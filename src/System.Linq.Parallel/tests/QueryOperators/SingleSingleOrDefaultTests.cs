@@ -169,6 +169,11 @@ namespace System.Linq.Parallel.Tests
         public static void Single_OperationCanceledException()
         {
             AssertThrows.EventuallyCanceled((source, canceler) => source.Single(x => { canceler(); return false; }));
+        }
+
+        [Fact]
+        public static void SingleOrDefault_OperationCanceledException()
+        {
             AssertThrows.EventuallyCanceled((source, canceler) => source.SingleOrDefault(x => { canceler(); return false; }));
         }
 
@@ -176,9 +181,13 @@ namespace System.Linq.Parallel.Tests
         public static void Single_AggregateException_Wraps_OperationCanceledException()
         {
             AssertThrows.OtherTokenCanceled((source, canceler) => source.Single(x => { canceler(); return false; }));
-            AssertThrows.OtherTokenCanceled((source, canceler) => source.SingleOrDefault(x => { canceler(); return false; }));
-
             AssertThrows.SameTokenNotCanceled((source, canceler) => source.Single(x => { canceler(); return false; }));
+        }
+
+        [Fact]
+        public static void SingleOrDefault_AggregateException_Wraps_OperationCanceledException()
+        {
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.SingleOrDefault(x => { canceler(); return false; }));
             AssertThrows.SameTokenNotCanceled((source, canceler) => source.SingleOrDefault(x => { canceler(); return false; }));
         }
 
@@ -187,7 +196,11 @@ namespace System.Linq.Parallel.Tests
         {
             AssertThrows.AlreadyCanceled(source => source.Single());
             AssertThrows.AlreadyCanceled(source => source.Single(x => true));
+        }
 
+        [Fact]
+        public static void SingleOrDefault_OperationCanceledException_PreCanceled()
+        {
             AssertThrows.AlreadyCanceled(source => source.SingleOrDefault());
             AssertThrows.AlreadyCanceled(source => source.SingleOrDefault(x => true));
         }
