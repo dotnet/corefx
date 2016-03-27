@@ -60,7 +60,6 @@ namespace System.Net.Tests
             yield return Tuple.Create("%F0%90%8F%BF", "\uD800\uDFFF"); // Surrogate pair
         }
 
-        [ActiveIssue(7166)]
         public static IEnumerable<Tuple<string, string>> UrlEncode_SharedTestData()
         {
             // Recent change brings function inline with RFC 3986 to return hex-encoded chars in uppercase
@@ -88,7 +87,6 @@ namespace System.Net.Tests
             */
         }
 
-        [ActiveIssue(7166)]
         public static IEnumerable<object[]> UrlEncodeDecode_Roundtrip_SharedTestData()
         {
             yield return new object[] { "'" };
@@ -143,6 +141,7 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(UrlEncode_TestData))]
+        // [ActiveIssue(7166)]
         public static void UrlEncode(string value, string expected)
         {
             Assert.Equal(expected, WebUtility.UrlEncode(value));
@@ -150,6 +149,7 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(UrlEncodeDecode_Roundtrip_SharedTestData))]
+        // [ActiveIssue(7166)]
         public static void UrlEncodeDecode_Roundtrip(string value)
         {
             string encoded = WebUtility.UrlEncode(value);
@@ -224,6 +224,7 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(UrlEncodeToBytes_TestData))]
+        // [ActiveIssue(7166)]
         public static void UrlEncodeToBytes(byte[] value, int offset, int count, byte[] expected)
         {
             byte[] actual = WebUtility.UrlEncodeToBytes(value, offset, count);
@@ -244,6 +245,7 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(UrlEncodeDecode_Roundtrip_SharedTestData))]
+        // [ActiveIssue(7166)]
         public static void UrlEncodeDecodeToBytes_Roundtrip(string url)
         {
             byte[] input = Encoding.UTF8.GetBytes(url);
