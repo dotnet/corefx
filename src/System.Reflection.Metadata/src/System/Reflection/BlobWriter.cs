@@ -86,7 +86,7 @@ namespace Roslyn.Reflection
             {
                 if (value < 0 || _start > _end - value)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(Offset));
+                    ValueArgumentOutOfRange();
                 }
 
                 _position = _start + value;
@@ -510,18 +510,24 @@ namespace Roslyn.Reflection
         {
             BlobWriterImpl.WriteConstant(ref this, value);
         }
-        
+
         public void Clear()
         {
             _position = _start;
         }
-        
+
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowOutOfBounds()
         {
             // TODO: error message
             throw new InvalidOperationException();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ValueArgumentOutOfRange()
+        {
+            throw new ArgumentOutOfRangeException("value");
         }
     }
 }

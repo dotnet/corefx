@@ -203,7 +203,7 @@ namespace System.IO
                 {
                     // On 32 bit machines, ensure we don't wrap around.
                     if (value > (long)Int32.MaxValue || _mem + value < _mem)
-                        throw new ArgumentOutOfRangeException(nameof(Position), SR.ArgumentOutOfRange_StreamLength);
+                        throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_StreamLength);
                 }
 #endif
                 Interlocked.Exchange(ref _position, value);
