@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection;
 
 #if !NET_NATIVE
 namespace System.Xml.Serialization.Emit
@@ -19,33 +18,6 @@ namespace System.Xml.Serialization.Emit
         }
 
         public override Module Module => _containingType.Module;
-
-        [Obsolete("TODO", error: false)]
-        public override PropertyAttributes Attributes
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override bool CanRead
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override bool CanWrite
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         [Obsolete("TODO", error: false)]
         public override Type DeclaringType
@@ -65,12 +37,6 @@ namespace System.Xml.Serialization.Emit
             {
                 throw new NotImplementedException();
             }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override ParameterInfo[] GetIndexParameters()
-        {
-            throw new NotImplementedException();
         }
     }
 }

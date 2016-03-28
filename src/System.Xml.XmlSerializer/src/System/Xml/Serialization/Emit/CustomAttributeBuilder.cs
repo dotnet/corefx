@@ -10,31 +10,8 @@ namespace System.Xml.Serialization.Emit
 {
     internal class CustomAttributeBuilder
     {
-        private readonly ConstructorInfo _ctor;
-        private readonly object[] _args;
-
         public CustomAttributeBuilder(ConstructorInfo con, object[] constructorArgs)
         {
-            _ctor = con;
-            _args = constructorArgs;
-        }
-
-        [Obsolete("TODO", error: false)]
-        public CustomAttributeBuilder(ConstructorInfo con, object[] constructorArgs, FieldInfo[] namedFields, object[] fieldValues)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public CustomAttributeBuilder(ConstructorInfo con, object[] constructorArgs, PropertyInfo[] namedProperties, object[] propertyValues)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public CustomAttributeBuilder(ConstructorInfo con, object[] constructorArgs, PropertyInfo[] namedProperties, object[] propertyValues, FieldInfo[] namedFields, object[] fieldValues)
-        {
-            throw new NotImplementedException();
         }
     }
 }

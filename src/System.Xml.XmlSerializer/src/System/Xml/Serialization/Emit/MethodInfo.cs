@@ -10,50 +10,12 @@ namespace System.Xml.Serialization.Emit
     internal abstract class MethodInfo : MethodBase
     {
         [Obsolete("TODO", error: false)]
-        public virtual ParameterInfo ReturnParameter
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
         public virtual Type ReturnType
         {
             get
             {
                 throw new NotImplementedException();
             }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public virtual Delegate CreateDelegate(Type delegateType)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public virtual Delegate CreateDelegate(Type delegateType, object target)
-        {
-            throw new NotImplementedException();
-        }
-        [Obsolete("TODO", error: false)]
-        public override Type[] GetGenericArguments()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public virtual MethodInfo GetGenericMethodDefinition()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public virtual MethodInfo MakeGenericMethod(params Type[] typeArguments)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -10,7 +10,7 @@ using AssemblyBuilderAccess = System.Reflection.Emit.AssemblyBuilderAccess;
 #if !NET_NATIVE
 namespace System.Xml.Serialization.Emit
 {
-    internal sealed class AssemblyBuilder : Assembly
+    internal class AssemblyBuilder : Assembly
     {
         private readonly AssemblyName _name;
 
@@ -27,12 +27,6 @@ namespace System.Xml.Serialization.Emit
             return new AssemblyBuilder(name);
         }
 
-        [Obsolete("TODO", error: false)]
-        public static AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, IEnumerable<CustomAttributeBuilder> assemblyAttributes)
-        {
-            throw new NotImplementedException();
-        }
-
         public ModuleBuilder DefineDynamicModule(string name)
         {
             if (_lazyModuleBuilder != null)
@@ -41,81 +35,6 @@ namespace System.Xml.Serialization.Emit
             }
 
             return _lazyModuleBuilder = new ModuleBuilder(this, name);
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override string FullName
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override bool IsDynamic
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Module ManifestModule
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override IEnumerable<TypeInfo> DefinedTypes
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override IEnumerable<Module> Modules
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public ModuleBuilder GetDynamicModule(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override ManifestResourceInfo GetManifestResourceInfo(string resourceName)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override string[] GetManifestResourceNames()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Stream GetManifestResourceStream(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public void SetCustomAttribute(ConstructorInfo con, byte[] binaryAttribute)
-        {
-            throw new NotImplementedException();
         }
 
         public void SetCustomAttribute(CustomAttributeBuilder customBuilder)

@@ -2,31 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection;
 using System.Reflection.Emit;
 
 #if !NET_NATIVE
 namespace System.Xml.Serialization.Emit
 {
-    internal sealed class TypeReference : TypeInfo, IEquatable<TypeReference>
+    internal class TypeReference : TypeInfo, IEquatable<TypeReference>
     {
         private readonly Module _containingModule;
-        private readonly TypeInfo _containingTypeOpt;
         private readonly Reflection.TypeInfo _info;
 
         internal System.Type SystemType => _info.AsType();
 
         internal TypeReference(Module containingModule, Reflection.TypeInfo info)
         {
-            _containingTypeOpt = null;
             _containingModule = containingModule;
-            _info = info;
-        }
-
-        internal TypeReference(TypeInfo containingType, Reflection.TypeInfo info)
-        {
-            _containingTypeOpt = containingType;
-            _containingModule = containingType.Module;
             _info = info;
         }
 
@@ -40,15 +30,6 @@ namespace System.Xml.Serialization.Emit
 
         [Obsolete("TODO", error: false)]
         public override string AssemblyQualifiedName
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override TypeAttributes Attributes
         {
             get
             {
@@ -75,15 +56,6 @@ namespace System.Xml.Serialization.Emit
         }
 
         [Obsolete("TODO", error: false)]
-        public override MethodBase DeclaringMethod
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
         public override Type DeclaringType
         {
             get
@@ -102,42 +74,6 @@ namespace System.Xml.Serialization.Emit
         }
 
         [Obsolete("TODO", error: false)]
-        public override GenericParameterAttributes GenericParameterAttributes
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override int GenericParameterPosition
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Type[] GenericTypeArguments
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Guid GUID
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
         public override bool IsEnum
         {
             get
@@ -147,34 +83,7 @@ namespace System.Xml.Serialization.Emit
         }
 
         [Obsolete("TODO", error: false)]
-        public override bool IsGenericParameter
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
         public override bool IsGenericType
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override bool IsGenericTypeDefinition
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override bool IsSerializable
         {
             get
             {
@@ -194,55 +103,25 @@ namespace System.Xml.Serialization.Emit
         }
 
         [Obsolete("TODO", error: false)]
-        public override int GetArrayRank()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
         public override Type GetElementType()
         {
             throw new NotImplementedException();
         }
 
         [Obsolete("TODO", error: false)]
-        public override Type[] GetGenericParameterConstraints()
+        public virtual Type MakeArrayType()
         {
             throw new NotImplementedException();
         }
 
         [Obsolete("TODO", error: false)]
-        public override Type GetGenericTypeDefinition()
+        public virtual Type MakeByRefType()
         {
             throw new NotImplementedException();
         }
 
         [Obsolete("TODO", error: false)]
-        public override Type MakeArrayType()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Type MakeArrayType(int rank)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Type MakeByRefType()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Type MakeGenericType(params Type[] typeArguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Type MakePointerType()
+        public virtual Type MakeGenericType(params Type[] typeArguments)
         {
             throw new NotImplementedException();
         }

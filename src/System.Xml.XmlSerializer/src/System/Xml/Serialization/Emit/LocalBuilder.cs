@@ -5,28 +5,10 @@
 #if !NET_NATIVE
 namespace System.Xml.Serialization.Emit
 {
-    internal sealed class LocalBuilder : LocalVariableInfo
+    internal class LocalBuilder : LocalVariableInfo
     {
         [Obsolete("TODO", error: false)]
-        public override bool IsPinned
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override int LocalIndex
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public override Type LocalType
+        public virtual Type LocalType
         {
             get
             {

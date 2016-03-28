@@ -7,7 +7,7 @@ using System.Reflection;
 #if !NET_NATIVE
 namespace System.Xml.Serialization.Emit
 {
-    internal sealed class FieldBuilder : FieldInfo
+    internal class FieldBuilder : FieldInfo
     {
         private readonly TypeBuilder _containingType;
         private readonly string _name;
@@ -23,15 +23,6 @@ namespace System.Xml.Serialization.Emit
         }
 
         public override Module Module => _containingType.Module;
-
-        [Obsolete("TODO", error: false)]
-        public override FieldAttributes Attributes
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         [Obsolete("TODO", error: false)]
         public override Type DeclaringType
@@ -52,36 +43,6 @@ namespace System.Xml.Serialization.Emit
         }
 
         public override string Name => _name;
-
-        [Obsolete("TODO", error: false)]
-        public override object GetValue(object obj)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public void SetConstant(object defaultValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public void SetCustomAttribute(ConstructorInfo con, byte[] binaryAttribute)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public void SetCustomAttribute(CustomAttributeBuilder customBuilder)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("TODO", error: false)]
-        public void SetOffset(int iOffset)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 #endif

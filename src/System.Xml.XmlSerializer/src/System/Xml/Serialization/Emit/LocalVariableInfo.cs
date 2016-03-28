@@ -7,32 +7,6 @@ namespace System.Xml.Serialization.Emit
 {
     internal class LocalVariableInfo
     {
-        [Obsolete("TODO", error: false)]
-        public virtual bool IsPinned
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public virtual int LocalIndex
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
-
-        [Obsolete("TODO", error: false)]
-        public virtual Type LocalType
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
     }
 }
 #endif

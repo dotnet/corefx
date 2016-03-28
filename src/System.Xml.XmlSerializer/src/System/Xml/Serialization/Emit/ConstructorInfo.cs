@@ -7,11 +7,6 @@ namespace System.Xml.Serialization.Emit
 {
     internal abstract class ConstructorInfo : MethodBase
     {
-        [Obsolete("TODO", error: false)]
-        public object Invoke(object[] parameters)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 #endif

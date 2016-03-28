@@ -117,9 +117,6 @@
     <Compile Include="System\Xml\Serialization\Emit\MethodReference.cs" />
     <Compile Include="System\Xml\Serialization\Emit\MethodInfo.cs" />
     <Compile Include="System\Xml\Serialization\Emit\ParameterBuilder.cs" />
-    <Compile Include="System\Xml\Serialization\Emit\GenericTypeParameterBuilder.cs" />
-    <Compile Include="System\Xml\Serialization\Emit\EnumBuilder.cs" />
-    <Compile Include="System\Xml\Serialization\Emit\EventBuilder.cs" />
     <Compile Include="System\Xml\Serialization\Emit\Module.cs" />
     <Compile Include="System\Xml\Serialization\Emit\Assembly.cs" />
     <Compile Include="System\Xml\Serialization\Emit\AssemblyBuilder.cs" />
@@ -135,7 +132,6 @@
     <Compile Include="System\Xml\Serialization\Emit\MethodBase.cs" />
     <Compile Include="System\Xml\Serialization\Emit\MethodBuilder.cs" />
     <Compile Include="System\Xml\Serialization\Emit\ModuleBuilder.cs" />
-    <Compile Include="System\Xml\Serialization\Emit\EventInfo.cs" />
     <Compile Include="System\Xml\Serialization\Emit\PropertyReference.cs" />
     <Compile Include="System\Xml\Serialization\Emit\PropertyInfo.cs" />
     <Compile Include="System\Xml\Serialization\Emit\PropertyBuilder.cs" />
