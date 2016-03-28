@@ -18,7 +18,7 @@ namespace System.IO.MemoryMappedFiles
         {
             if (requestedOffset > memMappedFileHandle._capacity)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(requestedOffset));
             }
             if (requestedSize > MaxProcessAddressSpace)
             {

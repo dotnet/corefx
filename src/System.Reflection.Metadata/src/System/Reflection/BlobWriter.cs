@@ -86,7 +86,7 @@ namespace Roslyn.Reflection
             {
                 if (value < 0 || _start > _end - value)
                 {
-                    ValueArgumentOutOfRange();
+                    throw new ArgumentOutOfRangeException(nameof(Offset));
                 }
 
                 _position = _start + value;
@@ -522,12 +522,6 @@ namespace Roslyn.Reflection
         {
             // TODO: error message
             throw new InvalidOperationException();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ValueArgumentOutOfRange()
-        {
-            throw new ArgumentOutOfRangeException("value");
         }
     }
 }
