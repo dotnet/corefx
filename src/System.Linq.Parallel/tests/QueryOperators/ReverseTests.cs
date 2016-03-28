@@ -89,7 +89,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Reverse_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<object>)null).Reverse());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<object>)null).Reverse());
         }
     }
 }

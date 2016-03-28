@@ -428,33 +428,33 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void GroupBy_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).GroupBy(i => i));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).GroupBy(i => i, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).GroupBy(i => i));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).GroupBy(i => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, EqualityComparer<int>.Default));
 
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).GroupBy(i => i, i => i));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, i => i));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, int>)null));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).GroupBy(i => i, i => i, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, i => i, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, int>)null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).GroupBy(i => i, i => i));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, i => i));
+            Assert.Throws<ArgumentNullException>("elementSelector", () => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, int>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).GroupBy(i => i, i => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, i => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("elementSelector", () => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, int>)null, EqualityComparer<int>.Default));
 
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).GroupBy(i => i, (i, j) => i));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, (i, j) => i));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, IEnumerable<int>, int>)null));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).GroupBy(i => i, (i, j) => i, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, (i, j) => i, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, IEnumerable<int>, int>)null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).GroupBy(i => i, (i, j) => i));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, (i, j) => i));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, IEnumerable<int>, int>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).GroupBy(i => i, (i, j) => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, (i, j) => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, IEnumerable<int>, int>)null, EqualityComparer<int>.Default));
 
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).GroupBy(i => i, i => i, (i, j) => i));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, i => i, (i, j) => i));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, int>)null, (i, j) => i));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy(i => i, i => i, (Func<int, IEnumerable<int>, int>)null));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).GroupBy(i => i, i => i, (i, j) => i, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, i => i, (i, j) => i, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, int>)null, (i, j) => i, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).GroupBy(i => i, i => i, (Func<int, IEnumerable<int>, int>)null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).GroupBy(i => i, i => i, (i, j) => i));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, i => i, (i, j) => i));
+            Assert.Throws<ArgumentNullException>("elementSelector", () => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, int>)null, (i, j) => i));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).GroupBy(i => i, i => i, (Func<int, IEnumerable<int>, int>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).GroupBy(i => i, i => i, (i, j) => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Range(0, 1).GroupBy((Func<int, int>)null, i => i, (i, j) => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("elementSelector", () => ParallelEnumerable.Range(0, 1).GroupBy(i => i, (Func<int, int>)null, (i, j) => i, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).GroupBy(i => i, i => i, (Func<int, IEnumerable<int>, int>)null, EqualityComparer<int>.Default));
         }
 
         [Fact]

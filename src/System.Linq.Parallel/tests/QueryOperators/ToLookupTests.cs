@@ -285,16 +285,16 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void ToLookup_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).ToLookup(x => x));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).ToLookup(x => x, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).ToLookup(x => x, y => y));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).ToLookup(x => x, y => y, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<int>().ToLookup((Func<int, int>)null));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<int>().ToLookup((Func<int, int>)null, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<int>().ToLookup((Func<int, int>)null, y => y));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<int>().ToLookup((Func<int, int>)null, y => y, EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<int>().ToLookup(x => x, (Func<int, int>)null));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<int>().ToLookup(x => x, (Func<int, int>)null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).ToLookup(x => x));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).ToLookup(x => x, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).ToLookup(x => x, y => y));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).ToLookup(x => x, y => y, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Empty<int>().ToLookup((Func<int, int>)null));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Empty<int>().ToLookup((Func<int, int>)null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Empty<int>().ToLookup((Func<int, int>)null, y => y));
+            Assert.Throws<ArgumentNullException>("keySelector", () => ParallelEnumerable.Empty<int>().ToLookup((Func<int, int>)null, y => y, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("elementSelector", () => ParallelEnumerable.Empty<int>().ToLookup(x => x, (Func<int, int>)null));
+            Assert.Throws<ArgumentNullException>("elementSelector", () => ParallelEnumerable.Empty<int>().ToLookup(x => x, (Func<int, int>)null, EqualityComparer<int>.Default));
         }
     }
 }

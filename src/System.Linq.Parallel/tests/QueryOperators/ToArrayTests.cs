@@ -53,7 +53,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void ToArray_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).ToArray());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).ToArray());
         }
     }
 }

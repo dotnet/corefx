@@ -197,10 +197,10 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Select_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).Select(x => x));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).Select((x, index) => x));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().Select((Func<bool, bool>)null));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().Select((Func<bool, int, bool>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).Select(x => x));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).Select((x, index) => x));
+            Assert.Throws<ArgumentNullException>("selector", () => ParallelEnumerable.Empty<bool>().Select((Func<bool, bool>)null));
+            Assert.Throws<ArgumentNullException>("selector", () => ParallelEnumerable.Empty<bool>().Select((Func<bool, int, bool>)null));
         }
 
         [Theory]
@@ -648,17 +648,17 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void SelectMany_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).SelectMany(x => new[] { x }));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).SelectMany((x, index) => new[] { x }));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().SelectMany((Func<bool, IEnumerable<bool>>)null));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().SelectMany((Func<bool, int, IEnumerable<bool>>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).SelectMany(x => new[] { x }));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).SelectMany((x, index) => new[] { x }));
+            Assert.Throws<ArgumentNullException>("selector", () => ParallelEnumerable.Empty<bool>().SelectMany((Func<bool, IEnumerable<bool>>)null));
+            Assert.Throws<ArgumentNullException>("selector", () => ParallelEnumerable.Empty<bool>().SelectMany((Func<bool, int, IEnumerable<bool>>)null));
 
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).SelectMany(x => new[] { x }, (x, y) => x));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).SelectMany((x, index) => new[] { x }, (x, y) => x));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().SelectMany((Func<bool, IEnumerable<bool>>)null, (x, y) => x));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().SelectMany((Func<bool, int, IEnumerable<bool>>)null, (x, y) => x));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().SelectMany(x => new[] { x }, (Func<bool, bool, bool>)null));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().SelectMany((x, index) => new[] { x }, (Func<bool, bool, bool>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).SelectMany(x => new[] { x }, (x, y) => x));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).SelectMany((x, index) => new[] { x }, (x, y) => x));
+            Assert.Throws<ArgumentNullException>("collectionSelector", () => ParallelEnumerable.Empty<bool>().SelectMany((Func<bool, IEnumerable<bool>>)null, (x, y) => x));
+            Assert.Throws<ArgumentNullException>("collectionSelector", () => ParallelEnumerable.Empty<bool>().SelectMany((Func<bool, int, IEnumerable<bool>>)null, (x, y) => x));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Empty<bool>().SelectMany(x => new[] { x }, (Func<bool, bool, bool>)null));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Empty<bool>().SelectMany((x, index) => new[] { x }, (Func<bool, bool, bool>)null));
         }
     }
 }

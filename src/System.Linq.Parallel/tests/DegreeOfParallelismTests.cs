@@ -154,7 +154,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void DegreeOfParallelism_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).WithDegreeOfParallelism(2));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).WithDegreeOfParallelism(2));
         }
 
         // ThreadPool is not currently exposed.

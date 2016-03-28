@@ -554,11 +554,11 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Union_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).Union(ParallelEnumerable.Range(0, 1)));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).Union(null));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Union(ParallelEnumerable.Range(0, 1)));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Union(null));
 
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).Union(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).Union(null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Union(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Union(null, EqualityComparer<int>.Default));
         }
     }
 }

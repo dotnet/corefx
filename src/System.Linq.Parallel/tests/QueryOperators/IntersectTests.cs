@@ -280,11 +280,11 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Intersect_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).Intersect(ParallelEnumerable.Range(0, 1)));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).Intersect(null));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Intersect(ParallelEnumerable.Range(0, 1)));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Intersect(null));
 
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).Intersect(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).Intersect(null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Intersect(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Intersect(null, EqualityComparer<int>.Default));
         }
     }
 }

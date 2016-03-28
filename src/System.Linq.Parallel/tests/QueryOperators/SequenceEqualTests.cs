@@ -189,10 +189,10 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void SequenceEqual_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).SequenceEqual(ParallelEnumerable.Range(0, 1)));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).SequenceEqual((ParallelQuery<int>)null));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).SequenceEqual(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).SequenceEqual((ParallelQuery<int>)null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).SequenceEqual(ParallelEnumerable.Range(0, 1)));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).SequenceEqual((ParallelQuery<int>)null));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).SequenceEqual(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).SequenceEqual((ParallelQuery<int>)null, EqualityComparer<int>.Default));
         }
 
         [Theory]

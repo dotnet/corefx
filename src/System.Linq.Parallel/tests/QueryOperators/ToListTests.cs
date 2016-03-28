@@ -53,7 +53,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void ToList_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).ToList());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).ToList());
         }
     }
 }

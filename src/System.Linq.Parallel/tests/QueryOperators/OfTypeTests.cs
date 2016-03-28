@@ -271,7 +271,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void OfType_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<object>)null).OfType<int>());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<object>)null).OfType<int>());
         }
     }
 }

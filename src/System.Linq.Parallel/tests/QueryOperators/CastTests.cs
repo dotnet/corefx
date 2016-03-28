@@ -119,7 +119,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Cast_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<object>)null).Cast<int>());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<object>)null).Cast<int>());
         }
 
         private class Castable

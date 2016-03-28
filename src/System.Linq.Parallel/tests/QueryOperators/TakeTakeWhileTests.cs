@@ -109,7 +109,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Take_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).Take(0));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).Take(0));
         }
 
         //
@@ -362,9 +362,9 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void TakeWhile_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).TakeWhile(x => true));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().TakeWhile((Func<bool, bool>)null));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().TakeWhile((Func<bool, int, bool>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).TakeWhile(x => true));
+            Assert.Throws<ArgumentNullException>("predicate", () => ParallelEnumerable.Empty<bool>().TakeWhile((Func<bool, bool>)null));
+            Assert.Throws<ArgumentNullException>("predicate", () => ParallelEnumerable.Empty<bool>().TakeWhile((Func<bool, int, bool>)null));
         }
     }
 }

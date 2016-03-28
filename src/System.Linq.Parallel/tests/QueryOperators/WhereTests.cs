@@ -172,10 +172,10 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Where_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).Where(x => x));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).Where((x, index) => x));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().Where((Func<bool, bool>)null));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Empty<bool>().Where((Func<bool, int, bool>)null));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).Where(x => x));
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).Where((x, index) => x));
+            Assert.Throws<ArgumentNullException>("predicate", () => ParallelEnumerable.Empty<bool>().Where((Func<bool, bool>)null));
+            Assert.Throws<ArgumentNullException>("predicate", () => ParallelEnumerable.Empty<bool>().Where((Func<bool, int, bool>)null));
         }
     }
 }

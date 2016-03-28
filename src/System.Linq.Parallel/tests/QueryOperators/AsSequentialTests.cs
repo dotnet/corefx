@@ -84,7 +84,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void AsSequential_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).AsSequential());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).AsSequential());
         }
     }
 }

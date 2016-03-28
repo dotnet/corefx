@@ -157,7 +157,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Distinct_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).Distinct());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).Distinct());
         }
     }
 }

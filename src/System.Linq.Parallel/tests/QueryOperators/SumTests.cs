@@ -447,9 +447,9 @@ namespace System.Linq.Parallel.Tests
             Assert.Throws<ArgumentNullException>("selector", () => ParallelEnumerable.Repeat((double?)0, 1).Sum((Func<double?, double>)null));
 
             Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<decimal>)null).Sum());
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Repeat((decimal)0, 1).Sum((Func<decimal, decimal>)null));
+            Assert.Throws<ArgumentNullException>("selector", () => ParallelEnumerable.Repeat((decimal)0, 1).Sum((Func<decimal, decimal>)null));
             Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<decimal?>)null).Sum());
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Repeat((decimal?)0, 1).Sum((Func<decimal?, decimal>)null));
+            Assert.Throws<ArgumentNullException>("selector", () => ParallelEnumerable.Repeat((decimal?)0, 1).Sum((Func<decimal?, decimal>)null));
         }
     }
 }
