@@ -12,6 +12,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="AppContext.BaseDirectory.cs" />
     <Compile Include="AppContext.Switch.cs" />
     <Compile Include="AppContext.Switch.Validation.cs" />
   </ItemGroup>
