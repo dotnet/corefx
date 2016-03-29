@@ -141,7 +141,6 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(UrlEncode_TestData))]
-        // [ActiveIssue(7166)]
         public static void UrlEncode(string value, string expected)
         {
             Assert.Equal(expected, WebUtility.UrlEncode(value));
@@ -149,7 +148,6 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(UrlEncodeDecode_Roundtrip_SharedTestData))]
-        // [ActiveIssue(7166)]
         public static void UrlEncodeDecode_Roundtrip(string value)
         {
             string encoded = WebUtility.UrlEncode(value);
@@ -224,7 +222,6 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(UrlEncodeToBytes_TestData))]
-        // [ActiveIssue(7166)]
         public static void UrlEncodeToBytes(byte[] value, int offset, int count, byte[] expected)
         {
             byte[] actual = WebUtility.UrlEncodeToBytes(value, offset, count);
@@ -245,7 +242,6 @@ namespace System.Net.Tests
 
         [Theory]
         [MemberData(nameof(UrlEncodeDecode_Roundtrip_SharedTestData))]
-        // [ActiveIssue(7166)]
         public static void UrlEncodeDecodeToBytes_Roundtrip(string url)
         {
             byte[] input = Encoding.UTF8.GetBytes(url);
