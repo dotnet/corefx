@@ -14,6 +14,7 @@ namespace System.Tests
     public partial class AppContextTests
     {
         [Fact]
+        [ActiveIssue(6677, PlatformID.OSX)]
         public void DefaultMatchesGetModuleFileName()
         {
             Assert.Equal(GetMainModuleDirectory(), AppContext.BaseDirectory.TrimEnd(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
