@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Diagnostics;
 using Xunit;
 
 namespace System.Tests
@@ -13,7 +14,6 @@ namespace System.Tests
     public partial class AppContextTests
     {
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
         public void DefaultMatchesGetModuleFileName()
         {
             Assert.Equal(GetMainModuleDirectory(), AppContext.BaseDirectory.TrimEnd('\\'));
@@ -21,15 +21,7 @@ namespace System.Tests
 
         private static string GetMainModuleDirectory()
         {
-            StringBuilder path = new StringBuilder(260);
-            int size = GetModuleFileNameOrThrow(IntPtr.Zero, path, path.Capacity);
-
-            while (size == path.Capacity)
-            {
-                path.Length = 0;
-                path.Capacity *= 2;
-                size = GetModuleFileNameOrThrow(IntPtr.Zero, path, path.Capacity);
-            }
+            string path = Process.GetCurrentProcess().MainModule.FileName;
 
             // Assume that the host environment for running tests has the default
             // behaviour of using the main module directory as its base directory
@@ -47,20 +39,5 @@ namespace System.Tests
 
             return modulePath;
         }
-
-        private static int GetModuleFileNameOrThrow(IntPtr module, StringBuilder path, int capacity)
-        {
-            int size = GetModuleFileNameW(IntPtr.Zero, path, capacity);
-
-            if (size == 0)
-            {
-                throw new InvalidOperationException("GetModuleFileName failed. Win32 error: " + Marshal.GetLastWin32Error());
-            }
-
-            return size;
-        }
-
-        [DllImport("api-ms-win-core-libraryloader-l1-1-0.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern int GetModuleFileNameW(IntPtr module, StringBuilder path, int capacity);
     }
 }
