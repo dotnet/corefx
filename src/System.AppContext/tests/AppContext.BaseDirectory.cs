@@ -16,7 +16,7 @@ namespace System.Tests
         [Fact]
         public void DefaultMatchesGetModuleFileName()
         {
-            Assert.Equal(GetMainModuleDirectory(), AppContext.BaseDirectory.TrimEnd('\\'));
+            Assert.Equal(GetMainModuleDirectory(), AppContext.BaseDirectory.TrimEnd(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
         }
 
         private static string GetMainModuleDirectory()
@@ -25,7 +25,7 @@ namespace System.Tests
 
             // Assume that the host environment for running tests has the default
             // behaviour of using the main module directory as its base directory
-            string modulePath = Path.GetDirectoryName(path.ToString()).TrimEnd('\\');
+            string modulePath = Path.GetDirectoryName(path.ToString()).TrimEnd(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 
             // The above assumption is not true for the NetCoreForCoreCLR enviornment.
             // In order to execute in a UAP environment we had to create a shim.  This
