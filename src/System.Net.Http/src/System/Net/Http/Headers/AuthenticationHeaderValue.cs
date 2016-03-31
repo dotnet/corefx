@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -145,12 +146,12 @@ namespace System.Net.Http.Headers
 
             if ((current == input.Length) || (input[current] == ','))
             {
-                // If we only have a scheme followed by whitespaces, we're done.
+                // If we only have a scheme followed by whitespace, we're done.
                 parsedValue = result;
                 return current - startIndex;
             }
 
-            // We need at least one space between the scheme and parameters. If there are no whitespaces, then we must
+            // We need at least one space between the scheme and parameters. If there are no whitespace, then we must
             // have reached the end of the string (i.e. scheme-only string).
             if (whitespaceLength == 0)
             {
@@ -206,7 +207,7 @@ namespace System.Net.Http.Headers
                 {
                     int whitespaceLength = HttpRuleParser.GetWhitespaceLength(input, current);
 
-                    // We don't want trailing whitespaces to be considered part of the parameter blob. Increment
+                    // We don't want trailing whitespace to be considered part of the parameter blob. Increment
                     // 'parameterEndIndex' only if we don't have a whitespace. E.g. "Basic AbC=  , NTLM" should return
                     // "AbC=" as parameter ignoring the spaces before ','.
                     if (whitespaceLength == 0)
@@ -276,7 +277,7 @@ namespace System.Net.Http.Headers
                 current = current + valueLength;
                 parameterEndIndex = current - 1; // -1 because 'current' already points to the char after <value>
                 current = current + HttpRuleParser.GetWhitespaceLength(input, current);
-                parseEndIndex = current; // this essentially points to parameterEndIndex + whitespaces + next char
+                parseEndIndex = current; // this essentially points to parameterEndIndex + whitespace + next char
             } while ((current < input.Length) && (input[current] == ','));
 
             return true;

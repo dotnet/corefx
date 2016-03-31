@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -249,26 +250,6 @@ namespace System.Linq.Tests
                 }
 
                 return base.GetEnumerator();
-            }
-        }
-
-        /// <summary>
-        /// Emulation of async collection change.
-        /// It adds a new element to the sequence each time the Count property touched,
-        /// so the further call of CopyTo method will fail.
-        /// </summary>
-        protected class GrowingAfterCountReadCollection : TestCollection<int>
-        {
-            public GrowingAfterCountReadCollection(int[] items) : base(items) { }
-
-            public override int Count
-            {
-                get
-                {
-                    var result = base.Count;
-                    Array.Resize(ref Items, Items.Length + 1);
-                    return result;
-                }
             }
         }
 

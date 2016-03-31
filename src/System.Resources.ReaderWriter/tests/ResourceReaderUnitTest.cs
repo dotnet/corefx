@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace System.Resources.ResourceWriterTests
             {
                 using (var rw = GenerateResourceStream(s_dict, ms2))
                 {
-                    //Rewind to begining of stream
+                    //Rewind to beginning of stream
 
                     ms2.Seek(0L, SeekOrigin.Begin);
 
@@ -77,7 +78,7 @@ namespace System.Resources.ResourceWriterTests
             {
                 using (var rw = GenerateResourceStream(s_dict, ms2))
                 {
-                    //Rewind to begining of stream
+                    //Rewind to beginning of stream
 
                     ms2.Seek(0L, SeekOrigin.Begin);
 
@@ -284,7 +285,7 @@ namespace System.Resources.ResourceWriterTests
             {
                 using (var rw = new ResourceReader(ms2))
                 {
-                    //Rewind to begining of stream
+                    //Rewind to beginning of stream
 
                     ms2.Seek(0L, SeekOrigin.Begin);
 

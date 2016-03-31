@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 //-----------------------------------------------------------------------------
 //
@@ -55,12 +56,6 @@ namespace System.IO.Packaging
     /// </summary>
     internal sealed class ContentType
     {
-        //------------------------------------------------------
-        //
-        //  Internal Constructors
-        //
-        //------------------------------------------------------
-
         #region Internal Constructors
 
         /// <summary>
@@ -78,7 +73,7 @@ namespace System.IO.Packaging
         internal ContentType(string contentType)
         {
             if (contentType == null)
-                throw new ArgumentNullException("contentType");
+                throw new ArgumentNullException(nameof(contentType));
 
             if (contentType.Length == 0)
             {
@@ -119,12 +114,6 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Constructors
-
-        //------------------------------------------------------
-        //
-        //  Internal Methods
-        //
-        //------------------------------------------------------
 
         #region Internal Properties
 
@@ -169,13 +158,7 @@ namespace System.IO.Packaging
             }
         }
         #endregion Internal Properties
-
-        //------------------------------------------------------
-        //
-        //  Internal Methods
-        //
-        //------------------------------------------------------
-
+        
         #region Internal Methods
 
         /// <summary>
@@ -194,7 +177,7 @@ namespace System.IO.Packaging
         /// This method does a weak comparison of the content types. We only compare the
         /// type and subType values in an ASCII case-insensitive manner.
         /// Parameter and value pairs are not used for the comparison. 
-        /// If you wish to compare the paramters too, then you must get the ParameterValuePairs from
+        /// If you wish to compare the parameters too, then you must get the ParameterValuePairs from
         /// both the ContentType objects and compare each parameter entry.
         /// The allowParameterValuePairs parameter is used to indicate whether the 
         /// comparison is tolerant to parameters being present or no.
@@ -278,12 +261,6 @@ namespace System.IO.Packaging
 
         #endregion Internal Methods
 
-        //------------------------------------------------------
-        //
-        //  Private Methods
-        //
-        //------------------------------------------------------
-
         #region Private Methods
 
 
@@ -358,7 +335,7 @@ namespace System.IO.Packaging
                 //Removing the leading ; from the string
                 parameterAndValue = parameterAndValue.Substring(1);
 
-                //okay to trim start as there can be spaces before the begining
+                //okay to trim start as there can be spaces before the beginning
                 //of the parameter name.
                 parameterAndValue = parameterAndValue.TrimStart(s_linearWhiteSpaceChars);
 
@@ -470,9 +447,9 @@ namespace System.IO.Packaging
         /// Validating if the value of a parameter is either a valid token or a 
         /// valid quoted string
         /// </summary>
-        /// <param name="parameterValue">paramter value string</param>
+        /// <param name="parameterValue">parameter value string</param>
         /// <returns>validate parameter value string</returns>
-        /// <exception cref="ArgumentException">If the paramter value is empty</exception>
+        /// <exception cref="ArgumentException">If the parameter value is empty</exception>
         private static string ValidateQuotedStringOrToken(string parameterValue)
         {
             if (String.IsNullOrEmpty(parameterValue))
@@ -576,11 +553,6 @@ namespace System.IO.Packaging
 
         #endregion Private Methods
 
-        //------------------------------------------------------
-        //
-        //  Private Members
-        //
-        //------------------------------------------------------
         #region Private Members
 
         private string _contentType = null;

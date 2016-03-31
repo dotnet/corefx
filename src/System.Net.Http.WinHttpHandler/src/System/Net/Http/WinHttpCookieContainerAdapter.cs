@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,16 +19,17 @@ namespace System.Net.Http
             HttpRequestMessage request = state.RequestMessage;
             SafeWinHttpHandle requestHandle = state.RequestHandle;
             CookieContainer cookieContainer = state.Handler.CookieContainer;
-            
+
             Debug.Assert(state.Handler.CookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer);
             Debug.Assert(cookieContainer != null);
 
             // Get 'Set-Cookie' headers from response.
-            List<string> cookieHeaders =
-                WinHttpResponseParser.GetResponseHeaders(requestHandle, Interop.WinHttp.WINHTTP_QUERY_SET_COOKIE);
+            char[] buffer = null;
+            uint index = 0;
+            string cookieHeader;
             WinHttpTraceHelper.Trace("WINHTTP_QUERY_SET_COOKIE");
-            
-            foreach (string cookieHeader in cookieHeaders)
+            while (WinHttpResponseParser.GetResponseHeader(
+                requestHandle, Interop.WinHttp.WINHTTP_QUERY_SET_COOKIE, ref buffer, ref index, out cookieHeader))
             {
                 WinHttpTraceHelper.Trace(cookieHeader);
                 try
@@ -40,9 +42,9 @@ namespace System.Net.Http
                     // We ignore malformed cookies in the response.
                     WinHttpTraceHelper.Trace("Ignoring invalid cookie: {0}", cookieHeader);
                 }
-            }            
+            }
         }
-        
+
         public static void ResetCookieRequestHeaders(WinHttpRequestState state, Uri redirectUri)
         {
             SafeWinHttpHandle requestHandle = state.RequestHandle;

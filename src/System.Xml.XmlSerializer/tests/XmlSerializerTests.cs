@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using SerializationTypes;
 using System;
@@ -97,6 +98,36 @@ public static partial class XmlSerializerTests
         Assert.StrictEqual(SerializeAndDeserialize<DateTime>(DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc),
 @"<?xml version=""1.0""?>
 <dateTime>9999-12-31T23:59:59.9999999Z</dateTime>"), DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc));
+    }
+
+    [Fact]
+    public static void Xml_TypeWithDateTimePropertyAsXmlTime()
+    {
+        DateTime localTime = new DateTime(549269870000L, DateTimeKind.Local);
+        TypeWithDateTimePropertyAsXmlTime localTimeOjbect = new TypeWithDateTimePropertyAsXmlTime()
+        {
+            Value = localTime
+        };
+
+        // This is how we convert DateTime from time to string.
+        var localTimeDateTime = DateTime.MinValue + localTime.TimeOfDay;
+        string localTimeString = localTimeDateTime.ToString("HH:mm:ss.fffffffzzzzzz", DateTimeFormatInfo.InvariantInfo);
+        TypeWithDateTimePropertyAsXmlTime localTimeOjbectRoundTrip = SerializeAndDeserialize(localTimeOjbect,
+string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<TypeWithDateTimePropertyAsXmlTime xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">{0}</TypeWithDateTimePropertyAsXmlTime>", localTimeString));
+
+        Assert.StrictEqual(localTimeOjbect.Value, localTimeOjbectRoundTrip.Value);
+
+        TypeWithDateTimePropertyAsXmlTime utcTimeOjbect = new TypeWithDateTimePropertyAsXmlTime()
+        {
+            Value = new DateTime(549269870000L, DateTimeKind.Utc)
+        };
+
+        TypeWithDateTimePropertyAsXmlTime utcTimeRoundTrip = SerializeAndDeserialize(utcTimeOjbect,
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<TypeWithDateTimePropertyAsXmlTime xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">15:15:26.9870000Z</TypeWithDateTimePropertyAsXmlTime>");
+
+        Assert.StrictEqual(utcTimeOjbect.Value, utcTimeRoundTrip.Value);
     }
 
     [Fact]
@@ -637,7 +668,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void Xml_WithXElementWithNestedXElement()
     {
         var original = new WithXElementWithNestedXElement(true);
@@ -656,7 +686,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void Xml_WithArrayOfXElement()
     {
         var original = new WithArrayOfXElement(true);
@@ -683,7 +712,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void Xml_WithListOfXElement()
     {
         var original = new WithListOfXElement(true);

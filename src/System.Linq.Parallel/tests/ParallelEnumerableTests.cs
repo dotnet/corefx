@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Concurrent;
@@ -50,7 +51,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_UndefinedOrder(int start, int count)
         {
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count);
@@ -61,7 +62,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_AsOrdered(int start, int count)
         {
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count).AsOrdered();
@@ -72,7 +73,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_AsSequential(int start, int count)
         {
             IEnumerable<int> query = ParallelEnumerable.Range(start, count).AsSequential();
@@ -83,7 +84,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_First(int start, int count)
         {
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count);
@@ -99,7 +100,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_FirstOrDefault(int start, int count)
         {
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count);
@@ -108,7 +109,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_Last(int start, int count)
         {
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count);
@@ -124,7 +125,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_LastOrDefault(int start, int count)
         {
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count);
@@ -133,7 +134,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_Take(int start, int count)
         {
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count).Take(count / 2);
@@ -145,7 +146,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RangeData")]
+        [MemberData(nameof(RangeData))]
         public static void Range_Skip(int start, int count)
         {
             ParallelQuery<int> query = ParallelEnumerable.Range(start, count).Skip(count / 2);
@@ -187,7 +188,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("RepeatData")]
+        [MemberData(nameof(RepeatData))]
         public static void Repeat<T>(T element, int count)
         {
             ParallelQuery<T> query = ParallelEnumerable.Repeat(element, count);
@@ -222,7 +223,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("EmptyData")]
+        [MemberData(nameof(EmptyData))]
         public static void Empty<T>(T def)
         {
             Assert.Empty(ParallelEnumerable.Empty<T>());

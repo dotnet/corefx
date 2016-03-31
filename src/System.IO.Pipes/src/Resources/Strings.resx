@@ -168,6 +168,12 @@
   <data name="ArgumentOutOfRange_MaxNumServerInstances" xml:space="preserve">
     <value>maxNumberOfServerInstances must either be a value between 1 and 254, or NamedPipeServerStream.MaxAllowedServerInstances (to obtain the maximum number allowed by system resources).</value>
   </data>
+  <data name="ArgumentOutOfRange_PathLengthInvalid" xml:space="preserve">
+    <value>The path '{0}' is of an invalid length for use with domain sockets on this platform.  The length must be between 1 and {1} characters, inclusive.</value>
+  </data>
+  <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
+    <value>Positive number required.</value>
+  </data>
   <data name="InvalidOperation_PipeNotYetConnected" xml:space="preserve">
     <value>Pipe hasn't been connected yet.</value>
   </data>
@@ -263,5 +269,14 @@
   </data>
   <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
     <value>Specified file length was too large for the file system.</value>
+  </data>
+  <data name="PlatformNotSupported_MessageTransmissionMode" xml:space="preserve">
+    <value>Message transmission mode is not supported on this platform.</value>
+  </data>
+  <data name="PlatformNotSupported_RemotePipes" xml:space="preserve">
+    <value>Access to remote named pipes is not supported on this platform.</value>
+  </data>
+  <data name="PlatformNotSupproted_InvalidNameChars" xml:space="preserve">
+    <value>The name of a pipe on this platform must only include characters valid in file names.</value>
   </data>
 </root>

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
@@ -35,22 +36,22 @@ namespace System.Security.Principal
         {
             if (accountName == null)
             {
-                throw new ArgumentNullException("accountName");
+                throw new ArgumentNullException(nameof(accountName));
             }
 
             if (accountName.Length == 0)
             {
-                throw new ArgumentException(SR.Argument_StringZeroLength, "accountName");
+                throw new ArgumentException(SR.Argument_StringZeroLength, nameof(accountName));
             }
 
             if (accountName.Length > MaximumAccountNameLength)
             {
-                throw new ArgumentException(SR.IdentityReference_AccountNameTooLong, "accountName");
+                throw new ArgumentException(SR.IdentityReference_AccountNameTooLong, nameof(accountName));
             }
 
             if (domainName != null && domainName.Length > MaximumDomainNameLength)
             {
-                throw new ArgumentException(SR.IdentityReference_DomainNameTooLong, "domainName");
+                throw new ArgumentException(SR.IdentityReference_DomainNameTooLong, nameof(domainName));
             }
             Contract.EndContractBlock();
 
@@ -68,17 +69,17 @@ namespace System.Security.Principal
         {
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             if (name.Length == 0)
             {
-                throw new ArgumentException(SR.Argument_StringZeroLength, "name");
+                throw new ArgumentException(SR.Argument_StringZeroLength, nameof(name));
             }
 
             if (name.Length > (MaximumDomainNameLength + 1 /* '\' */ + MaximumAccountNameLength))
             {
-                throw new ArgumentException(SR.IdentityReference_AccountNameTooLong, "name");
+                throw new ArgumentException(SR.IdentityReference_AccountNameTooLong, nameof(name));
             }
             Contract.EndContractBlock();
 
@@ -116,7 +117,7 @@ namespace System.Security.Principal
         {
             if (targetType == null)
             {
-                throw new ArgumentNullException("targetType");
+                throw new ArgumentNullException(nameof(targetType));
             }
             Contract.EndContractBlock();
 
@@ -136,7 +137,7 @@ namespace System.Security.Principal
             }
             else
             {
-                throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, "targetType");
+                throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, nameof(targetType));
             }
         }
 
@@ -184,7 +185,7 @@ namespace System.Security.Principal
         {
             if (sourceAccounts == null)
             {
-                throw new ArgumentNullException("sourceAccounts");
+                throw new ArgumentNullException(nameof(sourceAccounts));
             }
             Contract.EndContractBlock();
 
@@ -193,7 +194,7 @@ namespace System.Security.Principal
                 return TranslateToSids(sourceAccounts, out someFailed);
             }
 
-            throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, "targetType");
+            throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, nameof(targetType));
         }
 
         #endregion
@@ -233,12 +234,12 @@ namespace System.Security.Principal
         {
             if (sourceAccounts == null)
             {
-                throw new ArgumentNullException("sourceAccounts");
+                throw new ArgumentNullException(nameof(sourceAccounts));
             }
 
             if (sourceAccounts.Count == 0)
             {
-                throw new ArgumentException(SR.Arg_EmptyCollection, "sourceAccounts");
+                throw new ArgumentException(SR.Arg_EmptyCollection, nameof(sourceAccounts));
             }
             Contract.EndContractBlock();
 
@@ -261,7 +262,7 @@ namespace System.Security.Principal
 
                     if (nta == null)
                     {
-                        throw new ArgumentException(SR.Argument_ImproperType, "sourceAccounts");
+                        throw new ArgumentException(SR.Argument_ImproperType, nameof(sourceAccounts));
                     }
 
                     Names[currentName].Buffer = nta.ToString();

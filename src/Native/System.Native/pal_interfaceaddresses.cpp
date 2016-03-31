@@ -1,17 +1,21 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_interfaceaddresses.h"
 #include "pal_maphardwaretype.h"
 #include "pal_utilities.h"
 
+#include <sys/types.h>
 #include <assert.h>
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
+#endif
 
 #if defined(AF_PACKET)
 #include <linux/if_packet.h>

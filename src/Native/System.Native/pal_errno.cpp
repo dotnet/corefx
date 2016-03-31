@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_errno.h"
@@ -8,14 +9,6 @@
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error ConvertErrorPlatformToPal(int32_t platformErrno)
-{
-    return SystemNative_ConvertErrorPlatformToPal(platformErrno);
-}
 
 extern "C" Error SystemNative_ConvertErrorPlatformToPal(int32_t platformErrno)
 {
@@ -133,8 +126,6 @@ extern "C" Error SystemNative_ConvertErrorPlatformToPal(int32_t platformErrno)
             return PAL_ENOTDIR;
         case ENOTEMPTY:
             return PAL_ENOTEMPTY;
-        case ENOTRECOVERABLE:
-            return PAL_ENOTRECOVERABLE;
         case ENOTSOCK:
             return PAL_ENOTSOCK;
         case ENOTSUP:
@@ -145,8 +136,6 @@ extern "C" Error SystemNative_ConvertErrorPlatformToPal(int32_t platformErrno)
             return PAL_ENXIO;
         case EOVERFLOW:
             return PAL_EOVERFLOW;
-        case EOWNERDEAD:
-            return PAL_EOWNERDEAD;
         case EPERM:
             return PAL_EPERM;
         case EPIPE:
@@ -173,6 +162,16 @@ extern "C" Error SystemNative_ConvertErrorPlatformToPal(int32_t platformErrno)
             return PAL_ETXTBSY;
         case EXDEV:
             return PAL_EXDEV;
+        case ESOCKTNOSUPPORT:
+            return PAL_ESOCKTNOSUPPORT;
+        case EPFNOSUPPORT:
+            return PAL_EPFNOSUPPORT;
+        case ESHUTDOWN:
+            return PAL_ESHUTDOWN;
+        case EHOSTDOWN:
+            return PAL_EHOSTDOWN;
+        case ENODATA:
+            return PAL_ENODATA;
 
 // #if because these will trigger duplicate case label warnings when
 // they have the same value, which is permitted by POSIX and common.
@@ -187,14 +186,6 @@ extern "C" Error SystemNative_ConvertErrorPlatformToPal(int32_t platformErrno)
     }
 
     return PAL_ENONSTANDARD;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t ConvertErrorPalToPlatform(Error error)
-{
-    return SystemNative_ConvertErrorPalToPlatform(error);
 }
 
 extern "C" int32_t SystemNative_ConvertErrorPalToPlatform(Error error)
@@ -313,8 +304,6 @@ extern "C" int32_t SystemNative_ConvertErrorPalToPlatform(Error error)
             return ENOTDIR;
         case PAL_ENOTEMPTY:
             return ENOTEMPTY;
-        case PAL_ENOTRECOVERABLE:
-            return ENOTRECOVERABLE;
         case PAL_ENOTSOCK:
             return ENOTSOCK;
         case PAL_ENOTSUP:
@@ -325,8 +314,6 @@ extern "C" int32_t SystemNative_ConvertErrorPalToPlatform(Error error)
             return ENXIO;
         case PAL_EOVERFLOW:
             return EOVERFLOW;
-        case PAL_EOWNERDEAD:
-            return EOWNERDEAD;
         case PAL_EPERM:
             return EPERM;
         case PAL_EPIPE:
@@ -353,6 +340,16 @@ extern "C" int32_t SystemNative_ConvertErrorPalToPlatform(Error error)
             return ETXTBSY;
         case PAL_EXDEV:
             return EXDEV;
+        case PAL_EPFNOSUPPORT:
+            return EPFNOSUPPORT;
+        case PAL_ESOCKTNOSUPPORT:
+            return ESOCKTNOSUPPORT;
+        case PAL_ESHUTDOWN:
+            return ESHUTDOWN;
+        case PAL_EHOSTDOWN:
+            return EHOSTDOWN;
+        case PAL_ENODATA:
+            return ENODATA;
         case PAL_ENONSTANDARD:
             break; // fall through to assert
     }
@@ -368,14 +365,6 @@ extern "C" int32_t SystemNative_ConvertErrorPalToPlatform(Error error)
     // because the platform values are not part of an enum.
     assert(false && "Unknown error code");
     return -1;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" const char* StrErrorR(int32_t platformErrno, char* buffer, int32_t bufferSize)
-{
-    return SystemNative_StrErrorR(platformErrno, buffer, bufferSize);
 }
 
 extern "C" const char* SystemNative_StrErrorR(int32_t platformErrno, char* buffer, int32_t bufferSize)

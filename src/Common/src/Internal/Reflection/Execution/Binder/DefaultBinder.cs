@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Ported from desktop (BCL\System\DefaultBinder.cs)
 
@@ -15,10 +16,10 @@ namespace Internal.Reflection.Core.Execution.Binder
         // fit.  The methods all have the same number of arguments and the object
         // array args.  On exit, this method will choice the best fit method
         // and coerce the args to match that method.  By match, we mean all primitive
-        // arguments are exact matchs and all object arguments are exact or subclasses
+        // arguments are exact matches and all object arguments are exact or subclasses
         // of the target.  If the target OR is an interface, the object must implement
         // that interface.  There are a couple of exceptions
-        // thrown when a method cannot be returned.  If no method matchs the args and
+        // thrown when a method cannot be returned.  If no method matches the args and
         // ArgumentException is thrown.  If multiple methods match the args then 
         // an AmbiguousMatchException is thrown.
         // 
@@ -28,7 +29,7 @@ namespace Internal.Reflection.Core.Execution.Binder
         {
             if (match == null || match.Length == 0)
             {
-                throw new ArgumentException(SR.Arg_EmptyArray, "match");
+                throw new ArgumentException(SR.Arg_EmptyArray, nameof(match));
             }
 
             MethodBase[] candidates = (MethodBase[])match.Clone();
@@ -36,7 +37,7 @@ namespace Internal.Reflection.Core.Execution.Binder
             int i;
             int j;
 
-            #region Map named parameters to candidate parameter postions
+            #region Map named parameters to candidate parameter positions
             // We are creating an paramOrder array to act as a mapping
             //  between the order of the args and the actual order of the
             //  parameters in the method.  This order may differ because
@@ -196,7 +197,7 @@ namespace Internal.Reflection.Core.Execution.Binder
                 #region Match method by parameter type
                 for (j = 0; j < argsToCheck; j++)
                 {
-                    #region Classic argument coersion checks
+                    #region Classic argument coercion checks
                     // get the formal type
                     pCls = par[j].ParameterType;
 
@@ -441,7 +442,7 @@ namespace Internal.Reflection.Core.Execution.Binder
 
 
         // Given a set of methods that match the base criteria, select a method based
-        // upon an array of types.  This method should return null if no method matchs
+        // upon an array of types.  This method should return null if no method matches
         // the criteria.
         public static MethodBase SelectMethod(MethodBase[] match, Type[] types)
         {
@@ -719,12 +720,12 @@ namespace Internal.Reflection.Core.Execution.Binder
             if (indexes != null && !Contract.ForAll(indexes, delegate (Type t) { return t != null; }))
             {
                 Exception e;  // Written this way to pass the Code Contracts style requirements.
-                e = new ArgumentNullException("indexes");
+                e = new ArgumentNullException(nameof(indexes));
                 throw e;
             }
             if (match == null || match.Length == 0)
             {
-                throw new ArgumentException(SR.Arg_EmptyArray, "match");
+                throw new ArgumentException(SR.Arg_EmptyArray, nameof(match));
             }
 
             PropertyInfo[] candidates = (PropertyInfo[])match.Clone();
@@ -857,7 +858,7 @@ namespace Internal.Reflection.Core.Execution.Binder
             int res = FindMostSpecific(m1.GetParameters(), paramOrder1, paramArrayType1,
                                        m2.GetParameters(), paramOrder2, paramArrayType2, types, args);
 
-            // If the match was not ambigous then return the result.
+            // If the match was not ambiguous then return the result.
             if (res != 0)
             {
                 return res;
@@ -885,7 +886,7 @@ namespace Internal.Reflection.Core.Execution.Binder
                 }
             }
 
-            // The match is ambigous.
+            // The match is ambiguous.
             return 0;
         }
 
@@ -911,7 +912,7 @@ namespace Internal.Reflection.Core.Execution.Binder
                 }
             }
 
-            // The match is ambigous.
+            // The match is ambiguous.
             return 0;
         }
 

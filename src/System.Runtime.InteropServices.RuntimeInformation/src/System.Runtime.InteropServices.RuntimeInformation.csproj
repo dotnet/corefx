@@ -12,12 +12,13 @@
     <AssemblyName>System.Runtime.InteropServices.RuntimeInformation</AssemblyName>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <ProjectGuid>{F9DF2357-81B4-4317-908E-512DA9395583}</ProjectGuid>
-    <PackageTargetFramework>dotnet5.2</PackageTargetFramework>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.1</PackageTargetFramework>
     <PackageTargetRuntime Condition="'$(TargetsWindows)' == 'true'">win</PackageTargetRuntime>
     <PackageTargetRuntime Condition="'$(TargetsUnix)' == 'true'">unix</PackageTargetRuntime>
     <DefineConstants Condition="'$(TargetGroup)'=='net45'">net45</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netcore50'">netcore50</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netcore50aot'">netcore50;netcore50aot</DefineConstants>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.1</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU'" />
@@ -32,23 +33,23 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetsFreeBSD)'=='true'">
-    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.FreeBSD.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsLinux)'=='true'">
-    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.Linux.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsOSX)'=='true'">
-    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.OSX.cs" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45_Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetsUnix)'=='true'">
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetUnixName.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.GetUnixName.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetUnixVersion.cs">
       <Link>Common\Interop\Unix\System.Native\Interop.GetUnixVersion.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetUnixArchitecture.cs">
-      <Link>Common\Interop\Unix\System.Native\Interop.GetUnixArchitecture.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetOSArchitecture.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.GetOSArchitecture.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetProcessArchitecture.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.GetProcessArchitecture.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ProcessorArchitecture.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.ProcessorArchitecture.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
@@ -77,9 +78,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetSystemInfo.cs">
       <Link>Common\Interop\Windows\mincore\Interop.GetSystemInfo.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnknownUnix)' == 'true' ">
-    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.UnknownUnix.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

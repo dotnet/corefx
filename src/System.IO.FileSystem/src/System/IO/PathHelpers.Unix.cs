@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.IO
 {
@@ -22,7 +23,7 @@ namespace System.IO
                 if ((index == 0 || PathInternal.IsDirectorySeparator(searchPattern[index - 1])) && // previous character is directory separator
                     (index + 2 == searchPattern.Length || PathInternal.IsDirectorySeparator(searchPattern[index + 2]))) // next character is directory separator
                 {
-                    throw new ArgumentException(SR.Arg_InvalidSearchPattern, "searchPattern");
+                    throw new ArgumentException(SR.Arg_InvalidSearchPattern, nameof(searchPattern));
                 }
             }
         }

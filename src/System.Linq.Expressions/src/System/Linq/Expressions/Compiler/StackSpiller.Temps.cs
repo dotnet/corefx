@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -89,7 +90,7 @@ namespace System.Linq.Expressions.Compiler
             }
 
             // Free temporaries created since the last marking. 
-            // This is a performance optimization to lower the overall number of tempories needed.
+            // This is a performance optimization to lower the overall number of temporaries needed.
             internal void Free(int mark)
             {
                 // (_usedTemps != null) ==> (mark <= _usedTemps.Count)
@@ -117,8 +118,8 @@ namespace System.Linq.Expressions.Compiler
 
         /// <summary>
         /// Rewrites child expressions, spilling them into temps if needed. The
-        /// stack starts in the inital state, and after the first subexpression
-        /// is added it is change to non-empty. This behavior can be overridden
+        /// stack starts in the initial state, and after the first subexpression
+        /// is added it is changed to non-empty. This behavior can be overridden
         /// by setting the stack manually between adds.
         /// 
         /// When all children have been added, the caller should rewrite the 
@@ -251,7 +252,7 @@ namespace System.Linq.Expressions.Compiler
                         last += _expressions.Length;
                     }
                     int count = last - first + 1;
-                    ContractUtils.RequiresArrayRange(_expressions, first, count, "first", "last");
+                    ContractUtils.RequiresArrayRange(_expressions, first, count, nameof(first), nameof(last));
 
                     if (count == _expressions.Length)
                     {

@@ -1,11 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Net.Security;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 using CURLAUTH = Interop.Http.CURLAUTH;
 using CURLcode = Interop.Http.CURLcode;
@@ -18,7 +22,6 @@ namespace System.Net.Http
     {
         #region Constants
 
-        private const string VerboseDebuggingConditional = "CURLHANDLER_VERBOSE";
         private const char SpaceChar = ' ';
         private const int StatusCodeLength = 3;
 
@@ -37,13 +40,32 @@ namespace System.Net.Http
 
         #region Fields
 
-        private readonly static char[] s_newLineCharArray = new char[] { HttpRuleParser.CR, HttpRuleParser.LF };
-        private readonly static string[] s_authenticationSchemes = { "Negotiate", "Digest", "Basic" }; // the order in which libcurl goes over authentication schemes
-        private readonly static CURLAUTH[] s_authSchemePriorityOrder = { CURLAUTH.Negotiate, CURLAUTH.Digest, CURLAUTH.Basic };
+        // To enable developers to opt-in to support certain auth types that we don't want
+        // to enable by default (e.g. NTLM), we allow for such types to be specified explicitly
+        // when credentials are added to a credential cache, but we don't enable them
+        // when no auth type is specified, e.g. when a NetworkCredential is provided directly
+        // to the handler.  As such, we have two different sets of auth types that we use
+        // for when the supplied creds are a cache vs not.
+        private readonly static KeyValuePair<string,CURLAUTH>[] s_orderedAuthTypesCredentialCache = new KeyValuePair<string, CURLAUTH>[] {
+            new KeyValuePair<string,CURLAUTH>("Negotiate", CURLAUTH.Negotiate),
+            new KeyValuePair<string,CURLAUTH>("NTLM", CURLAUTH.NTLM), // only available when credentials supplied via a credential cache
+            new KeyValuePair<string,CURLAUTH>("Digest", CURLAUTH.Digest),
+            new KeyValuePair<string,CURLAUTH>("Basic", CURLAUTH.Basic),
+        };
+        private readonly static KeyValuePair<string, CURLAUTH>[] s_orderedAuthTypesICredential = new KeyValuePair<string, CURLAUTH>[] {
+            new KeyValuePair<string,CURLAUTH>("Negotiate", CURLAUTH.Negotiate),
+            new KeyValuePair<string,CURLAUTH>("Digest", CURLAUTH.Digest),
+            new KeyValuePair<string,CURLAUTH>("Basic", CURLAUTH.Basic),
+        };
 
+        private readonly static char[] s_newLineCharArray = new char[] { HttpRuleParser.CR, HttpRuleParser.LF };
         private readonly static bool s_supportsAutomaticDecompression;
         private readonly static bool s_supportsSSL;
         private readonly static bool s_supportsHttp2Multiplexing;
+        private static string s_curlVersionDescription;
+        private static string s_curlSslVersionDescription;
+
+        private readonly static DiagnosticListener s_diagnosticListener = new DiagnosticListener(HttpHandlerLoggingStrings.DiagnosticListenerName);
 
         private readonly MultiAgent _agent = new MultiAgent();
         private volatile bool _anyOperationStarted;
@@ -51,7 +73,7 @@ namespace System.Net.Http
 
         private IWebProxy _proxy = null;
         private ICredentials _serverCredentials = null;
-        private ProxyUsePolicy _proxyPolicy = ProxyUsePolicy.UseDefaultProxy;
+        private bool _useProxy = HttpHandlerDefaults.DefaultUseProxy;
         private DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
         private bool _preAuthenticate = HttpHandlerDefaults.DefaultPreAuthenticate;
         private CredentialCache _credentialCache = null; // protected by LockObject
@@ -60,6 +82,9 @@ namespace System.Net.Http
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
         private ClientCertificateOption _clientCertificateOption = HttpHandlerDefaults.DefaultClientCertificateOption;
+        private X509Certificate2Collection _clientCertificates;
+        private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> _serverCertificateValidationCallback;
+        private bool _checkCertificateRevocationList;
 
         private object LockObject { get { return _agent; } }
 
@@ -69,24 +94,21 @@ namespace System.Net.Http
         {
             // curl_global_init call handled by Interop.LibCurl's cctor
 
-            int age;
-            if (!Interop.Http.GetCurlVersionInfo(
-                out age, 
-                out s_supportsSSL, 
-                out s_supportsAutomaticDecompression, 
-                out s_supportsHttp2Multiplexing))
-            {
-                throw new InvalidOperationException(SR.net_http_unix_https_libcurl_no_versioninfo);  
-            }
+            Interop.Http.CurlFeatures features = Interop.Http.GetSupportedFeatures();
+            s_supportsSSL = (features & Interop.Http.CurlFeatures.CURL_VERSION_SSL) != 0;
+            s_supportsAutomaticDecompression = (features & Interop.Http.CurlFeatures.CURL_VERSION_LIBZ) != 0;
+            s_supportsHttp2Multiplexing = (features & Interop.Http.CurlFeatures.CURL_VERSION_HTTP2) != 0 && Interop.Http.GetSupportsHttp2Multiplexing();
 
-            // Verify the version of curl we're using is new enough
-            if (age < MinCurlAge)
+            if (HttpEventSource.Log.IsEnabled())
             {
-                throw new InvalidOperationException(SR.net_http_unix_https_libcurl_too_old);
+                EventSourceTrace($"libcurl: {CurlVersionDescription} {CurlSslVersionDescription} {features}");
             }
         }
 
         #region Properties
+
+        private static string CurlVersionDescription => s_curlVersionDescription ?? (s_curlVersionDescription = Interop.Http.GetVersionDescription() ?? string.Empty);
+        private static string CurlSslVersionDescription => s_curlSslVersionDescription ?? (s_curlSslVersionDescription = Interop.Http.GetSslVersionDescription() ?? string.Empty);
 
         internal bool AutomaticRedirection
         {
@@ -122,15 +144,13 @@ namespace System.Net.Http
         {
             get
             {
-                return _proxyPolicy != ProxyUsePolicy.DoNotUseProxy;
+                return _useProxy;
             }
 
             set
             {
                 CheckDisposedOrStarted();
-                _proxyPolicy = value ?
-                    ProxyUsePolicy.UseCustomProxy :
-                    ProxyUsePolicy.DoNotUseProxy;
+                _useProxy = value;
             }
         }
 
@@ -172,6 +192,31 @@ namespace System.Net.Http
             {
                 CheckDisposedOrStarted();
                 _clientCertificateOption = value;
+            }
+        }
+
+        internal X509Certificate2Collection ClientCertificates
+        {
+            get { return _clientCertificates ?? (_clientCertificates = new X509Certificate2Collection()); }
+        }
+
+        internal Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateValidationCallback
+        {
+            get { return _serverCertificateValidationCallback; }
+            set
+            {
+                CheckDisposedOrStarted();
+                _serverCertificateValidationCallback = value;
+            }
+        }
+
+        public bool CheckCertificateRevocationList
+        {
+            get { return _checkCertificateRevocationList; }
+            set
+            {
+                CheckDisposedOrStarted();
+                _checkCertificateRevocationList = value;
             }
         }
 
@@ -254,7 +299,7 @@ namespace System.Net.Http
                 if (value <= 0)
                 {
                     throw new ArgumentOutOfRangeException(
-                        "value",
+nameof(value),
                         value,
                         SR.Format(SR.net_http_value_must_be_greater_than, 0));
                 }
@@ -291,14 +336,14 @@ namespace System.Net.Http
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request", SR.net_http_handler_norequest);
+                throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
             }
 
             if (request.RequestUri.Scheme == UriSchemeHttps)
             {
                 if (!s_supportsSSL)
                 {
-                    throw new PlatformNotSupportedException(SR.net_http_unix_https_support_unavailable_libcurl);
+                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_unix_https_support_unavailable_libcurl, CurlVersionDescription));
                 }
             }
             else
@@ -316,6 +361,8 @@ namespace System.Net.Http
                 throw new InvalidOperationException(SR.net_http_invalid_cookiecontainer);
             }
 
+            Guid loggingRequestId = s_diagnosticListener.LogHttpRequest(request);
+
             CheckDisposed();
             SetOperationStarted();
 
@@ -326,6 +373,8 @@ namespace System.Net.Http
             {
                 return Task.FromCanceled<HttpResponseMessage>(cancellationToken);
             }
+
+            EventSourceTrace("{0}", request);
 
             // Create the easy request.  This associates the easy request with this handler and configures
             // it based on the settings configured for the handler.
@@ -344,6 +393,9 @@ namespace System.Net.Http
                 easy.FailRequest(exc);
                 easy.Cleanup(); // no active processing remains, so we can cleanup
             }
+
+            s_diagnosticListener.LogHttpResponse(easy.Task, loggingRequestId);
+
             return easy.Task;
         }
 
@@ -357,15 +409,21 @@ namespace System.Net.Http
             }
         }
 
-        private KeyValuePair<NetworkCredential, CURLAUTH> GetNetworkCredentials(ICredentials credentials, Uri requestUri)
+        private KeyValuePair<NetworkCredential, CURLAUTH> GetCredentials(Uri requestUri)
         {
+            // Get the auth types (Negotiate, Digest, etc.) that are allowed to be selected automatically
+            // based on the type of the ICredentials provided.
+            KeyValuePair<string, CURLAUTH>[] validAuthTypes = AuthTypesPermittedByCredentialKind(_serverCredentials);
+
+            // If preauthentication is enabled, we may have populated our internal credential cache,
+            // so first check there to see if we have any credentials for this uri.
             if (_preAuthenticate)
             {
                 KeyValuePair<NetworkCredential, CURLAUTH> ncAndScheme;
                 lock (LockObject)
                 {
                     Debug.Assert(_credentialCache != null, "Expected non-null credential cache");
-                    ncAndScheme = GetCredentials(_credentialCache, requestUri);
+                    ncAndScheme = GetCredentials(requestUri, _credentialCache, validAuthTypes);
                 }
                 if (ncAndScheme.Key != null)
                 {
@@ -373,29 +431,62 @@ namespace System.Net.Http
                 }
             }
 
-            return GetCredentials(credentials, requestUri);
+            // We either weren't preauthenticating or we didn't have any cached credentials
+            // available, so check the credentials on the handler.
+            return GetCredentials(requestUri, _serverCredentials, validAuthTypes);
         }
 
-        private void AddCredentialToCache(Uri serverUri, CURLAUTH authAvail, NetworkCredential nc)
+        private void TransferCredentialsToCache(Uri serverUri, CURLAUTH serverAuthAvail)
         {
+            if (_serverCredentials == null)
+            {
+                // No credentials, nothing to put into the cache.
+                return;
+            }
+
+            // Get the auth types valid based on the type of the ICredentials used.  We're effectively
+            // going to intersect this (the types we allow to be used) with those the server supports
+            // and with the credentials we have available.  The best of that resulting intersection
+            // will be added to the cache.
+            KeyValuePair<string, CURLAUTH>[] validAuthTypes = AuthTypesPermittedByCredentialKind(_serverCredentials);
+
             lock (LockObject)
             {
-                for (int i=0; i < s_authSchemePriorityOrder.Length; i++)
+                // For each auth type we allow, check whether it's one supported by the server.
+                for (int i = 0; i < validAuthTypes.Length; i++)
                 {
-                    if ((authAvail & s_authSchemePriorityOrder[i]) != 0)
+                    // Is it supported by the server?
+                    if ((serverAuthAvail & validAuthTypes[i].Value) != 0)
                     {
-                        Debug.Assert(_credentialCache != null, "Expected non-null credential cache");
-                        try
+                        // And do we have a credential for it?
+                        NetworkCredential nc = _serverCredentials.GetCredential(serverUri, validAuthTypes[i].Key);
+                        if (nc != null)
                         {
-                            _credentialCache.Add(serverUri, s_authenticationSchemes[i], nc);
-                        }
-                        catch(ArgumentException)
-                        {
-                            //Ignore the case of key already present
+                            // We have a credential for it, so add it, and we're done.
+                            Debug.Assert(_credentialCache != null, "Expected non-null credential cache");
+                            try
+                            {
+                                _credentialCache.Add(serverUri, validAuthTypes[i].Key, nc);
+                            }
+                            catch (ArgumentException)
+                            {
+                                // Ignore the case of key already present
+                            }
+                            break;
                         }
                     }
                 }
             }
+        }
+
+        private static KeyValuePair<string, CURLAUTH>[] AuthTypesPermittedByCredentialKind(ICredentials c)
+        {
+            // Special-case CredentialCache for auth types, as credentials put into the cache are put
+            // in explicitly tagged with an auth type, and thus credentials are opted-in to potentially
+            // less secure auth types we might otherwise want disabled by default.
+            return c is CredentialCache ?
+                s_orderedAuthTypesCredentialCache :
+                s_orderedAuthTypesICredential;
         }
 
         private void AddResponseCookies(EasyRequest state, string cookieHeader)
@@ -412,43 +503,42 @@ namespace System.Net.Http
             }
             catch (CookieException e)
             {
-                string msg = string.Format("Malformed cookie: SetCookies Failed with {0}, server: {1}, cookie:{2}",
-                                           e.Message,
-                                           state._requestMessage.RequestUri,
-                                           cookieHeader);
-                VerboseTrace(msg);
+                EventSourceTrace(
+                    "Malformed cookie parsing failed: {0}, server: {1}, cookie: {2}", 
+                    e.Message, state._requestMessage.RequestUri, cookieHeader);
             }
         }
 
-        private static KeyValuePair<NetworkCredential, CURLAUTH> GetCredentials(ICredentials credentials, Uri requestUri)
+        private static KeyValuePair<NetworkCredential, CURLAUTH> GetCredentials(Uri requestUri, ICredentials credentials, KeyValuePair<string, CURLAUTH>[] validAuthTypes)
         {
             NetworkCredential nc = null;
             CURLAUTH curlAuthScheme = CURLAUTH.None;
 
             if (credentials != null)
             {
-                // we collect all the schemes that are accepted by libcurl for which there is a non-null network credential.
-                // But CurlHandler works under following assumption:
-                //           for a given server, the credentials do not vary across authentication schemes.
-                for (int i=0; i < s_authSchemePriorityOrder.Length; i++)
+                // For each auth type we consider valid, try to get a credential for it.
+                // Union together the auth types for which we could get credentials, but validate
+                // that the found credentials are all the same, as libcurl doesn't support differentiating
+                // by auth type.
+                for (int i = 0; i < validAuthTypes.Length; i++)
                 {
-                    NetworkCredential networkCredential = credentials.GetCredential(requestUri, s_authenticationSchemes[i]);
+                    NetworkCredential networkCredential = credentials.GetCredential(requestUri, validAuthTypes[i].Key);
                     if (networkCredential != null)
                     {
-                        curlAuthScheme |= s_authSchemePriorityOrder[i];
+                        curlAuthScheme |= validAuthTypes[i].Value;
                         if (nc == null)
                         {
                             nc = networkCredential;
                         }
                         else if(!AreEqualNetworkCredentials(nc, networkCredential))
                         {
-                            throw new PlatformNotSupportedException(SR.net_http_unix_invalid_credential);
+                            throw new PlatformNotSupportedException(SR.Format(SR.net_http_unix_invalid_credential, CurlVersionDescription));
                         }
                     }
                 }
             }
 
-            VerboseTrace("curlAuthScheme = " + curlAuthScheme);
+            EventSourceTrace("Authentication scheme: {0}", curlAuthScheme);
             return new KeyValuePair<NetworkCredential, CURLAUTH>(nc, curlAuthScheme); ;
         }
 
@@ -474,17 +564,18 @@ namespace System.Net.Http
             if (error != CURLcode.CURLE_OK)
             {
                 var inner = new CurlException((int)error, isMulti: false);
-                VerboseTrace(inner.Message);
+                EventSourceTrace(inner.Message);
                 throw inner;
             }
         }
 
         private static void ThrowIfCURLMError(CURLMcode error)
         {
-            if (error != CURLMcode.CURLM_OK)
+            if (error != CURLMcode.CURLM_OK && // success
+                error != CURLMcode.CURLM_CALL_MULTI_PERFORM) // success + a hint to try curl_multi_perform again
             {
                 string msg = CurlException.GetCurlErrorString((int)error, true);
-                VerboseTrace(msg);
+                EventSourceTrace(msg);
                 switch (error)
                 {
                     case CURLMcode.CURLM_ADDED_ALREADY:
@@ -511,63 +602,68 @@ namespace System.Net.Http
                 string.Equals(credential1.Password, credential2.Password, StringComparison.Ordinal);
         }
 
-        [Conditional(VerboseDebuggingConditional)]
-        private static void VerboseTrace(string text = null, [CallerMemberName] string memberName = null, EasyRequest easy = null, MultiAgent agent = null)
+        private static bool EventSourceTracingEnabled { get { return HttpEventSource.Log.IsEnabled(); } }
+
+        // PERF NOTE:
+        // These generic overloads of EventSourceTrace (and similar wrapper methods in some of the other CurlHandler
+        // nested types) exist to allow call sites to call EventSourceTrace without boxing and without checking
+        // EventSourceTracingEnabled.  Do not remove these without fixing the call sites accordingly.
+
+        private static void EventSourceTrace<TArg0>(
+            string formatMessage, TArg0 arg0,
+            MultiAgent agent = null, EasyRequest easy = null, [CallerMemberName] string memberName = null)
+        {
+            if (EventSourceTracingEnabled)
+            {
+                EventSourceTraceCore(string.Format(formatMessage, arg0), agent, easy, memberName);
+            }
+        }
+
+        private static void EventSourceTrace<TArg0, TArg1, TArg2>
+            (string formatMessage, TArg0 arg0, TArg1 arg1, TArg2 arg2,
+            MultiAgent agent = null, EasyRequest easy = null, [CallerMemberName] string memberName = null)
+        {
+            if (EventSourceTracingEnabled)
+            {
+                EventSourceTraceCore(string.Format(formatMessage, arg0, arg1, arg2), agent, easy, memberName);
+            }
+        }
+
+        private static void EventSourceTrace(
+            string message, 
+            MultiAgent agent = null, EasyRequest easy = null, [CallerMemberName] string memberName = null)
+        {
+            if (EventSourceTracingEnabled)
+            {
+                EventSourceTraceCore(message, agent, easy, memberName);
+            }
+        }
+
+        private static void EventSourceTraceCore(string message, MultiAgent agent, EasyRequest easy, string memberName)
         {
             // If we weren't handed a multi agent, see if we can get one from the EasyRequest
-            if (agent == null && easy != null && easy._associatedMultiAgent != null)
+            if (agent == null && easy != null)
             {
                 agent = easy._associatedMultiAgent;
             }
-            int? agentId = agent != null ? agent.RunningWorkerId : null;
 
-            // Get an ID string that provides info about which MultiAgent worker and which EasyRequest this trace is about
-            string ids = "";
-            if (agentId != null || easy != null)
-            {
-                ids = "(" +
-                    (agentId != null ? "M#" + agentId : "") +
-                    (agentId != null && easy != null ? ", " : "") +
-                    (easy != null ? "E#" + easy.Task.Id : "") +
-                    ")";
-            }
-
-            // Create the message and trace it out
-            string msg = string.Format("[{0, -30}]{1, -16}: {2}", memberName, ids, text);
-            Interop.Sys.PrintF("%s\n", msg);
+            HttpEventSource.Log.HandlerMessage(
+                agent != null && agent.RunningWorkerId.HasValue ? agent.RunningWorkerId.GetValueOrDefault() : 0,
+                easy != null ? easy.Task.Id : 0,
+                memberName,
+                message);
         }
 
-        [Conditional(VerboseDebuggingConditional)]
-        private static void VerboseTraceIf(bool condition, string text = null, [CallerMemberName] string memberName = null, EasyRequest easy = null)
-        {
-            if (condition)
-            {
-                VerboseTrace(text, memberName, easy, agent: null);
-            }
-        }
-
-        private static Exception CreateHttpRequestException(Exception inner = null)
+        private static HttpRequestException CreateHttpRequestException(Exception inner)
         {
             return new HttpRequestException(SR.net_http_client_execution_error, inner);
         }
 
-        private static bool TryParseStatusLine(HttpResponseMessage response, string responseHeader, EasyRequest state)
+        private static IOException MapToReadWriteIOException(Exception error, bool isRead)
         {
-            if (!responseHeader.StartsWith(CurlResponseParseUtils.HttpPrefix, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            // Clear the header if status line is recieved again. This signifies that there are multiple response headers (like in redirection).
-            response.Headers.Clear();
-            response.Content.Headers.Clear();
-
-            CurlResponseParseUtils.ReadStatusLine(response, responseHeader);
-            state._isRedirect = state._handler.AutomaticRedirection &&
-                         (response.StatusCode == HttpStatusCode.Redirect ||
-                         response.StatusCode == HttpStatusCode.RedirectKeepVerb ||
-                         response.StatusCode == HttpStatusCode.RedirectMethod) ;
-            return true;
+            return new IOException(
+                isRead ? SR.net_http_io_read : SR.net_http_io_write,
+                error is HttpRequestException && error.InnerException != null ? error.InnerException : error);
         }
 
         private static void HandleRedirectLocationHeader(EasyRequest state, string locationValue)
@@ -580,7 +676,11 @@ namespace System.Net.Http
             Uri forwardUri;
             if (Uri.TryCreate(location, UriKind.RelativeOrAbsolute, out forwardUri) && forwardUri.IsAbsoluteUri)
             {
-                KeyValuePair<NetworkCredential, CURLAUTH> ncAndScheme = GetCredentials(state._handler.Credentials as CredentialCache, forwardUri);
+                // Just as with WinHttpHandler, for security reasons, we drop the server credential if it is 
+                // anything other than a CredentialCache. We allow credentials in a CredentialCache since they 
+                // are specifically tied to URIs.
+                var creds = state._handler.Credentials as CredentialCache;
+                KeyValuePair<NetworkCredential, CURLAUTH> ncAndScheme = GetCredentials(forwardUri, creds, AuthTypesPermittedByCredentialKind(creds));
                 if (ncAndScheme.Key != null)
                 {
                     state.SetCredentialsOptions(ncAndScheme);
@@ -617,7 +717,7 @@ namespace System.Net.Http
             Debug.Assert(requestContent != null, "request is null");
 
             // Deal with conflict between 'Content-Length' vs. 'Transfer-Encoding: chunked' semantics.
-            // libcurl adds a Tranfer-Encoding header by default and the request fails if both are set.
+            // libcurl adds a Transfer-Encoding header by default and the request fails if both are set.
             if (requestContent.Headers.ContentLength.HasValue)
             {
                 if (chunkedMode)
@@ -640,13 +740,6 @@ namespace System.Net.Http
         }
 
         #endregion
-
-        private enum ProxyUsePolicy
-        {
-            DoNotUseProxy = 0, // Do not use proxy. Ignores the value set in the environment.
-            UseDefaultProxy = 1, // Do not set the proxy parameter. Use the value of environment variable, if any.
-            UseCustomProxy = 2  // Use The proxy specified by the user.
-        }
     }
 }
 

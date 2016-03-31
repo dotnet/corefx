@@ -26,10 +26,19 @@ endif ()
 
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd64)
     add_definitions(-DBIT64=1)
-    add_definitions(-DX64=1)
+    add_definitions(-D_AMD64_)
+elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL x86)
+    add_definitions(-DBIT32=1)
+    add_definitions(-D_X86_)
+elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64)
+    add_definitions(-DBIT64=1)
+    add_definitions(-D_ARM64_)
+    # Because we don't use CMAKE_C_COMPILER/CMAKE_CXX_COMPILER to use clang
+    # we have to set the triple by adding a compiler argument
+    add_compile_options(-target aarch64-linux-gnu)
 elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
     add_definitions(-DBIT32=1)
-    add_definitions(-DARM=1)
+    add_definitions(-D_ARM_)
     add_definitions(-D_FILE_OFFSET_BITS=64)
     # Because we don't use CMAKE_C_COMPILER/CMAKE_CXX_COMPILER to use clang
     # we have to set the triple by adding a compiler argument
@@ -78,6 +87,11 @@ endif ()
 
 if (APPLE)
     add_definitions(-D__APPLE_USE_RFC_3542)
+   
+   # We cannot enable "stack-protector-strong" on OS X due to a bug in clang compiler (current version 7.0.2)  
+   add_compile_options(-fstack-protector)  
+else ()  
+   add_compile_options(-fstack-protector-strong)  
 endif ()
 
 include(configure.cmake)
@@ -85,4 +99,5 @@ include(configure.cmake)
 add_subdirectory(System.IO.Compression.Native)
 add_subdirectory(System.Native)
 add_subdirectory(System.Net.Http.Native)
+add_subdirectory(System.Net.Security.Native)
 add_subdirectory(System.Security.Cryptography.Native)

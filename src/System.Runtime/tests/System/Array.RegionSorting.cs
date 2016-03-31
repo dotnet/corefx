@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -8,7 +9,7 @@ using Xunit;
 public static class RegionSorting
 {
     [Fact]
-    public static void SortArrayArayIntIntWithNonZeroIndexAndOffsetStructArrays()
+    public static void SortArrayArrayIntIntWithNonZeroIndexAndOffsetStructArrays()
     {
         Random random = new Random(5);
 
@@ -47,7 +48,7 @@ public static class RegionSorting
     }
 
     [Fact]
-    public static void SortArrayArayIntIntWithNonZeroIndexAndOffsetStructAndRefArray()
+    public static void SortArrayArrayIntIntWithNonZeroIndexAndOffsetStructAndRefArray()
     {
         Random random = new Random(5);
 
@@ -86,7 +87,7 @@ public static class RegionSorting
     }
 
     [Fact]
-    public static void SortArrayArayIntIntWithNonZeroIndexAndOffsetRefAndStructArray()
+    public static void SortArrayArrayIntIntWithNonZeroIndexAndOffsetRefAndStructArray()
     {
         Random random = new Random(5);
 

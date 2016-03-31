@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -533,7 +534,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order01.order01
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order01.order01;
-    // <Title> Compound operator excute orders.</Title>
+    // <Title> Compound operator execute orders.</Title>
     // <Description>
     // </Description>
     // <RelatedBugs></RelatedBugs>
@@ -568,7 +569,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order02.order02
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order02.order02;
-    // <Title> Compound operator excute orders.</Title>
+    // <Title> Compound operator execute orders.</Title>
     // <Description>
     // </Description>
     // <RelatedBugs></RelatedBugs>
@@ -619,7 +620,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order03.order03
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order03.order03;
-    // <Title> Compound operator excute orders.</Title>
+    // <Title> Compound operator execute orders.</Title>
     // <Description>
     // </Description>
     // <RelatedBugs></RelatedBugs>
@@ -667,7 +668,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order04.order04
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order04.order04;
-    // <Title> Compound operator excute orders.</Title>
+    // <Title> Compound operator execute orders.</Title>
     // <Description>
     // </Description>
     // <RelatedBugs></RelatedBugs>
@@ -736,7 +737,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order05.order05
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order05.order05;
-    // <Title> Compound operator excute orders.</Title>
+    // <Title> Compound operator execute orders.</Title>
     // <Description>
     // </Description>
     // <RelatedBugs></RelatedBugs>
@@ -805,7 +806,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order06.order06
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.basic.order06.order06;
-    // <Title> Compound operator excute orders.</Title>
+    // <Title> Compound operator execute orders.</Title>
     // <Description>
     // </Description>
     // <RelatedBugs></RelatedBugs>

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -32,7 +33,7 @@ namespace System.Security.Cryptography
         public Oid(Oid oid)
         {
             if (oid == null)
-                throw new ArgumentNullException("oid");
+                throw new ArgumentNullException(nameof(oid));
             _value = oid._value;
             _friendlyName = oid._friendlyName;
             _group = oid._group;
@@ -42,7 +43,7 @@ namespace System.Security.Cryptography
         {
             if (friendlyName == null)
             {
-                throw new ArgumentNullException("friendlyName");
+                throw new ArgumentNullException(nameof(friendlyName));
             }
 
             String oidValue = OidLookup.ToOid(friendlyName, group, fallBackToAllGroups: false);
@@ -55,7 +56,7 @@ namespace System.Security.Cryptography
         public static Oid FromOidValue(String oidValue, OidGroup group)
         {
             if (oidValue == null)
-                throw new ArgumentNullException("oidValue");
+                throw new ArgumentNullException(nameof(oidValue));
 
             String friendlyName = OidLookup.ToFriendlyName(oidValue, group, fallBackToAllGroups: false);
             if (friendlyName == null)

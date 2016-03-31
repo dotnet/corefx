@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace BasicEventSourceTests
             var sessionName = Path.GetFileNameWithoutExtension(dataFileName) + "Session";
             var logger = ADShutdownEventSourceTester.ADShutdownEventSource.Log;
 
-            // Normalze to a full path name.  
+            // Normalize to a full path name.  
             dataFileName = Path.GetFullPath(dataFileName);
             Debug.WriteLine(String.Format("Creating data file {0}", dataFileName));
 
@@ -83,7 +84,7 @@ namespace BasicEventSourceTests
                         hasManifestEvents = true;
                 };
 
-                // Parse all the events as as best we can, and also send unhandled events there as well.  
+                // Parse all the events as best we can, and also send unhandled events there as well.  
                 traceEventSource.Registered.All += onEvent;
                 traceEventSource.Dynamic.All += onEvent;
                 traceEventSource.UnhandledEvent += onEvent;

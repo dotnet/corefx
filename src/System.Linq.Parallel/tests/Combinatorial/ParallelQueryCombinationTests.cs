@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -9,8 +10,8 @@ namespace System.Linq.Parallel.Tests
     public partial class ParallelQueryCombinationTests
     {
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Aggregate(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
@@ -18,8 +19,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Aggregate_Seed(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
@@ -27,8 +28,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Aggregate_Result(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
@@ -36,8 +37,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Aggregate_Accumulator(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
@@ -45,8 +46,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Aggregate_SeedFactory(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
@@ -54,16 +55,16 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void All_False(LabeledOperation source, LabeledOperation operation)
         {
             Assert.False(operation.Item(DefaultStart, DefaultSize, source.Item).All(x => false));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void All_True(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -72,8 +73,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Any_False(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -82,16 +83,16 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Any_True(LabeledOperation source, LabeledOperation operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).Any(x => true));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Average(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize) / (double)DefaultSize,
@@ -99,8 +100,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Average_Nullable(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize) / (double?)DefaultSize,
@@ -108,8 +109,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Cast(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -122,8 +123,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Cast_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -132,48 +133,48 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Contains_True(LabeledOperation source, LabeledOperation operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).Contains(DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Contains_False(LabeledOperation source, LabeledOperation operation)
         {
             Assert.False(operation.Item(DefaultStart, DefaultSize, source.Item).Contains(DefaultStart + DefaultSize));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Count_Elements(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultSize, operation.Item(DefaultStart, DefaultSize, source.Item).Count());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Count_Predicate_Some(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).Count(x => x < DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Count_Predicate_None(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(0, operation.Item(DefaultStart, DefaultSize, source.Item).Count(x => x < DefaultStart));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void DefaultIfEmpty(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -185,8 +186,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void DefaultIfEmpty_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -195,8 +196,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Distinct(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -209,8 +210,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Distinct_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -220,8 +221,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void ElementAt(LabeledOperation source, LabeledOperation operation)
         {
             ParallelQuery<int> query = operation.Item(DefaultStart, DefaultSize, source.Item);
@@ -235,8 +236,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void ElementAtOrDefault(LabeledOperation source, LabeledOperation operation)
         {
             ParallelQuery<int> query = operation.Item(DefaultStart, DefaultSize, source.Item);
@@ -251,8 +252,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Except(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -266,8 +267,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Except_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -278,48 +279,48 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void First(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, source.Item).First());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void First_Predicate(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).First(x => x >= DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void FirstOrDefault(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void FirstOrDefault_Predicate(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault(x => x >= DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void FirstOrDefault_Predicate_None(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(default(int), operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault(x => false));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void ForAll(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -328,8 +329,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void GetEnumerator(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -347,8 +348,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void GroupBy(LabeledOperation source, LabeledOperation operation)
         {
             int seenKey = DefaultStart / GroupFactor;
@@ -363,8 +364,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void GroupBy_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seenKey = DefaultStart / GroupFactor;
@@ -379,8 +380,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void GroupBy_ElementSelector(LabeledOperation source, LabeledOperation operation)
         {
             int seenKey = DefaultStart / GroupFactor;
@@ -395,8 +396,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void GroupBy_ElementSelector_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seenKey = DefaultStart / GroupFactor;
@@ -411,8 +412,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Intersect(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -426,8 +427,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Intersect_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -438,104 +439,104 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Last(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, source.Item).Last());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Last_Predicate(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart + DefaultSize / 2 - 1, operation.Item(DefaultStart, DefaultSize, source.Item).Last(x => x < DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void LastOrDefault(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void LastOrDefault_Predicate(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart + DefaultSize / 2 - 1, operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault(x => x < DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void LastOrDefault_Predicate_None(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(default(int), operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault(x => false));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void LongCount_Elements(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultSize, operation.Item(DefaultStart, DefaultSize, source.Item).LongCount());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void LongCount_Predicate_Some(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).LongCount(x => x < DefaultStart + DefaultSize / 2));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void LongCount_Predicate_None(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(0, operation.Item(DefaultStart, DefaultSize, source.Item).LongCount(x => x < DefaultStart));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Max(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, source.Item).Max());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Max_Nullable(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, source.Item).Max(x => (int?)x));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Min(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, source.Item).Min());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Min_Nullable(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, source.Item).Min(x => (int?)x));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void OfType(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -547,8 +548,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void OfType_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -557,26 +558,26 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void OfType_Other(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Empty(operation.Item(DefaultStart, DefaultSize, source.Item).OfType<long>());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void OfType_Other_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Empty(operation.Item(DefaultStart, DefaultSize, source.Item).OfType<long>().ToList());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OrderBy_Initial(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -588,10 +589,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OrderBy_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -600,10 +601,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OrderBy_OtherDirection(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -615,10 +616,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OrderBy_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -627,10 +628,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OrderByDescending_Initial(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -642,10 +643,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OrderByDescending_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -654,10 +655,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OrderByDescending_OtherDirection(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -669,10 +670,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OrderByDescending_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -681,8 +682,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Reverse(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -694,8 +695,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Reverse_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -707,8 +708,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Select(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -720,8 +721,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Select_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -730,8 +731,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Select_Indexed(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -743,8 +744,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Select_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -753,8 +754,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SelectMany(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -766,8 +767,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SelectMany_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -776,8 +777,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SelectMany_Indexed(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -789,8 +790,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SelectMany_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -799,8 +800,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SelectMany_ResultSelector(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -812,8 +813,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SelectMany_ResultSelector_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -822,8 +823,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SelectMany_Indexed_ResultSelector(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -835,8 +836,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SelectMany_Indexed_ResultSelector_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = -DefaultStart;
@@ -845,8 +846,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SequenceEqual(LabeledOperation source, LabeledOperation operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).SequenceEqual(ParallelEnumerable.Range(DefaultStart, DefaultSize).AsOrdered()));
@@ -854,18 +855,18 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SequenceEqual_Self(LabeledOperation source, LabeledOperation operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).SequenceEqual(operation.Item(DefaultStart, DefaultSize, source.Item)));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Single(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, 1, source.Item).Single());
@@ -873,10 +874,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SingleOrDefault(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, 1, source.Item).SingleOrDefault());
@@ -890,8 +891,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Skip(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
@@ -903,8 +904,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Skip_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
@@ -913,8 +914,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SkipWhile(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
@@ -926,8 +927,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SkipWhile_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
@@ -936,8 +937,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SkipWhile_Indexed(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
@@ -949,8 +950,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void SkipWhile_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
@@ -959,28 +960,28 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Sum(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize), operation.Item(DefaultStart, DefaultSize, source.Item).Sum());
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Sum_Nullable(LabeledOperation source, LabeledOperation operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize), operation.Item(DefaultStart, DefaultSize, source.Item).Sum(x => (int?)x));
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Take(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -992,8 +993,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Take_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1002,8 +1003,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void TakeWhile(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1015,8 +1016,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void TakeWhile_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1025,8 +1026,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void TakeWhile_Indexed(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1038,8 +1039,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void TakeWhile_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1048,10 +1049,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ThenBy_Initial(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1063,10 +1064,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ThenBy_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1075,10 +1076,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ThenBy_OtherDirection(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -1090,10 +1091,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ThenBy_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -1102,10 +1103,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ThenByDescending_Initial(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1117,10 +1118,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ThenByDescending_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1129,10 +1130,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ThenByDescending_OtherDirection(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -1144,10 +1145,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ThenByDescending_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -1156,8 +1157,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void ToArray(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1166,10 +1167,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ToDictionary(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -1183,10 +1184,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ToDictionary_ElementSelector(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -1200,8 +1201,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void ToList(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1210,10 +1211,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ToLookup(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seenOuter = new IntegerRangeSet(0, 2);
@@ -1231,10 +1232,10 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ToLookup_ElementSelector(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seenOuter = new IntegerRangeSet(0, 2);
@@ -1252,8 +1253,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Where(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1265,8 +1266,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Where_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1275,8 +1276,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Where_Indexed(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1288,8 +1289,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Where_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1298,8 +1299,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Zip(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1313,8 +1314,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
-        [MemberData("BinaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Zip_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;

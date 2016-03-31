@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -111,7 +112,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value == null) throw new ArgumentNullException("value");
+                if (value == null) throw new ArgumentNullException(nameof(value));
                 _taskScheduler = value;
             }
         }
@@ -134,7 +135,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _maxMessagesPerTask = value;
             }
         }
@@ -154,7 +155,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _boundedCapacity = value;
             }
         }
@@ -173,7 +174,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value == null) throw new ArgumentNullException("value");
+                if (value == null) throw new ArgumentNullException(nameof(value));
                 _nameFormat = value;
             }
         }
@@ -289,7 +290,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _maxDegreeOfParallelism = value;
             }
         }
@@ -432,7 +433,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value <= 0 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value <= 0 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _maxNumberOfGroups = value;
             }
         }

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using Xunit;
@@ -9,75 +10,75 @@ namespace System.Linq.Expressions.Tests
     public class ReferenceEqual : ReferenceEqualityTests
     {
         [Theory]
-        [MemberData("ReferenceObjectsData")]
-        public void TrueOnSame(object item)
+        [PerCompilationType(nameof(ReferenceObjectsData))]
+        public void TrueOnSame(object item, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                     Expression.Constant(item, item.GetType()),
                     Expression.Constant(item, item.GetType())
                 );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("ReferenceTypesData")]
-        public void TrueOnBothNull(Type type)
+        [PerCompilationType(nameof(ReferenceTypesData))]
+        public void TrueOnBothNull(Type type, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                 Expression.Constant(null, type),
                 Expression.Constant(null, type)
                 );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("ReferenceObjectsData")]
-        public void FalseIfLeftNull(object item)
+        [PerCompilationType(nameof(ReferenceObjectsData))]
+        public void FalseIfLeftNull(object item, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                     Expression.Constant(null, item.GetType()),
                     Expression.Constant(item, item.GetType())
                 );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("ReferenceObjectsData")]
-        public void FalseIfRightNull(object item)
+        [PerCompilationType(nameof(ReferenceObjectsData))]
+        public void FalseIfRightNull(object item, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                     Expression.Constant(item, item.GetType()),
                     Expression.Constant(null, item.GetType())
                 );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("DifferentObjects")]
-        public void FalseIfDifferentObjectsAsObject(object x, object y)
+        [PerCompilationType(nameof(DifferentObjects))]
+        public void FalseIfDifferentObjectsAsObject(object x, object y, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                     Expression.Constant(x, typeof(object)),
                     Expression.Constant(y, typeof(object))
                 );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("DifferentObjects")]
-        public void FalseIfDifferentObjectsOwnType(object x, object y)
+        [PerCompilationType(nameof(DifferentObjects))]
+        public void FalseIfDifferentObjectsOwnType(object x, object y, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                     Expression.Constant(x),
                     Expression.Constant(y)
                 );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("LeftValueType")]
-        [MemberData("RightValueType")]
-        [MemberData("BothValueType")]
+        [MemberData(nameof(LeftValueType))]
+        [MemberData(nameof(RightValueType))]
+        [MemberData(nameof(BothValueType))]
         public void ThrowsOnValueTypeArguments(object x, object y)
         {
             Expression xExp = Expression.Constant(x);
@@ -86,7 +87,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("UnassignablePairs")]
+        [MemberData(nameof(UnassignablePairs))]
         public void ThrowsOnUnassignablePairs(object x, object y)
         {
             Expression xExp = Expression.Constant(x);
@@ -95,47 +96,47 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("ComparableValuesData")]
-        public void TrueOnSameViaInterface(object item)
+        [PerCompilationType(nameof(ComparableValuesData))]
+        public void TrueOnSameViaInterface(object item, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                 Expression.Constant(item, typeof(IComparable)),
                 Expression.Constant(item, typeof(IComparable))
             );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("DifferentComparableValues")]
-        public void FalseOnDifferentViaInterface(object x, object y)
+        [PerCompilationType(nameof(DifferentComparableValues))]
+        public void FalseOnDifferentViaInterface(object x, object y, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                 Expression.Constant(x, typeof(IComparable)),
                 Expression.Constant(y, typeof(IComparable))
             );
-            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.False(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("ComparableReferenceTypesData")]
-        public void TrueOnSameLeftViaInterface(object item)
+        [PerCompilationType(nameof(ComparableReferenceTypesData))]
+        public void TrueOnSameLeftViaInterface(object item, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                 Expression.Constant(item, typeof(IComparable)),
                 Expression.Constant(item)
             );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("ComparableReferenceTypesData")]
-        public void TrueOnSameRightViaInterface(object item)
+        [PerCompilationType(nameof(ComparableReferenceTypesData))]
+        public void TrueOnSameRightViaInterface(object item, bool useInterpreter)
         {
             Expression exp = Expression.ReferenceEqual(
                 Expression.Constant(item),
                 Expression.Constant(item, typeof(IComparable))
             );
-            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(exp).Compile(useInterpreter)());
         }
 
         [Fact]

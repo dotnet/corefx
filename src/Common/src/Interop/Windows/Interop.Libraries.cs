@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 internal static partial class Interop
 {
@@ -25,6 +26,7 @@ internal static partial class Interop
         internal const string Kernel32 = "kernel32.dll";
         internal const string Kernel32_L1 = "api-ms-win-core-kernel32-legacy-l1-1-1.dll";
         internal const string Kernel32_L2 = "api-ms-win-core-kernel32-legacy-l1-1-0.dll";
+        internal const string Keyboard = "ext-ms-win-ntuser-keyboard-l1-2-1.dll";
         internal const string LibraryLoader = "api-ms-win-core-libraryloader-l1-1-0.dll";
         internal const string Localization = "api-ms-win-core-localization-l1-2-0.dll";
         internal const string Memory_L1_0 = "api-ms-win-core-memory-l1-1-0.dll";
@@ -49,6 +51,7 @@ internal static partial class Interop
         internal const string SecurityCpwl = "api-ms-win-security-cpwl-l1-1-0.dll";
         internal const string SecurityLsa = "api-ms-win-security-lsalookup-l2-1-0.dll";
         internal const string SecurityLsaPolicy = "api-ms-win-security-lsapolicy-l1-1-0";
+        internal const string SecurityProvider = "api-ms-win-security-provider-l1-1-0";
         internal const string SecuritySddl = "api-ms-win-security-sddl-l1-1-0";
         internal const string ServiceCore = "api-ms-win-service-core-l1-1-1.dll";
         internal const string ServiceMgmt_L1 = "api-ms-win-service-management-l1-1-0.dll";

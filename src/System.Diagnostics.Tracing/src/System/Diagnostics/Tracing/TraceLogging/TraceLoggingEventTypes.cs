@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections.Generic;
 using Interlocked = System.Threading.Interlocked;
@@ -90,7 +94,7 @@ namespace System.Diagnostics.Tracing
         {
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             Contract.EndContractBlock();
@@ -128,7 +132,7 @@ namespace System.Diagnostics.Tracing
         {
             if (defaultName == null)
             {
-                throw new ArgumentNullException("defaultName");
+                throw new ArgumentNullException(nameof(defaultName));
             }
 
             Contract.EndContractBlock();
@@ -208,7 +212,7 @@ namespace System.Diagnostics.Tracing
         {
             if (paramInfos == null)
             {
-                throw new ArgumentNullException("paramInfos");
+                throw new ArgumentNullException(nameof(paramInfos));
             }
 
             Contract.EndContractBlock();
@@ -227,7 +231,7 @@ namespace System.Diagnostics.Tracing
         {
             if (types == null)
             {
-                throw new ArgumentNullException("types");
+                throw new ArgumentNullException(nameof(types));
             }
 
             Contract.EndContractBlock();
@@ -247,7 +251,7 @@ namespace System.Diagnostics.Tracing
         {
             if (typeInfos == null)
             {
-                throw new ArgumentNullException("typeInfos");
+                throw new ArgumentNullException(nameof(typeInfos));
             }
 
             Contract.EndContractBlock();

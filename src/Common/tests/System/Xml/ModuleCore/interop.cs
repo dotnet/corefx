@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -43,7 +44,7 @@ namespace OLEDB.Test.ModuleCore
     ////////////////////////////////////////////////////////////////////////
     public enum tagCONSOLEFLAGS
     {
-        CONSOLE_RAW = 0x00000000,   //No fixup - Don't use, unless you know the text contains no CR/LF, no Xml reserverd tokens, or no other non-respresentable characters
+        CONSOLE_RAW = 0x00000000,   //No fixup - Don't use, unless you know the text contains no CR/LF, no Xml reserved tokens, or no other non-representable characters
         CONSOLE_TEXT = 0x00000001,  //Default  - Automatically fixup CR/LF correctly for log files, fixup xml tokens, etc
         CONSOLE_XML = 0x00000002,   //For Xml  - User text is placed into a CDATA section (with no xml fixups)
         CONSOLE_IGNORE = 0x00000004,    //Ignore   - User text is placed into ignore tags (can combine this with console_xml as well)

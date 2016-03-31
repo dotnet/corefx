@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -79,6 +80,27 @@ namespace System.IO.Tests
         public void ShouldThrowIOExceptionDeletingDirectory()
         {
             Assert.Throws<UnauthorizedAccessException>(() => Delete(TestDirectory));
+        }
+
+        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
+        public void DeletingSymLinkDoesntDeleteTarget()
+        {
+            var path = GetTestFilePath();
+            var linkPath = GetTestFilePath();
+
+            File.Create(path).Dispose();
+            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: false));
+
+            // Both the symlink and the target exist
+            Assert.True(File.Exists(path), "path should exist");
+            Assert.True(File.Exists(linkPath), "linkPath should exist");
+
+            // Delete the symlink
+            File.Delete(linkPath);
+
+            // Target should still exist
+            Assert.True(File.Exists(path), "path should still exist");
+            Assert.False(File.Exists(linkPath), "linkPath should no longer exist");
         }
 
         #endregion

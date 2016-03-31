@@ -4,18 +4,19 @@
   <PropertyGroup>
     <ProjectGuid>{56B9D0A9-44D3-488E-8B42-C14A6E30CAB2}</ProjectGuid>
     <AssemblyName>System.Runtime</AssemblyName>
-    <AssemblyVersion>4.0.21.0</AssemblyVersion>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)'==''">dotnet5.4</PackageTargetFramework>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)'==''">netstandard1.5</PackageTargetFramework>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.5</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net462_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net462_Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'net462'">
     <Compile Include="System\Action.cs" />
     <Compile Include="System\Function.cs" />
     <Compile Include="System\LazyOfTTMetadata.cs" />
@@ -23,22 +24,22 @@
     <Compile Include="System\ComponentModel\EditorBrowsableAttribute.cs" />
     <Compile Include="System\Runtime\CompilerServices\StrongBox.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'!='netcore50aot' And '$(TargetGroup)'!='net46'">
+  <ItemGroup Condition="'$(TargetGroup)'!='netcore50aot' And '$(TargetGroup)'!='net462'">
     <Compile Include="System\ComponentModel\DefaultValueAttribute.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'net462'">
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj">
-      <AdditionalProperties>OSGroup=Windows_NT</AdditionalProperties>
+      <OSGroup>Windows_NT</OSGroup>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='netcore50aot'">
-    <TargetingPackReference Include="mscorlib"/>
+    <TargetingPackReference Include="mscorlib" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcore50aot'">
-    <TargetingPackReference Include="System.Private.CoreLib"/>
+    <TargetingPackReference Include="System.Private.CoreLib" />
     <TargetingPackReference Include="System.Private.Reflection" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'net462'">
     <TargetingPackReference Include="System" />
     <TargetingPackReference Include="System.Core" />
     <TargetingPackReference Include="System.ComponentModel.Composition" />

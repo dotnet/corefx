@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -78,10 +79,9 @@ namespace Microsoft.SqlServer.Server
 
         // Hash table to map from clr type object to ExtendedClrTypeCodeMap enum
         // this HashTable should only be accessed from DetermineExtendedTypeCode and class ctor for setup.
-        private static readonly Hashtable s_typeToExtendedTypeCodeMap;
+        private static readonly Hashtable s_typeToExtendedTypeCodeMap = CreateTypeToExtendedTypeCodeMap();
 
-
-        static MetaDataUtilsSmi()
+        private static Hashtable CreateTypeToExtendedTypeCodeMap()
         {
             // Set up type mapping hash table
             // Keep this initialization list in the same order as ExtendedClrTypeCode for ease in validating!
@@ -127,9 +127,8 @@ namespace Microsoft.SqlServer.Server
             ht.Add(typeof(IEnumerable<SqlDataRecord>), ExtendedClrTypeCode.IEnumerableOfSqlDataRecord);
             ht.Add(typeof(System.TimeSpan), ExtendedClrTypeCode.TimeSpan);
             ht.Add(typeof(System.DateTimeOffset), ExtendedClrTypeCode.DateTimeOffset);
-            s_typeToExtendedTypeCodeMap = ht;
+            return ht;
         }
-
 
         internal static bool IsCharOrXmlType(SqlDbType type)
         {
@@ -177,8 +176,8 @@ namespace Microsoft.SqlServer.Server
         //  series of if statements, or using a hash table. 
         // NOTE: the form of these checks is taking advantage of a feature of the JIT compiler that is supposed to
         //      optimize checks of the form '(xxx.GetType() == typeof( YYY ))'.  The JIT team claimed at one point that
-        //      this doesn't even instantiate a Type instance, thus was the fastest method for individual comparisions.
-        //      Given that there's a known SqlDbType, thus a minimal number of comparisions, it's likely this is faster
+        //      this doesn't even instantiate a Type instance, thus was the fastest method for individual comparisons.
+        //      Given that there's a known SqlDbType, thus a minimal number of comparisons, it's likely this is faster
         //      than the other approaches considered (both GetType().GetTypeCode() switch and hash table using Type keys
         //      must instantiate a Type object.  The typecode switch also degenerates into a large if-then-else for
         //      all but the primitive clr types.
@@ -309,7 +308,7 @@ namespace Microsoft.SqlServer.Server
                         // SqlDbType doesn't help us here, call general-purpose function
                         extendedCode = DetermineExtendedTypeCode(value);
 
-                        // Some types aren't allowed for Variants but are for the general-purpos function.  
+                        // Some types aren't allowed for Variants but are for the general-purpose function.  
                         //  Match behavior of other types and return invalid in these cases.
                         if (ExtendedClrTypeCode.SqlXml == extendedCode)
                         {

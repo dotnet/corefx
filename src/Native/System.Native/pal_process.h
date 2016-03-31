@@ -1,9 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #pragma once
 
 #include "pal_types.h"
+#include <stdio.h>
 #include <string.h>
 
 /**
@@ -28,6 +30,16 @@ SystemNative_ForkAndExecProcess(const char* filename,   // filename argument to 
                    int32_t* stdinFd,       // [out] if redirectStdin, the parent's fd for the child's stdin
                    int32_t* stdoutFd,      // [out] if redirectStdout, the parent's fd for the child's stdout
                    int32_t* stderrFd);     // [out] if redirectStderr, the parent's fd for the child's stderr
+
+/**
+ * Shim for the popen function.
+ */
+extern "C" FILE* SystemNative_POpen(const char* command, const char* type);
+
+/**
+ * Shim for the pclose function.
+ */
+extern "C" int32_t SystemNative_PClose(FILE* stream);
 
 /************
  * The values below in the header are fixed and correct for managed callers to use forever.

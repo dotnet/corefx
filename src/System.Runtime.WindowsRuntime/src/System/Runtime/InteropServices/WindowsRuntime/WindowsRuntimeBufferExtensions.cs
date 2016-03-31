@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics.Contracts;
 using System.Diagnostics;
@@ -20,7 +21,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static IBuffer AsBuffer(this Byte[] source)
         {
-            if (source == null) throw new ArgumentNullException("source");
+            if (source == null) throw new ArgumentNullException(nameof(source));
 
             Contract.Ensures(Contract.Result<IBuffer>() != null);
             Contract.Ensures(Contract.Result<IBuffer>().Length == unchecked((UInt32)source.Length));
@@ -34,9 +35,9 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static IBuffer AsBuffer(this Byte[] source, Int32 offset, Int32 length)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (offset < 0) throw new ArgumentOutOfRangeException("offset");
-            if (length < 0) throw new ArgumentOutOfRangeException("length");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (source.Length - offset < length) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
 
             Contract.Ensures(Contract.Result<IBuffer>() != null);
@@ -51,10 +52,10 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static IBuffer AsBuffer(this Byte[] source, Int32 offset, Int32 length, Int32 capacity)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (offset < 0) throw new ArgumentOutOfRangeException("offset");
-            if (length < 0) throw new ArgumentOutOfRangeException("length");
-            if (length < 0) throw new ArgumentOutOfRangeException("capacity");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
             if (source.Length - offset < length) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (source.Length - offset < capacity) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (capacity < length) throw new ArgumentException(SR.Argument_InsufficientBufferCapacity);
@@ -81,8 +82,8 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static void CopyTo(this Byte[] source, IBuffer destination)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (destination == null) throw new ArgumentNullException("destination");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
             Contract.EndContractBlock();
 
             CopyTo(source, 0, destination, 0, source.Length);
@@ -102,12 +103,12 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static void CopyTo(this Byte[] source, Int32 sourceIndex, IBuffer destination, UInt32 destinationIndex, Int32 count)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (destination == null) throw new ArgumentNullException("destination");
-            if (count < 0) throw new ArgumentOutOfRangeException("count");
-            if (sourceIndex < 0) throw new ArgumentOutOfRangeException("sourceIndex");
-            if (destinationIndex < 0) throw new ArgumentOutOfRangeException("destinationIndex");
-            if (source.Length <= sourceIndex) throw new ArgumentException(SR.Argument_IndexOutOfArrayBounds, "sourceIndex");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+            if (sourceIndex < 0) throw new ArgumentOutOfRangeException(nameof(sourceIndex));
+            if (destinationIndex < 0) throw new ArgumentOutOfRangeException(nameof(destinationIndex));
+            if (source.Length <= sourceIndex) throw new ArgumentException(SR.Argument_IndexOutOfArrayBounds, nameof(sourceIndex));
             if (source.Length - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (destination.Capacity - destinationIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInTargetBuffer);
             Contract.EndContractBlock();
@@ -117,7 +118,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             Int32 destDataOffs;
             if (destination.TryGetUnderlyingData(out destDataArr, out destDataOffs))
             {
-                Array.Copy(source, sourceIndex, destDataArr, (int)(destDataOffs + destinationIndex), count);
+                Buffer.BlockCopy(source, sourceIndex, destDataArr, (int)(destDataOffs + destinationIndex), count);
                 return;
             }
 
@@ -133,7 +134,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static Byte[] ToArray(this IBuffer source)
         {
-            if (source == null) throw new ArgumentNullException("source");
+            if (source == null) throw new ArgumentNullException(nameof(source));
             Contract.EndContractBlock();
 
             return ToArray(source, 0, checked((Int32)source.Length));
@@ -143,9 +144,9 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static Byte[] ToArray(this IBuffer source, UInt32 sourceIndex, Int32 count)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (count < 0) throw new ArgumentOutOfRangeException("count");
-            if (sourceIndex < 0) throw new ArgumentOutOfRangeException("sourceIndex");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+            if (sourceIndex < 0) throw new ArgumentOutOfRangeException(nameof(sourceIndex));
             if (source.Capacity <= sourceIndex) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity);
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
             Contract.EndContractBlock();
@@ -166,8 +167,8 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static void CopyTo(this IBuffer source, Byte[] destination)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (destination == null) throw new ArgumentNullException("destination");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
             Contract.EndContractBlock();
 
             CopyTo(source, 0, destination, 0, checked((Int32)source.Length));
@@ -177,11 +178,11 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static void CopyTo(this IBuffer source, UInt32 sourceIndex, Byte[] destination, Int32 destinationIndex, Int32 count)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (destination == null) throw new ArgumentNullException("destination");
-            if (count < 0) throw new ArgumentOutOfRangeException("count");
-            if (sourceIndex < 0) throw new ArgumentOutOfRangeException("sourceIndex");
-            if (destinationIndex < 0) throw new ArgumentOutOfRangeException("destinationIndex");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+            if (sourceIndex < 0) throw new ArgumentOutOfRangeException(nameof(sourceIndex));
+            if (destinationIndex < 0) throw new ArgumentOutOfRangeException(nameof(destinationIndex));
             if (source.Capacity <= sourceIndex) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity);
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
             if (destination.Length <= destinationIndex) throw new ArgumentException(SR.Argument_IndexOutOfArrayBounds);
@@ -193,7 +194,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             Int32 srcDataOffs;
             if (source.TryGetUnderlyingData(out srcDataArr, out srcDataOffs))
             {
-                Array.Copy(srcDataArr, (int)(srcDataOffs + sourceIndex), destination, destinationIndex, count);
+                Buffer.BlockCopy(srcDataArr, (int)(srcDataOffs + sourceIndex), destination, destinationIndex, count);
                 return;
             }
 
@@ -209,8 +210,8 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static void CopyTo(this IBuffer source, IBuffer destination)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (destination == null) throw new ArgumentNullException("destination");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
             Contract.EndContractBlock();
 
             CopyTo(source, 0, destination, 0, source.Length);
@@ -220,11 +221,11 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static void CopyTo(this IBuffer source, UInt32 sourceIndex, IBuffer destination, UInt32 destinationIndex, UInt32 count)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (destination == null) throw new ArgumentNullException("destination");
-            if (count < 0) throw new ArgumentOutOfRangeException("count");
-            if (sourceIndex < 0) throw new ArgumentOutOfRangeException("sourceIndex");
-            if (destinationIndex < 0) throw new ArgumentOutOfRangeException("destinationIndex");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+            if (sourceIndex < 0) throw new ArgumentOutOfRangeException(nameof(sourceIndex));
+            if (destinationIndex < 0) throw new ArgumentOutOfRangeException(nameof(destinationIndex));
             if (source.Capacity <= sourceIndex) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity);
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
             if (destination.Capacity <= destinationIndex) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity);
@@ -244,7 +245,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
                 Debug.Assert(sourceIndex <= Int32.MaxValue);
                 Debug.Assert(destinationIndex <= Int32.MaxValue);
 
-                Array.Copy(srcDataArr, srcDataOffs + (Int32)sourceIndex, destDataArr, destDataOffs + (Int32)destinationIndex, (Int32)count);
+                Buffer.BlockCopy(srcDataArr, srcDataOffs + (Int32)sourceIndex, destDataArr, destDataOffs + (Int32)destinationIndex, (Int32)count);
                 return;
             }
 
@@ -296,7 +297,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         internal static bool TryGetUnderlyingData(this IBuffer buffer, out Byte[] underlyingDataArray, out Int32 underlyingDataArrayStartOffset)
         {
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
 
             Contract.EndContractBlock();
 
@@ -327,7 +328,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static bool IsSameData(this IBuffer buffer, IBuffer otherBuffer)
         {
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
 
             Contract.EndContractBlock();
 
@@ -378,7 +379,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static IBuffer GetWindowsRuntimeBuffer(this MemoryStream underlyingStream)
         {
             if (underlyingStream == null)
-                throw new ArgumentNullException("underlyingStream");
+                throw new ArgumentNullException(nameof(underlyingStream));
 
             Contract.Ensures(Contract.Result<IBuffer>() != null);
             Contract.Ensures(Contract.Result<IBuffer>().Length == underlyingStream.Length);
@@ -416,13 +417,13 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static IBuffer GetWindowsRuntimeBuffer(this MemoryStream underlyingStream, Int32 positionInStream, Int32 length)
         {
             if (underlyingStream == null)
-                throw new ArgumentNullException("underlyingStream");
+                throw new ArgumentNullException(nameof(underlyingStream));
 
             if (positionInStream < 0)
-                throw new ArgumentOutOfRangeException("positionInStream");
+                throw new ArgumentOutOfRangeException(nameof(positionInStream));
 
             if (length < 0)
-                throw new ArgumentOutOfRangeException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
 
             if (underlyingStream.Capacity <= positionInStream)
                 throw new ArgumentException(SR.Argument_StreamPositionBeyondEOS);
@@ -453,7 +454,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static Stream AsStream(this IBuffer source)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
 
             Contract.Ensures(Contract.Result<Stream>() != null);
             Contract.Ensures(Contract.Result<Stream>().Length == (UInt32)source.Capacity);
@@ -483,9 +484,9 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         [CLSCompliant(false)]
         public static Byte GetByte(this IBuffer source, UInt32 byteOffset)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (byteOffset < 0) throw new ArgumentOutOfRangeException("byteOffset");
-            if (source.Capacity <= byteOffset) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity, "byteOffset");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (byteOffset < 0) throw new ArgumentOutOfRangeException(nameof(byteOffset));
+            if (source.Capacity <= byteOffset) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity, nameof(byteOffset));
 
             Contract.EndContractBlock();
 

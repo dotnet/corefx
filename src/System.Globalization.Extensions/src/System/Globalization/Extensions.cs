@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -13,7 +14,7 @@ namespace System.Globalization
         {
             if (compareInfo == null)
             {
-                throw new ArgumentNullException("compareInfo");
+                throw new ArgumentNullException(nameof(compareInfo));
             }
 
             if (options == CompareOptions.Ordinal)
@@ -28,7 +29,7 @@ namespace System.Globalization
 
             if ((options & CultureAwareComparer.ValidCompareMaskOffFlags) != 0)
             {
-                throw new ArgumentException(SR.Argument_InvalidFlag, "options");
+                throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
             }
 
             return new CultureAwareComparer(compareInfo, options);
@@ -71,7 +72,7 @@ namespace System.Globalization
         {
             if (obj == null)
             {
-                throw new ArgumentNullException("obj");
+                throw new ArgumentNullException(nameof(obj));
             }
             Contract.EndContractBlock();
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -54,7 +55,7 @@ namespace System.Net.Sockets
             // TODO: receive bytes on socket if requested
 
             _acceptedFileDescriptor = acceptedFileDescriptor;
-            Debug.Assert(socketAddress == null || socketAddress == _acceptBuffer);
+            Debug.Assert(socketAddress == null || socketAddress == _acceptBuffer, $"Unexpected socketAddress: {socketAddress}");
             _acceptAddressBufferCount = socketAddressSize;
 
             CompletionCallback(0, socketError);
@@ -62,7 +63,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationAccept(Socket socket, SafeCloseSocket handle, SafeCloseSocket acceptHandle, out int bytesTransferred)
         {
-            Debug.Assert(acceptHandle == null);
+            Debug.Assert(acceptHandle == null, $"Unexpected acceptHandle: {acceptHandle}");
 
             bytesTransferred = 0;
 
@@ -93,7 +94,7 @@ namespace System.Net.Sockets
 
         private void TransferCompletionCallback(int bytesTransferred, byte[] socketAddress, int socketAddressSize, SocketFlags receivedFlags, SocketError socketError)
         {
-            Debug.Assert(socketAddress == null || socketAddress == _socketAddress.Buffer);
+            Debug.Assert(socketAddress == null || socketAddress == _socketAddress.Buffer, $"Unexpected socketAddress: {socketAddress}");
             _socketAddressSize = socketAddressSize;
             _receivedFlags = receivedFlags;
 
@@ -155,8 +156,8 @@ namespace System.Net.Sockets
 
         private void ReceiveMessageFromCompletionCallback(int bytesTransferred, byte[] socketAddress, int socketAddressSize, SocketFlags receivedFlags, IPPacketInformation ipPacketInformation, SocketError errorCode)
         {
-            Debug.Assert(_socketAddress != null);
-            Debug.Assert(socketAddress == null || _socketAddress.Buffer == socketAddress);
+            Debug.Assert(_socketAddress != null, "Expected non-null _socketAddress");
+            Debug.Assert(socketAddress == null || _socketAddress.Buffer == socketAddress, $"Unexpected socketAddress: {socketAddress}");
 
             _socketAddressSize = socketAddressSize;
             _receivedFlags = receivedFlags;

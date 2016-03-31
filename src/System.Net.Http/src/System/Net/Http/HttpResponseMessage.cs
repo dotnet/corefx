@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Http.Headers;
 using System.Text;
@@ -26,7 +27,7 @@ namespace System.Net.Http
 #if !PHONE
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
 #endif
                 CheckDisposed();
@@ -65,7 +66,7 @@ namespace System.Net.Http
             {
                 if (((int)value < 0) || ((int)value > 999))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 CheckDisposed();
 
@@ -135,7 +136,7 @@ namespace System.Net.Http
 
             if (((int)statusCode < 0) || ((int)statusCode > 999))
             {
-                throw new ArgumentOutOfRangeException("statusCode");
+                throw new ArgumentOutOfRangeException(nameof(statusCode));
             }
 
             _statusCode = statusCode;

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -7,7 +8,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.covariant.indexer001.indexer001;
     // <Title>Covariant return type for dynamic/object</Title>
-    // <Description> Tests simple indexers changing the return type from dynamic to object and viceversa
+    // <Description> Tests simple indexers changing the return type from dynamic to object and vice versa
     // </Description>
     // <RelatedBugs></RelatedBugs>
     //<Expects Status=success></Expects>
@@ -395,7 +396,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.covariant.indexer003.indexer003;
     // <Title>Covariant return type for dynamic/object</Title>
-    // <Description> Tests generic indexer changing the return type from dynamic to object and viceversa
+    // <Description> Tests generic indexer changing the return type from dynamic to object and vice versa
     // </Description>
     // <RelatedBugs></RelatedBugs>
     //<Expects Status=success></Expects>
@@ -1231,7 +1232,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.covariant.method001.method001;
     // <Title>Covariant return type for dynamic/object</Title>
-    // <Description> Tests simple method changing the return type from dynamic to object and viceversa
+    // <Description> Tests simple method changing the return type from dynamic to object and vice versa
     // </Description>
     // <RelatedBugs></RelatedBugs>
     //<Expects Status=success></Expects>
@@ -1563,7 +1564,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.covariant.method003.method003;
     // <Title>Covariant return type for dynamic/object</Title>
-    // <Description> Tests generic methods changing the return type from dynamic to object and viceversa
+    // <Description> Tests generic methods changing the return type from dynamic to object and vice versa
     // </Description>
     // <RelatedBugs></RelatedBugs>
     //<Expects Status=success></Expects>
@@ -1853,7 +1854,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.covariant.property001.property001;
     // <Title>Covariant return type for dynamic/object</Title>
-    // <Description> Tests simple indexers changing the return type from dynamic to object and viceversa
+    // <Description> Tests simple indexers changing the return type from dynamic to object and vice versa
     // </Description>
     // <RelatedBugs></RelatedBugs>
     //<Expects Status=success></Expects>
@@ -2241,7 +2242,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.covariant.property003.property003;
     // <Title>Covariant return type for dynamic/object</Title>
-    // <Description> Tests generic indexer changing the return type from dynamic to object and viceversa
+    // <Description> Tests generic indexer changing the return type from dynamic to object and vice versa
     // </Description>
     // <RelatedBugs></RelatedBugs>
     //<Expects Status=success></Expects>
@@ -2357,7 +2358,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.covariant.usage001.usage001;
     // <Title>Covariant return type for dynamic/object</Title>
-    // <Description> Tests simple method changing the return type from dynamic to object and viceversa
+    // <Description> Tests simple method changing the return type from dynamic to object and vice versa
     // </Description>
     // <RelatedBugs></RelatedBugs>
     //<Expects Status=success></Expects>
@@ -2666,7 +2667,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
             var t = x[0].Prop;
             if (Test.Called == "DerivedGetPBaseGetPDerivedGetP")
                 success++;
-            //member intializer of anon type
+            //member initializer of anon type
             var a1 = new
             {
                 d = d.Prop,
@@ -3430,7 +3431,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
         {
             int test = 0, success = 0;
             Derived d = new Derived();
-            //---- incrementst the result of a method call
+            //---- increments the result of a method call
             test++;
             var x = d.M();
             x++;

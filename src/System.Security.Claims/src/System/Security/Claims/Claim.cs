@@ -1,6 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -58,7 +58,7 @@ namespace System.Security.Claims
         public Claim(BinaryReader reader, ClaimsIdentity subject)
         {
             if (reader == null)
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
 
             Initialize(reader, subject);
         }
@@ -171,12 +171,12 @@ namespace System.Security.Claims
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             Contract.EndContractBlock();
@@ -215,7 +215,7 @@ namespace System.Security.Claims
         protected Claim(Claim other, ClaimsIdentity subject)
         {
             if (other == null)
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
 
             _issuer = other._issuer;
             _originalIssuer = other._originalIssuer;
@@ -334,7 +334,7 @@ namespace System.Security.Claims
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             _subject = subject;
@@ -436,7 +436,7 @@ namespace System.Security.Claims
         {
             if (writer == null)
             {
-                throw new ArgumentNullException("writer");
+                throw new ArgumentNullException(nameof(writer));
             }
 
             // TODO - brentsch, given that there may be a bunch of NameClaims and or RoleClaims, we should account for this.

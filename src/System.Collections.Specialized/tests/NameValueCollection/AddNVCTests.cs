@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -13,7 +14,6 @@ namespace System.Collections.Specialized.Tests
         public const int MAX_LEN = 50;          // max length of random strings
 
         [Fact]
-        [ActiveIssue(2769, PlatformID.AnyUnix)]
         public void Test01()
         {
             IntlStrings intl;

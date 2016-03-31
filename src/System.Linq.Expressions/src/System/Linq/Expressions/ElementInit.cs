@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -100,12 +101,12 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="T:ElementInit">ElementInit</see> expression.</returns>
         public static ElementInit ElementInit(MethodInfo addMethod, IEnumerable<Expression> arguments)
         {
-            ContractUtils.RequiresNotNull(addMethod, "addMethod");
-            ContractUtils.RequiresNotNull(arguments, "arguments");
+            ContractUtils.RequiresNotNull(addMethod, nameof(addMethod));
+            ContractUtils.RequiresNotNull(arguments, nameof(arguments));
 
             var argumentsRO = arguments.ToReadOnly();
 
-            RequiresCanRead(argumentsRO, "arguments");
+            RequiresCanRead(argumentsRO, nameof(arguments));
             ValidateElementInitAddMethodInfo(addMethod);
             ValidateArgumentTypes(addMethod, ExpressionType.Call, ref argumentsRO);
             return new ElementInit(addMethod, argumentsRO);

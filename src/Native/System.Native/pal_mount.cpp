@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_mount.h"
@@ -21,7 +22,11 @@ static int32_t GetMountInfo(MountPointFound onFound)
 {
 #if HAVE_MNTINFO
     // getmntinfo returns pointers to OS-internal structs, so we don't need to worry about free'ing the object
+#if HAVE_STATFS
     struct statfs* mounts = nullptr;
+#else
+    struct statvfs* mounts = nullptr;
+#endif
     int count = getmntinfo(&mounts, 0);
     for (int32_t i = 0; i < count; i++)
     {
@@ -67,11 +72,16 @@ extern "C" int32_t SystemNative_GetSpaceInfoForMountPoint(const char* name, Moun
     assert(name != nullptr);
     assert(mpi != nullptr);
 
+#if HAVE_STATFS
     struct statfs stats = {};
     int result = statfs(name, &stats);
+#else
+    struct statvfs stats = {};
+    int result = statvfs(name, &stats);
+#endif
     if (result == 0)
     {
-        // Note that these have signed integer types on some platforms but musn't be negative.
+        // Note that these have signed integer types on some platforms but mustn't be negative.
         // Also, upcast here (some platforms have smaller types) to 64-bit before multiplying to
         // avoid overflow.
         uint64_t bsize = UnsignedCast(stats.f_bsize);
@@ -97,13 +107,22 @@ SystemNative_GetFormatInfoForMountPoint(const char* name, char* formatNameBuffer
     assert((formatNameBuffer != nullptr) && (formatType != nullptr));
     assert(bufferLength > 0);
 
+#if HAVE_STATFS
     struct statfs stats;
     int result = statfs(name, &stats);
+#else
+    struct statvfs stats;
+    int result = statvfs(name, &stats);
+#endif
     if (result == 0)
     {
 
-#if HAVE_STATFS_FSTYPENAME
+#if HAVE_STATFS_FSTYPENAME || HAVE_STATVFS_FSTYPENAME
+#ifdef VFS_NAMELEN
+        if (bufferLength < VFS_NAMELEN)
+#else
         if (bufferLength < MFSNAMELEN)
+#endif
         {
             result = ERANGE;
             *formatType = 0;
@@ -115,7 +134,7 @@ SystemNative_GetFormatInfoForMountPoint(const char* name, char* formatNameBuffer
         }
 #else
         assert(formatType != nullptr);
-        *formatType = stats.f_type;
+        *formatType = SignedCast(stats.f_type);
         SafeStringCopy(formatNameBuffer, bufferLength, "");
 #endif
     }

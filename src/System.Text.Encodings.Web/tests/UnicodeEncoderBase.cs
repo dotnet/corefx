@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -59,11 +60,11 @@ namespace Microsoft.Framework.WebEncoders
             // Input checking
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             if (output == null)
             {
-                throw new ArgumentNullException("output");
+                throw new ArgumentNullException(nameof(output));
             }
             ValidateInputs(startIndex, characterCount, actualInputLength: value.Length);
 
@@ -120,11 +121,11 @@ namespace Microsoft.Framework.WebEncoders
             // Input checking
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             if (output == null)
             {
-                throw new ArgumentNullException("output");
+                throw new ArgumentNullException(nameof(output));
             }
             ValidateInputs(startIndex, characterCount, actualInputLength: value.Length);
 
@@ -242,11 +243,11 @@ namespace Microsoft.Framework.WebEncoders
         {
             if (startIndex < 0 || startIndex > actualInputLength)
             {
-                throw new ArgumentOutOfRangeException("startIndex");
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
             }
             if (characterCount < 0 || characterCount > (actualInputLength - startIndex))
             {
-                throw new ArgumentOutOfRangeException("characterCount");
+                throw new ArgumentOutOfRangeException(nameof(characterCount));
             }
         }
 

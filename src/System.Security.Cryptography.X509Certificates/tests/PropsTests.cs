@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using Test.Cryptography;
@@ -87,7 +88,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (var c = new X509Certificate2(TestData.MsCertificate))
             {
                 string format = c.GetFormat();
-                Assert.Equal("X509", format);  // Only one format is supported so this is very predicatable api...
+                Assert.Equal("X509", format);  // Only one format is supported so this is very predictable api...
             }
         }
 
@@ -203,8 +204,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
-        public static void TestArchive()
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void TestArchive_Windows()
         {
             using (var c = new X509Certificate2(TestData.MsCertificate))
             {
@@ -219,18 +220,53 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
-        public static void TestFriendlyName()
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public static void TestArchive_Unix()
         {
             using (var c = new X509Certificate2(TestData.MsCertificate))
             {
-                Assert.Equal(String.Empty, c.FriendlyName);
+                Assert.False(c.Archived);
+
+                Assert.Throws<PlatformNotSupportedException>(() => c.Archived = true);
+                Assert.False(c.Archived);
+
+                Assert.Throws<PlatformNotSupportedException>(() => c.Archived = false);
+                Assert.False(c.Archived);
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void TestFriendlyName_Windows()
+        {
+            using (var c = new X509Certificate2(TestData.MsCertificate))
+            {
+                Assert.Equal(string.Empty, c.FriendlyName);
 
                 c.FriendlyName = "This is a friendly name.";
                 Assert.Equal("This is a friendly name.", c.FriendlyName);
 
                 c.FriendlyName = null;
-                Assert.Equal(String.Empty, c.FriendlyName);
+                Assert.Equal(string.Empty, c.FriendlyName);
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public static void TestFriendlyName_Unix()
+        {
+            using (var c = new X509Certificate2(TestData.MsCertificate))
+            {
+                Assert.Equal(string.Empty, c.FriendlyName);
+
+                Assert.Throws<PlatformNotSupportedException>(() => c.FriendlyName = "This is a friendly name.");
+                Assert.Equal(string.Empty, c.FriendlyName);
+                
+                Assert.Throws<PlatformNotSupportedException>(() => c.FriendlyName = null);
+                Assert.Equal(string.Empty, c.FriendlyName);
+
+                Assert.Throws<PlatformNotSupportedException>(() => c.FriendlyName = string.Empty);
+                Assert.Equal(string.Empty, c.FriendlyName);
             }
         }
 

@@ -1,8 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
+
 
 
 namespace Microsoft.SqlServer.Server
@@ -213,6 +215,63 @@ namespace System.Data.SqlClient
         Ascending = 0,
         Descending = 1,
         Unspecified = -1,
+    }
+    public sealed partial class SqlBulkCopy : System.IDisposable
+    {
+        public SqlBulkCopy(System.Data.SqlClient.SqlConnection connection) { }
+        public SqlBulkCopy(System.Data.SqlClient.SqlConnection connection, System.Data.SqlClient.SqlBulkCopyOptions copyOptions, System.Data.SqlClient.SqlTransaction externalTransaction) { }
+        public SqlBulkCopy(string connectionString) { }
+        public SqlBulkCopy(string connectionString, System.Data.SqlClient.SqlBulkCopyOptions copyOptions) { }
+        public int BatchSize { get { return default(int); } set { } }
+        public int BulkCopyTimeout { get { return default(int); } set { } }
+        public System.Data.SqlClient.SqlBulkCopyColumnMappingCollection ColumnMappings { get { return default(System.Data.SqlClient.SqlBulkCopyColumnMappingCollection); } }
+        public string DestinationTableName { get { return default(string); } set { } }
+        public bool EnableStreaming { get { return default(bool); } set { } }
+        public int NotifyAfter { get { return default(int); } set { } }
+        public event System.Data.SqlClient.SqlRowsCopiedEventHandler SqlRowsCopied { add { } remove { } }
+        public void Close() { }
+        void System.IDisposable.Dispose() { }
+        public void WriteToServer(System.Data.Common.DbDataReader reader) { }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.Common.DbDataReader reader) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task WriteToServerAsync(System.Data.Common.DbDataReader reader, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+    }
+    public sealed partial class SqlBulkCopyColumnMapping
+    {
+        public SqlBulkCopyColumnMapping() { }
+        public SqlBulkCopyColumnMapping(int sourceColumnOrdinal, int destinationOrdinal) { }
+        public SqlBulkCopyColumnMapping(int sourceColumnOrdinal, string destinationColumn) { }
+        public SqlBulkCopyColumnMapping(string sourceColumn, int destinationOrdinal) { }
+        public SqlBulkCopyColumnMapping(string sourceColumn, string destinationColumn) { }
+        public string DestinationColumn { get { return default(string); } set { } }
+        public int DestinationOrdinal { get { return default(int); } set { } }
+        public string SourceColumn { get { return default(string); } set { } }
+        public int SourceOrdinal { get { return default(int); } set { } }
+    }
+    public sealed partial class SqlBulkCopyColumnMappingCollection
+    {
+        internal SqlBulkCopyColumnMappingCollection() { }
+        public System.Data.SqlClient.SqlBulkCopyColumnMapping this[int index] { get { return default(System.Data.SqlClient.SqlBulkCopyColumnMapping); } }
+        public System.Data.SqlClient.SqlBulkCopyColumnMapping Add(System.Data.SqlClient.SqlBulkCopyColumnMapping bulkCopyColumnMapping) { return default(System.Data.SqlClient.SqlBulkCopyColumnMapping); }
+        public System.Data.SqlClient.SqlBulkCopyColumnMapping Add(int sourceColumnIndex, int destinationColumnIndex) { return default(System.Data.SqlClient.SqlBulkCopyColumnMapping); }
+        public System.Data.SqlClient.SqlBulkCopyColumnMapping Add(int sourceColumnIndex, string destinationColumn) { return default(System.Data.SqlClient.SqlBulkCopyColumnMapping); }
+        public System.Data.SqlClient.SqlBulkCopyColumnMapping Add(string sourceColumn, int destinationColumnIndex) { return default(System.Data.SqlClient.SqlBulkCopyColumnMapping); }
+        public System.Data.SqlClient.SqlBulkCopyColumnMapping Add(string sourceColumn, string destinationColumn) { return default(System.Data.SqlClient.SqlBulkCopyColumnMapping); }
+        public bool Contains(System.Data.SqlClient.SqlBulkCopyColumnMapping value) { return default(bool); }
+        public void CopyTo(System.Data.SqlClient.SqlBulkCopyColumnMapping[] array, int index) { }
+        public int IndexOf(System.Data.SqlClient.SqlBulkCopyColumnMapping value) { return default(int); }
+        public void Insert(int index, System.Data.SqlClient.SqlBulkCopyColumnMapping value) { }
+        public void Remove(System.Data.SqlClient.SqlBulkCopyColumnMapping value) { }
+    }
+    [System.FlagsAttribute]
+    public enum SqlBulkCopyOptions
+    {
+        CheckConstraints = 2,
+        Default = 0,
+        FireTriggers = 16,
+        KeepIdentity = 1,
+        KeepNulls = 8,
+        TableLock = 4,
+        UseInternalTransaction = 32,
     }
     public sealed partial class SqlClientFactory : System.Data.Common.DbProviderFactory
     {
@@ -513,6 +572,13 @@ namespace System.Data.SqlClient
         protected override void SetParameter(int index, System.Data.Common.DbParameter value) { }
         protected override void SetParameter(string parameterName, System.Data.Common.DbParameter value) { }
     }
+    public partial class SqlRowsCopiedEventArgs : System.EventArgs
+    {
+        public SqlRowsCopiedEventArgs(long rowsCopied) { }
+        public bool Abort { get { return default(bool); } set { } }
+        public long RowsCopied { get { return default(long); } }
+    }
+    public delegate void SqlRowsCopiedEventHandler(object sender, System.Data.SqlClient.SqlRowsCopiedEventArgs e);
     public sealed partial class SqlTransaction : System.Data.Common.DbTransaction
     {
         internal SqlTransaction() { }
@@ -597,7 +663,7 @@ namespace System.Data.SqlTypes
         public static System.Data.SqlTypes.SqlBoolean operator |(System.Data.SqlTypes.SqlBoolean x, System.Data.SqlTypes.SqlBoolean y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static System.Data.SqlTypes.SqlBoolean operator ==(System.Data.SqlTypes.SqlBoolean x, System.Data.SqlTypes.SqlBoolean y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static System.Data.SqlTypes.SqlBoolean operator ^(System.Data.SqlTypes.SqlBoolean x, System.Data.SqlTypes.SqlBoolean y) { return default(System.Data.SqlTypes.SqlBoolean); }
-        public static explicit operator bool (System.Data.SqlTypes.SqlBoolean x) { return default(bool); }
+        public static explicit operator bool(System.Data.SqlTypes.SqlBoolean x) { return default(bool); }
         public static explicit operator System.Data.SqlTypes.SqlBoolean(System.Data.SqlTypes.SqlByte x) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static explicit operator System.Data.SqlTypes.SqlBoolean(System.Data.SqlTypes.SqlDecimal x) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static explicit operator System.Data.SqlTypes.SqlBoolean(System.Data.SqlTypes.SqlDouble x) { return default(System.Data.SqlTypes.SqlBoolean); }
@@ -666,7 +732,7 @@ namespace System.Data.SqlTypes
         public static System.Data.SqlTypes.SqlBoolean operator ==(System.Data.SqlTypes.SqlByte x, System.Data.SqlTypes.SqlByte y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static System.Data.SqlTypes.SqlByte operator ^(System.Data.SqlTypes.SqlByte x, System.Data.SqlTypes.SqlByte y) { return default(System.Data.SqlTypes.SqlByte); }
         public static explicit operator System.Data.SqlTypes.SqlByte(System.Data.SqlTypes.SqlBoolean x) { return default(System.Data.SqlTypes.SqlByte); }
-        public static explicit operator byte (System.Data.SqlTypes.SqlByte x) { return default(byte); }
+        public static explicit operator byte(System.Data.SqlTypes.SqlByte x) { return default(byte); }
         public static explicit operator System.Data.SqlTypes.SqlByte(System.Data.SqlTypes.SqlDecimal x) { return default(System.Data.SqlTypes.SqlByte); }
         public static explicit operator System.Data.SqlTypes.SqlByte(System.Data.SqlTypes.SqlDouble x) { return default(System.Data.SqlTypes.SqlByte); }
         public static explicit operator System.Data.SqlTypes.SqlByte(System.Data.SqlTypes.SqlInt16 x) { return default(System.Data.SqlTypes.SqlByte); }
@@ -841,7 +907,7 @@ namespace System.Data.SqlTypes
         public static System.Data.SqlTypes.SqlDecimal operator /(System.Data.SqlTypes.SqlDecimal x, System.Data.SqlTypes.SqlDecimal y) { return default(System.Data.SqlTypes.SqlDecimal); }
         public static System.Data.SqlTypes.SqlBoolean operator ==(System.Data.SqlTypes.SqlDecimal x, System.Data.SqlTypes.SqlDecimal y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static explicit operator System.Data.SqlTypes.SqlDecimal(System.Data.SqlTypes.SqlBoolean x) { return default(System.Data.SqlTypes.SqlDecimal); }
-        public static explicit operator decimal (System.Data.SqlTypes.SqlDecimal x) { return default(decimal); }
+        public static explicit operator decimal(System.Data.SqlTypes.SqlDecimal x) { return default(decimal); }
         public static explicit operator System.Data.SqlTypes.SqlDecimal(System.Data.SqlTypes.SqlDouble x) { return default(System.Data.SqlTypes.SqlDecimal); }
         public static explicit operator System.Data.SqlTypes.SqlDecimal(System.Data.SqlTypes.SqlSingle x) { return default(System.Data.SqlTypes.SqlDecimal); }
         public static explicit operator System.Data.SqlTypes.SqlDecimal(System.Data.SqlTypes.SqlString x) { return default(System.Data.SqlTypes.SqlDecimal); }
@@ -906,7 +972,7 @@ namespace System.Data.SqlTypes
         public static System.Data.SqlTypes.SqlDouble operator /(System.Data.SqlTypes.SqlDouble x, System.Data.SqlTypes.SqlDouble y) { return default(System.Data.SqlTypes.SqlDouble); }
         public static System.Data.SqlTypes.SqlBoolean operator ==(System.Data.SqlTypes.SqlDouble x, System.Data.SqlTypes.SqlDouble y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static explicit operator System.Data.SqlTypes.SqlDouble(System.Data.SqlTypes.SqlBoolean x) { return default(System.Data.SqlTypes.SqlDouble); }
-        public static explicit operator double (System.Data.SqlTypes.SqlDouble x) { return default(double); }
+        public static explicit operator double(System.Data.SqlTypes.SqlDouble x) { return default(double); }
         public static explicit operator System.Data.SqlTypes.SqlDouble(System.Data.SqlTypes.SqlString x) { return default(System.Data.SqlTypes.SqlDouble); }
         public static System.Data.SqlTypes.SqlBoolean operator >(System.Data.SqlTypes.SqlDouble x, System.Data.SqlTypes.SqlDouble y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static System.Data.SqlTypes.SqlBoolean operator >=(System.Data.SqlTypes.SqlDouble x, System.Data.SqlTypes.SqlDouble y) { return default(System.Data.SqlTypes.SqlBoolean); }
@@ -1010,7 +1076,7 @@ namespace System.Data.SqlTypes
         public static explicit operator System.Data.SqlTypes.SqlInt16(System.Data.SqlTypes.SqlBoolean x) { return default(System.Data.SqlTypes.SqlInt16); }
         public static explicit operator System.Data.SqlTypes.SqlInt16(System.Data.SqlTypes.SqlDecimal x) { return default(System.Data.SqlTypes.SqlInt16); }
         public static explicit operator System.Data.SqlTypes.SqlInt16(System.Data.SqlTypes.SqlDouble x) { return default(System.Data.SqlTypes.SqlInt16); }
-        public static explicit operator short (System.Data.SqlTypes.SqlInt16 x) { return default(short); }
+        public static explicit operator short(System.Data.SqlTypes.SqlInt16 x) { return default(short); }
         public static explicit operator System.Data.SqlTypes.SqlInt16(System.Data.SqlTypes.SqlInt32 x) { return default(System.Data.SqlTypes.SqlInt16); }
         public static explicit operator System.Data.SqlTypes.SqlInt16(System.Data.SqlTypes.SqlInt64 x) { return default(System.Data.SqlTypes.SqlInt16); }
         public static explicit operator System.Data.SqlTypes.SqlInt16(System.Data.SqlTypes.SqlMoney x) { return default(System.Data.SqlTypes.SqlInt16); }
@@ -1079,7 +1145,7 @@ namespace System.Data.SqlTypes
         public static explicit operator System.Data.SqlTypes.SqlInt32(System.Data.SqlTypes.SqlBoolean x) { return default(System.Data.SqlTypes.SqlInt32); }
         public static explicit operator System.Data.SqlTypes.SqlInt32(System.Data.SqlTypes.SqlDecimal x) { return default(System.Data.SqlTypes.SqlInt32); }
         public static explicit operator System.Data.SqlTypes.SqlInt32(System.Data.SqlTypes.SqlDouble x) { return default(System.Data.SqlTypes.SqlInt32); }
-        public static explicit operator int (System.Data.SqlTypes.SqlInt32 x) { return default(int); }
+        public static explicit operator int(System.Data.SqlTypes.SqlInt32 x) { return default(int); }
         public static explicit operator System.Data.SqlTypes.SqlInt32(System.Data.SqlTypes.SqlInt64 x) { return default(System.Data.SqlTypes.SqlInt32); }
         public static explicit operator System.Data.SqlTypes.SqlInt32(System.Data.SqlTypes.SqlMoney x) { return default(System.Data.SqlTypes.SqlInt32); }
         public static explicit operator System.Data.SqlTypes.SqlInt32(System.Data.SqlTypes.SqlSingle x) { return default(System.Data.SqlTypes.SqlInt32); }
@@ -1148,7 +1214,7 @@ namespace System.Data.SqlTypes
         public static explicit operator System.Data.SqlTypes.SqlInt64(System.Data.SqlTypes.SqlBoolean x) { return default(System.Data.SqlTypes.SqlInt64); }
         public static explicit operator System.Data.SqlTypes.SqlInt64(System.Data.SqlTypes.SqlDecimal x) { return default(System.Data.SqlTypes.SqlInt64); }
         public static explicit operator System.Data.SqlTypes.SqlInt64(System.Data.SqlTypes.SqlDouble x) { return default(System.Data.SqlTypes.SqlInt64); }
-        public static explicit operator long (System.Data.SqlTypes.SqlInt64 x) { return default(long); }
+        public static explicit operator long(System.Data.SqlTypes.SqlInt64 x) { return default(long); }
         public static explicit operator System.Data.SqlTypes.SqlInt64(System.Data.SqlTypes.SqlMoney x) { return default(System.Data.SqlTypes.SqlInt64); }
         public static explicit operator System.Data.SqlTypes.SqlInt64(System.Data.SqlTypes.SqlSingle x) { return default(System.Data.SqlTypes.SqlInt64); }
         public static explicit operator System.Data.SqlTypes.SqlInt64(System.Data.SqlTypes.SqlString x) { return default(System.Data.SqlTypes.SqlInt64); }
@@ -1212,7 +1278,7 @@ namespace System.Data.SqlTypes
         public static explicit operator System.Data.SqlTypes.SqlMoney(System.Data.SqlTypes.SqlBoolean x) { return default(System.Data.SqlTypes.SqlMoney); }
         public static explicit operator System.Data.SqlTypes.SqlMoney(System.Data.SqlTypes.SqlDecimal x) { return default(System.Data.SqlTypes.SqlMoney); }
         public static explicit operator System.Data.SqlTypes.SqlMoney(System.Data.SqlTypes.SqlDouble x) { return default(System.Data.SqlTypes.SqlMoney); }
-        public static explicit operator decimal (System.Data.SqlTypes.SqlMoney x) { return default(decimal); }
+        public static explicit operator decimal(System.Data.SqlTypes.SqlMoney x) { return default(decimal); }
         public static explicit operator System.Data.SqlTypes.SqlMoney(System.Data.SqlTypes.SqlSingle x) { return default(System.Data.SqlTypes.SqlMoney); }
         public static explicit operator System.Data.SqlTypes.SqlMoney(System.Data.SqlTypes.SqlString x) { return default(System.Data.SqlTypes.SqlMoney); }
         public static explicit operator System.Data.SqlTypes.SqlMoney(double x) { return default(System.Data.SqlTypes.SqlMoney); }
@@ -1282,7 +1348,7 @@ namespace System.Data.SqlTypes
         public static System.Data.SqlTypes.SqlBoolean operator ==(System.Data.SqlTypes.SqlSingle x, System.Data.SqlTypes.SqlSingle y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static explicit operator System.Data.SqlTypes.SqlSingle(System.Data.SqlTypes.SqlBoolean x) { return default(System.Data.SqlTypes.SqlSingle); }
         public static explicit operator System.Data.SqlTypes.SqlSingle(System.Data.SqlTypes.SqlDouble x) { return default(System.Data.SqlTypes.SqlSingle); }
-        public static explicit operator float (System.Data.SqlTypes.SqlSingle x) { return default(float); }
+        public static explicit operator float(System.Data.SqlTypes.SqlSingle x) { return default(float); }
         public static explicit operator System.Data.SqlTypes.SqlSingle(System.Data.SqlTypes.SqlString x) { return default(System.Data.SqlTypes.SqlSingle); }
         public static System.Data.SqlTypes.SqlBoolean operator >(System.Data.SqlTypes.SqlSingle x, System.Data.SqlTypes.SqlSingle y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static System.Data.SqlTypes.SqlBoolean operator >=(System.Data.SqlTypes.SqlSingle x, System.Data.SqlTypes.SqlSingle y) { return default(System.Data.SqlTypes.SqlBoolean); }
@@ -1364,7 +1430,7 @@ namespace System.Data.SqlTypes
         public static explicit operator System.Data.SqlTypes.SqlString(System.Data.SqlTypes.SqlInt64 x) { return default(System.Data.SqlTypes.SqlString); }
         public static explicit operator System.Data.SqlTypes.SqlString(System.Data.SqlTypes.SqlMoney x) { return default(System.Data.SqlTypes.SqlString); }
         public static explicit operator System.Data.SqlTypes.SqlString(System.Data.SqlTypes.SqlSingle x) { return default(System.Data.SqlTypes.SqlString); }
-        public static explicit operator string (System.Data.SqlTypes.SqlString x) { return default(string); }
+        public static explicit operator string(System.Data.SqlTypes.SqlString x) { return default(string); }
         public static System.Data.SqlTypes.SqlBoolean operator >(System.Data.SqlTypes.SqlString x, System.Data.SqlTypes.SqlString y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static System.Data.SqlTypes.SqlBoolean operator >=(System.Data.SqlTypes.SqlString x, System.Data.SqlTypes.SqlString y) { return default(System.Data.SqlTypes.SqlBoolean); }
         public static implicit operator System.Data.SqlTypes.SqlString(string x) { return default(System.Data.SqlTypes.SqlString); }

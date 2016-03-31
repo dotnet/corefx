@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +24,7 @@ namespace System.Xml.Linq
         /// <param name="name">The name to assign to the new <see cref="XStreamingElement"/> node</param>
         public XStreamingElement(XName name)
         {
-            if (name == null) throw new ArgumentNullException("name");
+            if (name == null) throw new ArgumentNullException(nameof(name));
             this.name = name;
         }
 
@@ -60,7 +61,7 @@ namespace System.Xml.Linq
             }
             set
             {
-                if (value == null) throw new ArgumentNullException("value");
+                if (value == null) throw new ArgumentNullException(nameof(value));
                 name = value;
             }
         }
@@ -155,7 +156,7 @@ namespace System.Xml.Linq
         /// <param name="writer"><see cref="XmlWriter"/> to write to </param>    
         public void Save(XmlWriter writer)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
             writer.WriteStartDocument();
             WriteTo(writer);
             writer.WriteEndDocument();
@@ -190,7 +191,7 @@ namespace System.Xml.Linq
         /// <param name="writer"></param>
         public void WriteTo(XmlWriter writer)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
             new StreamingElementWriter(writer).WriteStreamingElement(this);
         }
 

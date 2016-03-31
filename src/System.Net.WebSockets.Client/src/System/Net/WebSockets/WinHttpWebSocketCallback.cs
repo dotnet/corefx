@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Http;
 using System.Text;
@@ -40,6 +41,7 @@ namespace System.Net.WebSockets
             try
             {
                 WinHttpWebSocketState state = WinHttpWebSocketState.FromIntPtr(context);
+                Debug.Assert(state != null, "WinHttpWebSocketCallback: state should not be null");
 
                 if ((state.RequestHandle != null) &&
                     (state.RequestHandle.DangerousGetHandle() == handle))
@@ -133,6 +135,12 @@ namespace System.Net.WebSockets
 
             state.RequestHandle.DetachCallback();
             state.RequestHandle = null;
+            
+            // Unpin the state object if there are no more open handles that are wired to the callback.
+            if (state.DecrementHandlesOpenWithCallback() == 0)
+            {
+                state.Unpin();
+            }
         }
 
         private static void OnRequestError(
@@ -289,6 +297,12 @@ namespace System.Net.WebSockets
 
             state.WebSocketHandle.DetachCallback();
             state.WebSocketHandle = null;
+
+            // Unpin the state object if there are no more open handles that are wired to the callback.
+            if (state.DecrementHandlesOpenWithCallback() == 0)
+            {
+                state.Unpin();
+            }
         }
 
         private static void OnWebSocketError(

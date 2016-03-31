@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -279,21 +280,21 @@ namespace Microsoft.CSharp.RuntimeBinder
             // case we'll be PM_EXPRESSION_ARRAYINDEX, or we have multiple dimensions,
             // in which case we are PM_EXPRESSION_ARRAYINDEX2. 
             //
-            // Our arguments then, are: object, index or object, indicies.
+            // Our arguments then, are: object, index or object, indices.
             EXPRLIST list = pExpr.GetOptionalArguments().asLIST();
             Expression obj = GetExpression(list.GetOptionalElement());
-            Expression[] indicies;
+            Expression[] indices;
 
             if (pExpr.PredefinedMethod == PREDEFMETH.PM_EXPRESSION_ARRAYINDEX)
             {
-                indicies = new Expression[] { GetExpression(list.GetOptionalNextListNode()) };
+                indices = new Expression[] { GetExpression(list.GetOptionalNextListNode()) };
             }
             else
             {
                 Debug.Assert(pExpr.PredefinedMethod == PREDEFMETH.PM_EXPRESSION_ARRAYINDEX2);
-                indicies = GetArgumentsFromArrayInit(list.GetOptionalNextListNode().asARRINIT());
+                indices = GetArgumentsFromArrayInit(list.GetOptionalNextListNode().asARRINIT());
             }
-            return new ExpressionEXPR(Expression.ArrayAccess(obj, indicies));
+            return new ExpressionEXPR(Expression.ArrayAccess(obj, indices));
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -319,7 +320,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 if (e.Type.MakeByRefType() == t)
                 {
-                    // We're trying to convert from a type to its by ref type. Dont do that.
+                    // We're trying to convert from a type to its by ref type. Don't do that.
                     return new ExpressionEXPR(e);
                 }
                 Debug.Assert((pExpr.flags & EXPRFLAG.EXF_UNBOXRUNTIME) == 0);
@@ -347,7 +348,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 if (e.Type.MakeByRefType() == t)
                 {
-                    // We're trying to convert from a type to its by ref type. Dont do that.
+                    // We're trying to convert from a type to its by ref type. Don't do that.
                     return new ExpressionEXPR(e);
                 }
 

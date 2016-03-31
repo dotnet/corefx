@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*============================================================
 **
@@ -26,7 +27,7 @@ namespace System.Collections.Generic
                 {
                     object comparer;
 
-                    // NUTC compiler is able to static evalulate the conditions and only put the necessary branches in finally binary code, 
+                    // NUTC compiler is able to static evaluate the conditions and only put the necessary branches in finally binary code, 
                     // even casting to EqualityComparer<T> can be removed.
 
                     // For example: for Byte, the code generated is
@@ -85,7 +86,7 @@ namespace System.Collections.Generic
                 return 0;
             if (obj is T)
                 return GetHashCode((T)obj);
-            throw new ArgumentException(SR.Argument_InvalidArgumentForComparison);
+            throw new ArgumentException(SR.Argument_InvalidArgumentForComparison, nameof(obj));
         }
 
         bool IEqualityComparer.Equals(object x, object y)
@@ -101,7 +102,7 @@ namespace System.Collections.Generic
     }
 
     //
-    // ProjectN compatiblity notes:
+    // ProjectN compatibility notes:
     //
     //    Unlike the full desktop, we make no attempt to use the IEquatable<T> interface on T. Because we can't generate
     //    code at runtime, we derive no performance benefit from using the type-specific Equals(). We can't even
@@ -281,7 +282,8 @@ namespace System.Collections.Generic
     {
         public override bool Equals(Single x, Single y)
         {
-            return x == y;
+            // == has the wrong semantic for NaN for Single
+            return x.Equals(y);
         }
 
         public override int GetHashCode(Single x)
@@ -295,7 +297,8 @@ namespace System.Collections.Generic
     {
         public override bool Equals(Double x, Double y)
         {
-            return x == y;
+            // == has the wrong semantic for NaN for Double
+            return x.Equals(y);
         }
 
         public override int GetHashCode(Double x)

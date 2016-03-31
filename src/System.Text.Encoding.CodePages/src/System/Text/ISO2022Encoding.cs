@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 //
@@ -16,7 +17,7 @@
 // IsAlwaysNormalized ???
 // Regarding Normalization for ISO-2022-JP (50220, 50221, 50222), its the same rules as EUCJP
 //  Forms KC & KD are precluded because of things like halfwidth Katakana that has compatibility mappings
-//  Form D is precluded because of 0x00a8, which changes to space + dierises.
+//  Form D is precluded because of 0x00a8, which changes to space + dieresis.
 // 
 // Note: I think that IsAlwaysNormalized should probably return true for form C for Japanese 20932 based CPs.
 //
@@ -26,7 +27,7 @@
 // IsAlwaysNormalized ???
 // Regarding Normalization for ISO-2022-CN (50227, 50229) & HZ-GB2312 (52936) I think is similar to the Japanese case.
 //  Forms KC & KD are precluded because of things like halfwidth Katakana that has compatibility mappings
-//  Form D is precluded because of 0x00a8, which changes to space + dierises.
+//  Form D is precluded because of 0x00a8, which changes to space + dieresis.
 //
 // Note: I think that IsAlwaysNormalized should probably return true for form C for Chinese 20936 based CPs.
 //
@@ -1040,7 +1041,7 @@ namespace System.Text
                     // MLang treated JIS 0208 '*' lead byte like a single halfwidth katakana
                     // escape, so use 0x8e00 as katakana lead byte and keep same trail byte.
                     // 0x2a lead byte range is normally unused in JIS 0208, so shouldn't have
-                    // any wierd compatibility issues.
+                    // any weird compatibility issues.
                     if ((b2Bytes == true) && ((iBytes & 0xff00) == 0x2a00))
                     {
                         iBytes = (ushort)(iBytes & 0xff);
@@ -1705,7 +1706,7 @@ namespace System.Text
         public override int GetMaxByteCount(int charCount)
         {
             if (charCount < 0)
-                throw new ArgumentOutOfRangeException("charCount", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(charCount), SR.ArgumentOutOfRange_NeedNonNegNum);
             Contract.EndContractBlock();
 
             // Characters would be # of characters + 1 in case high surrogate is ? * max fallback
@@ -1751,7 +1752,7 @@ namespace System.Text
             byteCount += extraStart + extraEnd;
 
             if (byteCount > 0x7fffffff)
-                throw new ArgumentOutOfRangeException("charCount", SR.ArgumentOutOfRange_GetByteCountOverflow);
+                throw new ArgumentOutOfRangeException(nameof(charCount), SR.ArgumentOutOfRange_GetByteCountOverflow);
 
             return (int)byteCount;
         }
@@ -1759,7 +1760,7 @@ namespace System.Text
         public override int GetMaxCharCount(int byteCount)
         {
             if (byteCount < 0)
-                throw new ArgumentOutOfRangeException("byteCount", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(byteCount), SR.ArgumentOutOfRange_NeedNonNegNum);
             Contract.EndContractBlock();
 
             int perChar = 1;
@@ -1788,7 +1789,7 @@ namespace System.Text
                 charCount *= DecoderFallback.MaxCharCount;
 
             if (charCount > 0x7fffffff)
-                throw new ArgumentOutOfRangeException("byteCount", SR.ArgumentOutOfRange_GetCharCountOverflow);
+                throw new ArgumentOutOfRangeException(nameof(byteCount), SR.ArgumentOutOfRange_GetCharCountOverflow);
 
             return (int)charCount;
         }

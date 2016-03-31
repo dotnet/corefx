@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System;
@@ -57,6 +58,7 @@ namespace System.IO.Tests
             }
         }
 
+        [ActiveIssue(6153, PlatformID.AnyUnix)]
         [Fact]
         public void DisposeVirtualBehavior()
         {
@@ -124,7 +126,7 @@ namespace System.IO.Tests
         {
             string fileName = GetTestFilePath();
 
-            // use a seperate method to be sure that fs isn't rooted at time of GC.
+            // use a separate method to be sure that fs isn't rooted at time of GC.
             Action leakFs = () =>
             {
                 // we must specify useAsync:false, otherwise the finalizer just kicks off an async write.

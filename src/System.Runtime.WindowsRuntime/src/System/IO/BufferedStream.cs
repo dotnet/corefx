@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -90,10 +91,10 @@ namespace System.IO
         public BufferedStream(Stream stream, Int32 bufferSize)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             if (bufferSize <= 0)
-                throw new ArgumentOutOfRangeException("bufferSize", SR.Format(SR.ArgumentOutOfRange_MustBePositive, "bufferSize"));
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.Format(SR.ArgumentOutOfRange_MustBePositive, "bufferSize"));
 
             Contract.EndContractBlock();
 
@@ -169,7 +170,7 @@ namespace System.IO
                 return;
 
             Byte[] shadowBuffer = new Byte[Math.Min(_bufferSize + _bufferSize, MaxShadowBufferSize)];
-            Array.Copy(_buffer, 0, shadowBuffer, 0, _writePos);
+            Buffer.BlockCopy(_buffer, 0, shadowBuffer, 0, _writePos);
             _buffer = shadowBuffer;
         }
 
@@ -251,7 +252,7 @@ namespace System.IO
             set
             {
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
                 Contract.EndContractBlock();
 
                 EnsureNotClosed();
@@ -354,7 +355,7 @@ namespace System.IO
 
         // We bring instance fields down as local parameters to this async method becasue BufferedStream is derived from MarshalByRefObject.
         // Field access would be from the async state machine i.e., not via the this pointer and would require runtime checking to see
-        // if we are talking to a remote object, whcih is currently very slow (Dev11 bug #365921).
+        // if we are talking to a remote object, which is currently very slow (Dev11 bug #365921).
         // Field access from whithin Asserts is, of course, irrelevant.
         Debug.Assert(stream != null);
 
@@ -484,7 +485,7 @@ namespace System.IO
 
             if (readBytes > count)
                 readBytes = count;
-            Array.Copy(_buffer, _readPos, array, offset, readBytes);
+            Buffer.BlockCopy(_buffer, _readPos, array, offset, readBytes);
             _readPos += readBytes;
 
             return readBytes;
@@ -509,11 +510,11 @@ namespace System.IO
         public override int Read([In, Out] Byte[] array, Int32 offset, Int32 count)
         {
             if (array == null)
-                throw new ArgumentNullException("array", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (array.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             Contract.EndContractBlock();
@@ -841,7 +842,7 @@ namespace System.IO
                 return;
 
             EnsureBufferAllocated();
-            Array.Copy(array, offset, _buffer, _writePos, bytesToWrite);
+            Buffer.BlockCopy(array, offset, _buffer, _writePos, bytesToWrite);
 
             _writePos += bytesToWrite;
             count -= bytesToWrite;
@@ -866,11 +867,11 @@ namespace System.IO
         public override void Write(Byte[] array, Int32 offset, Int32 count)
         {
             if (array == null)
-                throw new ArgumentNullException("array", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (array.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             Contract.EndContractBlock();
@@ -985,7 +986,7 @@ namespace System.IO
                     if (totalUserBytes <= (_bufferSize + _bufferSize) && totalUserBytes <= MaxShadowBufferSize)
                     {
                         EnsureShadowBufferAllocated();
-                        Array.Copy(array, offset, _buffer, _writePos, count);
+                        Buffer.BlockCopy(array, offset, _buffer, _writePos, count);
                         _stream.Write(_buffer, 0, totalUserBytes);
                         _writePos = 0;
                         return;
@@ -1373,7 +1374,7 @@ namespace System.IO
         public override void SetLength(Int64 value)
         {
             if (value < 0)
-                throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NegFileSize);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NegFileSize);
             Contract.EndContractBlock();
 
             EnsureNotClosed();

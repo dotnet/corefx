@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Diagnostics;
@@ -135,7 +136,7 @@ namespace System.Xml
 
                 if ((uint)value > (uint)ConformanceLevel.Document)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 _conformanceLevel = value;
             }
@@ -165,7 +166,7 @@ namespace System.Xml
                 CheckReadOnly("MaxCharactersInDocument");
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 _maxCharactersInDocument = value;
             }
@@ -182,7 +183,7 @@ namespace System.Xml
                 CheckReadOnly("MaxCharactersFromEntities");
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 _maxCharactersFromEntities = value;
             }
@@ -241,7 +242,7 @@ namespace System.Xml
 
                 if ((uint)value > (uint)DtdProcessing.Parse)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 _dtdProcessing = value;
             }
@@ -287,11 +288,11 @@ namespace System.Xml
         {
             if (inputUri == null)
             {
-                throw new ArgumentNullException("inputUri");
+                throw new ArgumentNullException(nameof(inputUri));
             }
             if (inputUri.Length == 0)
             {
-                throw new ArgumentException(SR.XmlConvert_BadUri, "inputUri");
+                throw new ArgumentException(SR.XmlConvert_BadUri, nameof(inputUri));
             }
 
             // resolve and open the url
@@ -316,7 +317,7 @@ namespace System.Xml
         {
             if (input == null)
             {
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
             }
             if (baseUriString == null)
             {
@@ -346,7 +347,7 @@ namespace System.Xml
         {
             if (input == null)
             {
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
             }
             if (baseUriString == null)
             {
@@ -369,7 +370,7 @@ namespace System.Xml
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
             // wrap with conformance layer (if needed)
             return AddConformanceWrapper(reader);

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -178,7 +179,7 @@ namespace System.Reflection.Tests
             Assert.Equal(expectedValue, actualValue);
         }
 
-        // PosTest14: consturctor in referenced module
+        // PosTest14: constructor in referenced module
         [Fact]
         public void PosTest14()
         {
@@ -197,7 +198,7 @@ namespace System.Reflection.Tests
         {
             private static int s_count = 0;
 
-            //Defualt constructor
+            //Default constructor
             public TestClass1()
             {
                 ++s_count;

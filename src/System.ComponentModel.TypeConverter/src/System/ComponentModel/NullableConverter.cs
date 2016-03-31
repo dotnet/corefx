@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Globalization;
@@ -8,7 +9,7 @@ using System.Reflection;
 namespace System.ComponentModel
 {
     /// <devdoc>
-    /// TypeConverter to convert Nullable types to adn from strings or the underlying simple type.
+    /// TypeConverter to convert Nullable types to and from strings or the underlying simple type.
     /// </devdoc>
     public class NullableConverter : TypeConverter
     {
@@ -26,7 +27,7 @@ namespace System.ComponentModel
             _simpleType = Nullable.GetUnderlyingType(type);
             if (_simpleType == null)
             {
-                throw new ArgumentException(SR.NullableConverterBadCtorArg, "type");
+                throw new ArgumentException(SR.NullableConverterBadCtorArg, nameof(type));
             }
 
             _simpleTypeConverter = TypeDescriptor.GetConverter(_simpleType);
@@ -101,7 +102,7 @@ namespace System.ComponentModel
         {
             if (destinationType == null)
             {
-                throw new ArgumentNullException("destinationType");
+                throw new ArgumentNullException(nameof(destinationType));
             }
 
             if (destinationType == _simpleType && value != null && _nullableType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo()))

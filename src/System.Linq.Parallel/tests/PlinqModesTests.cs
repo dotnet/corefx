@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -136,7 +137,7 @@ namespace System.Linq.Parallel.Tests
 
         // Check that some queries run in parallel by default, and some require forcing.
         [Theory]
-        [MemberData("WithExecutionModeQueryData", new int[] { 1, 4 })] // DOP of 1 to verify sequential and 4 to verify parallel
+        [MemberData(nameof(WithExecutionModeQueryData), new[] { 1, 4 })] // DOP of 1 to verify sequential and 4 to verify parallel
         public static void WithExecutionMode(
             Labeled<ParallelQuery<int>> labeled,
             int requestedDop, int expectedDop,
@@ -149,7 +150,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void WithExecutionMode_ArgumentException(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -157,7 +158,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("AllExecutionModes_Multiple")]
+        [MemberData(nameof(AllExecutionModes_Multiple))]
         public static void WithExecutionMode_Multiple(ParallelExecutionMode first, ParallelExecutionMode second)
         {
             Assert.Throws<InvalidOperationException>(() => ParallelEnumerable.Range(0, 1).WithExecutionMode(first).WithExecutionMode(second));

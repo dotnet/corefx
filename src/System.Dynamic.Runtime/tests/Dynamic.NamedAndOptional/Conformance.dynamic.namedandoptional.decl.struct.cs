@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -240,7 +241,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.namedandoptional.decl.s
 
     // <Area>Declaration of Methods with Optional Parameters</Area>
     // <Title>Declaration of Optional Params</Title>
-    // <Description>Simple Declaration of a method with optional parameters. Expressions ued</Description>
+    // <Description>Simple Declaration of a method with optional parameters. Expressions used</Description>
     // <Expects status=success></Expects>
     // <Code>
     public struct Parent

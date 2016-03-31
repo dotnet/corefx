@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -38,14 +39,14 @@ namespace System.Xml
                 get
                 {
                     if (_field == null)
-                        throw new ArgumentOutOfRangeException("index");
+                        throw new ArgumentOutOfRangeException(nameof(index));
 
                     List<object> list = _field as List<object>;
                     if (list != null)
                         return list[index];
 
                     if (index != 0)
-                        throw new ArgumentOutOfRangeException("index");
+                        throw new ArgumentOutOfRangeException(nameof(index));
 
                     return _field;
                 }
@@ -86,7 +87,7 @@ namespace System.Xml
             public void RemoveAt(int index)
             {
                 if (_field == null)
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
 
                 List<object> list = _field as List<object>;
                 if (list != null)
@@ -96,7 +97,7 @@ namespace System.Xml
                 }
 
                 if (index != 0)
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
 
                 _field = null;
             }
@@ -106,7 +107,7 @@ namespace System.Xml
                 if (_field == null)
                 {
                     if (index != 0)
-                        throw new ArgumentOutOfRangeException("index");
+                        throw new ArgumentOutOfRangeException(nameof(index));
                     Add(value);
                     return;
                 }
@@ -134,7 +135,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
             }
 

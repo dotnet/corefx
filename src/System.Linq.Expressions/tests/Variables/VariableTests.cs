@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace System.Linq.Expressions.Tests
     public class VariableTests : ParameterExpressionTests
     {
         [Theory]
-        [MemberData("ValidTypeData")]
+        [MemberData(nameof(ValidTypeData))]
         public void CreateVariableForValidTypeNoName(Type type)
         {
             ParameterExpression variable = Expression.Variable(type);
@@ -20,7 +21,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("ValidTypeData")]
+        [MemberData(nameof(ValidTypeData))]
         public void CrateVariableForValidTypeWithName(Type type)
         {
             ParameterExpression variable = Expression.Variable(type, "name");
@@ -32,8 +33,8 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NameNeedNotBeCSharpValid()
         {
-            ParameterExpression variable = Expression.Variable(typeof(int), "a name with charcters not allowed in C# <, >, !, =, \0, \uFFFF, &c.");
-            Assert.Equal("a name with charcters not allowed in C# <, >, !, =, \0, \uFFFF, &c.", variable.Name);
+            ParameterExpression variable = Expression.Variable(typeof(int), "a name with characters not allowed in C# <, >, !, =, \0, \uFFFF, &c.");
+            Assert.Equal("a name with characters not allowed in C# <, >, !, =, \0, \uFFFF, &c.", variable.Name);
         }
 
         [Fact]
@@ -51,7 +52,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("ByRefTypeData")]
+        [MemberData(nameof(ByRefTypeData))]
         public void VariableCannotBeByRef(Type type)
         {
             Assert.Throws<ArgumentException>(() => Expression.Variable(type));
@@ -59,8 +60,8 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("ValueData")]
-        public void CanWriteAndReadBack(object value)
+        [PerCompilationType(nameof(ValueData))]
+        public void CanWriteAndReadBack(object value, bool useInterpreter)
         {
             Type type = value.GetType();
             ParameterExpression variable = Expression.Variable(type);
@@ -75,18 +76,19 @@ namespace System.Linq.Expressions.Tests
                             variable
                             )
                         )
-                    ).Compile()()
+                    ).Compile(useInterpreter)()
                 );
         }
 
-        [Fact]
-        public void CanUseAsLambdaParameter()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void CanUseAsLambdaParameter(bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(typeof(int));
             Func<int, int> addOne = Expression.Lambda<Func<int, int>>(
                 Expression.Add(variable, Expression.Constant(1)),
                 variable
-                ).Compile();
+                ).Compile(useInterpreter);
             Assert.Equal(3, addOne(2));
         }
 

@@ -1,5 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace System.Linq.Expressions.Tests
 {
     public class LabelTests
     {
-        // The actual use of label when compiling, interpretting or otherwise acting upon an expression
+        // The actual use of label when compiling, interpreting or otherwise acting upon an expression
         // that makes use of them is by necessity covered by testing those GotoExpressions that make use of them.
         // These tests focus on the LabelTarget class and the factory methods producing them.
 

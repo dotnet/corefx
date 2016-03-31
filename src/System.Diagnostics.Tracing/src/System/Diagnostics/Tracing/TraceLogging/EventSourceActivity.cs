@@ -1,4 +1,8 @@
-﻿using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 
 #if !ES_BUILD_AGAINST_DOTNET_V35
 using Contract = System.Diagnostics.Contracts.Contract;
@@ -31,7 +35,7 @@ namespace System.Diagnostics.Tracing
         public EventSourceActivity(EventSource eventSource)
         {
             if (eventSource == null)
-                throw new ArgumentNullException("eventSource");
+                throw new ArgumentNullException(nameof(eventSource));
             Contract.EndContractBlock();
 
             this.eventSource = eventSource;

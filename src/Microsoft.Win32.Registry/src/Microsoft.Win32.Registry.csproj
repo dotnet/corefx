@@ -5,19 +5,26 @@
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Win32.Registry</RootNamespace>
     <AssemblyName>Microsoft.Win32.Registry</AssemblyName>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
+    <PackageTargetRuntime Condition="'$(TargetGroup)' != 'net46' AND '$(TargetsWindows)' == 'true'">win</PackageTargetRuntime>
+    <PackageTargetRuntime Condition="'$(TargetsUnix)' == 'true'">unix</PackageTargetRuntime>
+    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'net46' AND '$(TargetsWindows)' == 'true'">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -66,6 +73,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegSetValueEx.cs">
       <Link>Common\Interop\Windows\Interop.RegSetValueEx.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
       <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
@@ -77,6 +87,9 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs" />
     <Compile Include="Microsoft\Win32\ThrowHelper.cs" />
     <Compile Include="System\Security\AccessControl\RegistryRights.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <TargetingPackReference Include="mscorlib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

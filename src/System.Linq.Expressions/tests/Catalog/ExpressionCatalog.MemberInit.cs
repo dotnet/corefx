@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -85,7 +86,7 @@ namespace System.Linq.Expressions.Tests
             public MI1(bool b)
             {
                 if (!b)
-                    throw new ArgumentException("Can't be false.", "b");
+                    throw new ArgumentException("Can't be false.", nameof(b));
             }
 
             public int X
@@ -94,7 +95,7 @@ namespace System.Linq.Expressions.Tests
                 set
                 {
                     if (_x == 0)
-                        throw new ArgumentException("Can't be zero.", "value");
+                        throw new ArgumentException("Can't be zero.", nameof(value));
 
                     _x = value;
                 }
@@ -105,7 +106,7 @@ namespace System.Linq.Expressions.Tests
                 set
                 {
                     if (_y == null)
-                        throw new ArgumentNullException("value", "Can't be null.");
+                        throw new ArgumentNullException(nameof(value), "Can't be null.");
 
                     _y = value;
                 }

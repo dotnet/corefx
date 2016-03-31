@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -30,8 +31,8 @@ namespace System.Linq.Parallel
             // Initialize state shared among the partitions. A latch and a matrix of buffers. Note that
             // the actual elements in the buffer array are lazily allocated if needed.
             CountdownEvent barrier = new CountdownEvent(inputStream.PartitionCount);
-            ListChunk<Pair>[][] valueExchangeMatrix =
-                JaggedArray<ListChunk<Pair>>.Allocate(inputStream.PartitionCount, inputStream.PartitionCount);
+            ListChunk<Pair<TInputOutput, THashKey>>[][] valueExchangeMatrix =
+                JaggedArray<ListChunk<Pair<TInputOutput, THashKey>>>.Allocate(inputStream.PartitionCount, inputStream.PartitionCount);
 
             // Now construct each partition object.
             for (int i = 0; i < inputStream.PartitionCount; i++)

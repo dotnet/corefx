@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -173,7 +174,7 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        // TODO: more writebacks and by-ref tests
+        // TODO: more write-backs and by-ref tests
         // TODO: tests for special methods that can't just be call'd or callvirt'd
 
         class C

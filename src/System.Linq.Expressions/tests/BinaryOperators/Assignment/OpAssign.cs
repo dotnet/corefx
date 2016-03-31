@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,8 @@ namespace System.Linq.Expressions.Tests
     public class OpAssign
     {
         [Theory]
-        [MemberData("AssignAndEquivalentMethods")]
-        public void AssignmentEquivalents(MethodInfo nonAssign, MethodInfo assign, Type type)
+        [PerCompilationType(nameof(AssignAndEquivalentMethods))]
+        public void AssignmentEquivalents(MethodInfo nonAssign, MethodInfo assign, Type type, bool useInterpreter)
         {
             Func<Expression, Expression, Expression> withoutAssignment = (Func<Expression, Expression, Expression>)nonAssign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -31,7 +32,7 @@ namespace System.Linq.Expressions.Tests
                         initAssign,
                         assignment
                         );
-                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, wAssign)).Compile()());
+                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, wAssign)).Compile(useInterpreter)());
                     LabelTarget target = Expression.Label(type);
                     Expression wAssignReturningVariable = Expression.Block(
                         new ParameterExpression[] { variable },
@@ -40,7 +41,7 @@ namespace System.Linq.Expressions.Tests
                         Expression.Return(target, variable),
                         Expression.Label(target, Expression.Default(type))
                         );
-                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, wAssignReturningVariable)).Compile()());
+                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, wAssignReturningVariable)).Compile(useInterpreter)());
                 }
         }
 
@@ -65,8 +66,8 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("AssignAndEquivalentMethods")]
-        public void AssignmentEquivalentsWithMemberAccess(MethodInfo nonAssign, MethodInfo assign, Type type)
+        [PerCompilationType(nameof(AssignAndEquivalentMethods))]
+        public void AssignmentEquivalentsWithMemberAccess(MethodInfo nonAssign, MethodInfo assign, Type type, bool useInterpreter)
         {
             Func<Expression, Expression, Expression> withoutAssignment = (Func<Expression, Expression, Expression>)nonAssign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -82,7 +83,7 @@ namespace System.Linq.Expressions.Tests
                     Expression boxExp = Expression.Constant(box);
                     Expression property = Expression.Property(boxExp, boxType.GetProperty("Value"));
                     Expression assignment = withAssignment(property, yExp);
-                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, assignment)).Compile()());
+                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, assignment)).Compile(useInterpreter)());
                     LabelTarget target = Expression.Label(type);
                     box = boxType.GetConstructor(new[] { type }).Invoke(new object[] { x });
                     boxExp = Expression.Constant(box);
@@ -93,13 +94,13 @@ namespace System.Linq.Expressions.Tests
                         Expression.Return(target, property),
                         Expression.Label(target, Expression.Default(type))
                         );
-                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, wAssignReturningVariable)).Compile()());
+                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, wAssignReturningVariable)).Compile(useInterpreter)());
                 }
         }
 
         [Theory]
-        [MemberData("AssignAndEquivalentMethods")]
-        public void AssignmentEquivalentsWithIndexAccess(MethodInfo nonAssign, MethodInfo assign, Type type)
+        [PerCompilationType(nameof(AssignAndEquivalentMethods))]
+        public void AssignmentEquivalentsWithIndexAccess(MethodInfo nonAssign, MethodInfo assign, Type type, bool useInterpreter)
         {
             Func<Expression, Expression, Expression> withoutAssignment = (Func<Expression, Expression, Expression>)nonAssign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -115,7 +116,7 @@ namespace System.Linq.Expressions.Tests
                     Expression boxExp = Expression.Constant(box);
                     Expression property = Expression.Property(boxExp, boxType.GetProperty("Item"), Expression.Constant(0));
                     Expression assignment = withAssignment(property, yExp);
-                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, assignment)).Compile()());
+                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, assignment)).Compile(useInterpreter)());
                     LabelTarget target = Expression.Label(type);
                     box = boxType.GetConstructor(new[] { type }).Invoke(new object[] { x });
                     boxExp = Expression.Constant(box);
@@ -126,12 +127,12 @@ namespace System.Linq.Expressions.Tests
                         Expression.Return(target, property),
                         Expression.Label(target, Expression.Default(type))
                         );
-                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, wAssignReturningVariable)).Compile()());
+                    Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(woAssign, wAssignReturningVariable)).Compile(useInterpreter)());
                 }
         }
 
         [Theory]
-        [MemberData("AssignmentMethods")]
+        [MemberData(nameof(AssignmentMethods))]
         public void AssignmentReducable(MethodInfo assign, Type type)
         {
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -143,7 +144,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("AssignmentMethods")]
+        [MemberData(nameof(AssignmentMethods))]
         public void CannotAssignToNonWritable(MethodInfo assign, Type type)
         {
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -152,7 +153,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("AssignmentMethods")]
+        [MemberData(nameof(AssignmentMethods))]
         public void AssignmentWithMemberAccessReducable(MethodInfo assign, Type type)
         {
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -167,7 +168,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("AssignmentMethods")]
+        [MemberData(nameof(AssignmentMethods))]
         public void AssignmentWithIndexAccessReducable(MethodInfo assign, Type type)
         {
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -191,7 +192,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("AssignmentMethods")]
+        [MemberData(nameof(AssignmentMethods))]
         public static void ThrowsOnLeftUnreadable(MethodInfo assign, Type type)
         {
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -202,7 +203,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("AssignmentMethods")]
+        [MemberData(nameof(AssignmentMethods))]
         public static void ThrowsOnRightUnreadable(MethodInfo assign, Type type)
         {
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
@@ -214,7 +215,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("AssignmentMethodsWithoutTypes")]
+        [MemberData(nameof(AssignmentMethodsWithoutTypes))]
         public void ThrowIfNoSuchBinaryOperation(MethodInfo assign)
         {
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));

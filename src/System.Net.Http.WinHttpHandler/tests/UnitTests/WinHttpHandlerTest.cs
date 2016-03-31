@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -500,14 +501,14 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         {
             var handler = new WinHttpHandler();
             var client = new HttpClient(handler);
-            TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
 
-            HttpResponseMessage response = await client.GetAsync(TestServer.FakeServerEndpoint);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            response = await client.GetAsync(TestServer.FakeServerEndpoint);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            response = await client.GetAsync(TestServer.FakeServerEndpoint);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            for (int i = 0; i < 3; i++)
+            {
+                TestServer.SetResponse(DecompressionMethods.None, TestServer.ExpectedResponseBody);
+                HttpResponseMessage response = await client.GetAsync(TestServer.FakeServerEndpoint);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
             client.Dispose();
         }
 
@@ -750,7 +751,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                 });
 
             Assert.Equal(Interop.WinHttp.WINHTTP_ACCESS_TYPE_NO_PROXY, APICallHistory.SessionProxySettings.AccessType);
-            Assert.Equal(Interop.WinHttp.WINHTTP_ACCESS_TYPE_NO_PROXY, APICallHistory.RequestProxySettings.AccessType);
+            Assert.Null(APICallHistory.RequestProxySettings.AccessType);
         }
 
         [Fact]

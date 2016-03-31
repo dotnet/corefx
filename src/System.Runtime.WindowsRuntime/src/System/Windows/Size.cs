@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 //
 
@@ -39,9 +40,9 @@ namespace Windows.Foundation
         public Size(double width, double height)
         {
             if (width < 0)
-                throw new ArgumentException("width");
+                throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_NeedNonNegNum, nameof(width));
             if (height < 0)
-                throw new ArgumentException("height");
+                throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_NeedNonNegNum, nameof(height));
 
             _width = (float)width;
             _height = (float)height;
@@ -53,7 +54,7 @@ namespace Windows.Foundation
             set
             {
                 if (value < 0)
-                    throw new ArgumentException("Width");
+                    throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_NeedNonNegNum, nameof(Width));
 
                 _width = (float)value;
             }
@@ -65,7 +66,7 @@ namespace Windows.Foundation
             set
             {
                 if (value < 0)
-                    throw new ArgumentException("Height");
+                    throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_NeedNonNegNum, nameof(Height));
 
                 _height = (float)value;
             }

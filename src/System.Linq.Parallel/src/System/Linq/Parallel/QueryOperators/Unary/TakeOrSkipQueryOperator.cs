@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -62,9 +63,9 @@ namespace System.Linq.Parallel
         {
             OrdinalIndexState indexState = Child.OrdinalIndexState;
 
-            if (indexState == OrdinalIndexState.Indexible)
+            if (indexState == OrdinalIndexState.Indexable)
             {
-                return OrdinalIndexState.Indexible;
+                return OrdinalIndexState.Indexable;
             }
 
             if (indexState.IsWorseThan(OrdinalIndexState.Increasing))
@@ -85,7 +86,7 @@ namespace System.Linq.Parallel
         internal override void WrapPartitionedStream<TKey>(
             PartitionedStream<TResult, TKey> inputStream, IPartitionedStreamRecipient<TResult> recipient, bool preferStriping, QuerySettings settings)
         {
-            Debug.Assert(Child.OrdinalIndexState != OrdinalIndexState.Indexible, "Don't take this code path if the child is indexible.");
+            Debug.Assert(Child.OrdinalIndexState != OrdinalIndexState.Indexable, "Don't take this code path if the child is indexable.");
 
             // If the index is not at least increasing, we need to reindex.
             if (_prematureMerge)
@@ -156,7 +157,7 @@ namespace System.Linq.Parallel
             private readonly CountdownEvent _sharedBarrier; // To separate the search/yield phases.
             private readonly CancellationToken _cancellationToken; // Indicates that cancellation has occurred.
 
-            private List<Pair> _buffer; // Our buffer.
+            private List<Pair<TResult, TKey>> _buffer; // Our buffer.
             private Shared<int> _bufferIndex; // Our current index within the buffer. [allocate in moveNext to avoid false-sharing]
 
             //---------------------------------------------------------------------------------------
@@ -194,7 +195,7 @@ namespace System.Linq.Parallel
                 if (_buffer == null && _count > 0)
                 {
                     // Create a buffer, but don't publish it yet (in case of exception).
-                    List<Pair> buffer = new List<Pair>();
+                    List<Pair<TResult, TKey>> buffer = new List<Pair<TResult, TKey>>();
 
                     // Enter the search phase. In this phase, all partitions race to populate
                     // the shared indices with their first 'count' contiguous elements.
@@ -207,7 +208,7 @@ namespace System.Linq.Parallel
                             CancellationState.ThrowIfCanceled(_cancellationToken);
 
                         // Add the current element to our buffer.
-                        buffer.Add(new Pair(current, index));
+                        buffer.Add(new Pair<TResult, TKey>(current, index));
 
                         // Now we will try to insert our index into the shared indices list, quitting if
                         // our index is greater than all of the indices already inside it.
@@ -243,12 +244,12 @@ namespace System.Linq.Parallel
 
                     // Increment the index, and remember the values.
                     ++_bufferIndex.Value;
-                    currentElement = (TResult)_buffer[_bufferIndex.Value].First;
-                    currentKey = (TKey)_buffer[_bufferIndex.Value].Second;
+                    currentElement = _buffer[_bufferIndex.Value].First;
+                    currentKey = _buffer[_bufferIndex.Value].Second;
 
                     // Only yield the element if its index is less than or equal to the max index.
                     return _sharedIndices.Count == 0
-                        || _keyComparer.Compare((TKey)_buffer[_bufferIndex.Value].Second, _sharedIndices.MaxValue) <= 0;
+                        || _keyComparer.Compare(_buffer[_bufferIndex.Value].Second, _sharedIndices.MaxValue) <= 0;
                 }
                 else
                 {
@@ -274,10 +275,10 @@ namespace System.Linq.Parallel
                             {
                                 // If the current buffered element's index is greater than the 'count'-th index,
                                 // we will yield it as a result.
-                                if (_keyComparer.Compare((TKey)_buffer[_bufferIndex.Value].Second, minKey) > 0)
+                                if (_keyComparer.Compare(_buffer[_bufferIndex.Value].Second, minKey) > 0)
                                 {
-                                    currentElement = (TResult)_buffer[_bufferIndex.Value].First;
-                                    currentKey = (TKey)_buffer[_bufferIndex.Value].Second;
+                                    currentElement = _buffer[_bufferIndex.Value].First;
+                                    currentKey = _buffer[_bufferIndex.Value].Second;
                                     return true;
                                 }
                             }
@@ -318,8 +319,8 @@ namespace System.Linq.Parallel
         }
 
         //-----------------------------------------------------------------------------------
-        // Query results for a Take or a Skip operator. The results are indexible if the child
-        // results were indexible.
+        // Query results for a Take or a Skip operator. The results are indexable if the child
+        // results were indexable.
         //
 
         class TakeOrSkipQueryOperatorResults : UnaryQueryOperatorResults

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -96,7 +97,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedBySize")]
+        [MemberData(nameof(GetArraysVariedBySize))]
         public static void TryGetBuffer_Constructor_ByteArray_AlwaysReturnsEmptyArraySegment(byte[] array)
         {
             var stream = new MemoryStream(array);
@@ -109,7 +110,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedBySize")]
+        [MemberData(nameof(GetArraysVariedBySize))]
         public static void TryGetBuffer_Constructor_ByteArray_Bool_AlwaysReturnsEmptyArraySegment(byte[] array)
         {
             var stream = new MemoryStream(array, writable: true);
@@ -122,7 +123,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_Constructor_ByteArray_Int32_Int32_AlwaysReturnsEmptyArraySegment(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count);
@@ -135,7 +136,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_Constructor_ByteArray_Int32_Int32_Bool_AlwaysReturnsEmptyArraySegment(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true);
@@ -148,7 +149,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_Constructor_ByteArray_Int32_Int32_Bool_Bool_FalseAsPubliclyVisible_ReturnsEmptyArraySegment(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true, publiclyVisible: false);
@@ -184,7 +185,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_Constructor_ByteArray_Int32_Int32_Bool_Bool_ValueAsIndexAndTrueAsPubliclyVisible_AlwaysReturnsOffsetSetToIndex(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true, publiclyVisible: true);
@@ -207,7 +208,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedBySize")]
+        [MemberData(nameof(GetArraysVariedBySize))]
         public static void TryGetBuffer_Constructor_ReturnsCountSetToWrittenLength(byte[] array)
         {
             var stream = new MemoryStream();
@@ -231,7 +232,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedBySize")]
+        [MemberData(nameof(GetArraysVariedBySize))]
         public static void TryGetBuffer_Constructor_Int32_ReturnsCountSetToWrittenLength(byte[] array)
         {
             var stream = new MemoryStream(512);
@@ -244,7 +245,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_Constructor_ByteArray_Int32_Int32_Bool_Bool_ValueAsCountAndTrueAsPubliclyVisible_AlwaysReturnsCountSetToCount(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true, publiclyVisible: true);
@@ -310,7 +311,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_Constructor_ByteArray_Int32_Int32_Bool_Bool_ValueAsBufferAndTrueAsPubliclyVisible_AlwaysReturnsArraySetToBuffer(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true, publiclyVisible: true);
@@ -322,7 +323,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_WhenDisposed_ReturnsTrue(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true, publiclyVisible: true);
@@ -337,7 +338,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_WhenDisposed_ReturnsOffsetSetToIndex(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true, publiclyVisible: true);
@@ -350,7 +351,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_WhenDisposed_ReturnsCountSetToCount(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true, publiclyVisible: true);
@@ -363,7 +364,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("GetArraysVariedByOffsetAndLength")]
+        [MemberData(nameof(GetArraysVariedByOffsetAndLength))]
         public static void TryGetBuffer_WhenDisposed_ReturnsArraySetToBuffer(ArraySegment<byte> array)
         {
             var stream = new MemoryStream(array.Array, index: array.Offset, count: array.Count, writable: true, publiclyVisible: true);

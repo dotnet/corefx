@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Private.DataContractSerialization</AssemblyName>
-    <AssemblyVersion>4.1.0.0</AssemblyVersion>
+    <AssemblyVersion>4.1.1.0</AssemblyVersion>
     <RootNamespace>System.Private.DataContractSerialization</RootNamespace>
     <NoWarn>$(NoWarn);1634;1691;649</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -11,11 +11,17 @@
     <FileAlignment>512</FileAlignment>
     <DebugSymbols>true</DebugSymbols>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>$(DefineConstants)</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcore50aot'">$(DefineConstants);NET_NATIVE</DefineConstants>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
+    <!-- We do not want to block reflection for this assembly -->
+    <BlockReflectionAttribute Condition="'$(TargetGroup)'=='netcore50aot'">false</BlockReflectionAttribute>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Release|AnyCPU'" />
   <PropertyGroup>
     <RuntimeSerializationSources>System\Runtime\Serialization</RuntimeSerializationSources>
     <JsonSources>System\Runtime\Serialization\Json</JsonSources>
@@ -76,6 +82,7 @@
     <Compile Include="$(RuntimeSerializationSources)\BitFlagsGenerator.cs" Condition="!$(NetNative)" />
     <Compile Include="$(RuntimeSerializationSources)\DataContractSurrogateCaller.cs" />
     <Compile Include="$(RuntimeSerializationSources)\DataContractSerializerExtensions.cs" />
+    <Compile Include="$(RuntimeSerializationSources)\XmlSerializableServices.cs" />
     <Compile Include="$(XmlSources)\ArrayHelper.cs" />
     <Compile Include="$(XmlSources)\BytesWithOffset.cs" />
     <Compile Include="$(XmlSources)\XmlDictionaryAsyncCheckWriter.cs" />
@@ -128,12 +135,6 @@
     <Compile Include="$(JsonSources)\JsonGlobals.cs" />
     <Compile Include="$(JsonSources)\XmlObjectSerializerReadContextComplexJson.cs" />
     <Compile Include="$(JsonSources)\XmlObjectSerializerWriteContextComplexJson.cs" />
-    <Compile Include="$(JsonSources)\DataContractToObjectConverter.cs" />
-    <Compile Include="$(JsonSources)\ObjectToDataContractConverterHelper.cs" />
-    <Compile Include="$(JsonSources)\JavaScriptObjectDeserializer.cs" />
-    <Compile Include="$(JsonSources)\JavaScriptSerializer.cs" />
-    <Compile Include="$(JsonSources)\JavaScriptDeserializer.cs" />
-    <Compile Include="$(JsonSources)\JavaScriptString.cs" />
     <Compile Include="$(JsonSources)\DateTimeFormat.cs" />
     <Compile Include="$(JsonSources)\EmitTypeInformation.cs" />
     <Compile Include="$(JsonSources)\DataContractJsonSerializerSettings.cs" />
@@ -146,6 +147,10 @@
     <Compile Include="$(JsonSources)\ByteArrayHelperWithString.cs" />
     <Compile Include="$(JsonSources)\JsonEncodingStreamWrapper.cs" />
     <Compile Include="$(JsonSources)\JsonFormatGeneratorStatics.cs" Condition="!$(NetNative)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netcore50aot'">
+    <TargetingPackReference Include="System.Private.CoreLib.Augments" />
+    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

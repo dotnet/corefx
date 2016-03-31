@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -224,7 +225,7 @@ namespace System.Linq.Expressions
     }
 
 #if !FEATURE_COMPILE
-    // Seperate expression creation class to hide the CreateExpressionFunc function from users reflecting on Expression<T>
+    // Separate expression creation class to hide the CreateExpressionFunc function from users reflecting on Expression<T>
     public class ExpressionCreator<TDelegate>
     {
         public static LambdaExpression CreateExpressionFunc(Expression body, string name, bool tailCall, ReadOnlyCollection<ParameterExpression> parameters)
@@ -473,7 +474,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="LambdaExpression"/> that has the <see cref="P:NodeType"/> property equal to Lambda and the <see cref="P:Body"/> and <see cref="P:Parameters"/> properties set to the specified values.</returns>
         public static LambdaExpression Lambda(Expression body, string name, bool tailCall, IEnumerable<ParameterExpression> parameters)
         {
-            ContractUtils.RequiresNotNull(body, "body");
+            ContractUtils.RequiresNotNull(body, nameof(body));
 
             var parameterList = parameters.ToReadOnly();
 
@@ -536,8 +537,8 @@ namespace System.Linq.Expressions
 
         private static void ValidateLambdaArgs(Type delegateType, ref Expression body, ReadOnlyCollection<ParameterExpression> parameters)
         {
-            ContractUtils.RequiresNotNull(delegateType, "delegateType");
-            RequiresCanRead(body, "body");
+            ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
+            RequiresCanRead(body, nameof(body));
 
             if (!typeof(MulticastDelegate).IsAssignableFrom(delegateType) || delegateType == typeof(MulticastDelegate))
             {
@@ -568,7 +569,7 @@ namespace System.Linq.Expressions
                 {
                     ParameterExpression pex = parameters[i];
                     ParameterInfo pi = pis[i];
-                    RequiresCanRead(pex, "parameters");
+                    RequiresCanRead(pex, nameof(parameters));
                     Type pType = pi.ParameterType;
                     if (pex.IsByRef)
                     {
@@ -607,14 +608,14 @@ namespace System.Linq.Expressions
         {
             if (typeArgs == null)
             {
-                throw new ArgumentNullException("typeArgs");
+                throw new ArgumentNullException(nameof(typeArgs));
             }
             for (int i = 0, n = typeArgs.Length; i < n; i++)
             {
                 var a = typeArgs[i];
                 if (a == null)
                 {
-                    throw new ArgumentNullException("typeArgs");
+                    throw new ArgumentNullException(nameof(typeArgs));
                 }
                 if (a.IsByRef)
                 {
@@ -704,8 +705,8 @@ namespace System.Linq.Expressions
         /// to System.Void to produce an Action.</remarks>
         public static Type GetDelegateType(params Type[] typeArgs)
         {
-            ContractUtils.RequiresNotEmpty(typeArgs, "typeArgs");
-            ContractUtils.RequiresNotNullItems(typeArgs, "typeArgs");
+            ContractUtils.RequiresNotEmpty(typeArgs, nameof(typeArgs));
+            ContractUtils.RequiresNotNullItems(typeArgs, nameof(typeArgs));
             return Compiler.DelegateHelpers.MakeDelegateType(typeArgs);
         }
     }

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Test.Common;
 using System.Threading.Tasks;
@@ -10,6 +11,27 @@ namespace System.Net.NetworkInformation.Tests
 {
     public class PingTest
     {
+        private class FinalizingPing : Ping
+        {
+            public static volatile bool WasFinalized;
+
+            public static void CreateAndRelease()
+            {
+                new FinalizingPing();
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (!disposing)
+                {
+                    WasFinalized = true;
+                }
+
+                base.Dispose(disposing);
+            }
+        }
+
+
         [Fact]
         public async Task SendPingAsync_InvalidArgs()
         {
@@ -112,7 +134,7 @@ namespace System.Net.NetworkInformation.Tests
                     Assert.True(pingReply.Address.Equals(localIpAddress));
 
                     // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-                    if (Capability.CanUseRawSockets())
+                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
                     {
                         Assert.Equal(buffer, pingReply.Buffer);
                     }
@@ -157,7 +179,7 @@ namespace System.Net.NetworkInformation.Tests
                     Assert.True(pingReply.Address.Equals(localIpAddress));
 
                     // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-                    if (Capability.CanUseRawSockets())
+                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
                     {
                         Assert.Equal(buffer, pingReply.Buffer);
                     }
@@ -229,7 +251,7 @@ namespace System.Net.NetworkInformation.Tests
                     Assert.True(pingReply.Address.Equals(localIpAddress));
 
                     // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-                    if (Capability.CanUseRawSockets())
+                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
                     {
                         Assert.Equal(buffer, pingReply.Buffer);
                     }
@@ -273,7 +295,7 @@ namespace System.Net.NetworkInformation.Tests
                     Assert.True(pingReply.Address.Equals(localIpAddress));
 
                     // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-                    if (Capability.CanUseRawSockets())
+                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
                     {
                         Assert.Equal(buffer, pingReply.Buffer);
                     }
@@ -341,6 +363,15 @@ namespace System.Net.NetworkInformation.Tests
         {
             var pingResult = await sendPing(new Ping());
             pingResultValidator(pingResult);
+        }
+
+        [Fact]
+        public void CanBeFinalized()
+        {
+            FinalizingPing.CreateAndRelease();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Assert.True(FinalizingPing.WasFinalized);
         }
     }
 }

@@ -1,20 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-//------------------------------------------------------------------------------
-//  File:           IgnoreCloseAndFlushStream.cs
-//
-//  Description:    The class is used to wrap a given stream in a way that the Flush
-//                  and Close calls to the stream are Ignored. This stream class has been
-//                  created specifically for perf improvements for the ZipPackage.
-//------------------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.IO.Packaging
 {
     /// <summary>
     /// This class ignores all calls to Flush() and Close() methods
     /// depending on whether the IgnoreFlushAndClose property is set to true
-    /// or false.
+    /// or false. This has been created for performance improvements for the
+    /// ZipPackage.
     /// </summary>
     internal sealed class IgnoreFlushAndCloseStream : Stream
     {
@@ -27,7 +21,7 @@ namespace System.IO.Packaging
         internal IgnoreFlushAndCloseStream(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             _stream = stream;
         }
@@ -158,11 +152,6 @@ namespace System.IO.Packaging
         }
         #endregion Methods
 
-        //------------------------------------------------------
-        //
-        //  Protected Methods
-        //
-        //------------------------------------------------------
         /// <summary>
         /// Dispose(bool)
         /// </summary>

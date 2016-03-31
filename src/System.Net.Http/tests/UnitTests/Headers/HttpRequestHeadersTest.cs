@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -619,7 +620,7 @@ namespace System.Net.Http.Tests
             Assert.Equal("custom\u4F1A", headers.GetValues("User-Agent").First());
 
             headers.Clear();
-            // Note that "User-Agent" uses whitespaces as separators, so the following is an invalid value
+            // Note that "User-Agent" uses whitespace as separators, so the following is an invalid value
             headers.TryAddWithoutValidation("User-Agent", "custom1, custom2");
             Assert.Null(headers.GetParsedValues("User-Agent"));
             Assert.Equal(1, headers.GetValues("User-Agent").Count());
@@ -929,7 +930,7 @@ namespace System.Net.Http.Tests
             Assert.True(destination.TransferEncodingChunked.Value);
             Assert.True(destination.ConnectionClose.Value);
 
-            // Negitive
+            // Negative
             source = new HttpRequestHeaders();
             source.ExpectContinue = false;
             source.TransferEncodingChunked = false;
@@ -980,7 +981,7 @@ namespace System.Net.Http.Tests
             Assert.True(destination.TransferEncodingChunked.Value);
             Assert.True(destination.ConnectionClose.Value);
 
-            // Negitive
+            // Negative
             destination = new HttpRequestHeaders();
             destination.ExpectContinue = false;
             destination.TransferEncodingChunked = false;

@@ -1,7 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -108,6 +110,12 @@ namespace System.IO.Compression
             throw new NotSupportedException(SR.NotSupported);
         }
 
+        public override int ReadByte()
+        {
+            CheckDeflateStream();
+            return _deflateStream.ReadByte();
+        }
+
         public override int Read(byte[] array, int offset, int count)
         {
             CheckDeflateStream();
@@ -173,8 +181,14 @@ namespace System.IO.Compression
         {
             if (_deflateStream == null)
             {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
+                ThrowStreamClosedException();
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowStreamClosedException()
+        {
+            throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
         }
     }
 }

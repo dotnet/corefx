@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 
@@ -37,7 +38,7 @@ namespace System.Collections.Immutable
             /// <param name="set">The set.</param>
             internal MutationInput(ImmutableHashSet<T> set)
             {
-                Requires.NotNull(set, "set");
+                Requires.NotNull(set, nameof(set));
                 _root = set._root;
                 _equalityComparer = set._equalityComparer;
                 _count = set._count;
@@ -51,9 +52,9 @@ namespace System.Collections.Immutable
             /// <param name="count">The count.</param>
             internal MutationInput(SortedInt32KeyNode<HashBucket> root, IEqualityComparer<T> equalityComparer, int count)
             {
-                Requires.NotNull(root, "root");
-                Requires.NotNull(equalityComparer, "equalityComparer");
-                Requires.Range(count >= 0, "count");
+                Requires.NotNull(root, nameof(root));
+                Requires.NotNull(equalityComparer, nameof(equalityComparer));
+                Requires.Range(count >= 0, nameof(count));
                 _root = root;
                 _equalityComparer = equalityComparer;
                 _count = count;

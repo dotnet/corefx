@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -282,12 +283,18 @@ namespace Microsoft.Win32.SafeHandles
         private void Disconnect()
         {
             Debug.Assert(!IsInvalid, "Expected a valid context in Disconnect");
+
+            // Because we set "quiet shutdown" on the SSL_CTX, SslShutdown is supposed
+            // to always return 1 (completed success).  In "close-notify" shutdown (the
+            // opposite of quiet) there's also 0 (incomplete success) and negative
+            // (probably async IO WANT_READ/WANT_WRITE, but need to check) return codes
+            // to handle.
+            //
+            // If quiet shutdown is ever not set, see
+            // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
+            // for guidance on how to rewrite this method.
             int retVal = Interop.Ssl.SslShutdown(handle);
-            if (retVal < 0)
-            {
-                //TODO (Issue #4031) check this error
-                Interop.Ssl.SslGetError(handle, retVal);
-            }
+            Debug.Assert(retVal == 1);
         }
 
         private SafeSslHandle() : base(IntPtr.Zero, true)
@@ -314,27 +321,20 @@ namespace Microsoft.Win32.SafeHandles
             internal int ApplicationDataOffset;
         }
 
+        private const int CertHashMaxSize = 128;
         private static readonly byte[] s_tlsServerEndPointByteArray = Encoding.UTF8.GetBytes("tls-server-end-point:");
         private static readonly byte[] s_tlsUniqueByteArray = Encoding.UTF8.GetBytes("tls-unique:");
         private static readonly int s_secChannelBindingSize = Marshal.SizeOf<SecChannelBindings>();
+
         private readonly int _cbtPrefixByteArraySize;
-        private const int CertHashMaxSize = 128;
-
-        internal int Length
-        {
-            get;
-            private set;
-        }
-
-        internal IntPtr CertHashPtr
-        {
-            get;
-            private set;
-        }
+        internal int Length { get; private set; }
+        internal IntPtr CertHashPtr { get; private set; }
 
         internal void SetCertHash(byte[] certHashBytes)
         {
             Debug.Assert(certHashBytes != null, "check certHashBytes is not null");
+            Debug.Assert(certHashBytes.Length <= CertHashMaxSize);
+
             int length = certHashBytes.Length;
             Marshal.Copy(certHashBytes, 0, CertHashPtr, length);
             SetCertHashLength(length);
@@ -342,18 +342,10 @@ namespace Microsoft.Win32.SafeHandles
 
         private byte[] GetPrefixBytes(ChannelBindingKind kind)
         {
-            if (kind == ChannelBindingKind.Endpoint)
-            {
-                return s_tlsServerEndPointByteArray;
-            }
-            else if (kind == ChannelBindingKind.Unique)
-            {
-                return s_tlsUniqueByteArray;
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            Debug.Assert(kind == ChannelBindingKind.Endpoint || kind == ChannelBindingKind.Unique);
+            return kind == ChannelBindingKind.Endpoint ?
+                s_tlsServerEndPointByteArray :
+                s_tlsUniqueByteArray;
         }
 
         internal SafeChannelBindingHandle(ChannelBindingKind kind)
@@ -381,10 +373,7 @@ namespace Microsoft.Win32.SafeHandles
             Marshal.StructureToPtr(channelBindings, handle, true);
         }
 
-        public override bool IsInvalid
-        {
-            get { return handle == IntPtr.Zero; }
-        }
+        public override bool IsInvalid => handle == IntPtr.Zero;
 
         protected override bool ReleaseHandle()
         {

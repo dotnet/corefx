@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -70,7 +71,7 @@ namespace OLEDB.Test.ModuleCore
         public CTestException(int result, string message, object actual, object expected, Exception inner)
             : base(message, inner)
         {
-            //Note: iResult is the variation result (ie: TEST_PASS, TEST_FAIL, etc...)
+            //Note: iResult is the variation result (i.e.: TEST_PASS, TEST_FAIL, etc...)
             //Setup the exception
             Result = result;
             Actual = actual;

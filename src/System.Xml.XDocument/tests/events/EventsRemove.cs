@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XNode[] { new XComment("Comment") }, 0 },
             new object[] { new XNode[] { new XText(""), new XText(" "), new XText("\t") }, 1 }
         };
-        [Theory, MemberData("ExecuteXDocumentVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXDocumentVariationParams))]
         public void ExecuteXDocumentVariation(XNode[] content, int index)
         {
             XDocument xDoc = new XDocument(content);
@@ -51,7 +52,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XNode[] { new XText(""), new XText(" "), new XText("\t") }, 2 },
             new object[] { InputSpace.GetElement(100, 10).DescendantNodes().ToArray(), 50 }
         };
-        [Theory, MemberData("ExecuteXElementVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXElementVariationParams))]
         public void ExecuteXElementVariation(XNode[] content, int index)
         {
             XElement xElem = new XElement("root", content);
@@ -79,7 +80,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XAttribute[] { new XAttribute("{b}xxx", "b_yyy"), new XAttribute("{a}xxx", "a_yyy") }, 0 },
             new object[] { InputSpace.GetAttributeElement(10, 1000).Elements().Attributes().ToArray(), 10 }
         };
-        [Theory, MemberData("ExecuteXAttributeVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXAttributeVariationParams))]
         public void ExecuteXAttributeVariation(XAttribute[] content, int index)
         {
             XElement xElem = new XElement("root", content);
@@ -343,7 +344,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XNode[] { new XComment("Comment") } },
             new object[] { new XNode[] { new XText(""), new XText(" "), new XText("\t") } }
         };
-        [Theory, MemberData("ExecuteXDocumentVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXDocumentVariationParams))]
         public void ExecuteXDocumentVariation(XNode[] content)
         {
             XDocument xDoc = new XDocument(content);
@@ -370,7 +371,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XNode[] { new XText(""), new XText(" "), new XText("\t") } },
             new object[] { InputSpace.GetElement(100, 10).DescendantNodes().ToArray() }
         };
-        [Theory, MemberData("ExecuteXElementVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXElementVariationParams))]
         public void ExecuteXElementVariation(XNode[] content)
         {
             XElement xElem = new XElement("root", InputSpace.GetAttributeElement(10, 1000).Elements().Attributes(), content);
@@ -485,7 +486,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { InputSpace.GetAttributeElement(10, 1000).Elements().Attributes().ToArray() },
             new object[] { new XObject[] { new XAttribute("{b}xxx", "b_yyy"), new XElement("parent", new XElement("child", "child text")) } }
         };
-        [Theory, MemberData("ExecuteXElementVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXElementVariationParams))]
         public void ExecuteXElementVariation(XObject[] content)
         {
             XElement xElem = new XElement("root", content);

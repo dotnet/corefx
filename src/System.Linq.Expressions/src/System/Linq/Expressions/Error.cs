@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -86,20 +87,6 @@ namespace System.Linq.Expressions
         internal static Exception TypeDoesNotHaveConstructorForTheSignature()
         {
             return new ArgumentException(Strings.TypeDoesNotHaveConstructorForTheSignature);
-        }
-        /// <summary>
-        /// ArgumentException with message like "Count must be non-negative."
-        /// </summary>
-        internal static Exception CountCannotBeNegative()
-        {
-            return new ArgumentException(Strings.CountCannotBeNegative);
-        }
-        /// <summary>
-        /// ArgumentException with message like "arrayType must be an array type"
-        /// </summary>
-        internal static Exception ArrayTypeMustBeArray()
-        {
-            return new ArgumentException(Strings.ArrayTypeMustBeArray);
         }
         /// <summary>
         /// ArgumentException with message like "Setter should have void type."
@@ -328,16 +315,16 @@ namespace System.Linq.Expressions
         /// <summary>
         /// ArgumentException with message like "Argument must be either a FieldInfo or PropertyInfo"
         /// </summary>
-        internal static Exception ArgumentMustBeFieldInfoOrPropertInfo()
+        internal static Exception ArgumentMustBeFieldInfoOrPropertyInfo()
         {
-            return new ArgumentException(Strings.ArgumentMustBeFieldInfoOrPropertInfo);
+            return new ArgumentException(Strings.ArgumentMustBeFieldInfoOrPropertyInfo);
         }
         /// <summary>
         /// ArgumentException with message like "Argument must be either a FieldInfo, PropertyInfo or MethodInfo"
         /// </summary>
-        internal static Exception ArgumentMustBeFieldInfoOrPropertInfoOrMethod()
+        internal static Exception ArgumentMustBeFieldInfoOrPropertyInfoOrMethod()
         {
-            return new ArgumentException(Strings.ArgumentMustBeFieldInfoOrPropertInfoOrMethod);
+            return new ArgumentException(Strings.ArgumentMustBeFieldInfoOrPropertyInfoOrMethod);
         }
         /// <summary>
         /// ArgumentException with message like "Argument must be an instance member"
@@ -866,13 +853,6 @@ namespace System.Linq.Expressions
             return new ArgumentOutOfRangeException(Strings.OutOfRange(p0, p1));
         }
         /// <summary>
-        /// InvalidOperationException with message like "Queue empty."
-        /// </summary>
-        internal static Exception QueueEmpty()
-        {
-            return new InvalidOperationException(Strings.QueueEmpty);
-        }
-        /// <summary>
         /// InvalidOperationException with message like "Cannot redefine label '{0}' in an inner block."
         /// </summary>
         internal static Exception LabelTargetAlreadyDefined(object p0)
@@ -952,7 +932,7 @@ namespace System.Linq.Expressions
         /// <summary>
         /// InvalidOperationException with message like "Invalid lvalue for assignment: {0}."
         /// </summary>
-        internal static Exception InvalidLvalue(object p0)
+        internal static Exception InvalidLvalue(ExpressionType p0)
         {
             return new InvalidOperationException(Strings.InvalidLvalue(p0));
         }
@@ -1041,7 +1021,7 @@ namespace System.Linq.Expressions
             return new InvalidOperationException(Strings.MustRewriteChildToSameType(p0, p1, p2));
         }
         /// <summary>
-        /// InvalidOperationException with message like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is is intentional, override '{1}' and change it to allow this rewrite."
+        /// InvalidOperationException with message like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is intentional, override '{1}' and change it to allow this rewrite."
         /// </summary>
         internal static Exception MustRewriteWithoutMethod(object p0, object p1)
         {
@@ -1063,11 +1043,11 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// InvalidOperationException with message like "Dynamic operations can only be performed in homogenous AppDomain."
+        /// InvalidOperationException with message like "Dynamic operations can only be performed in homogeneous AppDomain."
         /// </summary>
-        internal static Exception HomogenousAppDomainRequired()
+        internal static Exception HomogeneousAppDomainRequired()
         {
-            return new InvalidOperationException(Strings.HomogenousAppDomainRequired);
+            return new InvalidOperationException(Strings.HomogeneousAppDomainRequired);
         }
         /// <summary>
         /// ArgumentException with message like "Test value of type '{0}' cannot be used for the comparison method parameter of type '{1}'"

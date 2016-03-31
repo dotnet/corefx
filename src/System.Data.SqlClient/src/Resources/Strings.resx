@@ -186,6 +186,9 @@
   <data name="ADP_NonPooledOpenTimeout" xml:space="preserve">
     <value>Timeout attempting to open the connection.  The time period elapsed prior to attempting to open the connection has been exceeded.  This may have occurred because of too many simultaneous non-pooled connection attempts.</value>
   </data>
+  <data name="Arg_RemoveArgNotFound" xml:space="preserve">
+    <value>Cannot remove the specified item because it was not found in the specified Collection.</value>
+  </data>
   <data name="Data_InvalidOffsetLength" xml:space="preserve">
     <value>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
   </data>
@@ -1030,12 +1033,9 @@
     <value>TCP Provider</value>
   </data>
   <data name="SNI_PN8" xml:space="preserve">
-    <value>   </value>
+    <value></value>
   </data>
   <data name="SNI_PN9" xml:space="preserve">
     <value>SQL Network Interfaces</value>
-  </data>
-  <data name="ADP_FeatureNotSupportedOnNonWindowsPlatform" xml:space="preserve">
-    <value>{0} is not supported on non-Windows platform.</value>
   </data>
 </root>

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // The BigNumber class implements methods for formatting and parsing
 // big numeric values. To format and parse numeric values, applications should
@@ -270,13 +271,10 @@
 // NaNs or Infinities.
 //
 
-using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
-using Conditional = System.Diagnostics.ConditionalAttribute;
 
 namespace System.Numerics
 {
@@ -325,7 +323,7 @@ namespace System.Numerics
         }
 
         [SecuritySafeCritical]
-        internal static Boolean TryParseBigInteger(String value, NumberStyles style, NumberFormatInfo info, out BigInteger result)
+        internal static bool TryParseBigInteger(string value, NumberStyles style, NumberFormatInfo info, out BigInteger result)
         {
             unsafe
             {
@@ -356,10 +354,10 @@ namespace System.Numerics
             }
         }
 
-        internal static BigInteger ParseBigInteger(String value, NumberStyles style, NumberFormatInfo info)
+        internal static BigInteger ParseBigInteger(string value, NumberStyles style, NumberFormatInfo info)
         {
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
 
             ArgumentException e;
             if (!TryValidateParseStyleInteger(style, out e))
@@ -373,19 +371,19 @@ namespace System.Numerics
             return result;
         }
 
-        private unsafe static Boolean HexNumberToBigInteger(ref BigNumberBuffer number, ref BigInteger value)
+        private unsafe static bool HexNumberToBigInteger(ref BigNumberBuffer number, ref BigInteger value)
         {
             if (number.digits == null || number.digits.Length == 0)
                 return false;
 
-            int len = number.digits.Length - 1; // ignore trailing '\0'
+            int len = number.digits.Length - 1; // Ignore trailing '\0'
             byte[] bits = new byte[(len / 2) + (len % 2)];
 
             bool shift = false;
             bool isNegative = false;
             int bitIndex = 0;
 
-            // parse the string into a little-endian two's complement byte array
+            // Parse the string into a little-endian two's complement byte array
             // string value     : O F E B 7 \0
             // string index (i) : 0 1 2 3 4 5 <--
             // byte[] (bitIndex): 2 1 1 0 0 <--
@@ -427,10 +425,10 @@ namespace System.Numerics
             return true;
         }
 
-        private unsafe static Boolean NumberToBigInteger(ref BigNumberBuffer number, ref BigInteger value)
+        private unsafe static bool NumberToBigInteger(ref BigNumberBuffer number, ref BigInteger value)
         {
-            Int32 i = number.scale;
-            Int32 cur = 0;
+            int i = number.scale;
+            int cur = 0;
 
             BigInteger ten = 10;
             value = 0;
@@ -439,12 +437,12 @@ namespace System.Numerics
                 value *= ten;
                 if (number.digits[cur] != '\0')
                 {
-                    value += (Int32)(number.digits[cur++] - '0');
+                    value += number.digits[cur++] - '0';
                 }
             }
             while (number.digits[cur] != '\0')
             {
-                if (number.digits[cur++] != '0') return false; // disallow non-zero trailing decimal places
+                if (number.digits[cur++] != '0') return false; // Disallow non-zero trailing decimal places
             }
             if (number.sign)
             {
@@ -453,11 +451,11 @@ namespace System.Numerics
             return true;
         }
 
-        // this function is consistent with VM\COMNumber.cpp!COMNumber::ParseFormatSpecifier
-        internal static char ParseFormatSpecifier(String format, out Int32 digits)
+        // This function is consistent with VM\COMNumber.cpp!COMNumber::ParseFormatSpecifier
+        internal static char ParseFormatSpecifier(string format, out int digits)
         {
             digits = -1;
-            if (String.IsNullOrEmpty(format))
+            if (string.IsNullOrEmpty(format))
             {
                 return 'R';
             }
@@ -485,14 +483,14 @@ namespace System.Numerics
                     return ch;
                 }
             }
-            return (char)0; // custom format
+            return (char)0; // Custom format
         }
 
-        private static String FormatBigIntegerToHexString(BigInteger value, char format, int digits, NumberFormatInfo info)
+        private static string FormatBigIntegerToHexString(BigInteger value, char format, int digits, NumberFormatInfo info)
         {
             StringBuilder sb = new StringBuilder();
             byte[] bits = value.ToByteArray();
-            String fmt = null;
+            string fmt = null;
             int cur = bits.Length - 1;
 
             if (cur > -1)
@@ -511,14 +509,14 @@ namespace System.Numerics
                 {
                     // {0xF8-0xFF} print as {8-F}
                     // {0x00-0x07} print as {0-7}
-                    fmt = String.Format(CultureInfo.InvariantCulture, "{0}1", format);
+                    fmt = string.Format(CultureInfo.InvariantCulture, "{0}1", format);
                     sb.Append(head.ToString(fmt, info));
                     cur--;
                 }
             }
             if (cur > -1)
             {
-                fmt = String.Format(CultureInfo.InvariantCulture, "{0}2", format);
+                fmt = string.Format(CultureInfo.InvariantCulture, "{0}2", format);
                 while (cur > -1)
                 {
                     sb.Append(bits[cur--].ToString(fmt, info));
@@ -526,14 +524,14 @@ namespace System.Numerics
             }
             if (digits > 0 && digits > sb.Length)
             {
-                // insert leading zeros.  User specified "X5" so we create "0ABCD" instead of "ABCD"
+                // Insert leading zeros.  User specified "X5" so we create "0ABCD" instead of "ABCD"
                 sb.Insert(0, (value._sign >= 0 ? ("0") : (format == 'x' ? "f" : "F")), digits - sb.Length);
             }
             return sb.ToString();
         }
 
         [SecuritySafeCritical]
-        internal static String FormatBigInteger(BigInteger value, String format, NumberFormatInfo info)
+        internal static string FormatBigInteger(BigInteger value, string format, NumberFormatInfo info)
         {
             int digits = 0;
             char fmt = ParseFormatSpecifier(format, out digits);
@@ -547,7 +545,7 @@ namespace System.Numerics
                 if (fmt == 'g' || fmt == 'G' || fmt == 'r' || fmt == 'R')
                 {
                     if (digits > 0)
-                        format = String.Format(CultureInfo.InvariantCulture, "D{0}", digits.ToString(CultureInfo.InvariantCulture));
+                        format = string.Format(CultureInfo.InvariantCulture, "D{0}", digits.ToString(CultureInfo.InvariantCulture));
                     else
                         format = "D";
                 }
@@ -645,7 +643,7 @@ namespace System.Numerics
             {
                 // sign = true for negative and false for 0 and positive values
                 bool sign = (value._sign < 0);
-                // the cut-off point to switch (G)eneral from (F)ixed-point to (E)xponential form
+                // The cut-off point to switch (G)eneral from (F)ixed-point to (E)xponential form
                 int precision = 29;
                 int scale = cchMax - ichDst;
 
@@ -667,11 +665,11 @@ namespace System.Numerics
             }
             if (value._sign < 0)
             {
-                String negativeSign = info.NegativeSign;
+                string negativeSign = info.NegativeSign;
                 for (int i = info.NegativeSign.Length - 1; i > -1; i--)
                     rgch[--ichDst] = info.NegativeSign[i];
             }
-            return new String(rgch, ichDst, cchMax - ichDst);
+            return new string(rgch, ichDst, cchMax - ichDst);
         }
     }
 }

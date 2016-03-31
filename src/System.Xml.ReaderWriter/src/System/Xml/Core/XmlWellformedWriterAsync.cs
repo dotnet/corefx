@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Threading.Tasks;
 
@@ -94,21 +95,21 @@ namespace System.Xml
                     {
                         if ((i = _xmlCharType.IsPublicId(pubid)) >= 0)
                         {
-                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(pubid, i)), "pubid");
+                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(pubid, i)), nameof(pubid));
                         }
                     }
                     if (sysid != null)
                     {
                         if ((i = _xmlCharType.IsOnlyCharData(sysid)) >= 0)
                         {
-                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(sysid, i)), "sysid");
+                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(sysid, i)), nameof(sysid));
                         }
                     }
                     if (subset != null)
                     {
                         if ((i = _xmlCharType.IsOnlyCharData(subset)) >= 0)
                         {
-                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(subset, i)), "subset");
+                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(subset, i)), nameof(subset));
                         }
                     }
                 }
@@ -1028,19 +1029,19 @@ namespace System.Xml
             {
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
                 if (count < 0)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
                 if (count > buffer.Length - index)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
 
                 await AdvanceStateAsync(Token.Text).ConfigureAwait(false);
@@ -1066,19 +1067,19 @@ namespace System.Xml
             {
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
                 if (count < 0)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
                 if (count > buffer.Length - index)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
 
                 await AdvanceStateAsync(Token.RawData).ConfigureAwait(false);
@@ -1130,19 +1131,19 @@ namespace System.Xml
             {
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
                 if (count < 0)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
                 if (count > buffer.Length - index)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
 
                 Task task = AdvanceStateAsync(Token.Base64);

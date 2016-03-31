@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 using Xunit;
@@ -246,7 +247,7 @@ namespace System.IO.Tests
                     case '/':
                         Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
                         break;
-                    //We dont throw in V1 too
+                    //We don't throw in V1 too
                     case ':':
                         //History:
                         // 1) we assumed that this will work in all non-9x machine
@@ -283,7 +284,7 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
-        public void WindowsSearchPatternQuestionMarks()
+        public virtual void WindowsSearchPatternQuestionMarks()
         {
             string testDir1Str = GetTestFileName();
             DirectoryInfo testDir = new DirectoryInfo(TestDirectory);
@@ -311,7 +312,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux)]
+        [PlatformSpecific(CaseSensitivePlatforms)]
         public void SearchPatternCaseSensitive()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -333,7 +334,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows | PlatformID.OSX)]
+        [PlatformSpecific(CaseInsensitivePlatforms)]
         public void SearchPatternCaseInsensitive()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());

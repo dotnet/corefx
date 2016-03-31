@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
-  </PropertyGroup>   
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -44,7 +41,6 @@
     <Compile Include="System\ComponentModel\DefaultValueAttribute.cs" />
     <Compile Include="System\DateTime.cs" />
     <Compile Include="System\DateTimeOffset.cs" />
-    <Compile Include="System\DateTimeOffset.UnixTimeConversions.cs" />
     <Compile Include="System\Decimal.cs" />
     <Compile Include="System\Delegate.cs" />
     <Compile Include="System\Double.cs" />
@@ -98,6 +94,8 @@
     </Compile>
     <!-- Performance Tests -->
     <Compile Include="Performance\Perf.Boolean.cs" />
+    <Compile Include="Performance\Perf.Char.cs" />
+    <Compile Include="Performance\Perf.Double.cs" />
     <Compile Include="Performance\Perf.Enum.cs" />
     <Compile Include="Performance\Perf.Guid.cs" />
     <Compile Include="Performance\Perf.Object.cs" />
@@ -118,7 +116,17 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Compile tests against the System.Runtime contract, but copy our local-built implementation for testing -->
+	<ProjectReference Include="..\ref\System.Runtime.csproj">
+      <Project>{446de6f0-47a0-4c2f-a918-768a76ccf461}</Project>
+      <Name>System.Runtime</Name>
+      <!-- Don't copy the reference assembly to output -->
+      <Private>false</Private>
+      <UndefineProperties>OSGroup</UndefineProperties>
+    </ProjectReference>
     <ProjectReference Include="..\src\System.Runtime.csproj">
+      <Project>{1e689c1b-690c-4799-bde9-6e7990585894}</Project>
+      <Name>System.Runtime</Name>
+      <!-- Don't reference implementation assembly, but do deploy it. -->
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -129,6 +137,7 @@
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+      <OSGroup>Windows_NT</OSGroup>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

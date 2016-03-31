@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -26,7 +27,7 @@ namespace System.Security.Cryptography
             if (_disposed)
                 throw new ObjectDisposedException(null);
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
 
             HashCore(buffer, 0, buffer.Length);
             return CaptureHashCodeAndReinitialize();
@@ -35,9 +36,9 @@ namespace System.Security.Cryptography
         public byte[] ComputeHash(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0 || (count > buffer.Length))
                 throw new ArgumentException(SR.Argument_InvalidValue);
             if ((buffer.Length - count) < offset)

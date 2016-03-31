@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Collections;
 
@@ -36,7 +40,7 @@ namespace System.Diagnostics.Tracing
             get
             {
                 if (key == null)
-                    throw new System.ArgumentNullException("key");
+                    throw new System.ArgumentNullException(nameof(key));
 
                 int position = 0;
                 foreach(var name in m_names)
@@ -79,7 +83,7 @@ namespace System.Diagnostics.Tracing
         public bool ContainsKey(string key)
         {
             if (key == null)
-                throw new System.ArgumentNullException("key");
+                throw new System.ArgumentNullException(nameof(key));
 
             foreach (var item in m_names)
             {
@@ -95,7 +99,10 @@ namespace System.Diagnostics.Tracing
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            throw new System.NotSupportedException();
+            for (int i = 0; i < Keys.Count; i++)
+            {
+                yield return new KeyValuePair<string, object>(this.m_names[i], this.m_values[i]);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -122,7 +129,7 @@ namespace System.Diagnostics.Tracing
         public bool TryGetValue(string key, out object value)
         {
             if (key == null)
-                throw new System.ArgumentNullException("key");
+                throw new System.ArgumentNullException(nameof(key));
 
             int position = 0;
             foreach (var name in m_names)

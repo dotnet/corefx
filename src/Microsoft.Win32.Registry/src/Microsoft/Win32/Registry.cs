@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -16,11 +17,6 @@ namespace Microsoft.Win32
     //This class contains only static members and does not need to be serializable.
     public static class Registry
     {
-        [System.Security.SecuritySafeCritical]  
-        static Registry()
-        {
-        }
-
         /**
          * Current User Key.
          * 
@@ -74,7 +70,7 @@ namespace Microsoft.Win32
         {
             if (keyName == null)
             {
-                throw new ArgumentNullException("keyName");
+                throw new ArgumentNullException(nameof(keyName));
             }
 
             string basekeyName;

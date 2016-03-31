@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 //
 
@@ -44,7 +45,7 @@ namespace Windows.UI.Xaml.Media.Animation
                 || Double.IsNaN(count)
                 || count < 0.0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             _Duration = new TimeSpan(0);
@@ -56,7 +57,7 @@ namespace Windows.UI.Xaml.Media.Animation
         {
             if (duration < new TimeSpan(0))
             {
-                throw new ArgumentOutOfRangeException("duration");
+                throw new ArgumentOutOfRangeException(nameof(duration));
             }
 
             _Duration = duration;

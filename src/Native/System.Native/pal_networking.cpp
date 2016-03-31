@@ -1,13 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_networking.h"
 #include "pal_utilities.h"
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
+#include <stdlib.h>
+#include <pthread.h>
 #include <arpa/inet.h>
 #include <assert.h>
 #if HAVE_EPOLL
@@ -24,11 +24,62 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #if defined(__APPLE__) && __APPLE__
 #include <sys/socketvar.h>
 #endif
 #include <unistd.h>
 #include <vector>
+#include <pwd.h>
+
+#if HAVE_KQUEUE
+#if KEVENT_HAS_VOID_UDATA
+void* GetKeventUdata(uintptr_t udata)
+{
+    return reinterpret_cast<void*>(udata);
+}
+uintptr_t GetSocketEventData(void* udata)
+{
+    return reinterpret_cast<uintptr_t>(udata);
+}
+#else
+intptr_t GetKeventUdata(uintptr_t udata)
+{
+    return static_cast<intptr_t>(udata);
+}
+uintptr_t GetSocketEventData(intptr_t udata)
+{
+    return static_cast<uintptr_t>(udata);
+}
+#endif
+#if KEVENT_REQUIRES_INT_PARAMS
+int GetKeventNchanges(int nchanges)
+{
+    return nchanges;
+}
+int16_t GetKeventFilter(int16_t filter)
+{
+    return filter;
+}
+uint16_t GetKeventFlags(uint16_t flags)
+{
+    return flags;
+}
+#else
+size_t GetKeventNchanges(int nchanges)
+{
+    return static_cast<size_t>(nchanges);
+}
+int16_t GetKeventFilter(uint32_t filter)
+{
+    return static_cast<int16_t>(filter);
+}
+uint16_t GetKeventFlags(uint32_t flags)
+{
+    return static_cast<uint16_t>(flags);
+}
+#endif
+#endif
 
 #if !HAVE_IN_PKTINFO
 // On platforms, such as FreeBSD, where in_pktinfo
@@ -117,9 +168,12 @@ static void ConvertByteArrayToIn6Addr(in6_addr& addr, const uint8_t* buffer, int
 #if HAVE_IN6_U
     assert(bufferLength == ARRAY_SIZE(addr.__in6_u.__u6_addr8));
     memcpy(addr.__in6_u.__u6_addr8, buffer, UnsignedCast(bufferLength));
-#else
+#elif HAVE_U6_ADDR
     assert(bufferLength == ARRAY_SIZE(addr.__u6_addr.__u6_addr8));
     memcpy(addr.__u6_addr.__u6_addr8, buffer, UnsignedCast(bufferLength));
+#else
+    assert(bufferLength == ARRAY_SIZE(addr.s6_addr));
+    memcpy(addr.s6_addr, buffer, UnsignedCast(bufferLength));
 #endif
 }
 
@@ -128,9 +182,12 @@ static void ConvertIn6AddrToByteArray(uint8_t* buffer, int32_t bufferLength, con
 #if HAVE_IN6_U
     assert(bufferLength == ARRAY_SIZE(addr.__in6_u.__u6_addr8));
     memcpy(buffer, addr.__in6_u.__u6_addr8, UnsignedCast(bufferLength));
-#else
+#elif HAVE_U6_ADDR
     assert(bufferLength == ARRAY_SIZE(addr.__u6_addr.__u6_addr8));
     memcpy(buffer, addr.__u6_addr.__u6_addr8, UnsignedCast(bufferLength));
+#else
+    assert(bufferLength == ARRAY_SIZE(addr.s6_addr));
+    memcpy(buffer, addr.s6_addr, UnsignedCast(bufferLength));
 #endif
 }
 
@@ -192,14 +249,6 @@ static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
     return -1;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t IPv6StringToAddress(const uint8_t* address, const uint8_t* port, uint8_t* buffer, int32_t bufferLength, uint32_t* scope)
-{
-    return SystemNative_IPv6StringToAddress(address, port, buffer, bufferLength, scope);
-}
-
 extern "C" int32_t
 SystemNative_IPv6StringToAddress(const uint8_t* address, const uint8_t* port, uint8_t* buffer, int32_t bufferLength, uint32_t* scope)
 {
@@ -220,14 +269,6 @@ SystemNative_IPv6StringToAddress(const uint8_t* address, const uint8_t* port, ui
     }
 
     return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t IPv4StringToAddress(const uint8_t* address, uint8_t* buffer, int32_t bufferLength, uint16_t* port)
-{
-    return SystemNative_IPv4StringToAddress(address, buffer, bufferLength, port);
 }
 
 extern "C" int32_t SystemNative_IPv4StringToAddress(const uint8_t* address, uint8_t* buffer, int32_t bufferLength, uint16_t* port)
@@ -270,15 +311,6 @@ static void AppendScopeIfNecessary(uint8_t* string, int32_t stringLength, uint32
     int n = snprintf(reinterpret_cast<char*>(&string[i]), capacity, "%%%d", scope);
     assert(static_cast<size_t>(n) < capacity);
     (void)n; // Silence an unused variable warning in release mode
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t IPAddressToString(
-    const uint8_t* address, int32_t addressLength, bool isIPv6, uint8_t* string, int32_t stringLength, uint32_t scope)
-{
-    return SystemNative_IPAddressToString(address, addressLength, isIPv6, string, stringLength, scope);
 }
 
 extern "C" int32_t SystemNative_IPAddressToString(
@@ -326,14 +358,6 @@ extern "C" int32_t SystemNative_IPAddressToString(
     }
 
     return 0;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetHostEntryForName(const uint8_t* address, HostEntry* entry)
-{
-    return SystemNative_GetHostEntryForName(address, entry);
 }
 
 extern "C" int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry)
@@ -413,6 +437,109 @@ static void ConvertHostEntPlatformToPal(HostEntry& hostEntry, hostent& entry)
     }
 }
 
+#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR
+#if !HAVE_GETHOSTBYNAME_R
+static int copy_hostent(struct hostent* from, struct hostent* to,
+                        char* buffer, size_t buflen)
+{
+    // FIXME: the implementation done for this function in https://github.com/dotnet/corefx/commit/6a99b74
+    //        requires testing when managed assemblies are built and tested on NetBSD. Until that time,
+    //        return an error code.
+    (void)from;   // unused arg
+    (void)to;     // unused arg
+    (void)buffer; // unused arg
+    (void)buflen; // unused arg
+    return ENOSYS;
+}
+
+/*
+Note: we're assuming that all access to these functions are going through these shims on the platforms, which do not provide
+      thread-safe functions to get host name or address. If that is not the case (which is very likely) race condition is
+      possible, for instance; if other libs (such as libcurl) call gethostby[name/addr] simultaneously.
+*/
+static pthread_mutex_t lock_hostbyx_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static int gethostbyname_r(char const* hostname, struct hostent* result,
+                           char* buffer, size_t buflen, hostent** entry, int* error)
+{
+    assert(hostname != nullptr);
+    assert(result != nullptr);
+    assert(buffer != nullptr);
+    assert(entry != nullptr);
+    assert(error != nullptr);
+
+    if (hostname == nullptr || entry == nullptr || error == nullptr || buffer == nullptr || result == nullptr)
+    {
+        if (error != nullptr)
+        {
+            *error = PAL_BAD_ARG;
+        }
+
+        return PAL_BAD_ARG;
+    }
+
+    pthread_mutex_lock(&lock_hostbyx_mutex);
+
+    *entry = gethostbyname(hostname);
+    if ((!(*entry)) || ((*entry)->h_addrtype != AF_INET) || ((*entry)->h_length != 4))
+    {
+        *error = h_errno;
+        *entry = nullptr;
+    }
+    else
+    {
+        h_errno = copy_hostent(*entry, result, buffer, buflen);
+        *entry = (h_errno == 0) ? result : nullptr;
+    }
+
+    pthread_mutex_unlock(&lock_hostbyx_mutex);
+
+    return h_errno;
+}
+
+static int gethostbyaddr_r(const uint8_t* addr, const socklen_t len, int type, struct hostent* result,
+                           char* buffer, size_t buflen, hostent** entry, int* error)
+{
+    assert(addr != nullptr);
+    assert(result != nullptr);
+    assert(buffer != nullptr);
+    assert(entry != nullptr);
+    assert(error != nullptr);
+
+    if (addr == nullptr || entry == nullptr || buffer == nullptr || result == nullptr)
+    {
+        if (error != nullptr)
+        {
+            *error = PAL_BAD_ARG;
+        }
+
+        return PAL_BAD_ARG;
+    }
+
+    pthread_mutex_lock(&lock_hostbyx_mutex);
+
+    *entry = gethostbyaddr(reinterpret_cast<const char*>(addr), static_cast<unsigned int>(len), type);
+    if ((!(*entry)) || ((*entry)->h_addrtype != AF_INET) || ((*entry)->h_length != 4))
+    {
+        *error = h_errno;
+        *entry = nullptr;
+    }
+    else
+    {
+        h_errno = copy_hostent(*entry, result, buffer, buflen);
+        *entry = (h_errno == 0) ? result : nullptr;
+    }
+
+    pthread_mutex_unlock(&lock_hostbyx_mutex);
+
+    return h_errno;
+}
+#undef HAVE_GETHOSTBYNAME_R
+#undef HAVE_GETHOSTBYADDR_R
+#define HAVE_GETHOSTBYNAME_R 1
+#define HAVE_GETHOSTBYADDR_R 1
+#endif /* !HAVE_GETHOSTBYNAME_R */
+
 #if HAVE_GETHOSTBYNAME_R
 static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
 {
@@ -453,15 +580,8 @@ static int GetHostByNameHelper(const uint8_t* hostname, hostent** entry)
         }
     }
 }
-#endif
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetHostByName(const uint8_t* hostname, HostEntry* entry)
-{
-    return SystemNative_GetHostByName(hostname, entry);
-}
+#endif /* HAVE_GETHOSTBYNAME_R */
+#endif /* !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR */
 
 extern "C" int32_t SystemNative_GetHostByName(const uint8_t* hostname, HostEntry* entry)
 {
@@ -491,7 +611,7 @@ extern "C" int32_t SystemNative_GetHostByName(const uint8_t* hostname, HostEntry
     return PAL_SUCCESS;
 }
 
-#if HAVE_GETHOSTBYADDR_R
+#if !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR && HAVE_GETHOSTBYADDR_R
 static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int type, hostent** entry)
 {
     assert(addr != nullptr);
@@ -531,15 +651,7 @@ static int GetHostByAddrHelper(const uint8_t* addr, const socklen_t addrLen, int
         }
     }
 }
-#endif
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetHostByAddress(const IPAddress* address, HostEntry* entry)
-{
-    return SystemNative_GetHostByAddress(address, entry);
-}
+#endif /* !HAVE_THREAD_SAFE_GETHOSTBYNAME_AND_GETHOSTBYADDR && HAVE_GETHOSTBYADDR_R */
 
 extern "C" int32_t SystemNative_GetHostByAddress(const IPAddress* address, HostEntry* entry)
 {
@@ -671,14 +783,6 @@ static int32_t GetNextIPAddressFromHostEnt(hostent** hostEntry, IPAddress* addre
     return PAL_EAI_SUCCESS;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetNextIPAddress(const HostEntry* hostEntry, void** addressListHandle, IPAddress* endPoint)
-{
-    return SystemNative_GetNextIPAddress(hostEntry, addressListHandle, endPoint);
-}
-
 extern "C" int32_t SystemNative_GetNextIPAddress(const HostEntry* hostEntry, void** addressListHandle, IPAddress* endPoint)
 {
     if (hostEntry == nullptr || addressListHandle == nullptr || endPoint == nullptr)
@@ -697,14 +801,6 @@ extern "C" int32_t SystemNative_GetNextIPAddress(const HostEntry* hostEntry, voi
         default:
             return PAL_EAI_BADARG;
     }
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" void FreeHostEntry(HostEntry* entry)
-{
-    return SystemNative_FreeHostEntry(entry);
 }
 
 extern "C" void SystemNative_FreeHostEntry(HostEntry* entry)
@@ -747,28 +843,6 @@ inline int32_t ConvertGetNameInfoFlagsToPal(int32_t flags)
     }
 
     return outFlags;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetNameInfo(const uint8_t* address,
-    int32_t addressLength,
-    bool isIPv6,
-    uint8_t* host,
-    int32_t hostLength,
-    uint8_t* service,
-    int32_t serviceLength,
-    int32_t flags)
-{
-    return SystemNative_GetNameInfo(address,
-        addressLength,
-        isIPv6,
-        host,
-        hostLength,
-        service,
-        serviceLength,
-        flags);
 }
 
 extern "C" int32_t SystemNative_GetNameInfo(const uint8_t* address,
@@ -816,14 +890,6 @@ extern "C" int32_t SystemNative_GetNameInfo(const uint8_t* address,
     return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetDomainName(uint8_t* name, int32_t nameLength)
-{
-    return SystemNative_GetDomainName(name, nameLength);
-}
-
 extern "C" int32_t SystemNative_GetDomainName(uint8_t* name, int32_t nameLength)
 {
     assert(name != nullptr);
@@ -836,14 +902,6 @@ extern "C" int32_t SystemNative_GetDomainName(uint8_t* name, int32_t nameLength)
 #endif
 
     return getdomainname(reinterpret_cast<char*>(name), namelen);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetHostName(uint8_t* name, int32_t nameLength)
-{
-    return SystemNative_GetHostName(name, nameLength);
 }
 
 extern "C" int32_t SystemNative_GetHostName(uint8_t* name, int32_t nameLength)
@@ -861,14 +919,6 @@ static bool IsInBounds(const TType* base, size_t len, const TField* value)
     auto* baseAddr = reinterpret_cast<const uint8_t*>(base);
     auto* valueAddr = reinterpret_cast<const uint8_t*>(value);
     return valueAddr >= baseAddr && (valueAddr + sizeof(TField)) <= (baseAddr + len);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetIPSocketAddressSizes(int32_t* ipv4SocketAddressSize, int32_t* ipv6SocketAddressSize)
-{
-    return SystemNative_GetIPSocketAddressSizes(ipv4SocketAddressSize, ipv6SocketAddressSize);
 }
 
 extern "C" Error SystemNative_GetIPSocketAddressSizes(int32_t* ipv4SocketAddressSize, int32_t* ipv6SocketAddressSize)
@@ -939,14 +989,6 @@ static bool TryConvertAddressFamilyPalToPlatform(int32_t palAddressFamily, sa_fa
     }
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetAddressFamily(const uint8_t* socketAddress, int32_t socketAddressLen, int32_t* addressFamily)
-{
-    return SystemNative_GetAddressFamily(socketAddress, socketAddressLen, addressFamily);
-}
-
 extern "C" Error SystemNative_GetAddressFamily(const uint8_t* socketAddress, int32_t socketAddressLen, int32_t* addressFamily)
 {
     if (socketAddress == nullptr || addressFamily == nullptr || socketAddressLen < 0)
@@ -968,14 +1010,6 @@ extern "C" Error SystemNative_GetAddressFamily(const uint8_t* socketAddress, int
     return PAL_SUCCESS;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SetAddressFamily(uint8_t* socketAddress, int32_t socketAddressLen, int32_t addressFamily)
-{
-    return SystemNative_SetAddressFamily(socketAddress, socketAddressLen, addressFamily);
-}
-
 extern "C" Error SystemNative_SetAddressFamily(uint8_t* socketAddress, int32_t socketAddressLen, int32_t addressFamily)
 {
     auto* sockAddr = reinterpret_cast<sockaddr*>(socketAddress);
@@ -991,14 +1025,6 @@ extern "C" Error SystemNative_SetAddressFamily(uint8_t* socketAddress, int32_t s
     }
 
     return PAL_SUCCESS;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetPort(const uint8_t* socketAddress, int32_t socketAddressLen, uint16_t* port)
-{
-    return SystemNative_GetPort(socketAddress, socketAddressLen, port);
 }
 
 extern "C" Error SystemNative_GetPort(const uint8_t* socketAddress, int32_t socketAddressLen, uint16_t* port)
@@ -1043,14 +1069,6 @@ extern "C" Error SystemNative_GetPort(const uint8_t* socketAddress, int32_t sock
     }
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SetPort(uint8_t* socketAddress, int32_t socketAddressLen, uint16_t port)
-{
-    return SystemNative_SetPort(socketAddress, socketAddressLen, port);
-}
-
 extern "C" Error SystemNative_SetPort(uint8_t* socketAddress, int32_t socketAddressLen, uint16_t port)
 {
     if (socketAddress == nullptr)
@@ -1093,14 +1111,6 @@ extern "C" Error SystemNative_SetPort(uint8_t* socketAddress, int32_t socketAddr
     }
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetIPv4Address(const uint8_t* socketAddress, int32_t socketAddressLen, uint32_t* address)
-{
-    return SystemNative_GetIPv4Address(socketAddress, socketAddressLen, address);
-}
-
 extern "C" Error SystemNative_GetIPv4Address(const uint8_t* socketAddress, int32_t socketAddressLen, uint32_t* address)
 {
     if (socketAddress == nullptr || address == nullptr || socketAddressLen < 0 ||
@@ -1122,14 +1132,6 @@ extern "C" Error SystemNative_GetIPv4Address(const uint8_t* socketAddress, int32
 
     *address = reinterpret_cast<const sockaddr_in*>(socketAddress)->sin_addr.s_addr;
     return PAL_SUCCESS;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SetIPv4Address(uint8_t* socketAddress, int32_t socketAddressLen, uint32_t address)
-{
-    return SystemNative_SetIPv4Address(socketAddress, socketAddressLen, address);
 }
 
 extern "C" Error SystemNative_SetIPv4Address(uint8_t* socketAddress, int32_t socketAddressLen, uint32_t address)
@@ -1155,15 +1157,6 @@ extern "C" Error SystemNative_SetIPv4Address(uint8_t* socketAddress, int32_t soc
     inetSockAddr->sin_family = AF_INET;
     inetSockAddr->sin_addr.s_addr = address;
     return PAL_SUCCESS;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetIPv6Address(
-    const uint8_t* socketAddress, int32_t socketAddressLen, uint8_t* address, int32_t addressLen, uint32_t* scopeId)
-{
-    return SystemNative_GetIPv6Address(socketAddress, socketAddressLen, address, addressLen, scopeId);
 }
 
 extern "C" Error SystemNative_GetIPv6Address(
@@ -1222,14 +1215,6 @@ SystemNative_SetIPv6Address(uint8_t* socketAddress, int32_t socketAddressLen, ui
     return PAL_SUCCESS;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SetIPv6Address(uint8_t* socketAddress, int32_t socketAddressLen, uint8_t* address, int32_t addressLen, uint32_t scopeId)
-{
-    return SystemNative_SetIPv6Address(socketAddress, socketAddressLen, address, addressLen, scopeId);
-}
-
 static void ConvertMessageHeaderToMsghdr(msghdr* header, const MessageHeader& messageHeader)
 {
     *header = {
@@ -1240,14 +1225,6 @@ static void ConvertMessageHeaderToMsghdr(msghdr* header, const MessageHeader& me
         .msg_control = messageHeader.ControlBuffer,
         .msg_controllen = static_cast<decltype(header->msg_controllen)>(messageHeader.ControlBufferLen),
     };
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t GetControlMessageBufferSize(int32_t isIPv4, int32_t isIPv6)
-{
-    return SystemNative_GetControlMessageBufferSize(isIPv4, isIPv6);
 }
 
 extern "C" int32_t SystemNative_GetControlMessageBufferSize(int32_t isIPv4, int32_t isIPv6)
@@ -1303,12 +1280,20 @@ static int32_t GetIPv6PacketInformation(cmsghdr* controlMessage, IPPacketInforma
     return 1;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isIPv4, IPPacketInformation* packetInfo)
+cmsghdr* GET_CMSG_NXTHDR(msghdr* mhdr, cmsghdr* cmsg)
 {
-    return SystemNative_TryGetIPPacketInformation(messageHeader, isIPv4, packetInfo);
+#ifndef __GLIBC__
+// Tracking issue: #6312
+// In musl-libc, CMSG_NXTHDR typecasts char* to cmsghdr* which causes
+// clang to throw cast-align warning. This is to suppress the warning
+// inline.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
+    return CMSG_NXTHDR(mhdr, cmsg);
+#ifndef __GLIBC__
+#pragma clang diagnostic pop
+#endif
 }
 
 extern "C" int32_t
@@ -1326,7 +1311,7 @@ SystemNative_TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isI
     if (isIPv4 != 0)
     {
         for (; controlMessage != nullptr && controlMessage->cmsg_len > 0;
-             controlMessage = CMSG_NXTHDR(&header, controlMessage))
+             controlMessage = GET_CMSG_NXTHDR(&header, controlMessage))
         {
             if (controlMessage->cmsg_level == IPPROTO_IP && controlMessage->cmsg_type == IP_PKTINFO)
             {
@@ -1337,7 +1322,7 @@ SystemNative_TryGetIPPacketInformation(MessageHeader* messageHeader, int32_t isI
     else
     {
         for (; controlMessage != nullptr && controlMessage->cmsg_len > 0;
-             controlMessage = CMSG_NXTHDR(&header, controlMessage))
+             controlMessage = GET_CMSG_NXTHDR(&header, controlMessage))
         {
             if (controlMessage->cmsg_level == IPPROTO_IPV6 && controlMessage->cmsg_type == IPV6_PKTINFO)
             {
@@ -1361,17 +1346,13 @@ static bool GetMulticastOptionName(int32_t multicastOption, bool isIPv6, int& op
             optionName = isIPv6 ? IPV6_DROP_MEMBERSHIP : IP_DROP_MEMBERSHIP;
             return true;
 
+        case PAL_MULTICAST_IF:
+            optionName = IP_MULTICAST_IF;
+            return true;
+
         default:
             return false;
     }
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetIPv4MulticastOption(int32_t socket, int32_t multicastOption, IPv4MulticastOption* option)
-{
-    return SystemNative_GetIPv4MulticastOption(socket, multicastOption, option);
 }
 
 extern "C" Error SystemNative_GetIPv4MulticastOption(int32_t socket, int32_t multicastOption, IPv4MulticastOption* option)
@@ -1387,7 +1368,11 @@ extern "C" Error SystemNative_GetIPv4MulticastOption(int32_t socket, int32_t mul
         return PAL_EINVAL;
     }
 
+#if HAVE_IP_MREQN
     ip_mreqn opt;
+#else
+    ip_mreq opt;
+#endif
     socklen_t len = sizeof(opt);
     int err = getsockopt(socket, IPPROTO_IP, optionName, &opt, &len);
     if (err != 0)
@@ -1396,17 +1381,14 @@ extern "C" Error SystemNative_GetIPv4MulticastOption(int32_t socket, int32_t mul
     }
 
     *option = {.MulticastAddress = opt.imr_multiaddr.s_addr,
+#if HAVE_IP_MREQN
                .LocalAddress = opt.imr_address.s_addr,
                .InterfaceIndex = opt.imr_ifindex};
+#else
+               .LocalAddress = opt.imr_interface.s_addr,
+               .InterfaceIndex = 0};
+#endif
     return PAL_SUCCESS;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SetIPv4MulticastOption(int32_t socket, int32_t multicastOption, IPv4MulticastOption* option)
-{
-    return SystemNative_SetIPv4MulticastOption(socket, multicastOption, option);
 }
 
 extern "C" Error SystemNative_SetIPv4MulticastOption(int32_t socket, int32_t multicastOption, IPv4MulticastOption* option)
@@ -1422,19 +1404,20 @@ extern "C" Error SystemNative_SetIPv4MulticastOption(int32_t socket, int32_t mul
         return PAL_EINVAL;
     }
 
+#if HAVE_IP_MREQN
     ip_mreqn opt = {.imr_multiaddr = {.s_addr = option->MulticastAddress},
                     .imr_address = {.s_addr = option->LocalAddress},
                     .imr_ifindex = option->InterfaceIndex};
+#else
+    ip_mreq opt = {.imr_multiaddr = {.s_addr = option->MulticastAddress},
+                   .imr_interface = {.s_addr = option->LocalAddress}};
+    if (option->InterfaceIndex != 0)
+    {
+        return PAL_ENOPROTOOPT;
+    }
+#endif
     int err = setsockopt(socket, IPPROTO_IP, optionName, &opt, sizeof(opt));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetIPv6MulticastOption(int32_t socket, int32_t multicastOption, IPv6MulticastOption* option)
-{
-    return SystemNative_GetIPv6MulticastOption(socket, multicastOption, option);
 }
 
 extern "C" Error SystemNative_GetIPv6MulticastOption(int32_t socket, int32_t multicastOption, IPv6MulticastOption* option)
@@ -1461,14 +1444,6 @@ extern "C" Error SystemNative_GetIPv6MulticastOption(int32_t socket, int32_t mul
     ConvertIn6AddrToByteArray(&option->Address.Address[0], NUM_BYTES_IN_IPV6_ADDRESS, opt.ipv6mr_multiaddr);
     option->InterfaceIndex = static_cast<int32_t>(opt.ipv6mr_interface);
     return PAL_SUCCESS;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SetIPv6MulticastOption(int32_t socket, int32_t multicastOption, IPv6MulticastOption* option)
-{
-    return SystemNative_SetIPv6MulticastOption(socket, multicastOption, option);
 }
 
 extern "C" Error SystemNative_SetIPv6MulticastOption(int32_t socket, int32_t multicastOption, IPv6MulticastOption* option)
@@ -1528,14 +1503,6 @@ constexpr int32_t GetMaxLingerTime()
 }
 #endif
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetLingerOption(int32_t socket, LingerOption* option)
-{
-    return SystemNative_GetLingerOption(socket, option);
-}
-
 extern "C" Error SystemNative_GetLingerOption(int32_t socket, LingerOption* option)
 {
     if (option == nullptr)
@@ -1555,14 +1522,6 @@ extern "C" Error SystemNative_GetLingerOption(int32_t socket, LingerOption* opti
     return PAL_SUCCESS;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SetLingerOption(int32_t socket, LingerOption* option)
-{
-    return SystemNative_SetLingerOption(socket, option);
-}
-
 extern "C" Error SystemNative_SetLingerOption(int32_t socket, LingerOption* option)
 {
     if (option == nullptr)
@@ -1578,6 +1537,33 @@ extern "C" Error SystemNative_SetLingerOption(int32_t socket, LingerOption* opti
     linger opt = {.l_onoff = option->OnOff, .l_linger = option->Seconds};
     int err = setsockopt(socket, SOL_SOCKET, LINGER_OPTION_NAME, &opt, sizeof(opt));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
+Error SetTimeoutOption(int32_t socket, int32_t millisecondsTimeout, int optionName)
+{
+    if (millisecondsTimeout < 0)
+    {
+        return PAL_EINVAL;
+    }
+
+    timeval timeout =
+    {
+        timeout.tv_sec = millisecondsTimeout / 1000,
+        timeout.tv_usec = (millisecondsTimeout % 1000) * 1000
+    };
+
+    int err = setsockopt(socket, SOL_SOCKET, optionName, &timeout, sizeof(timeout));
+    return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
+extern "C" Error SystemNative_SetReceiveTimeout(int32_t socket, int32_t millisecondsTimeout)
+{
+    return SetTimeoutOption(socket, millisecondsTimeout, SO_RCVTIMEO);
+}
+
+extern "C" Error SystemNative_SetSendTimeout(int32_t socket, int32_t millisecondsTimeout)
+{
+    return SetTimeoutOption(socket, millisecondsTimeout, SO_SNDTIMEO);
 }
 
 static bool ConvertSocketFlagsPalToPlatform(int32_t palFlags, int& platformFlags)
@@ -1608,14 +1594,6 @@ static int32_t ConvertSocketFlagsPlatformToPal(int platformFlags)
            ((platformFlags & MSG_DONTROUTE) == 0 ? 0 : PAL_MSG_DONTROUTE) |
            ((platformFlags & MSG_TRUNC) == 0 ? 0 : PAL_MSG_TRUNC) |
            ((platformFlags & MSG_CTRUNC) == 0 ? 0 : PAL_MSG_CTRUNC);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error ReceiveMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* received)
-{
-    return SystemNative_ReceiveMessage(socket, messageHeader, flags, received);
 }
 
 extern "C" Error SystemNative_ReceiveMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* received)
@@ -1658,14 +1636,6 @@ extern "C" Error SystemNative_ReceiveMessage(int32_t socket, MessageHeader* mess
     return SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SendMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* sent)
-{
-    return SystemNative_SendMessage(socket, messageHeader, flags, sent);
-}
-
 extern "C" Error SystemNative_SendMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* sent)
 {
     if (messageHeader == nullptr || sent == nullptr || messageHeader->SocketAddressLen < 0 ||
@@ -1695,14 +1665,6 @@ extern "C" Error SystemNative_SendMessage(int32_t socket, MessageHeader* message
     return SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error Accept(int32_t socket, uint8_t* socketAddress, int32_t* socketAddressLen, int32_t* acceptedSocket)
-{
-    return SystemNative_Accept(socket, socketAddress, socketAddressLen, acceptedSocket);
-}
-
 extern "C" Error SystemNative_Accept(int32_t socket, uint8_t* socketAddress, int32_t* socketAddressLen, int32_t* acceptedSocket)
 {
     if (socketAddress == nullptr || socketAddressLen == nullptr || acceptedSocket == nullptr || *socketAddressLen < 0)
@@ -1725,14 +1687,6 @@ extern "C" Error SystemNative_Accept(int32_t socket, uint8_t* socketAddress, int
     return PAL_SUCCESS;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error Bind(int32_t socket, uint8_t* socketAddress, int32_t socketAddressLen)
-{
-    return SystemNative_Bind(socket, socketAddress, socketAddressLen);
-}
-
 extern "C" Error SystemNative_Bind(int32_t socket, uint8_t* socketAddress, int32_t socketAddressLen)
 {
     if (socketAddress == nullptr || socketAddressLen < 0)
@@ -1742,14 +1696,6 @@ extern "C" Error SystemNative_Bind(int32_t socket, uint8_t* socketAddress, int32
 
     int err = bind(socket, reinterpret_cast<sockaddr*>(socketAddress), static_cast<socklen_t>(socketAddressLen));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error Connect(int32_t socket, uint8_t* socketAddress, int32_t socketAddressLen)
-{
-    return SystemNative_Connect(socket, socketAddress, socketAddressLen);
 }
 
 extern "C" Error SystemNative_Connect(int32_t socket, uint8_t* socketAddress, int32_t socketAddressLen)
@@ -1762,14 +1708,6 @@ extern "C" Error SystemNative_Connect(int32_t socket, uint8_t* socketAddress, in
     int err;
     while (CheckInterrupted(err = connect(socket, reinterpret_cast<sockaddr*>(socketAddress), static_cast<socklen_t>(socketAddressLen))));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetPeerName(int32_t socket, uint8_t* socketAddress, int32_t* socketAddressLen)
-{
-    return SystemNative_GetPeerName(socket, socketAddress, socketAddressLen);
 }
 
 extern "C" Error SystemNative_GetPeerName(int32_t socket, uint8_t* socketAddress, int32_t* socketAddressLen)
@@ -1791,14 +1729,6 @@ extern "C" Error SystemNative_GetPeerName(int32_t socket, uint8_t* socketAddress
     return PAL_SUCCESS;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetSockName(int32_t socket, uint8_t* socketAddress, int32_t* socketAddressLen)
-{
-    return SystemNative_GetSockName(socket, socketAddress, socketAddressLen);
-}
-
 extern "C" Error SystemNative_GetSockName(int32_t socket, uint8_t* socketAddress, int32_t* socketAddressLen)
 {
     if (socketAddress == nullptr || socketAddressLen == nullptr || *socketAddressLen < 0)
@@ -1818,26 +1748,10 @@ extern "C" Error SystemNative_GetSockName(int32_t socket, uint8_t* socketAddress
     return PAL_SUCCESS;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error Listen(int32_t socket, int32_t backlog)
-{
-    return SystemNative_Listen(socket, backlog);
-}
-
 extern "C" Error SystemNative_Listen(int32_t socket, int32_t backlog)
 {
     int err = listen(socket, backlog);
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error Shutdown(int32_t socket, int32_t socketShutdown)
-{
-    return SystemNative_Shutdown(socket, socketShutdown);
 }
 
 extern "C" Error SystemNative_Shutdown(int32_t socket, int32_t socketShutdown)
@@ -1863,14 +1777,6 @@ extern "C" Error SystemNative_Shutdown(int32_t socket, int32_t socketShutdown)
 
     int err = shutdown(socket, how);
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetSocketErrorOption(int32_t socket, Error* error)
-{
-    return SystemNative_GetSocketErrorOption(socket, error);
 }
 
 extern "C" Error SystemNative_GetSocketErrorOption(int32_t socket, Error* error)
@@ -2021,21 +1927,29 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
 
                 // case PAL_SO_IP_DONTFRAGMENT:
 
+#ifdef IP_ADD_SOURCE_MEMBERSHIP
                 case PAL_SO_IP_ADD_SOURCE_MEMBERSHIP:
                     optName = IP_ADD_SOURCE_MEMBERSHIP;
                     return true;
+#endif
 
+#ifdef IP_DROP_SOURCE_MEMBERSHIP
                 case PAL_SO_IP_DROP_SOURCE_MEMBERSHIP:
                     optName = IP_DROP_SOURCE_MEMBERSHIP;
                     return true;
+#endif
 
+#ifdef IP_BLOCK_SOURCE
                 case PAL_SO_IP_BLOCK_SOURCE:
                     optName = IP_BLOCK_SOURCE;
                     return true;
+#endif
 
+#ifdef IP_UNBLOCK_SOURCE
                 case PAL_SO_IP_UNBLOCK_SOURCE:
                     optName = IP_UNBLOCK_SOURCE;
                     return true;
+#endif
 
                 case PAL_SO_IP_PKTINFO:
                     optName = IP_PKTINFO;
@@ -2105,14 +2019,6 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
     }
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetSockOpt(int32_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen)
-{
-    return SystemNative_GetSockOpt(socket, socketOptionLevel, socketOptionName, optionValue, optionLen);
-}
-
 extern "C" Error SystemNative_GetSockOpt(
     int32_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen)
 {
@@ -2137,14 +2043,6 @@ extern "C" Error SystemNative_GetSockOpt(
     assert(optLen <= static_cast<socklen_t>(*optionLen));
     *optionLen = static_cast<int32_t>(optLen);
     return PAL_SUCCESS;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error SetSockOpt(int32_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t optionLen)
-{
-    return SystemNative_SetSockOpt(socket, socketOptionLevel, socketOptionName, optionValue, optionLen);
 }
 
 extern "C" Error
@@ -2229,14 +2127,6 @@ static bool TryConvertProtocolTypePalToPlatform(int32_t palProtocolType, int* pl
     }
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error Socket(int32_t addressFamily, int32_t socketType, int32_t protocolType, int32_t* createdSocket)
-{
-    return SystemNative_Socket(addressFamily, socketType, protocolType, createdSocket);
-}
-
 extern "C" Error SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t protocolType, int32_t* createdSocket)
 {
     if (createdSocket == nullptr)
@@ -2267,181 +2157,6 @@ extern "C" Error SystemNative_Socket(int32_t addressFamily, int32_t socketType, 
 
     *createdSocket = socket(platformAddressFamily, platformSocketType, platformProtocolType);
     return *createdSocket != -1 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
-}
-
-const int FD_SETSIZE_BYTES = FD_SETSIZE / 8;
-
-#if !HAVE_FDS_BITS && !HAVE_PRIVATE_FDS_BITS
-const int FD_SETSIZE_UINTS = FD_SETSIZE_BYTES / sizeof(uint32_t);
-#endif
-
-static void ConvertFdSetPlatformToPal(uint32_t* palSet, fd_set& platformSet, int32_t fdCount)
-{
-    assert(fdCount >= 0);
-
-    memset(palSet, 0, FD_SETSIZE_BYTES);
-
-#if !HAVE_FDS_BITS && !HAVE_PRIVATE_FDS_BITS
-    for (int i = 0; i < fdCount; i++)
-    {
-        uint32_t* word = &palSet[i / FD_SETSIZE_UINTS];
-        uint32_t mask = 1 << (i % FD_SETSIZE_UINTS);
-
-        if (FD_ISSET(i, &platformSet))
-        {
-            *word |= mask;
-        }
-        else
-        {
-            *word &= ~mask;
-        }
-    }
-#else
-    size_t bytesToCopy = static_cast<size_t>((fdCount / 8) + ((fdCount % 8) != 0 ? 1 : 0));
-
-    uint8_t* source;
-#if HAVE_FDS_BITS
-    source = reinterpret_cast<uint8_t*>(&platformSet.fds_bits[0]);
-#elif HAVE_PRIVATE_FDS_BITS
-    source = reinterpret_cast<uint8_t*>(&platformSet.__fds_bits[0]);
-#endif
-
-    memcpy(palSet, source, bytesToCopy);
-#endif
-}
-
-static void ConvertFdSetPalToPlatform(fd_set& platformSet, uint32_t* palSet, int32_t fdCount)
-{
-    assert(fdCount >= 0);
-
-    memset(&platformSet, 0, sizeof(platformSet));
-
-#if !HAVE_FDS_BITS && !HAVE_PRIVATE_FDS_BITS
-    for (int i = 0; i < fdCount; i++)
-    {
-        int word = i / FD_SETSIZE_UINTS;
-        int bit = i % FD_SETSIZE_UINTS;
-        if ((palSet[word] & (1 << bit)) == 0)
-        {
-            FD_CLR(i, &platformSet);
-        }
-        else
-        {
-            FD_SET(i, &platformSet);
-        }
-    }
-#else
-
-    size_t bytesToCopy = static_cast<size_t>((fdCount / 8) + ((fdCount % 8) != 0 ? 1 : 0));
-
-    uint8_t* dest;
-#if HAVE_FDS_BITS
-    dest = reinterpret_cast<uint8_t*>(&platformSet.fds_bits[0]);
-#elif HAVE_PRIVATE_FDS_BITS
-    dest = reinterpret_cast<uint8_t*>(&platformSet.__fds_bits[0]);
-#endif
-
-    memcpy(dest, palSet, bytesToCopy);
-#endif
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t FdSetSize()
-{
-    return SystemNative_FdSetSize();
-}
-
-extern "C" int32_t SystemNative_FdSetSize()
-{
-    return FD_SETSIZE;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error Select(int32_t fdCount, uint32_t* readFdSet, uint32_t* writeFdSet, uint32_t* errorFdSet, int32_t microseconds, int32_t* selected)
-{
-    return SystemNative_Select(fdCount, readFdSet, writeFdSet, errorFdSet, microseconds, selected);
-}
-
-extern "C" Error
-SystemNative_Select(int32_t fdCount, uint32_t* readFdSet, uint32_t* writeFdSet, uint32_t* errorFdSet, int32_t microseconds, int32_t* selected)
-{
-    if (selected == nullptr)
-    {
-        return PAL_EFAULT;
-    }
-
-    if (fdCount < 0 || static_cast<uint32_t>(fdCount) >= FD_SETSIZE || microseconds < -1)
-    {
-        return PAL_EINVAL;
-    }
-
-    fd_set* readFds = nullptr;
-    fd_set* writeFds = nullptr;
-    fd_set* errorFds = nullptr;
-    timeval* timeout = nullptr;
-    timeval tv;
-
-    if (readFdSet != nullptr)
-    {
-        readFds = reinterpret_cast<fd_set*>(alloca(sizeof(fd_set)));
-        ConvertFdSetPalToPlatform(*readFds, readFdSet, fdCount);
-    }
-
-    if (writeFdSet != nullptr)
-    {
-        writeFds = reinterpret_cast<fd_set*>(alloca(sizeof(fd_set)));
-        ConvertFdSetPalToPlatform(*writeFds, writeFdSet, fdCount);
-    }
-
-    if (errorFdSet != nullptr)
-    {
-        errorFds = reinterpret_cast<fd_set*>(alloca(sizeof(fd_set)));
-        ConvertFdSetPalToPlatform(*errorFds, errorFdSet, fdCount);
-    }
-
-    if (microseconds != -1)
-    {
-        tv.tv_sec = microseconds / 1000000;
-        tv.tv_usec = microseconds % 1000000;
-        timeout = &tv;
-    }
-
-    int rv;
-    while (CheckInterrupted(rv = select(fdCount, readFds, writeFds, errorFds, timeout)));
-    if (rv == -1)
-    {
-        return SystemNative_ConvertErrorPlatformToPal(errno);
-    }
-
-    if (readFdSet != nullptr)
-    {
-        ConvertFdSetPlatformToPal(readFdSet, *readFds, fdCount);
-    }
-
-    if (writeFdSet != nullptr)
-    {
-        ConvertFdSetPlatformToPal(writeFdSet, *writeFds, fdCount);
-    }
-
-    if (errorFdSet != nullptr)
-    {
-        ConvertFdSetPlatformToPal(errorFdSet, *errorFds, fdCount);
-    }
-
-    *selected = rv;
-    return PAL_SUCCESS;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error GetBytesAvailable(int32_t socket, int32_t* available)
-{
-    return SystemNative_GetBytesAvailable(socket, available);
 }
 
 extern "C" Error SystemNative_GetBytesAvailable(int32_t socket, int32_t* available)
@@ -2536,7 +2251,7 @@ static void ConvertEventEPollToSocketAsync(SocketEvent* sae, epoll_event* epoll)
     uint32_t events = epoll->events;
     if ((events & EPOLLHUP) != 0)
     {
-        events = (events & ~EPOLLHUP) | EPOLLIN | EPOLLOUT;
+        events = (events & static_cast<uint32_t>(~EPOLLHUP)) | EPOLLIN | EPOLLOUT;
     }
 
     *sae = {.Data = reinterpret_cast<uintptr_t>(epoll->data.ptr), .Events = GetSocketEvents(events)};
@@ -2657,8 +2372,13 @@ static Error CloseSocketEventPortInner(int32_t port)
 static Error TryChangeSocketEventRegistrationInner(
     int32_t port, int32_t socket, SocketEvents currentEvents, SocketEvents newEvents, uintptr_t data)
 {
+#ifdef EV_RECEIPT
     const uint16_t AddFlags = EV_ADD | EV_CLEAR | EV_RECEIPT;
     const uint16_t RemoveFlags = EV_DELETE | EV_RECEIPT;
+#else
+    const uint16_t AddFlags = EV_ADD | EV_CLEAR;
+    const uint16_t RemoveFlags = EV_DELETE;
+#endif
 
     assert(currentEvents != newEvents);
 
@@ -2677,7 +2397,7 @@ static Error TryChangeSocketEventRegistrationInner(
                (newEvents & PAL_SA_READ) == 0 ? RemoveFlags : AddFlags,
                0,
                0,
-               reinterpret_cast<void*>(data));
+               GetKeventUdata(data));
     }
 
     if (writeChanged)
@@ -2688,11 +2408,11 @@ static Error TryChangeSocketEventRegistrationInner(
                (newEvents & PAL_SA_WRITE) == 0 ? RemoveFlags : AddFlags,
                0,
                0,
-               reinterpret_cast<void*>(data));
+               GetKeventUdata(data));
     }
 
     int err;
-    while (CheckInterrupted(err = kevent(port, events, i, nullptr, 0, nullptr)));
+    while (CheckInterrupted(err = kevent(port, events, GetKeventNchanges(i), nullptr, 0, nullptr)));
     return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
@@ -2704,7 +2424,7 @@ static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t
 
     auto* events = reinterpret_cast<struct kevent*>(buffer);
     int numEvents;
-    while (CheckInterrupted(numEvents = kevent(port, nullptr, 0, events, *count, nullptr)));
+    while (CheckInterrupted(numEvents = kevent(port, nullptr, 0, events, GetKeventNchanges(*count), nullptr)));
     if (numEvents == -1)
     {
         *count = -1;
@@ -2722,7 +2442,7 @@ static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t
     {
         // This copy is made deliberately to avoid overwriting data.
         struct kevent evt = events[i];
-        buffer[i] = {.Data = reinterpret_cast<uintptr_t>(evt.udata), .Events = GetSocketEvents(evt.filter, evt.flags)};
+        buffer[i] = {.Data = GetSocketEventData(evt.udata), .Events = GetSocketEvents(GetKeventFilter(evt.filter), GetKeventFlags(evt.flags))};
     }
 
     *count = numEvents;
@@ -2732,14 +2452,6 @@ static Error WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32_t
 #else
 #error Asynchronous sockets require epoll or kqueue support.
 #endif
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error CreateSocketEventPort(int32_t* port)
-{
-    return SystemNative_CreateSocketEventPort(port);
-}
 
 extern "C" Error SystemNative_CreateSocketEventPort(int32_t* port)
 {
@@ -2751,25 +2463,9 @@ extern "C" Error SystemNative_CreateSocketEventPort(int32_t* port)
     return CreateSocketEventPortInner(port);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error CloseSocketEventPort(int32_t port)
-{
-    return SystemNative_CloseSocketEventPort(port);
-}
-
 extern "C" Error SystemNative_CloseSocketEventPort(int32_t port)
 {
     return CloseSocketEventPortInner(port);
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error CreateSocketEventBuffer(int32_t count, SocketEvent** buffer)
-{
-    return SystemNative_CreateSocketEventBuffer(count, buffer);
 }
 
 extern "C" Error SystemNative_CreateSocketEventBuffer(int32_t count, SocketEvent** buffer)
@@ -2790,26 +2486,10 @@ extern "C" Error SystemNative_CreateSocketEventBuffer(int32_t count, SocketEvent
     return PAL_SUCCESS;
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error FreeSocketEventBuffer(SocketEvent* buffer)
-{
-    return SystemNative_FreeSocketEventBuffer(buffer);
-}
-
 extern "C" Error SystemNative_FreeSocketEventBuffer(SocketEvent* buffer)
 {
     free(buffer);
     return PAL_SUCCESS;
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error TryChangeSocketEventRegistration(int32_t port, int32_t socket, int32_t currentEvents, int32_t newEvents, uintptr_t data)
-{
-    return SystemNative_TryChangeSocketEventRegistration(port, socket, currentEvents, newEvents, data);
 }
 
 extern "C" Error
@@ -2831,14 +2511,6 @@ SystemNative_TryChangeSocketEventRegistration(int32_t port, int32_t socket, int3
         port, socket, static_cast<SocketEvents>(currentEvents), static_cast<SocketEvents>(newEvents), data);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" Error WaitForSocketEvents(int32_t port, SocketEvent* buffer, int32_t* count)
-{
-    return SystemNative_WaitForSocketEvents(port, buffer, count);
-}
-
 extern "C" Error SystemNative_WaitForSocketEvents(int32_t port, SocketEvent* buffer, int32_t* count)
 {
     if (buffer == nullptr || count == nullptr || *count < 0)
@@ -2849,31 +2521,6 @@ extern "C" Error SystemNative_WaitForSocketEvents(int32_t port, SocketEvent* buf
     return WaitForSocketEventsInner(port, buffer, count);
 }
 
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t PlatformSupportsMultipleConnectAttempts()
-{
-    return SystemNative_PlatformSupportsMultipleConnectAttempts();
-}
-
-extern "C" int32_t SystemNative_PlatformSupportsMultipleConnectAttempts()
-{
-#if HAVE_SUPPORT_FOR_MULTIPLE_CONNECT_ATTEMPTS
-    return 1;
-#else
-    return 0;
-#endif
-}
-
-// TODO: temporarily keeping the un-prefixed signature of this method
-// to keep tests running in CI. This will be removed once the managed assemblies
-// are synced up with the native assemblies.
-extern "C" int32_t PlatformSupportsDualModeIPv4PacketInfo()
-{
-    return SystemNative_PlatformSupportsDualModeIPv4PacketInfo();
-}
-
 extern "C" int32_t SystemNative_PlatformSupportsDualModeIPv4PacketInfo()
 {
 #if HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO
@@ -2881,4 +2528,77 @@ extern "C" int32_t SystemNative_PlatformSupportsDualModeIPv4PacketInfo()
 #else
     return 0;
 #endif
+}
+
+static char* GetNameFromUid(uid_t uid)
+{
+    size_t bufferLength = 512;
+    while (true)
+    {
+        char *buffer = reinterpret_cast<char*>(malloc(bufferLength));
+        if (buffer == nullptr)
+            return nullptr;
+
+        struct passwd pw;
+        struct passwd* result;
+        if (getpwuid_r(uid, &pw, buffer, bufferLength, &result) == 0)
+        {
+            if (result == nullptr)
+            {
+                errno = ENOENT;
+                free(buffer);
+                return nullptr;
+            }
+            else
+            {
+                char* name = strdup(pw.pw_name);
+                free(buffer);
+                return name;
+            }
+        }
+
+        free(buffer);
+        if (errno == ERANGE)
+        {
+            bufferLength *= 2;
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+}
+
+extern "C" char* SystemNative_GetPeerUserName(intptr_t socket)
+{
+    int fd = ToFileDescriptor(socket);
+#ifdef SO_PEERCRED
+    struct ucred creds;
+    socklen_t len = sizeof(creds);
+    return getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &creds, &len) == 0 ?
+        GetNameFromUid(creds.uid) :
+        nullptr;
+#elif HAVE_GETPEEREID
+    uid_t euid, egid;
+    return getpeereid(fd, &euid, &egid) == 0 ?
+        GetNameFromUid(euid) :
+        nullptr;
+#else
+    (void)fd;
+    errno = ENOTSUP;
+    return nullptr;
+#endif
+}
+
+extern "C" void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, int32_t* addressSize)
+{
+    assert(pathOffset != nullptr);
+    assert(pathSize != nullptr);
+    assert(addressSize != nullptr);
+
+    struct sockaddr_un domainSocket;
+
+    *pathOffset = offsetof(struct sockaddr_un, sun_path);
+    *pathSize = sizeof(domainSocket.sun_path);
+    *addressSize = sizeof(domainSocket);
 }

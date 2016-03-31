@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -35,26 +36,26 @@ namespace System.Linq.Expressions.Tests
             return ObjectAssignableTypes().Concat(NonObjectAssignableTypes());
         }
 
-        private static IEnumerable<object[]> TypesData()
+        public static IEnumerable<object[]> TypesData()
         {
             return Types().Select(i => new object[] { i });
         }
 
-        private static IEnumerable<object> ObjectAssignableConstantValues()
+        public static IEnumerable<object> ObjectAssignableConstantValues()
         {
             yield return new object();
             yield return "Hello";
             yield return new Uri("http://example.net/");
         }
 
-        private static IEnumerable<object> NonObjectAssignableConstantValues()
+        public static IEnumerable<object> NonObjectAssignableConstantValues()
         {
             yield return 42;
             yield return 42L;
             yield return DateTime.MinValue;
         }
 
-        private static IEnumerable<object> ConstantValues()
+        public static IEnumerable<object> ConstantValues()
         {
             return NonObjectAssignableConstantValues().Concat(ObjectAssignableConstantValues());
         }

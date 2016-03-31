@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -66,7 +67,7 @@ namespace System.Linq.Expressions.Compiler
 
         /// <summary>
         /// Lambda rewrite result. We need this for inlined lambdas to figure
-        /// out whether we need to guarentee it an empty stack.
+        /// out whether we need to guarantee it an empty stack.
         /// </summary>
         private RewriteAction _lambdaRewrite;
 
@@ -381,7 +382,7 @@ namespace System.Linq.Expressions.Compiler
                 if (expression.Action == RewriteAction.SpillStack &&
                     node.Member is PropertyInfo)
                 {
-                    // Only need to validate propreties because reading a field
+                    // Only need to validate properties because reading a field
                     // is always side-effect free.
                     RequireNotRefInstance(node.Expression);
                 }
@@ -571,7 +572,7 @@ namespace System.Linq.Expressions.Compiler
             UnaryExpression node = (UnaryExpression)expr;
 
             // Throw statement itself does not care about the stack
-            // but it will empty the stack and it may cause stack misbalance
+            // but it will empty the stack and it may cause stack imbalance
             // it so we need to restore stack after unconditional throw to make JIT happy
             // this has an effect of executing Throw on an empty stack.
 
@@ -862,7 +863,7 @@ namespace System.Linq.Expressions.Compiler
                 for (int j = 0; j < testValues.Count; j++)
                 {
                     // All tests execute at the same stack state as the switch.
-                    // This is guarenteed by the compiler (to simplify spilling)
+                    // This is guaranteed by the compiler (to simplify spilling)
                     Result test = RewriteExpression(testValues[j], stack);
                     action |= test.Action;
 
@@ -1009,7 +1010,7 @@ namespace System.Linq.Expressions.Compiler
 
         /// <summary>
         /// Will clone an IList into an array of the same size, and copy
-        /// all vaues up to (and NOT including) the max index
+        /// all values up to (and NOT including) the max index
         /// </summary>
         /// <returns>The cloned array.</returns>
         private static T[] Clone<T>(ReadOnlyCollection<T> original, int max)

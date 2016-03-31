@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
@@ -14,6 +15,9 @@ namespace System.Diagnostics
 {
     public partial class Process : IDisposable
     {
+        private static readonly UTF8Encoding s_utf8NoBom =
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
         /// special mode by enabling the native property SeDebugPrivilege on the current thread.
@@ -243,23 +247,26 @@ namespace System.Diagnostics
             SetProcessId(childPid);
 
             // Configure the parent's ends of the redirection streams.
+            // We use UTF8 encoding without BOM by-default(instead of Console encoding as on Windows)
+            // as there is no good way to get this information from the native layer
+            // and we do not want to take dependency on Console contract.
             if (startInfo.RedirectStandardInput)
             {
                 Debug.Assert(stdinFd >= 0);
                 _standardInput = new StreamWriter(OpenStream(stdinFd, FileAccess.Write),
-                    new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), StreamBufferSize) { AutoFlush = true };
+                    s_utf8NoBom, StreamBufferSize) { AutoFlush = true };
             }
             if (startInfo.RedirectStandardOutput)
             {
                 Debug.Assert(stdoutFd >= 0);
                 _standardOutput = new StreamReader(OpenStream(stdoutFd, FileAccess.Read),
-                    startInfo.StandardOutputEncoding ?? Encoding.UTF8, true, StreamBufferSize);
+                    startInfo.StandardOutputEncoding ?? s_utf8NoBom, true, StreamBufferSize);
             }
             if (startInfo.RedirectStandardError)
             {
                 Debug.Assert(stderrFd >= 0);
                 _standardError = new StreamReader(OpenStream(stderrFd, FileAccess.Read),
-                    startInfo.StandardErrorEncoding ?? Encoding.UTF8, true, StreamBufferSize);
+                    startInfo.StandardErrorEncoding ?? s_utf8NoBom, true, StreamBufferSize);
             }
 
             return true;
@@ -384,6 +391,22 @@ namespace System.Diagnostics
                 throw new Win32Exception();
             }
             return TimeSpan.FromSeconds(ticks / (double)ticksPerSecond);
+        }
+
+        /// <summary>Computes a time based on a number of ticks since boot.</summary>
+        /// <param name="timespanAfterBoot">The timespan since boot.</param>
+        /// <returns>The converted time.</returns>
+        internal static DateTime BootTimeToDateTime(TimeSpan timespanAfterBoot)
+        {
+            // Use the uptime and the current time to determine the absolute boot time
+            DateTime bootTime = DateTime.UtcNow - TimeSpan.FromMilliseconds(Environment.TickCount);
+
+            // And use that to determine the absolute time for timespan.
+            DateTime dt = bootTime + timespanAfterBoot;
+
+            // The return value is expected to be in the local time zone.
+            // It is converted here (rather than starting with DateTime.Now) to avoid DST issues.
+            return dt.ToLocalTime();
         }
 
         /// <summary>Opens a stream around the specified file descriptor and with the specified access.</summary>

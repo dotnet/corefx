@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Reflection
 {
@@ -26,7 +27,7 @@ namespace System.Reflection
         /// <returns></returns>
         public static MethodInfo GetAddMethod(this EventInfo eventInfo, bool nonPublic)
         {
-            Requires.NotNull(eventInfo, "eventInfo");
+            Requires.NotNull(eventInfo, nameof(eventInfo));
             return Helpers.FilterAccessor(eventInfo.AddMethod, nonPublic);
         }
 
@@ -48,7 +49,7 @@ namespace System.Reflection
         /// <returns>A MethodInfo object that was called when the event was raised.</returns>
         public static MethodInfo GetRaiseMethod(this EventInfo eventInfo, bool nonPublic)
         {
-            Requires.NotNull(eventInfo, "eventInfo");
+            Requires.NotNull(eventInfo, nameof(eventInfo));
             return Helpers.FilterAccessor(eventInfo.RaiseMethod, nonPublic);
         }
 
@@ -70,7 +71,7 @@ namespace System.Reflection
         /// <returns>A MethodInfo object representing the method used to remove an event handler delegate from the event source.</returns>
         public static MethodInfo GetRemoveMethod(this EventInfo eventInfo, bool nonPublic)
         {
-            Requires.NotNull(eventInfo, "eventInfo");
+            Requires.NotNull(eventInfo, nameof(eventInfo));
             return Helpers.FilterAccessor(eventInfo.RemoveMethod, nonPublic);
         }
     }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -11,7 +12,7 @@ namespace System.Linq.Parallel.Tests
         private const int GroupFactor = 8;
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -33,14 +34,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_Unordered(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(Sources))]
         public static void GroupBy(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -62,14 +63,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(Sources))]
         public static void GroupBy_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -87,14 +88,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_Unordered_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(Sources))]
         public static void GroupBy_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -112,14 +113,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(Sources))]
         public static void GroupBy_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_CustomComparator(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -141,14 +142,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_Unordered_CustomComparator(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(Sources))]
         // GroupBy doesn't select the first 'identical' key.  Issue #1490
         public static void GroupBy_CustomComparator(Labeled<ParallelQuery<int>> labeled, int count)
         {
@@ -171,14 +172,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(Sources))]
         public static void GroupBy_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_CustomComparator(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ElementSelector(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -197,14 +198,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ElementSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_Unordered_ElementSelector(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(Sources))]
         public static void GroupBy_ElementSelector(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -222,14 +223,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(Sources))]
         public static void GroupBy_ElementSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_ElementSelector(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ElementSelector_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -248,14 +249,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ElementSelector_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_Unordered_ElementSelector_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(Sources))]
         public static void GroupBy_ElementSelector_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -273,14 +274,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(Sources))]
         public static void GroupBy_ElementSelector_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_ElementSelector_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ResultSelector(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -297,14 +298,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ResultSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_Unordered_ResultSelector(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(Sources))]
         public static void GroupBy_ResultSelector(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -321,14 +322,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(Sources))]
         public static void GroupBy_ResultSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_ResultSelector(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 7, 8, 15, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 7, 8, 15, 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ResultSelector_CustomComparator(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -345,14 +346,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ResultSelector_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_Unordered_ResultSelector_CustomComparator(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(Sources))]
         public static void GroupBy_ResultSelector_CustomComparator(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -369,14 +370,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(Sources))]
         public static void GroupBy_ResultSelector_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_ResultSelector_CustomComparator(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 7, 8, 15, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 7, 8, 15, 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ElementSelector_ResultSelector(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -394,14 +395,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void GroupBy_Unordered_ElementSelector_ResultSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_Unordered_ElementSelector_ResultSelector(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor - 1, GroupFactor, GroupFactor * 2 - 1, GroupFactor * 2 }, MemberType = typeof(Sources))]
         public static void GroupBy_ElementSelector_ResultSelector(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -418,7 +419,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 16 }, MemberType = typeof(Sources))]
         public static void GroupBy_ElementSelector_ResultSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GroupBy_ElementSelector_ResultSelector(labeled, count);

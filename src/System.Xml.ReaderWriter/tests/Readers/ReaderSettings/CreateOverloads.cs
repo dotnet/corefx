@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using OLEDB.Test.ModuleCore;
 using System.IO;
@@ -323,17 +324,17 @@ namespace System.Xml.Tests
         [Variation("Null Input")]
         public int v1()
         {
-            CError.Equals(ReaderDelegate.Create((Stream)null), false, "Null Stream doesnt throw error1");
-            CError.Equals(ReaderDelegate.Create((Stream)null, GetSettings(), GetBaseUri()), false, "Null Stream doesnt throw error2");
-            CError.Equals(ReaderDelegate.Create((Stream)null, GetSettings()), false, "Null Stream doesnt throw error3");
+            CError.Equals(ReaderDelegate.Create((Stream)null), false, "Null Stream doesn't throw error1");
+            CError.Equals(ReaderDelegate.Create((Stream)null, GetSettings(), GetBaseUri()), false, "Null Stream doesn't throw error2");
+            CError.Equals(ReaderDelegate.Create((Stream)null, GetSettings()), false, "Null Stream doesn't throw error3");
 
-            CError.Equals(ReaderDelegate.Create((string)null), false, "Null URL doesnt throw error1");
-            CError.Equals(ReaderDelegate.Create((string)null, GetSettings()), false, "Null URL doesnt throw error2");
-            CError.Equals(ReaderDelegate.Create((string)null, GetSettings(), GetParserContext()), false, "Null URL doesnt throw error3");
+            CError.Equals(ReaderDelegate.Create((string)null), false, "Null URL doesn't throw error1");
+            CError.Equals(ReaderDelegate.Create((string)null, GetSettings()), false, "Null URL doesn't throw error2");
+            CError.Equals(ReaderDelegate.Create((string)null, GetSettings(), GetParserContext()), false, "Null URL doesn't throw error3");
 
-            CError.Equals(ReaderDelegate.Create((TextReader)null), false, "Null TextReader doesnt throw error1");
-            CError.Equals(ReaderDelegate.Create((TextReader)null, GetSettings(), GetBaseUri()), false, "Null TextReader doesnt throw error2");
-            CError.Equals(ReaderDelegate.Create((TextReader)null, GetSettings()), false, "Null TextReader doesnt throw error2");
+            CError.Equals(ReaderDelegate.Create((TextReader)null), false, "Null TextReader doesn't throw error1");
+            CError.Equals(ReaderDelegate.Create((TextReader)null, GetSettings(), GetBaseUri()), false, "Null TextReader doesn't throw error2");
+            CError.Equals(ReaderDelegate.Create((TextReader)null, GetSettings()), false, "Null TextReader doesn't throw error2");
 
             return TEST_PASS;
         }

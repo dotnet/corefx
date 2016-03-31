@@ -1,9 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 
 namespace System.Collections.Specialized
 {
@@ -46,10 +45,7 @@ namespace System.Collections.Specialized
 
         private OrderedDictionary(OrderedDictionary dictionary)
         {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException("dictionary");
-            }
+            Debug.Assert(dictionary != null);
 
             _readOnly = true;
             _objectsArray = dictionary._objectsArray;
@@ -169,7 +165,7 @@ namespace System.Collections.Specialized
                 }
                 if (index < 0 || index >= objectsArray.Count)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
                 object key = ((DictionaryEntry)objectsArray[index]).Key;
                 objectsArray[index] = new DictionaryEntry(key, value);
@@ -299,7 +295,7 @@ namespace System.Collections.Specialized
             }
             if (index > Count || index < 0)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             objectsTable.Add(key, value);
             objectsArray.Insert(index, new DictionaryEntry(key, value));
@@ -316,7 +312,7 @@ namespace System.Collections.Specialized
             }
             if (index >= Count || index < 0)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             object key = ((DictionaryEntry)objectsArray[index]).Key;
             objectsArray.RemoveAt(index);
@@ -334,7 +330,7 @@ namespace System.Collections.Specialized
             }
             if (key == null)
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             int index = IndexOfKey(key);
@@ -467,9 +463,9 @@ namespace System.Collections.Specialized
             void ICollection.CopyTo(Array array, int index)
             {
                 if (array == null)
-                    throw new ArgumentNullException("array");
+                    throw new ArgumentNullException(nameof(array));
                 if (index < 0)
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
                 foreach (object o in _objects)
                 {
                     array.SetValue(_isKeys ? ((DictionaryEntry)o).Key : ((DictionaryEntry)o).Value, index);

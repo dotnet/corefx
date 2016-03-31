@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +14,7 @@ namespace System.Reflection
 {
     // Helper class to handle the IL EMIT for the generation of proxies.
     // Much of this code was taken directly from the Silverlight proxy generation.
-    // Differences beteen this and the Silverlight version are:
+    // Differences between this and the Silverlight version are:
     //  1. This version is based on DispatchProxy from NET Native and CoreCLR, not RealProxy in Silverlight ServiceModel.
     //     There are several notable differences between them.
     //  2. Both DispatchProxy and RealProxy permit the caller to ask for a proxy specifying a pair of types:
@@ -420,7 +421,7 @@ namespace System.Reflection
 
             internal void AddInterfaceImpl(Type iface)
             {
-                // If necessary, generate an attribute to permit visiblity
+                // If necessary, generate an attribute to permit visibility
                 // to internal types.
                 _assembly.EnsureTypeIsVisible(iface);
 

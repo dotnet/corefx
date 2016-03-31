@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -1652,7 +1653,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC: An upper-bound inference from a CType U to a CType V is made as follows:
 
             // SPEC:  If V is one of the unfixed Xi then U is added to the set of 
-            // SPEC:   uppper bounds for Xi.
+            // SPEC:   upper bounds for Xi.
 
             if (UpperBoundTypeParameterInference(pSource, pDest))
             {

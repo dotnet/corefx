@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -8,7 +9,7 @@ namespace System.Linq.Parallel.Tests
     public class OfTypeTests
     {
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_Unordered_AllValid(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -22,14 +23,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_Unordered_AllValid_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_Unordered_AllValid(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void OfType_AllValid(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -43,14 +44,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
         public static void OfType_AllValid_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_AllValid(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_Unordered_AllValid_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -61,14 +62,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_Unordered_AllValid_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_Unordered_AllValid_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void OfType_AllValid_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -79,15 +80,15 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
         public static void OfType_AllValid_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_AllValid_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_NoneValid(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -96,16 +97,16 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_NoneValid_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_NoneValid(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_NoneValid_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -114,15 +115,15 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_NoneValid_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_NoneValid_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_Unordered_SomeValid(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -136,14 +137,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_Unordered_SomeValid_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_Unordered_SomeValid(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void OfType_SomeValid(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -157,14 +158,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
         public static void OfType_SomeValid_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_SomeValid(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_Unordered_SomeValid_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -175,14 +176,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(UnorderedSources))]
         public static void OfType_Unordered_SomeValid_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_Unordered_SomeValid_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void OfType_SomeValid_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -193,14 +194,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
         public static void OfType_SomeValid_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_SomeValid_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void OfType_SomeInvalidNull(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -211,14 +212,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
         public static void OfType_SomeInvalidNull_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_SomeInvalidNull(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void OfType_SomeValidNull(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -236,14 +237,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
         public static void OfType_SomeValidNull_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_SomeValidNull(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void OfType_SomeNull(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -261,7 +262,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 256 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 256 }, MemberType = typeof(Sources))]
         public static void OfType_SomeNull_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             OfType_SomeNull(labeled, count);

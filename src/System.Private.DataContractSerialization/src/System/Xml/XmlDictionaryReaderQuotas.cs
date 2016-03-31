@@ -1,7 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------
-//------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.Serialization;
 using System.ComponentModel;
@@ -67,7 +66,7 @@ namespace System.Xml
         public void CopyTo(XmlDictionaryReaderQuotas quotas)
         {
             if (quotas == null)
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("quotas"));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(quotas)));
             if (quotas._readOnly)
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.QuotaCopyReadOnly)));
 
@@ -96,7 +95,7 @@ namespace System.Xml
                 if (_readOnly)
                     throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.QuotaIsReadOnly, "MaxStringContentLength")));
                 if (value <= 0)
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), "value"));
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), nameof(value)));
                 _maxStringContentLength = value;
                 _modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxStringContentLength;
             }
@@ -114,7 +113,7 @@ namespace System.Xml
                 if (_readOnly)
                     throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.QuotaIsReadOnly, "MaxArrayLength")));
                 if (value <= 0)
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), "value"));
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), nameof(value)));
                 _maxArrayLength = value;
                 _modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxArrayLength;
             }
@@ -132,7 +131,7 @@ namespace System.Xml
                 if (_readOnly)
                     throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.QuotaIsReadOnly, "MaxBytesPerRead")));
                 if (value <= 0)
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), "value"));
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), nameof(value)));
 
                 _maxBytesPerRead = value;
                 _modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxBytesPerRead;
@@ -151,7 +150,7 @@ namespace System.Xml
                 if (_readOnly)
                     throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.QuotaIsReadOnly, "MaxDepth")));
                 if (value <= 0)
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), "value"));
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), nameof(value)));
 
                 _maxDepth = value;
                 _modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxDepth;
@@ -170,7 +169,7 @@ namespace System.Xml
                 if (_readOnly)
                     throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.QuotaIsReadOnly, "MaxNameTableCharCount")));
                 if (value <= 0)
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), "value"));
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.QuotaMustBePositive), nameof(value)));
 
                 _maxNameTableCharCount = value;
                 _modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxNameTableCharCount;

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -10,22 +11,46 @@ namespace System.Security.Cryptography.EcDsaOpenSsl.Tests
 {
     public static class EcDsaOpenSslTests
     {
-        // TODO: Issue #4337.  Temporary workaround for tests to pass on CentOS 
-        // where secp224r1 appears to be disabled. 
+        // On CentOS, secp224r1 appears to be disabled. To prevent test failures on that platform, probe for this capability
+        // before depending on it. 
         private static bool ECDsa224Available
         {
             get
             {
-                try
+                using (ECDsaOpenSsl key = new ECDsaOpenSsl())
                 {
-                    using (ECDsaOpenSsl e = new ECDsaOpenSsl(224)) e.Exercise();
-                    return true;
-                }
-                catch (Exception exc)
-                {
-                    return !exc.Message.Contains("unknown group");
+                    KeySizes[] legalKeySizes = key.LegalKeySizes;
+                    return IsLegalSize(224, legalKeySizes);
                 }
             }
+        }
+
+        private static bool IsLegalSize(int size, KeySizes[] legalSizes)
+        {
+            for (int i = 0; i < legalSizes.Length; i++)
+            {
+                KeySizes currentSizes = legalSizes[i];
+
+                // If a cipher has only one valid key size, MinSize == MaxSize and SkipSize will be 0
+                if (currentSizes.SkipSize == 0)
+                {
+                    if (currentSizes.MinSize == size)
+                        return true;
+                }
+                else if (size >= currentSizes.MinSize && size <= currentSizes.MaxSize)
+                {
+                    // If the number is in range, check to see if it's a legal increment above MinSize
+                    int delta = size - currentSizes.MinSize;
+
+                    // While it would be unusual to see KeySizes { 10, 20, 5 } and { 11, 14, 1 }, it could happen.
+                    // So don't return false just because this one doesn't match.
+                    if (delta % currentSizes.SkipSize == 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         [Fact]
@@ -39,7 +64,7 @@ namespace System.Security.Cryptography.EcDsaOpenSsl.Tests
             }
         }
 
-        [ConditionalFact("ECDsa224Available")] // Issue #4337
+        [ConditionalFact(nameof(ECDsa224Available))]
         public static void Ctor224()
         {
             int expectedKeySize = 224;
@@ -75,7 +100,7 @@ namespace System.Security.Cryptography.EcDsaOpenSsl.Tests
             }
         }
 
-        [ConditionalFact("ECDsa224Available")] // Issue #4337
+        [ConditionalFact(nameof(ECDsa224Available))]
         public static void CtorHandle224()
         {
             IntPtr ecKey = Interop.Crypto.EcKeyCreateByCurveName(NID_secp224r1);
@@ -148,7 +173,7 @@ namespace System.Security.Cryptography.EcDsaOpenSsl.Tests
             }
         }
 
-        [ConditionalFact("ECDsa224Available")] // Issue #4337
+        [ConditionalFact(nameof(ECDsa224Available))]
         public static void KeySizeProp()
         {
             using (ECDsaOpenSsl e = new ECDsaOpenSsl())

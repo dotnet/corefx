@@ -1,7 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------
-//------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.Serialization;
 using System.Diagnostics;
@@ -668,6 +667,7 @@ namespace System.Xml
             int byteCount = _length;
             bool insufficientSpaceInCharsArray = false;
 
+            var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
             while (true)
             {
                 while (charCount > 0 && byteCount > 0)
@@ -689,7 +689,6 @@ namespace System.Xml
                 int actualByteCount;
                 int actualCharCount;
 
-                UTF8Encoding encoding = new UTF8Encoding(false, true);
                 try
                 {
                     // If we're asking for more than are possibly available, or more than are truly available then we can return the entire thing
@@ -708,7 +707,7 @@ namespace System.Xml
                         // We use a decoder so we don't error if we fall across a character boundary
                         actualCharCount = decoder.GetChars(bytes, byteOffset, actualByteCount, chars, charOffset);
 
-                        // We might've gotten zero characters though if < 4 bytes were requested because
+                        // We might have gotten zero characters though if < 4 bytes were requested because
                         // codepoints from U+0000 - U+FFFF can be up to 3 bytes in UTF-8, and represented as ONE char
                         // codepoints from U+10000 - U+10FFFF (last Unicode codepoint representable in UTF-8) are represented by up to 4 bytes in UTF-8 
                         //                                    and represented as TWO chars (high+low surrogate)

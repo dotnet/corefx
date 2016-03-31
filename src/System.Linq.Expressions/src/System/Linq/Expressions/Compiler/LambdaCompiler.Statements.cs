@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,11 +21,17 @@ namespace System.Linq.Expressions.Compiler
 
         private void Emit(BlockExpression node, CompilationFlags flags)
         {
+            int count = node.ExpressionCount;
+
+            if (count == 0)
+            {
+                return;
+            }
+
             EnterScope(node);
 
             CompilationFlags emitAs = flags & CompilationFlags.EmitAsTypeMask;
 
-            int count = node.ExpressionCount;
             CompilationFlags tailCall = flags & CompilationFlags.EmitAsTailCallMask;
             for (int index = 0; index < count - 1; index++)
             {
@@ -153,6 +160,27 @@ namespace System.Linq.Expressions.Compiler
         {
             SwitchExpression node = (SwitchExpression)expr;
 
+            if (node.Cases.Count == 0)
+            {
+                // Emit the switch value in case it has side-effects, but as void
+                // since the value is ignored.
+                EmitExpressionAsVoid(node.SwitchValue);
+
+                // Now if there is a default body, it happens unconditionally.
+                if (node.DefaultBody != null)
+                {
+                    EmitExpressionAsType(node.DefaultBody, node.Type, flags);
+                }
+                else
+                {
+                    // If there are no cases and no default then the type must be void.
+                    // Assert that earlier validation caught any exceptions to that.
+                    Debug.Assert(expr.Type == typeof(void));
+                }
+
+                return;
+            }
+
             // Try to emit it as an IL switch. Works for integer types.
             if (TryEmitSwitchInstruction(node, flags))
             {
@@ -204,7 +232,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
         /// <summary>
-        /// Gets the common test test value type of the SwitchExpression.
+        /// Gets the common test value type of the SwitchExpression.
         /// </summary>
         private static Type GetTestValueType(SwitchExpression node)
         {
@@ -371,7 +399,7 @@ namespace System.Linq.Expressions.Compiler
 
                 foreach (ConstantExpression test in node.Cases[i].TestValues)
                 {
-                    // Guarenteed to work thanks to CanOptimizeSwitchType.
+                    // Guaranteed to work thanks to CanOptimizeSwitchType.
                     //
                     // Use decimal because it can hold Int64 or UInt64 without
                     // precision loss or signed/unsigned conversions.

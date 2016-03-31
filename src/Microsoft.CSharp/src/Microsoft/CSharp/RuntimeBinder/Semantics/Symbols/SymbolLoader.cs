@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -315,7 +316,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   interfaces, provided that there is an implicit identity or reference
             //   conversion from S to T.
 
-            // We only have six interfaces to check. IList<T>, IReadOnlyList<T> and their bases bases:
+            // We only have six interfaces to check. IList<T>, IReadOnlyList<T> and their bases:
             // * The base interface of IList<T> is ICollection<T>.
             // * The base interface of ICollection<T> is IEnumerable<T>.
             // * The base interface of IEnumerable<T> is IEnumerable.
@@ -731,7 +732,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // A boxing conversion exists from any non-nullable value type to object,
             // to System.ValueType, and to any interface type implemented by the
-            // non-nullable value type.  Futhermore, an enum type can be converted
+            // non-nullable value type.  Furthermore, an enum type can be converted
             // to the type System.Enum.
 
             // We set the base class of the structs to System.ValueType, System.Enum, etc,

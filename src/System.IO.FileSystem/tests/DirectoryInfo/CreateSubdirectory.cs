@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -79,6 +80,13 @@ namespace System.IO.Tests
 
             result = new DirectoryInfo(TestDirectory).CreateSubdirectory(Path.Combine(GetTestFileName(), "..") + Path.DirectorySeparatorChar);
             Assert.Equal(IOServices.AddTrailingSlashIfNeeded(TestDirectory), result.FullName);
+        }
+
+        [Fact]
+        public void SubDirectoryIsParentDirectory_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory).CreateSubdirectory(Path.Combine(TestDirectory, "..")));
+            Assert.Throws<ArgumentException>(() => new DirectoryInfo(TestDirectory + "/path").CreateSubdirectory("../../path2"));
         }
 
         [Fact]

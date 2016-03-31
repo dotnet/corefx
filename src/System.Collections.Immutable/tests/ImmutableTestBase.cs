@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -137,9 +138,9 @@ namespace System.Collections.Immutable.Tests
         protected static void StructuralEqualityHelper<TCollection, TElement>(TCollection objectUnderTest, TElement additionalItem, Func<TCollection, IEnumerable<TElement>, bool> equalsStructurally)
             where TCollection : class, IEnumerable<TElement>
         {
-            Requires.NotNull(objectUnderTest, "objectUnderTest");
-            Requires.Argument(objectUnderTest.Count() >= 2, "objectUnderTest", "Collection must contain at least two elements.");
-            Requires.NotNull(equalsStructurally, "equalsStructurally");
+            Requires.NotNull(objectUnderTest, nameof(objectUnderTest));
+            Requires.Argument(objectUnderTest.Count() >= 2, nameof(objectUnderTest), "Collection must contain at least two elements.");
+            Requires.NotNull(equalsStructurally, nameof(equalsStructurally));
 
             var structuralEquatableUnderTest = objectUnderTest as IStructuralEquatable;
             var enumerableUnderTest = (IEnumerable<TElement>)objectUnderTest;
@@ -202,7 +203,7 @@ namespace System.Collections.Immutable.Tests
 
             internal NonGenericEnumerableWrapper(IEnumerable enumerable)
             {
-                Requires.NotNull(enumerable, "enumerable");
+                Requires.NotNull(enumerable, nameof(enumerable));
                 _enumerable = enumerable;
             }
 

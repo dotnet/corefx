@@ -15,36 +15,37 @@ wait_on_pids()
 
 usage()
 {
-    echo "Runs .NET CoreFX tests on FreeBSD, Linux or OSX"
+    echo "Runs .NET CoreFX tests on FreeBSD, Linux, NetBSD or OSX"
     echo "usage: run-test [options]"
     echo
     echo "Input sources:"
     echo "    --coreclr-bins <location>         Location of root of the binaries directory"
-    echo "                                      containing the FreeBSD, Linux or OSX coreclr build"
+    echo "                                      containing the FreeBSD, Linux, NetBSD or OSX coreclr build"
     echo "                                      default: <repo_root>/bin/Product/<OS>.x64.<ConfigurationGroup>"
     echo "    --mscorlib-bins <location>        Location of the root binaries directory containing"
-    echo "                                      the FreeBSD, Linux or OSX mscorlib.dll"
+    echo "                                      the FreeBSD, Linux, NetBSD or OSX mscorlib.dll"
     echo "                                      default: <repo_root>/bin/Product/<OS>.x64.<ConfigurationGroup>"
     echo "    --corefx-tests <location>         Location of the root binaries location containing"
     echo "                                      the tests to run"
     echo "                                      default: <repo_root>/bin/tests/<OS>.AnyCPU.<ConfigurationGroup>"
-    echo "    --corefx-native-bins <location>   Location of the FreeBSD, Linux or OSX native corefx binaries"
+    echo "    --corefx-native-bins <location>   Location of the FreeBSD, Linux, NetBSD or OSX native corefx binaries"
     echo "                                      default: <repo_root>/bin/<OS>.x64.<ConfigurationGroup>"
     echo
     echo "Flavor/OS options:"
     echo "    --configurationGroup <config>     ConfigurationGroup to run (Debug/Release)"
     echo "                                      default: Debug"
-    echo "    --os <os>                         OS to run (FreeBSD, Linux or OSX)"
+    echo "    --os <os>                         OS to run (FreeBSD, Linux, NetBSD or OSX)"
     echo "                                      default: detect current OS"
     echo
     echo "Execution options:"
-    echo "    --restrict-proj <regex>       Run test projects that match regex"
-    echo "                                  default: .* (all projects)"
+    echo "    --restrict-proj <regex>           Run test projects that match regex"
+    echo "                                      default: .* (all projects)"
+    echo "    --useServerGC                     Enable Server GC for this test run"
     echo
     echo "Runtime Code Coverage options:"
     echo "    --coreclr-coverage                Optional argument to get coreclr code coverage reports"
     echo "    --coreclr-objs <location>         Location of root of the object directory"
-    echo "                                      containing the FreeBSD, Linux or OSX coreclr build"
+    echo "                                      containing the FreeBSD, Linux, NetBSD or OSX coreclr build"
     echo "                                      default: <repo_root>/bin/obj/<OS>.x64.<ConfigurationGroup"
     echo "    --coreclr-src <location>          Location of root of the directory"
     echo "                                      containing the coreclr source files"
@@ -70,6 +71,10 @@ case $OSName in
         OS=Linux
         ;;
 
+    NetBSD)
+        OS=NetBSD
+        ;;
+
     *)
         echo "Unsupported OS $OSName detected, configuring as if for Linux"
         OS=Linux
@@ -78,7 +83,6 @@ esac
 # Misc defaults
 TestSelection=".*"
 TestsFailed=0
-OverlayDir="$ProjectRoot/bin/tests/$OS.AnyCPU.$ConfigurationGroup/TestOverlay/"
 
 create_test_overlay()
 {
@@ -158,8 +162,16 @@ runtest()
 
   if [ ! -d "$dirName" ] || [ ! -f "$dirName/$testDllName" ]
   then
-    echo "error: Did not find corresponding test dll for $testProject at $dirName/$testDllName"
-    exit 1
+    dirName="$AnyOsTestDir/$fileNameWithoutExtension/dnxcore50"
+    if [ ! -d "$dirName" ] || [ ! -f "$dirName/$testDllName" ]
+    then
+      dirName="$UnixTestDir/$fileNameWithoutExtension/dnxcore50"
+      if [ ! -d "$dirName" ] || [ ! -f "$dirName/$testDllName" ]
+      then
+        echo "error: Did not find corresponding test dll for $testProject"
+        exit 1
+      fi
+    fi
   fi
 
   copy_test_overlay $dirName
@@ -179,9 +191,9 @@ runtest()
 
   echo
   echo "Running tests in $dirName"
-  echo "./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing -notrait category=OuterLoop -notrait category=$xunitOSCategory" -notrait Benchmark=true
+  echo "./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing $OuterLoop -notrait category=$xunitOSCategory" -notrait Benchmark=true
   echo
-  ./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing -notrait category=OuterLoop -notrait category=$xunitOSCategory -notrait Benchmark=true
+  ./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing $OuterLoop -notrait category=$xunitOSCategory -notrait Benchmark=true
   exitCode=$?
 
   if [ $exitCode -ne 0 ]
@@ -195,7 +207,7 @@ runtest()
 
 coreclr_code_coverage()
 {
-  if [ ! "$OS" == "FreeBSD" ] && [ ! "$OS" == "Linux" ] && [ ! "$OS" == "OSX" ]
+  if [ ! "$OS" == "FreeBSD" ] && [ ! "$OS" == "Linux" ] && [ ! "$OS" == "NetBSD" ] && [ ! "$OS" == "OSX" ]
   then
       echo "error: Code Coverage not supported on $OS"
       exit 1
@@ -246,6 +258,9 @@ coreclr_code_coverage()
 
 # Parse arguments
 
+((serverGC = 0))
+OuterLoop="-notrait category=outerloop"
+
 while [[ $# > 0 ]]
 do
     opt="$1"
@@ -283,11 +298,21 @@ do
         --coreclr-src)
         CoreClrSrc=$2
         ;;
+        --useServerGC)
+        ((serverGC = 1))
+        ;;
+        --outerloop)
+        OuterLoop=""
+        ;;
         *)
         ;;
     esac
     shift
 done
+
+OverlayDir="$ProjectRoot/bin/tests/$OS.AnyCPU.$ConfigurationGroup/TestOverlay/"
+AnyOsTestDir="$ProjectRoot/bin/tests/AnyOS.AnyCPU.$ConfigurationGroup"
+UnixTestDir="$ProjectRoot/bin/tests/Unix.AnyCPU.$ConfigurationGroup"
 
 # Compute paths to the binaries if they haven't already been computed
 
@@ -319,15 +344,23 @@ then
     exit 1
 fi
 
-if [ ! "$OS" == "FreeBSD" ] && [ ! "$OS" == "Linux" ] && [ ! "$OS" == "OSX" ]
+if [ ! "$OS" == "FreeBSD" ] && [ ! "$OS" == "Linux" ] && [ ! "$OS" == "NetBSD" ] && [ ! "$OS" == "OSX" ]
 then
-    echo "error: OS should be FreeBSD, Linux or OSX"
+    echo "error: OS should be FreeBSD, Linux, NetBSD or OSX"
     exit 1
 fi
 
 if [ "$CoreClrObjs" == "" ]
 then
     CoreClrObjs="$ProjectRoot/bin/obj/$OS.x64.$ConfigurationGroup"
+fi
+
+export CORECLR_SERVER_GC="$serverGC"
+export PAL_OUTPUTDEBUGSTRING="1"
+
+if [ "$LANG" == "" ]
+then
+    export LANG="en_US.UTF-8"
 fi
 
 
@@ -337,7 +370,13 @@ create_test_overlay
 
 TestsFailed=0
 numberOfProcesses=0
-maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
+
+if [ `uname` = "NetBSD" ]; then
+  maxProcesses=$(($(getconf NPROCESSORS_ONLN)+1))
+else
+  maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
+fi
+
 TestProjects=($(find . -regex ".*/src/.*/tests/.*\.Tests\.csproj"))
 for file in ${TestProjects[@]}
 do
@@ -368,4 +407,3 @@ else
 fi
 
 exit $TestsFailed
-

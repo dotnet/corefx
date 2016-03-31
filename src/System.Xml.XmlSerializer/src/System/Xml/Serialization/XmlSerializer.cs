@@ -1,8 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------------------------
-// </copyright>
-//------------------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 namespace System.Xml.Serialization
@@ -154,7 +152,7 @@ namespace System.Xml.Serialization
         public XmlSerializer(Type type, string defaultNamespace)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
 #if NET_NATIVE
             this.DefaultNamespace = defaultNamespace;
@@ -209,7 +207,7 @@ namespace System.Xml.Serialization
             throw new PlatformNotSupportedException();
 #else
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             XmlReflectionImporter importer = new XmlReflectionImporter(overrides, defaultNamespace);
             if (extraTypes != null)
@@ -231,7 +229,7 @@ namespace System.Xml.Serialization
         internal static TempAssembly GenerateTempAssembly(XmlMapping xmlMapping, Type type, string defaultNamespace)
         {
             if (xmlMapping == null)
-                throw new ArgumentNullException("xmlMapping");
+                throw new ArgumentNullException(nameof(xmlMapping));
             return new TempAssembly(new XmlMapping[] { xmlMapping }, new Type[] { type }, defaultNamespace, null, null);
         }
 

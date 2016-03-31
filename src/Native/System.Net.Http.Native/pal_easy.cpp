@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_easy.h"
@@ -7,6 +8,7 @@
 #include <assert.h>
 
 static_assert(PAL_CURLOPT_INFILESIZE == CURLOPT_INFILESIZE, "");
+static_assert(PAL_CURLOPT_SSLVERSION == CURLOPT_SSLVERSION, "");
 static_assert(PAL_CURLOPT_VERBOSE == CURLOPT_VERBOSE, "");
 static_assert(PAL_CURLOPT_NOBODY == CURLOPT_NOBODY, "");
 static_assert(PAL_CURLOPT_UPLOAD == CURLOPT_UPLOAD, "");
@@ -14,7 +16,9 @@ static_assert(PAL_CURLOPT_POST == CURLOPT_POST, "");
 static_assert(PAL_CURLOPT_FOLLOWLOCATION == CURLOPT_FOLLOWLOCATION, "");
 static_assert(PAL_CURLOPT_PROXYPORT == CURLOPT_PROXYPORT, "");
 static_assert(PAL_CURLOPT_POSTFIELDSIZE == CURLOPT_POSTFIELDSIZE, "");
+static_assert(PAL_CURLOPT_SSL_VERIFYPEER == CURLOPT_SSL_VERIFYPEER, "");
 static_assert(PAL_CURLOPT_MAXREDIRS == CURLOPT_MAXREDIRS, "");
+static_assert(PAL_CURLOPT_SSL_VERIFYHOST == CURLOPT_SSL_VERIFYHOST, "");
 static_assert(PAL_CURLOPT_HTTP_VERSION == CURLOPT_HTTP_VERSION, "");
 static_assert(PAL_CURLOPT_NOSIGNAL == CURLOPT_NOSIGNAL, "");
 static_assert(PAL_CURLOPT_PROXYTYPE == CURLOPT_PROXYTYPE, "");
@@ -36,8 +40,10 @@ static_assert(PAL_CURLOPT_PASSWORD == CURLOPT_PASSWORD, "");
 
 static_assert(PAL_CURLE_OK == CURLE_OK, "");
 static_assert(PAL_CURLE_UNSUPPORTED_PROTOCOL == CURLE_UNSUPPORTED_PROTOCOL, "");
+static_assert(PAL_CURLE_FAILED_INIT == CURLE_FAILED_INIT, "");
 static_assert(PAL_CURLE_NOT_BUILT_IN == CURLE_NOT_BUILT_IN, "");
 static_assert(PAL_CURLE_COULDNT_RESOLVE_HOST == CURLE_COULDNT_RESOLVE_HOST, "");
+static_assert(PAL_CURLE_OUT_OF_MEMORY == CURLE_OUT_OF_MEMORY, "");
 static_assert(PAL_CURLE_ABORTED_BY_CALLBACK == CURLE_ABORTED_BY_CALLBACK, "");
 static_assert(PAL_CURLE_UNKNOWN_OPTION == CURLE_UNKNOWN_OPTION, "");
 
@@ -48,6 +54,8 @@ static_assert(PAL_CURL_HTTP_VERSION_1_1 == CURL_HTTP_VERSION_1_1, "");
 static_assert(PAL_CURL_HTTP_VERSION_2_0 == CURL_HTTP_VERSION_2_0, "");
 #endif
 
+static_assert(PAL_CURL_SSLVERSION_TLSv1 == CURL_SSLVERSION_TLSv1, "");
+
 static_assert(PAL_CURLINFO_PRIVATE == CURLINFO_PRIVATE, "");
 static_assert(PAL_CURLINFO_HTTPAUTH_AVAIL == CURLINFO_HTTPAUTH_AVAIL, "");
 
@@ -55,6 +63,7 @@ static_assert(PAL_CURLAUTH_None == CURLAUTH_NONE, "");
 static_assert(PAL_CURLAUTH_Basic == CURLAUTH_BASIC, "");
 static_assert(PAL_CURLAUTH_Digest == CURLAUTH_DIGEST, "");
 static_assert(PAL_CURLAUTH_Negotiate == CURLAUTH_GSSNEGOTIATE, "");
+static_assert(PAL_CURLAUTH_NTLM == CURLAUTH_NTLM, "");
 
 static_assert(PAL_CURLPROXY_HTTP == CURLPROXY_HTTP, "");
 
@@ -68,6 +77,16 @@ static_assert(PAL_CURL_SEEKFUNC_CANTSEEK == CURL_SEEKFUNC_CANTSEEK, "");
 static_assert(PAL_CURL_READFUNC_ABORT == CURL_READFUNC_ABORT, "");
 static_assert(PAL_CURL_READFUNC_PAUSE == CURL_READFUNC_PAUSE, "");
 static_assert(PAL_CURL_WRITEFUNC_PAUSE == CURL_WRITEFUNC_PAUSE, "");
+
+static_assert(PAL_CURLINFO_TEXT == CURLINFO_TEXT, "");
+static_assert(PAL_CURLINFO_HEADER_IN == CURLINFO_HEADER_IN, "");
+static_assert(PAL_CURLINFO_HEADER_OUT == CURLINFO_HEADER_OUT, "");
+static_assert(PAL_CURLINFO_DATA_IN == CURLINFO_DATA_IN, "");
+static_assert(PAL_CURLINFO_DATA_OUT == CURLINFO_DATA_OUT, "");
+static_assert(PAL_CURLINFO_SSL_DATA_IN == CURLINFO_SSL_DATA_IN, "");
+static_assert(PAL_CURLINFO_SSL_DATA_OUT == CURLINFO_SSL_DATA_OUT, "");
+
+static_assert(PAL_CURL_MAX_HTTP_HEADER == CURL_MAX_HTTP_HEADER, "");
 
 extern "C" CURL* HttpNative_EasyCreate()
 {
@@ -145,6 +164,9 @@ struct CallbackHandle
 
     SslCtxCallback sslCtxCallback;
     void* sslUserPointer;
+
+    DebugCallback debugCallback;
+    void* debugUserPointer;
 };
 
 static inline void EnsureCallbackHandle(CallbackHandle** callbackHandle)
@@ -253,6 +275,31 @@ extern "C" int32_t HttpNative_RegisterSslCtxCallback(CURL* curl,
 
     curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, handle);
     return curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &ssl_ctx_callback);
+}
+
+static int debug_callback(CURL* curl, curl_infotype type, char* data, size_t size, void* userPointer)
+{
+    assert(userPointer != nullptr);
+    CallbackHandle* handle = static_cast<CallbackHandle*>(userPointer);
+    handle->debugCallback(curl, static_cast<PAL_CurlInfoType>(type), data, size, handle->debugUserPointer);
+    return 0;
+}
+
+extern "C" int32_t HttpNative_RegisterDebugCallback(CURL* curl, 
+                                                    DebugCallback callback, 
+                                                    void* userPointer, 
+                                                    CallbackHandle** callbackHandle)
+{
+    EnsureCallbackHandle(callbackHandle);
+
+    CallbackHandle* handle = *callbackHandle;
+    handle->debugCallback = callback;
+    handle->debugUserPointer = userPointer;
+
+    CURLcode rv = curl_easy_setopt(curl, CURLOPT_DEBUGDATA, handle);
+    return rv == CURLE_OK ? 
+        curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, &debug_callback) : 
+        rv;
 }
 
 extern "C" void HttpNative_FreeCallbackHandle(CallbackHandle* callbackHandle)

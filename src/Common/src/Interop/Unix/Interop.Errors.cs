@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -11,7 +12,7 @@ internal static partial class Interop
     {
         // These values were defined in src/Native/System.Native/fxerrno.h
         //
-        // They compare against values obtaied via Interop.Sys.GetLastError() not Marshal.GetLastWin32Error()
+        // They compare against values obtained via Interop.Sys.GetLastError() not Marshal.GetLastWin32Error()
         // which obtains the raw errno that varies between unixes. The strong typing as an enum is meant to
         // prevent confusing the two. Casting to or from int is suspect. Use GetLastErrorInfo() if you need to
         // correlate these to the underlying platform values or obtain the corresponding error message.
@@ -74,13 +75,11 @@ internal static partial class Interop
         ENOTCONN         = 0x10038,           // The socket is not connected.
         ENOTDIR          = 0x10039,           // Not a directory or a symbolic link to a directory.
         ENOTEMPTY        = 0x1003A,           // Directory not empty.
-        ENOTRECOVERABLE  = 0x1003B,           // State not recoverable.
         ENOTSOCK         = 0x1003C,           // Not a socket.
         ENOTSUP          = 0x1003D,           // Not supported (same value as EOPNOTSUP).
         ENOTTY           = 0x1003E,           // Inappropriate I/O control operation.
         ENXIO            = 0x1003F,           // No such device or address.
         EOVERFLOW        = 0x10040,           // Value too large to be stored in data type.
-        EOWNERDEAD       = 0x10041,           // Previous owner died.
         EPERM            = 0x10042,           // Operation not permitted.
         EPIPE            = 0x10043,           // Broken pipe.
         EPROTO           = 0x10044,           // Protocol error.
@@ -94,12 +93,17 @@ internal static partial class Interop
         ETIMEDOUT        = 0x1004D,           // Connection timed out.
         ETXTBSY          = 0x1004E,           // Text file busy.
         EXDEV            = 0x1004F,           // Cross-device link.
+        ESOCKTNOSUPPORT  = 0x1005E,           // Socket type not supported.
+        EPFNOSUPPORT     = 0x10060,           // Protocol family not supported.
+        ESHUTDOWN        = 0x1006C,           // Socket shutdown.
+        EHOSTDOWN        = 0x10070,           // Host is down.
+        ENODATA          = 0x10071,           // No data available.
 
         // POSIX permits these to have the same value and we make them always equal so
         // that CoreFX cannot introduce a dependency on distinguishing between them that
         // would not work on all platforms.
-        EOPNOTSUPP      = ENOTSUP,            // Operation not supported on socket
-        EWOULDBLOCK     = EAGAIN,             // Operation would block
+        EOPNOTSUPP      = ENOTSUP,            // Operation not supported on socket.
+        EWOULDBLOCK     = EAGAIN,             // Operation would block.
     }
 
 

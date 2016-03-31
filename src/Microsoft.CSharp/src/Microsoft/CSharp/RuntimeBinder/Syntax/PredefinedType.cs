@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace Microsoft.CSharp.RuntimeBinder.Syntax
 {
@@ -16,7 +17,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Syntax
         PT_BOOL,
 
         // "simple" types are certain types that the compiler knows about for conversion and operator purposes.ses.
-        // Keep these first so that we can build conversion tables on their ordinals... Don't change the orderder
+        // Keep these first so that we can build conversion tables on their ordinals... Don't change the orderer
         // of the simple types because it will mess up conversion tables.
         // The following Quasi-Simple types are considered simple, except they are non-CLS compliant
         PT_SBYTE,
@@ -111,7 +112,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Syntax
         // Used to enable wrapped exceptions
         PT_RUNTIMECOMPATIBILITY,
 
-        // Used for friend assmeblies
+        // Used for friend assemblies
         PT_FRIENDASSEMBLY,
 
         // Used to hide compiler-generated code from the debugger

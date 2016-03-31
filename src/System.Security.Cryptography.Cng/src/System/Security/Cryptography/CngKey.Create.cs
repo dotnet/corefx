@@ -1,9 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 
@@ -36,7 +33,7 @@ namespace System.Security.Cryptography
         public static CngKey Create(CngAlgorithm algorithm, string keyName, CngKeyCreationParameters creationParameters)
         {
             if (algorithm == null)
-                throw new ArgumentNullException("algorithm");
+                throw new ArgumentNullException(nameof(algorithm));
 
             if (creationParameters == null)
                 creationParameters = new CngKeyCreationParameters();

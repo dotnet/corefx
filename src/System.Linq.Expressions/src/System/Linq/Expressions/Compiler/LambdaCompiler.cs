@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -84,7 +85,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
         /// <summary>
-        /// Creates a lambda compiler that will compile into the provided Methodbuilder
+        /// Creates a lambda compiler that will compile into the provided MethodBuilder
         /// </summary>
         private LambdaCompiler(AnalyzedTree tree, LambdaExpression lambda, MethodBuilder method)
         {
@@ -276,7 +277,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
         /// <summary>
-        /// Creates an unitialized field suitable for private implementation details
+        /// Creates an uninitialized field suitable for private implementation details
         /// Works with DynamicMethods or TypeBuilders.
         /// </summary>
         private MemberExpression CreateLazyInitializedField<T>(string name)

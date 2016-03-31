@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Threading.Tasks
 {
@@ -27,7 +28,7 @@ namespace System.Threading.Tasks
         {
             if (task == null)
             {
-                throw new ArgumentNullException("task");
+                throw new ArgumentNullException(nameof(task));
             }
 
             // Creates a proxy Task and hooks up the logic to have it represent the task.Result
@@ -55,7 +56,7 @@ namespace System.Threading.Tasks
         {
             if (task == null)
             {
-                throw new ArgumentNullException("task");
+                throw new ArgumentNullException(nameof(task));
             }
 
             // Creates a proxy Task<TResult> and hooks up the logic to have it represent the task.Result

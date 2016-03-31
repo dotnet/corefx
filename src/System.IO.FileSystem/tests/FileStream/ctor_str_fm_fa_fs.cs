@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -43,7 +44,7 @@ namespace System.IO.Tests
             using (FileStream fs = CreateFileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete))
             { }
 
-            // just check that the inputs are accepted, actual sharing varies by platform so we seperate the behavior testing
+            // just check that the inputs are accepted, actual sharing varies by platform so we separate the behavior testing
             foreach(FileShare share in shares)
             {
                 using (FileStream fs = CreateFileStream(fileName, FileMode.Open, FileAccess.ReadWrite, share))
@@ -60,7 +61,7 @@ namespace System.IO.Tests
         [Fact]
         public void FileShareCreate()
         {
-            // just check that the inputs are accepted, actual sharing varies by platform so we seperate the behavior testing
+            // just check that the inputs are accepted, actual sharing varies by platform so we separate the behavior testing
             int i = 0;
             foreach (FileShare share in shares)
             {
@@ -75,7 +76,7 @@ namespace System.IO.Tests
         [Fact]
         public void FileShareOpenOrCreate()
         {
-            // just check that the inputs are accepted, actual sharing varies by platform so we seperate the behavior testing
+            // just check that the inputs are accepted, actual sharing varies by platform so we separate the behavior testing
             int i = 0;
             foreach (FileShare share in shares)
             {

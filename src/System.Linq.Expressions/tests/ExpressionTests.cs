@@ -1,5 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -138,7 +139,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<InvalidOperationException>(() => exp.NodeType);
         }
 
-        [Theory, TestOrder(1), MemberData("AllNodeTypesPlusSomeInvalid")]
+        [Theory, TestOrder(1), MemberData(nameof(AllNodeTypesPlusSomeInvalid))]
         public void NodeTypeFromConstructor(ExpressionType nodeType)
         {
             Assert.Equal(nodeType, new ObsoleteIncompleteExpressionOverride(nodeType, typeof(int)).NodeType);
@@ -158,7 +159,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<InvalidOperationException>(() => exp.Type);
         }
 
-        [Theory, TestOrder(1), MemberData("SomeTypes")]
+        [Theory, TestOrder(1), MemberData(nameof(SomeTypes))]
         public void TypeFromConstructor(Type type)
         {
             Assert.Equal(type, new ObsoleteIncompleteExpressionOverride(ExpressionType.Constant, type).Type);
@@ -360,7 +361,7 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Theory, MemberData("UnreadableExpressionData")]
+        [Theory, MemberData(nameof(UnreadableExpressionData))]
         public void ConfirmCannotRead(Expression unreadableExpression)
         {
             if (unreadableExpression == null)
@@ -375,7 +376,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(void), UnreadableExpressions));
         }
 
-        [Theory, MemberData("UnwritableExpressionData")]
+        [Theory, MemberData(nameof(UnwritableExpressionData))]
         public void ConfirmCannotWrite(Expression unwritableExpression)
         {
             if (unwritableExpression == null)
@@ -384,7 +385,7 @@ namespace System.Linq.Expressions.Tests
                 Assert.Throws<ArgumentException>("left", () => Expression.Assign(unwritableExpression, Expression.Constant(0)));
         }
 
-        [Theory, MemberData("WritableExpressionData")]
+        [Theory, MemberData(nameof(WritableExpressionData))]
         public void ConfirmCanWrite(Expression writableExpression)
         {
             Expression.Assign(writableExpression, Expression.Default(writableExpression.Type));

@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Threading;
 
@@ -15,7 +15,7 @@ namespace System.Buffers
     {
         private int _index;
         private readonly T[][] _data;
-        private readonly int _bufferLength;
+        internal readonly int _bufferLength;
         private SpinLock _lock;
         private bool _exhaustedEventSent;
         private readonly int _poolId;
@@ -25,7 +25,7 @@ namespace System.Buffers
         /// </summary>
         internal DefaultArrayPoolBucket(int bufferLength, int numberOfBuffers, int poolId)
         {
-            _lock = new SpinLock();
+            _lock = new SpinLock(Debugger.IsAttached); // only enable thread tracking if debugger is attached; it adds non-trivial overheads to Enter/Exit
             _data = new T[numberOfBuffers][];
             _bufferLength = bufferLength;
             _exhaustedEventSent = false;
@@ -88,6 +88,10 @@ namespace System.Buffers
         /// </summary>
         internal void Return(T[] buffer)
         {
+            // Check to see if the buffer is the correct size for this bucket
+            if (buffer.Length != _bufferLength)
+                throw new ArgumentException(SR.ArgumentException_BufferNotFromPool, nameof(buffer));
+
             // Use a SpinLock since it is super lightweight
             // and our lock is very short lived. Wrap in try-finally
             // to protect against thread-aborts

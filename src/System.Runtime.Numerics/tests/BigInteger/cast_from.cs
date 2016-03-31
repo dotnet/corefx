@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using Xunit;
@@ -478,7 +479,7 @@ namespace System.Numerics.Tests
             VerifySingleExplicitCastFromBigInteger(Single.MaxValue, bigInteger);
 
             // Single Explicit Cast from BigInteger: Random value > Single.MaxValue
-            bigInteger = GenerateRandomBigIntegerGreaterThan(Single.MaxValue * 2, s_random);
+            bigInteger = GenerateRandomBigIntegerGreaterThan((double)Single.MaxValue * 2, s_random);
             VerifySingleExplicitCastFromBigInteger(Single.PositiveInfinity, bigInteger);
 
             // Single Explicit Cast from BigInteger: value < Single.MaxValue but can not be accurately represented in a Single
@@ -706,7 +707,7 @@ namespace System.Numerics.Tests
         }
 
         /// <summary>
-        /// Test cast to Double on Very Large BigInteger more than (1 &lt&lt Int.MaxValue)
+        /// Test cast to Double on Very Large BigInteger more than (1 &lt;&lt; Int.MaxValue)
         /// Tested BigInteger are: +/-pow(2, startShift + smallLoopShift * [1..smallLoopLimit] + Int32.MaxValue * [1..bigLoopLimit])
         /// Expected double is positive and negative infinity
         /// Note: 

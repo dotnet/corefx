@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -151,7 +152,7 @@ namespace System.Diagnostics
             catch (IOException)
             {
                 // Between the time that we get an ID and the time that we try to read the associated 
-                // directoies and files in procfs, the process could be gone.
+                // directories and files in procfs, the process could be gone.
             }
 
             // Finally return what we've built up

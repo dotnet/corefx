@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
@@ -34,7 +35,7 @@ namespace System.IO.Pipes
             // Make sure the pipe name isn't one of our reserved names for anonymous pipes.
             if (String.Equals(fullPipeName, @"\\.\pipe\anonymous", StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentOutOfRangeException("pipeName", SR.ArgumentOutOfRange_AnonymousReserved);
+                throw new ArgumentOutOfRangeException(nameof(pipeName), SR.ArgumentOutOfRange_AnonymousReserved);
             }
 
 
@@ -297,16 +298,6 @@ namespace System.IO.Pipes
                 throw new InvalidOperationException(SR.InvalidOperation_PipeHandleNotSet);
             }
             CheckConnectOperationsServer();
-        }
-
-        private void ValidateMaxNumberOfServerInstances(int maxNumberOfServerInstances)
-        {
-            // win32 allows fixed values of 1-254 or 255 to mean max allowed by system. We expose 255 as -1 (unlimited)
-            // through the MaxAllowedServerInstances constant. This is consistent e.g. with -1 as infinite timeout, etc
-            if ((maxNumberOfServerInstances < 1 || maxNumberOfServerInstances > 254) && (maxNumberOfServerInstances != MaxAllowedServerInstances))
-            {
-                throw new ArgumentOutOfRangeException("maxNumberOfServerInstances", SR.ArgumentOutOfRange_MaxNumServerInstances);
-            }
         }
     }
 }

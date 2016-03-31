@@ -1,89 +1,55 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class DateTimeFormatInfoGetAbbreviatedDayName
     {
-        // PosTest1: Call GetAbbreviatedDayName on default invariant DateTimeFormatInfo instance
-        [Fact]
-        public void PosTest1()
+        public static IEnumerable<object[]> GetAbbreviatedDayName_TestData()
         {
-            DateTimeFormatInfo info = CultureInfo.InvariantCulture.DateTimeFormat;
-            string[] expected = new string[] {
-                "Sun",
-                "Mon",
-                "Tue",
-                "Wed",
-                "Thu",
-                "Fri",
-                "Sat"
-            };
-            VerificationHelper(info, expected);
-        }
+            string[] englishAbbreviatedDayNames = new string[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+            yield return new object[] { DateTimeFormatInfo.InvariantInfo, englishAbbreviatedDayNames };
+            yield return new object[] { new CultureInfo("en-US").DateTimeFormat, englishAbbreviatedDayNames };
+            yield return new object[] { new DateTimeFormatInfo(), englishAbbreviatedDayNames };
 
-        // Call GetAbbreviatedDayName on en-us culture DateTimeFormatInfo instance
-        // Call GetAbbreviatedDayName on fr-FR culture DateTimeFormatInfo instance
-        [Theory]
-        [InlineData("en-us")]
-        [InlineData("fr-FR")]
-        public void PosTest2(string localeName)
-        {
-            CultureInfo culture = new CultureInfo(localeName);
-            string[] expected = DateTimeFormatInfoData.GetAbbreviatedDayNames(culture);
-
-            DateTimeFormatInfo info = culture.DateTimeFormat;
-            VerificationHelper(info, expected);
-        }
-
-        // PosTest4: Call GetAbbreviatedDayName on DateTimeFormatInfo instance created from ctor
-        [Fact]
-        public void PosTest4()
-        {
-            DateTimeFormatInfo info = new DateTimeFormatInfo();
-            string[] expected = new string[] {
-                "Sun",
-                "Mon",
-                "Tue",
-                "Wed",
-                "Thu",
-                "Fri",
-                "Sat"
-            };
-
-            VerificationHelper(info, expected);
-        }
-
-        // NegTest1: ArgumentOutOfRangeException should be thrown when dayofweek is not a valid System.DayOfWeek value
-        [Fact]
-        public void NegTest1()
-        {
-            DateTimeFormatInfo info = new DateTimeFormatInfo();
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            // ActiveIssue(2103)
+            if (!PlatformDetection.IsUbuntu1510)
             {
-                info.GetAbbreviatedDayName((DayOfWeek)(-1));
-            });
+                yield return new object[] { new CultureInfo("fr-FR").DateTimeFormat, DateTimeFormatInfoData.FrFRAbbreviatedDayNames() };
+            }
         }
 
-        private void VerificationHelper(DateTimeFormatInfo info, string[] expected)
+        [Theory]
+        [MemberData(nameof(GetAbbreviatedDayName_TestData))]
+        public void GetAbbreviatedDayName(DateTimeFormatInfo info, string[] expected)
         {
-            DayOfWeek[] values = new DayOfWeek[] {
-            DayOfWeek.Sunday,
-            DayOfWeek.Monday,
-            DayOfWeek.Tuesday,
-            DayOfWeek.Wednesday,
-            DayOfWeek.Thursday,
-            DayOfWeek.Friday,
-            DayOfWeek.Saturday
+            DayOfWeek[] values = new DayOfWeek[]
+            {
+                DayOfWeek.Sunday,
+                DayOfWeek.Monday,
+                DayOfWeek.Tuesday,
+                DayOfWeek.Wednesday,
+                DayOfWeek.Thursday,
+                DayOfWeek.Friday,
+                DayOfWeek.Saturday
             };
 
             for (int i = 0; i < values.Length; ++i)
             {
-                string actual = info.GetAbbreviatedDayName(values[i]);
-                Assert.Equal(expected[i], actual);
+                Assert.Equal(expected[i], info.GetAbbreviatedDayName(values[i]));
             }
+        }
+
+        [Theory]
+        [InlineData(DayOfWeek.Sunday - 1)]
+        [InlineData(DayOfWeek.Saturday + 1)]
+        public void GetAbbreviatedDayName_Invalid_ThrowsArgumentOutOfRangeException(DayOfWeek dayofweek)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("dayofweek", () => new DateTimeFormatInfo().GetAbbreviatedDayName(dayofweek));
         }
     }
 }

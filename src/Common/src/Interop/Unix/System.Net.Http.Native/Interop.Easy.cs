@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -47,6 +48,8 @@ internal static partial class Interop
 
         public delegate CURLcode SslCtxCallback(IntPtr curl, IntPtr sslCtx, IntPtr userPointer);
 
+        public delegate void DebugCallback(IntPtr curl, CurlInfoType type, IntPtr data, ulong size, IntPtr userPointer);
+
         [DllImport(Libraries.HttpNative, EntryPoint = "HttpNative_RegisterSeekCallback")]
         public static extern void RegisterSeekCallback(
             SafeCurlHandle curl,
@@ -69,6 +72,13 @@ internal static partial class Interop
             IntPtr userPointer,
             ref SafeCallbackHandle callbackHandle);
 
+        [DllImport(Libraries.HttpNative, EntryPoint = "HttpNative_RegisterDebugCallback")]
+        public static extern CURLcode RegisterDebugCallback(
+            SafeCurlHandle curl,
+            DebugCallback callback,
+            IntPtr userPointer,
+            ref SafeCallbackHandle callbackHandle);
+
         [DllImport(Libraries.HttpNative, EntryPoint = "HttpNative_FreeCallbackHandle")]
         private static extern void FreeCallbackHandle(IntPtr handle);
 
@@ -80,6 +90,7 @@ internal static partial class Interop
         internal enum CURLoption
         {
             CURLOPT_INFILESIZE = CurlOptionLongBase + 14,
+            CURLOPT_SSLVERSION = CurlOptionLongBase + 32,
             CURLOPT_VERBOSE = CurlOptionLongBase + 41,
             CURLOPT_NOBODY = CurlOptionLongBase + 44,
             CURLOPT_UPLOAD = CurlOptionLongBase + 46,
@@ -87,7 +98,9 @@ internal static partial class Interop
             CURLOPT_FOLLOWLOCATION = CurlOptionLongBase + 52,
             CURLOPT_PROXYPORT = CurlOptionLongBase + 59,
             CURLOPT_POSTFIELDSIZE = CurlOptionLongBase + 60,
+            CURLOPT_SSL_VERIFYPEER = CurlOptionLongBase + 64,
             CURLOPT_MAXREDIRS = CurlOptionLongBase + 68,
+            CURLOPT_SSL_VERIFYHOST = CurlOptionLongBase + 81,
             CURLOPT_HTTP_VERSION = CurlOptionLongBase + 84,
             CURLOPT_NOSIGNAL = CurlOptionLongBase + 99,
             CURLOPT_PROXYTYPE = CurlOptionLongBase + 101,
@@ -128,6 +141,12 @@ internal static partial class Interop
             CURL_HTTP_VERSION_2_0 = 3,
         };
 
+        // Enum for constants defined for CURL_SSLVERSION
+        internal enum CurlSslVersion
+        {
+            CURL_SSLVERSION_TLSv1 = 1, /* TLS 1.x */
+        };
+
         // Enum for constants defined for the enum CURLINFO in curl.h
         internal enum CURLINFO
         {
@@ -143,6 +162,7 @@ internal static partial class Interop
             Basic = 1 << 0,
             Digest = 1 << 1,
             Negotiate = 1 << 2,
+            NTLM = 1 << 3,
         }
 
         // Enum for constants defined for the enum curl_proxytype in curl.h
@@ -166,10 +186,23 @@ internal static partial class Interop
             CURL_SEEKFUNC_CANTSEEK = 2,
         }
 
+        internal enum CurlInfoType : int
+        {
+            CURLINFO_TEXT = 0,
+            CURLINFO_HEADER_IN = 1,
+            CURLINFO_HEADER_OUT = 2,
+            CURLINFO_DATA_IN = 3,
+            CURLINFO_DATA_OUT = 4,
+            CURLINFO_SSL_DATA_IN = 5,
+            CURLINFO_SSL_DATA_OUT = 6,
+        };
+
         // constants defined for the results of a CURL_READ or CURL_WRITE function
         internal const ulong CURL_READFUNC_ABORT = 0x10000000;
         internal const ulong CURL_READFUNC_PAUSE = 0x10000001;
         internal const ulong CURL_WRITEFUNC_PAUSE = 0x10000001;
+
+        internal const ulong CURL_MAX_HTTP_HEADER = 100 * 1024;
 
         internal sealed class SafeCurlHandle : SafeHandle
         {

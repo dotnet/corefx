@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Debug = System.Diagnostics.Debug;
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
@@ -54,7 +55,7 @@ namespace System.Xml.Linq
         /// </remarks>
         public XName GetName(string localName)
         {
-            if (localName == null) throw new ArgumentNullException("localName");
+            if (localName == null) throw new ArgumentNullException(nameof(localName));
             return GetName(localName, 0, localName.Length);
         }
 
@@ -113,7 +114,7 @@ namespace System.Xml.Linq
         /// </remarks>
         public static XNamespace Get(string namespaceName)
         {
-            if (namespaceName == null) throw new ArgumentNullException("namespaceName");
+            if (namespaceName == null) throw new ArgumentNullException(nameof(namespaceName));
             return Get(namespaceName, 0, namespaceName.Length);
         }
 
@@ -137,7 +138,7 @@ namespace System.Xml.Linq
         [SuppressMessage("Microsoft.Usage", "CA2225:OperatorOverloadsHaveNamedAlternates", Justification = "Functionality available via XNamespace.Get().")]
         public static XName operator +(XNamespace ns, string localName)
         {
-            if (ns == null) throw new ArgumentNullException("ns");
+            if (ns == null) throw new ArgumentNullException(nameof(ns));
             return ns.GetName(localName);
         }
 

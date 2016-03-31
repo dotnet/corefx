@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -565,7 +566,7 @@ namespace System.Data.SqlClient
         /// <summary>
         /// used to block two scenarios if MultiSubnetFailover is true: 
         /// * server-provided failover partner - raising SqlException in this case
-        /// * connection string with failover partner and MultiSubnetFailover=true - rasing argument one in this case with the same message
+        /// * connection string with failover partner and MultiSubnetFailover=true - raising argument one in this case with the same message
         /// </summary>
         static internal Exception MultiSubnetFailoverWithFailoverPartner(bool serverProvidedFailoverPartner, SqlInternalConnectionTds internalConnection)
         {
@@ -795,7 +796,7 @@ namespace System.Data.SqlClient
 
     sealed internal class SQLMessage
     {
-        private SQLMessage() { /* prevent utility class from being insantiated*/ }
+        private SQLMessage() { /* prevent utility class from being instantiated*/ }
 
         // The class SQLMessage defines the error messages that are specific to the SqlDataAdapter
         // that are caused by a netlib error.  The functions will be called and then return the

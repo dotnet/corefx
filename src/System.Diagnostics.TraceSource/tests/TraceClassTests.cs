@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -318,7 +319,7 @@ namespace System.Diagnostics.TraceSourceTests
             Trace.IndentLevel = 2;
             Trace.Write("This message should be indented.");
             Trace.TraceError("This error not be indented.");
-            Trace.TraceError("{0}", "This error is indendented");
+            Trace.TraceError("{0}", "This error is indented");
             Trace.TraceWarning("This warning is indented");
             Trace.TraceWarning("{0}", "This warning is also indented");
             Trace.TraceInformation("This information in indented");
@@ -330,7 +331,7 @@ namespace System.Diagnostics.TraceSourceTests
             String newLine = Environment.NewLine;
             var expected =
                 String.Format(
-                    "Message start." + newLine + "    This message should be indented.{0} Error: 0 : This error not be indented." + newLine + "    {0} Error: 0 : This error is indendented" + newLine + "    {0} Warning: 0 : This warning is indented" + newLine + "    {0} Warning: 0 : This warning is also indented" + newLine + "    {0} Information: 0 : This information in indented" + newLine + "    {0} Information: 0 : This information is also indented" + newLine + "Message end." + newLine + "",
+                    "Message start." + newLine + "    This message should be indented.{0} Error: 0 : This error not be indented." + newLine + "    {0} Error: 0 : This error is indented" + newLine + "    {0} Warning: 0 : This warning is indented" + newLine + "    {0} Warning: 0 : This warning is also indented" + newLine + "    {0} Information: 0 : This information in indented" + newLine + "    {0} Information: 0 : This information is also indented" + newLine + "Message end." + newLine + "",
                     "DEFAULT_APPNAME" //DEFAULT_APPNAME this a bug which needs to be fixed.
                 );
 

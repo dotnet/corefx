@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -34,17 +35,18 @@ namespace Microsoft.SqlServer.Server
         private SmiMetaDataProperty[] _properties;
         private bool _isReadOnly;
 
-        internal static readonly SmiMetaDataPropertyCollection EmptyInstance;
-
         // Singleton empty instances to ensure each property is always non-null
         private static readonly SmiDefaultFieldsProperty s_emptyDefaultFields = new SmiDefaultFieldsProperty(new List<bool>());
         private static readonly SmiOrderProperty s_emptySortOrder = new SmiOrderProperty(new List<SmiOrderProperty.SmiColumnOrder>());
         private static readonly SmiUniqueKeyProperty s_emptyUniqueKey = new SmiUniqueKeyProperty(new List<bool>());
 
-        static SmiMetaDataPropertyCollection()
+        internal static readonly SmiMetaDataPropertyCollection EmptyInstance = CreateEmptyInstance();
+
+        private static SmiMetaDataPropertyCollection CreateEmptyInstance()
         {
-            EmptyInstance = new SmiMetaDataPropertyCollection();
-            EmptyInstance.SetReadOnly();
+            var emptyInstance = new SmiMetaDataPropertyCollection();
+            emptyInstance.SetReadOnly();
+            return emptyInstance;
         }
 
         internal SmiMetaDataPropertyCollection()

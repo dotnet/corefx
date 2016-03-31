@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -105,7 +106,7 @@ namespace System.Reflection.Tests
             Assert.False(n.FullName != expected && n.FullName != extended);
         }
 
-        //Verify AssemblyName.Version for xecuting assembly.
+        //Verify AssemblyName.Version for executing assembly.
         [Fact]
         public void Case8_Version()
         {
@@ -126,7 +127,7 @@ namespace System.Reflection.Tests
             Assert.Null(n.CultureName);
         }
 
-        //Verify AssemblyName.ContentType Deffault
+        //Verify AssemblyName.ContentType Default
         [Fact]
         public void Case10_ContentType()
         {

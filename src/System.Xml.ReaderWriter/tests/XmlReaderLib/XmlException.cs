@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using OLEDB.Test.ModuleCore;
+using System.IO;
 
 namespace System.Xml.Tests
 {
@@ -93,7 +95,7 @@ namespace System.Xml.Tests
         [Variation("Inner exception on non-supported encoding")]
         public int ReadingNonSupportedEncodingDoesntThrow()
         {
-            string filename = TestData + "Common/Bug81489.xml";
+            string filename = Path.Combine(TestData, "Common", "Bug81489.xml");
             ReloadSource(filename);
             while (DataReader.Read()) ;
             return TEST_PASS;
@@ -118,7 +120,7 @@ namespace System.Xml.Tests
         [Variation("XmlReader: scanner error on invalid character for an encoding give pointer to scanner buffer, not file position")]
         public int InvalidEncodingCharacterThrowsExceptionWithCorrectLineNumberAndPosition()
         {
-            string filename = TestData + "Common/Bug61321.xml";
+            string filename = Path.Combine(TestData, "Common", "Bug61321.xml");
             ReloadSource(filename);
 
             try
@@ -136,7 +138,7 @@ namespace System.Xml.Tests
         [Variation("XmlDocument.Load: XmlException contains ambiguous error when finding unexpected token")]
         public int UnexpectedTokenThrowsErrorWithCorrectPositions()
         {
-            string filename = TestData + "Common/Bug95253.xml";
+            string filename = Path.Combine(TestData, "Common", "Bug95253.xml");
             ReloadSource(filename);
             try
             {
@@ -153,7 +155,7 @@ namespace System.Xml.Tests
         [Variation("Check to see if SourceUri1 is set correctly")]
         public int SourceUri1()
         {
-            string filename = TestData + "Common/Bug95253.xml";
+            string filename = Path.Combine(TestData, "Common", "Bug95253.xml");
             ReloadSource(filename);
 
             try

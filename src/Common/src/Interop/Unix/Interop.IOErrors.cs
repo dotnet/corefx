@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -110,6 +111,8 @@ internal static partial class Interop
     /// <returns></returns>
     internal static Exception GetExceptionForIoErrno(ErrorInfo errorInfo, string path = null, bool isDirectory = false)
     {
+        // Translate the errno into a known set of exception types.  For cases where multiple errnos map
+        // to the same exception type, include an inner exception with the details.
         switch (errorInfo.Error)
         {
             case Error.ENOENT:
@@ -129,9 +132,10 @@ internal static partial class Interop
             case Error.EACCES:
             case Error.EBADF:
             case Error.EPERM:
+                Exception inner = GetIOException(errorInfo);
                 return !string.IsNullOrEmpty(path) ?
-                    new UnauthorizedAccessException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, path)) :
-                    new UnauthorizedAccessException(SR.UnauthorizedAccess_IODenied_NoPathName);
+                    new UnauthorizedAccessException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, path), inner) :
+                    new UnauthorizedAccessException(SR.UnauthorizedAccess_IODenied_NoPathName, inner);
 
             case Error.ENAMETOOLONG:
                 return new PathTooLongException(SR.IO_PathTooLong);

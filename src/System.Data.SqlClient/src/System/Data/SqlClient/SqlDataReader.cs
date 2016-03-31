@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -17,10 +18,12 @@ using System.Xml;
 
 using Microsoft.SqlServer.Server;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace System.Data.SqlClient
 {
-    public class SqlDataReader : DbDataReader
+    public class SqlDataReader : DbDataReader, IDbColumnSchemaGenerator
     {
         private enum ALTROWSTATUS
         {
@@ -67,6 +70,7 @@ namespace System.Data.SqlClient
         private CommandBehavior _commandBehavior;
 
         private static int s_objectTypeCount; // Bid counter
+        private readonly static ReadOnlyCollection<DbColumn> s_emptySchema = new ReadOnlyCollection<DbColumn>(Array.Empty<DbColumn>());
         internal readonly int ObjectID = System.Threading.Interlocked.Increment(ref s_objectTypeCount);
 
         // metadata (no explicit table, use 'Table')
@@ -1373,7 +1377,7 @@ namespace System.Data.SqlClient
                         cbytes = length;
                 }
 
-                Array.Copy(data, ndataIndex, buffer, bufferIndex, cbytes);
+                Buffer.BlockCopy(data, ndataIndex, buffer, bufferIndex, cbytes);
             }
             catch (Exception e)
             {
@@ -2317,7 +2321,7 @@ namespace System.Data.SqlClient
                     }
                     else
                     {
-                        // Legitmate InvalidCast, rethrow
+                        // Legitimate InvalidCast, rethrow
                         throw;
                     }
                 }
@@ -2354,7 +2358,7 @@ namespace System.Data.SqlClient
 
                 for (int i = 0; i < copyLen; i++)
                 {
-                    // Get the usable, TypeSystem-compatible value from the iternal buffer
+                    // Get the usable, TypeSystem-compatible value from the internal buffer
                     values[_metaData.indexMap[i]] = GetValueFromSqlBufferInternal(_data[i], _metaData[i]);
 
                     // If this is sequential access, then we need to wipe the internal buffer
@@ -3172,7 +3176,7 @@ namespace System.Data.SqlClient
                     var metaType = _metaData[currentColumn].metaType;
                     if ((metaType.IsLong) || (metaType.IsPlp) || (metaType.SqlDbType == SqlDbType.Udt) || (metaType.SqlDbType == SqlDbType.Structured))
                     {
-                        // Plp, Udt and TVP types have an unknownable size - so return that the estimate failed
+                        // Plp, Udt and TVP types have an unknowable size - so return that the estimate failed
                         return false;
                     }
                     int maxHeaderSize;
@@ -3709,7 +3713,7 @@ namespace System.Data.SqlClient
 
                     if (TryReadColumnHeader(i))
                     {
-                        // Only once we have read upto where we need to be can we check the cancellation tokens (otherwise we will be in an unknown state)
+                        // Only once we have read up to where we need to be can we check the cancellation tokens (otherwise we will be in an unknown state)
 
                         if (cancellationToken.IsCancellationRequested)
                         {
@@ -3723,7 +3727,7 @@ namespace System.Data.SqlClient
                         }
                         else
                         {
-                            // Upto the correct column - continue to read
+                            // Up to the correct column - continue to read
                             SwitchToAsyncWithoutSnapshot();
                             int totalBytesRead;
                             var readTask = GetBytesAsyncReadDataStage(i, buffer, index, length, timeout, true, cancellationToken, timeoutToken, out totalBytesRead);
@@ -4579,6 +4583,74 @@ namespace System.Data.SqlClient
         {
             Debug.Assert(false, "TdsParser should have thrown on UDT");
             return SQL.UnsupportedFeatureAndToken(_parser.Connection, SqlDbType.Udt.ToString());
+        }
+
+        public ReadOnlyCollection<DbColumn> GetColumnSchema()
+        {
+            SqlStatistics statistics = null;
+            try
+            {
+                statistics = SqlStatistics.StartTimer(Statistics);
+                if (null == _metaData || null == _metaData.dbColumnSchema)
+                {
+                    if (null != this.MetaData)
+                    {
+
+                        _metaData.dbColumnSchema = BuildColumnSchema();
+                        Debug.Assert(null != _metaData.dbColumnSchema, "No schema information yet!");
+                        // filter table?
+                    }
+                }
+                if (null != _metaData)
+                {
+                    return _metaData.dbColumnSchema;
+                }
+                return s_emptySchema;
+            }
+            finally
+            {
+                SqlStatistics.StopTimer(statistics);
+            }
+        }
+
+        private ReadOnlyCollection<DbColumn> BuildColumnSchema()
+        {
+            _SqlMetaDataSet md = MetaData;
+            DbColumn[] columnSchema = new DbColumn[md.Length];
+            for (int i = 0; i < md.Length; i++)
+            {
+                _SqlMetaData col = md[i];
+                SqlDbColumn dbColumn = new SqlDbColumn(md[i]);
+                
+                if (_typeSystem <= SqlConnectionString.TypeSystem.SQLServer2005 && col.IsNewKatmaiDateTimeType)
+                {
+                    dbColumn.SqlNumericScale = MetaType.MetaNVarChar.Scale;
+                }
+                else if (TdsEnums.UNKNOWN_PRECISION_SCALE != col.scale)
+                {
+                    dbColumn.SqlNumericScale = col.scale;
+                }
+                else
+                {
+                    dbColumn.SqlNumericScale = col.metaType.Scale;
+                }
+
+                if (_browseModeInfoConsumed)
+                {
+                    dbColumn.SqlIsAliased = col.isDifferentName;
+                    dbColumn.SqlIsKey = col.isKey;
+                    dbColumn.SqlIsHidden = col.isHidden;
+                    dbColumn.SqlIsExpression = col.isExpression;
+                }
+
+                dbColumn.SqlDataType = GetFieldTypeInternal(col);
+
+                dbColumn.SqlDataTypeName = GetDataTypeNameInternal(col);
+
+                columnSchema[i] = dbColumn;
+            }
+
+            return new ReadOnlyCollection<DbColumn>(columnSchema);
         }
     }// SqlDataReader
 }// namespace

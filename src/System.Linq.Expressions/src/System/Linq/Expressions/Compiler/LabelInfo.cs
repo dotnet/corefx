@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -52,7 +53,7 @@ namespace System.Linq.Expressions.Compiler
 
         // Until we have more information, default to a leave instruction,
         // which always works. Note: leave spills the stack, so we need to
-        // ensure that StackSpiller has guarenteed us an empty stack at this
+        // ensure that StackSpiller has guaranteed us an empty stack at this
         // point. Otherwise Leave and Branch are not equivalent
         private OpCode _opCode = OpCodes.Leave;
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -180,7 +181,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="IndexExpression"/>.</returns>
         public static IndexExpression ArrayAccess(Expression array, IEnumerable<Expression> indexes)
         {
-            RequiresCanRead(array, "array");
+            RequiresCanRead(array, nameof(array));
 
             Type arrayType = array.Type;
             if (!arrayType.IsArray)
@@ -196,7 +197,7 @@ namespace System.Linq.Expressions
 
             foreach (Expression e in indexList)
             {
-                RequiresCanRead(e, "indexes");
+                RequiresCanRead(e, nameof(indexes));
                 if (e.Type != typeof(int))
                 {
                     throw Error.ArgumentMustBeArrayIndexType();
@@ -218,8 +219,8 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="IndexExpression"/>.</returns>
         public static IndexExpression Property(Expression instance, string propertyName, params Expression[] arguments)
         {
-            RequiresCanRead(instance, "instance");
-            ContractUtils.RequiresNotNull(propertyName, "indexerName");
+            RequiresCanRead(instance, nameof(instance));
+            ContractUtils.RequiresNotNull(propertyName, nameof(propertyName));
             PropertyInfo pi = FindInstanceProperty(instance.Type, propertyName, arguments);
             return Property(instance, pi, arguments);
         }
@@ -388,7 +389,7 @@ namespace System.Linq.Expressions
             // should match the type returned by the get method.
             // Accessor parameters cannot be ByRef.
 
-            ContractUtils.RequiresNotNull(property, "property");
+            ContractUtils.RequiresNotNull(property, nameof(property));
             if (property.PropertyType.IsByRef) throw Error.PropertyCannotHaveRefType();
             if (property.PropertyType == typeof(void)) throw Error.PropertyTypeCannotBeVoid();
 
@@ -436,7 +437,7 @@ namespace System.Linq.Expressions
 
         private static void ValidateAccessor(Expression instance, MethodInfo method, ParameterInfo[] indexes, ref ReadOnlyCollection<Expression> arguments)
         {
-            ContractUtils.RequiresNotNull(arguments, "arguments");
+            ContractUtils.RequiresNotNull(arguments, nameof(arguments));
 
             ValidateMethodInfo(method);
             if ((method.CallingConvention & CallingConventions.VarArgs) != 0) throw Error.AccessorsCannotHaveVarArgs();
@@ -447,7 +448,7 @@ namespace System.Linq.Expressions
             else
             {
                 if (instance == null) throw Error.OnlyStaticMethodsHaveNullInstance();
-                RequiresCanRead(instance, "instance");
+                RequiresCanRead(instance, nameof(instance));
                 ValidateCallInstanceType(instance.Type, method);
             }
 
@@ -467,7 +468,7 @@ namespace System.Linq.Expressions
                 {
                     Expression arg = arguments[i];
                     ParameterInfo pi = indexes[i];
-                    RequiresCanRead(arg, "arguments");
+                    RequiresCanRead(arg, nameof(arguments));
 
                     Type pType = pi.ParameterType;
                     if (pType.IsByRef) throw Error.AccessorsCannotHaveByRefArgs();

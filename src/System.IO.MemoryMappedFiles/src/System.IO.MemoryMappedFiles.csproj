@@ -5,25 +5,26 @@
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Windows_Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <ProjectGuid>{16EE5522-F387-4C9E-9EF2-B5134B043F37}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <AssemblyName>System.IO.MemoryMappedFiles</AssemblyName>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
-    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
+    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net46'">None</ResourcesSourceOutputDirectory>
+    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.3</PackageTargetFramework>
+    <PackageTargetRuntime Condition="'$(TargetsWindows)' == 'true' And '$(TargetGroup)' == ''">win7</PackageTargetRuntime>
+    <PackageTargetRuntime Condition="'$(TargetsUnix)' == 'true'">unix</PackageTargetRuntime>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
   <!-- Compiled Source Files -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="$(CommonPath)\System\IO\Error.cs">
       <Link>Common\System\IO\Error.cs</Link>
     </Compile>
@@ -36,7 +37,7 @@
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMappedViewStream.cs" />
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMappedFileRights.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' ">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -97,6 +98,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.PipeOptions.cs">
       <Link>Common\Interop\Windows\Interop.PipeOptions.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
       <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
@@ -126,6 +130,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
       <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.SetCloseOnExec.cs">
+      <Link>Common\Interop\Unix\Interop.Fcntl.SetCloseOnExec.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
       <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
@@ -180,7 +187,10 @@
       <Link>Common\System\IO\PersistedFiles.Unix.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- Resource files -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System.Core" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

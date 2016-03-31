@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
@@ -21,7 +22,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private EXPRTYPEORNAMESPACE _exprTypeDest;
 
             // This is for lambda error reporting. The reason we have this is because we 
-            // store errors for lambda conversions, and then we dont bind the conversion
+            // store errors for lambda conversions, and then we don't bind the conversion
             // again to report errors. Consider the following case:
             //
             // int? x = () => null;

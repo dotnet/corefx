@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Reflection;
@@ -27,7 +28,7 @@ namespace Internal.Reflection.Extensions.NonPortable
 
         //
         // Policy to decide whether a member is considered "virtual", "virtual new" and what its member visibility is.
-        // (For "visbility", we reuse the MethodAttributes enum since Reflection lacks an element-agnostic enum for this.
+        // (For "visibility", we reuse the MethodAttributes enum since Reflection lacks an element-agnostic enum for this.
         //  Only the MemberAccessMask bits are set.)
         //
         public abstract void GetMemberAttributes(M member, out MethodAttributes visibility, out bool isStatic, out bool isVirtual, out bool isNewSlot);

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -125,17 +126,17 @@ namespace System.Runtime.Versioning
         {
             if (identifier == null)
             {
-                throw new ArgumentNullException("identifier");
+                throw new ArgumentNullException(nameof(identifier));
             }
 
             identifier = identifier.Trim();
             if (identifier.Length == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_emptystringcall, "identifier"), "identifier");
+                throw new ArgumentException(SR.Format(SR.net_emptystringcall, nameof(identifier)), nameof(identifier));
             }
             if (version == null)
             {
-                throw new ArgumentNullException("version");
+                throw new ArgumentNullException(nameof(version));
             }
 
             _identifier = identifier;
@@ -168,19 +169,19 @@ namespace System.Runtime.Versioning
         {
             if (frameworkName == null)
             {
-                throw new ArgumentNullException("frameworkName");
+                throw new ArgumentNullException(nameof(frameworkName));
             }
             if (frameworkName.Length == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_emptystringcall, "frameworkName"), "frameworkName");
+                throw new ArgumentException(SR.Format(SR.net_emptystringcall, nameof(frameworkName)), nameof(frameworkName));
             }
 
             string[] components = frameworkName.Split(c_componentSeparator);
 
-            // Identifer and Version are required, Profile is optional.
+            // Identifier and Version are required, Profile is optional.
             if (components.Length < 2 || components.Length > 3)
             {
-                throw new ArgumentException(SR.Argument_FrameworkNameTooShort, "frameworkName");
+                throw new ArgumentException(SR.Argument_FrameworkNameTooShort, nameof(frameworkName));
             }
 
             //
@@ -190,7 +191,7 @@ namespace System.Runtime.Versioning
 
             if (_identifier.Length == 0)
             {
-                throw new ArgumentException(SR.Argument_FrameworkNameInvalid, "frameworkName");
+                throw new ArgumentException(SR.Argument_FrameworkNameInvalid, nameof(frameworkName));
             }
 
             bool versionFound = false;
@@ -202,16 +203,17 @@ namespace System.Runtime.Versioning
             for (int i = 1; i < components.Length; i++)
             {
                 // Get the key/value pair separated by '='
-                string[] keyValuePair = components[i].Split(c_keyValueSeparator);
+                string component = components[i];
+                int separatorIndex = component.IndexOf(c_keyValueSeparator);
 
-                if (keyValuePair.Length != 2)
+                if (separatorIndex == -1 || separatorIndex != component.LastIndexOf(c_keyValueSeparator))
                 {
-                    throw new ArgumentException(SR.Argument_FrameworkNameInvalid, "frameworkName");
+                    throw new ArgumentException(SR.Argument_FrameworkNameInvalid, nameof(frameworkName));
                 }
 
                 // Get the key and value, trimming any whitespace
-                string key = keyValuePair[0].Trim();
-                string value = keyValuePair[1].Trim();
+                string key = component.Substring(0, separatorIndex).Trim();
+                string value = component.Substring(separatorIndex + 1).Trim();
 
                 //
                 // 2) Parse the required "Version" key value
@@ -231,7 +233,7 @@ namespace System.Runtime.Versioning
                     }
                     catch (Exception e)
                     {
-                        throw new ArgumentException(SR.Argument_FrameworkNameInvalidVersion, "frameworkName", e);
+                        throw new ArgumentException(SR.Argument_FrameworkNameInvalidVersion, nameof(frameworkName), e);
                     }
                 }
                 //
@@ -246,13 +248,13 @@ namespace System.Runtime.Versioning
                 }
                 else
                 {
-                    throw new ArgumentException(SR.Argument_FrameworkNameInvalid, "frameworkName");
+                    throw new ArgumentException(SR.Argument_FrameworkNameInvalid, nameof(frameworkName));
                 }
             }
 
             if (!versionFound)
             {
-                throw new ArgumentException(SR.Argument_FrameworkNameMissingVersion, "frameworkName");
+                throw new ArgumentException(SR.Argument_FrameworkNameMissingVersion, nameof(frameworkName));
             }
         }
         #endregion constructors

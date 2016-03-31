@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -51,7 +52,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.unsfe.basic.array01.arr
     unsafe // <Area> dynamic in unsafe code </Area>
            // <Title> unsafe type </Title>
            // <Description>
-           // array initializer : usafe array initializer with dynamic
+           // array initializer : unsafe array initializer with dynamic
            // </Description>
            //<Expects Status=success></Expects>
            // <Code>
@@ -670,7 +671,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.unsfe.basic.fieldinit01
     using ManagedTests.DynamicCSharp.Conformance.dynamic.unsfe.basic.fieldinit01.fieldinit01;
 
     unsafe // <Area> dynamic in unsafe code </Area>
-           // <Title>unsafe conext</Title>
+           // <Title>unsafe context</Title>
            // <Description>
            // dynamic in field initializer
            // </Description>

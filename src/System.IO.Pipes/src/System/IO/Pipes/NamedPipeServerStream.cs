@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics.CodeAnalysis;
@@ -67,7 +68,7 @@ namespace System.IO.Pipes
         /// Win32 note: this gets used for dwPipeMode. CreateNamedPipe allows you to specify PIPE_TYPE_BYTE/MESSAGE
         /// and PIPE_READMODE_BYTE/MESSAGE independently, but this sets type and readmode to match.
         /// </param>
-        /// <param name="options">PipeOption enum: None, Asynchronous, or Writethrough
+        /// <param name="options">PipeOption enum: None, Asynchronous, or Write-through
         /// Win32 note: this gets passed in with dwOpenMode to CreateNamedPipe. Asynchronous corresponds to 
         /// FILE_FLAG_OVERLAPPED option. PipeOptions enum doesn't expose FIRST_PIPE_INSTANCE option because
         /// this sets that automatically based on the number of instances specified.
@@ -88,7 +89,7 @@ namespace System.IO.Pipes
         {
             if (pipeName == null)
             {
-                throw new ArgumentNullException("pipeName");
+                throw new ArgumentNullException(nameof(pipeName));
             }
             if (pipeName.Length == 0)
             {
@@ -96,19 +97,26 @@ namespace System.IO.Pipes
             }
             if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous)) != 0)
             {
-                throw new ArgumentOutOfRangeException("options", SR.ArgumentOutOfRange_OptionsInvalid);
+                throw new ArgumentOutOfRangeException(nameof(options), SR.ArgumentOutOfRange_OptionsInvalid);
             }
             if (inBufferSize < 0)
             {
-                throw new ArgumentOutOfRangeException("inBufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(inBufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
-            ValidateMaxNumberOfServerInstances(maxNumberOfServerInstances);
+            if ((maxNumberOfServerInstances < 1 || maxNumberOfServerInstances > 254) && (maxNumberOfServerInstances != MaxAllowedServerInstances))
+            {
+                // win32 allows fixed values of 1-254 or 255 to mean max allowed by system. We expose 255 as -1 (unlimited)
+                // through the MaxAllowedServerInstances constant. This is consistent e.g. with -1 as infinite timeout, etc.
+                // We do this check for consistency on Unix, even though maxNumberOfServerInstances is otherwise ignored.
+                throw new ArgumentOutOfRangeException(nameof(maxNumberOfServerInstances), SR.ArgumentOutOfRange_MaxNumServerInstances);
+            }
+
             // inheritability will always be None since this private constructor is only called from other constructors from which
             // inheritability is always set to None. Desktop has a public constructor to allow setting it to something else, but Core
-            // doesnt.
+            // doesn't.
             if (inheritability < HandleInheritability.None || inheritability > HandleInheritability.Inheritable)
             {
-                throw new ArgumentOutOfRangeException("inheritability", SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
+                throw new ArgumentOutOfRangeException(nameof(inheritability), SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
             }
 
             Create(pipeName, direction, maxNumberOfServerInstances, transmissionMode,
@@ -122,11 +130,11 @@ namespace System.IO.Pipes
         {
             if (safePipeHandle == null)
             {
-                throw new ArgumentNullException("safePipeHandle");
+                throw new ArgumentNullException(nameof(safePipeHandle));
             }
             if (safePipeHandle.IsInvalid)
             {
-                throw new ArgumentException(SR.Argument_InvalidHandle, "safePipeHandle");
+                throw new ArgumentException(SR.Argument_InvalidHandle, nameof(safePipeHandle));
             }
             ValidateHandleIsPipe(safePipeHandle);
             

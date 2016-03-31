@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Text;
 
@@ -114,7 +115,7 @@ namespace System.Net.Primitives.PalTests
             new object[] { new byte[] { 255, 255, 255, 255 }, "255.255.255.255" }
         };
 
-        [Theory, MemberData("ValidIPv4Addresses")]
+        [Theory, MemberData(nameof(ValidIPv4Addresses))]
         public void IPv4AddressToString_Valid(byte[] bytes, string addressString)
         {
             var buffer = new StringBuilder(IPAddressParser.INET_ADDRSTRLEN);
@@ -123,7 +124,7 @@ namespace System.Net.Primitives.PalTests
             Assert.Equal(addressString, buffer.ToString());
         }
 
-        [Theory, MemberData("ValidIPv4Addresses")]
+        [Theory, MemberData(nameof(ValidIPv4Addresses))]
         public void IPv4AddressToString_RoundTrip(byte[] bytes, string addressString)
         {
             var buffer = new StringBuilder(IPAddressParser.INET_ADDRSTRLEN);
@@ -144,7 +145,7 @@ namespace System.Net.Primitives.PalTests
             Assert.Equal(0, port);
         }
 
-        [Theory, MemberData("ValidIPv4Addresses")]
+        [Theory, MemberData(nameof(ValidIPv4Addresses))]
         public void IPv4StringToAddress_RoundTrip(byte[] bytes, string addressString)
         {
             var actualBytes = new byte[IPAddressParserStatics.IPv4AddressBytes];
@@ -361,7 +362,7 @@ namespace System.Net.Primitives.PalTests
             }
         };
 
-        [Theory, MemberData("ValidIPv6Addresses")]
+        [Theory, MemberData(nameof(ValidIPv6Addresses))]
         public void IPv6AddressToString_Valid(byte[] bytes, string addressString)
         {
             var buffer = new StringBuilder(IPAddressParser.INET6_ADDRSTRLEN);
@@ -370,7 +371,7 @@ namespace System.Net.Primitives.PalTests
             Assert.Equal(addressString, buffer.ToString());
         }
 
-        [Theory, MemberData("ValidIPv6Addresses")]
+        [Theory, MemberData(nameof(ValidIPv6Addresses))]
         public void IPv6AddressToString_RoundTrip(byte[] bytes, string addressString)
         {
             var buffer = new StringBuilder(IPAddressParser.INET6_ADDRSTRLEN);
@@ -391,7 +392,7 @@ namespace System.Net.Primitives.PalTests
             Assert.Equal(0, (int)scope);
         }
 
-        [Theory, MemberData("ValidIPv6Addresses")]
+        [Theory, MemberData(nameof(ValidIPv6Addresses))]
         public void IPv6StringToAddress_RoundTrip(byte[] bytes, string addressString)
         {
             var actualBytes = new byte[IPAddressParserStatics.IPv6AddressBytes];

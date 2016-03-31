@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*============================================================
 **
@@ -169,7 +170,7 @@ namespace System
         {
             if (minValue > maxValue)
             {
-                throw new ArgumentOutOfRangeException("minValue", SR.Format(SR.Argument_MinMaxValue, "minValue", "maxValue"));
+                throw new ArgumentOutOfRangeException(nameof(minValue), SR.Format(SR.Argument_MinMaxValue, "minValue", "maxValue"));
             }
             Contract.EndContractBlock();
 
@@ -194,7 +195,7 @@ namespace System
         {
             if (maxValue < 0)
             {
-                throw new ArgumentOutOfRangeException("maxValue", SR.Format(SR.ArgumentOutOfRange_MustBePositive, "maxValue"));
+                throw new ArgumentOutOfRangeException(nameof(maxValue), SR.Format(SR.ArgumentOutOfRange_MustBePositive, "maxValue"));
             }
             Contract.EndContractBlock();
             return (int)(Sample() * maxValue);
@@ -215,12 +216,12 @@ namespace System
         /*==================================NextBytes===================================
         **Action:  Fills the byte array with random bytes [0..0x7f].  The entire array is filled.
         **Returns:Void
-        **Arugments:  buffer -- the array to be filled.
+        **Arguments:  buffer -- the array to be filled.
         **Exceptions: None
         ==============================================================================*/
         public virtual void NextBytes(byte[] buffer)
         {
-            if (buffer == null) throw new ArgumentNullException("buffer");
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
             Contract.EndContractBlock();
             for (int i = 0; i < buffer.Length; i++)
             {

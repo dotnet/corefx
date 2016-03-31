@@ -1,7 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Composition.Runtime.Util;
@@ -45,8 +45,8 @@ namespace System.Composition.Hosting.Core
         /// <param name="metadataConstraints">Optionally, a non-empty collection of named constraints that apply to the contract.</param>
         public CompositionContract(Type contractType, string contractName, IDictionary<string, object> metadataConstraints)
         {
-            if (contractType == null) throw new ArgumentNullException("contractType");
-            if (metadataConstraints != null && metadataConstraints.Count == 0) throw new ArgumentOutOfRangeException("metadataConstraints");
+            if (contractType == null) throw new ArgumentNullException(nameof(contractType));
+            if (metadataConstraints != null && metadataConstraints.Count == 0) throw new ArgumentOutOfRangeException(nameof(metadataConstraints));
 
             _contractType = contractType;
             _contractName = contractName;
@@ -73,7 +73,7 @@ namespace System.Composition.Hosting.Core
         /// Determines equality between two contracts.
         /// </summary>
         /// <param name="obj">The contract to test.</param>
-        /// <returns>True if the the contracts are equivalent; otherwise, false.</returns>
+        /// <returns>True if the contracts are equivalent; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
             var contract = obj as CompositionContract;
@@ -98,9 +98,9 @@ namespace System.Composition.Hosting.Core
         }
 
         /// <summary>
-        /// Creates a string representaiton of the contract.
+        /// Creates a string representation of the contract.
         /// </summary>
-        /// <returns>A string representaiton of the contract.</returns>
+        /// <returns>A string representation of the contract.</returns>
         public override string ToString()
         {
             var result = Formatters.Format(_contractType);
@@ -125,7 +125,7 @@ namespace System.Composition.Hosting.Core
         /// new contract type.</returns>
         public CompositionContract ChangeType(Type newContractType)
         {
-            if (newContractType == null) throw new ArgumentNullException("newContractType");
+            if (newContractType == null) throw new ArgumentNullException(nameof(newContractType));
             return new CompositionContract(newContractType, _contractName, _metadataConstraints);
         }
 
@@ -141,7 +141,7 @@ namespace System.Composition.Hosting.Core
         /// <returns>True if the constraint is present and of the correct type, otherwise false.</returns>
         public bool TryUnwrapMetadataConstraint<T>(string constraintName, out T constraintValue, out CompositionContract remainingContract)
         {
-            if (constraintName == null) throw new ArgumentNullException("constraintName");
+            if (constraintName == null) throw new ArgumentNullException(nameof(constraintName));
 
             constraintValue = default(T);
             remainingContract = null;

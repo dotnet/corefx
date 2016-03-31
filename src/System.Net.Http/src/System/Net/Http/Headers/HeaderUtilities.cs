@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -39,7 +40,7 @@ namespace System.Net.Http.Headers
                 // value.
                 if ((value < 0) || (value > 1))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 string qualityString = ((double)value).ToString("0.0##", NumberFormatInfo.InvariantInfo);
@@ -206,7 +207,7 @@ namespace System.Net.Http.Headers
                 return current;
             }
 
-            // If we have a separator, skip the separator and all following whitespaces. If we support
+            // If we have a separator, skip the separator and all following whitespace. If we support
             // empty values, continue until the current character is neither a separator nor a whitespace.
             separatorFound = true;
             current++; // skip delimiter.

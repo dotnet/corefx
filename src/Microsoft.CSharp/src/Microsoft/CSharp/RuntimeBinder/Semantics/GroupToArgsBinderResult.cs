@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 
@@ -20,15 +21,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public MethPropWithInst GetAmbiguousResult() { return AmbiguousResult; }
             public MethPropWithInst InaccessibleResult;
             public MethPropWithInst GetInaccessibleResult() { return InaccessibleResult; }
-            public MethPropWithInst UninferrableResult;
-            public MethPropWithInst GetUninferrableResult() { return UninferrableResult; }
+            public MethPropWithInst UninferableResult;
+            public MethPropWithInst GetUninferableResult() { return UninferableResult; }
             public MethPropWithInst InconvertibleResult;
             public GroupToArgsBinderResult()
             {
                 BestResult = new MethPropWithInst();
                 AmbiguousResult = new MethPropWithInst();
                 InaccessibleResult = new MethPropWithInst();
-                UninferrableResult = new MethPropWithInst();
+                UninferableResult = new MethPropWithInst();
                 InconvertibleResult = new MethPropWithInst();
                 _inconvertibleResults = new List<MethPropWithInst>();
             }
@@ -74,7 +75,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     int max = pTypeArgs1.Size > pTypeArgs2.Size ? pTypeArgs2.Size : pTypeArgs1.Size;
 
-                    // If we dont have a winner yet, go through each element's type args.
+                    // If we don't have a winner yet, go through each element's type args.
                     for (int i = 0; i < max; i++)
                     {
                         if (pTypeArgs1.Item(i).IsAggregateType())
@@ -90,18 +91,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return rightErrors < leftErrors;
             }
 
-            public bool IsBetterUninferrableResult(TypeArray pTypeArguments)
+            public bool IsBetterUninferableResult(TypeArray pTypeArguments)
             {
-                if (UninferrableResult.Sym == null)
+                if (UninferableResult.Sym == null)
                 {
-                    // If we dont even have a result, then its definitely better.
+                    // If we don't even have a result, then its definitely better.
                     return true;
                 }
                 if (pTypeArguments == null)
                 {
                     return false;
                 }
-                return IsBetterThanCurrent(UninferrableResult.TypeArgs, pTypeArguments);
+                return IsBetterThanCurrent(UninferableResult.TypeArgs, pTypeArguments);
             }
         }
     }

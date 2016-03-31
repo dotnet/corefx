@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -24,7 +25,7 @@ namespace Tests.Collections
             if (arguments == null && default(T) == null)
                 return array.Push(default(T));
             if (arguments == null)
-                throw new ArgumentNullException("arguments");
+                throw new ArgumentNullException(nameof(arguments));
             var ret = new T[array.Length + arguments.Length];
             Array.Copy(array, ret, array.Length);
             Array.Copy(

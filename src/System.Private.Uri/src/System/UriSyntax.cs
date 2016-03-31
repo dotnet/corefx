@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // This file utilizes partial class feature and contains
 // only internal implementation of UriParser type
@@ -296,7 +297,7 @@ namespace System
 
         //
         // These are simple internal wrappers that will call virtual protected methods
-        // (to avoid "protected internal" siganures in the public docs)
+        // (to avoid "protected internal" signatures in the public docs)
         //
         internal UriParser InternalOnNewUri()
         {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.IO;
@@ -122,7 +123,7 @@ namespace System.Reflection.PortableExecutable
             {
                 if (unchecked(size.Value) > maxSize)
                 {
-                    throw new ArgumentOutOfRangeException("size");
+                    throw new ArgumentOutOfRangeException(nameof(size));
                 }
 
                 return size.Value;
@@ -131,7 +132,7 @@ namespace System.Reflection.PortableExecutable
             {
                 if (maxSize > int.MaxValue)
                 {
-                    throw new ArgumentException(SR.StreamTooLarge, "peStream");
+                    throw new ArgumentException(SR.StreamTooLarge, nameof(peStream));
                 }
 
                 return (int)maxSize;

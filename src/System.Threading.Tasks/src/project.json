@@ -1,18 +1,21 @@
 {
   "frameworks": {
-    "dnxcore50": {
+    "netstandard1.3": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc2-23713"
-      }
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-23931-00"
+      },
+      "imports": [
+        "dotnet5.4"
+      ]
     },
-    "net46":{
+    "net46": {
       "dependencies": {
-        "Microsoft.TargetingPack.NetFramework.v4.6": "1.0.0"
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     },
     "netcore50": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.NETNative": "1.0.0-rc2-23713"
+        "Microsoft.TargetingPack.Private.NETNative": "1.0.0-rc3-23931-00"
       }
     }
   }

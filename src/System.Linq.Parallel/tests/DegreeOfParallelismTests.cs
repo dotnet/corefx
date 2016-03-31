@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("DegreeData", new[] { 1024 }, new[] { 1, 4, 512 })]
+        [MemberData(nameof(DegreeData), new[] { 1024 }, new[] { 1, 4, 512 })]
         [OuterLoop]
         public static void DegreeOfParallelism(Labeled<ParallelQuery<int>> labeled, int count, int degree)
         {
@@ -51,7 +52,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("DegreeData", new[] { 1, 4, 32 }, new int[] { })]
+        [MemberData(nameof(DegreeData), new[] { 1, 4, 32 }, new int[] { })]
         [OuterLoop]
         public static void DegreeOfParallelism_Barrier(Labeled<ParallelQuery<int>> labeled, int count, int degree)
         {
@@ -69,7 +70,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("DegreeData", new[] { 128 * 1024 }, new[] { 1, 4, 64, 512 })]
+        [MemberData(nameof(DegreeData), new[] { 128 * 1024 }, new[] { 1, 4, 64, 512 })]
         [OuterLoop]
         public static void DegreeOfParallelism_Pipelining(Labeled<ParallelQuery<int>> labeled, int count, int degree)
         {
@@ -77,11 +78,11 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("DegreeData", new[] { 1, 4 }, new int[] { })]
-        [MemberData("DegreeData", new[] { 32 }, new[] { 4 })]
+        [MemberData(nameof(DegreeData), new[] { 1, 4 }, new int[] { })]
+        [MemberData(nameof(DegreeData), new[] { 32 }, new[] { 4 })]
         // Without the ability to ask the thread pool to create a minimum number of threads ahead of time,
         // higher thread counts take a prohibitive amount of time spooling them up.
-        //[MemberData("DegreeSourceData", new[] { 64, 512 }, new object[] { })]
+        //[MemberData(nameof(DegreeSourceData), new[] { 64, 512 }, new object[] { })]
         [OuterLoop]
         public static void DegreeOfParallelism_Throttled_Pipelining(Labeled<ParallelQuery<int>> labeled, int count, int degree)
         {
@@ -98,8 +99,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("NotLoadBalancedDegreeData", new[] { 1, 4 }, new int[] { })]
-        [MemberData("NotLoadBalancedDegreeData", new[] { 32, 512, 1024 }, new[] { 4, 16 })]
+        [MemberData(nameof(NotLoadBalancedDegreeData), new[] { 1, 4 }, new int[] { })]
+        [MemberData(nameof(NotLoadBalancedDegreeData), new[] { 32, 512, 1024 }, new[] { 4, 16 })]
         [OuterLoop]
         public static void DegreeOfParallelism_Aggregate_Accumulator(Labeled<ParallelQuery<int>> labeled, int count, int degree)
         {
@@ -116,8 +117,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("NotLoadBalancedDegreeData", new[] { 1, 4 }, new int[] { })]
-        [MemberData("NotLoadBalancedDegreeData", new[] { 32, 512, 1024 }, new[] { 4, 16 })]
+        [MemberData(nameof(NotLoadBalancedDegreeData), new[] { 1, 4 }, new int[] { })]
+        [MemberData(nameof(NotLoadBalancedDegreeData), new[] { 32, 512, 1024 }, new[] { 4, 16 })]
         [OuterLoop]
         public static void DegreeOfParallelism_Aggregate_SeedFunction(Labeled<ParallelQuery<int>> labeled, int count, int degree)
         {
@@ -137,7 +138,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("DegreeData", new[] { 1024 }, new[] { 0, 513 })]
+        [MemberData(nameof(DegreeData), new[] { 1024 }, new[] { 0, 513 })]
         [OuterLoop]
         public static void DegreeOfParallelism_OutOfRange(Labeled<ParallelQuery<int>> labeled, int count, int degree)
         {

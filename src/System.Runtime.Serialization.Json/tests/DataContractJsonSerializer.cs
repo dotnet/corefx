@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using SerializationTypes;
 using System;
@@ -211,6 +212,57 @@ public static partial class DataContractJsonSerializerTests
         foreach (string value in new string[] { "abc", "  a b  ", null, "", " ", "Hello World! 漢 ñ" })
         {
             Assert.StrictEqual(SerializeAndDeserialize<string>(value, value == null ? "null" : string.Format(@"""{0}""", value.ToString())), value);
+        }
+
+        var testStrings = new[]
+        {
+            new { value = "\u0008", baseline = "\\b" }, // BACKSPACE
+            new { value = "\u000C", baseline = "\\f" }, // FORM FEED (FF)
+            new { value = "\u000A", baseline = "\\n" }, // LINE FEED (LF)
+            new { value = "\u000D", baseline = "\\r" }, // CARRIAGE RETURN (CR)
+            new { value = "\u0009", baseline = "\\t" }, // HORIZONTAL TABULATION
+            new { value = "\u0022", baseline = "\\\"" }, // QUOTATION MARK
+            new { value = "\u005C", baseline = "\\\\" }, // REVERSE SOLIDUS
+            new { value = "\u0000", baseline = "\\u0000" }, // NULL
+            new { value = "\u000B", baseline = "\\u000b" }, // LINE TABULATION
+            new { value = "\u000F", baseline = "\\u000f" }, // SHIFT IN
+            new { value = "\u0027", baseline = "'" },
+        };
+
+        foreach(var pair in testStrings)
+        {
+            Assert.StrictEqual(SerializeAndDeserialize<string>(pair.value, string.Format(@"""{0}""", pair.baseline)), pair.value);
+        }
+    }
+
+    [Fact]
+    public static void DCJS_StringAsRoot_BackwardCompatibility()
+    {
+        var testStrings = new[]
+        {
+            new { value = "\u0008", text = @"""\u0008""" }, // BACKSPACE
+            new { value = "\u000C", text = @"""\u000c""" }, // FORM FEED (FF)
+            new { value = "\u000A", text = @"""\u000a""" }, // LINE FEED (LF)
+            new { value = "\u000D", text = @"""\u000d""" }, // CARRIAGE RETURN (CR)
+            new { value = "\u0009", text = @"""\u0009""" }, // HORIZONTAL TABULATION
+        };
+
+        var serializer = new DataContractJsonSerializer(typeof(string));
+        foreach(var pair in testStrings)
+        {
+            using (var ms = new MemoryStream())
+            {
+                using (var sw = new StreamWriter(ms))
+                {
+                    {
+                        sw.Write(pair.text);
+                        sw.Flush();
+                        ms.Position = 0;
+                        string actual = (string)serializer.ReadObject(ms);
+                        Assert.StrictEqual(pair.value, actual);
+                    }
+                }
+            }
         }
     }
 
@@ -957,7 +1009,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCJS_XElementAsRoot()
     {
         var original = new XElement("ElementName1");
@@ -969,7 +1020,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCJS_WithXElement()
     {
         var original = new WithXElement(true);
@@ -991,7 +1041,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCJS_WithXElementWithNestedXElement()
     {
         var original = new WithXElementWithNestedXElement(true);
@@ -1002,7 +1051,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCJS_WithArrayOfXElement()
     {
         var original = new WithArrayOfXElement(true);
@@ -1015,7 +1063,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCJS_WithListOfXElement()
     {
         var original = new WithListOfXElement(true);
@@ -1602,6 +1649,20 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
+    public static void DCJS_ReadOnlyDictionary()
+    {
+        var dict = new Dictionary<string, int>();
+        dict["Foo"] = 1;
+        dict["Bar"] = 2;
+        ReadOnlyDictionary<string, int> value = new ReadOnlyDictionary<string, int>(dict);
+        var deserializedValue = SerializeAndDeserialize(value, @"{""_dictionary"":[{""Key"":""Foo"",""Value"":1},{""Key"":""Bar"",""Value"":2}]}");
+
+        Assert.StrictEqual(value.Count, deserializedValue.Count);
+        Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
+        Assert.StrictEqual(value["Bar"], deserializedValue["Bar"]);
+    }
+
+    [Fact]
     public static void DCJS_KeyValuePair()
     {
         var value = new KeyValuePair<string, object>("FooKey", "FooValue");
@@ -1719,6 +1780,45 @@ public static partial class DataContractJsonSerializerTests
         Assert.Throws<InvalidDataContractException>(() => {
             var obj = new TypeWithEnumerableInterfaceGetOnlyCollection(new List<string>() { "item1", "item2", "item3" });
             SerializeAndDeserialize(obj, @"{""Items"":[""item1"",""item2"",""item3""]}");
+        });
+    }
+
+    [Fact]
+    public static void DCJS_XmlElementAsRoot()
+    {
+        XmlDocument xDoc = new XmlDocument();
+        xDoc.LoadXml(@"<html></html>");
+        XmlElement expected = xDoc.CreateElement("Element");
+        expected.InnerText = "Element innertext";
+        var actual = SerializeAndDeserialize(expected, @"""<Element>Element innertext<\/Element>""");
+        Assert.NotNull(actual);
+        Assert.StrictEqual(expected.InnerText, actual.InnerText);
+    }
+
+    [Fact]
+    public static void DCJS_TypeWithXmlElementProperty()
+    {
+        XmlDocument xDoc = new XmlDocument();
+        xDoc.LoadXml(@"<html></html>");
+        XmlElement productElement = xDoc.CreateElement("Product");
+        productElement.InnerText = "Product innertext";
+        XmlElement categoryElement = xDoc.CreateElement("Category");
+        categoryElement.InnerText = "Category innertext";
+        var expected = new TypeWithXmlElementProperty() { Elements = new[] { productElement, categoryElement } };
+        var actual = SerializeAndDeserialize(expected, @"{""Elements"":[""<Product>Product innertext<\/Product>"",""<Category>Category innertext<\/Category>""]}");
+        Assert.StrictEqual(expected.Elements.Length, actual.Elements.Length);
+        for (int i = 0; i < expected.Elements.Length; ++i)
+        {
+            Assert.StrictEqual(expected.Elements[i].InnerText, actual.Elements[i].InnerText);
+        }
+    }
+
+    [Fact]
+    public static void DCS_RecursiveCollection()
+    {
+        Assert.Throws<InvalidDataContractException>(() =>
+        {
+            (new DataContractSerializer(typeof(RecursiveCollection))).WriteObject(new MemoryStream(), new RecursiveCollection());
         });
     }
 

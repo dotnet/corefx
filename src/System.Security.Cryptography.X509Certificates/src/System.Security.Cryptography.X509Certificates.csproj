@@ -10,28 +10,29 @@
     <ProjectGuid>{6F8576C2-6CD0-4DF3-8394-00B002D82E40}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Security.Cryptography.X509Certificates</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)'=='net46'">4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">dotnet5.4</PackageTargetFramework>
-    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.4</PackageTargetFramework>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net46' OR '$(TargetGroup)'=='net461'">true</IsPartialFacadeAssembly>
+    <UsePackageTargetRuntimeDefaults Condition="'$(IsPartialFacadeAssembly)' != 'true'">true</UsePackageTargetRuntimeDefaults>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)'==''">.NETStandard,Version=v1.4</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetGroup)' == 'netcore50' and '$(ProjectJson)' == '' ">
-    <ProjectJson>netcore50\project.json</ProjectJson>
-    <ProjectLockJson>netcore50\project.lock.json</ProjectLockJson>
+    <ProjectJson>netcore50/project.json</ProjectJson>
+    <ProjectLockJson>netcore50/project.lock.json</ProjectLockJson>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' and '$(ProjectJson)' == '' ">
-    <ProjectJson>win\project.json</ProjectJson>
-    <ProjectLockJson>win\project.lock.json</ProjectLockJson>
+  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(ProjectJson)' == '' ">
+    <ProjectJson>win/project.json</ProjectJson>
+    <ProjectLockJson>win/project.lock.json</ProjectLockJson>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' and '$(ProjectJson)' == '' ">
-    <ProjectJson>unix\project.json</ProjectJson>
-    <ProjectLockJson>unix\project.lock.json</ProjectLockJson>
+    <ProjectJson>unix/project.json</ProjectJson>
+    <ProjectLockJson>unix/project.lock.json</ProjectLockJson>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Debug|AnyCPU'" />
@@ -39,7 +40,8 @@
   <PropertyGroup Condition="'$(TargetGroup)' == 'netcore50'">
     <DefineConstants>$(DefineConstants);NETNATIVE</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
+  
+  <ItemGroup Condition=" '$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="Internal\Cryptography\ICertificatePal.cs" />
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleCache.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleCache.cs</Link>
@@ -93,7 +95,7 @@
     <Compile Include="System\Security\Cryptography\X509Certificates\X509SubjectKeyIdentifierHashAlgorithm.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509VerificationFlags.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="System\Security\Cryptography\DSACryptoServiceProviderStub.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\CertificatePal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\CertificatePal.CspParametersStub.cs" />
@@ -145,7 +147,7 @@
       <Link>Common\Microsoft\Win32\SafeHandles\SafeBCryptKeyHandle.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="Internal\Cryptography\Pal.Unix\CertificateAssetDownloader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CertificatePal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CertificatePolicy.cs" />
@@ -230,6 +232,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Close.cs">
       <Link>Common\Interop\Unix\Interop.Close.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.FChMod.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.FChMod.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetEUid.cs">
       <Link>Common\Interop\Unix\Interop.GetEUid.cs</Link>
     </Compile>
@@ -289,10 +294,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\DerSequenceReader.cs">
       <Link>Common\System\Security\Cryptography\DerSequenceReader.cs</Link>
-    </Compile>
+    </Compile>    
   </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
+  <ItemGroup Condition=" '$(IsPartialFacadeAssembly)'=='true'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System" />
+    <TargetingPackReference Include="System.Core" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

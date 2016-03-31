@@ -1,6 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -44,6 +46,7 @@ namespace System.IO.Pipes.Tests
                 PipeStream pipe = pair.writeablePipe;
                 Assert.True(pipe.IsConnected);
                 Assert.True(pipe.CanWrite);
+                Assert.False(pipe.CanSeek);
 
                 // Offset must be nonnegative
                 Assert.Throws<ArgumentOutOfRangeException>("offset", () => pipe.Write(new byte[5], -1, 1));
@@ -190,6 +193,14 @@ namespace System.IO.Pipes.Tests
         {
             using (ServerClientPair pair = CreateServerClientPair())
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                    (pair.readablePipe is NamedPipeClientStream || pair.writeablePipe is NamedPipeClientStream))
+                {
+                    // On Unix, NamedPipe*Stream is implemented in term of sockets, where information 
+                    // about shutdown is not immediately propagated.
+                    return;
+                }
+
                 pair.readablePipe.Dispose();
                 byte[] buffer = new byte[] { 0, 0, 0, 0 };
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Runtime.InteropServices;
@@ -14,13 +15,12 @@ namespace System.Net.Http
     {
         private volatile bool _disposed;
         private readonly WinHttpRequestState _state;
+        private SafeWinHttpHandle _requestHandle;
         
-        // TODO (Issue 2505): temporary pinned buffer caches of 1 item. Will be replaced by PinnableBufferCache.
-        private GCHandle _cachedReceivePinnedBuffer = new GCHandle();
-
-        internal WinHttpResponseStream(WinHttpRequestState state)
+        internal WinHttpResponseStream(SafeWinHttpHandle requestHandle, WinHttpRequestState state)
         {
             _state = state;
+            _requestHandle = requestHandle;
         }
 
         public override bool CanRead
@@ -87,22 +87,22 @@ namespace System.Net.Http
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             if (count > buffer.Length - offset)
             {
-                throw new ArgumentException("buffer");
+                throw new ArgumentException(SR.net_http_buffer_insufficient_length, nameof(buffer));
             }
 
             if (token.IsCancellationRequested)
@@ -117,16 +117,7 @@ namespace System.Net.Http
                 throw new InvalidOperationException(SR.net_http_no_concurrent_io_allowed);
             }
 
-            // TODO (Issue 2505): replace with PinnableBufferCache.
-            if (!_cachedReceivePinnedBuffer.IsAllocated || _cachedReceivePinnedBuffer.Target != buffer)
-            {
-                if (_cachedReceivePinnedBuffer.IsAllocated)
-                {
-                    _cachedReceivePinnedBuffer.Free();
-                }
-
-                _cachedReceivePinnedBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            }
+            _state.PinReceiveBuffer(buffer);
 
             _state.TcsReadFromResponseStream =
                 new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -139,9 +130,9 @@ namespace System.Net.Http
                     {
                         _state.TcsReadFromResponseStream.TrySetException(previousTask.Exception.InnerException);
                     }
-                    else if (previousTask.IsCanceled)
+                    else if (previousTask.IsCanceled || token.IsCancellationRequested)
                     {
-                        _state.TcsReadFromResponseStream.TrySetCanceled();
+                        _state.TcsReadFromResponseStream.TrySetCanceled(token);
                     }
                     else
                     {
@@ -159,7 +150,7 @@ namespace System.Net.Http
                         lock (_state.Lock)
                         {
                             if (!Interop.WinHttp.WinHttpReadData(
-                                _state.RequestHandle,
+                                _requestHandle,
                                 Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset),
                                 (uint)bytesToRead,
                                 IntPtr.Zero))
@@ -170,13 +161,13 @@ namespace System.Net.Http
                         }
                     }
                 }, 
-                token, TaskContinuationOptions.None, TaskScheduler.Default);
+                CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
 
             // TODO: Issue #2165. Register callback on cancellation token to cancel WinHTTP operation.
                 
             lock (_state.Lock)
             {
-                if (!Interop.WinHttp.WinHttpQueryDataAvailable(_state.RequestHandle, IntPtr.Zero))
+                if (!Interop.WinHttp.WinHttpQueryDataAvailable(_requestHandle, IntPtr.Zero))
                 {
                     _state.TcsReadFromResponseStream.TrySetException(
                         new IOException(SR.net_http_io_read, WinHttpException.CreateExceptionUsingLastError()));
@@ -217,17 +208,10 @@ namespace System.Net.Http
 
                 if (disposing)
                 {
-                    // TODO (Issue 2508): Pinned buffers must be released in the callback, when it is guaranteed no further
-                    // operations will be made to the send/receive buffers.
-                    if (_cachedReceivePinnedBuffer.IsAllocated)
+                    if (_requestHandle != null)
                     {
-                        _cachedReceivePinnedBuffer.Free();
-                    }
-
-                    if (_state.RequestHandle != null)
-                    {
-                        _state.RequestHandle.Dispose();
-                        _state.RequestHandle = null;
+                        _requestHandle.Dispose();
+                        _requestHandle = null;
                     }
                 }
             }

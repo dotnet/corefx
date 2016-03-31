@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -48,7 +49,7 @@ namespace Microsoft.Win32.RegistryTests
             const int maxValueNameLength = 255;
             Assert.Throws<ArgumentException>(() => TestRegistryKey.CreateSubKey(new string('a', maxValueNameLength + 1)));
 
-            //According to msdn documetation max nesting level exceeds is 510 but actual is 508
+            //According to msdn documentation max nesting level exceeds is 510 but actual is 508
             const int maxNestedLevel = 508;
             string exceedsNestedSubkeyName = string.Join(@"\", Enumerable.Repeat("a", maxNestedLevel));
             Assert.Throws<IOException>(() => TestRegistryKey.CreateSubKey(exceedsNestedSubkeyName, true));

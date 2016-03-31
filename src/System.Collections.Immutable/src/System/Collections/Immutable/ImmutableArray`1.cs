@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 
 namespace System.Collections.Immutable
 {
@@ -31,6 +33,7 @@ namespace System.Collections.Immutable
     /// it is insulated from other threads.
     /// </devremarks>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [NonVersionable] // Applies to field layout
     public partial struct ImmutableArray<T> : IReadOnlyList<T>, IList<T>, IEquatable<ImmutableArray<T>>, IImmutableList<T>, IList, IImmutableArray, IStructuralComparable, IStructuralEquatable
     {
         /// <summary>
@@ -65,6 +68,7 @@ namespace System.Collections.Immutable
         /// <param name="left">The instance to the left of the operator.</param>
         /// <param name="right">The instance to the right of the operator.</param>
         /// <returns><c>true</c> if the values' underlying arrays are reference equal; <c>false</c> otherwise.</returns>
+        [NonVersionable]
         public static bool operator ==(ImmutableArray<T> left, ImmutableArray<T> right)
         {
             return left.Equals(right);
@@ -76,6 +80,7 @@ namespace System.Collections.Immutable
         /// <param name="left">The instance to the left of the operator.</param>
         /// <param name="right">The instance to the right of the operator.</param>
         /// <returns><c>true</c> if the values' underlying arrays are reference not equal; <c>false</c> otherwise.</returns>
+        [NonVersionable]
         public static bool operator !=(ImmutableArray<T> left, ImmutableArray<T> right)
         {
             return !left.Equals(right);
@@ -112,6 +117,7 @@ namespace System.Collections.Immutable
         /// <returns>The element at the specified index in the read-only list.</returns>
         public T this[int index]
         {
+            [NonVersionable]
             get
             {
                 // We intentionally do not check this.array != null, and throw NullReferenceException
@@ -159,6 +165,7 @@ namespace System.Collections.Immutable
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsEmpty
         {
+            [NonVersionable]
             get { return this.Length == 0; }
         }
 
@@ -168,6 +175,7 @@ namespace System.Collections.Immutable
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public int Length
         {
+            [NonVersionable]
             get
             {
                 // We intentionally do not check this.array != null, and throw NullReferenceException
@@ -345,8 +353,8 @@ namespace System.Collections.Immutable
                 return -1;
             }
 
-            Requires.Range(startIndex >= 0 && startIndex < self.Length, "startIndex");
-            Requires.Range(count >= 0 && startIndex + count <= self.Length, "count");
+            Requires.Range(startIndex >= 0 && startIndex < self.Length, nameof(startIndex));
+            Requires.Range(count >= 0 && startIndex + count <= self.Length, nameof(count));
 
             equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
             if (equalityComparer == EqualityComparer<T>.Default)
@@ -434,8 +442,8 @@ namespace System.Collections.Immutable
                 return -1;
             }
 
-            Requires.Range(startIndex >= 0 && startIndex < self.Length, "startIndex");
-            Requires.Range(count >= 0 && startIndex - count + 1 >= 0, "count");
+            Requires.Range(startIndex >= 0 && startIndex < self.Length, nameof(startIndex));
+            Requires.Range(count >= 0 && startIndex - count + 1 >= 0, nameof(count));
 
             equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
             if (equalityComparer == EqualityComparer<T>.Default)
@@ -518,7 +526,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            Requires.Range(index >= 0 && index <= self.Length, "index");
+            Requires.Range(index >= 0 && index <= self.Length, nameof(index));
 
             if (self.Length == 0)
             {
@@ -543,8 +551,8 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            Requires.Range(index >= 0 && index <= self.Length, "index");
-            Requires.NotNull(items, "items");
+            Requires.Range(index >= 0 && index <= self.Length, nameof(index));
+            Requires.NotNull(items, nameof(items));
 
             if (self.Length == 0)
             {
@@ -581,7 +589,7 @@ namespace System.Collections.Immutable
             var self = this;
             self.ThrowNullRefIfNotInitialized();
             ThrowNullRefIfNotInitialized(items);
-            Requires.Range(index >= 0 && index <= self.Length, "index");
+            Requires.Range(index >= 0 && index <= self.Length, nameof(index));
 
             if (self.IsEmpty)
             {
@@ -658,7 +666,7 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> SetItem(int index, T item)
         {
             var self = this;
-            Requires.Range(index >= 0 && index < self.Length, "index");
+            Requires.Range(index >= 0 && index < self.Length, nameof(index));
 
             T[] tmp = new T[self.Length];
             Array.Copy(self.array, 0, tmp, 0, self.Length);
@@ -697,7 +705,7 @@ namespace System.Collections.Immutable
             int index = self.IndexOf(oldValue, equalityComparer);
             if (index < 0)
             {
-                throw new ArgumentException(SR.CannotFindOldValue, "oldValue");
+                throw new ArgumentException(SR.CannotFindOldValue, nameof(oldValue));
             }
 
             return self.SetItem(index, newValue);
@@ -757,8 +765,8 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> RemoveRange(int index, int length)
         {
             var self = this;
-            Requires.Range(index >= 0 && index <= self.Length, "index");
-            Requires.Range(length >= 0 && index + length <= self.Length, "length");
+            Requires.Range(index >= 0 && index <= self.Length, nameof(index));
+            Requires.Range(length >= 0 && index + length <= self.Length, nameof(length));
 
             if (length == 0)
             {
@@ -800,7 +808,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            Requires.NotNull(items, "items");
+            Requires.NotNull(items, nameof(items));
 
             var indexesToRemove = new SortedSet<int>();
             foreach (var item in items)
@@ -843,7 +851,7 @@ namespace System.Collections.Immutable
         public ImmutableArray<T> RemoveRange(ImmutableArray<T> items, IEqualityComparer<T> equalityComparer)
         {
             var self = this;
-            Requires.NotNull(items.array, "items");
+            Requires.NotNull(items.array, nameof(items));
 
             if (items.IsEmpty)
             {
@@ -876,7 +884,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            Requires.NotNull(match, "match");
+            Requires.NotNull(match, nameof(match));
 
             if (self.IsEmpty)
             {
@@ -933,7 +941,7 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableArray<T> Sort(Comparison<T> comparison)
         {
-            Requires.NotNull(comparison, "comparison");
+            Requires.NotNull(comparison, nameof(comparison));
 
             var self = this;
             return self.Sort(Comparer<T>.Create(comparison));
@@ -961,8 +969,8 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            Requires.Range(index >= 0, "index");
-            Requires.Range(count >= 0 && index + count <= self.Length, "count");
+            Requires.Range(index >= 0, nameof(index));
+            Requires.Range(count >= 0 && index + count <= self.Length, nameof(count));
 
             // 0 and 1 element arrays don't need to be sorted.
             if (count > 1)
@@ -1065,6 +1073,7 @@ namespace System.Collections.Immutable
         /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
         /// </returns>
         [Pure]
+        [NonVersionable]
         public bool Equals(ImmutableArray<T> other)
         {
             return this.array == other.array;
@@ -1588,7 +1597,7 @@ namespace System.Collections.Immutable
                     }
                     else if (self.array == null ^ theirs.Array == null)
                     {
-                        throw new ArgumentException(SR.ArrayInitializedStateNotEqual, "other");
+                        throw new ArgumentException(SR.ArrayInitializedStateNotEqual, nameof(other));
                     }
 
                     otherArray = theirs.Array;
@@ -1601,7 +1610,7 @@ namespace System.Collections.Immutable
                 return ours.CompareTo(otherArray, comparer);
             }
 
-            throw new ArgumentException(SR.ArrayLengthsNotEqual, "other");
+            throw new ArgumentException(SR.ArrayLengthsNotEqual, nameof(other));
         }
 
         #endregion
@@ -1620,12 +1629,6 @@ namespace System.Collections.Immutable
             // so touching it, and potentially causing a cache miss, is not going to be an
             // extra expense.
             var unused = this.array.Length;
-
-            // This line is a workaround for a bug in C# compiler
-            // The code in this line will not be emitted, but it will prevent incorrect
-            // optimizing away of "Length" call above in Release builds.
-            // TODO: remove the workaround when building with Roslyn which does not have this bug.
-            var unused2 = unused;
         }
 
         /// <summary>
@@ -1658,7 +1661,7 @@ namespace System.Collections.Immutable
         {
             var self = this;
             self.ThrowNullRefIfNotInitialized();
-            Requires.NotNull(indexesToRemove, "indexesToRemove");
+            Requires.NotNull(indexesToRemove, nameof(indexesToRemove));
 
             if (indexesToRemove.Count == 0)
             {

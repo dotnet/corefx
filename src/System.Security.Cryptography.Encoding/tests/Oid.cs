@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -17,7 +18,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNamePairs")]
+        [MemberData(nameof(ValidOidFriendlyNamePairs))]
         public static void LookupOidByValue_Ctor(string oidValue, string friendlyName)
         {
             Oid oid = new Oid(oidValue);
@@ -27,7 +28,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNamePairs")]
+        [MemberData(nameof(ValidOidFriendlyNamePairs))]
         public static void LookupOidByFriendlyName_Ctor(string oidValue, string friendlyName)
         {
             Oid oid = new Oid(friendlyName);
@@ -62,7 +63,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNamePairs")]
+        [MemberData(nameof(ValidOidFriendlyNamePairs))]
         public static void Oid_StringString_NullFriendlyName(string oidValue, string expectedFriendlyName)
         {
             // Can omit friendly-name - FriendlyName property demand-computes it.
@@ -153,7 +154,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
         
         [Theory]
-        [MemberData("ValidOidFriendlyNameHashAlgorithmPairs")]
+        [MemberData(nameof(ValidOidFriendlyNameHashAlgorithmPairs))]
         public static void LookupOidByValue_Method_HashAlgorithm(string oidValue, string friendlyName)
         {
             Oid oid = Oid.FromOidValue(oidValue, OidGroup.HashAlgorithm);
@@ -163,7 +164,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNameEncryptionAlgorithmPairs")]
+        [MemberData(nameof(ValidOidFriendlyNameEncryptionAlgorithmPairs))]
         public static void LookupOidByValue_Method_EncryptionAlgorithm(string oidValue, string friendlyName)
         {
             Oid oid = Oid.FromOidValue(oidValue, OidGroup.EncryptionAlgorithm);
@@ -173,7 +174,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNameHashAlgorithmPairs")]
+        [MemberData(nameof(ValidOidFriendlyNameHashAlgorithmPairs))]
         [PlatformSpecific(PlatformID.Windows)]
         public static void LookupOidByValue_Method_WrongGroup(string oidValue, string friendlyName)
         {
@@ -196,7 +197,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNameHashAlgorithmPairs")]
+        [MemberData(nameof(ValidOidFriendlyNameHashAlgorithmPairs))]
         public static void LookupOidByFriendlyName_Method_HashAlgorithm(string oidValue, string friendlyName)
         {
             Oid oid = Oid.FromFriendlyName(friendlyName, OidGroup.HashAlgorithm);
@@ -206,7 +207,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNameEncryptionAlgorithmPairs")]
+        [MemberData(nameof(ValidOidFriendlyNameEncryptionAlgorithmPairs))]
         public static void LookupOidByFriendlyName_Method_EncryptionAlgorithm(string oidValue, string friendlyName)
         {
             Oid oid = Oid.FromFriendlyName(friendlyName, OidGroup.EncryptionAlgorithm);
@@ -216,7 +217,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNamePairs")]
+        [MemberData(nameof(ValidOidFriendlyNamePairs))]
         public static void LookupOidByFriendlyName_Method_InverseCase(string oidValue, string friendlyName)
         {
             // Note that oid lookup is case-insensitive, and we store the name in the form it was
@@ -229,7 +230,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory]
-        [MemberData("ValidOidFriendlyNameHashAlgorithmPairs")]
+        [MemberData(nameof(ValidOidFriendlyNameHashAlgorithmPairs))]
         [PlatformSpecific(PlatformID.Windows)]
         public static void LookupOidByFriendlyName_Method_WrongGroup(string oidValue, string friendlyName)
         {

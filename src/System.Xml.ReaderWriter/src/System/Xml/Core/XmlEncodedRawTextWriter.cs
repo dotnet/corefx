@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -290,7 +291,7 @@ namespace System.Xml
 
             // StartElementContent is always called; therefore, in order to allow shortcut syntax, we save the
             // position of the '>' character.  If WriteEndElement is called and no other characters have been
-            // output, then the '>' character can be be overwritten with the shortcut syntax " />".
+            // output, then the '>' character can be overwritten with the shortcut syntax " />".
             contentPos = bufPos;
         }
 
@@ -1555,7 +1556,7 @@ namespace System.Xml
             }
         }
 
-        // Following methods do not check whether pDst is beyond the bufSize because the buffer was allocated with a OVERFLOW to accomodate
+        // Following methods do not check whether pDst is beyond the bufSize because the buffer was allocated with a OVERFLOW to accommodate
         // for the writes of small constant-length string as below.
 
         // Entitize '<' as "&lt;".  Return an updated pointer.

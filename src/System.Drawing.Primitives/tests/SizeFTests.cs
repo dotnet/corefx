@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 using Xunit;
@@ -31,6 +32,12 @@ namespace System.Drawing.PrimitivesTest
 
             Assert.Equal(width, s1.Width);
             Assert.Equal(height, s1.Height);
+
+            s1.Width = 10;
+            Assert.Equal(10, s1.Width);
+
+            s1.Height = -10.123f;
+            Assert.Equal(-10.123, s1.Height, 3);
         }
 
         [Fact]
@@ -91,6 +98,24 @@ namespace System.Drawing.PrimitivesTest
             Assert.True(sLeft != sRight);
             Assert.False(sLeft == sRight);
             Assert.False(sLeft.Equals(sRight));
+        }
+
+        [Fact]
+        public static void EqualityTest_NotSizeF()
+        {
+            var size = new SizeF(0, 0);
+            Assert.False(size.Equals(null));
+            Assert.False(size.Equals(0));
+            Assert.False(size.Equals(new Size(0, 0)));
+        }
+
+        [Fact]
+        public static void GetHashCodeTest()
+        {
+            var size = new SizeF(10, 10);
+            Assert.Equal(size.GetHashCode(), new SizeF(10, 10).GetHashCode());
+            Assert.NotEqual(size.GetHashCode(), new SizeF(20, 10).GetHashCode());
+            Assert.NotEqual(size.GetHashCode(), new SizeF(10, 20).GetHashCode());
         }
 
         [Theory]

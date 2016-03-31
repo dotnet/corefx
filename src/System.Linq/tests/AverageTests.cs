@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,15 @@ namespace System.Linq.Tests
             float? expected = null;
 
             Assert.Equal(expected, source.Average());
+        }
+
+        [Fact]
+        public void EmptyNullableFloatSourceWithSelector()
+        {
+            float?[] source = { };
+            float? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
         }
 
         [Fact]
@@ -102,6 +112,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void MultipleNullableFloatSourceAllNullWithSelector()
+        {
+            float?[] source = { null, null, null, null, null };
+            float? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void NullableFloatFromSelector()
         {
             var source = new []
@@ -121,6 +140,14 @@ namespace System.Linq.Tests
             int[] source = { };
             
             Assert.Throws<InvalidOperationException>(() => source.Average());
+        }
+
+        [Fact]
+        public void EmptyIntSourceWithSelector()
+        {
+            int[] source = { };
+
+            Assert.Throws<InvalidOperationException>(() => source.Average(i => i));
         }
 
         [Fact]
@@ -193,6 +220,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void EmptyNullableIntSourceWithSelector()
+        {
+            int?[] source = { };
+            double? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void NullNIntSource()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int?>)null).Average());
@@ -257,6 +293,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void MultipleNullableIntSourceAllNullWithSelector()
+        {
+            int?[] source = { null, null, null, null, null };
+            double? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void NullableIntFromSelector()
         {
             var source = new []
@@ -274,8 +319,16 @@ namespace System.Linq.Tests
         public void EmptyLongSource()
         {
             long[] source = { };
-            
+
             Assert.Throws<InvalidOperationException>(() => source.Average());
+        }
+
+        [Fact]
+        public void EmptyLongSourceWithSelector()
+        {
+            long[] source = { };
+
+            Assert.Throws<InvalidOperationException>(() => source.Average(i => i));
         }
 
         [Fact]
@@ -356,6 +409,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void EmptyNullableLongSourceWithSelector()
+        {
+            long?[] source = { };
+            double? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void NullNLongSource()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<long?>)null).Average());
@@ -420,6 +482,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void MultipleNullableLongSourceAllNullWithSelector()
+        {
+            long?[] source = { null, null, null, null, null };
+            double? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void NullableLongFromSelector()
         {
             var source = new []
@@ -437,8 +508,16 @@ namespace System.Linq.Tests
         public void EmptyDoubleSource()
         {
             double[] source = { };
-            
+
             Assert.Throws<InvalidOperationException>(() => source.Average());
+        }
+
+        [Fact]
+        public void EmptyDoubleSourceWithSelector()
+        {
+            double[] source = { };
+
+            Assert.Throws<InvalidOperationException>(() => source.Average(i => i));
         }
 
         [Fact]
@@ -520,6 +599,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void EmptyNullableDoubleSourceWithSelector()
+        {
+            double?[] source = { };
+            double? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void NullNDoubleSource()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<double?>)null).Average());
@@ -584,6 +672,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void MultipleNullableDoubleSourceAllNullWithSelector()
+        {
+            double?[] source = { null, null, null, null, null };
+            double? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void MultipleNullableDoubleSourceIncludingNaN()
         {
             double?[] source = { -23.5, 0, Double.NaN, 54.3, 0.56 };
@@ -612,6 +709,14 @@ namespace System.Linq.Tests
             decimal[] source = { };
 
             Assert.Throws<InvalidOperationException>(() => source.Average());
+        }
+
+        [Fact]
+        public void EmptyDecimalSourceWithSelector()
+        {
+            decimal[] source = { };
+
+            Assert.Throws<InvalidOperationException>(() => source.Average(i => i));
         }
 
         [Fact]
@@ -683,6 +788,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void EmptyNullableDecimalSourceWithSelector()
+        {
+            decimal?[] source = { };
+            decimal? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void NullNDecimalSource()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<decimal?>)null).Average());
@@ -747,6 +861,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void MultipleNullableDecimalSourceAllNullWithSelector()
+        {
+            decimal?[] source = { null, null, null, null, null };
+            decimal? expected = null;
+
+            Assert.Equal(expected, source.Average(i => i));
+        }
+
+        [Fact]
         public void NullableDecimalFromSelector()
         {
             var source = new[]
@@ -774,6 +897,14 @@ namespace System.Linq.Tests
             float[] source = { };
 
             Assert.Throws<InvalidOperationException>(() => source.Average());
+        }
+
+        [Fact]
+        public void EmptyFloatSourceWithSelector()
+        {
+            float[] source = { };
+
+            Assert.Throws<InvalidOperationException>(() => source.Average(i => i));
         }
 
         [Fact]

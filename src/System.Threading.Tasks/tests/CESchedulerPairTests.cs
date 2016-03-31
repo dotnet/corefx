@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -220,7 +221,7 @@ namespace System.Threading.Tasks.Tests
                         itemsExecutedCount, maxItemsPerTask, id));
                 }
                 else
-                { //Since ids dont match, this is the first Task being executed in the CEScheduler Task
+                { //Since ids don't match, this is the first Task being executed in the CEScheduler Task
                     schedulerIDInsideTask.Value = id; //cache the scheduler ID seen by the thread, so other tasks running in same thread can see this
                     itemsExecutedCount.Value = 1;
                 }
@@ -335,7 +336,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Theory]
-        [MemberData("ApiType")]
+        [MemberData(nameof(ApiType))]
         public static void TestIntegration(String apiType, bool useReader)
         {
             Debug.WriteLine(string.Format(" Running apiType:{0} useReader:{1}", apiType, useReader));

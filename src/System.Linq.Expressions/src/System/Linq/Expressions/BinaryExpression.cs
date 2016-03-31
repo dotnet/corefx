@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -408,7 +409,7 @@ namespace System.Linq.Expressions
         }
 
         //
-        // For a userdefined type T which has op_False defined and L, R are
+        // For a user-defined type T which has op_False defined and L, R are
         // nullable, (L AndAlso R) is computed as:
         //
         // L.HasValue
@@ -419,7 +420,7 @@ namespace System.Linq.Expressions
         //             : null
         //     : null
         //
-        // For a userdefined type T which has op_True defined and L, R are
+        // For a user-defined type T which has op_True defined and L, R are
         // nullable, (L OrElse R)  is computed as:
         //
         // L.HasValue
@@ -624,8 +625,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Assign(Expression left, Expression right)
         {
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             TypeUtils.ValidateType(left.Type);
             TypeUtils.ValidateType(right.Type);
             if (!TypeUtils.AreReferenceAssignable(left.Type, right.Type))
@@ -815,10 +816,8 @@ namespace System.Linq.Expressions
 
         private static void ValidateMethodInfo(MethodInfo method)
         {
-            if (method.IsGenericMethodDefinition)
-                throw Error.MethodIsGeneric(method);
             if (method.ContainsGenericParameters)
-                throw Error.MethodContainsGenericParameters(method);
+                throw method.IsGenericMethodDefinition ? Error.MethodIsGeneric(method) : Error.MethodContainsGenericParameters(method);
         }
 
 
@@ -1065,8 +1064,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Equal(Expression left, Expression right, bool liftToNull, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 return GetEqualityComparisonOperator(ExpressionType.Equal, "op_Equality", left, right, liftToNull);
@@ -1084,8 +1083,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression ReferenceEqual(Expression left, Expression right)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (TypeUtils.HasReferenceEquality(left.Type, right.Type))
             {
                 return new LogicalBinaryExpression(ExpressionType.Equal, left, right);
@@ -1117,8 +1116,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression NotEqual(Expression left, Expression right, bool liftToNull, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 return GetEqualityComparisonOperator(ExpressionType.NotEqual, "op_Inequality", left, right, liftToNull);
@@ -1136,8 +1135,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression ReferenceNotEqual(Expression left, Expression right)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (TypeUtils.HasReferenceEquality(left.Type, right.Type))
             {
                 return new LogicalBinaryExpression(ExpressionType.NotEqual, left, right);
@@ -1211,8 +1210,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression GreaterThan(Expression left, Expression right, bool liftToNull, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 return GetComparisonOperator(ExpressionType.GreaterThan, "op_GreaterThan", left, right, liftToNull);
@@ -1245,8 +1244,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression LessThan(Expression left, Expression right, bool liftToNull, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 return GetComparisonOperator(ExpressionType.LessThan, "op_LessThan", left, right, liftToNull);
@@ -1279,8 +1278,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression GreaterThanOrEqual(Expression left, Expression right, bool liftToNull, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 return GetComparisonOperator(ExpressionType.GreaterThanOrEqual, "op_GreaterThanOrEqual", left, right, liftToNull);
@@ -1313,8 +1312,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression LessThanOrEqual(Expression left, Expression right, bool liftToNull, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 return GetComparisonOperator(ExpressionType.LessThanOrEqual, "op_LessThanOrEqual", left, right, liftToNull);
@@ -1367,8 +1366,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression AndAlso(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             Type returnType;
             if (method == null)
             {
@@ -1421,8 +1420,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression OrElse(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             Type returnType;
             if (method == null)
             {
@@ -1478,8 +1477,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Coalesce(Expression left, Expression right, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
 
             if (conversion == null)
             {
@@ -1579,8 +1578,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Add(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -1633,9 +1632,9 @@ namespace System.Linq.Expressions
 
         public static BinaryExpression AddAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -1719,9 +1718,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression AddAssignChecked(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
 
             if (method == null)
             {
@@ -1763,8 +1762,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression AddChecked(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -1800,8 +1799,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Subtract(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -1853,9 +1852,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression SubtractAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -1912,9 +1911,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression SubtractAssignChecked(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -1955,8 +1954,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression SubtractChecked(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -1992,8 +1991,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Divide(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -2045,9 +2044,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression DivideAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -2088,8 +2087,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Modulo(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -2141,9 +2140,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression ModuloAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -2184,8 +2183,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Multiply(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -2237,9 +2236,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression MultiplyAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -2296,9 +2295,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression MultiplyAssignChecked(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -2339,8 +2338,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression MultiplyChecked(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsArithmetic(left.Type))
@@ -2392,8 +2391,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression LeftShift(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (IsSimpleShift(left.Type, right.Type))
@@ -2446,9 +2445,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression LeftShiftAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (IsSimpleShift(left.Type, right.Type))
@@ -2490,8 +2489,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression RightShift(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (IsSimpleShift(left.Type, right.Type))
@@ -2544,9 +2543,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression RightShiftAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (IsSimpleShift(left.Type, right.Type))
@@ -2588,8 +2587,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression And(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsIntegerOrBool(left.Type))
@@ -2641,9 +2640,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression AndAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsIntegerOrBool(left.Type))
@@ -2684,8 +2683,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Or(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsIntegerOrBool(left.Type))
@@ -2737,9 +2736,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression OrAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsIntegerOrBool(left.Type))
@@ -2779,8 +2778,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression ExclusiveOr(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsIntegerOrBool(left.Type))
@@ -2831,9 +2830,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression ExclusiveOrAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 if (left.Type == right.Type && TypeUtils.IsIntegerOrBool(left.Type))
@@ -2873,8 +2872,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression Power(Expression left, Expression right, MethodInfo method)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 Type mathType = typeof(System.Math);
@@ -2927,9 +2926,9 @@ namespace System.Linq.Expressions
         /// </returns>
         public static BinaryExpression PowerAssign(Expression left, Expression right, MethodInfo method, LambdaExpression conversion)
         {
-            RequiresCanRead(left, "left");
-            RequiresCanWrite(left, "left");
-            RequiresCanRead(right, "right");
+            RequiresCanRead(left, nameof(left));
+            RequiresCanWrite(left, nameof(left));
+            RequiresCanRead(right, nameof(right));
             if (method == null)
             {
                 Type mathType = typeof(System.Math);
@@ -2955,8 +2954,8 @@ namespace System.Linq.Expressions
         /// <returns>A BinaryExpression that has the NodeType property equal to ArrayIndex and the Left and Right properties set to the specified values.</returns>
         public static BinaryExpression ArrayIndex(Expression array, Expression index)
         {
-            RequiresCanRead(array, "array");
-            RequiresCanRead(index, "index");
+            RequiresCanRead(array, nameof(array));
+            RequiresCanRead(index, nameof(index));
             if (index.Type != typeof(int))
             {
                 throw Error.ArgumentMustBeArrayIndexType();

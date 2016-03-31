@@ -1,31 +1,39 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Linq;
 using Xunit;
+using System.Threading.Tasks;
 
 namespace System.Diagnostics.Tests
 {
     public class ProcessThreadTests : ProcessTestBase
     {
-        [ActiveIssue(3202, PlatformID.OSX)]
         [Fact]
         public void TestCommonPriorityAndTimeProperties()
         {
             ProcessThreadCollection threadCollection = _process.Threads;
             Assert.True(threadCollection.Count > 0);
-
             ProcessThread thread = threadCollection[0];
-
-            if (ThreadState.Terminated != thread.ThreadState)
+            try
             {
-                Assert.True(thread.Id >= 0);
-                Assert.Equal(_process.BasePriority, thread.BasePriority);
-                Assert.True(thread.CurrentPriority >= 0);
-                Assert.True(thread.PrivilegedProcessorTime.TotalSeconds >= 0);
-                Assert.True(thread.UserProcessorTime.TotalSeconds >= 0);
-                Assert.True(thread.TotalProcessorTime.TotalSeconds >= 0);
+                if (ThreadState.Terminated != thread.ThreadState)
+                {
+                    Assert.True(thread.Id >= 0);
+                    Assert.Equal(_process.BasePriority, thread.BasePriority);
+                    Assert.True(thread.CurrentPriority >= 0);
+                    Assert.True(thread.PrivilegedProcessorTime.TotalSeconds >= 0);
+                    Assert.True(thread.UserProcessorTime.TotalSeconds >= 0);
+                    Assert.True(thread.TotalProcessorTime.TotalSeconds >= 0);
+                }
+            }
+            catch (Win32Exception)
+            {
+                // Win32Exception is thrown when getting threadinfo fails. 
             }
         }
 
@@ -53,44 +61,56 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(2613, PlatformID.Linux)]
-        public void TestStartTimeProperty()
+        [PlatformSpecific(PlatformID.OSX)]
+        public void TestStartTimeProperty_OSX()
         {
-            DateTime timeBeforeCreatingProcess = DateTime.UtcNow;
-            Process p = CreateProcessLong();
-            try
+            using (Process p = Process.GetCurrentProcess())
             {
-                p.Start();
+                ProcessThreadCollection threads = p.Threads;
+                Assert.NotNull(threads);
+                Assert.NotEmpty(threads);
 
-                ProcessThreadCollection threadCollection = p.Threads;
-                Assert.True(threadCollection.Count > 0);
+                ProcessThread thread = threads[0];
+                Assert.NotNull(thread);
 
-                ProcessThread thread = threadCollection[0];
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    Assert.Throws<PlatformNotSupportedException>(() => thread.StartTime);
-                    return;
-                }
-
-                if (ThreadState.Initialized != thread.ThreadState)
-                {
-                    // Time in unix, is measured in jiffies, which is incremented by one for every timer interrupt since the boot time.
-                    // Thus, because there are HZ timer interrupts in a second, there are HZ jiffies in a second. Hence 1\HZ, will
-                    // be the resolution of system timer. The lowest value of HZ on unix is 100, hence the timer resolution is 10 ms.
-                    // Allowing for error in 10 ms.
-                    long tenMSTicks = new TimeSpan(0, 0, 0, 0, 10).Ticks;
-                    long beforeTicks = timeBeforeCreatingProcess.Ticks - tenMSTicks;
-                    long afterTicks = DateTime.UtcNow.Ticks + tenMSTicks;
-                    Assert.InRange(thread.StartTime.ToUniversalTime().Ticks, beforeTicks, afterTicks);
-                }
+                Assert.Throws<PlatformNotSupportedException>(() => thread.StartTime);
             }
-            finally
-            {
-                if (!p.HasExited)
-                    p.Kill();
+        }
 
-                Assert.True(p.WaitForExit(WaitInMS));
+        [Fact]
+        [PlatformSpecific(~PlatformID.OSX)] // OSX throws PNSE from StartTime
+        public async Task TestStartTimeProperty()
+        {
+            TimeSpan allowedWindow = TimeSpan.FromSeconds(1);
+
+            using (Process p = Process.GetCurrentProcess())
+            {
+                // Get the process' start time
+                DateTime startTime = p.StartTime.ToUniversalTime();
+
+                // Get the process' threads
+                ProcessThreadCollection threads = p.Threads;
+                Assert.NotNull(threads);
+                Assert.NotEmpty(threads);
+
+                // Get the current time
+                DateTime curTime = DateTime.UtcNow;
+
+                // Make sure each thread's start time is at least the process'
+                // start time and not beyond the current time.
+                Assert.All(
+                    threads.Cast<ProcessThread>(),
+                    t => Assert.InRange(t.StartTime.ToUniversalTime(), startTime - allowedWindow, curTime + allowedWindow));
+
+                // Now add a thread, and from that thread, while it's still alive, verify
+                // that there's at least one thread greater than the current time we previously grabbed.
+                await Task.Factory.StartNew(() =>
+                {
+                    p.Refresh();
+                    Assert.Contains(
+                        p.Threads.Cast<ProcessThread>(), 
+                        t => t.StartTime.ToUniversalTime() >= curTime - allowedWindow);
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
         }
 

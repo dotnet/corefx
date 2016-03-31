@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -2703,7 +2704,7 @@ namespace Microsoft.SqlServer.Server
         private const bool _ = false;
 
         private static bool[,] s_canAccessGetterDirectly = {
-            // SqlDbTypes as columns (abreviated, but in order)
+            // SqlDbTypes as columns (abbreviated, but in order)
             //  ExtendedClrTypeCodes as rows
 
             //     BI, Bin, Bit, Ch, DT, Dec, Fl, Im, Int, Mny, NCh, NTx, NVC, Rl, UI, SDT, SI, SMn, Txt, TS, TI, VBn, VCh, Var, 24, Xml, 26, 27, 28, Udt, St, Dat, Tm, DT2, DTO
@@ -2801,7 +2802,7 @@ namespace Microsoft.SqlServer.Server
         };
 
         private static bool[,] s_canAccessSetterDirectly = {
-            // Setters as columns (labels are abreviated from ExtendedClrTypeCode names)
+            // Setters as columns (labels are abbreviated from ExtendedClrTypeCode names)
             // SqlDbTypes as rows
             //     BI, Bin, Bit, Ch, DT, Dec, Fl, Im, Int, Mny, NCh, NTx, NVC, Rl, UI, SDT, SI, SMn, Txt, TS, TI, VBn, VCh, Var, 24, Xml, 26, 27, 28, Udt, St, Dat, Tm, DT2, DTO
             /*Bool*/
@@ -3119,7 +3120,7 @@ namespace Microsoft.SqlServer.Server
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
-            // Note: depending on different getters, the result string maybed truncated, e.g. for 
+            // Note: depending on different getters, the result string maybe truncated, e.g. for 
             // Inproc process, the getter is InProcRecordBuffer (implemented in SqlAcess), string will be
             // truncated to 4000 (if length is more than 4000). If MemoryRecordBuffer getter is used, data 
             // is not truncated. Please refer VSDD 479655 for more detailed information regarding the string length.

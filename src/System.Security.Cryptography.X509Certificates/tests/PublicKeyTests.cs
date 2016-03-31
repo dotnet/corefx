@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Text;
@@ -125,6 +126,28 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 Assert.Equal(expectedModulus, rsaParameters.Modulus);
                 Assert.Equal(expectedExponent, rsaParameters.Exponent);
+            }
+        }
+
+        [Fact]
+        public static void TestKey_RSA384_ValidatesSignature()
+        {
+            byte[] signature =
+            {
+                0x79, 0xD9, 0x3C, 0xBF, 0x54, 0xFA, 0x55, 0x8C,
+                0x44, 0xC3, 0xC3, 0x83, 0x85, 0xBB, 0x78, 0x44,
+                0xCD, 0x0F, 0x5A, 0x8E, 0x71, 0xC9, 0xC2, 0x68,
+                0x68, 0x0A, 0x33, 0x93, 0x19, 0x37, 0x02, 0x06,
+                0xE2, 0xF7, 0x67, 0x97, 0x3C, 0x67, 0xB3, 0xF4,
+                0x11, 0xE0, 0x6E, 0xD2, 0x22, 0x75, 0xE7, 0x7C,
+            };
+
+            byte[] helloBytes = Encoding.ASCII.GetBytes("Hello");
+
+            using (var cert = new X509Certificate2(TestData.Rsa384CertificatePemBytes))
+            using (RSA rsa = cert.GetRSAPublicKey())
+            {
+                Assert.True(rsa.VerifyData(helloBytes, signature, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1));
             }
         }
 

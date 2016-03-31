@@ -1,13 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -15,6 +13,20 @@ using AstUtils = System.Linq.Expressions.Utils;
 
 namespace System.Linq.Expressions.Interpreter
 {
+    internal sealed class ExceptionFilter
+    {
+        public readonly int LabelIndex;
+        public readonly int StartIndex;
+        public readonly int EndIndex;
+
+        internal ExceptionFilter(int labelIndex, int start, int end)
+        {
+            LabelIndex = labelIndex;
+            StartIndex = start;
+            EndIndex = end;
+        }
+    }
+
     internal sealed class ExceptionHandler
     {
         public readonly Type ExceptionType;
@@ -23,12 +35,13 @@ namespace System.Linq.Expressions.Interpreter
         public readonly int LabelIndex;
         public readonly int HandlerStartIndex;
         public readonly int HandlerEndIndex;
+        public readonly ExceptionFilter Filter;
 
         internal TryCatchFinallyHandler Parent = null;
 
         public bool IsFault { get { return ExceptionType == null; } }
 
-        internal ExceptionHandler(int start, int end, int labelIndex, int handlerStartIndex, int handlerEndIndex, Type exceptionType)
+        internal ExceptionHandler(int start, int end, int labelIndex, int handlerStartIndex, int handlerEndIndex, Type exceptionType, ExceptionFilter filter)
         {
             StartIndex = start;
             EndIndex = end;
@@ -36,6 +49,7 @@ namespace System.Linq.Expressions.Interpreter
             ExceptionType = exceptionType;
             HandlerStartIndex = handlerStartIndex;
             HandlerEndIndex = handlerEndIndex;
+            Filter = filter;
         }
 
         internal void SetParent(TryCatchFinallyHandler tryHandler)
@@ -147,28 +161,63 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        /// <summary>
-        /// Goto the index of the first instruction of the suitable catch block
-        /// </summary>
-        internal int GotoHandler(InterpretedFrame frame, object exception, out ExceptionHandler handler)
+        internal bool HasHandler(InterpretedFrame frame, ref Exception exception, out ExceptionHandler handler)
         {
-            Debug.Assert(_handlers != null, "we should have at least one handler if the method gets called");
-            handler = null;
-            for (int i = 0; i < _handlers.Length; i++)
+            frame.SaveTraceToException(exception);
+
+            if (IsCatchBlockExist)
             {
-                if (_handlers[i].Matches(exception.GetType()))
+                Type exceptionType = exception.GetType();
+                for (int i = 0; i != _handlers.Length; ++i)
                 {
-                    handler = _handlers[i];
-                    break;
+                    ExceptionHandler candidate = _handlers[i];
+                    if (candidate.Matches(exceptionType) && (candidate.Filter == null || FilterPasses(frame, ref exception, candidate.Filter)))
+                    {
+                        handler = candidate;
+                        return true;
+                    }
                 }
             }
-            if (handler == null) { return 0; }
-            return frame.Goto(handler.LabelIndex, exception, gotoExceptionHandler: true);
+
+            handler = null;
+            return false;
+        }
+
+        internal bool FilterPasses(InterpretedFrame frame, ref Exception exception, ExceptionFilter filter)
+        {
+            Interpreter interpreter = frame.Interpreter;
+            Instruction[] instructions = interpreter.Instructions.Instructions;
+            int stackIndex = frame.StackIndex;
+            try
+            {
+                int index = interpreter._labels[filter.LabelIndex].Index;
+                frame.Push(exception);
+                while (index >= filter.StartIndex && index < filter.EndIndex)
+                {
+                    index += instructions[index].Run(frame);
+                }
+
+                if ((bool)frame.Pop())
+                {
+                    // If this is the handler that will be executed, then if the filter has assigned to the exception variable
+                    // that change should be visible to the handler. Otherwise, it should not.
+                    exception = (Exception)frame.Peek();
+                    return true;
+                }
+            }
+            catch
+            {
+                // Silently eating exceptions and returning false matches the CLR behavior.
+                // Restore stack depth first.
+                frame.StackIndex = stackIndex;
+            }
+
+            return false;
         }
     }
 
     /// <summary>
-    /// The re-throw instrcution will throw this exception
+    /// The re-throw instruction will throw this exception
     /// </summary>
     internal sealed class RethrowException : Exception
     {
@@ -492,11 +541,15 @@ namespace System.Linq.Expressions.Interpreter
         private void CompileBlockExpression(Expression expr, bool asVoid)
         {
             var node = (BlockExpression)expr;
-            var end = CompileBlockStart(node);
 
-            var lastExpression = node.Expressions[node.Expressions.Count - 1];
-            Compile(lastExpression, asVoid);
-            CompileBlockEnd(end);
+            if (node.ExpressionCount != 0)
+            {
+                var end = CompileBlockStart(node);
+
+                var lastExpression = node.Expressions[node.Expressions.Count - 1];
+                Compile(lastExpression, asVoid);
+                CompileBlockEnd(end);
+            }
         }
 
         private LocalDefinition[] CompileBlockStart(BlockExpression node)
@@ -708,7 +761,7 @@ namespace System.Linq.Expressions.Interpreter
                     break;
 
                 default:
-                    throw new InvalidOperationException("Invalid lvalue for assignment: " + node.Left.NodeType);
+                    throw Error.InvalidLvalue(node.Left.NodeType);
             }
         }
 
@@ -1081,7 +1134,7 @@ namespace System.Linq.Expressions.Interpreter
             Type nonNullableTo = typeTo.GetNonNullableType();
 
             // use numeric conversions for both numeric types and enums
-            if ((TypeUtils.IsNumeric(nonNullableFrom) || nonNullableFrom.GetTypeInfo().IsEnum)
+            if ((TypeUtils.IsNumericOrBool(nonNullableFrom) || nonNullableFrom.GetTypeInfo().IsEnum)
                  && (TypeUtils.IsNumeric(nonNullableTo) || nonNullableTo.GetTypeInfo().IsEnum))
             {
                 Type enumTypeTo = null;
@@ -1129,7 +1182,13 @@ namespace System.Linq.Expressions.Interpreter
                     _instructions.MarkLabel(whenNull);
                 }
 
+                return;
+            }
 
+            if (typeTo.GetTypeInfo().IsEnum)
+            {
+                _instructions.Emit(NullCheckInstruction.Instance);
+                _instructions.EmitCastReferenceToEnum(typeTo);
                 return;
             }
 
@@ -1468,6 +1527,26 @@ namespace System.Linq.Expressions.Interpreter
 
             if (node.Cases.All(c => c.TestValues.All(t => t is ConstantExpression)))
             {
+                if (node.Cases.Count == 0)
+                {
+                    // Emit the switch value in case it has side-effects, but as void
+                    // since the value is ignored.
+                    CompileAsVoid(node.SwitchValue);
+
+                    // Now if there is a default body, it happens unconditionally.
+                    if (node.DefaultBody != null)
+                    {
+                        Compile(node.DefaultBody);
+                    }
+                    else
+                    {
+                        // If there are no cases and no default then the type must be void.
+                        // Assert that earlier validation caught any exceptions to that.
+                        Debug.Assert(expr.Type == typeof(void));
+                    }
+                    return;
+                }
+
                 var switchType = System.Dynamic.Utils.TypeExtensions.GetTypeCode(node.SwitchValue.Type);
 
                 if (node.Comparison == null)
@@ -1478,8 +1557,8 @@ namespace System.Linq.Expressions.Interpreter
                             CompileIntSwitchExpression<System.Int32>(node);
                             return;
 
-                        // the following cases are uncomon,
-                        // so to avoid numerous unecessary generic
+                        // the following cases are uncommon,
+                        // so to avoid numerous unnecessary generic
                         // instantiations of Dictionary<K, V> and related types
                         // in AOT scenarios, we will just use "object" as the key
                         // NOTE: this does not actually result in any
@@ -1793,7 +1872,7 @@ namespace System.Linq.Expressions.Interpreter
                     return true;
                 case ExpressionType.Switch:
                     PushLabelBlock(LabelScopeKind.Switch);
-                    // Define labels inside of the switch cases so theyare in
+                    // Define labels inside of the switch cases so they are in
                     // scope for the whole switch. This allows "goto case" and
                     // "goto default" to be considered as local jumps.
                     var @switch = (SwitchExpression)node;
@@ -1869,7 +1948,7 @@ namespace System.Linq.Expressions.Interpreter
                     break;
                 }
             }
-            throw new InvalidOperationException("Rethrow requires catch");
+            throw Error.RethrowRequiresCatch();
         }
 
         private void CompileThrowUnaryExpression(Expression expr, bool asVoid)
@@ -1965,9 +2044,10 @@ namespace System.Linq.Expressions.Interpreter
             Debug.Assert(enterTryInstr != null);
 
             PushLabelBlock(LabelScopeKind.Try);
-            Compile(node.Body);
+            bool hasValue = node.Type != typeof(void);
 
-            bool hasValue = node.Body.Type != typeof(void);
+            Compile(node.Body, !hasValue);
+
             int tryEnd = _instructions.Count;
 
             // handlers jump here:
@@ -2004,7 +2084,7 @@ namespace System.Linq.Expressions.Interpreter
                             _instructions.EmitLeaveFault(hasValue);
                             _instructions.MarkLabel(end);
 
-                            exHandlers.Add(new ExceptionHandler(tryStart, tryEnd, handlerLabel, handlerStart, _instructions.Count, null));
+                            exHandlers.Add(new ExceptionHandler(tryStart, tryEnd, handlerLabel, handlerStart, _instructions.Count, null, null));
                             enterTryInstr.SetTryHandler(new TryCatchFinallyHandler(tryStart, tryEnd, gotoEnd.TargetIndex, exHandlers.ToArray()));
                             PopLabelBlock(LabelScopeKind.Try);
                             return;
@@ -2014,17 +2094,35 @@ namespace System.Linq.Expressions.Interpreter
 
                 foreach (var handler in node.Handlers)
                 {
-                    PushLabelBlock(LabelScopeKind.Catch);
-
-                    if (handler.Filter != null)
-                    {
-                        throw new PlatformNotSupportedException(SR.FilterBlockNotSupported);
-                    }
-
                     var parameter = handler.Variable ?? Expression.Parameter(handler.Test);
 
                     var local = _locals.DefineLocal(parameter, _instructions.Count);
                     _exceptionForRethrowStack.Push(parameter);
+
+                    ExceptionFilter filter = null;
+
+                    if (handler.Filter != null)
+                    {
+                        PushLabelBlock(LabelScopeKind.Filter);
+
+                        _instructions.EmitEnterExceptionFilter();
+
+                        // at this point the stack balance is prepared for the hidden exception variable:
+                        int filterLabel = _instructions.MarkRuntimeLabel();
+                        int filterStart = _instructions.Count;
+
+                        CompileSetVariable(parameter, true);
+                        Compile(handler.Filter);
+
+                        filter = new ExceptionFilter(filterLabel, filterStart, _instructions.Count);
+
+                        // keep the value of the body on the stack:
+                        _instructions.EmitLeaveExceptionFilter();
+
+                        PopLabelBlock(LabelScopeKind.Filter);
+                    }
+
+                    PushLabelBlock(LabelScopeKind.Catch);
 
                     // add a stack balancing nop instruction (exception handling pushes the current exception):
                     if (hasValue)
@@ -2041,15 +2139,14 @@ namespace System.Linq.Expressions.Interpreter
                     int handlerStart = _instructions.Count;
 
                     CompileSetVariable(parameter, true);
-                    Compile(handler.Body);
+                    Compile(handler.Body, !hasValue);
 
                     _exceptionForRethrowStack.Pop();
 
                     // keep the value of the body on the stack:
-                    Debug.Assert(hasValue == (handler.Body.Type != typeof(void)));
                     _instructions.EmitLeaveExceptionHandler(hasValue, gotoEnd);
 
-                    exHandlers.Add(new ExceptionHandler(tryStart, tryEnd, handlerLabel, handlerStart, _instructions.Count, handler.Test));
+                    exHandlers.Add(new ExceptionHandler(tryStart, tryEnd, handlerLabel, handlerStart, _instructions.Count, handler.Test, filter));
                     PopLabelBlock(LabelScopeKind.Catch);
 
                     _locals.UndefineLocal(local, _instructions.Count);
@@ -2179,6 +2276,28 @@ namespace System.Linq.Expressions.Interpreter
             CompileAddress(node, -1);
         }
 
+        private static bool ShouldWritebackNode(Expression node)
+        {
+            if (node.Type.GetTypeInfo().IsValueType)
+            {
+                switch (node.NodeType)
+                {
+                    case ExpressionType.Parameter:
+                    case ExpressionType.Call:
+                    case ExpressionType.ArrayIndex:
+                        return true;
+                    case ExpressionType.Index:
+                        return ((IndexExpression)node).Object.Type.IsArray;
+                    case ExpressionType.MemberAccess:
+                        return ((MemberExpression)node).Member is FieldInfo;
+                    // ExpressionType.Unbox does have the behaviour write-back is used to simulate, but
+                    // it doesn't need explicit write-back to produce it, so include it in the default
+                    // false cases.
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Emits the address of the specified node.  
         /// </summary>
@@ -2187,115 +2306,108 @@ namespace System.Linq.Expressions.Interpreter
         /// <returns></returns>
         private ByRefUpdater CompileAddress(Expression node, int index)
         {
-            switch (node.NodeType)
+            if (index != -1 || ShouldWritebackNode(node))
             {
-                case ExpressionType.Parameter:
-                    LoadLocalNoValueTypeCopy((ParameterExpression)node);
+                switch (node.NodeType)
+                {
+                    case ExpressionType.Parameter:
+                        LoadLocalNoValueTypeCopy((ParameterExpression)node);
 
-                    return new ParameterByRefUpdater(ResolveLocal((ParameterExpression)node), index);
-                case ExpressionType.ArrayIndex:
-                    BinaryExpression array = (BinaryExpression)node;
+                        return new ParameterByRefUpdater(ResolveLocal((ParameterExpression)node), index);
+                    case ExpressionType.ArrayIndex:
+                        BinaryExpression array = (BinaryExpression)node;
 
-                    return CompileArrayIndexAddress(array.Left, array.Right, index);
-                case ExpressionType.Index:
-                    var indexNode = (IndexExpression)node;
-                    if (/*!TypeUtils.AreEquivalent(type, node.Type) || */indexNode.Indexer != null)
-                    {
-                        LocalDefinition? objTmp = null;
-                        if (indexNode.Object != null)
+                        return CompileArrayIndexAddress(array.Left, array.Right, index);
+                    case ExpressionType.Index:
+                        var indexNode = (IndexExpression)node;
+                        if (/*!TypeUtils.AreEquivalent(type, node.Type) || */indexNode.Indexer != null)
                         {
-                            Compile(indexNode.Object);
-                            objTmp = _locals.DefineLocal(Expression.Parameter(indexNode.Object.Type), _instructions.Count);
+                            LocalDefinition? objTmp = null;
+                            if (indexNode.Object != null)
+                            {
+                                Compile(indexNode.Object);
+                                objTmp = _locals.DefineLocal(Expression.Parameter(indexNode.Object.Type), _instructions.Count);
+                                _instructions.EmitDup();
+                                _instructions.EmitStoreLocal(objTmp.Value.Index);
+                            }
+
+                            List<LocalDefinition> indexLocals = new List<LocalDefinition>();
+                            for (int i = 0; i < indexNode.Arguments.Count; i++)
+                            {
+                                Compile(indexNode.Arguments[i]);
+
+                                var argTmp = _locals.DefineLocal(Expression.Parameter(indexNode.Arguments[i].Type), _instructions.Count);
+                                _instructions.EmitDup();
+                                _instructions.EmitStoreLocal(argTmp.Index);
+
+                                indexLocals.Add(argTmp);
+                            }
+
+                            EmitIndexGet(indexNode);
+
+                            return new IndexMethodByRefUpdater(objTmp, indexLocals.ToArray(), indexNode.Indexer.GetSetMethod(), index);
+                        }
+                        else if (indexNode.Arguments.Count == 1)
+                        {
+                            return CompileArrayIndexAddress(indexNode.Object, indexNode.Arguments[0], index);
+                        }
+                        else
+                        {
+                            return CompileMultiDimArrayAccess(indexNode.Object, indexNode.Arguments, index);
+                        }
+                    case ExpressionType.MemberAccess:
+                        var member = (MemberExpression)node;
+
+                        LocalDefinition? memberTemp = null;
+                        if (member.Expression != null)
+                        {
+                            memberTemp = _locals.DefineLocal(Expression.Parameter(member.Expression.Type, "member"), _instructions.Count);
+                            EmitThisForMethodCall(member.Expression);
                             _instructions.EmitDup();
-                            _instructions.EmitStoreLocal(objTmp.Value.Index);
+                            _instructions.EmitStoreLocal(memberTemp.Value.Index);
                         }
 
-                        List<LocalDefinition> indexLocals = new List<LocalDefinition>();
-                        for (int i = 0; i < indexNode.Arguments.Count; i++)
+                        FieldInfo field = member.Member as FieldInfo;
+                        if (field != null)
                         {
-                            Compile(indexNode.Arguments[i]);
-
-                            var argTmp = _locals.DefineLocal(Expression.Parameter(indexNode.Arguments[i].Type), _instructions.Count);
-                            _instructions.EmitDup();
-                            _instructions.EmitStoreLocal(argTmp.Index);
-
-                            indexLocals.Add(argTmp);
+                            _instructions.EmitLoadField(field);
+                            if (!field.IsLiteral && !field.IsInitOnly)
+                            {
+                                return new FieldByRefUpdater(memberTemp, field, index);
+                            }
+                            return null;
                         }
-
-                        EmitIndexGet(indexNode);
-
-                        return new IndexMethodByRefUpdater(objTmp, indexLocals.ToArray(), indexNode.Indexer.GetSetMethod(), index);
-                    }
-                    else if (indexNode.Arguments.Count == 1)
-                    {
-                        return CompileArrayIndexAddress(indexNode.Object, indexNode.Arguments[0], index);
-                    }
-                    else
-                    {
-                        return CompileMultiDimArrayAccess(indexNode.Object, indexNode.Arguments, index);
-                    }
-                case ExpressionType.MemberAccess:
-                    var member = (MemberExpression)node;
-
-                    LocalDefinition? memberTemp = null;
-                    if (member.Expression != null)
-                    {
-                        memberTemp = _locals.DefineLocal(Expression.Parameter(member.Expression.Type, "member"), _instructions.Count);
-                        EmitThisForMethodCall(member.Expression);
-                        _instructions.EmitDup();
-                        _instructions.EmitStoreLocal(memberTemp.Value.Index);
-                    }
-
-                    FieldInfo field = member.Member as FieldInfo;
-                    if (field != null)
-                    {
-                        _instructions.EmitLoadField(field);
-                        if (!field.IsLiteral && !field.IsInitOnly)
-                        {
-                            return new FieldByRefUpdater(memberTemp, field, index);
-                        }
-                        return null;
-                    }
-                    PropertyInfo property = member.Member as PropertyInfo;
-                    if (property != null)
-                    {
+                        Debug.Assert(member.Member is PropertyInfo);
+                        PropertyInfo property = (PropertyInfo)member.Member;
                         _instructions.EmitCall(property.GetGetMethod(true));
                         if (property.CanWrite)
                         {
                             return new PropertyByRefUpdater(memberTemp, property, index);
                         }
                         return null;
-                    }
-                    throw new InvalidOperationException(String.Format("Address of {0}", node.NodeType));
-                case ExpressionType.Call:
-                    // An array index of a multi-dimensional array is represented by a call to Array.Get,
-                    // rather than having its own array-access node. This means that when we are trying to
-                    // get the address of a member of a multi-dimensional array, we'll be trying to
-                    // get the address of a Get method, and it will fail to do so. Instead, detect
-                    // this situation and replace it with a call to the Address method.
-                    MethodCallExpression call = (MethodCallExpression)node;
-                    if (!call.Method.IsStatic &&
-                        call.Object.Type.IsArray &&
-                        call.Method == call.Object.Type.GetMethod("Get", BindingFlags.Public | BindingFlags.Instance))
-                    {
-                        return CompileMultiDimArrayAccess(
-                            call.Object,
-                            call.Arguments,
-                            index
-                        );
-                    }
-                    else
-                    {
-                        goto default;
-                    }
-
-                case ExpressionType.Unbox:
-                    Compile(node);
-                    return null;
-                default:
-                    Compile(node);
-                    return null;
+                    case ExpressionType.Call:
+                        // An array index of a multi-dimensional array is represented by a call to Array.Get,
+                        // rather than having its own array-access node. This means that when we are trying to
+                        // get the address of a member of a multi-dimensional array, we'll be trying to
+                        // get the address of a Get method, and it will fail to do so. Instead, detect
+                        // this situation and replace it with a call to the Address method.
+                        MethodCallExpression call = (MethodCallExpression)node;
+                        if (!call.Method.IsStatic &&
+                            call.Object.Type.IsArray &&
+                            call.Method == call.Object.Type.GetMethod("Get", BindingFlags.Public | BindingFlags.Instance))
+                        {
+                            return CompileMultiDimArrayAccess(
+                                call.Object,
+                                call.Arguments,
+                                index
+                            );
+                        }
+                        break;
+                }
             }
+            // Includes Unbox case as it doesn't need explicit write-back.
+            Compile(node);
+            return null;
         }
 
         private ByRefUpdater CompileMultiDimArrayAccess(Expression array, IList<Expression> arguments, int index)
@@ -2610,7 +2722,10 @@ namespace System.Linq.Expressions.Interpreter
                 {
                     Compile(arg);
                 }
-                _instructions.EmitCall(initializers[i].AddMethod);
+                var add = initializers[i].AddMethod;
+                _instructions.EmitCall(add);
+                if (add.ReturnType != typeof(void))
+                    _instructions.EmitPop();
             }
         }
 
@@ -2649,7 +2764,7 @@ namespace System.Linq.Expressions.Interpreter
                         Type type = GetMemberType(memberMember.Member);
                         if (memberMember.Member is PropertyInfo && type.GetTypeInfo().IsValueType)
                         {
-                            throw new InvalidOperationException("CannotAutoInitializeValueTypeMemberThroughProperty");
+                            throw Error.CannotAutoInitializeValueTypeMemberThroughProperty(memberMember.Bindings);
                         }
 
                         CompileMember(null, memberMember.Member);

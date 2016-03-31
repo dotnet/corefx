@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Threading;
@@ -55,7 +56,7 @@ namespace System.Linq.Parallel.Tests
             foreach (int leftCount in counts.Cast<int>())
             {
                 ParallelQuery<int> left = Enumerable.Range(0, leftCount * DuplicateFactor).Select(x => x % leftCount).ToArray().AsParallel();
-                foreach (int rightCount in new int[] { 0, 1, Math.Max(DuplicateFactor, leftCount / 2), Math.Max(DuplicateFactor, leftCount) })
+                foreach (int rightCount in new[] { 0, 1, Math.Max(DuplicateFactor, leftCount / 2), Math.Max(DuplicateFactor, leftCount) })
                 {
                     int rightStart = leftCount - Math.Min(leftCount, rightCount) / 2;
                     ParallelQuery<int> right = Enumerable.Range(0, rightCount * DuplicateFactor).Select(x => x % rightCount + rightStart).ToArray().AsParallel();
@@ -68,7 +69,7 @@ namespace System.Linq.Parallel.Tests
         // Union
         //
         [Theory]
-        [MemberData("UnionUnorderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionUnorderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_Unordered(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -83,14 +84,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionUnorderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionUnorderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_Unordered_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_Unordered(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -105,14 +106,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionFirstOrderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionFirstOrderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_FirstOrdered(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -136,14 +137,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionFirstOrderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionFirstOrderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_FirstOrdered_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_FirstOrdered(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionSecondOrderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionSecondOrderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_SecondOrdered(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -167,14 +168,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionSecondOrderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionSecondOrderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_SecondOrdered_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_SecondOrdered(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionUnorderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionUnorderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_Unordered_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -186,14 +187,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionUnorderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionUnorderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_Unordered_NotPipelined(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -205,14 +206,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_NotPipelined(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionFirstOrderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionFirstOrderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_FirstOrdered_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -230,14 +231,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionFirstOrderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionFirstOrderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_FirstOrdered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_FirstOrdered_NotPipelined(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionSecondOrderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionSecondOrderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_SecondOrdered_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -255,14 +256,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionSecondOrderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionSecondOrderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_SecondOrdered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_SecondOrdered_NotPipelined(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionUnorderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionUnorderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_Unordered_Distinct(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -281,14 +282,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionUnorderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionUnorderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_Unordered_Distinct_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_Unordered_Distinct(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_Distinct(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -307,14 +308,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_Distinct_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_Distinct(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionFirstOrderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionFirstOrderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_FirstOrdered_Distinct(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -343,14 +344,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionFirstOrderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionFirstOrderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_FirstOrdered_Distinct_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_FirstOrdered_Distinct(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionSecondOrderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionSecondOrderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_SecondOrdered_Distinct(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -379,14 +380,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionSecondOrderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionSecondOrderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_SecondOrdered_Distinct_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_SecondOrdered_Distinct(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionUnorderedData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionUnorderedData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_Unordered_Distinct_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -403,14 +404,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionUnorderedData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionUnorderedData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_Unordered_Distinct_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_Unordered_Distinct_NotPipelined(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionData", new int[] { 0, 1, 2, 16 }, new int[] { 0, 1, 8 })]
+        [MemberData(nameof(UnionData), new[] { 0, 1, 2, 16 }, new[] { 0, 1, 8 })]
         public static void Union_Distinct_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -428,14 +429,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionData", new int[] { 512, 1024 * 8 }, new int[] { 0, 1, 1024, 1024 * 16 })]
+        [MemberData(nameof(UnionData), new[] { 512, 1024 * 8 }, new[] { 0, 1, 1024, 1024 * 16 })]
         public static void Union_Distinct_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Union_Distinct_NotPipelined(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("UnionSourceMultipleData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(UnionSourceMultipleData), new[] { 0, 1, 2, 16 })]
         public static void Union_Unordered_SourceMultiple(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             // The difference between this test and the previous, is that it's not possible to
@@ -449,14 +450,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionSourceMultipleData", (object)(new int[] { 512, 1024 * 8 }))]
+        [MemberData(nameof(UnionSourceMultipleData), new[] { 512, 1024 * 8 })]
         public static void Union_Unordered_SourceMultiple_Longrunning(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             Union_Unordered_SourceMultiple(leftQuery, leftCount, rightQuery, rightCount, count);
         }
 
         [Theory]
-        [MemberData("UnionSourceMultipleData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(UnionSourceMultipleData), new[] { 0, 1, 2, 16 })]
         public static void Union_SourceMultiple(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             int seen = 0;
@@ -466,14 +467,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionSourceMultipleData", (object)(new int[] { 512, 1024 * 8 }))]
+        [MemberData(nameof(UnionSourceMultipleData), new[] { 512, 1024 * 8 })]
         public static void Union_SourceMultiple_Longrunning(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             Union_SourceMultiple(leftQuery, leftCount, rightQuery, rightCount, count);
         }
 
         [Theory]
-        [MemberData("UnionSourceMultipleData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(UnionSourceMultipleData), new[] { 0, 1, 2, 16 })]
         public static void Union_FirstOrdered_SourceMultiple(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             IntegerRangeSet seenUnordered = new IntegerRangeSet(leftCount, count - leftCount);
@@ -495,14 +496,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionSourceMultipleData", (object)(new int[] { 512, 1024 * 8 }))]
+        [MemberData(nameof(UnionSourceMultipleData), new[] { 512, 1024 * 8 })]
         public static void Union_FirstOrdered_SourceMultiple_Longrunning(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             Union_FirstOrdered_SourceMultiple(leftQuery, leftCount, rightQuery, rightCount, count);
         }
 
         [Theory]
-        [MemberData("UnionSourceMultipleData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(UnionSourceMultipleData), new[] { 0, 1, 2, 16 })]
         public static void Union_SecondOrdered_SourceMultiple(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             IntegerRangeSet seenUnordered = new IntegerRangeSet(0, leftCount);
@@ -524,7 +525,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("UnionSourceMultipleData", (object)(new int[] { 512, 1024 * 8 }))]
+        [MemberData(nameof(UnionSourceMultipleData), new[] { 512, 1024 * 8 })]
         public static void Union_SecondOrdered_SourceMultiple_Longrunning(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             Union_SecondOrdered_SourceMultiple(leftQuery, leftCount, rightQuery, rightCount, count);

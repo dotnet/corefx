@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Xml;
@@ -43,7 +44,7 @@ namespace System.Xml.Schema
 
         private static readonly string s_untypedStringTypeName = "xdt:untypedAtomic";
 
-        // Static convertor instance
+        // Static converter instance
         internal static XmlUntypedStringConverter Instance = new XmlUntypedStringConverter(true);
 
         private XmlUntypedStringConverter(bool listsAllowed)
@@ -57,7 +58,7 @@ namespace System.Xml.Schema
 
         internal string ToString(object value, IXmlNamespaceResolver nsResolver)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             Type sourceType = value.GetType();
             //we can consider avoiding the type equality checks and instead doing a "is" check
@@ -88,8 +89,8 @@ namespace System.Xml.Schema
 
         internal object FromString(string value, Type destinationType, IXmlNamespaceResolver nsResolver)
         {
-            if (value == null) throw new ArgumentNullException("value");
-            if (destinationType == null) throw new ArgumentNullException("destinationType");
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
 
             if (destinationType == s_objectType) destinationType = typeof(string);
             if (destinationType == s_booleanType) return XmlConvert.ToBoolean((string)value);

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -88,8 +89,8 @@ namespace System.IO.Compression
         /// appropriately. <code>Fixed</code> prevents the use of dynamic Huffman codes, allowing for a simpler decoder for special applications.</p>
         /// 
         /// <p><strong>For NetFx use:</strong></p>
-        /// <p>We have investigated compression scenarios for a bunch of different requently occuring compression data and found that in all
-        /// cases we invesigated so far, <code>DefaultStrategy</code> provided best results</p>
+        /// <p>We have investigated compression scenarios for a bunch of different frequently occurring compression data and found that in all
+        /// cases we investigated so far, <code>DefaultStrategy</code> provided best results</p>
         /// <p>See also: How to choose a compression level (in comments to <code>CompressionLevel</code>.</p>
         /// </summary>
         public enum CompressionStrategy : int
@@ -120,7 +121,7 @@ namespace System.IO.Compression
         /// <code>Deflate</code> will then generate raw deflate data with no ZLib header or trailer, and will not compute an adler32 check value.<br />
         /// <p>See also: How to choose a compression level (in comments to <code>CompressionLevel</code>.</p>
         /// </summary>
-        public const int Deflate_DefaultWindowBits = -15; // Leagl values are 8..15 and -8..-15. 15 is the window size,
+        public const int Deflate_DefaultWindowBits = -15; // Legal values are 8..15 and -8..-15. 15 is the window size,
                                                           // negative val causes deflate to produce raw deflate data (no zlib header).
 
         /// <summary>

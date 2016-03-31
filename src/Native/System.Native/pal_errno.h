@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #pragma once
 
@@ -83,13 +84,11 @@ enum Error : int32_t
     PAL_ENOTCONN = 0x10038,        // The socket is not connected.
     PAL_ENOTDIR = 0x10039,         // Not a directory or a symbolic link to a directory.
     PAL_ENOTEMPTY = 0x1003A,       // Directory not empty.
-    PAL_ENOTRECOVERABLE = 0x1003B, // State not recoverable.
     PAL_ENOTSOCK = 0x1003C,        // Not a socket.
     PAL_ENOTSUP = 0x1003D,         // Not supported (same value as EOPNOTSUP).
     PAL_ENOTTY = 0x1003E,          // Inappropriate I/O control operation.
     PAL_ENXIO = 0x1003F,           // No such device or address.
     PAL_EOVERFLOW = 0x10040,       // Value too large to be stored in data type.
-    PAL_EOWNERDEAD = 0x10041,      // Previous owner died.
     PAL_EPERM = 0x10042,           // Operation not permitted.
     PAL_EPIPE = 0x10043,           // Broken pipe.
     PAL_EPROTO = 0x10044,          // Protocol error.
@@ -103,6 +102,11 @@ enum Error : int32_t
     PAL_ETIMEDOUT = 0x1004D,       // Connection timed out.
     PAL_ETXTBSY = 0x1004E,         // Text file busy.
     PAL_EXDEV = 0x1004F,           // Cross-device link.
+    PAL_ESOCKTNOSUPPORT = 0x1005E, // Socket type not supported.
+    PAL_EPFNOSUPPORT = 0x10060,    // Protocol family not supported.
+    PAL_ESHUTDOWN = 0x1006C,       // Socket shutdown.
+    PAL_EHOSTDOWN = 0x10070,       // Host is down.
+    PAL_ENODATA = 0x10071,         // No data available.
 
     // POSIX permits these to have the same value and we make them
     // always equal so that we cannot introduce a dependency on

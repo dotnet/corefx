@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -289,7 +290,7 @@ namespace System.Net.Http.Headers
         {
             if (string.IsNullOrEmpty(receivedBy))
             {
-                throw new ArgumentException(SR.net_http_argument_empty_string, "receivedBy");
+                throw new ArgumentException(SR.net_http_argument_empty_string, nameof(receivedBy));
             }
 
             // 'receivedBy' can either be a host or a token. Since a token is a valid host, we only verify if the value

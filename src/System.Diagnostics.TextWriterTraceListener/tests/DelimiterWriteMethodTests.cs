@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -43,7 +44,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         }
 
         [Theory]
-        [MemberData("TraceEventInvariants")]
+        [MemberData(nameof(TraceEventInvariants))]
         public void TraceEvent_FormatString_Test(TraceFilter filter, TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, object[] args)
         {
             using (var target = new DelimitedListTraceListener(_stream))
@@ -58,7 +59,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         }
 
         [Theory]
-        [MemberData("TraceEventInvariants")]
+        [MemberData(nameof(TraceEventInvariants))]
         public void TraceEvent_String_Test(TraceFilter filter, TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, object[] args)
         {
             string message = args != null ? string.Format(format, args) : format;
@@ -95,7 +96,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         }
 
         [Theory]
-        [MemberData("TraceDataObjectInvariants")]
+        [MemberData(nameof(TraceDataObjectInvariants))]
         public void TraceData_Object_Test(TraceFilter filter, TraceEventCache eventCache, string source, TraceEventType eventType, int id, object data)
         {
             using (var target = new DelimitedListTraceListener(_stream))
@@ -130,7 +131,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
         }
 
         [Theory]
-        [MemberData("TraceDataObjectArrayInvariants")]
+        [MemberData(nameof(TraceDataObjectArrayInvariants))]
         public void TraceData_ObjectArray_Test(string delimiter,TraceFilter filter, TraceEventCache eventCache, string source, TraceEventType eventType, int id, object[] data)
         {
             using (var target = new DelimitedListTraceListener(_stream))

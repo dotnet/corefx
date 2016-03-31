@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Net;
@@ -27,7 +28,7 @@ namespace System.Net.Sockets
 
             if (localEP == null)
             {
-                throw new ArgumentNullException("localEP");
+                throw new ArgumentNullException(nameof(localEP));
             }
             _serverSocketEP = localEP;
             _serverSocket = new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -48,11 +49,11 @@ namespace System.Net.Sockets
 
             if (localaddr == null)
             {
-                throw new ArgumentNullException("localaddr");
+                throw new ArgumentNullException(nameof(localaddr));
             }
             if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
 
             _serverSocketEP = new IPEndPoint(localaddr, port);
@@ -119,7 +120,7 @@ namespace System.Net.Sockets
         {
             if (backlog > (int)SocketOptionName.MaxConnections || backlog < 0)
             {
-                throw new ArgumentOutOfRangeException("backlog");
+                throw new ArgumentOutOfRangeException(nameof(backlog));
             }
 
             if (NetEventSource.Log.IsEnabled())
@@ -241,14 +242,14 @@ namespace System.Net.Sockets
 
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             LazyAsyncResult lazyResult = asyncResult as LazyAsyncResult;
             Socket asyncSocket = lazyResult == null ? null : lazyResult.AsyncObject as Socket;
             if (asyncSocket == null)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
 
             // This will throw ObjectDisposedException if Stop() has been called.
@@ -292,14 +293,14 @@ namespace System.Net.Sockets
 
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             LazyAsyncResult lazyResult = asyncResult as LazyAsyncResult;
             Socket asyncSocket = lazyResult == null ? null : lazyResult.AsyncObject as Socket;
             if (asyncSocket == null)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
 
             // This will throw ObjectDisposedException if Stop() has been called.

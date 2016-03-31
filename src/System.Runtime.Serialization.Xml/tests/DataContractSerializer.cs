@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using SerializationTypes;
 using System;
@@ -945,7 +946,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_XElementAsRoot()
     {
         var original = new XElement("ElementName1");
@@ -957,7 +957,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_WithXElement()
     {
         var original = new WithXElement(true);
@@ -978,7 +977,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_WithXElementWithNestedXElement()
     {
         var original = new WithXElementWithNestedXElement(true);
@@ -989,7 +987,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_WithArrayOfXElement()
     {
         var original = new WithArrayOfXElement(true);
@@ -1002,7 +999,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(846, PlatformID.AnyUnix)]
     public static void DCS_WithListOfXElement()
     {
         var original = new WithListOfXElement(true);
@@ -1746,6 +1742,20 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    public static void DCS_ReadOnlyDictionary()
+    {
+        var dict = new Dictionary<string, int>();
+        dict["Foo"] = 1;
+        dict["Bar"] = 2;
+        ReadOnlyDictionary<string, int> value = new ReadOnlyDictionary<string, int>(dict);
+        var deserializedValue = SerializeAndDeserialize(value, @"<ReadOnlyDictionaryOfstringint xmlns=""http://schemas.datacontract.org/2004/07/System.Collections.ObjectModel"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_dictionary xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:KeyValueOfstringint><a:Key>Foo</a:Key><a:Value>1</a:Value></a:KeyValueOfstringint><a:KeyValueOfstringint><a:Key>Bar</a:Key><a:Value>2</a:Value></a:KeyValueOfstringint></_dictionary></ReadOnlyDictionaryOfstringint>");
+
+        Assert.StrictEqual(value.Count, deserializedValue.Count);
+        Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
+        Assert.StrictEqual(value["Bar"], deserializedValue["Bar"]);
+    }
+
+    [Fact]
     public static void DCS_KeyValuePair()
     {
         var value = new KeyValuePair<string, object>("FooKey", "FooValue");
@@ -1920,7 +1930,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Theory]
-    [MemberData("XmlDictionaryReaderQuotasData")]
+    [MemberData(nameof(XmlDictionaryReaderQuotasData))]
     public static void DCS_XmlDictionaryQuotas(XmlDictionaryReaderQuotas quotas, bool shouldSucceed)
     {
         var input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TypeWithTypeWithIntAndStringPropertyProperty><ObjectProperty><SampleInt>10</SampleInt><SampleString>Sample string</SampleString></ObjectProperty></TypeWithTypeWithIntAndStringPropertyProperty>";
@@ -1970,6 +1980,47 @@ public static partial class DataContractSerializerTests
             var obj = new TypeWithEnumerableInterfaceGetOnlyCollection(new List<string>() { "item1", "item2", "item3" });
             SerializeAndDeserialize(obj, @"<TypeWithEnumerableInterfaceGetOnlyCollection xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Items xmlns:a=""http://schemas.microsoft.com/2003/10/Serialization/Arrays""><a:string>item1</a:string><a:string>item2</a:string><a:string>item3</a:string></Items></TypeWithEnumerableInterfaceGetOnlyCollection>");
         });
+    }
+
+    [Fact]
+    public static void DCS_RecursiveCollection()
+    {
+        Assert.Throws<InvalidDataContractException>(() =>
+        {
+            (new DataContractSerializer(typeof (RecursiveCollection))).WriteObject(new MemoryStream(), new RecursiveCollection());
+        });
+    }
+
+    [Fact]
+    public static void DCS_XmlElementAsRoot()
+    {
+        XmlDocument xDoc = new XmlDocument();
+        xDoc.LoadXml(@"<html></html>");
+        XmlElement expected = xDoc.CreateElement("Element");
+        expected.InnerText = "Element innertext";
+        var actual = SerializeAndDeserialize(expected,
+@"<Element>Element innertext</Element>");
+        Assert.NotNull(actual);
+        Assert.StrictEqual(expected.InnerText, actual.InnerText);
+    }
+
+    [Fact]
+    public static void DCS_TypeWithXmlElementProperty()
+    {
+        XmlDocument xDoc = new XmlDocument();
+        xDoc.LoadXml(@"<html></html>");
+        XmlElement productElement = xDoc.CreateElement("Product");
+        productElement.InnerText = "Product innertext";
+        XmlElement categoryElement = xDoc.CreateElement("Category");
+        categoryElement.InnerText = "Category innertext";
+        var expected = new TypeWithXmlElementProperty() { Elements = new[] { productElement, categoryElement } };
+        var actual = SerializeAndDeserialize(expected,
+@"<TypeWithXmlElementProperty xmlns=""http://schemas.datacontract.org/2004/07/"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><Elements xmlns:a=""http://schemas.datacontract.org/2004/07/System.Xml""><a:XmlElement><Product xmlns="""">Product innertext</Product></a:XmlElement><a:XmlElement><Category xmlns="""">Category innertext</Category></a:XmlElement></Elements></TypeWithXmlElementProperty>");
+        Assert.StrictEqual(expected.Elements.Length, actual.Elements.Length);
+        for (int i = 0; i < expected.Elements.Length; ++i)
+        {
+            Assert.StrictEqual(expected.Elements[i].InnerText, actual.Elements[i].InnerText);
+        }
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)

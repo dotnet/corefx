@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -87,7 +88,7 @@ namespace System.Data.SqlClient
             internal const string Connect_Retry_Interval = "connectretryinterval";
         }
 
-        // Constant for the number of duplicate options in the connnection string
+        // Constant for the number of duplicate options in the connection string
 
         private static class SYNONYM
         {
@@ -193,6 +194,9 @@ namespace System.Data.SqlClient
             ThrowUnsupportedIfKeywordSet(KEY.Context_Connection);
             ThrowUnsupportedIfKeywordSet(KEY.Enlist);
             ThrowUnsupportedIfKeywordSet(KEY.TransactionBinding);
+#if MANAGED_SNI
+            ThrowUnsupportedIfKeywordSet(KEY.Integrated_Security);
+#endif
 
             // Network Library has its own special error message
             if (ContainsKey(KEY.Network_Library))
@@ -201,7 +205,6 @@ namespace System.Data.SqlClient
             }
 
             _integratedSecurity = ConvertValueToIntegratedSecurity();
-
             _encrypt = ConvertValueToBoolean(KEY.Encrypt, DEFAULT.Encrypt);
             _mars = ConvertValueToBoolean(KEY.MARS, DEFAULT.MARS);
             _persistSecurityInfo = ConvertValueToBoolean(KEY.Persist_Security_Info, DEFAULT.Persist_Security_Info);

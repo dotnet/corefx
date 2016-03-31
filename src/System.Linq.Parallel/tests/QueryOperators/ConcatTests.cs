@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Threading;
@@ -28,7 +29,7 @@ namespace System.Linq.Parallel.Tests
         // Concat
         //
         [Theory]
-        [MemberData("ConcatUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(ConcatUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void Concat_Unordered(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -43,14 +44,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("ConcatUnorderedData", (object)(new int[] { 1024, 1024 * 16 }))]
+        [MemberData(nameof(ConcatUnorderedData), new[] { 1024, 1024 * 16 })]
         public static void Concat_Unordered_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Concat_Unordered(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("ConcatData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(ConcatData), new[] { 0, 1, 2, 16 })]
         public static void Concat(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -65,14 +66,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("ConcatData", (object)(new int[] { 1024, 1024 * 16 }))]
+        [MemberData(nameof(ConcatData), new[] { 1024, 1024 * 16 })]
         public static void Concat_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Concat(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("ConcatUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(ConcatUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void Concat_Unordered_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -84,14 +85,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("ConcatUnorderedData", (object)(new int[] { 1024, 1024 * 16 }))]
+        [MemberData(nameof(ConcatUnorderedData), new[] { 1024, 1024 * 16 })]
         public static void Concat_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Concat_Unordered_NotPipelined(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("ConcatData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(ConcatData), new[] { 0, 1, 2, 16 })]
         public static void Concat_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -103,7 +104,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("ConcatData", (object)(new int[] { 1024, 1024 * 16 }))]
+        [MemberData(nameof(ConcatData), new[] { 1024, 1024 * 16 })]
         public static void Concat_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Concat_NotPipelined(left, leftCount, right, rightCount);

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -157,7 +158,7 @@ namespace System.Text.Tests
             VerificationHelper(encoder, chars, 0, 1, bytes, 0, bytes.Length, true, 1, 2, true, "007.4");
         }
 
-        // PosTest8: Call Convert to convert a unicode character array with Unicode encoder
+        // PosTest8: Call Convert to convert a Unicode character array with Unicode encoder
         [Fact]
         public void PosTest8()
         {
@@ -169,7 +170,7 @@ namespace System.Text.Tests
             VerificationHelper(encoder, chars, 0, chars.Length, bytes, 0, bytes.Length, true, chars.Length, bytes.Length, true, "008.2");
         }
 
-        // PosTest9: Call Convert to convert partial of a unicode character array with Unicode encoder
+        // PosTest9: Call Convert to convert partial of a Unicode character array with Unicode encoder
         [Fact]
         public void PosTest9()
         {

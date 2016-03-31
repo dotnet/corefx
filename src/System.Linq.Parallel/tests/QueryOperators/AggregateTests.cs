@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -51,14 +52,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 1024, 1024 * 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Sum(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_Seed(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -67,14 +68,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 1024, 1024 * 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_Seed_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Sum_Seed(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", 1, new int[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), 1, new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Product_Seed(Labeled<ParallelQuery<int>> labeled, int count, int start)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -85,14 +86,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", 1, new int[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), 1, new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Product_Seed_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int start)
         {
             Aggregate_Product_Seed(labeled, count, start);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Collection_Seed(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -101,14 +102,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 512, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 512, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Collection_Seed_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Collection_Seed(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_Result(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -117,14 +118,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 1024, 1024 * 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_Result_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Sum_Result(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", 1, new int[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), 1, new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Product_Result(Labeled<ParallelQuery<int>> labeled, int count, int start)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -133,14 +134,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", 1, new int[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), 1, new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Product_Results_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int start)
         {
             Aggregate_Product_Result(labeled, count, start);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Collection_Results(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -149,14 +150,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 512, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 512, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Collection_Results_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Collection_Results(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_Accumulator(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -170,14 +171,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 1024, 1024 * 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_Accumulator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Sum_Accumulator(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", 1, new int[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), 1, new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Product_Accumulator(Labeled<ParallelQuery<int>> labeled, int count, int start)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -191,14 +192,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", 1, new int[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), 1, new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Product_Accumulator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int start)
         {
             Aggregate_Product_Accumulator(labeled, count, start);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Collection_Accumulator(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -212,14 +213,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 512, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 512, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Collection_Accumulator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Collection_Accumulator(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_SeedFunction(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -233,14 +234,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 1024, 1024 * 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Sum_SeedFunction_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Sum_SeedFunction(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", 1, new int[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), 1, new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Product_SeedFunction(Labeled<ParallelQuery<int>> labeled, int count, int start)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -254,14 +255,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", 1, new int[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), 1, new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Product_SeedFunction_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int start)
         {
             Aggregate_Product_SeedFunction(labeled, count, start);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Collection_SeedFunction(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -275,7 +276,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 512, 1024 * 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 512, 1024 * 16 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_Collection_SeedFunction_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Aggregate_Collection_SeedFunction(labeled, count);
@@ -293,7 +294,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Aggregate_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
             CancellationTokenSource cs = new CancellationTokenSource();
@@ -306,7 +307,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("AggregateExceptionData", (object)(new int[] { 2 }))]
+        [MemberData(nameof(AggregateExceptionData), new[] { 2 })]
         public static void Aggregate_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Aggregate((i, j) => { throw new DeliberateTestException(); }));

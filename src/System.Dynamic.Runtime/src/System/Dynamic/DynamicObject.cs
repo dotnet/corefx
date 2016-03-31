@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
@@ -182,7 +183,7 @@ namespace System.Dynamic
 
         /// <summary>
         /// Provides the implementation of performing a set index operation.  Derived classes can
-        /// override this method to custmize behavior.  When not overridden the call site requesting
+        /// override this method to customize behavior.  When not overridden the call site requesting
         /// the binder determines the behavior.
         /// </summary>
         /// <param name="binder">The binder provided by the call site.</param>
@@ -197,7 +198,7 @@ namespace System.Dynamic
 
         /// <summary>
         /// Provides the implementation of performing a delete index operation.  Derived classes
-        /// can override this method to custmize behavior.  When not overridden the call site
+        /// can override this method to customize behavior.  When not overridden the call site
         /// requesting the binder determines the behavior.
         /// </summary>
         /// <param name="binder">The binder provided by the call site.</param>

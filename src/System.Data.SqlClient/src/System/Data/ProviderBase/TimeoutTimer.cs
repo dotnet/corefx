@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 //
 //  Class used to manage timeouts in complex system operations.
@@ -132,7 +133,7 @@ namespace System.Data.ProviderBase
 
         // Returns milliseconds remaining trimmed to zero for none remaining
         //  and long.MaxValue for infinite
-        // This method should be prefered for internal calculations that are not
+        // This method should be preferred for internal calculations that are not
         //  yet common enough to code into the TimeoutTimer class itself.
         internal long MillisecondsRemaining
         {

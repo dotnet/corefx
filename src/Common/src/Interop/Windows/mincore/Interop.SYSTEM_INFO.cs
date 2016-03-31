@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -30,6 +31,7 @@ internal partial class Interop
             Processor_Architecture_ARM = 5,
             Processor_Architecture_IA64 = 6,
             Processor_Architecture_AMD64 = 9,
+            Processor_Architecture_ARM64 = 12,
             Processor_Architecture_UNKNOWN = 0xFFFF
         }
     }

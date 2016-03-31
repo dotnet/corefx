@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Linq;
@@ -178,7 +179,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XElement("parent", new XElement("child", "child text")), "newValue" },
             new object[] { new XElement("root", InputSpace.GetElement(100, 10).DescendantNodes()), "newValue" }
         };
-        [Theory, MemberData("ExecuteXElementVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXElementVariationParams))]
         public void ExecuteXElementVariation(XElement toChange, String newValue)
         {
             int count = toChange.Nodes().Count();
@@ -208,7 +209,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XAttribute("xxx", "yyy"), "newValue" },
             new object[] { new XAttribute("{a}xxx", "a_yyy"), "newValue" }
         };
-        [Theory, MemberData("ExecuteXAttributeVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXAttributeVariationParams))]
         public void ExecuteXAttributeVariation(XAttribute toChange, string newValue)
         {
             XElement xElem = new XElement("root", toChange);
@@ -237,7 +238,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XAttribute("xxx", "yyy"), "newValue" },
             new object[] { new XAttribute("{a}xxx", "a_yyy"), "newValue" }
         };
-        [Theory, MemberData("ExecuteXAttributeVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXAttributeVariationParams))]
         public void ExecuteXAttributeVariation(XAttribute toChange, object newValue)
         {
             XElement xElem = new XElement("root", toChange);
@@ -268,7 +269,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XElement("parent", new XElement("child", "child text")), "newValue" },
             new object[] { new XElement("root", InputSpace.GetElement(100, 10).DescendantNodes()), "newValue" }
         };
-        [Theory, MemberData("ExecuteXElementVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXElementVariationParams))]
         public void ExecuteXElementVariation(XElement toChange, object newValue)
         {
             int count = toChange.Nodes().Count();
@@ -297,7 +298,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XAttribute("xxx", "yyy"), "newValue" },
             new object[] { new XAttribute("{a}xxx", "a_yyy"), "newValue" }
         };
-        [Theory, MemberData("ExecuteXAttributeVariationParams")]
+        [Theory, MemberData(nameof(ExecuteXAttributeVariationParams))]
         public void ExecuteXAttributeVariation(XAttribute toChange, object newValue)
         {
             XElement xElem = new XElement("root", toChange);
@@ -328,7 +329,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XAttribute("a", "aa"), new XElement("parent", new XElement("child", "child text")) },
             new object[] { new XElement("element"), new XElement("nodes", InputSpace.GetElement(100, 10).DescendantNodes()) }
         };
-        [Theory, MemberData("ExecuteAddVariationParams")]
+        [Theory, MemberData(nameof(ExecuteAddVariationParams))]
         public void ExecuteAddVariation(XObject content, XElement toAdd)
         {
             XElement xElem = new XElement("root", content);
@@ -355,7 +356,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XElement("parent", new XElement("child", "child text")) },
             new object[] { new XElement("nodes", InputSpace.GetElement(100, 10).DescendantNodes()) }
         };
-        [Theory, MemberData("ExecuteRemoveVariationParams")]
+        [Theory, MemberData(nameof(ExecuteRemoveVariationParams))]
         public void ExecuteRemoveVariation(XElement content)
         {
             XElement xElem = new XElement("root", content);
@@ -382,7 +383,7 @@ namespace CoreXml.Test.XLinq.FunctionalTests.EventsTests
             new object[] { new XElement("parent", new XElement("child", "child text")), "Windows 8" },
             new object[] { new XElement("nodes", InputSpace.GetElement(100, 10).DescendantNodes()), "StackTrace" }
         };
-        [Theory, MemberData("ExecuteValueVariationParams")]
+        [Theory, MemberData(nameof(ExecuteValueVariationParams))]
         public void ExecuteValueVariation(XElement content, object newValue)
         {
             int count = content.Nodes().Count();

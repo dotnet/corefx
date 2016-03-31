@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -304,7 +305,7 @@ namespace System.Numerics.Tests
         [Fact]
         public static void RunCustomFormatThousandsSeparator()
         {
-            // Thousands Seperator
+            // Thousands Separator
             RunCustomFormatToStringTests(s_random, "#,#", CultureInfo.CurrentCulture.NumberFormat.NegativeSign, 0, ThousandsFormatter);
             RunCustomFormatToStringTests(s_random, "00,00", CultureInfo.CurrentCulture.NumberFormat.NegativeSign, 4, ThousandsFormatter);
             RunCustomFormatToStringTests(s_random, "0000,0,00,0", CultureInfo.CurrentCulture.NumberFormat.NegativeSign, 8, ThousandsFormatter);
@@ -373,7 +374,7 @@ namespace System.Numerics.Tests
         [Fact]
         public static void RunCustomFormatSeparator()
         {
-            // Seperator
+            // Separator
             RunCustomFormatToStringTests(s_random, "00.00;0.00E000", CultureInfo.CurrentCulture.NumberFormat.NegativeSign, 2, CombinedFormatter(DecimalPointFormatter, ScientificFormatter));
             RunCustomFormatToStringTests(s_random, "00.00;;0.00E000", CultureInfo.CurrentCulture.NumberFormat.NegativeSign, 2, CombinedFormatter(DecimalPointFormatter, DecimalPointFormatter, ScientificFormatter, true));
             RunCustomFormatToStringTests(s_random, "00.00;#%00;0.00E000", CultureInfo.CurrentCulture.NumberFormat.NegativeSign, 2, CombinedFormatter(DecimalPointFormatter, PercentSymbolFormatter, ScientificFormatter));

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -50,19 +51,19 @@ namespace System.Xml
         {
             if (chars == null)
             {
-                throw new ArgumentNullException("chars");
+                throw new ArgumentNullException(nameof(chars));
             }
             if (len < 0)
             {
-                throw new ArgumentOutOfRangeException("len");
+                throw new ArgumentOutOfRangeException(nameof(len));
             }
             if (startPos < 0)
             {
-                throw new ArgumentOutOfRangeException("startPos");
+                throw new ArgumentOutOfRangeException(nameof(startPos));
             }
             if (chars.Length - startPos < len)
             {
-                throw new ArgumentOutOfRangeException("len");
+                throw new ArgumentOutOfRangeException(nameof(len));
             }
 
             if (len == 0)
@@ -88,19 +89,19 @@ namespace System.Xml
         {
             if (str == null)
             {
-                throw new ArgumentNullException("str");
+                throw new ArgumentNullException(nameof(str));
             }
             if (len < 0)
             {
-                throw new ArgumentOutOfRangeException("len");
+                throw new ArgumentOutOfRangeException(nameof(len));
             }
             if (startPos < 0)
             {
-                throw new ArgumentOutOfRangeException("startPos");
+                throw new ArgumentOutOfRangeException(nameof(startPos));
             }
             if (str.Length - startPos < len)
             {
-                throw new ArgumentOutOfRangeException("len");
+                throw new ArgumentOutOfRangeException(nameof(len));
             }
 
             if (len == 0)

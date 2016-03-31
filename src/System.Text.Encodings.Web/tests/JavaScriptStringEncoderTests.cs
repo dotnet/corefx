@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Globalization;
@@ -12,6 +13,17 @@ namespace Microsoft.Framework.WebEncoders
 {
     public class JavaScriptStringEncoderTests
     {
+        [Fact]
+        public void TestSurrogate()
+        {
+            Assert.Equal("\\uD83D\\uDCA9", System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode("\U0001f4a9"));
+            using (var writer = new StringWriter())
+            {
+                System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(writer, "\U0001f4a9");
+                Assert.Equal("\\uD83D\\uDCA9", writer.GetStringBuilder().ToString());
+            }
+        }
+
         [Fact]
         public void Ctor_WithTextEncoderSettings()
         {
@@ -77,7 +89,7 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void JavaScriptStringEncode_AllRangesAllowed_StillEncodesForbiddenChars_Simple_Escaping() {
             // The following two calls could be simply InlineData to the Theory below
-            // Unfortunatelly, the xUnit logger fails to escape the inputs when logging the test results,
+            // Unfortunately, the xUnit logger fails to escape the inputs when logging the test results,
             // and so the suite fails despite all tests passing. 
             // TODO: I will try to fix it in xUnit, but for now this is a workaround to enable these tests.
             JavaScriptStringEncode_AllRangesAllowed_StillEncodesForbiddenChars_Simple("\b", @"\b");
@@ -132,6 +144,7 @@ namespace Microsoft.Framework.WebEncoders
                     else if (input == "\r") { expected = @"\r"; }
                     else if (input == "\\") { expected = @"\\"; }
                     else if (input == "/") { expected = @"\/"; }
+                    else if (input == "`") { expected = @"\u0060"; }
                     else
                     {
                         bool mustEncode = false;

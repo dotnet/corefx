@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -83,12 +84,18 @@ namespace System.Net.Http
             {
                 if (value)
                 {
+                    _winHttpHandler.DefaultProxyCredentials = CredentialCache.DefaultCredentials;
                     _winHttpHandler.ServerCredentials = CredentialCache.DefaultCredentials;
                 }
-                else if (_winHttpHandler.ServerCredentials == CredentialCache.DefaultCredentials)
+                else
                 {
-                    // Only clear out the ServerCredentials property if it was a DefaultCredentials.
-                    _winHttpHandler.ServerCredentials = null;
+                    _winHttpHandler.DefaultProxyCredentials = null;
+
+                    if (_winHttpHandler.ServerCredentials == CredentialCache.DefaultCredentials)
+                    {
+                        // Only clear out the ServerCredentials property if it was a DefaultCredentials.
+                        _winHttpHandler.ServerCredentials = null;
+                    }
                 }
             }
         }

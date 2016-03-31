@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -93,7 +94,7 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         internal static void EmitLoadValueIndirect(this ILGenerator il, Type type)
         {
-            ContractUtils.RequiresNotNull(type, "type");
+            ContractUtils.RequiresNotNull(type, nameof(type));
 
             if (type.GetTypeInfo().IsValueType)
             {
@@ -150,7 +151,7 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         internal static void EmitStoreValueIndirect(this ILGenerator il, Type type)
         {
-            ContractUtils.RequiresNotNull(type, "type");
+            ContractUtils.RequiresNotNull(type, nameof(type));
 
             if (type.GetTypeInfo().IsValueType)
             {
@@ -197,7 +198,7 @@ namespace System.Linq.Expressions.Compiler
 
         internal static void EmitLoadElement(this ILGenerator il, Type type)
         {
-            ContractUtils.RequiresNotNull(type, "type");
+            ContractUtils.RequiresNotNull(type, nameof(type));
 
             if (!type.GetTypeInfo().IsValueType)
             {
@@ -253,7 +254,7 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         internal static void EmitStoreElement(this ILGenerator il, Type type)
         {
-            ContractUtils.RequiresNotNull(type, "type");
+            ContractUtils.RequiresNotNull(type, nameof(type));
 
             if (type.GetTypeInfo().IsEnum)
             {
@@ -301,7 +302,7 @@ namespace System.Linq.Expressions.Compiler
 
         internal static void EmitType(this ILGenerator il, Type type)
         {
-            ContractUtils.RequiresNotNull(type, "type");
+            ContractUtils.RequiresNotNull(type, nameof(type));
 
             il.Emit(OpCodes.Ldtoken, type);
             il.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle"));
@@ -313,7 +314,7 @@ namespace System.Linq.Expressions.Compiler
 
         internal static void EmitFieldAddress(this ILGenerator il, FieldInfo fi)
         {
-            ContractUtils.RequiresNotNull(fi, "fi");
+            ContractUtils.RequiresNotNull(fi, nameof(fi));
 
             if (fi.IsStatic)
             {
@@ -327,7 +328,7 @@ namespace System.Linq.Expressions.Compiler
 
         internal static void EmitFieldGet(this ILGenerator il, FieldInfo fi)
         {
-            ContractUtils.RequiresNotNull(fi, "fi");
+            ContractUtils.RequiresNotNull(fi, nameof(fi));
 
             if (fi.IsStatic)
             {
@@ -341,7 +342,7 @@ namespace System.Linq.Expressions.Compiler
 
         internal static void EmitFieldSet(this ILGenerator il, FieldInfo fi)
         {
-            ContractUtils.RequiresNotNull(fi, "fi");
+            ContractUtils.RequiresNotNull(fi, nameof(fi));
 
             if (fi.IsStatic)
             {
@@ -356,7 +357,7 @@ namespace System.Linq.Expressions.Compiler
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix")]
         internal static void EmitNew(this ILGenerator il, ConstructorInfo ci)
         {
-            ContractUtils.RequiresNotNull(ci, "ci");
+            ContractUtils.RequiresNotNull(ci, nameof(ci));
 
             if (ci.DeclaringType.GetTypeInfo().ContainsGenericParameters)
             {
@@ -369,8 +370,8 @@ namespace System.Linq.Expressions.Compiler
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix")]
         internal static void EmitNew(this ILGenerator il, Type type, Type[] paramTypes)
         {
-            ContractUtils.RequiresNotNull(type, "type");
-            ContractUtils.RequiresNotNull(paramTypes, "paramTypes");
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            ContractUtils.RequiresNotNull(paramTypes, nameof(paramTypes));
 
             ConstructorInfo ci = type.GetConstructor(paramTypes);
             if (ci == null) throw Error.TypeDoesNotHaveConstructorForTheSignature();
@@ -388,7 +389,7 @@ namespace System.Linq.Expressions.Compiler
 
         internal static void EmitString(this ILGenerator il, string value)
         {
-            ContractUtils.RequiresNotNull(value, "value");
+            ContractUtils.RequiresNotNull(value, nameof(value));
             il.Emit(OpCodes.Ldstr, value);
         }
 
@@ -1050,7 +1051,7 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         internal static void EmitArray<T>(this ILGenerator il, IList<T> items)
         {
-            ContractUtils.RequiresNotNull(items, "items");
+            ContractUtils.RequiresNotNull(items, nameof(items));
 
             il.EmitInt(items.Count);
             il.Emit(OpCodes.Newarr, typeof(T));
@@ -1069,9 +1070,9 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         internal static void EmitArray(this ILGenerator il, Type elementType, int count, Action<int> emit)
         {
-            ContractUtils.RequiresNotNull(elementType, "elementType");
-            ContractUtils.RequiresNotNull(emit, "emit");
-            if (count < 0) throw Error.CountCannotBeNegative();
+            ContractUtils.RequiresNotNull(elementType, nameof(elementType));
+            ContractUtils.RequiresNotNull(emit, nameof(emit));
+            Debug.Assert(count >= 0);
 
             il.EmitInt(count);
             il.Emit(OpCodes.Newarr, elementType);
@@ -1093,8 +1094,8 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         internal static void EmitArray(this ILGenerator il, Type arrayType)
         {
-            ContractUtils.RequiresNotNull(arrayType, "arrayType");
-            if (!arrayType.IsArray) throw Error.ArrayTypeMustBeArray();
+            ContractUtils.RequiresNotNull(arrayType, nameof(arrayType));
+            Debug.Assert(arrayType.IsArray);
 
             if (arrayType.IsVector())
             {

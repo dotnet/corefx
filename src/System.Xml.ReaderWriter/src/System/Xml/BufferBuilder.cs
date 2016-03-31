@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -17,11 +18,11 @@ namespace System.Xml
     // BufferBuilder is a replacement for StringBuilder for cases when large strings can occur.
     // StringBuilder stores the string that is being built in one large chunk of memory. If it needs more memory,
     // it allocates a new chunk of double size and copies the data into it. This results in bad perf and
-    // memory constumption in case the string is very large (>85kB). Large objects are allocated on Large Object 
+    // memory consumption in case the string is very large (>85kB). Large objects are allocated on Large Object 
     // Heap and are not freed by GC as fast as smaller objects.
     // 
     // BufferBuilder uses a StringBuilder as long as the stored string is smaller that 64kB. If the final string
-    // should be bigger that that, it stores the data in a list of char[] arrays. A StringBuilder object still needs to be 
+    // should be bigger than that, it stores the data in a list of char[] arrays. A StringBuilder object still needs to be 
     // used in order to create the final string in ToString methods, but this is ok since at that point 
     // we already know the resulting string length and we can initialize the StringBuilder with the correct 
     // capacity. 
@@ -120,7 +121,7 @@ namespace System.Xml
 
                 if (value < 0 || value > _length)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 if (value == 0)
                 {
@@ -187,7 +188,7 @@ namespace System.Xml
                 {
                     return;
                 }
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             if (count == 0)
             {
@@ -195,11 +196,11 @@ namespace System.Xml
             }
             if (start < 0)
             {
-                throw new ArgumentOutOfRangeException("start");
+                throw new ArgumentOutOfRangeException(nameof(start));
             }
             if (count < 0 || start + count > value.Length)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             if (_length + count <= MaxStringBuilderLength)
@@ -246,7 +247,7 @@ namespace System.Xml
                 {
                     return;
                 }
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             if (count == 0)
             {
@@ -254,11 +255,11 @@ namespace System.Xml
             }
             if (start < 0)
             {
-                throw new ArgumentOutOfRangeException("start");
+                throw new ArgumentOutOfRangeException(nameof(start));
             }
             if (count < 0 || start + count > value.Length)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
             if (_length + count <= MaxStringBuilderLength)
             {

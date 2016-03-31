@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -73,18 +74,6 @@ namespace System.Text.Tests
         {
             UTF7Encoding utf7 = new UTF7Encoding();
             Assert.Equal(c_INT_STRINGEMPTYlENGTH, utf7.GetByteCount(String.Empty));
-        }
-
-        //NegTest1: The argument is null reference
-        [Fact]
-        public void NegTest1()
-        {
-            string source = null;
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                UTF7Encoding UTF7 = new UTF7Encoding();
-                UTF7.GetByteCount(source);
-            });
         }
     }
 }

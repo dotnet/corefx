@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using Xunit;
@@ -8,8 +9,8 @@ namespace System.Linq.Expressions.Tests
 {
     public class Assign
     {
-        [Fact]
-        public void SimpleAssignment()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void SimpleAssignment(bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(typeof(int));
             LabelTarget target = Expression.Label(typeof(int));
@@ -19,18 +20,18 @@ namespace System.Linq.Expressions.Tests
                 Expression.Return(target, variable),
                 Expression.Label(target, Expression.Default(typeof(int)))
                 );
-            Assert.Equal(42, Expression.Lambda<Func<int>>(exp).Compile()());
+            Assert.Equal(42, Expression.Lambda<Func<int>>(exp).Compile(useInterpreter)());
         }
 
-        [Fact]
-        public void AssignmentHasValueItself()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void AssignmentHasValueItself(bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(typeof(int));
             Expression exp = Expression.Block(
                 new ParameterExpression[] { variable },
                 Expression.Assign(variable, Expression.Constant(42))
                 );
-            Assert.Equal(42, Expression.Lambda<Func<int>>(exp).Compile()());
+            Assert.Equal(42, Expression.Lambda<Func<int>>(exp).Compile(useInterpreter)());
         }
 
         [Fact]
@@ -72,8 +73,8 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentException>(() => Expression.Assign(Expression.Variable(typeof(long)), Expression.Constant(1)));
         }
 
-        [Fact]
-        public void ReferenceAssignable()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void ReferenceAssignable(bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(typeof(object));
             LabelTarget target = Expression.Label(typeof(object));
@@ -83,7 +84,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Return(target, variable),
                 Expression.Label(target, Expression.Default(typeof(object)))
                 );
-            Assert.Equal("Hello", Expression.Lambda<Func<object>>(exp).Compile()());
+            Assert.Equal("Hello", Expression.Lambda<Func<object>>(exp).Compile(useInterpreter)());
         }
 
         [Fact]

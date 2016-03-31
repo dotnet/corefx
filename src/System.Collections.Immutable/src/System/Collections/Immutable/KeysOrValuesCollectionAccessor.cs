@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,8 +32,8 @@ namespace System.Collections.Immutable
         /// <param name="keysOrValues">The keys or values enumeration to wrap as a collection.</param>
         protected KeysOrValuesCollectionAccessor(IImmutableDictionary<TKey, TValue> dictionary, IEnumerable<T> keysOrValues)
         {
-            Requires.NotNull(dictionary, "dictionary");
-            Requires.NotNull(keysOrValues, "keysOrValues");
+            Requires.NotNull(dictionary, nameof(dictionary));
+            Requires.NotNull(keysOrValues, nameof(keysOrValues));
 
             _dictionary = dictionary;
             _keysOrValues = keysOrValues;
@@ -89,9 +90,9 @@ namespace System.Collections.Immutable
         /// </summary>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            Requires.NotNull(array, "array");
-            Requires.Range(arrayIndex >= 0, "arrayIndex");
-            Requires.Range(array.Length >= arrayIndex + this.Count, "arrayIndex");
+            Requires.NotNull(array, nameof(array));
+            Requires.Range(arrayIndex >= 0, nameof(arrayIndex));
+            Requires.Range(array.Length >= arrayIndex + this.Count, nameof(arrayIndex));
 
             foreach (T item in this)
             {
@@ -130,9 +131,9 @@ namespace System.Collections.Immutable
         /// <param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param>
         void ICollection.CopyTo(Array array, int arrayIndex)
         {
-            Requires.NotNull(array, "array");
-            Requires.Range(arrayIndex >= 0, "arrayIndex");
-            Requires.Range(array.Length >= arrayIndex + this.Count, "arrayIndex");
+            Requires.NotNull(array, nameof(array));
+            Requires.Range(arrayIndex >= 0, nameof(arrayIndex));
+            Requires.Range(array.Length >= arrayIndex + this.Count, nameof(arrayIndex));
 
             foreach (T item in this)
             {

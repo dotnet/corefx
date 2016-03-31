@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace System.Linq.Parallel.Tests
         // Sum
         //
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 0, 1, 2, 16 })]
         public static void Sum_Int(Labeled<ParallelQuery<int>> labeled, int count, int sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -31,7 +32,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Int_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, int sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -40,7 +41,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Int_AllNull(Labeled<ParallelQuery<int>> labeled, int count, int sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -50,14 +51,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SumData", (object)(new int[] { 1024 * 4, 1024 * 64 }))]
+        [MemberData(nameof(SumData), new[] { 1024 * 4, 1024 * 64 })]
         public static void Sum_Int_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int sum)
         {
             Sum_Int(labeled, count, sum);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Int_Overflow(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? int.MaxValue : x).Sum());
@@ -67,7 +68,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 0, 1, 2, 16 })]
         public static void Sum_Long(Labeled<ParallelQuery<int>> labeled, int count, long sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -81,14 +82,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SumData", (object)(new int[] { 1024 * 4, 1024 * 1024 }))]
+        [MemberData(nameof(SumData), new[] { 1024 * 4, 1024 * 1024 })]
         public static void Sum_Long_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, long sum)
         {
             Sum_Long(labeled, count, sum);
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Long_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, long sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -97,7 +98,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Long_AllNull(Labeled<ParallelQuery<int>> labeled, int count, long sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -106,7 +107,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Long_Overflow(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? long.MaxValue : x).Sum());
@@ -116,7 +117,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 0, 1, 2, 16 })]
         public static void Sum_Float(Labeled<ParallelQuery<int>> labeled, int count, float sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -130,14 +131,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SumData", (object)(new int[] { 1024 * 4, 1024 * 1024 }))]
+        [MemberData(nameof(SumData), new[] { 1024 * 4, 1024 * 1024 })]
         public static void Sum_Float_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, float sum)
         {
             Sum_Float(labeled, count, sum);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Float_Overflow(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Assert.Equal(float.PositiveInfinity, labeled.Item.Select(x => float.MaxValue).Sum());
@@ -160,7 +161,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Float_NaN(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Assert.Equal(float.NaN, labeled.Item.Select(x => x == 0 ? float.NaN : x).Sum());
@@ -183,7 +184,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Float_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, float sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -192,7 +193,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Float_AllNull(Labeled<ParallelQuery<int>> labeled, int count, float sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -201,7 +202,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 0, 1, 2, 16 })]
         public static void Sum_Double(Labeled<ParallelQuery<int>> labeled, int count, double sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -215,14 +216,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SumData", (object)(new int[] { 1024 * 4, 1024 * 1024 }))]
+        [MemberData(nameof(SumData), new[] { 1024 * 4, 1024 * 1024 })]
         public static void Sum_Double_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, double sum)
         {
             Sum_Double(labeled, count, sum);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Double_Overflow(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Assert.Equal(double.PositiveInfinity, labeled.Item.Select(x => double.MaxValue).Sum());
@@ -245,7 +246,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Double_NaN(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Assert.Equal(double.NaN, labeled.Item.Select(x => x == 0 ? double.NaN : x).Sum());
@@ -268,7 +269,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Double_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, double sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -277,7 +278,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Double_AllNull(Labeled<ParallelQuery<int>> labeled, int count, double sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -286,7 +287,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 0, 1, 2, 16 })]
         public static void Sum_Decimal(Labeled<ParallelQuery<int>> labeled, int count, decimal sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -299,14 +300,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SumData", (object)(new int[] { 1024 * 4, 1024 * 1024 }))]
+        [MemberData(nameof(SumData), new[] { 1024 * 4, 1024 * 1024 })]
         public static void Sum_Decimal_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, decimal sum)
         {
             Sum_Decimal(labeled, count, sum);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_Decimal_Overflow(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertThrowsWrapped<OverflowException>(() => labeled.Item.Select(x => x == 0 ? decimal.MaxValue : x).Sum());
@@ -316,7 +317,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Decimal_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, decimal sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -325,7 +326,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SumData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SumData), new[] { 1, 2, 16 })]
         public static void Sum_Decimal_AllNull(Labeled<ParallelQuery<int>> labeled, int count, decimal sum)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -334,7 +335,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
             CancellationTokenSource cs = new CancellationTokenSource();
@@ -357,7 +358,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Sum_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Sum((Func<int, int>)(x => { throw new DeliberateTestException(); })));

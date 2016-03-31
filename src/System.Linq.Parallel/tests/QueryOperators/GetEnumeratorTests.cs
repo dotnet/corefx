@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -9,19 +10,11 @@ namespace System.Linq.Parallel.Tests
     public class GetEnumeratorTests
     {
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void GetEnumerator_Unordered(Labeled<ParallelQuery<int>> labeled, int count)
         {
             IntegerRangeSet seen = new IntegerRangeSet(0, count);
             IEnumerator<int> enumerator = labeled.Item.GetEnumerator();
-            if (count == 0 && labeled.ToString().Contains("Array"))
-            {
-                Assert.Same(enumerator, labeled.Item.GetEnumerator());
-            }
-            else
-            {
-                Assert.NotSame(enumerator, labeled.Item.GetEnumerator());
-            }
             while (enumerator.MoveNext())
             {
                 int current = enumerator.Current;
@@ -48,26 +41,18 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 128 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 4, 1024 * 128 }, MemberType = typeof(UnorderedSources))]
         public static void GetEnumerator_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GetEnumerator_Unordered(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void GetEnumerator(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int seen = 0;
             IEnumerator<int> enumerator = labeled.Item.GetEnumerator();
-            if (count == 0 && labeled.ToString().Contains("Array"))
-            {
-                Assert.Same(enumerator, labeled.Item.GetEnumerator());
-            }
-            else
-            {
-                Assert.NotSame(enumerator, labeled.Item.GetEnumerator());
-            }
             while (enumerator.MoveNext())
             {
                 int current = enumerator.Current;
@@ -94,14 +79,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 128 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 128 }, MemberType = typeof(Sources))]
         public static void GetEnumerator_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             GetEnumerator(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void GetEnumerator_MoveNextAfterQueryOpeningFailsIsIllegal(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item.Select<int, int>(x => { throw new DeliberateTestException(); }).OrderBy(x => x);
@@ -116,8 +101,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 16 }), MemberType = typeof(UnorderedSources))]
-        [MemberData("Ranges", (object)(new int[] { 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 16 }, MemberType = typeof(Sources))]
         public static void GetEnumerator_CurrentBeforeMoveNext(Labeled<ParallelQuery<int>> labeled, int count)
         {
             IEnumerator<int> enumerator = labeled.Item.GetEnumerator();
@@ -133,8 +118,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void GetEnumerator_MoveNextAfterEnd(Labeled<ParallelQuery<int>> labeled, int count)
         {
             IEnumerator<int> enumerator = labeled.Item.GetEnumerator();

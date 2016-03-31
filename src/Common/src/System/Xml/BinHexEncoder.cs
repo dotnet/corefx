@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Xml
 {
@@ -12,19 +13,19 @@ namespace System.Xml
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
             if (count > buffer.Length - index)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             char[] chars = new char[(count * 2) < CharsChunkSize ? (count * 2) : CharsChunkSize];
@@ -43,19 +44,19 @@ namespace System.Xml
         {
             if (null == inArray)
             {
-                throw new ArgumentNullException("inArray");
+                throw new ArgumentNullException(nameof(inArray));
             }
             if (0 > offsetIn)
             {
-                throw new ArgumentOutOfRangeException("offsetIn");
+                throw new ArgumentOutOfRangeException(nameof(offsetIn));
             }
             if (0 > count)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
             if (count > inArray.Length - offsetIn)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             char[] outArray = new char[2 * count];

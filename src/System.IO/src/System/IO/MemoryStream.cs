@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using System.Diagnostics.Contracts;
 
 namespace System.IO
 {
-    // A MemoryStream represents a Stream in memory (ie, it has no backing store).
+    // A MemoryStream represents a Stream in memory (i.e, it has no backing store).
     // This stream may reduce the need for temporary buffers and files in 
     // an application.  
     // 
@@ -32,7 +33,7 @@ namespace System.IO
         private bool _isOpen;      // Is this stream open or closed?
 
         // <TODO>In V2, if we get support for arrays of more than 2 GB worth of elements,
-        // consider removing this constraing, or setting it to Int64.MaxValue.</TODO>
+        // consider removing this constraint, or setting it to Int64.MaxValue.</TODO>
         private const int MemStreamMaxLength = int.MaxValue;
 
         public MemoryStream()
@@ -44,10 +45,10 @@ namespace System.IO
         {
             if (capacity < 0)
             {
-                throw new ArgumentOutOfRangeException("capacity", SR.ArgumentOutOfRange_NegativeCapacity);
+                throw new ArgumentOutOfRangeException(nameof(capacity), SR.ArgumentOutOfRange_NegativeCapacity);
             }
 
-            _buffer = new byte[capacity];
+            _buffer = capacity != 0 ? new byte[capacity] : Array.Empty<byte>();
             _capacity = capacity;
             _expandable = true;
             _writable = true;
@@ -65,7 +66,7 @@ namespace System.IO
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             }
 
             _buffer = buffer;
@@ -90,15 +91,15 @@ namespace System.IO
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - index < count)
             {
@@ -292,7 +293,7 @@ namespace System.IO
                 // Special behavior if the MS isn't expandable: we don't throw if value is the same as the current capacity
                 if (value < Length)
                 {
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_SmallCapacity);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_SmallCapacity);
                 }
                 if (!_isOpen)
                 {
@@ -353,7 +354,7 @@ namespace System.IO
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
                 if (!_isOpen)
                 {
@@ -361,7 +362,7 @@ namespace System.IO
                 }
                 if (value > MemStreamMaxLength)
                 {
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_StreamLength);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_StreamLength);
                 }
 
                 _position = _origin + (int)value;
@@ -372,15 +373,15 @@ namespace System.IO
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             }
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - offset < count)
             {
@@ -420,15 +421,15 @@ namespace System.IO
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             }
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - offset < count)
             {
@@ -466,16 +467,16 @@ namespace System.IO
 
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
-            // This implementation offers beter performance compared to the base class version.
+            // This implementation offers better performance compared to the base class version.
 
             // The parameter checks must be in sync with the base version:
             if (destination == null)
             {
-                throw new ArgumentNullException("destination");
+                throw new ArgumentNullException(nameof(destination));
             }
             if (bufferSize <= 0)
             {
-                throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedPosNum);
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
             }
             if (!CanRead && !CanWrite)
             {
@@ -483,7 +484,7 @@ namespace System.IO
             }
             if (!destination.CanRead && !destination.CanWrite)
             {
-                throw new ObjectDisposedException("destination", SR.ObjectDisposed_StreamClosed);
+                throw new ObjectDisposedException(nameof(destination), SR.ObjectDisposed_StreamClosed);
             }
             if (!CanRead)
             {
@@ -495,7 +496,7 @@ namespace System.IO
             }
 
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Read() or Write() which a subclass might have overriden.  
+            // since it does not call through to Read() or Write() which a subclass might have overridden.  
             // To be safe we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Read/Write) when we are not sure.
             if (GetType() != typeof(MemoryStream))
@@ -538,7 +539,7 @@ namespace System.IO
             }
             if (offset > MemStreamMaxLength)
             {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_StreamLength);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_StreamLength);
             }
 
             switch (loc)
@@ -598,7 +599,7 @@ namespace System.IO
         {
             if (value < 0 || value > int.MaxValue)
             {
-                throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_StreamLength);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_StreamLength);
             }
             EnsureWriteable();
 
@@ -606,7 +607,7 @@ namespace System.IO
             Debug.Assert(MemStreamMaxLength == int.MaxValue);  // Check parameter validation logic in this method if this fails.
             if (value > (int.MaxValue - _origin))
             {
-                throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_StreamLength);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_StreamLength);
             }
 
             int newLength = _origin + (int)value;
@@ -641,15 +642,15 @@ namespace System.IO
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             }
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - offset < count)
             {
@@ -705,15 +706,15 @@ namespace System.IO
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             }
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - offset < count)
             {
@@ -766,7 +767,7 @@ namespace System.IO
         {
             if (stream == null)
             {
-                throw new ArgumentNullException("stream", SR.ArgumentNull_Stream);
+                throw new ArgumentNullException(nameof(stream), SR.ArgumentNull_Stream);
             }
             if (!_isOpen)
             {

@@ -1,7 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// Ported from DirectoryInfo.cs and made extension methods to allow extending
-// the class without System.IO.FileSystem needing to rely on System.Security.AccessControl
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics.Contracts;
@@ -25,7 +24,7 @@ namespace System.IO
         public static void SetAccessControl(this DirectoryInfo directoryInfo, DirectorySecurity directorySecurity)
         {
             if (directorySecurity == null)
-                throw new ArgumentNullException("directorySecurity");
+                throw new ArgumentNullException(nameof(directorySecurity));
             Contract.EndContractBlock();
 
             String fullPath = Path.GetFullPath(directoryInfo.FullName);
@@ -45,7 +44,7 @@ namespace System.IO
         public static void SetAccessControl(this FileInfo fileInfo, FileSecurity fileSecurity)
         {
             if (fileSecurity == null)
-                throw new ArgumentNullException("fileSecurity");
+                throw new ArgumentNullException(nameof(fileSecurity));
             Contract.EndContractBlock();
 
             String fullPath = Path.GetFullPath(fileInfo.FullName);
@@ -69,7 +68,7 @@ namespace System.IO
             SafeFileHandle handle = fileStream.SafeFileHandle;
 
             if (fileSecurity == null)
-                throw new ArgumentNullException("fileSecurity");
+                throw new ArgumentNullException(nameof(fileSecurity));
             Contract.EndContractBlock();
 
             if (handle.IsClosed)

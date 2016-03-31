@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Text;
@@ -106,7 +107,7 @@ namespace System.Diagnostics
             set
             {
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException("IndentSize", value, SR.TraceListenerIndentSize);
+                    throw new ArgumentOutOfRangeException(nameof(IndentSize), value, SR.TraceListenerIndentSize);
                 _indentSize = value;
             }
         }
@@ -147,7 +148,7 @@ namespace System.Diagnostics
             {
                 if (((int)value >> 6) != 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 _traceOptions = value;

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -25,6 +26,11 @@ namespace System.Reflection.Tests
             {
                 int value = (int)pi.GetConstantValue();
             });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                int value = (int)pi.GetRawConstantValue();
+            });
         }
 
 
@@ -42,6 +48,12 @@ namespace System.Reflection.Tests
             {
                 string value = (string)pi.GetConstantValue();
             });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                string value = (string)pi.GetRawConstantValue();
+            });
+
         }
 
 
@@ -58,6 +70,11 @@ namespace System.Reflection.Tests
             {
                 double value = (double)pi.GetConstantValue();
             });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                double value = (double)pi.GetRawConstantValue();
+            });
         }
 
 
@@ -73,6 +90,11 @@ namespace System.Reflection.Tests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 float value = (float)pi.GetConstantValue();
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                float value = (float)pi.GetRawConstantValue();
             });
         }
 

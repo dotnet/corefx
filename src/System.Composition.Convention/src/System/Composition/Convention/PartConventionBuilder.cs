@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -73,7 +74,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Export(Action<ExportConventionBuilder> exportConfiguration)
         {
-            Requires.NotNull(exportConfiguration, "exportConfiguration");
+            Requires.NotNull(exportConfiguration, nameof(exportConfiguration));
             var exportBuilder = new ExportConventionBuilder();
             exportConfiguration(exportBuilder);
             _typeExportBuilders.Add(exportBuilder);
@@ -98,7 +99,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Export<T>(Action<ExportConventionBuilder> exportConfiguration)
         {
-            Requires.NotNull(exportConfiguration, "exportConfiguration");
+            Requires.NotNull(exportConfiguration, nameof(exportConfiguration));
             var exportBuilder = new ExportConventionBuilder().AsContractType<T>();
             exportConfiguration(exportBuilder);
             _typeExportBuilders.Add(exportBuilder);
@@ -112,7 +113,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder SelectConstructor(Func<IEnumerable<ConstructorInfo>, ConstructorInfo> constructorSelector)
         {
-            Requires.NotNull(constructorSelector, "constructorSelector");
+            Requires.NotNull(constructorSelector, nameof(constructorSelector));
             _constructorFilter = constructorSelector;
             return this;
         }
@@ -127,7 +128,7 @@ namespace System.Composition.Convention
             Func<IEnumerable<ConstructorInfo>, ConstructorInfo> constructorSelector,
             Action<ParameterInfo, ImportConventionBuilder> importConfiguration)
         {
-            Requires.NotNull(importConfiguration, "importConfiguration");
+            Requires.NotNull(importConfiguration, nameof(importConfiguration));
             SelectConstructor(constructorSelector);
             _configureConstuctorImports = importConfiguration;
             return this;
@@ -140,7 +141,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ExportInterfaces(Predicate<Type> interfaceFilter)
         {
-            Requires.NotNull(interfaceFilter, "interfaceFilter");
+            Requires.NotNull(interfaceFilter, nameof(interfaceFilter));
             return ExportInterfacesImpl(interfaceFilter, null);
         }
 
@@ -163,8 +164,8 @@ namespace System.Composition.Convention
             Predicate<Type> interfaceFilter,
             Action<Type, ExportConventionBuilder> exportConfiguration)
         {
-            Requires.NotNull(interfaceFilter, "interfaceFilter");
-            Requires.NotNull(exportConfiguration, "exportConfiguration");
+            Requires.NotNull(interfaceFilter, nameof(interfaceFilter));
+            Requires.NotNull(exportConfiguration, nameof(exportConfiguration));
             return ExportInterfacesImpl(interfaceFilter, exportConfiguration);
         }
 
@@ -183,7 +184,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ExportProperties(Predicate<PropertyInfo> propertyFilter)
         {
-            Requires.NotNull(propertyFilter, "propertyFilter");
+            Requires.NotNull(propertyFilter, nameof(propertyFilter));
 
             return ExportPropertiesImpl(propertyFilter, null);
         }
@@ -198,8 +199,8 @@ namespace System.Composition.Convention
             Predicate<PropertyInfo> propertyFilter,
             Action<PropertyInfo, ExportConventionBuilder> exportConfiguration)
         {
-            Requires.NotNull(propertyFilter, "propertyFilter");
-            Requires.NotNull(exportConfiguration, "exportConfiguration");
+            Requires.NotNull(propertyFilter, nameof(propertyFilter));
+            Requires.NotNull(exportConfiguration, nameof(exportConfiguration));
             return ExportPropertiesImpl(propertyFilter, exportConfiguration);
         }
 
@@ -219,7 +220,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ExportProperties<T>(Predicate<PropertyInfo> propertyFilter)
         {
-            Requires.NotNull(propertyFilter, "propertyFilter");
+            Requires.NotNull(propertyFilter, nameof(propertyFilter));
 
             return ExportPropertiesImpl<T>(propertyFilter, null);
         }
@@ -235,8 +236,8 @@ namespace System.Composition.Convention
             Predicate<PropertyInfo> propertyFilter,
             Action<PropertyInfo, ExportConventionBuilder> exportConfiguration)
         {
-            Requires.NotNull(propertyFilter, "propertyFilter");
-            Requires.NotNull(exportConfiguration, "exportConfiguration");
+            Requires.NotNull(propertyFilter, nameof(propertyFilter));
+            Requires.NotNull(exportConfiguration, nameof(exportConfiguration));
 
             return ExportPropertiesImpl<T>(propertyFilter, exportConfiguration);
         }
@@ -256,7 +257,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ImportProperties(Predicate<PropertyInfo> propertyFilter)
         {
-            Requires.NotNull(propertyFilter, "propertyFilter");
+            Requires.NotNull(propertyFilter, nameof(propertyFilter));
 
             return ImportPropertiesImpl(propertyFilter, null);
         }
@@ -271,8 +272,8 @@ namespace System.Composition.Convention
             Predicate<PropertyInfo> propertyFilter,
             Action<PropertyInfo, ImportConventionBuilder> importConfiguration)
         {
-            Requires.NotNull(propertyFilter, "propertyFilter");
-            Requires.NotNull(importConfiguration, "importConfiguration");
+            Requires.NotNull(propertyFilter, nameof(propertyFilter));
+            Requires.NotNull(importConfiguration, nameof(importConfiguration));
 
             return ImportPropertiesImpl(propertyFilter, importConfiguration);
         }
@@ -293,7 +294,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ImportProperties<T>(Predicate<PropertyInfo> propertyFilter)
         {
-            Requires.NotNull(propertyFilter, "propertyFilter");
+            Requires.NotNull(propertyFilter, nameof(propertyFilter));
 
             return ImportPropertiesImpl<T>(propertyFilter, null);
         }
@@ -309,8 +310,8 @@ namespace System.Composition.Convention
             Predicate<PropertyInfo> propertyFilter,
             Action<PropertyInfo, ImportConventionBuilder> importConfiguration)
         {
-            Requires.NotNull(propertyFilter, "propertyFilter");
-            Requires.NotNull(importConfiguration, "importConfiguration");
+            Requires.NotNull(propertyFilter, nameof(propertyFilter));
+            Requires.NotNull(importConfiguration, nameof(importConfiguration));
 
             return ImportPropertiesImpl<T>(propertyFilter, importConfiguration);
         }
@@ -350,7 +351,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Shared(string sharingBoundary)
         {
-            Requires.NotNullOrEmpty(sharingBoundary, "sharingBoundary");
+            Requires.NotNullOrEmpty(sharingBoundary, nameof(sharingBoundary));
             return SharedImpl(sharingBoundary);
         }
 
@@ -369,7 +370,7 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder AddPartMetadata(string name, object value)
         {
-            Requires.NotNullOrEmpty(name, "name");
+            Requires.NotNullOrEmpty(name, nameof(name));
 
             if (_metadataItems == null)
             {
@@ -387,8 +388,8 @@ namespace System.Composition.Convention
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder AddPartMetadata(string name, Func<Type, object> getValueFromPartType)
         {
-            Requires.NotNullOrEmpty(name, "name");
-            Requires.NotNull(getValueFromPartType, "itemFunc");
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.NotNull(getValueFromPartType, nameof(getValueFromPartType));
 
             if (_metadataItemFuncs == null)
             {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
@@ -14,7 +15,7 @@ internal static partial class Interop
             POSIX_FADV_RANDOM       = 1,    /* random I/O access */
             POSIX_FADV_SEQUENTIAL   = 2,    /* sequential I/O access */
             POSIX_FADV_WILLNEED     = 3,    /* will need specified pages */
-            POSIX_FADV_DONTNEED     = 4,    /* dont need the specified pages */
+            POSIX_FADV_DONTNEED     = 4,    /* don't need the specified pages */
             POSIX_FADV_NOREUSE      = 5,    /* data will only be acessed once */
         }
 

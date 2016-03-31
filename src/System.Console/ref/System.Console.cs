@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -11,34 +12,50 @@ namespace System
     {
         public static System.ConsoleColor BackgroundColor { get { return default(System.ConsoleColor); } set { } }
         public static void Beep() { }
+        public static void Beep(int frequency, int duration) { }
+        public static int BufferHeight { get { return default(int); } set { } }
+        public static int BufferWidth { get { return default(int); } set { } }
+        public static bool CapsLock { get { return default(bool); } }
+        public static event System.ConsoleCancelEventHandler CancelKeyPress { add { } remove { } }
         public static void Clear() { }
-        public static bool CursorVisible { get { return default(bool); } set { } }
-        public static int CursorTop { get { return default(int); } set { } }
         public static int CursorLeft { get { return default(int); } set { } }
+        public static int CursorSize { get { return default(int); } set { } }
+        public static int CursorTop { get { return default(int); } set { } }
+        public static bool CursorVisible { get { return default(bool); } set { } }
         public static System.IO.TextWriter Error { get { return default(System.IO.TextWriter); } }
         public static System.ConsoleColor ForegroundColor { get { return default(System.ConsoleColor); } set { } }
+        public static System.Text.Encoding InputEncoding { get { return default(System.Text.Encoding); } set { } }
+        public static bool IsErrorRedirected { get { return false; } }
         public static bool IsInputRedirected { get { return false; } }
         public static bool IsOutputRedirected { get { return false; } }
-        public static bool IsErrorRedirected { get { return false; } }
         public static System.IO.TextReader In { get { return default(System.IO.TextReader); } }
-        public static bool KeyAvailable { get { return default(bool); } }
-        public static System.IO.TextWriter Out { get { return default(System.IO.TextWriter); } }
-        public static event System.ConsoleCancelEventHandler CancelKeyPress { add { } remove { } }
+        public static bool KeyAvailable { get { return default(bool); }}
+        public static int LargestWindowWidth { get { return default(int); } }
+        public static int LargestWindowHeight { get { return default(int); }}
+        public static void MoveBufferArea(int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop) { }
+        public static void MoveBufferArea(int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop, char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor) { }
+        public static bool NumberLock { get { return default(bool); }}
         public static System.IO.Stream OpenStandardError() { return default(System.IO.Stream); }
         public static System.IO.Stream OpenStandardInput() { return default(System.IO.Stream); }
         public static System.IO.Stream OpenStandardOutput() { return default(System.IO.Stream); }
+        public static System.IO.TextWriter Out { get { return default(System.IO.TextWriter); } }
+        public static System.Text.Encoding OutputEncoding { get { return default(System.Text.Encoding); } set { } }
         public static int Read() { return default(int); }
         public static ConsoleKeyInfo ReadKey() { return default(ConsoleKeyInfo); }
         public static ConsoleKeyInfo ReadKey(bool intercept) { return default(ConsoleKeyInfo); }
         public static string ReadLine() { return default(string); }
         public static void ResetColor() { }
+        public static void SetBufferSize(int width, int height) { }
         public static void SetCursorPosition(int left, int top) { }
         public static void SetError(System.IO.TextWriter newError) { }
         public static void SetIn(System.IO.TextReader newIn) { }
         public static void SetOut(System.IO.TextWriter newOut) { }
+        public static void SetWindowPosition(int left, int top) { }
+        public static void SetWindowSize(int width, int height) { }
         public static string Title { get { return default(string); } set { } }
-        public static int WindowWidth { get { return default(int); } set { } }
+        public static bool TreatControlCAsInput { get { return default(bool); } set { } }
         public static int WindowHeight { get { return default(int); } set { } }
+        public static int WindowWidth { get { return default(int); } set { } }
         public static int WindowLeft { get { return default(int); } set { } }
         public static int WindowTop { get { return default(int); } set { } }
         public static void Write(bool value) { }
@@ -113,6 +130,11 @@ namespace System
         public char KeyChar { get { return default(char); } }
         public ConsoleKey Key { get { return default(ConsoleKey); } }
         public ConsoleModifiers Modifiers { get { return default(ConsoleModifiers); ; } }
+        public bool Equals(ConsoleKeyInfo obj) { return default(bool); }
+        public override bool Equals(object value) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public static bool operator ==(ConsoleKeyInfo a, ConsoleKeyInfo b) { return default(bool); }
+        public static bool operator !=(ConsoleKeyInfo a, ConsoleKeyInfo b) { return default(bool); }
     }
     public enum ConsoleKey
     {

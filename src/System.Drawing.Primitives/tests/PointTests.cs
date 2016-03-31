@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 using Xunit;
@@ -168,9 +169,42 @@ namespace System.Drawing.PrimitivesTests
         }
 
         [Fact]
-        public void ToStringTest()
+        public static void EqualityTest_NotPoint()
         {
-            Point p = new Point(0, 0);
+            var point = new Point(0, 0);
+            Assert.False(point.Equals(null));
+            Assert.False(point.Equals(0));
+            Assert.False(point.Equals(new PointF(0, 0)));
+        }
+
+        [Fact]
+        public static void GetHashCodeTest()
+        {
+            var point = new Point(10, 10);
+            Assert.Equal(point.GetHashCode(), new Point(10, 10).GetHashCode());
+            Assert.NotEqual(point.GetHashCode(), new Point(20, 10).GetHashCode());
+            Assert.NotEqual(point.GetHashCode(), new Point(10, 20).GetHashCode());
+        }
+
+        [Theory]
+        [InlineData(0, 0, 0, 0)]
+        [InlineData(1, -2, 3, -4)]
+        public void ConversionTest(int x, int y, int width, int height)
+        {
+            Rectangle rect = new Rectangle(x, y, width, height);
+            RectangleF rectF = rect;
+            Assert.Equal(x, rectF.X);
+            Assert.Equal(y, rectF.Y);
+            Assert.Equal(width, rectF.Width);
+            Assert.Equal(height, rectF.Height);
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(5, -5)]
+        public void ToStringTest(int x, int y)
+        {
+            Point p = new Point(x, y);
             Assert.Equal(string.Format(CultureInfo.CurrentCulture, "{{X={0},Y={1}}}", p.X, p.Y), p.ToString());
         }
     }

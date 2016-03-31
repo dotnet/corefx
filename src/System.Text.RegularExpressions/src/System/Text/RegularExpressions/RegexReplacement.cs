@@ -1,8 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // The RegexReplacement class represents a substitution string for
-// use when using regexs to search/replace, etc. It's logically
+// use when using regexes to search/replace, etc. It's logically
 // a sequence intermixed (1) constant strings and (2) group numbers.
 
 using System.Collections.Generic;
@@ -187,9 +188,9 @@ namespace System.Text.RegularExpressions
         internal String Replace(Regex regex, String input, int count, int startat)
         {
             if (count < -1)
-                throw new ArgumentOutOfRangeException("count", SR.CountTooSmall);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.CountTooSmall);
             if (startat < 0 || startat > input.Length)
-                throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
+                throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
 
             if (count == 0)
                 return input;
@@ -267,11 +268,11 @@ namespace System.Text.RegularExpressions
                                        String input, int count, int startat)
         {
             if (evaluator == null)
-                throw new ArgumentNullException("evaluator");
+                throw new ArgumentNullException(nameof(evaluator));
             if (count < -1)
-                throw new ArgumentOutOfRangeException("count", SR.CountTooSmall);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.CountTooSmall);
             if (startat < 0 || startat > input.Length)
-                throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
+                throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
 
             if (count == 0)
                 return input;
@@ -348,9 +349,9 @@ namespace System.Text.RegularExpressions
         internal static String[] Split(Regex regex, String input, int count, int startat)
         {
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.CountTooSmall);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.CountTooSmall);
             if (startat < 0 || startat > input.Length)
-                throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
+                throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
 
             String[] result;
 

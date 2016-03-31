@@ -13,7 +13,6 @@
     <ExternallyShipping>false</ExternallyShipping>
     <NuGetPackageImportStamp>83230753</NuGetPackageImportStamp>
     <CLSCompliant>false</CLSCompliant>
-    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Metadata\ClassLayoutRow.cs" />
+    <Compile Include="Metadata\Decoding\CustomAttributeDecoderTests.cs" />
     <Compile Include="Metadata\Decoding\DisassemblingTypeProvider.cs" />
     <Compile Include="Metadata\Decoding\MethodSignatureTests.cs" />
     <Compile Include="Metadata\Decoding\OpaqueHandleTypeProvider.cs" />
@@ -46,6 +46,7 @@
     <Compile Include="Metadata\MetadataReaderTestHelpers.cs" />
     <Compile Include="Metadata\MetadataReaderTests.cs" />
     <Compile Include="Metadata\MethodImportRow.cs" />
+    <Compile Include="Metadata\PortablePdb\StandalonePortablePdbStreamTests.cs" />
     <Compile Include="Metadata\TagToTokenTests.cs" />
     <Compile Include="Metadata\PortablePdb\DocumentNameTests.cs" />
     <Compile Include="PortableExecutable\AbstractMemoryBlockTests.cs" />
@@ -95,6 +96,8 @@
     <EmbeddedResource Include="Resources\NetModule\ModuleCS01.mod" />
     <EmbeddedResource Include="Resources\NetModule\ModuleVB01.mod" />
     <None Include="Resources\NetModule\ModuleVB01.vb" />
+    <EmbeddedResource Include="Resources\WinRT\Lib.winmd" />
+    <None Include="Resources\WinRT\Lib.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

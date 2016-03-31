@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
@@ -159,7 +160,7 @@ namespace System.Linq.Expressions.Compiler
         /// <param name="parent">The parent scope.</param>
         /// <param name="inlined">true if the lambda is inlined; false otherwise.</param>
         /// <param name="flags">
-        /// The emum to specify if the lambda is compiled with the tail call optimization. 
+        /// The enum to specify if the lambda is compiled with the tail call optimization. 
         /// </param>
         private void EmitLambdaBody(CompilerScope parent, bool inlined, CompilationFlags flags)
         {

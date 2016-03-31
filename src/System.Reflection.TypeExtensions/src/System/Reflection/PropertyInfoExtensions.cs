@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Reflection
 {
@@ -31,7 +32,7 @@ namespace System.Reflection
             //       desktop can return them. However, they are extraordinarily rare and there
             //       is no portable way to get them from the core reflection contract.
 
-            Requires.NotNull(property, "property");
+            Requires.NotNull(property, nameof(property));
 
             MethodInfo getMethod = Helpers.FilterAccessor(property.GetMethod, nonPublic);
             MethodInfo setMethod = Helpers.FilterAccessor(property.SetMethod, nonPublic);
@@ -72,7 +73,7 @@ namespace System.Reflection
         /// <returns>A MethodInfo object representing the get accessor for this property, if nonPublic is true. Returns null if nonPublic is false and the get accessor is non-public, or if nonPublic is true but no get accessors exist.</returns>
         public static MethodInfo GetGetMethod(this PropertyInfo property, bool nonPublic)
         {
-            Requires.NotNull(property, "property");
+            Requires.NotNull(property, nameof(property));
             return Helpers.FilterAccessor(property.GetMethod, nonPublic);
         }
 
@@ -96,7 +97,7 @@ namespace System.Reflection
         /// null </returns>
         public static MethodInfo GetSetMethod(this PropertyInfo property, bool nonPublic)
         {
-            Requires.NotNull(property, "property");
+            Requires.NotNull(property, nameof(property));
             return Helpers.FilterAccessor(property.SetMethod, nonPublic);
         }
     }

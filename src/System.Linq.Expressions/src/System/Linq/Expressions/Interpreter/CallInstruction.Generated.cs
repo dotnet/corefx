@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -66,7 +67,7 @@ namespace System.Linq.Expressions.Interpreter
 #if FEATURE_FAST_CREATE
         /// <summary>
         /// Fast creation works if we have a known primitive types for the entire
-        /// method siganture.  If we have any non-primitive types then FastCreate
+        /// method signature.  If we have any non-primitive types then FastCreate
         /// falls back to SlowCreate which works for all types.
         /// 
         /// Fast creation is fast because it avoids using reflection (MakeGenericType
@@ -76,7 +77,7 @@ namespace System.Linq.Expressions.Interpreter
         /// appropriate CallInstruction with the strong-types that have been built up.
         /// 
         /// One relaxation is that for return types which are non-primitive types
-        /// we can fallback to object due to relaxed delegates.
+        /// we can fall back to object due to relaxed delegates.
         /// </summary>
         private static CallInstruction FastCreate(MethodInfo target, ParameterInfo[] pi)
         {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
@@ -51,7 +52,7 @@ namespace System.IO
         /// <summary>
         /// Extra state used by the file stream when _useAsyncIO is true.  This includes
         /// the semaphore used to serialize all operation, the buffer/offset/count provided by the
-        /// caller for ReadAsync/WriteAsync operations, and the last successul task returned
+        /// caller for ReadAsync/WriteAsync operations, and the last successful task returned
         /// synchronously from ReadAsync which can be reused if the count matches the next request.
         /// Only initialized when <see cref="_useAsyncIO"/> is true.
         /// </summary>
@@ -109,9 +110,17 @@ namespace System.IO
                 _asyncState = new AsyncState();
             }
 
-            // Translate the arguments into arguments for an open call
+            // Translate the arguments into arguments for an open call.
             Interop.Sys.OpenFlags openFlags = PreOpenConfigurationFromOptions(mode, access, options); // FileShare currently ignored
-            Interop.Sys.Permissions openPermissions = Interop.Sys.Permissions.S_IRWXU; // creator has read/write/execute permissions; no permissions for anyone else
+
+            // If the file gets created a new, we'll select the permissions for it.  Most utilities by default use 666 (read and 
+            // write for all). However, on Windows it's possible to write out a file and then execute it.  To maintain that similarity, 
+            // we use 766, so that in addition the user has execute privileges. No matter what we choose, it'll be subject to the umask 
+            // applied by the system, such that the actual permissions will typically be less than what we select here.
+            const Interop.Sys.Permissions openPermissions =
+                Interop.Sys.Permissions.S_IRWXU |
+                Interop.Sys.Permissions.S_IRGRP | Interop.Sys.Permissions.S_IWGRP |
+                Interop.Sys.Permissions.S_IROTH | Interop.Sys.Permissions.S_IWOTH;
 
             // Open the file and store the safe handle. Subsequent code in this method expects the safe handle to be initialized.
             _fileHandle = SafeFileHandle.Open(path, openFlags, (int)openPermissions);
@@ -121,9 +130,11 @@ namespace System.IO
 
                 // Lock the file if requested via FileShare.  This is only advisory locking. FileShare.None implies an exclusive 
                 // lock on the file and all other modes use a shared lock.  While this is not as granular as Windows, not mandatory, 
-                // and not atomic with file opening, it's better than nothing.
+                // and not atomic with file opening, it's better than nothing.  Some kinds of files, e.g. FIFOs, don't support
+                // locking on some platforms, e.g. OSX, and so if flock returns ENOTSUP, we similarly treat it as a hint and ignore it,
+                // as we don't want to entirely prevent usage of a particular file simply because locking isn't supported.
                 Interop.Sys.LockOperations lockOperation = (share == FileShare.None) ? Interop.Sys.LockOperations.LOCK_EX : Interop.Sys.LockOperations.LOCK_SH;
-                CheckFileCall(Interop.Sys.FLock(_fileHandle, lockOperation | Interop.Sys.LockOperations.LOCK_NB));
+                CheckFileCall(Interop.Sys.FLock(_fileHandle, lockOperation | Interop.Sys.LockOperations.LOCK_NB), ignoreNotSupported: true);
 
                 // These provide hints around how the file will be accessed.  Specifying both RandomAccess
                 // and Sequential together doesn't make sense as they are two competing options on the same spectrum,
@@ -164,15 +175,15 @@ namespace System.IO
         {
             // Make sure the handle is open
             if (handle.IsInvalid)
-                throw new ArgumentException(SR.Arg_InvalidHandle, "handle");
+                throw new ArgumentException(SR.Arg_InvalidHandle, nameof(handle));
             if (handle.IsClosed)
                 throw new ObjectDisposedException(SR.ObjectDisposed_FileClosed);
             if (access < FileAccess.Read || access > FileAccess.ReadWrite)
-                throw new ArgumentOutOfRangeException("access", SR.ArgumentOutOfRange_Enum);
+                throw new ArgumentOutOfRangeException(nameof(access), SR.ArgumentOutOfRange_Enum);
             if (bufferSize <= 0)
-                throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (handle.IsAsync.HasValue && useAsyncIO != handle.IsAsync.Value)
-                throw new ArgumentException(SR.Arg_HandleNotAsync, "handle");
+                throw new ArgumentException(SR.Arg_HandleNotAsync, nameof(handle));
 
             _fileHandle = handle;
             _access = access;
@@ -378,7 +389,7 @@ namespace System.IO
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
                 }
                 _parent.Seek(value, SeekOrigin.Begin);
             }
@@ -440,12 +451,12 @@ namespace System.IO
                     FlushWriteBuffer();
 
                     // If DeleteOnClose was requested when constructed, delete the file now.
-                    // (Unix doesn't directly support DeleteOnClose, so we mimick it here.)
+                    // (Unix doesn't directly support DeleteOnClose, so we mimic it here.)
                     if (_path != null && (_options & FileOptions.DeleteOnClose) != 0)
                     {
                         // Since we still have the file open, this will end up deleting
                         // it (assuming we're the only link to it) once it's closed, but the
-                        // name will be removed immediatly.
+                        // name will be removed immediately.
                         Interop.Sys.Unlink(_path); // ignore errors; it's valid that the path may no longer exist
                     }
                 }
@@ -586,7 +597,7 @@ namespace System.IO
         {
             if (value < 0)
             {
-                throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (_fileHandle.IsClosed)
             {
@@ -1149,15 +1160,15 @@ namespace System.IO
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
             }
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (array.Length - offset < count)
             {
@@ -1180,7 +1191,7 @@ namespace System.IO
         {
             if (origin < SeekOrigin.Begin || origin > SeekOrigin.End)
             {
-                throw new ArgumentException(SR.Argument_InvalidSeekOrigin, "origin");
+                throw new ArgumentException(SR.Argument_InvalidSeekOrigin, nameof(origin));
             }
             if (_fileHandle.IsClosed)
             {

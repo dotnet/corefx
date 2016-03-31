@@ -1,19 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
-
-using System.Collections;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
-using System.Security.Authentication;
 
 namespace System.Net.Security
 {
@@ -74,6 +70,7 @@ namespace System.Net.Security
                 {
                     GlobalLog.AssertFormat("SecureChannel#{0}::.ctor()|hostname == null", LoggingHash.HashString(this));
                 }
+
                 Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::.ctor()|hostname == null");
             }
             _hostName = hostname;
@@ -403,9 +400,9 @@ namespace System.Net.Security
             }
 
             // Acquire possible Client Certificate information and set it on the handle.
-            X509Certificate clientCertificate = null;   // This is a candidate that can come from the user callback or be guessed when targeting a session restart.
-            ArrayList filteredCerts = new ArrayList();  // This is an intermediate client certs collection that try to use if no selectedCert is available yet.
-            string[] issuers = null;                    // This is a list of issuers sent by the server, only valid is we do know what the server cert is.
+            X509Certificate clientCertificate = null;        // This is a candidate that can come from the user callback or be guessed when targeting a session restart.
+            var filteredCerts = new List<X509Certificate>(); // This is an intermediate client certs collection that try to use if no selectedCert is available yet.
+            string[] issuers = null;                         // This is a list of issuers sent by the server, only valid is we do know what the server cert is.
 
             bool sessionRestartAttempt = false; // If true and no cached creds we will use anonymous creds.
 
@@ -607,7 +604,7 @@ namespace System.Net.Security
             // EnsurePrivateKey should do the right demand for us.
             for (int i = 0; i < filteredCerts.Count; ++i)
             {
-                clientCertificate = filteredCerts[i] as X509Certificate;
+                clientCertificate = filteredCerts[i];
                 if ((selectedCert = EnsurePrivateKey(clientCertificate)) != null)
                 {
                     break;
@@ -623,6 +620,7 @@ namespace System.Net.Security
                 {
                     GlobalLog.Assert("AcquireClientCredentials()|'selectedCert' does not match 'clientCertificate'.");
                 }
+
                 Debug.Fail("AcquireClientCredentials()|'selectedCert' does not match 'clientCertificate'.");
             }
 
@@ -643,7 +641,10 @@ namespace System.Net.Security
                 // We can probably do some optimization here. If the selectedCert is returned by the delegate
                 // we can always go ahead and use the certificate to create our credential
                 // (instead of going anonymous as we do here).
-                if (sessionRestartAttempt && cachedCredentialHandle == null && selectedCert != null)
+                if (sessionRestartAttempt &&
+                    cachedCredentialHandle == null &&
+                    selectedCert != null &&
+                    SslStreamPal.StartMutualAuthAsAnonymous)
                 {
                     if (GlobalLog.IsEnabled)
                     {
@@ -749,6 +750,7 @@ namespace System.Net.Security
                 {
                     GlobalLog.Assert("AcquireServerCredentials()|'selectedCert' does not match 'localCertificate'.");
                 }
+
                 Debug.Fail("AcquireServerCredentials()|'selectedCert' does not match 'localCertificate'.");
             }
 
@@ -798,9 +800,9 @@ namespace System.Net.Security
             }
 
             byte[] nextmsg = null;
-            SecurityStatusPal errorCode = GenerateToken(incoming, offset, count, ref nextmsg);
+            SecurityStatusPal status = GenerateToken(incoming, offset, count, ref nextmsg);
 
-            if (!_serverMode && errorCode == SecurityStatusPal.CredentialsNeeded)
+            if (!_serverMode && status.ErrorCode == SecurityStatusPalErrorCode.CredentialsNeeded)
             {
                 if (GlobalLog.IsEnabled)
                 {
@@ -808,10 +810,10 @@ namespace System.Net.Security
                 }
 
                 SetRefreshCredentialNeeded();
-                errorCode = GenerateToken(incoming, offset, count, ref nextmsg);
+                status = GenerateToken(incoming, offset, count, ref nextmsg);
             }
 
-            ProtocolToken token = new ProtocolToken(nextmsg, errorCode);
+            ProtocolToken token = new ProtocolToken(nextmsg, status);
             if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage", token.ToString());
@@ -832,7 +834,7 @@ namespace System.Net.Security
                 output - ref to byte [], what we will send to the
                     server in response
             Return:
-                errorCode - an SSPI error code
+                status - error information
         --*/
         private SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
         {
@@ -849,8 +851,9 @@ namespace System.Net.Security
                 {
                     GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken", "Argument 'offset' out of range.");
                 }
+
                 Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken", "Argument 'offset' out of range.");
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0 || count > (input == null ? 0 : input.Length - offset))
@@ -859,8 +862,9 @@ namespace System.Net.Security
                 {
                     GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken", "Argument 'count' out of range.");
                 }
+
                 Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken", "Argument 'count' out of range.");
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             SecurityBuffer incomingSecurity = null;
@@ -878,7 +882,7 @@ namespace System.Net.Security
 
             SecurityBuffer outgoingSecurity = new SecurityBuffer(null, SecurityBufferType.Token);
 
-            SecurityStatusPal errorCode = 0;
+            SecurityStatusPal status = default(SecurityStatusPal);
 
             bool cachedCreds = false;
             byte[] thumbPrint = null;
@@ -901,7 +905,7 @@ namespace System.Net.Security
 
                     if (_serverMode)
                     {
-                        errorCode = SslStreamPal.AcceptSecurityContext(
+                        status = SslStreamPal.AcceptSecurityContext(
                                       ref _credentialsHandle,
                                       ref _securityContext,
                                       incomingSecurity,
@@ -912,7 +916,7 @@ namespace System.Net.Security
                     {
                         if (incomingSecurity == null)
                         {
-                            errorCode = SslStreamPal.InitializeSecurityContext(
+                            status = SslStreamPal.InitializeSecurityContext(
                                            ref _credentialsHandle,
                                            ref _securityContext,
                                            _destination,
@@ -921,7 +925,7 @@ namespace System.Net.Security
                         }
                         else
                         {
-                            errorCode = SslStreamPal.InitializeSecurityContext(
+                            status = SslStreamPal.InitializeSecurityContext(
                                            _credentialsHandle,
                                            ref _securityContext,
                                            _destination,
@@ -965,7 +969,7 @@ namespace System.Net.Security
                 GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken()", Interop.MapSecurityStatus((uint)errorCode));
             }
 #endif
-            return (SecurityStatusPal)errorCode;
+            return status;
         }
 
         /*++
@@ -1001,6 +1005,7 @@ namespace System.Net.Security
                         {
                             GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::ProcessHandshakeSuccess", "StreamSizes out of range.");
                         }
+
                         Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::ProcessHandshakeSuccess", "StreamSizes out of range.");
                     }
 
@@ -1043,12 +1048,12 @@ namespace System.Net.Security
             {
                 if (offset < 0 || offset > (buffer == null ? 0 : buffer.Length))
                 {
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
                 }
 
                 if (size < 0 || size > (buffer == null ? 0 : buffer.Length - offset))
                 {
-                    throw new ArgumentOutOfRangeException("size");
+                    throw new ArgumentOutOfRangeException(nameof(size));
                 }
 
                 resultSize = 0;
@@ -1073,6 +1078,7 @@ namespace System.Net.Security
                     {
                         GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Arguments out of range.");
                     }
+
                     Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Arguments out of range.");
                 }
 
@@ -1081,7 +1087,7 @@ namespace System.Net.Security
 
             SecurityStatusPal secStatus = SslStreamPal.EncryptMessage(_securityContext, writeBuffer, size, _headerSize, _trailerSize, out resultSize);
 
-            if (secStatus != SecurityStatusPal.OK)
+            if (secStatus.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
                 if (GlobalLog.IsEnabled)
                 {
@@ -1113,8 +1119,9 @@ namespace System.Net.Security
                 {
                     GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Argument 'offset' out of range.");
                 }
+
                 Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Argument 'offset' out of range.");
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0 || count > (payload == null ? 0 : payload.Length - offset))
@@ -1123,8 +1130,9 @@ namespace System.Net.Security
                 {
                     GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Argument 'count' out of range.");
                 }
+
                 Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Argument 'count' out of range.");
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             SecurityStatusPal secStatus = SslStreamPal.DecryptMessage(_securityContext, payload, ref offset, ref count);
@@ -1289,7 +1297,7 @@ namespace System.Net.Security
         {
             get
             {
-                return ((Status != SecurityStatusPal.OK) && (Status != SecurityStatusPal.ContinueNeeded));
+                return ((Status.ErrorCode != SecurityStatusPalErrorCode.OK) && (Status.ErrorCode != SecurityStatusPalErrorCode.ContinueNeeded));
             }
         }
 
@@ -1297,7 +1305,7 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatusPal.OK);
+                return (Status.ErrorCode == SecurityStatusPalErrorCode.OK);
             }
         }
 
@@ -1305,7 +1313,7 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatusPal.Renegotiate);
+                return (Status.ErrorCode == SecurityStatusPalErrorCode.Renegotiate);
             }
         }
 
@@ -1313,13 +1321,13 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatusPal.ContextExpired);
+                return (Status.ErrorCode == SecurityStatusPalErrorCode.ContextExpired);
             }
         }
 
-        internal ProtocolToken(byte[] data, SecurityStatusPal errorCode)
+        internal ProtocolToken(byte[] data, SecurityStatusPal status)
         {
-            Status = errorCode;
+            Status = status;
             Payload = data;
             Size = data != null ? data.Length : 0;
         }

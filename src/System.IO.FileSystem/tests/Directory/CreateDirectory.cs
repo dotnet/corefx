@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using Xunit;
@@ -336,7 +337,7 @@ namespace System.IO.Tests
         [PlatformSpecific(PlatformID.Windows)]
         public void WindowsTrailingWhiteSpace()
         {
-            // Windows will remove all nonsignificant whitespace in a path
+            // Windows will remove all non-significant whitespace in a path
             DirectoryInfo testDir = Create(GetTestFilePath());
             var components = IOInputs.GetWhiteSpace();
 
@@ -460,7 +461,6 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        [ActiveIssue(2459)]
         public void DriveLetter_Unix()
         {
             // On Unix, there's no special casing for drive letters, which are valid file names
@@ -468,7 +468,14 @@ namespace System.IO.Tests
             var current = Create(".");
             Assert.Equal("C:", driveLetter.Name);
             Assert.Equal(Path.Combine(current.FullName, "C:"), driveLetter.FullName);
-            Directory.Delete("C:");
+            try
+            {
+                // If this test is inherited then it's possible this call will fail due to the "C:" directory
+                // being deleted in that other test before this call. What we care about testing (proper path 
+                // handling) is unaffected by this race condition.
+                Directory.Delete("C:");
+            }
+            catch (DirectoryNotFoundException) { }
         }
 
         [Fact]

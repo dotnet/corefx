@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Net.Sockets;
@@ -23,6 +24,23 @@ namespace System.Net.NetworkInformation
         private const int InProgress = 1;
         private const int Disposed = 2;
         private int _status = Free;
+
+        public Ping()
+        {
+            // This class once inherited a finalizer. For backward compatibility it has one so that 
+            // any derived class that depends on it will see the behaviour expected. Since it is
+            // not used by this class itself, suppress it immediately if this is not an instance
+            // of a derived class it doesn't suffer the GC burden of finalization.
+            if (GetType() == typeof(Ping))
+            {
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        ~Ping()
+        {
+            Dispose(false);
+        }
 
         private void CheckStart()
         {
@@ -70,6 +88,7 @@ namespace System.Net.NetworkInformation
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -115,22 +134,22 @@ namespace System.Net.NetworkInformation
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (buffer.Length > MaxBufferSize)
             {
-                throw new ArgumentException(SR.net_invalidPingBufferSize, "buffer");
+                throw new ArgumentException(SR.net_invalidPingBufferSize, nameof(buffer));
             }
 
             if (timeout < 0)
             {
-                throw new ArgumentOutOfRangeException("timeout");
+                throw new ArgumentOutOfRangeException(nameof(timeout));
             }
 
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
 
             // Check if address family is installed.
@@ -138,7 +157,7 @@ namespace System.Net.NetworkInformation
 
             if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
             {
-                throw new ArgumentException(SR.net_invalid_ip_addr, "address");
+                throw new ArgumentException(SR.net_invalid_ip_addr, nameof(address));
             }
 
             // Need to snapshot the address here, so we're sure that it's not changed between now
@@ -163,7 +182,7 @@ namespace System.Net.NetworkInformation
         {
             if (string.IsNullOrEmpty(hostNameOrAddress))
             {
-                throw new ArgumentNullException("hostNameOrAddress");
+                throw new ArgumentNullException(nameof(hostNameOrAddress));
             }
 
             IPAddress address;
@@ -174,17 +193,17 @@ namespace System.Net.NetworkInformation
 
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (buffer.Length > MaxBufferSize)
             {
-                throw new ArgumentException(SR.net_invalidPingBufferSize, "buffer");
+                throw new ArgumentException(SR.net_invalidPingBufferSize, nameof(buffer));
             }
 
             if (timeout < 0)
             {
-                throw new ArgumentOutOfRangeException("timeout");
+                throw new ArgumentOutOfRangeException(nameof(timeout));
             }
 
             CheckStart();

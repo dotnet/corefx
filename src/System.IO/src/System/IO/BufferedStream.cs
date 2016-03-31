@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 using System.Diagnostics;
@@ -69,8 +70,6 @@ namespace System.IO
             return LazyInitializer.EnsureInitialized(ref _asyncActiveSemaphore, () => new SemaphoreSlim(1, 1));
         }
 
-        private BufferedStream() { }
-
         public BufferedStream(Stream stream)
             : this(stream, DefaultBufferSize)
         {
@@ -79,10 +78,10 @@ namespace System.IO
         public BufferedStream(Stream stream, int bufferSize)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             if (bufferSize <= 0)
-                throw new ArgumentOutOfRangeException("bufferSize", SR.Format(SR.ArgumentOutOfRange_MustBePositive, "bufferSize"));
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.Format(SR.ArgumentOutOfRange_MustBePositive, "bufferSize"));
 
             _stream = stream;
             _bufferSize = bufferSize;
@@ -135,7 +134,7 @@ namespace System.IO
                 return;
 
             byte[] shadowBuffer = new byte[Math.Min(_bufferSize + _bufferSize, MaxShadowBufferSize)];
-            Array.Copy(_buffer, 0, shadowBuffer, 0, _writePos);
+            Buffer.BlockCopy(_buffer, 0, shadowBuffer, 0, _writePos);
             _buffer = shadowBuffer;
         }
 
@@ -201,7 +200,7 @@ namespace System.IO
             set
             {
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
 
                 EnsureNotClosed();
                 EnsureCanSeek();
@@ -258,7 +257,7 @@ namespace System.IO
             {
                 // If the underlying stream is not seekable AND we have something in the read buffer, then FlushRead would throw.
                 // We can either throw away the buffer resulting in data loss (!) or ignore the Flush.
-                // (We cannot throw becasue it would be a breaking change.) We opt into ignoring the Flush in that situation.
+                // (We cannot throw because it would be a breaking change.) We opt into ignoring the Flush in that situation.
                 if (!_stream.CanSeek)
                     return;
 
@@ -309,7 +308,7 @@ namespace System.IO
                 if (_readPos < _readLen)
                 {
                     // If the underlying stream is not seekable AND we have something in the read buffer, then FlushRead would throw.
-                    // We can either throw away the buffer resulting in date loss (!) or ignore the Flush. (We cannot throw becasue it
+                    // We can either throw away the buffer resulting in date loss (!) or ignore the Flush. (We cannot throw because it
                     // would be a breaking change.) We opt into ignoring the Flush in that situation.
                     if (!_stream.CanSeek)
                         return;
@@ -417,7 +416,7 @@ namespace System.IO
 
             if (readbytes > count)
                 readbytes = count;
-            Array.Copy(_buffer, _readPos, array, offset, readbytes);
+            Buffer.BlockCopy(_buffer, _readPos, array, offset, readbytes);
             _readPos += readbytes;
 
             return readbytes;
@@ -440,11 +439,11 @@ namespace System.IO
         public override int Read([In, Out] byte[] array, int offset, int count)
         {
             if (array == null)
-                throw new ArgumentNullException("array", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (array.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
 
@@ -519,11 +518,11 @@ namespace System.IO
         {
 
             if (buffer == null)
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
 
@@ -549,7 +548,7 @@ namespace System.IO
                     Exception error;
                     bytesFromBuffer = ReadFromBuffer(buffer, offset, count, out error);
 
-                    // If we satistied enough data from the buffer, we can complete synchronously.
+                    // If we satisfied enough data from the buffer, we can complete synchronously.
                     // Reading again for more data may cause us to block if we're using a device with no clear end of file,
                     // such as a serial port or pipe. If we blocked here and this code was used with redirected pipes for a
                     // process's standard output, this can lead to deadlocks involving two processes.              
@@ -647,24 +646,33 @@ namespace System.IO
 
         public override int ReadByte()
         {
+            return _readPos != _readLen ?
+                _buffer[_readPos++] :
+                ReadByteSlow();
+        }
+
+        private int ReadByteSlow()
+        {
+            Debug.Assert(_readPos == _readLen);
+
+            // We want to check for whether the underlying stream has been closed and whether
+            // it's readable, but we only need to do so if we don't have data in our buffer,
+            // as any data we have came from reading it from an open stream, and we don't
+            // care if the stream has been closed or become unreadable since. Further, if
+            // the stream is closed, its read buffer is flushed, so we'll take this slow path.
             EnsureNotClosed();
             EnsureCanRead();
 
-            if (_readPos == _readLen)
-            {
-                if (_writePos > 0)
-                    FlushWrite();
+            if (_writePos > 0)
+                FlushWrite();
 
-                EnsureBufferAllocated();
-                _readLen = _stream.Read(_buffer, 0, _bufferSize);
-                _readPos = 0;
-            }
-
-            if (_readPos == _readLen)
+            EnsureBufferAllocated();
+            _readLen = _stream.Read(_buffer, 0, _bufferSize);
+            if (_readLen == 0)
                 return -1;
 
-            int b = _buffer[_readPos++];
-            return b;
+            _readPos = 0;
+            return _buffer[_readPos++];
         }
 
         private void WriteToBuffer(byte[] array, ref int offset, ref int count)
@@ -675,7 +683,7 @@ namespace System.IO
                 return;
 
             EnsureBufferAllocated();
-            Array.Copy(array, offset, _buffer, _writePos, bytesToWrite);
+            Buffer.BlockCopy(array, offset, _buffer, _writePos, bytesToWrite);
 
             _writePos += bytesToWrite;
             count -= bytesToWrite;
@@ -699,11 +707,11 @@ namespace System.IO
         public override void Write(byte[] array, int offset, int count)
         {
             if (array == null)
-                throw new ArgumentNullException("array", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (array.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
 
@@ -817,7 +825,7 @@ namespace System.IO
                     if (totalUserbytes <= (_bufferSize + _bufferSize) && totalUserbytes <= MaxShadowBufferSize)
                     {
                         EnsureShadowBufferAllocated();
-                        Array.Copy(array, offset, _buffer, _writePos, count);
+                        Buffer.BlockCopy(array, offset, _buffer, _writePos, count);
                         _stream.Write(_buffer, 0, totalUserbytes);
                         _writePos = 0;
                         return;
@@ -837,11 +845,11 @@ namespace System.IO
         {
 
             if (buffer == null)
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
 
@@ -969,7 +977,7 @@ namespace System.IO
                         if (totalUserBytes <= (_bufferSize + _bufferSize) && totalUserBytes <= MaxShadowBufferSize)
                         {
                             EnsureShadowBufferAllocated();
-                            Array.Copy(array, offset, _buffer, _writePos, count);
+                            Buffer.BlockCopy(array, offset, _buffer, _writePos, count);
 
                             await _stream.WriteAsync(_buffer, 0, totalUserBytes, cancellationToken).ConfigureAwait(false);
                             _writePos = 0;
@@ -1063,7 +1071,7 @@ namespace System.IO
         public override void SetLength(long value)
         {
             if (value < 0)
-                throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             EnsureNotClosed();
             EnsureCanSeek();

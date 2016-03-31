@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -91,7 +92,7 @@ namespace System.Data.SqlClient
             // Need to find out if we should add byte order mark or not. 
             // We need to add this if we are getting ntext xml, not if we are getting binary xml
             // Binary Xml always begins with the bytes 0xDF and 0xFF
-            // If we aren't getting these, then we are getting unicode xml
+            // If we aren't getting these, then we are getting Unicode xml
             if ((byteArr.Length < 2) || (byteArr[0] != 0xDF) || (byteArr[1] != 0xFF))
             {
                 Debug.Assert(cachedBytes.Count == 0);

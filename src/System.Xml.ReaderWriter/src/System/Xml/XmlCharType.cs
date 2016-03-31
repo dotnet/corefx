@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Threading;
 using System.Diagnostics;
@@ -1028,22 +1029,16 @@ namespace System.Xml
                         0x700 , 0x700 , 0x700 , 0x700 , 0x700 , 0x700 , 0x700 , 0x1B00
         };
 
-        private static byte** s_CharProperties;
+        private static readonly IntPtr[] s_PageIndexes = new IntPtr[256];
+        private static readonly byte** s_CharProperties = InitializeCharProperties();
         private byte** _charProperties;
-        private static IntPtr[] s_PageIndexes;
-
-        static XmlCharType()
-        {
-            s_PageIndexes = new IntPtr[256];
-            s_CharProperties = InitializeCharProperties();
-        }
 
         private static byte** InitializeCharProperties()
         {
             byte* s_CharData = (byte*)GCHandle.Alloc(s_xmlCharTypeData, GCHandleType.Pinned).AddrOfPinnedObject();
 
             // we never free this memory. we avoid allocate this memory in the managed heap and pinning it to reduce 
-            // the presure on the GC
+            // the pressure on the GC
             for (int i = 0; i < 256; i++)
             {
                 s_PageIndexes[i] = (IntPtr)(s_CharData + s_Indexes[i]);

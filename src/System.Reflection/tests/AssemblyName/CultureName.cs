@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Globalization;
@@ -10,7 +11,7 @@ namespace System.Reflection.Tests
 {
     public class CultureNameTests
     {
-        [Fact, ActiveIssue(846, PlatformID.AnyUnix)]
+        [Fact]
         public void SettingNullCultureNameSucceeds()
         {
             var an = new AssemblyName("Test, Culture=en-US");
@@ -22,7 +23,7 @@ namespace System.Reflection.Tests
             AssertAssemblyNamesAreEqual(new AssemblyName("Test"), an);
         }
 
-        [Fact, ActiveIssue(846, PlatformID.AnyUnix)]
+        [Fact]
         public void SettingEmptyCultureNameSucceeds()
         {
             var an = new AssemblyName("Test, Culture=en-US");
@@ -34,7 +35,7 @@ namespace System.Reflection.Tests
             AssertAssemblyNamesAreEqual(new AssemblyName("Test, Culture=neutral"), an);
         }
 
-        [Fact, ActiveIssue(846, PlatformID.AnyUnix)]
+        [Fact]
         public void SettingValidCultureNameSucceeds()
         {
             var an = new AssemblyName("Test");
@@ -45,7 +46,7 @@ namespace System.Reflection.Tests
             AssertAssemblyNamesAreEqual(new AssemblyName("Test, Culture=en-US"), an);
         }
 
-        [Fact, ActiveIssue(846, PlatformID.AnyUnix)]
+        [Fact]
         public void SettingCultureNameIsCaseInsensitive()
         {
             var an = new AssemblyName("Test");
@@ -57,7 +58,7 @@ namespace System.Reflection.Tests
             AssertAssemblyNamesAreEqual(new AssemblyName("Test, Culture=en-US"), an);
         }
 
-        [Fact, ActiveIssue(846, PlatformID.AnyUnix)]
+        [Fact]
         public void SettingInvalidCultureNameThrowsCultureNotFound()
         {
             var an = new AssemblyName("Test");

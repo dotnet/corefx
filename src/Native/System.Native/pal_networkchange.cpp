@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 
@@ -9,7 +10,6 @@
 #include "pal_utilities.h"
 
 #include <errno.h>
-#include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <net/if.h>
 #include <sys/socket.h>
@@ -51,7 +51,7 @@ extern "C" NetworkChangeKind SystemNative_ReadSingleEvent(int32_t sock)
     char buffer[4096];
     iovec iov = {buffer, sizeof(buffer)};
     sockaddr_nl sanl;
-    msghdr msg = {reinterpret_cast<void*>(&sanl), sizeof(sockaddr_nl), &iov, 1, NULL, 0, 0};
+    msghdr msg = { .msg_name = reinterpret_cast<void*>(&sanl), .msg_namelen = sizeof(sockaddr_nl), .msg_iov = &iov, .msg_iovlen = 1 };
     ssize_t len;
     while (CheckInterrupted(len = recvmsg(sock, &msg, 0)));
     if (len == -1)

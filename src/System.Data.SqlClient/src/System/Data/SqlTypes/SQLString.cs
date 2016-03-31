@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //------------------------------------------------------------------------------
@@ -771,7 +772,7 @@ namespace System.Data.SqlTypes
         private static void ValidateSqlCompareOptions(SqlCompareOptions compareOptions)
         {
             if ((compareOptions & x_iValidSqlCompareOptionMask) != compareOptions)
-                throw new ArgumentOutOfRangeException("compareOptions");
+                throw new ArgumentOutOfRangeException(nameof(compareOptions));
         }
 
         public static CompareOptions CompareOptionsFromSqlCompareOptions(SqlCompareOptions compareOptions)
@@ -978,7 +979,7 @@ namespace System.Data.SqlTypes
 
             int returnValue = StringCompare(this, value);
 
-            // Conver the result into -1, 0, or 1 as this method never returned any other values
+            // Convert the result into -1, 0, or 1 as this method never returned any other values
             //  This is to ensure the backcompat
             if (returnValue < 0)
             {
@@ -1101,7 +1102,7 @@ namespace System.Data.SqlTypes
                   }
 
                   // Now sort in place
-                  // Algo:
+                  // Algorithm:
                   // Start from 1, assume list before i is sorted, if next item
                   // violates this assumption, exchange with prev items until the
                   // item is in its correct place

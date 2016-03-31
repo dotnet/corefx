@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
@@ -18,26 +19,45 @@ namespace System.Net.Sockets
     {
         private int _receiveTimeout = -1;
         private int _sendTimeout = -1;
+        private bool _nonBlocking;
+        private SocketAsyncContext _asyncContext;
 
         public SocketAsyncContext AsyncContext
         {
             get
             {
-                return _innerSocket == null ?
-                    SocketAsyncContext.ClosedAsyncContext :
-                    _innerSocket.AsyncContext;
+                if (Volatile.Read(ref _asyncContext) == null)
+                {
+                    Interlocked.CompareExchange(ref _asyncContext, new SocketAsyncContext(this), null);
+                }
+
+                return _asyncContext;
             }
         }
 
-        public int FileDescriptor
+
+        public bool IsNonBlocking
         {
             get
             {
-                return (int)handle;
+                return _nonBlocking;
+            }
+            set
+            {
+                _nonBlocking = value;
+
+                //
+                // If transitioning to non-blocking, we need to set the native socket to non-blocking mode.
+                // If we ever transition back to blocking, we keep the native socket in non-blocking mode, and emulate
+                // blocking.  This avoids problems with switching to native blocking while there are pending async
+                // operations.
+                //
+                if (value)
+                {
+                    AsyncContext.SetNonBlocking();
+                }
             }
         }
-
-        public bool IsNonBlocking { get; set; }
 
         public int ReceiveTimeout
         {
@@ -47,7 +67,7 @@ namespace System.Net.Sockets
             }
             set
             {
-                Debug.Assert(value == -1 || value > 0);
+                Debug.Assert(value == -1 || value > 0, $"Unexpected value: {value}");
                 _receiveTimeout = value;;
             }
         }
@@ -60,7 +80,7 @@ namespace System.Net.Sockets
             }
             set
             {
-                Debug.Assert(value == -1 || value > 0);
+                Debug.Assert(value == -1 || value > 0, $"Unexpected value: {value}");
                 _sendTimeout = value;
             }
         }
@@ -86,33 +106,17 @@ namespace System.Net.Sockets
 
         private void InnerReleaseHandle()
         {
-            // No-op for Unix.
+            if (_asyncContext != null)
+            {
+                _asyncContext.Close();
+            }
         }
 
         internal sealed partial class InnerSafeCloseSocket : SafeHandleMinusOneIsInvalid
         {
-            private SocketAsyncContext _asyncContext;
-
-            public SocketAsyncContext AsyncContext
-            {
-                get
-                {
-                    if (Volatile.Read(ref _asyncContext) == null)
-                    {
-                        Interlocked.CompareExchange(ref _asyncContext, new SocketAsyncContext((int)handle, SocketAsyncEngine.Instance), null);
-                    }
-                    return _asyncContext;
-                }
-            }
-
             private unsafe SocketError InnerReleaseHandle()
             {
                 int errorCode;
-
-                if (_asyncContext != null)
-                {
-                    _asyncContext.Close();
-                }
 
                 // If _blockable was set in BlockingRelease, it's safe to block here, which means
                 // we can honor the linger options set on the socket.  It also means closesocket() might return WSAEWOULDBLOCK, in which
@@ -142,16 +146,12 @@ namespace System.Net.Sockets
                     // If it's not EWOULDBLOCK, there's no more recourse - we either succeeded or failed.
                     if (errorCode != (int)Interop.Error.EWOULDBLOCK)
                     {
-                        if (errorCode == 0 && _asyncContext != null)
-                        {
-                            _asyncContext.Close();
-                        }
                         return SocketPal.GetSocketErrorForErrorCode((Interop.Error)errorCode);
                     }
 
                     // The socket must be non-blocking with a linger timeout set.
                     // We have to set the socket to blocking.
-                    errorCode = Interop.Sys.Fcntl.SetIsNonBlocking(handle, 0);
+                    errorCode = Interop.Sys.Fcntl.DangerousSetIsNonBlocking(handle, 0);
                     if (errorCode == 0)
                     {
                         // The socket successfully made blocking; retry the close().
@@ -165,10 +165,6 @@ namespace System.Net.Sockets
                         _closeSocketHandle = handle;
                         _closeSocketResult = SocketPal.GetSocketErrorForErrorCode((Interop.Error)errorCode);
 #endif
-                        if (errorCode == 0 && _asyncContext != null)
-                        {
-                            _asyncContext.Close();
-                        }
                         return SocketPal.GetSocketErrorForErrorCode((Interop.Error)errorCode);
                     }
 
@@ -181,7 +177,7 @@ namespace System.Net.Sockets
                     Seconds = 0
                 };
 
-                errorCode = (int)Interop.Sys.SetLingerOption((int)handle, &linger);
+                errorCode = (int)Interop.Sys.DangerousSetLingerOption((int)handle, &linger);
 #if DEBUG
                 _closeSocketLinger = SocketPal.GetSocketErrorForErrorCode((Interop.Error)errorCode);
 #endif
@@ -222,23 +218,15 @@ namespace System.Net.Sockets
                 Interop.Error error = Interop.Sys.Socket(addressFamily, socketType, protocolType, &fd);
                 if (error == Interop.Error.SUCCESS)
                 {
-                    Debug.Assert(fd != -1);
+                    Debug.Assert(fd != -1, "fd should not be -1");
 
                     errorCode = SocketError.Success;
 
-                    // The socket was created successfully; make it non-blocking and enable
-                    // IPV6_V6ONLY by default for AF_INET6 sockets.
-                    int err = Interop.Sys.Fcntl.SetIsNonBlocking((IntPtr)fd, 1);
-                    if (err != 0)
-                    {
-                        Interop.Sys.Close((IntPtr)fd);
-                        fd = -1;
-                        errorCode = SocketError.SocketError;
-                    }
-                    else if (addressFamily == AddressFamily.InterNetworkV6)
+                    // The socket was created successfully; enable IPV6_V6ONLY by default for AF_INET6 sockets.
+                    if (addressFamily == AddressFamily.InterNetworkV6)
                     {
                         int on = 1;
-                        error = Interop.Sys.SetSockOpt(fd, SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, (byte*)&on, sizeof(int));
+                        error = Interop.Sys.DangerousSetSockOpt(fd, SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, (byte*)&on, sizeof(int));
                         if (error != Interop.Error.SUCCESS)
                         {
                             Interop.Sys.Close((IntPtr)fd);
@@ -249,7 +237,7 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    Debug.Assert(fd == -1);
+                    Debug.Assert(fd == -1, $"Unexpected fd: {fd}");
 
                     errorCode = SocketPal.GetSocketErrorForErrorCode(error);
                 }
@@ -268,7 +256,7 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    SocketPal.TryCompleteAccept(socketHandle.FileDescriptor, socketAddress, ref socketAddressLen, out acceptedFd, out errorCode);
+                    SocketPal.TryCompleteAccept(socketHandle, socketAddress, ref socketAddressLen, out acceptedFd, out errorCode);
                 }
 
                 var res = new InnerSafeCloseSocket();

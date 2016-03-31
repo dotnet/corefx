@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 
@@ -70,7 +71,7 @@ namespace System.Xml.Linq
         /// </returns>
         public static XName Get(string expandedName)
         {
-            if (expandedName == null) throw new ArgumentNullException("expandedName");
+            if (expandedName == null) throw new ArgumentNullException(nameof(expandedName));
             if (expandedName.Length == 0) throw new ArgumentException(SR.Format(SR.Argument_InvalidExpandedName, expandedName));
             if (expandedName[0] == '{')
             {

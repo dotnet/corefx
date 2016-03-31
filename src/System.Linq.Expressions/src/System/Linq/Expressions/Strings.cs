@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -128,28 +129,6 @@ namespace System.Linq.Expressions
             get
             {
                 return SR.TypeDoesNotHaveConstructorForTheSignature;
-            }
-        }
-
-        /// <summary>
-        /// A string like "Count must be non-negative."
-        /// </summary>
-        internal static string CountCannotBeNegative
-        {
-            get
-            {
-                return SR.CountCannotBeNegative;
-            }
-        }
-
-        /// <summary>
-        /// A string like "arrayType must be an array type"
-        /// </summary>
-        internal static string ArrayTypeMustBeArray
-        {
-            get
-            {
-                return SR.ArrayTypeMustBeArray;
             }
         }
 
@@ -527,22 +506,22 @@ namespace System.Linq.Expressions
         /// <summary>
         /// A string like "Argument must be either a FieldInfo or PropertyInfo"
         /// </summary>
-        internal static string ArgumentMustBeFieldInfoOrPropertInfo
+        internal static string ArgumentMustBeFieldInfoOrPropertyInfo
         {
             get
             {
-                return SR.ArgumentMustBeFieldInfoOrPropertInfo;
+                return SR.ArgumentMustBeFieldInfoOrPropertyInfo;
             }
         }
 
         /// <summary>
         /// A string like "Argument must be either a FieldInfo, PropertyInfo or MethodInfo"
         /// </summary>
-        internal static string ArgumentMustBeFieldInfoOrPropertInfoOrMethod
+        internal static string ArgumentMustBeFieldInfoOrPropertyInfoOrMethod
         {
             get
             {
-                return SR.ArgumentMustBeFieldInfoOrPropertInfoOrMethod;
+                return SR.ArgumentMustBeFieldInfoOrPropertyInfoOrMethod;
             }
         }
 
@@ -1163,17 +1142,6 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Queue empty."
-        /// </summary>
-        internal static string QueueEmpty
-        {
-            get
-            {
-                return SR.QueueEmpty;
-            }
-        }
-
-        /// <summary>
         /// A string like "Cannot redefine label '{0}' in an inner block."
         /// </summary>
         internal static string LabelTargetAlreadyDefined(object p0)
@@ -1397,7 +1365,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is is intentional, override '{1}' and change it to allow this rewrite."
+        /// A string like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is intentional, override '{1}' and change it to allow this rewrite."
         /// </summary>
         internal static string MustRewriteWithoutMethod(object p0, object p1)
         {
@@ -1421,13 +1389,13 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Dynamic operations can only be performed in homogenous AppDomain."
+        /// A string like "Dynamic operations can only be performed in homogeneous AppDomain."
         /// </summary>
-        internal static string HomogenousAppDomainRequired
+        internal static string HomogeneousAppDomainRequired
         {
             get
             {
-                return SR.HomogenousAppDomainRequired;
+                return SR.HomogeneousAppDomainRequired;
             }
         }
 

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Threading;
@@ -23,7 +24,7 @@ namespace System.Linq.Parallel.Tests
         // Min
         //
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Int(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -35,14 +36,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("MinData", (object)(new int[] { 1024 * 32, 1024 * 1024 }))]
+        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
         public static void Min_Int_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             Min_Int(labeled, count, min);
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Int_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -51,7 +52,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Int_AllNull(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -60,7 +61,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Long(Labeled<ParallelQuery<int>> labeled, int count, long min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -72,14 +73,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("MinData", (object)(new int[] { 1024 * 32, 1024 * 1024 }))]
+        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
         public static void Min_Long_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, long min)
         {
             Min_Long(labeled, count, min);
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Long_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, long min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -88,7 +89,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Long_AllNull(Labeled<ParallelQuery<int>> labeled, int count, long min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -97,7 +98,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Float(Labeled<ParallelQuery<int>> labeled, int count, float min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -113,14 +114,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("MinData", (object)(new int[] { 1024 * 32, 1024 * 1024 }))]
+        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
         public static void Min_Float_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, float min)
         {
             Min_Float(labeled, count, min);
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Float_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, float min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -129,7 +130,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 3 }))]
+        [MemberData(nameof(MinData), new[] { 3 })]
         public static void Min_Float_Special(Labeled<ParallelQuery<int>> labeled, int count, float min)
         {
             // Null is defined as 'least' when ordered, but is not the minimum.
@@ -144,7 +145,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Float_AllNull(Labeled<ParallelQuery<int>> labeled, int count, float min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -153,7 +154,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Double(Labeled<ParallelQuery<int>> labeled, int count, double min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -169,14 +170,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("MinData", (object)(new int[] { 1024 * 32, 1024 * 1024 }))]
+        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
         public static void Min_Double_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, double min)
         {
             Min_Double(labeled, count, min);
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 3 }))]
+        [MemberData(nameof(MinData), new[] { 3 })]
         public static void Min_Double_Special(Labeled<ParallelQuery<int>> labeled, int count, double min)
         {
             // Null is defined as 'least' when ordered, but is not the minimum.
@@ -191,7 +192,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Double_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, double min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -200,7 +201,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Double_AllNull(Labeled<ParallelQuery<int>> labeled, int count, double min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -209,7 +210,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Decimal(Labeled<ParallelQuery<int>> labeled, int count, decimal min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -221,14 +222,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("MinData", (object)(new int[] { 1024 * 32, 1024 * 1024 }))]
+        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
         public static void Min_Decimal_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, decimal min)
         {
             Min_Decimal(labeled, count, min);
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Decimal_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, decimal min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -237,7 +238,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Decimal_AllNull(Labeled<ParallelQuery<int>> labeled, int count, decimal min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -246,7 +247,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Other(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -256,14 +257,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("MinData", (object)(new int[] { 1024 * 32, 1024 * 1024 }))]
+        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
         public static void Min_Other_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             Min_Other(labeled, count, min);
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, }))]
+        [MemberData(nameof(MinData), new[] { 1 })]
         public static void Min_NotComparable(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             NotComparable a = new NotComparable(0);
@@ -271,7 +272,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Other_SomeNull(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -280,7 +281,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("MinData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(MinData), new[] { 1, 2, 16 })]
         public static void Min_Other_AllNull(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -289,7 +290,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0 }, MemberType = typeof(UnorderedSources))]
         public static void Min_EmptyNullable(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Assert.Null(labeled.Item.Min(x => (int?)x));
@@ -301,7 +302,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0 }, MemberType = typeof(UnorderedSources))]
         public static void Min_InvalidOperationException(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Assert.Throws<InvalidOperationException>(() => labeled.Item.Min());
@@ -313,7 +314,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 1 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Min_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> labeled, int count)
         {
             CancellationTokenSource cs = new CancellationTokenSource();
@@ -338,7 +339,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 1 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
         public static void Min_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertThrowsWrapped<DeliberateTestException>(() => labeled.Item.Min((Func<int, int>)(x => { throw new DeliberateTestException(); })));
@@ -360,7 +361,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 2 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 2 }, MemberType = typeof(UnorderedSources))]
         public static void Min_AggregateException_NotComparable(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Functions.AssertThrowsWrapped<ArgumentException>(() => labeled.Item.Min(x => new NotComparable(x)));

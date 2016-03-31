@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -120,10 +121,10 @@ internal static class Utils
         {
             if ((stringcompare.Equal != true) && (!string.IsNullOrEmpty(stringcompare.ErrorMessage)))
             {
-                Debug.WriteLine("Basic basline XML comparison failed with the error : {0}\n. Running the smart XML comparer", stringcompare.ErrorMessage);
+                Debug.WriteLine("Basic baseline XML comparison failed with the error : {0}\n. Running the smart XML comparer", stringcompare.ErrorMessage);
                 if (!SmartXmlCompare(expected, actual))
                 {
-                    return new CompareResult { ErrorMessage = "XML comparision is also failing" };
+                    return new CompareResult { ErrorMessage = "XML comparison is also failing" };
                 }
                 else
                 {
@@ -206,7 +207,7 @@ internal static class Utils
             return false;
         }
 
-        //Comparising attributes
+        // Comparing attributes
         XAttribute[] deskAtrs = baselineXElement.Attributes().OrderBy(m => m.Value).ToArray();
         XAttribute[] coreCLRAtrs = actualXElement.Attributes().OrderBy(m => m.Value).ToArray();
 
@@ -228,7 +229,7 @@ internal static class Utils
             {
                 if (0 != String.Compare(deskAtrs[i].Name.NamespaceName, coreCLRAtrs[i].Name.NamespaceName))
                 {
-                    Debug.WriteLine("Namspaces are different.Expected {0} namespace doesn't match with actual {1} namespace ", deskAtrs[i].Name.NamespaceName, coreCLRAtrs[i].Name.NamespaceName);
+                    Debug.WriteLine("Namespaces are different.Expected {0} namespace doesn't match with actual {1} namespace ", deskAtrs[i].Name.NamespaceName, coreCLRAtrs[i].Name.NamespaceName);
                     return false;
                 }
                 if (0 != String.Compare(deskAtrs[i].Value, coreCLRAtrs[i].Value))

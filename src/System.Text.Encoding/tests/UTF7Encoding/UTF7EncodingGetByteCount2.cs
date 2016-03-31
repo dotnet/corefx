@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -74,61 +75,6 @@ namespace System.Text.Tests
         {
             UTF7Encoding utf7 = new UTF7Encoding();
             Assert.Equal(c_INT_EMPTYlENGTH, utf7.GetByteCount(_ARRAY_EMPTY, 0, 0));
-        }
-
-        //NegTest1: to test UTF7Encoding.GetByteCount(null,Int32 index ,Int32 count)
-        [Fact]
-        public void NegTest1()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                UTF7Encoding UTF7 = new UTF7Encoding();
-                UTF7.GetByteCount(null, 0, 1);
-            });
-        }
-
-        // NegTest2: to test index is less than zero
-        [Fact]
-        public void NegTest2()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                UTF7Encoding UTF7 = new UTF7Encoding();
-                UTF7.GetByteCount(_ARRAY_DIRECTCHARS, -1, 1);
-            });
-        }
-
-        // NegTest3: to test count is less than zero
-        [Fact]
-        public void NegTest3()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                UTF7Encoding UTF7 = new UTF7Encoding();
-                UTF7.GetByteCount(_ARRAY_DIRECTCHARS, 0, -1);
-            });
-        }
-
-        // NegTest4: to test index do not denote a valid range in chars
-        [Fact]
-        public void NegTest4()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                UTF7Encoding UTF7 = new UTF7Encoding();
-                UTF7.GetByteCount(_ARRAY_DIRECTCHARS, 13, 1);
-            });
-        }
-
-        // NegTest5: to test count do not denote a valid range in chars
-        [Fact]
-        public void NegTest5()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                UTF7Encoding UTF7 = new UTF7Encoding();
-                UTF7.GetByteCount(_ARRAY_DIRECTCHARS, 0, 13);
-            });
         }
     }
 }

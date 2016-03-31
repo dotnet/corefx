@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
@@ -52,6 +53,7 @@ namespace System.IO.MemoryMappedFiles
                     (int)MemoryMappedFile.GetFileMapAccess(access), offsetHigh, offsetLow, new UIntPtr(nativeSize));
             if (viewHandle.IsInvalid)
             {
+                viewHandle.Dispose();
                 throw Win32Marshal.GetExceptionForLastWin32Error();
             }
 
@@ -78,6 +80,7 @@ namespace System.IO.MemoryMappedFiles
                 int lastError = Marshal.GetLastWin32Error();
                 if (viewHandle.IsInvalid)
                 {
+                    viewHandle.Dispose();
                     throw Win32Marshal.GetExceptionForWin32Error(lastError);
                 }
                 // again query the view for its new size

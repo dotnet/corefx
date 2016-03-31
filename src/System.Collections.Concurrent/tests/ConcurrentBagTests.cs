@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Threading;
@@ -15,6 +16,7 @@ namespace System.Collections.Concurrent.Tests
         public static void TestBasicScenarios()
         {
             ConcurrentBag<int> cb = new ConcurrentBag<int>();
+            Assert.True(cb.IsEmpty);
             Task[] tks = new Task[2];
             tks[0] = Task.Run(() =>
                 {

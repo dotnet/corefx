@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -9,7 +10,7 @@ namespace System.Linq.Parallel.Tests
     public class AsEnumerableTests
     {
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void AsEnumerable_Unordered(Labeled<ParallelQuery<int>> labeled, int count)
         {
             IntegerRangeSet seen = new IntegerRangeSet(0, count);
@@ -20,14 +21,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 1024, 1024 * 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void AsEnumerable_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             AsEnumerable_Unordered(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void AsEnumerable(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int seen = 0;
@@ -38,7 +39,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 128 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 128 }, MemberType = typeof(Sources))]
         public static void AsEnumerable_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             AsEnumerable(labeled, count);
@@ -46,7 +47,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [ActiveIssue("AsEnumerable.Cast<T>() retains origin type")]
-        [MemberData("Ranges", (object)(new int[] { 0, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 16 }, MemberType = typeof(Sources))]
         public static void AsEnumerable_LinqBinding(Labeled<ParallelQuery<int>> labeled, int count)
         {
             IEnumerable<int> enumerable = labeled.Item.AsEnumerable();

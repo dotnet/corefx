@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*=============================================================================
 **
@@ -47,7 +48,7 @@ namespace System.Collections.Generic
         public Queue(int capacity)
         {
             if (capacity < 0)
-                throw new ArgumentOutOfRangeException("capacity", SR.ArgumentOutOfRange_NeedNonNegNumRequired);
+                throw new ArgumentOutOfRangeException(nameof(capacity), capacity, SR.ArgumentOutOfRange_NeedNonNegNum);
             _array = new T[capacity];
         }
 
@@ -58,7 +59,7 @@ namespace System.Collections.Generic
         public Queue(IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             _array = EnumerableHelpers.ToArray(collection, out _size);
             _tail = (_size == _array.Length) ? 0 : _size;
@@ -119,12 +120,12 @@ namespace System.Collections.Generic
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             if (arrayIndex < 0 || arrayIndex > array.Length)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_Index);
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, SR.ArgumentOutOfRange_Index);
             }
 
             int arrayLen = array.Length;
@@ -149,23 +150,23 @@ namespace System.Collections.Generic
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             if (array.Rank != 1)
             {
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             }
 
             if (array.GetLowerBound(0) != 0)
             {
-                throw new ArgumentException(SR.Arg_NonZeroLowerBound);
+                throw new ArgumentException(SR.Arg_NonZeroLowerBound, nameof(array));
             }
 
             int arrayLen = array.Length;
             if (index < 0 || index > arrayLen)
             {
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
             }
 
             if (arrayLen - index < _size)
@@ -189,7 +190,7 @@ namespace System.Collections.Generic
             }
             catch (ArrayTypeMismatchException)
             {
-                throw new ArgumentException(SR.Argument_InvalidArrayType);
+                throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
             }
         }
 
@@ -297,9 +298,12 @@ namespace System.Collections.Generic
         /// <include file='doc\Queue.uex' path='docs/doc[@for="Queue.ToArray"]/*' />
         public T[] ToArray()
         {
-            T[] arr = new T[_size];
             if (_size == 0)
-                return arr; // consider replacing with Array.Empty<T>() to be consistent with non-generic Queue
+            {
+                return Array.Empty<T>();
+            }
+
+            T[] arr = new T[_size];
             
             if (_head < _tail)
             {

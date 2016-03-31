@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -9,6 +10,23 @@ internal static partial class Interop
     internal static partial class Sys
     {
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetPeerName")]
-        internal static extern unsafe Error GetPeerName(int socket, byte* socketAddress, int* socketAddressLen);
+        private static extern unsafe Error DangerousGetPeerName(int socket, byte* socketAddress, int* socketAddressLen);
+
+        internal static unsafe Error GetPeerName(SafeHandle socket, byte* socketAddress, int* socketAddressLen)
+        {
+            bool release = false;
+            try
+            {
+                socket.DangerousAddRef(ref release);
+                return DangerousGetPeerName((int)socket.DangerousGetHandle(), socketAddress, socketAddressLen);
+            }
+            finally
+            {
+                if (release)
+                {
+                    socket.DangerousRelease();
+                }
+            }
+        }
     }
 }

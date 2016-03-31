@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -30,7 +31,7 @@ namespace System.Net.Sockets.Tests
 */
         };
 
-        [Theory, MemberData("DualModeSuccessInputs")]
+        [Theory, MemberData(nameof(DualModeSuccessInputs))]
         public void DualMode_Success(SocketType socketType, ProtocolType protocolType)
         {
             using (new Socket(socketType, protocolType))
@@ -38,7 +39,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Theory, MemberData("DualModeFailureInputs")]
+        [Theory, MemberData(nameof(DualModeFailureInputs))]
         public void DualMode_Failure(SocketType socketType, ProtocolType protocolType)
         {
             Assert.Throws<SocketException>(() => new Socket(socketType, protocolType));
@@ -51,7 +52,7 @@ namespace System.Net.Sockets.Tests
             new object[] { AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp },
         };
 
-        [Theory, MemberData("CtorSuccessInputs")]
+        [Theory, MemberData(nameof(CtorSuccessInputs))]
         public void Ctor_Success(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
             using (new Socket(addressFamily, socketType, protocolType))
@@ -78,7 +79,7 @@ namespace System.Net.Sockets.Tests
 */
         };
 
-        [Theory, MemberData("CtorFailureInputs")]
+        [Theory, MemberData(nameof(CtorFailureInputs))]
         public void Ctor_Failure(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
             Assert.Throws<SocketException>(() => new Socket(addressFamily, socketType, protocolType));

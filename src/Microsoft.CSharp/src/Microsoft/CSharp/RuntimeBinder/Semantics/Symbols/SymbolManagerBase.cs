@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -399,7 +400,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeArray ConcatParams(CType[] prgtype1, CType[] prgtype2)
         {
             CType[] combined = new CType[prgtype1.Length + prgtype2.Length];
-            Array.Copy(prgtype1, combined, prgtype1.Length);
+            Array.Copy(prgtype1, 0, combined, 0, prgtype1.Length);
             Array.Copy(prgtype2, 0, combined, prgtype1.Length, prgtype2.Length);
             return AllocParams(combined);
         }

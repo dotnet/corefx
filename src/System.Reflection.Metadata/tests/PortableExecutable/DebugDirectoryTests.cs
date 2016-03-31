@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Linq;
@@ -83,7 +84,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(@"C:\Temp\Deterministic.pdb", cv.Path);
 
                 var detEntry = entries[1];
-                Assert.Equal(DebugDirectoryEntryType.Deterministic, detEntry.Type);
+                Assert.Equal(DebugDirectoryEntryType.Reproducible, detEntry.Type);
                 Assert.Equal(0, detEntry.DataPointer);
                 Assert.Equal(0, detEntry.DataRelativeVirtualAddress);
                 Assert.Equal(0, detEntry.DataSize);
@@ -93,7 +94,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
                 Assert.Equal(2, entries.Length);
 
-                Assert.Throws<ArgumentException>(() => reader.ReadCodeViewDebugDirectoryData(detEntry));
+                Assert.Throws<ArgumentException>("entry", () => reader.ReadCodeViewDebugDirectoryData(detEntry));
             }
         }
     }

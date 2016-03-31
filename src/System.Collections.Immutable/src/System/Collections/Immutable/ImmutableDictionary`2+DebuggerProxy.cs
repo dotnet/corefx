@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,7 +29,7 @@ namespace System.Collections.Immutable
         /// <param name="map">The collection to display in the debugger</param>
         public ImmutableDictionaryDebuggerProxy(ImmutableDictionary<TKey, TValue> map)
         {
-            Requires.NotNull(map, "map");
+            Requires.NotNull(map, nameof(map));
             _map = map;
         }
 

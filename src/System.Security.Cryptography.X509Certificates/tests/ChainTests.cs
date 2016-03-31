@@ -1,8 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Microsoft.Win32.SafeHandles;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -125,7 +128,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("VerifyExpressionData")]
+        [MemberData(nameof(VerifyExpressionData))]
         public static void VerifyExpiration_LocalTime(DateTime verificationTime, bool shouldBeValid, DateTimeKind kind)
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
@@ -150,6 +153,171 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 if (!shouldBeValid)
                 {
                     Assert.Contains(chain.ChainStatus, s => s.Status == X509ChainStatusFlags.NotTimeValid);
+                }
+            }
+        }
+
+        [Fact]
+        public static void BuildChain_WithApplicationPolicy_Match()
+        {
+            using (var msCer = new X509Certificate2(TestData.MsCertificate))
+            using (X509Chain chain = new X509Chain())
+            {
+                // Code Signing
+                chain.ChainPolicy.ApplicationPolicy.Add(new Oid("1.3.6.1.5.5.7.3.3"));
+                chain.ChainPolicy.VerificationTime = msCer.NotBefore.AddHours(2);
+                chain.ChainPolicy.VerificationFlags =
+                    X509VerificationFlags.AllowUnknownCertificateAuthority;
+
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+
+                bool valid = chain.Build(msCer);
+                Assert.True(valid, "Chain built validly");
+            }
+        }
+
+        [Fact]
+        public static void BuildChain_WithApplicationPolicy_NoMatch()
+        {
+            using (var cert = new X509Certificate2(TestData.MsCertificate))
+            using (X509Chain chain = new X509Chain())
+            {
+                // Gibberish.  (Code Signing + ".1")
+                chain.ChainPolicy.ApplicationPolicy.Add(new Oid("1.3.6.1.5.5.7.3.3.1"));
+                chain.ChainPolicy.VerificationFlags =
+                    X509VerificationFlags.AllowUnknownCertificateAuthority;
+
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationTime = cert.NotBefore.AddHours(2);
+
+                bool valid = chain.Build(cert);
+                Assert.False(valid, "Chain built validly");
+
+                Assert.InRange(chain.ChainElements.Count, 1, int.MaxValue);
+
+                Assert.NotSame(cert, chain.ChainElements[0].Certificate);
+                Assert.Equal(cert, chain.ChainElements[0].Certificate);
+
+                X509ChainStatus[] chainElementStatus = chain.ChainElements[0].ChainElementStatus;
+                Assert.InRange(chainElementStatus.Length, 1, int.MaxValue);
+                Assert.Contains(chainElementStatus, x => x.Status == X509ChainStatusFlags.NotValidForUsage);
+            }
+        }
+
+        [Fact]
+        public static void BuildChain_WithCertificatePolicy_Match()
+        {
+            using (var cert = new X509Certificate2(TestData.CertWithPolicies))
+            using (X509Chain chain = new X509Chain())
+            {
+                // Code Signing
+                chain.ChainPolicy.CertificatePolicy.Add(new Oid("2.18.19"));
+                chain.ChainPolicy.VerificationFlags =
+                    X509VerificationFlags.AllowUnknownCertificateAuthority;
+                chain.ChainPolicy.VerificationTime = cert.NotBefore.AddHours(2);
+
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+
+                bool valid = chain.Build(cert);
+                Assert.True(valid, "Chain built validly");
+            }
+        }
+
+        [Fact]
+        public static void BuildChain_WithCertificatePolicy_NoMatch()
+        {
+            using (var cert = new X509Certificate2(TestData.CertWithPolicies))
+            using (X509Chain chain = new X509Chain())
+            {
+                chain.ChainPolicy.CertificatePolicy.Add(new Oid("2.999"));
+                chain.ChainPolicy.VerificationFlags =
+                    X509VerificationFlags.AllowUnknownCertificateAuthority;
+
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationTime = cert.NotBefore.AddHours(2);
+
+                bool valid = chain.Build(cert);
+                Assert.False(valid, "Chain built validly");
+
+                Assert.InRange(chain.ChainElements.Count, 1, int.MaxValue);
+
+                Assert.NotSame(cert, chain.ChainElements[0].Certificate);
+                Assert.Equal(cert, chain.ChainElements[0].Certificate);
+
+                X509ChainStatus[] chainElementStatus = chain.ChainElements[0].ChainElementStatus;
+                Assert.InRange(chainElementStatus.Length, 1, int.MaxValue);
+                Assert.Contains(chainElementStatus, x => x.Status == X509ChainStatusFlags.NotValidForUsage);
+            }
+        }
+
+        [Fact]
+        public static void SafeX509ChainHandle_InvalidHandle_IsInvalid()
+        {
+            Assert.True(SafeX509ChainHandle.InvalidHandle.IsInvalid);
+        }
+
+        [Fact]
+        public static void SafeX509ChainHandle_InvalidHandle_StaticObject()
+        {
+            SafeX509ChainHandle firstCall = SafeX509ChainHandle.InvalidHandle;
+            SafeX509ChainHandle secondCall = SafeX509ChainHandle.InvalidHandle;
+
+            Assert.Same(firstCall, secondCall);
+        }
+
+        [Fact]
+        [OuterLoop( /* May require using the network, to download CRLs and intermediates */)]
+        public static void VerifyWithRevocation()
+        {
+            using (var cert = new X509Certificate2(Path.Combine("TestData", "MS.cer")))
+            using (var onlineChain = new X509Chain())
+            using (var offlineChain = new X509Chain())
+            {
+                onlineChain.ChainPolicy.VerificationFlags =
+                    X509VerificationFlags.AllowUnknownCertificateAuthority;
+
+                onlineChain.ChainPolicy.VerificationTime = cert.NotBefore.AddHours(2);
+                onlineChain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                onlineChain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+
+                bool valid = onlineChain.Build(cert);
+                Assert.True(valid, "Online Chain Built Validly");
+
+                // Since the network was enabled, we should get the whole chain.
+                Assert.Equal(3, onlineChain.ChainElements.Count);
+
+                Assert.Equal(0, onlineChain.ChainElements[0].ChainElementStatus.Length);
+                Assert.Equal(0, onlineChain.ChainElements[1].ChainElementStatus.Length);
+
+                // The root CA is not expected to be installed on everyone's machines,
+                // so allow for it to report UntrustedRoot, but nothing else..
+                X509ChainStatus[] rootElementStatus = onlineChain.ChainElements[2].ChainElementStatus;
+                
+                if (rootElementStatus.Length != 0)
+                {
+                    Assert.Equal(1, rootElementStatus.Length);
+                    Assert.Equal(X509ChainStatusFlags.UntrustedRoot, rootElementStatus[0].Status);
+                }
+
+                // Now that everything is cached, try again in Offline mode.
+                offlineChain.ChainPolicy.VerificationFlags = onlineChain.ChainPolicy.VerificationFlags;
+                offlineChain.ChainPolicy.VerificationTime = onlineChain.ChainPolicy.VerificationTime;
+                offlineChain.ChainPolicy.RevocationMode = X509RevocationMode.Offline;
+                offlineChain.ChainPolicy.RevocationFlag = onlineChain.ChainPolicy.RevocationFlag;
+
+                valid = offlineChain.Build(cert);
+                Assert.True(valid, "Offline Chain Built Validly");
+
+                // Everything should look just like the online chain:
+                Assert.Equal(onlineChain.ChainElements.Count, offlineChain.ChainElements.Count);
+
+                for (int i = 0; i < offlineChain.ChainElements.Count; i++)
+                {
+                    X509ChainElement onlineElement = onlineChain.ChainElements[i];
+                    X509ChainElement offlineElement = offlineChain.ChainElements[i];
+
+                    Assert.Equal(onlineElement.ChainElementStatus, offlineElement.ChainElementStatus);
+                    Assert.Equal(onlineElement.Certificate, offlineElement.Certificate);
                 }
             }
         }

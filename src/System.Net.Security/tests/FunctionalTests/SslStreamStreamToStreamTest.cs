@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using System.Net.Test.Common;
@@ -16,14 +17,14 @@ namespace System.Net.Security.Tests
     {
         private readonly byte[] _sampleMsg = Encoding.UTF8.GetBytes("Sample Test Message");
 
-        [Fact]
         [ActiveIssue(4467)]
+        [Fact]
         public void SslStream_StreamToStream_Authentication_Success()
         {
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new SslStream(clientStream, false, AllowAnyServerCertificate))
             using (var server = new SslStream(serverStream))
             {
@@ -40,10 +41,10 @@ namespace System.Net.Security.Tests
         [Fact]
         public void SslStream_StreamToStream_Authentication_IncorrectServerName_Fail()
         {
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new SslStream(clientStream))
             using (var server = new SslStream(serverStream))
             {
@@ -64,10 +65,10 @@ namespace System.Net.Security.Tests
         public void SslStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
             byte[] recvBuf = new byte[_sampleMsg.Length];
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
             using (var serverSslStream = new SslStream(serverStream))
             {
@@ -89,14 +90,62 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SslStream_StreamToStream_LargeWrites_Sync_Success(bool randomizedData)
+        {
+            VirtualNetwork network = new VirtualNetwork();
+
+            using (var clientStream = new VirtualNetworkStream(network, isServer:false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer:true))
+            using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            using (var serverSslStream = new SslStream(serverStream))
+            {
+                Assert.True(DoHandshake(clientSslStream, serverSslStream), "Handshake complete");
+
+                byte[] largeMsg = new byte[4096 * 5]; // length longer than max read chunk size (16K + headers)
+                if (randomizedData)
+                {
+                    new Random().NextBytes(largeMsg); // not very compressible
+                }
+                else
+                {
+                    for (int i = 0; i < largeMsg.Length; i++)
+                    {
+                        largeMsg[i] = (byte)i; // very compressible
+                    }
+                }
+                byte[] receivedLargeMsg = new byte[largeMsg.Length];
+
+                // First do a large write and read blocks at a time
+                clientSslStream.Write(largeMsg);
+                int bytesRead = 0, totalRead = 0;
+                while (totalRead < largeMsg.Length &&
+                    (bytesRead = serverSslStream.Read(receivedLargeMsg, totalRead, receivedLargeMsg.Length - totalRead)) != 0)
+                {
+                    totalRead += bytesRead;
+                }
+                Assert.Equal(receivedLargeMsg.Length, totalRead);
+                Assert.Equal(largeMsg, receivedLargeMsg);
+
+                // Then write again and read bytes at a time
+                clientSslStream.Write(largeMsg);
+                foreach (byte b in largeMsg)
+                {
+                    Assert.Equal(b, serverSslStream.ReadByte());
+                }
+            }
+        }
+
         [Fact]
         public void SslStream_StreamToStream_Successive_ClientWrite_Async_Success()
         {
             byte[] recvBuf = new byte[_sampleMsg.Length];
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
             using (var serverSslStream = new SslStream(serverStream))
             {
@@ -106,17 +155,41 @@ namespace System.Net.Security.Tests
 
                 Task[] tasks = new Task[2];
 
-                tasks[0] = clientSslStream.WriteAsync(_sampleMsg, 0, _sampleMsg.Length);
-                tasks[1] = serverSslStream.ReadAsync(recvBuf, 0, _sampleMsg.Length);
+                tasks[0] = serverSslStream.ReadAsync(recvBuf, 0, _sampleMsg.Length);
+                tasks[1] = clientSslStream.WriteAsync(_sampleMsg, 0, _sampleMsg.Length);
                 bool finished = Task.WaitAll(tasks, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Send/receive completed in the allotted time");
                 Assert.True(VerifyOutput(recvBuf, _sampleMsg), "verify first read data is as expected.");
 
-                tasks[0] = clientSslStream.WriteAsync(_sampleMsg, 0, _sampleMsg.Length);
-                tasks[1] = serverSslStream.ReadAsync(recvBuf, 0, _sampleMsg.Length);
+                tasks[0] = serverSslStream.ReadAsync(recvBuf, 0, _sampleMsg.Length);
+                tasks[1] = clientSslStream.WriteAsync(_sampleMsg, 0, _sampleMsg.Length);
                 finished = Task.WaitAll(tasks, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Send/receive completed in the allotted time");
                 Assert.True(VerifyOutput(recvBuf, _sampleMsg), "verify second read data is as expected.");
+            }
+        }
+
+        [Fact]
+        public void SslStream_StreamToStream_Write_ReadByte_Success()
+        {
+            VirtualNetwork network = new VirtualNetwork();
+
+            using (var clientStream = new VirtualNetworkStream(network, isServer:false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer:true))
+            using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            using (var serverSslStream = new SslStream(serverStream))
+            {
+                bool result = DoHandshake(clientSslStream, serverSslStream);
+                Assert.True(result, "Handshake completed.");
+
+                for (int i = 0; i < 3; i++)
+                {
+                    clientSslStream.Write(_sampleMsg);
+                    foreach (byte b in _sampleMsg)
+                    {
+                        Assert.Equal(b, serverSslStream.ReadByte());
+                    }
+                }
             }
         }
 

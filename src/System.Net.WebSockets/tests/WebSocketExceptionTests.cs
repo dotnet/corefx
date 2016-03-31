@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 
@@ -30,7 +31,7 @@ namespace System.Net.WebSockets.Tests
         public static object[][] UnrelatedErrorData =
             ErrorData.SelectMany(wse => NativeErrorData.Select(ne => new object[] { wse[0], ne[0] })).ToArray();
 
-        [Theory, MemberData("ErrorData")]
+        [Theory, MemberData(nameof(ErrorData))]
         public void ConstructorTests_WebSocketError_Success(WebSocketError error)
         {
             var wse = new WebSocketException(error);
@@ -39,7 +40,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Null(wse.InnerException);
         }
 
-        [Theory, MemberData("ErrorData")]
+        [Theory, MemberData(nameof(ErrorData))]
         public void ConstructorTests_WebSocketError_Message_Success(WebSocketError error)
         {
             const string Message = "Message";
@@ -49,7 +50,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Null(wse.InnerException);
         }
 
-        [Theory, MemberData("ErrorData")]
+        [Theory, MemberData(nameof(ErrorData))]
         public void ConstructorTests_WebSocketError_Exception_Success(WebSocketError error)
         {
             var inner = new Exception();
@@ -59,7 +60,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Equal(wse.InnerException, inner);
         }
 
-        [Theory, MemberData("ErrorData")]
+        [Theory, MemberData(nameof(ErrorData))]
         public void ConstructorTests_WebSocketError_Message_Exception_Success(WebSocketError error)
         {
             const string Message = "Message";
@@ -70,7 +71,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Equal(wse.InnerException, inner);
         }
 
-        [Theory, MemberData("NativeErrorData")]
+        [Theory, MemberData(nameof(NativeErrorData))]
         public void ConstructorTests_NativeError_Success(int nativeError, WebSocketError webSocketError)
         {
             var wse = new WebSocketException(nativeError);
@@ -80,7 +81,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Null(wse.InnerException);
         }
 
-        [Theory, MemberData("NativeErrorData")]
+        [Theory, MemberData(nameof(NativeErrorData))]
         public void ConstructorTests_NativeError_Message_Success(int nativeError, WebSocketError webSocketError)
         {
             const string Message = "Message";
@@ -91,7 +92,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Null(wse.InnerException);
         }
 
-        [Theory, MemberData("NativeErrorData")]
+        [Theory, MemberData(nameof(NativeErrorData))]
         public void ConstructorTests_NativeError_Exception_Success(int nativeError, WebSocketError webSocketError)
         {
             var inner = new Exception();
@@ -102,7 +103,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Equal(wse.InnerException, inner);
         }
 
-        [Theory, MemberData("UnrelatedErrorData")]
+        [Theory, MemberData(nameof(UnrelatedErrorData))]
         public void ConstructorTests_WebSocketError_NativeError_Success(int nativeError, WebSocketError error)
         {
             var wse = new WebSocketException(error, nativeError);
@@ -112,7 +113,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Null(wse.InnerException);
         }
 
-        [Theory, MemberData("UnrelatedErrorData")]
+        [Theory, MemberData(nameof(UnrelatedErrorData))]
         public void ConstructorTests_WebSocketError_NativeError_Message_Success(int nativeError, WebSocketError error)
         {
             const string Message = "Message";
@@ -123,7 +124,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Null(wse.InnerException);
         }
 
-        [Theory, MemberData("UnrelatedErrorData")]
+        [Theory, MemberData(nameof(UnrelatedErrorData))]
         public void ConstructorTests_WebSocketError_NativeError_Exception_Success(int nativeError, WebSocketError error)
         {
             var inner = new Exception();
@@ -134,7 +135,7 @@ namespace System.Net.WebSockets.Tests
             Assert.Equal(wse.InnerException, inner);
         }
 
-        [Theory, MemberData("UnrelatedErrorData")]
+        [Theory, MemberData(nameof(UnrelatedErrorData))]
         public void ConstructorTests_WebSocketError_NativeError_Message_Exception_Success(int nativeError, WebSocketError error)
         {
             const string Message = "Message";

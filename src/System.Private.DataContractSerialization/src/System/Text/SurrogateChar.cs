@@ -1,7 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 using System.Runtime.Serialization; // Just for SR
@@ -25,7 +24,7 @@ namespace System.Text
         public SurrogateChar(int ch)
         {
             if (ch < MinValue || ch > MaxValue)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.XmlInvalidSurrogate, ch.ToString("X", CultureInfo.InvariantCulture)), "ch"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.XmlInvalidSurrogate, ch.ToString("X", CultureInfo.InvariantCulture)), nameof(ch)));
 
             const int mask = ((1 << 10) - 1);
 
@@ -36,10 +35,10 @@ namespace System.Text
         public SurrogateChar(char lowChar, char highChar)
         {
             if (lowChar < surLowMin || lowChar > surLowMax)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.XmlInvalidLowSurrogate, ((int)lowChar).ToString("X", CultureInfo.InvariantCulture)), "lowChar"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.XmlInvalidLowSurrogate, ((int)lowChar).ToString("X", CultureInfo.InvariantCulture)), nameof(lowChar)));
 
             if (highChar < surHighMin || highChar > surHighMax)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.XmlInvalidHighSurrogate, ((int)highChar).ToString("X", CultureInfo.InvariantCulture)), "highChar"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.XmlInvalidHighSurrogate, ((int)highChar).ToString("X", CultureInfo.InvariantCulture)), nameof(highChar)));
 
             _lowChar = lowChar;
             _highChar = highChar;

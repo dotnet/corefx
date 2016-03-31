@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,26 @@ public class CreatedTests
             AutoResetEvent eventOccurred = Utility.WatchForEvents(watcher, WatcherChangeTypes.Created);
 
             watcher.EnableRaisingEvents = true;
+
+            using (var file = new TemporaryTestFile(fileName))
+            {
+                Utility.ExpectEvent(eventOccurred, "created");
+            }
+        }
+    }
+
+    [Fact]
+    public static void FileSystemWatcher_Created_File_ForceRestart()
+    {
+        using (var watcher = new FileSystemWatcher("."))
+        {
+            string fileName = Guid.NewGuid().ToString();
+            watcher.Filter = fileName;
+            AutoResetEvent eventOccurred = Utility.WatchForEvents(watcher, WatcherChangeTypes.Created);
+
+            watcher.EnableRaisingEvents = true;
+
+            watcher.NotifyFilter = NotifyFilters.FileName; // change filter to force restart
 
             using (var file = new TemporaryTestFile(fileName))
             {

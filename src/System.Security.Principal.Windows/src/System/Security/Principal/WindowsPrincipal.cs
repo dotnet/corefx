@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace System.Security.Principal
             : base(ntIdentity)
         {
             if (ntIdentity == null)
-                throw new ArgumentNullException("ntIdentity");
+                throw new ArgumentNullException(nameof(ntIdentity));
             Contract.EndContractBlock();
 
             _identity = ntIdentity;
@@ -129,7 +130,7 @@ namespace System.Security.Principal
         public virtual bool IsInRole(WindowsBuiltInRole role)
         {
             if (role < WindowsBuiltInRole.Administrator || role > WindowsBuiltInRole.Replicator)
-                throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, (int)role), "role");
+                throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, (int)role), nameof(role));
             Contract.EndContractBlock();
 
             return IsInRole((int)role);
@@ -151,7 +152,7 @@ namespace System.Security.Principal
         public virtual bool IsInRole(SecurityIdentifier sid)
         {
             if (sid == null)
-                throw new ArgumentNullException("sid");
+                throw new ArgumentNullException(nameof(sid));
             Contract.EndContractBlock();
 
             // special case the anonymous identity.

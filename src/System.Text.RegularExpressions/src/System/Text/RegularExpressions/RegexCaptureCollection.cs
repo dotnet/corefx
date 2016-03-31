@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // The CaptureCollection lists the captured Capture numbers
 // contained in a compiled Regex.
@@ -63,7 +64,7 @@ namespace System.Text.RegularExpressions
                 return _group;
 
             if (i >= _capcount || i < 0)
-                throw new ArgumentOutOfRangeException("i");
+                throw new ArgumentOutOfRangeException(nameof(i));
 
             // first time a capture is accessed, compute them all
             if (_captures == null)
@@ -91,7 +92,7 @@ namespace System.Text.RegularExpressions
         void ICollection.CopyTo(Array array, int arrayIndex)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
 
             for (int i = arrayIndex, j = 0; j < Count; i++, j++)
             {

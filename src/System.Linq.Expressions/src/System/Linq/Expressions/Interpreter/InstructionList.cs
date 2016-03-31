@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Enables instruction counting and displaying stats at process exit.
 // #define STATS
@@ -821,6 +822,11 @@ namespace System.Linq.Expressions.Interpreter
             Emit(new CastToEnumInstruction(toType));
         }
 
+        public void EmitCastReferenceToEnum(Type toType)
+        {
+            Emit(new CastReferenceToEnumInstruction(toType));
+        }
+
         #endregion
 
         #region Boolean Operators
@@ -1114,6 +1120,16 @@ namespace System.Linq.Expressions.Interpreter
         public void EmitLeaveFault(bool hasValue)
         {
             Emit(hasValue ? LeaveFaultInstruction.NonVoid : LeaveFaultInstruction.Void);
+        }
+
+        public void EmitEnterExceptionFilter()
+        {
+            Emit(EnterExceptionFilterInstruction.Instance);
+        }
+
+        public void EmitLeaveExceptionFilter()
+        {
+            Emit(LeaveExceptionFilterInstruction.Instance);
         }
 
         public void EmitEnterExceptionHandlerNonVoid()

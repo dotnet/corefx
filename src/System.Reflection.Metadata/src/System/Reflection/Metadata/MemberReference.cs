@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Reflection.Metadata.Decoding;
@@ -69,9 +70,6 @@ namespace System.Reflection.Metadata
 
         /// <summary>
         /// Gets a handle to the signature blob.
-        ///
-        /// Decode using <see cref="DecodeMethodSignature"/> if <see cref="GetKind"/> returns <see cref="MemberReferenceKind.Method"/>
-        /// Decode using <see cref="DecodeFieldSignature"/> if <see cref="GetKind"/> returns <see cref="MemberReferenceKind.Field"/>
         /// </summary>
         public BlobHandle Signature
         {
@@ -127,7 +125,7 @@ namespace System.Reflection.Metadata
             return new CustomAttributeHandleCollection(_reader, Handle);
         }
 
-        #region Projections
+#region Projections
 
         private EntityHandle GetProjectedParent()
         {
@@ -150,6 +148,6 @@ namespace System.Reflection.Metadata
             // no change
             return _reader.MemberRefTable.GetSignature(Handle);
         }
-        #endregion
+#endregion
     }
 }

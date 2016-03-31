@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Security;
 
@@ -8,7 +9,7 @@ using ZErrorCode = System.IO.Compression.ZLibNative.ErrorCode;
 namespace System.IO.Compression
 {
     /// <summary>
-    /// This is the exception that is thrown when a ZLib returns an error code inticating an unrecovarable error.
+    /// This is the exception that is thrown when a ZLib returns an error code indicating an unrecoverable error.
     /// </summary>
     internal class ZLibException : IOException
     {
@@ -24,8 +25,8 @@ namespace System.IO.Compression
         /// </summary>
         /// <param name="message">A (localised) human readable error description.</param>
         /// <param name="zlibErrorContext">A description of the context within zlib where the error occurred (e.g. the function name).</param>
-        /// <param name="zlibErrorCode">The error code returned by a ZLib function that casued this exception.</param>
-        /// <param name="zlibErrorMessage">The string provided by ZLib as error information (unloicalised).</param>
+        /// <param name="zlibErrorCode">The error code returned by a ZLib function that caused this exception.</param>
+        /// <param name="zlibErrorMessage">The string provided by ZLib as error information (unlocalised).</param>
         public ZLibException(string message, string zlibErrorContext, int zlibErrorCode, string zlibErrorMessage) :
             base(message)
         {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -44,11 +45,6 @@ namespace Internal.Cryptography
             if (src != null && src.Length == 0)
                 return new byte[1];
             return src;
-        }
-
-        public static CryptographicException ToCryptographicException(this ErrorCode errorCode)
-        {
-            return ((int)errorCode).ToCryptographicException();
         }
 
         public static SafeNCryptProviderHandle OpenStorageProvider(this CngProvider provider)
@@ -163,18 +159,24 @@ namespace Internal.Cryptography
         {
             for (int i = 0; i < legalSizes.Length; i++)
             {
+                KeySizes currentSizes = legalSizes[i];
+
                 // If a cipher has only one valid key size, MinSize == MaxSize and SkipSize will be 0
-                if (legalSizes[i].SkipSize == 0)
+                if (currentSizes.SkipSize == 0)
                 {
-                    if (legalSizes[i].MinSize == size)
+                    if (currentSizes.MinSize == size)
                         return true;
                 }
-                else
+                else if (size >= currentSizes.MinSize && size <= currentSizes.MaxSize)
                 {
-                    for (int j = legalSizes[i].MinSize; j <= legalSizes[i].MaxSize; j += legalSizes[i].SkipSize)
+                    // If the number is in range, check to see if it's a legal increment above MinSize
+                    int delta = size - currentSizes.MinSize;
+
+                    // While it would be unusual to see KeySizes { 10, 20, 5 } and { 11, 14, 1 }, it could happen.
+                    // So don't return false just because this one doesn't match.
+                    if (delta % currentSizes.SkipSize == 0)
                     {
-                        if (j == size)
-                            return true;
+                        return true;
                     }
                 }
             }

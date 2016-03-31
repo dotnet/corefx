@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -21,7 +22,7 @@ namespace System.Security.Cryptography
         public override byte[] SignHash(byte[] hash)
         {
             if (hash == null)
-                throw new ArgumentNullException("hash");
+                throw new ArgumentNullException(nameof(hash));
 
             int estimatedSize;
             switch (KeySize)
@@ -38,7 +39,7 @@ namespace System.Security.Cryptography
 
             unsafe
             {
-                byte[] signature = Key.SignHash(hash, AsymmetricPaddingMode.None, null, estimatedSize);
+                byte[] signature = Key.Handle.SignHash(hash, AsymmetricPaddingMode.None, null, estimatedSize);
                 return signature;
             }
         }
@@ -49,13 +50,13 @@ namespace System.Security.Cryptography
         public override bool VerifyHash(byte[] hash, byte[] signature)
         {
             if (hash == null)
-                throw new ArgumentNullException("hash");
+                throw new ArgumentNullException(nameof(hash));
             if (signature == null)
-                throw new ArgumentNullException("signature");
+                throw new ArgumentNullException(nameof(signature));
 
             unsafe
             {
-                bool verified = Key.VerifyHash(hash, signature, AsymmetricPaddingMode.None, null);
+                bool verified = Key.Handle.VerifyHash(hash, signature, AsymmetricPaddingMode.None, null);
                 return verified;
             }
         }

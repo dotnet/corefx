@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -112,7 +113,7 @@ namespace System.Net
         {
             if ((source & ThreadKinds.SourceMask) != source || source == ThreadKinds.Unknown)
             {
-                throw new ArgumentException("Must specify the thread source.", "source");
+                throw new ArgumentException("Must specify the thread source.", nameof(source));
             }
 
             if (ThreadKindStack.Count == 0)
@@ -247,7 +248,7 @@ namespace System.Net
             }
 
             var bufferSegment = new byte[length];
-            Array.Copy(buffer, offset, bufferSegment, 0, length);
+            Buffer.BlockCopy(buffer, offset, bufferSegment, 0, length);
             EventSourceLogging.Log.DebugDumpArray(bufferSegment);
         }
 

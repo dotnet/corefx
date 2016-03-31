@@ -12,15 +12,15 @@
     <AssemblyName>System.Globalization.Extensions</AssemblyName>
     <AssemblyVersion>4.0.1.0</AssemblyVersion>
     <ProjectGuid>{2B96AA10-84C0-4927-8611-8D2474B990E8}</ProjectGuid>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)'==''">dotnet5.4</PackageTargetFramework>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)'==''">netstandard1.3</PackageTargetFramework>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net46'">true</IsPartialFacadeAssembly>
-    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+    <PackageTargetRuntime Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' == ''">win7</PackageTargetRuntime> 
+    <PackageTargetRuntime Condition="'$(TargetsUnix)' == 'true' and '$(TargetGroup)' == ''">unix</PackageTargetRuntime> 
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
@@ -39,8 +39,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetLastError.cs">
       <Link>Common\Interop\Windows\Interop.SetLastError.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Interop.Globalization.Extensions.manual.cs">
-      <Link>Common\Interop\Interop.Globalization.Extensions.manual.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.Normalization.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.Normalization.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.Idna.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.Idna.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\StringNormalizationExtensions.Windows.cs">
       <Link>Common\System\StringNormalizationExtensions.Windows.cs</Link>

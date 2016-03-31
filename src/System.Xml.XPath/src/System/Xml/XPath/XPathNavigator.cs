@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using MS.Internal.Xml.XPath;
 using System.Collections;
@@ -53,7 +54,7 @@ namespace System.Xml.XPath
         {
             if (typedValue == null)
             {
-                throw new ArgumentNullException("typedValue");
+                throw new ArgumentNullException(nameof(typedValue));
             }
             switch (NodeType)
             {
@@ -305,7 +306,7 @@ namespace System.Xml.XPath
         public virtual void WriteSubtree(XmlWriter writer)
         {
             if (null == writer)
-                throw new ArgumentNullException("writer");
+                throw new ArgumentNullException(nameof(writer));
             writer.WriteNode(this, true);
         }
 
@@ -909,7 +910,7 @@ namespace System.Xml.XPath
         {
             if (newNode == null)
             {
-                throw new ArgumentNullException("newNode");
+                throw new ArgumentNullException(nameof(newNode));
             }
             XPathNodeType type = NodeType;
             if (type == XPathNodeType.Root
@@ -927,7 +928,7 @@ namespace System.Xml.XPath
         {
             if (newNode == null)
             {
-                throw new ArgumentNullException("newNode");
+                throw new ArgumentNullException(nameof(newNode));
             }
             XmlReader reader = newNode.CreateReader();
             ReplaceSelf(reader);
@@ -1027,7 +1028,7 @@ namespace System.Xml.XPath
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
 
                 switch (NodeType)
@@ -1063,7 +1064,7 @@ namespace System.Xml.XPath
         {
             if (newChild == null)
             {
-                throw new ArgumentNullException("newChild");
+                throw new ArgumentNullException(nameof(newChild));
             }
             XmlWriter writer = AppendChild();
             BuildSubtree(newChild, writer);
@@ -1074,7 +1075,7 @@ namespace System.Xml.XPath
         {
             if (newChild == null)
             {
-                throw new ArgumentNullException("newChild");
+                throw new ArgumentNullException(nameof(newChild));
             }
             if (!IsValidChildType(newChild.NodeType))
             {
@@ -1094,7 +1095,7 @@ namespace System.Xml.XPath
         {
             if (newChild == null)
             {
-                throw new ArgumentNullException("newChild");
+                throw new ArgumentNullException(nameof(newChild));
             }
             XmlWriter writer = PrependChild();
             BuildSubtree(newChild, writer);
@@ -1105,7 +1106,7 @@ namespace System.Xml.XPath
         {
             if (newChild == null)
             {
-                throw new ArgumentNullException("newChild");
+                throw new ArgumentNullException(nameof(newChild));
             }
             if (!IsValidChildType(newChild.NodeType))
             {
@@ -1125,7 +1126,7 @@ namespace System.Xml.XPath
         {
             if (newSibling == null)
             {
-                throw new ArgumentNullException("newSibling");
+                throw new ArgumentNullException(nameof(newSibling));
             }
             XmlWriter writer = InsertBefore();
             BuildSubtree(newSibling, writer);
@@ -1136,7 +1137,7 @@ namespace System.Xml.XPath
         {
             if (newSibling == null)
             {
-                throw new ArgumentNullException("newSibling");
+                throw new ArgumentNullException(nameof(newSibling));
             }
             if (!IsValidSiblingType(newSibling.NodeType))
             {
@@ -1156,7 +1157,7 @@ namespace System.Xml.XPath
         {
             if (newSibling == null)
             {
-                throw new ArgumentNullException("newSibling");
+                throw new ArgumentNullException(nameof(newSibling));
             }
             XmlWriter writer = InsertAfter();
             BuildSubtree(newSibling, writer);
@@ -1167,7 +1168,7 @@ namespace System.Xml.XPath
         {
             if (newSibling == null)
             {
-                throw new ArgumentNullException("newSibling");
+                throw new ArgumentNullException(nameof(newSibling));
             }
             if (!IsValidSiblingType(newSibling.NodeType))
             {
@@ -1536,7 +1537,7 @@ namespace System.Xml.XPath
         {
             if (xml == null)
             {
-                throw new ArgumentNullException("xml");
+                throw new ArgumentNullException(nameof(xml));
             }
 
             // We have to set the namespace context for the reader.
@@ -1569,7 +1570,7 @@ namespace System.Xml.XPath
             if (readState != ReadState.Initial
                 && readState != ReadState.Interactive)
             {
-                throw new ArgumentException(SR.Xml_InvalidOperation, "reader");
+                throw new ArgumentException(SR.Xml_InvalidOperation, nameof(reader));
             }
             int level = 0;
             if (readState == ReadState.Initial)

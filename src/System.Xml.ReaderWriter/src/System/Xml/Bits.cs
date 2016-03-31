@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -43,7 +44,7 @@ namespace System.Xml
 
 
         /// <summary>
-        /// Compute the 1-based position of the least sigificant bit that is set, and return it (return 0 if no bits are set).
+        /// Compute the 1-based position of the least significant bit that is set, and return it (return 0 if no bits are set).
         /// (e.g. 0x1001100 will return 3, since the 3rd bit is set).
         /// </summary>
         public static int LeastPosition(uint num)

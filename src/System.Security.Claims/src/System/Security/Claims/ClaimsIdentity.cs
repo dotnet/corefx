@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -202,7 +203,7 @@ namespace System.Security.Claims
         public ClaimsIdentity(BinaryReader reader)
         {
             if (reader == null)
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
 
             Initialize(reader);
         }
@@ -216,7 +217,7 @@ namespace System.Security.Claims
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if (other._actor != null)
@@ -395,7 +396,7 @@ namespace System.Security.Claims
         {
             if (claim == null)
             {
-                throw new ArgumentNullException("claim");
+                throw new ArgumentNullException(nameof(claim));
             }
 
             Contract.EndContractBlock();
@@ -420,7 +421,7 @@ namespace System.Security.Claims
         {
             if (claims == null)
             {
-                throw new ArgumentNullException("claims");
+                throw new ArgumentNullException(nameof(claims));
             }
 
             Contract.EndContractBlock();
@@ -542,7 +543,7 @@ namespace System.Security.Claims
         {
             if (match == null)
             {
-                throw new ArgumentNullException("match");
+                throw new ArgumentNullException(nameof(match));
             }
 
             Contract.EndContractBlock();
@@ -567,7 +568,7 @@ namespace System.Security.Claims
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             Contract.EndContractBlock();
@@ -594,7 +595,7 @@ namespace System.Security.Claims
         {
             if (match == null)
             {
-                throw new ArgumentNullException("match");
+                throw new ArgumentNullException(nameof(match));
             }
 
             Contract.EndContractBlock();
@@ -621,7 +622,7 @@ namespace System.Security.Claims
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             Contract.EndContractBlock();
@@ -650,7 +651,7 @@ namespace System.Security.Claims
         {
             if (match == null)
             {
-                throw new ArgumentNullException("match");
+                throw new ArgumentNullException(nameof(match));
             }
 
             Contract.EndContractBlock();
@@ -679,12 +680,12 @@ namespace System.Security.Claims
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             Contract.EndContractBlock();
@@ -715,7 +716,7 @@ namespace System.Security.Claims
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             SerializationMask mask = (SerializationMask)reader.ReadInt32();
@@ -799,7 +800,7 @@ namespace System.Security.Claims
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             return new Claim(reader, this);
@@ -825,7 +826,7 @@ namespace System.Security.Claims
         {
             if (writer == null)
             {
-                throw new ArgumentNullException("writer");
+                throw new ArgumentNullException(nameof(writer));
             }
 
             int numberOfPropertiesWritten = 0;

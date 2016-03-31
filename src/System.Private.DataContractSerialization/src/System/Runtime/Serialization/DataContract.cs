@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Runtime.Serialization
 {
@@ -68,7 +69,7 @@ namespace System.Runtime.Serialization
 #if NET_NATIVE
         private static DataContract GetGeneratedDataContract(Type type)
         {
-            // this method used to be rewritten by an IL transfrom
+            // this method used to be rewritten by an IL transform
             // with the restructuring for multi-file, it has become a regular method
             DataContract result;
             return s_dataContracts.TryGetValue(type, out result) ? result : null;
@@ -504,8 +505,8 @@ namespace System.Runtime.Serialization
         [SecurityCritical]
         internal class DataContractCriticalHelper
         {
-            private static Dictionary<TypeHandleRef, IntRef> s_typeToIDCache;
-            private static DataContract[] s_dataContractCache;
+            private static Dictionary<TypeHandleRef, IntRef> s_typeToIDCache = new Dictionary<TypeHandleRef, IntRef>(new TypeHandleRefEqualityComparer());
+            private static DataContract[] s_dataContractCache = new DataContract[32];
             private static int s_dataContractID;
             private static Dictionary<Type, DataContract> s_typeToBuiltInContract;
             private static Dictionary<XmlQualifiedName, DataContract> s_nameToBuiltInContract;
@@ -536,13 +537,6 @@ namespace System.Runtime.Serialization
             /// Critical - in deserialization, we initialize an object instance passing this Type to GetUninitializedObject method
             /// </SecurityNote>
             private Type _typeForInitialization;
-
-            static DataContractCriticalHelper()
-            {
-                s_typeToIDCache = new Dictionary<TypeHandleRef, IntRef>(new TypeHandleRefEqualityComparer());
-                s_dataContractCache = new DataContract[32];
-                s_dataContractID = 0;
-            }
 
             internal static DataContract GetDataContractSkipValidation(int id, RuntimeTypeHandle typeHandle, Type type)
             {
@@ -712,7 +706,7 @@ namespace System.Runtime.Serialization
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
-            static void AssignDataContractToId(DataContract dataContract, int id)
+            private static void AssignDataContractToId(DataContract dataContract, int id)
             {
                 lock (s_cacheLock)
                 {
@@ -720,7 +714,7 @@ namespace System.Runtime.Serialization
                 }
             }
 
-            //Silverlight no longer supprts ISerializable and [Serializable] attribute. Use this function to determine if any
+            //Silverlight no longer supports ISerializable and [Serializable] attribute. Use this function to determine if any
             //Serializable types from Orcas needs to be supported in Silverlight 
             private static bool IsTypeSerializable(Type type)
             {
@@ -821,22 +815,6 @@ namespace System.Runtime.Serialization
                     return false;
                 }
                 dataContract = null;
-
-#if NET_NATIVE
-                // ProjectN pre-generates all the primitive data contract types.
-                // Special-case only the remaining possibilities.
-                if (!DataContract.TryGetDataContractFromGeneratedAssembly(type, out dataContract))
-                {
-                    if (type == typeof(Enum) || type == typeof(ValueType))
-                    {
-                        dataContract = new SpecialTypeDataContract(type, DictionaryGlobals.ObjectLocalName, DictionaryGlobals.SchemaNamespace);
-                    }
-                    else if (type == typeof(Array))
-                    {
-                        dataContract = new CollectionDataContract(type);
-                    }
-                }
-#else
                 switch (type.GetTypeCode())
                 {
                     case TypeCode.Boolean:
@@ -903,9 +881,10 @@ namespace System.Runtime.Serialization
                         }
                         else if (type == typeof(Array))
                             dataContract = new CollectionDataContract(type);
+                        else if (type == typeof(XmlElement) || type == typeof(XmlNode[]))
+                            dataContract = new XmlDataContract(type);
                         break;
                 }
-#endif
                 return dataContract != null;
             }
 
@@ -963,6 +942,13 @@ namespace System.Runtime.Serialization
                         dataContract = new CharDataContract();
                     else if ("ArrayOfanyType" == name)
                         dataContract = new CollectionDataContract(typeof(Array));
+                }
+                else if (ns == Globals.DataContractXmlNamespace)
+                {
+                    if (name == "XmlElement")
+                        dataContract = new XmlDataContract(typeof(XmlElement));
+                    else if (name == "ArrayOfXmlNode")
+                        dataContract = new XmlDataContract(typeof(XmlNode[]));
                 }
                 return dataContract != null;
             }
@@ -1225,19 +1211,47 @@ namespace System.Runtime.Serialization
 
         static internal bool IsTypeSerializable(Type type)
         {
+            return IsTypeSerializable(type, new HashSet<Type>());
+        }
+
+        private static bool IsTypeSerializable(Type type, HashSet<Type> previousCollectionTypes)
+        {
             Type itemType;
 
-            return (type.GetTypeInfo().IsEnum ||
-                    type.GetTypeInfo().IsDefined(Globals.TypeOfDataContractAttribute, false) ||
-                    type.GetTypeInfo().IsInterface ||
-                    type.IsPointer ||
-                    Globals.TypeOfIXmlSerializable.IsAssignableFrom(type) ||
-                    (CollectionDataContract.IsCollection(type, out itemType) && IsTypeSerializable(itemType)) ||
-                    DataContract.GetBuiltInDataContract(type) != null ||
-                    ClassDataContract.IsNonAttributedTypeValidForSerialization(type) ||
-                    //Special casing DateTimeOffset and DBNull as its considered a Primitive but is no longer Serializable
-                    type == Globals.TypeOfDateTimeOffset ||
-                    type == Globals.TypeOfDBNull);
+            if (type.GetTypeInfo().IsEnum ||
+                type.GetTypeInfo().IsDefined(Globals.TypeOfDataContractAttribute, false) ||
+                type.GetTypeInfo().IsInterface ||
+                type.IsPointer ||
+                //Special casing DateTimeOffset and DBNull as its considered a Primitive but is no longer Serializable
+                type == Globals.TypeOfDateTimeOffset ||
+                type == Globals.TypeOfDBNull ||
+                Globals.TypeOfIXmlSerializable.IsAssignableFrom(type))
+            {
+                return true;
+            }
+            if (CollectionDataContract.IsCollection(type, out itemType))
+            {
+                ValidatePreviousCollectionTypes(type, itemType, previousCollectionTypes);
+                if (IsTypeSerializable(itemType, previousCollectionTypes))
+                {
+                    return true;
+                }
+            }
+            return DataContract.GetBuiltInDataContract(type) != null ||
+                   ClassDataContract.IsNonAttributedTypeValidForSerialization(type);
+        }
+
+        private static void ValidatePreviousCollectionTypes(Type collectionType, Type itemType, HashSet<Type> previousCollectionTypes)
+        {
+            previousCollectionTypes.Add(collectionType);
+            while (itemType.IsArray)
+            {
+                itemType = itemType.GetElementType();
+            }
+            if (previousCollectionTypes.Contains(itemType))
+            {
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.RecursiveCollectionType, GetClrTypeFullName(itemType))));
+            }
         }
 
         internal static Type UnwrapRedundantNullableType(Type type)
@@ -2016,7 +2030,7 @@ namespace System.Runtime.Serialization
                 {
                     //Ignore any InvalidDataContractException as this phase is a workaround for lack of ISerializable.
                     //InvalidDataContractException may happen as we walk the type hierarchy back to Object and encounter
-                    //types that may not be valid DC. This step is purely for KeyValuePair and shouldnt fail the (de)serialization.
+                    //types that may not be valid DC. This step is purely for KeyValuePair and shouldn't fail the (de)serialization.
                     //Any IDCE in this case fails the serialization/deserialization process which is not the optimal experience.
                 }
 #endif
@@ -2036,7 +2050,7 @@ namespace System.Runtime.Serialization
             }
             else if (nameToDataContractTable.TryGetValue(dataContract.StableName, out alreadyExistingContract))
             {
-                //Dont throw duplicate if its a KeyValuePair<K,T> as it could have been added by Dictionary<K,T>
+                // Don't throw duplicate if its a KeyValuePair<K,T> as it could have been added by Dictionary<K,T>
                 if (alreadyExistingContract.UnderlyingType != DataContractCriticalHelper.GetDataContractAdapterType(type) &&
                     !(alreadyExistingContract is ClassDataContract && ((ClassDataContract)alreadyExistingContract).IsKeyValuePairAdapter))
                     throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.DupContractInKnownTypes, type, alreadyExistingContract.UnderlyingType, dataContract.StableName.Namespace, dataContract.StableName.Name)));

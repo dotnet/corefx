@@ -1,14 +1,14 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.0.1-rc2-23712",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23712",
-    "Microsoft.NETCore.Console": "1.0.0-rc2-23712",
-    "System.IO.Compression": "4.1.0-rc2-23712",
+    "Microsoft.NETCore.Platforms": "1.0.1-rc3-23931-00",
+    "Microsoft.NETCore.TestHost": "1.0.0-rc3-23931-00",
+    "Microsoft.NETCore.Console": "1.0.0-rc3-23931-00",
+    "System.IO.Compression": "4.1.0-rc3-23931-00",
     "coveralls.io": "1.4",
-    "OpenCover": "4.6.401-rc",
-    "ReportGenerator": "2.4.0-beta2",
-    "Microsoft.DotNet.xunit.performance.analysis": "1.0.0-alpha-build0025",
-    "Microsoft.DotNet.xunit.performance.runner.Windows": "1.0.0-alpha-build0025",
+    "OpenCover": "4.6.519",
+    "ReportGenerator": "2.4.3",
+    "Microsoft.DotNet.xunit.performance.analysis": "1.0.0-alpha-build0029",
+    "Microsoft.DotNet.xunit.performance.runner.Windows": "1.0.0-alpha-build0029",
     "xunit": "2.1.0",
     "xunit.console.netcore": "1.0.2-prerelease-00120",
     "xunit.runner.utility": "2.1.0"
@@ -22,6 +22,9 @@
     "win7-x64": {},
     "win7-x86": {},
     "ubuntu.14.04-x64": {},
-    "osx.10.10-x64": {}
+    "osx.10.10-x64": {},
+    "centos.7-x64": {},
+    "rhel.7-x64": {},
+    "debian.8.2-x64": {}
   }
 }

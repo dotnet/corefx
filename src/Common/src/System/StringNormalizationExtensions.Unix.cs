@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Security;
 using System.Text;
@@ -17,7 +18,7 @@ namespace System
 
             if (ret == -1)
             {
-                throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, "value");
+                throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, nameof(value));
             }
 
             return ret == 1;
@@ -36,7 +37,7 @@ namespace System
 
                 if (realLen == -1)
                 {
-                    throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, "value");
+                    throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, nameof(value));
                 }
 
                 if (realLen <= buf.Length)
@@ -47,7 +48,7 @@ namespace System
                 buf = new char[realLen];
             }
 
-            throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, "value");
+            throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, nameof(value));
         }
 
         // -----------------------------
@@ -58,18 +59,18 @@ namespace System
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             if (normalizationForm != NormalizationForm.FormC && normalizationForm != NormalizationForm.FormD &&
                 normalizationForm != NormalizationForm.FormKC && normalizationForm != NormalizationForm.FormKD)
             {
-                throw new ArgumentException(SR.Argument_InvalidNormalizationForm, "normalizationForm");
+                throw new ArgumentException(SR.Argument_InvalidNormalizationForm, nameof(normalizationForm));
             }
 
             if (HasInvalidUnicodeSequence(value))
             {
-                throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, "value");
+                throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, nameof(value));
             }
         }
 

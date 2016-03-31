@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -64,5 +65,30 @@ namespace System.Security.Cryptography
         PublicKeyAlgorithm = 3,
         SignatureAlgorithm = 4,
         Template = 9,
+    }
+
+    public sealed class AsnEncodedDataCollection : System.Collections.ICollection, System.Collections.IEnumerable
+    {
+        public AsnEncodedDataCollection() { }
+        public AsnEncodedDataCollection(AsnEncodedData asnEncodedData) { }
+        public int Count { get { return default(int); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
+        public AsnEncodedData this[int index] { get { return default(AsnEncodedData); } }
+        public int Add(AsnEncodedData asnEncodedData) { return default(int); }
+        public void CopyTo(AsnEncodedData[] array, int index) { }
+        public AsnEncodedDataEnumerator GetEnumerator() { return default(AsnEncodedDataEnumerator); }
+        public void Remove(AsnEncodedData asnEncodedData) { }
+        void System.Collections.ICollection.CopyTo(Array array, int index) { }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return default(System.Collections.IEnumerator); }
+    }
+
+    public sealed class AsnEncodedDataEnumerator : System.Collections.IEnumerator
+    {
+        private AsnEncodedDataEnumerator() { }
+        public AsnEncodedData Current { get { return default(AsnEncodedData); } }
+        object System.Collections.IEnumerator.Current { get { return default(object); } }
+        public bool MoveNext() { return default(bool); }
+        public void Reset() { }
     }
 }

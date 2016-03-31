@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Http.Headers;
 
@@ -188,7 +189,7 @@ namespace System.Net.Http.Tests
             Assert.False(result.HasRange);
             Assert.True(result.HasLength);
 
-            // Note that we don't have a public constructor for value 'bytes */*' since the RFC doesn't mentione a 
+            // Note that we don't have a public constructor for value 'bytes */*' since the RFC doesn't mention a 
             // scenario for it. However, if a server returns this value, we're flexible and accept it.
             CallGetContentRangeLength("bytes */*", 0, 9, out result);
             Assert.Equal("bytes", result.Unit);

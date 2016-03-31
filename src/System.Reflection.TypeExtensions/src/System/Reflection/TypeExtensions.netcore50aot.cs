@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Internal.Reflection.Core.Execution.Binder;
 using Internal.Reflection.Extensions.NonPortable;
@@ -26,7 +27,7 @@ namespace System.Reflection
         {
             if (types == null)
             {
-                throw new ArgumentNullException("types");
+                throw new ArgumentNullException(nameof(types));
             }
             GetTypeInfoOrThrow(type);
 
@@ -328,7 +329,7 @@ namespace System.Reflection
         {
             if (types == null)
             {
-                throw new ArgumentNullException("types");
+                throw new ArgumentNullException(nameof(types));
             }
             GetTypeInfoOrThrow(type);
 
@@ -484,7 +485,7 @@ namespace System.Reflection
         {
             if (types == null)
             {
-                throw new ArgumentNullException("types");
+                throw new ArgumentNullException(nameof(types));
             }
             GetTypeInfoOrThrow(type);
 

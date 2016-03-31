@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics.CodeAnalysis;
@@ -17,7 +18,7 @@ namespace System.IO.Pipes
     public sealed partial class NamedPipeClientStream : PipeStream
     {
         // Waits for a pipe instance to become available. This method may return before WaitForConnection is called
-        // on the server end, but WaitForConnection will not return until we have returned.  Any data writen to the
+        // on the server end, but WaitForConnection will not return until we have returned.  Any data written to the
         // pipe by us after we have connected but before the server has called WaitForConnection will be available
         // to the server after it calls WaitForConnection. 
         [SecurityCritical]

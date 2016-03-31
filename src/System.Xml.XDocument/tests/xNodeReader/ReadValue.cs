@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -75,7 +76,7 @@ namespace CoreXml.Test.XLinq
                     }
 
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars");
-                    TestLog.Compare("value", new string(buffer), "Strings dont match");
+                    TestLog.Compare("value", new string(buffer), "Strings don't match");
                 }
 
                 //[Variation("ReadValue on Element", Priority = 0)]
@@ -131,7 +132,7 @@ namespace CoreXml.Test.XLinq
                         }
                     }
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars");
-                    TestLog.Compare("value", new string(buffer), "Strings dont match");
+                    TestLog.Compare("value", new string(buffer), "Strings don't match");
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 0, "Did read 5 chars");
                 }
 
@@ -159,12 +160,12 @@ namespace CoreXml.Test.XLinq
                     TestLog.Compare(DataReader.ReadAttributeValue(), true, "Didnt read attribute value");
                     TestLog.Compare(DataReader.Value, "value", "Didnt read correct attribute value");
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars");
-                    TestLog.Compare("value", new string(buffer), "Strings dont match");
+                    TestLog.Compare("value", new string(buffer), "Strings don't match");
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 0, "Did read 5 chars");
                     DataReader.MoveToElement();
                     DataReader.Read();
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars on text node");
-                    TestLog.Compare("value", new string(buffer), "Strings dont match");
+                    TestLog.Compare("value", new string(buffer), "Strings don't match");
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 0, "Did read 5 chars on text node");
                 }
 
@@ -287,10 +288,10 @@ namespace CoreXml.Test.XLinq
                     }
 
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read first 5");
-                    TestLog.Compare("01234", new string(buffer), "First strings dont match");
+                    TestLog.Compare("01234", new string(buffer), "First strings don't match");
 
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read second 5 chars");
-                    TestLog.Compare("56789", new string(buffer), "Second strings dont match");
+                    TestLog.Compare("56789", new string(buffer), "Second strings don't match");
                 }
 
                 //[Variation("ReadValue entire value in one call", Priority = 0)]
@@ -315,7 +316,7 @@ namespace CoreXml.Test.XLinq
                     }
 
                     TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 10), 10, "Didnt read 10");
-                    TestLog.Compare("0123456789", new string(buffer), "Strings dont match");
+                    TestLog.Compare("0123456789", new string(buffer), "Strings don't match");
                 }
 
                 //[Variation("ReadValue bit by bit", Priority = 0)]
@@ -346,7 +347,7 @@ namespace CoreXml.Test.XLinq
                         TestLog.Compare(DataReader.ReadValueChunk(buffer, index, 1), 1, "Read " + index);
                     }
 
-                    TestLog.Compare("0123456789", new string(buffer), "Strings dont match");
+                    TestLog.Compare("0123456789", new string(buffer), "Strings don't match");
                 }
 
                 //[Variation("ReadValue for value more than 4K", Priority = 0)]
@@ -379,7 +380,7 @@ namespace CoreXml.Test.XLinq
                         TestLog.Compare(DataReader.ReadValueChunk(buffer, index, 1), 1, "Read " + index);
                     }
 
-                    TestLog.Compare(val, new string(buffer), "Strings dont match");
+                    TestLog.Compare(val, new string(buffer), "Strings don't match");
                 }
 
                 //[Variation("ReadValue for value more than 4K and invalid element", Priority = 1)]
@@ -410,7 +411,7 @@ namespace CoreXml.Test.XLinq
                         {
                             TestLog.Compare(DataReader.ReadValueChunk(buffer, index, 1), 1, "Read " + index);
                         }
-                        TestLog.Compare(val, new string(buffer), "Strings dont match");
+                        TestLog.Compare(val, new string(buffer), "Strings don't match");
                         DataReader.Read();
                         throw new TestException(TestResult.Failed, "");
                     }
@@ -679,7 +680,7 @@ namespace CoreXml.Test.XLinq
                         {
                             TestLog.Compare(DataReader.ReadValueChunk(buffer, index, 1), 1, "Read " + index);
                         }
-                        TestLog.Compare("somevalue", new string(buffer), "Strings dont match");
+                        TestLog.Compare("somevalue", new string(buffer), "Strings don't match");
                         while (DataReader.Read()) ;
                     }
                     catch (XmlException)
@@ -784,7 +785,7 @@ namespace CoreXml.Test.XLinq
                             }
                         }
                         TestLog.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars");
-                        TestLog.Compare("value", new string(buffer), "Strings dont match");
+                        TestLog.Compare("value", new string(buffer), "Strings don't match");
                         DataReader.Read();
                         throw new TestException(TestResult.Failed, "");
                     }

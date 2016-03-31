@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.IO.Compression
 {
@@ -11,7 +12,7 @@ namespace System.IO.Compression
     /// or Unix (3) will be treated as equal to the current OS.
     /// </summary>
     /// <remarks>
-    /// The value of 0 more specificaly corresponds to the FAT file system while NTFS is assigned a higher value. However
+    /// The value of 0 more specifically corresponds to the FAT file system while NTFS is assigned a higher value. However
     /// for historical and compatibility reasons, Windows is always assigned a 0 value regardless of file system.
     /// </remarks>
     internal enum ZipVersionMadeByPlatform : byte

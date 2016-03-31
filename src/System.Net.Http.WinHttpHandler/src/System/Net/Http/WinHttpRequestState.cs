@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -16,7 +17,7 @@ namespace System.Net.Http
     internal sealed class WinHttpRequestState : IDisposable
     {
         // TODO (Issue 2506): The current locking mechanism doesn't allow any two WinHttp functions executing at
-        // the same time for the same handle. Enahnce locking to prevent only WinHttpCloseHandle being called
+        // the same time for the same handle. Enhance locking to prevent only WinHttpCloseHandle being called
         // during other API execution. E.g. using a Reader/Writer model or, even better, Interlocked functions.
 
         // The _lock object must be used during the execution of any WinHttp function to ensure no race conditions with 
@@ -39,7 +40,7 @@ namespace System.Net.Http
         {
             GCHandle stateHandle = GCHandle.FromIntPtr(gcHandle);
             return (WinHttpRequestState)stateHandle.Target;
-        }        
+        }
 
         public IntPtr ToIntPtr()
         {
@@ -52,6 +53,25 @@ namespace System.Net.Http
             {
                 return _lock;
             }
+        }
+
+        public void ClearSendRequestState()
+        {
+            // Since WinHttpRequestState has a self-referenced strong GCHandle, we
+            // need to clear out object references to break cycles and prevent leaks.
+            Tcs = null;
+            TcsSendRequest = null;
+            TcsWriteToRequestStream = null;
+            TcsInternalWriteDataToRequestStream = null;
+            TcsReceiveResponseHeaders = null;
+            RequestMessage = null;
+            Handler = null;
+            RequestHandle = null;
+            ServerCertificateValidationCallback = null;
+            TransportContext = null;
+            Proxy = null;
+            ServerCredentials = null;
+            DefaultProxyCredentials = null;
         }
 
         public TaskCompletionSource<HttpResponseMessage> Tcs { get; set; }
@@ -96,8 +116,28 @@ namespace System.Net.Http
         public TaskCompletionSource<bool> TcsWriteToRequestStream { get; set; }
         public TaskCompletionSource<bool> TcsInternalWriteDataToRequestStream { get; set; }
         public TaskCompletionSource<bool> TcsReceiveResponseHeaders { get; set; }
+        
+        // WinHttpResponseStream state.
         public TaskCompletionSource<int> TcsQueryDataAvailable { get; set; }
         public TaskCompletionSource<int> TcsReadFromResponseStream { get; set; }
+        public long? ExpectedBytesToRead { get; set; }
+        public long CurrentBytesRead { get; set; }
+
+        // TODO (Issue 2505): temporary pinned buffer caches of 1 item. Will be replaced by PinnableBufferCache.
+        private GCHandle _cachedReceivePinnedBuffer = default(GCHandle);
+
+        public void PinReceiveBuffer(byte[] buffer)
+        {
+            if (!_cachedReceivePinnedBuffer.IsAllocated || _cachedReceivePinnedBuffer.Target != buffer)
+            {
+                if (_cachedReceivePinnedBuffer.IsAllocated)
+                {
+                    _cachedReceivePinnedBuffer.Free();
+                }
+
+                _cachedReceivePinnedBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            }
+        }
 
         #region IDisposable Members
         private void Dispose(bool disposing)
@@ -123,7 +163,17 @@ namespace System.Net.Http
 
             if (_operationHandle.IsAllocated)
             {
+                // This method only gets called when the WinHTTP request handle is fully closed and thus all
+                // async operations are done. So, it is safe at this point to unpin the buffers and release
+                // the strong GCHandle for this object.
+                if (_cachedReceivePinnedBuffer.IsAllocated)
+                {
+                    _cachedReceivePinnedBuffer.Free();
+                    _cachedReceivePinnedBuffer = default(GCHandle);
+                }
+
                 _operationHandle.Free();
+                _operationHandle = default(GCHandle);
             }
         }
 

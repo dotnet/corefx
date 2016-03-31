@@ -14,6 +14,8 @@ The following free downloads are compatible:
 
 Note: In order to build our C++ projects be sure to select "Programming Languages | Visual C++ | Common Tools for Visual C++ 2015" while installing VS 2015 (or modify your install to include it).
 
+We also require that [Visual Studio 2015 Update 1](https://www.visualstudio.com/en-us/news/vs2015-update1-vs.aspx) be installed.
+
 [CMake](https://cmake.org/) is required to build the native libraries for Windows. To build these libraries cmake must be installed from [the CMake download page](https://cmake.org/download/) and added to your path.
 
 ## Building From the Command Line
@@ -24,10 +26,22 @@ the core tests for the project. Visual Studio Solution (.sln) files exist for
 related groups of libraries. These can be loaded to build, debug and test inside
 the Visual Studio IDE.
 
-By default building from the root will only build the libraries for the OS you are running on. One can
-build for another OS by specifying `/p:FilterOSGroup=[Windows_NT|Linux|OSX|FreeBSD]` or build for all by specifying
-`/p:BuildAllOSGroups=true`.
+### Building individual DLLs of the CoreFX
 
+Under the src directory is a set of directories, each of which represents a particular assembly in CoreFX.  
+For example the src\System.Diagnostics.DiagnosticSource directory holds the source code for the System.Diagnostics.DiagnosticSource.dll assembly.   Each of these directories has a .sln solution 
+file that typically includes two projects, one for the DLL being built and one for the tests.   Thus
+you can build both the DLL and Tests for System.Diagnostics.DiagnosticSource.dll by going to 
+src\System.Diagnostics.DiagnosticSource and typing `msbuild`. You can build just the System.Diagnostics.DiagnosticSource.dll (without the tests) by going to the src\System.Diagnostics.DiagnosticsSource\src directory and again typing `msbuild`. The DLL ends up as  bin\AnyOS.AnyCPU.Debug\System.Diagnostics.DiagnosticSource\System.DiagnosticSource.dll.
+
+There is also a pkg directory, and if you go into it and type `msbuild`, it will build the DLL (if needed)
+and then also build the Nuget package for it.   The Nuget package ends up in the bin\pkg directory.  
+
+### Building other OSes
+
+By default building from the root will only build the libraries for the OS you are running on. One can
+build for another OS by specifying `/p:FilterToOSGroup=[Windows_NT|Linux|OSX|FreeBSD]` or build for all by specifying
+`/p:BuildAllOSGroups=true`.
 
 [Building CoreFX on FreeBSD, Linux and OS X](unix-instructions.md)
 ## Tests
@@ -48,7 +62,7 @@ msbuild /t:BuildAndTest (or /t:Test to just run the tests if the binaries are al
 
 It is possible to pass parameters to the underlying xunit runner via the `XunitOptions` parameter, e.g.:
 ```cmd
-msbuild /t:Test "/p:XunitOptions=-class Test.ClassUnderTests -notrait category=outerloop"
+msbuild /t:Test "/p:XunitOptions=-class Test.ClassUnderTests"
 ```
 
 There may be multiple projects in some directories so you may need to specify the path to a specific test project to get it to build and run the tests.
@@ -61,7 +75,7 @@ _**`OuterLoop`:**_
 This attribute applies the 'outerloop' category; to run outerloop tests, use the following commandline
 ```cmd
 xunit.console.netcore.exe *.dll -trait category=outerloop
-build.cmd *.csproj /p:RunTestsWithCategories=OuterLoop
+build.cmd *.csproj /p:WithCategories=OuterLoop
 ```
 
 _**`PlatformSpecific(Xunit.PlatformID platforms)`:**_

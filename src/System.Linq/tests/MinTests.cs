@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -562,6 +563,13 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void NullableSingleNaNLastWithNullsWithSelector()
+        {
+            float?[] source = { 6.8f, 9.4f, 10f, 0, null, -5.6f, float.NaN };
+            Assert.True(float.IsNaN(source.Min(i => i).Value));
+        }
+
+        [Fact]
         public void NullableSingleNaNThenNegativeInfinity()
         {
             float?[] source = { float.NaN, float.NegativeInfinity };
@@ -657,6 +665,13 @@ namespace System.Linq.Tests
         {
             double?[] source = { double.NaN, 6.8, 9.4, 10.0, 0.0, null, -5.6 };
             Assert.True(double.IsNaN(source.Min().Value));
+        }
+
+        [Fact]
+        public void NullableDoubleNaNLastWIthNullsWithSelector()
+        {
+            double?[] source = { 6.8, 9.4, 10, 0.0, null, -5.6f, double.NaN };
+            Assert.True(double.IsNaN(source.Min(i => i).Value));
         }
 
         [Fact]

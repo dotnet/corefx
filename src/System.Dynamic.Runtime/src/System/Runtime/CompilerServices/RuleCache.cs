@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
 using System.Diagnostics;
@@ -91,7 +92,7 @@ namespace System.Runtime.CompilerServices
         }
 
 
-        // Adds to end or or inserts items at InsertPosition
+        // Adds to end or inserts items at InsertPosition
         private const int InsertPosition = MaxRules / 2;
 
         private static T[] AddOrInsert(T[] rules, T item)

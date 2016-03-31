@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace System.Linq.Expressions.Tests
     public class Continue : GotoExpressionTests
     {
         [Theory]
-        [MemberData("TypesData")]
+        [MemberData(nameof(TypesData))]
         public void NonVoidTargetContinueHasNoValue(Type type)
         {
             LabelTarget target = Expression.Label(type);
@@ -18,15 +19,16 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("TypesData")]
+        [MemberData(nameof(TypesData))]
         public void NonVoidTargetContinueHasNoValueTypeExplicit(Type type)
         {
             LabelTarget target = Expression.Label(type);
             Assert.Throws<ArgumentException>(() => Expression.Continue(target, type));
         }
 
-        [Fact]
-        public void ContinueVoidNoValue()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void ContinueVoidNoValue(bool useInterpreter)
         {
             LabelTarget target = Expression.Label();
             Expression block = Expression.Block(
@@ -34,11 +36,12 @@ namespace System.Linq.Expressions.Tests
                 Expression.Throw(Expression.Constant(new InvalidOperationException())),
                 Expression.Label(target)
                 );
-            Expression.Lambda<Action>(block).Compile()();
+            Expression.Lambda<Action>(block).Compile(useInterpreter)();
         }
 
-        [Fact]
-        public void ContinueExplicitVoidNoValue()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void ContinueExplicitVoidNoValue(bool useInterpreter)
         {
             LabelTarget target = Expression.Label();
             Expression block = Expression.Block(
@@ -46,18 +49,18 @@ namespace System.Linq.Expressions.Tests
                 Expression.Throw(Expression.Constant(new InvalidOperationException())),
                 Expression.Label(target)
                 );
-            Expression.Lambda<Action>(block).Compile()();
+            Expression.Lambda<Action>(block).Compile(useInterpreter)();
         }
 
         [Theory]
-        [MemberData("TypesData")]
+        [MemberData(nameof(TypesData))]
         public void NullValueOnNonVoidContinue(Type type)
         {
             Assert.Throws<ArgumentException>(() => Expression.Continue(Expression.Label(type)));
         }
 
         [Theory]
-        [MemberData("ConstantValueData")]
+        [MemberData(nameof(ConstantValueData))]
         public void ExplicitNullTypeWithValue(object value)
         {
             Assert.Throws<ArgumentException>(() => Expression.Continue(Expression.Label(value.GetType()), default(Type)));

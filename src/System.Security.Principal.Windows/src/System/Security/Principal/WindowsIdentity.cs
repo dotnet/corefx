@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
@@ -74,7 +75,7 @@ namespace System.Security.Principal
                 if (!Interop.SecurityBase.AllocateLocallyUniqueId(out sourceContext.SourceIdentifier))
                     throw new SecurityException(new Win32Exception().Message);
                 sourceContext.SourceName = new byte[TOKEN_SOURCE.TOKEN_SOURCE_LENGTH];
-                Array.Copy(sourceName, 0, sourceContext.SourceName, 0, sourceName.Length);
+                Buffer.BlockCopy(sourceName, 0, sourceContext.SourceName, 0, sourceName.Length);
 
                 // Desktop compat: Desktop never null-checks sUserPrincipalName. Actual behavior is that the null makes it down to Encoding.Unicode.GetBytes() which then throws
                 // the ArgumentNullException (provided that the prior LSA calls didn't fail first.) To make this compat decision explicit, we'll null check ourselves 
@@ -562,7 +563,7 @@ namespace System.Security.Principal
         public static void RunImpersonated(SafeAccessTokenHandle safeAccessTokenHandle, Action action)
         {
             if (action == null)
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
 
             RunImpersonatedInternal(safeAccessTokenHandle, action);
         }
@@ -571,7 +572,7 @@ namespace System.Security.Principal
         public static T RunImpersonated<T>(SafeAccessTokenHandle safeAccessTokenHandle, Func<T> func)
         {
             if (func == null)
-                throw new ArgumentNullException("func");
+                throw new ArgumentNullException(nameof(func));
 
             T result = default(T);
             RunImpersonatedInternal(safeAccessTokenHandle, () => result = func());
@@ -827,7 +828,7 @@ namespace System.Security.Principal
             : base(identity, null, identity._authType, null, null)
         {
             if (identity == null)
-                throw new ArgumentNullException("identity");
+                throw new ArgumentNullException(nameof(identity));
 
             Contract.EndContractBlock();
 

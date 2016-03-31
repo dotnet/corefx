@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -125,7 +126,7 @@ namespace System.Runtime.Serialization.Json
                    object.ReferenceEquals(contract.Namespace, declaredContract.Namespace)) ||
                  (contract.Name.Value == declaredContract.Name.Value &&
                  contract.Namespace.Value == declaredContract.Namespace.Value)) &&
-                 (contract.UnderlyingType != Globals.TypeOfObjectArray) && 
+                 (contract.UnderlyingType != Globals.TypeOfObjectArray) &&
                  (_emitXsiType != EmitTypeInformation.Never))
             {
                 // We always deserialize collections assigned to System.Object as object[]
@@ -340,7 +341,7 @@ namespace System.Runtime.Serialization.Json
                 oldItemContract.UnderlyingType.GetTypeInfo().IsGenericType &&
                 (oldItemContract.UnderlyingType.GetGenericTypeDefinition() == Globals.TypeOfKeyValue))
             {
-                return ClassDataContract.CreateClassDataContractForKeyValue(oldItemContract.UnderlyingType, oldItemContract.Namespace, new string[] { JsonGlobals.KeyString, JsonGlobals.ValueString });
+                return DataContract.GetDataContract(oldItemContract.UnderlyingType);
             }
             return oldItemContract;
         }

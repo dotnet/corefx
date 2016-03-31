@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -23,7 +24,7 @@ namespace System.Threading.Tasks.Dataflow
 {
     /// <summary>
     /// Provides a dataflow block that joins across multiple dataflow sources, not necessarily of the same type, 
-    /// waiting for one item to arrive for each type before they’re all released together as a tuple of one item per type.
+    /// waiting for one item to arrive for each type before they?re all released together as a tuple of one item per type.
     /// </summary>
     /// <typeparam name="T1">Specifies the type of data accepted by the block's first target.</typeparam>
     /// <typeparam name="T2">Specifies the type of data accepted by the block's second target.</typeparam>
@@ -51,7 +52,7 @@ namespace System.Threading.Tasks.Dataflow
         public JoinBlock(GroupingDataflowBlockOptions dataflowBlockOptions)
         {
             // Validate arguments
-            if (dataflowBlockOptions == null) throw new ArgumentNullException("dataflowBlockOptions");
+            if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
             Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
@@ -146,7 +147,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             Debug.Assert(_sharedResources != null, "_sharedResources not initialized");
@@ -254,7 +255,7 @@ namespace System.Threading.Tasks.Dataflow
 
     /// <summary>
     /// Provides a dataflow block that joins across multiple dataflow sources, not necessarily of the same type, 
-    /// waiting for one item to arrive for each type before they’re all released together as a tuple of one item per type.
+    /// waiting for one item to arrive for each type before they?re all released together as a tuple of one item per type.
     /// </summary>
     /// <typeparam name="T1">Specifies the type of data accepted by the block's first target.</typeparam>
     /// <typeparam name="T2">Specifies the type of data accepted by the block's second target.</typeparam>
@@ -286,7 +287,7 @@ namespace System.Threading.Tasks.Dataflow
         public JoinBlock(GroupingDataflowBlockOptions dataflowBlockOptions)
         {
             // Validate arguments
-            if (dataflowBlockOptions == null) throw new ArgumentNullException("dataflowBlockOptions");
+            if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
             Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
@@ -381,7 +382,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             Debug.Assert(_sharedResources != null, "_sharedResources not initialized");
@@ -842,8 +843,8 @@ namespace System.Threading.Tasks.Dataflow.Internal
         DataflowMessageStatus ITargetBlock<T>.OfferMessage(DataflowMessageHeader messageHeader, T messageValue, ISourceBlock<T> source, Boolean consumeToAccept)
         {
             // Validate arguments
-            if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, "messageHeader");
-            if (source == null && consumeToAccept) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, "consumeToAccept");
+            if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
+            if (source == null && consumeToAccept) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, nameof(consumeToAccept));
             Contract.EndContractBlock();
 
             lock (_sharedResources.IncomingLock)
@@ -954,7 +955,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             CompleteCore(exception, dropPendingMessages: true, releaseReservedMessages: false);

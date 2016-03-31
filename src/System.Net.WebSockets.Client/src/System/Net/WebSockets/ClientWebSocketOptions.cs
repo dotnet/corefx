@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,7 @@ namespace System.Net.WebSockets
                 ThrowIfReadOnly();
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
                 _clientCertificates = value;
             }
@@ -121,7 +122,7 @@ namespace System.Net.WebSockets
                 if (string.Equals(item, subProtocol, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new ArgumentException(SR.Format(SR.net_WebSockets_NoDuplicateProtocol, subProtocol),
-                        "subProtocol");
+nameof(subProtocol));
                 }
             }
             _requestedSubProtocols.Add(subProtocol);
@@ -138,7 +139,7 @@ namespace System.Net.WebSockets
                 ThrowIfReadOnly();
                 if (value != Timeout.InfiniteTimeSpan && value < TimeSpan.Zero)
                 {
-                    throw new ArgumentOutOfRangeException("value", value,
+                    throw new ArgumentOutOfRangeException(nameof(value), value,
                         SR.Format(SR.net_WebSockets_ArgumentOutOfRange_TooSmall,
                         Timeout.InfiniteTimeSpan.ToString()));
                 }

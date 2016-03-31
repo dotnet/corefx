@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -27,20 +28,6 @@ namespace System.Text.Tests
             UTF8Encoding utf8 = new UTF8Encoding();
             int byteCount = utf8.GetByteCount(chars);
             Assert.Equal(0, byteCount);
-        }
-        #endregion
-
-        #region Negative Test Cases
-        // NegTest1: ArgumentNullException is not thrown when string is a null reference
-        [Fact]
-        public void NegTest1()
-        {
-            String chars = null;
-            UTF8Encoding utf8 = new UTF8Encoding();
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                int byteCount = utf8.GetByteCount(chars);
-            });
         }
         #endregion
     }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -10,7 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection.CustomAttributesTests.Data;
 
-// Need to disable warning related to CLS Compliance as using Array as cusom attribute is not CLS compliant
+// Need to disable warning related to CLS Compliance as using Array as custom attribute is not CLS compliant
 #pragma warning disable 3016
 
 namespace System.Reflection.Tests
@@ -27,7 +28,12 @@ namespace System.Reflection.Tests
         StringAttr("hello", name = "StringAttrSimple"),
         EnumAttr(MyColorEnum.RED, name = "EnumAttrSimple"),
         TypeAttr(typeof(Object), name = "TypeAttrSimple")]
-
+        [return:Attr(77, name = "AttrSimple"),
+        Int32Attr(77, name = "Int32AttrSimple"),
+        Int64Attr((Int64)77, name = "Int64AttrSimple"),
+        StringAttr("hello", name = "StringAttrSimple"),
+        EnumAttr(MyColorEnum.RED, name = "EnumAttrSimple"),
+        TypeAttr(typeof(Object), name = "TypeAttrSimple")]
         public void MyMethod() { }
 
         public int Prop
@@ -110,6 +116,18 @@ namespace System.Reflection.Tests
             }
 
             Assert.True(result);
+
+            // Also check the custom attribute on the return type.
+            VerifyReturnTypeCustomAttribute(type, attributeStr);
+        }
+
+        private static void VerifyReturnTypeCustomAttribute(Type type, String attributeStr)
+        {
+            MethodInfo mi = GetMethod(typeof(MethodInfoTestClass), "MyMethod");
+
+            //Get all the customAttributes of the type.
+            object[] atrs = mi.ReturnTypeCustomAttributes.GetCustomAttributes(type, false);
+            Assert.Equal(1, atrs.Length);
         }
 
         private static MethodInfo GetMethod(Type t, string method)

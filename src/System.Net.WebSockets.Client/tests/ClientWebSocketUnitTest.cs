@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,14 +24,14 @@ namespace System.Net.WebSockets.Client.Tests
 
         private static bool WebSocketsSupported { get { return WebSocketHelper.WebSocketsSupported; } }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void Ctor_Success()
         {
             var cws = new ClientWebSocket();
             cws.Dispose();
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void Abort_CreateAndAbort_StateIsClosed()
         {
             using (var cws = new ClientWebSocket())
@@ -41,7 +42,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndClose_ThrowsInvalidOperationException()
         {
             using (var cws = new ClientWebSocket())
@@ -53,7 +54,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndCloseOutput_ThrowsInvalidOperationExceptionWithMessage()
         {
             using (var cws = new ClientWebSocket())
@@ -67,7 +68,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndReceive_ThrowsInvalidOperationException()
         {
             using (var cws = new ClientWebSocket())
@@ -83,7 +84,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndReceive_ThrowsInvalidOperationExceptionWithMessage()
         {
             using (var cws = new ClientWebSocket())
@@ -100,7 +101,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndSend_ThrowsInvalidOperationException()
         {
             using (var cws = new ClientWebSocket())
@@ -116,7 +117,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_CreateAndSend_ThrowsInvalidOperationExceptionWithMessage()
         {
             using (var cws = new ClientWebSocket())
@@ -133,7 +134,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void Ctor_ExpectedPropertyValues()
         {
             using (var cws = new ClientWebSocket())
@@ -147,7 +148,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void Abort_CreateAndDisposeAndAbort_StateIsClosedSuccess()
         {
             var cws = new ClientWebSocket();
@@ -157,7 +158,7 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_DisposeAndClose_ThrowsObjectDisposedException()
         {
             var cws = new ClientWebSocket();
@@ -169,7 +170,7 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void CloseAsync_DisposeAndCloseOutput_ThrowsObjectDisposedExceptionWithMessage()
         {
             var cws = new ClientWebSocket();
@@ -185,7 +186,7 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void ReceiveAsync_CreateAndDisposeAndReceive_ThrowsObjectDisposedExceptionWithMessage()
         {
             var cws = new ClientWebSocket();
@@ -204,7 +205,7 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void SendAsync_CreateAndDisposeAndSend_ThrowsObjectDisposedExceptionWithMessage()
         {
             var cws = new ClientWebSocket();
@@ -223,7 +224,7 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(WebSocketState.Closed, cws.State);
         }
 
-        [ConditionalFact("WebSocketsSupported")]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public void Dispose_CreateAndDispose_ExpectedPropertyValues()
         {
             var cws = new ClientWebSocket();

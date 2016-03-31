@@ -3,15 +3,14 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="System.Threading.Timer.csproj" />
+    <!-- Net46 facade is currently inbox for 4.0
     <Project Include="System.Threading.Timer.csproj">
       <TargetGroup>net46</TargetGroup>
-    </Project>
+    </Project> -->
     <Project Include="System.Threading.Timer.csproj">
-      <OSGroup>Windows_NT</OSGroup>
       <TargetGroup>netcore50</TargetGroup>
     </Project>
     <Project Include="System.Threading.Timer.csproj">
-      <OSGroup>Windows_NT</OSGroup>
       <TargetGroup>netcore50aot</TargetGroup>
     </Project>
   </ItemGroup>

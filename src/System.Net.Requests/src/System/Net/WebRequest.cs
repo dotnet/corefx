@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -136,7 +137,7 @@ namespace System.Net
         {
             if (requestUriString == null)
             {
-                throw new ArgumentNullException("requestUriString");
+                throw new ArgumentNullException(nameof(requestUriString));
             }
 
             return Create(new Uri(requestUriString), false);
@@ -156,7 +157,7 @@ namespace System.Net
         {
             if (requestUri == null)
             {
-                throw new ArgumentNullException("requestUri");
+                throw new ArgumentNullException(nameof(requestUri));
             }
 
             return Create(requestUri, false);
@@ -177,7 +178,7 @@ namespace System.Net
         {
             if (requestUri == null)
             {
-                throw new ArgumentNullException("requestUri");
+                throw new ArgumentNullException(nameof(requestUri));
             }
 
             return Create(requestUri, true);
@@ -187,7 +188,7 @@ namespace System.Net
         {
             if (requestUriString == null)
             {
-                throw new ArgumentNullException("requestUriString");
+                throw new ArgumentNullException(nameof(requestUriString));
             }
             return CreateHttp(new Uri(requestUriString));
         }
@@ -196,7 +197,7 @@ namespace System.Net
         {
             if (requestUri == null)
             {
-                throw new ArgumentNullException("requestUri");
+                throw new ArgumentNullException(nameof(requestUri));
             }
             if ((requestUri.Scheme != "http") && (requestUri.Scheme != "https"))
             {
@@ -230,11 +231,11 @@ namespace System.Net
 
             if (prefix == null)
             {
-                throw new ArgumentNullException("prefix");
+                throw new ArgumentNullException(nameof(prefix));
             }
             if (creator == null)
             {
-                throw new ArgumentNullException("creator");
+                throw new ArgumentNullException(nameof(creator));
             }
 
             // Lock this object, then walk down PrefixList looking for a place to

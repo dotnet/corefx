@@ -137,6 +137,7 @@
     <Compile Include="Interpreter\InterpreterTests.Address.cs" />
     <Compile Include="Interpreter\InterpreterTests.cs" />
     <Compile Include="Interpreter\InterpreterTests.Generated.cs" />
+    <Compile Include="Interpreter\InterpreterTests.Call.cs" />
     <Compile Include="Invoke\InvocationTests.cs" />
     <Compile Include="Invoke\InvokeFactoryTests.cs" />
     <Compile Include="Label\LabelTargetTests.cs" />
@@ -179,6 +180,8 @@
     <Compile Include="Lifted\NonLiftedComparisonLessThanNullableTests.cs" />
     <Compile Include="Lifted\NonLiftedComparisonLessThanOrEqualNullableTests.cs" />
     <Compile Include="Lifted\NonLiftedComparisonNotEqualNullableTests.cs" />
+    <Compile Include="ListInit\ElementInitTests.cs" />
+    <Compile Include="ListInit\ListInitExpressionTests.cs" />
     <Compile Include="MemberInit\MemberInitTests.cs" />
     <Compile Include="Member\MemberAccessTests.cs" />
     <Compile Include="New\NewTests.cs" />
@@ -190,6 +193,7 @@
     <Compile Include="Ternary\TernaryArrayTests.cs" />
     <Compile Include="Ternary\TernaryNullableTests.cs" />
     <Compile Include="Ternary\TernaryTests.cs" />
+    <Compile Include="TestExtensions\PerCompilationTypeAttribute.cs" />
     <Compile Include="TestExtensions\TestOrderer.cs" />
     <Compile Include="TestExtensions\TestOrderAttribute.cs" />
     <Compile Include="TypeBinary\TypeBinaryTests.cs" />
@@ -206,6 +210,7 @@
     <Compile Include="Unary\UnaryArithmeticNegateCheckedTests.cs" />
     <Compile Include="Unary\UnaryArithmeticNegateTests.cs" />
     <Compile Include="Unary\UnaryBitwiseNotNullableTests.cs" />
+    <Compile Include="Unary\UnaryConvertTests.cs" />
     <Compile Include="Unary\UnaryDecrementTests.cs" />
     <Compile Include="Unary\UnaryDecrementNullableTests.cs" />
     <Compile Include="Unary\UnaryIncrementNullableTests.cs" />

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // This program uses code hyperlinks available as part of the HyperAddin Visual Studio plug-in.
 // It is available from http://www.codeplex.com/hyperAddin 
@@ -149,11 +150,11 @@ namespace System.Diagnostics.Tracing
         public static void SendCommand(EventSource eventSource, EventCommand command, IDictionary<string, string> commandArguments)
         {
             if (eventSource == null)
-                throw new ArgumentNullException("eventSource");
+                throw new ArgumentNullException(nameof(eventSource));
 
             // User-defined EventCommands should not conflict with the reserved commands.
             if ((int)command <= (int)EventCommand.Update && (int)command != (int)EventCommand.SendManifest)
-                throw new ArgumentException(SR.ArgumentOutOfRange_NeedPosNum, "command");
+                throw new ArgumentException(SR.ArgumentOutOfRange_NeedPosNum, nameof(command));
 
             eventSource.SendCommand(null, command, true, EventLevel.LogAlways, EventKeywords.None, commandArguments);
         }
@@ -1160,7 +1161,7 @@ namespace System.Diagnostics.Tracing
                 envelope.Format = ManifestEnvelope.ManifestFormats.SimpleXmlFormat;
                 envelope.MajorVersion = 1;
                 envelope.MinorVersion = 0;
-                envelope.Magic = 0x5B;              // An unusual number that can be checked for consistancy. 
+                envelope.Magic = 0x5B;              // An unusual number that can be checked for consistency. 
                 int dataLeft = rawManifest.Length;
                 envelope.TotalChunks = (ushort)((dataLeft + (ManifestEnvelope.MaxChunkSize - 1)) / ManifestEnvelope.MaxChunkSize);
                 envelope.ChunkNumber = 0;
@@ -1426,7 +1427,7 @@ namespace System.Diagnostics.Tracing
         {
             if (eventSource == null)
             {
-                throw new ArgumentNullException("eventSource");
+                throw new ArgumentNullException(nameof(eventSource));
             }
 
             Contract.EndContractBlock();
@@ -1444,7 +1445,7 @@ namespace System.Diagnostics.Tracing
         {
             if (eventSource == null)
             {
-                throw new ArgumentNullException("eventSource");
+                throw new ArgumentNullException(nameof(eventSource));
             }
 
             Contract.EndContractBlock();
@@ -1575,7 +1576,7 @@ namespace System.Diagnostics.Tracing
         }
 
         /// <summary>
-        /// Checks internal consistancy of EventSources/Listeners. 
+        /// Checks internal consistency of EventSources/Listeners. 
         /// </summary>
         [Conditional("DEBUG")]
         internal static void Validate()
@@ -1876,7 +1877,7 @@ namespace System.Diagnostics.Tracing
         // Instance fields
         readonly internal EventListener m_Listener;   // The dispatcher this entry is for
         internal bool[] m_EventEnabled;               // For every event in a the eventSource, is it enabled?
-        // Only guarenteed to exist after a InsureInit()
+        // Only guaranteed to exist after a InsureInit()
         internal EventDispatcher m_Next;              // These form a linked list in code:EventSource.m_Dispatchers
         // Of all listeners for that eventSource.  
     }

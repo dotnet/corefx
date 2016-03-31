@@ -1,6 +1,6 @@
 {
   "frameworks": {
-    "dotnet5.4": {
+    "netstandard1.4": {
       "dependencies": {
         "System.Collections": "4.0.10",
         "System.ComponentModel": "4.0.0",
@@ -16,11 +16,14 @@
         "System.Runtime.Extensions": "4.0.10",
         "System.Text.RegularExpressions": "4.0.10",
         "System.Threading": "4.0.10"
-      }
+      },
+      "imports": [
+        "dotnet5.5"
+      ]
     },
-    "net46":{
+    "net461": {
       "dependencies": {
-        "Microsoft.TargetingPack.NetFramework.v4.6": "1.0.0",
+        "Microsoft.TargetingPack.NETFramework.v4.6.1": "1.0.1"
       }
     }
   }

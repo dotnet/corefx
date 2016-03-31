@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -191,7 +192,7 @@ namespace System.Net.Http.Functional.Tests
             rm.Content = new StringContent("content");
 
             // Note that there is no Content-Length header: The reason is that the value for Content-Length header
-            // doesn't get set by StringContent..ctor, but ony if someone actually accesses the ContentLength property.
+            // doesn't get set by StringContent..ctor, but only if someone actually accesses the ContentLength property.
             Assert.Equal(
                 "Method: PUT, RequestUri: 'http://a.com/', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                 "{\r\n" +

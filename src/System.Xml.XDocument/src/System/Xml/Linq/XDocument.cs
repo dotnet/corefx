@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 
@@ -348,7 +349,7 @@ namespace System.Xml.Linq
         /// </returns>
         public static XDocument Load(XmlReader reader, LoadOptions options)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
             if (reader.ReadState == ReadState.Initial) reader.Read();
             XDocument d = new XDocument();
             if ((options & LoadOptions.SetBaseUri) != 0)
@@ -540,7 +541,7 @@ namespace System.Xml.Linq
         /// </param>
         public override void WriteTo(XmlWriter writer)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
             if (_declaration != null && _declaration.Standalone == "yes")
             {
                 writer.WriteStartDocument(true);

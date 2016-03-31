@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 //------------------------------------------------------------------------------
@@ -42,7 +43,7 @@ namespace System.Data.ProviderBase
         // PoolGroupStateUninitialized = 0;
         private const int PoolGroupStateActive = 1; // initial state, GetPoolGroup from cache, connection Open
         private const int PoolGroupStateIdle = 2; // all pools are pruned via Clear
-        private const int PoolGroupStateDisabled = 4; // factory pool entry prunning method
+        private const int PoolGroupStateDisabled = 4; // factory pool entry pruning method
 
         internal DbConnectionPoolGroup(DbConnectionOptions connectionOptions, DbConnectionPoolKey key, DbConnectionPoolGroupOptions poolGroupOptions)
         {
@@ -159,13 +160,6 @@ namespace System.Data.ProviderBase
 
                 if (_poolGroupOptions.PoolByIdentity)
                 {
-                    // There is no concept of Windows identity on non-Windows platform. Hence we 
-                    // cannot support Windows authentication.
-                    if (!ADP.IsWindows)
-                    {
-                        throw new PlatformNotSupportedException(SR.GetString(SR.ADP_FeatureNotSupportedOnNonWindowsPlatform, DbConnectionStringKeywords.IntegratedSecurity));
-                    }
-
                     // if we're pooling by identity (because integrated security is
                     // being used for these connections) then we need to go out and
                     // search for the connectionPool that matches the current identity.

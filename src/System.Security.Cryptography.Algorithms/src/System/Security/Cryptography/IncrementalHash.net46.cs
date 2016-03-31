@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -46,7 +47,7 @@ namespace System.Security.Cryptography
         public void AppendData(byte[] data)
         {
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
 
             AppendData(data, 0, data.Length);
         }
@@ -74,11 +75,11 @@ namespace System.Security.Cryptography
         public void AppendData(byte[] data, int offset, int count)
         {
             if (data == null)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0 || (count > data.Length))
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             if ((data.Length - count) < offset)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             if (_disposed)
@@ -154,7 +155,7 @@ namespace System.Security.Cryptography
         public static IncrementalHash CreateHash(HashAlgorithmName hashAlgorithm)
         {
             if (string.IsNullOrEmpty(hashAlgorithm.Name))
-                throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, "hashAlgorithm");
+                throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, nameof(hashAlgorithm));
 
             return new IncrementalHash(hashAlgorithm, GetHashAlgorithm(hashAlgorithm));
         }
@@ -184,9 +185,9 @@ namespace System.Security.Cryptography
         public static IncrementalHash CreateHMAC(HashAlgorithmName hashAlgorithm, byte[] key)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             if (string.IsNullOrEmpty(hashAlgorithm.Name))
-                throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, "hashAlgorithm");
+                throw new ArgumentException(SR.Cryptography_HashAlgorithmNameNullOrEmpty, nameof(hashAlgorithm));
 
             return new IncrementalHash(hashAlgorithm, GetHMAC(hashAlgorithm, key));
         }
@@ -207,6 +208,7 @@ namespace System.Security.Cryptography
             throw new CryptographicException(NTE_BAD_ALGID);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5351")] // We are providing the implementations for these algorithms
         private static HashAlgorithm GetHMAC(HashAlgorithmName hashAlgorithm, byte[] key)
         {
             if (hashAlgorithm == HashAlgorithmName.MD5)

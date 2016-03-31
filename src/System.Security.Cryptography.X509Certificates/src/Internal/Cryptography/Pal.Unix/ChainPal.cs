@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -43,11 +44,11 @@ namespace Internal.Cryptography.Pal
             }
 
             TimeSpan remainingDownloadTime = timeout;
-            X509Certificate2 leaf = new X509Certificate2(cert.Handle);
-            List<X509Certificate2> downloaded = new List<X509Certificate2>();
-            List<X509Certificate2> systemTrusted = new List<X509Certificate2>();
+            var leaf = new X509Certificate2(cert.Handle);
+            var downloaded = new HashSet<X509Certificate2>();
+            var systemTrusted = new HashSet<X509Certificate2>();
 
-            List<X509Certificate2> candidates = OpenSslX509ChainProcessor.FindCandidates(
+            HashSet<X509Certificate2> candidates = OpenSslX509ChainProcessor.FindCandidates(
                 leaf,
                 extraStore,
                 downloaded,
@@ -76,7 +77,7 @@ namespace Internal.Cryptography.Pal
 
         private static void SaveIntermediateCertificates(
             X509ChainElement[] chainElements,
-            List<X509Certificate2> downloaded)
+            HashSet<X509Certificate2> downloaded)
         {
             List<X509Certificate2> chainDownloaded = new List<X509Certificate2>(chainElements.Length);
 
@@ -109,11 +110,11 @@ namespace Internal.Cryptography.Pal
                     return;
                 }
 
-                for (int i = 0; i < chainDownloaded.Count; i++)
+                foreach (X509Certificate2 cert in chainDownloaded)
                 {
                     try
                     {
-                        userIntermediate.Add(downloaded[i]);
+                        userIntermediate.Add(cert);
                     }
                     catch (CryptographicException)
                     {

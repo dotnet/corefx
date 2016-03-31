@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 
@@ -77,7 +78,7 @@ namespace System.Xml.Linq
         /// <param name="annotation">The annotation to add.</param>
         public void AddAnnotation(object annotation)
         {
-            if (annotation == null) throw new ArgumentNullException("annotation");
+            if (annotation == null) throw new ArgumentNullException(nameof(annotation));
             if (annotations == null)
             {
                 annotations = annotation is object[] ? new object[] { annotation } : annotation;
@@ -114,7 +115,7 @@ namespace System.Xml.Linq
         /// </returns>
         public object Annotation(Type type)
         {
-            if (type == null) throw new ArgumentNullException("type");
+            if (type == null) throw new ArgumentNullException(nameof(type));
             if (annotations != null)
             {
                 object[] a = annotations as object[];
@@ -193,7 +194,7 @@ namespace System.Xml.Linq
         /// <returns>An enumerable collection of annotations for this XObject.</returns>
         public IEnumerable<object> Annotations(Type type)
         {
-            if (type == null) throw new ArgumentNullException("type");
+            if (type == null) throw new ArgumentNullException(nameof(type));
             return AnnotationsIterator(type);
         }
 
@@ -253,7 +254,7 @@ namespace System.Xml.Linq
         /// <param name="type">The type of annotations to remove.</param>
         public void RemoveAnnotations(Type type)
         {
-            if (type == null) throw new ArgumentNullException("type");
+            if (type == null) throw new ArgumentNullException(nameof(type));
             if (annotations != null)
             {
                 object[] a = annotations as object[];

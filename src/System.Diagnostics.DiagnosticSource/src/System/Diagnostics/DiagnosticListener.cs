@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Threading;
@@ -9,7 +10,7 @@ using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
 
 // TODO when we upgrade to C# V6 you can remove this.  
-// warning CS0420: ‘P.x': a reference to a volatile field will not be treated as volatile
+// warning CS0420: 'P.x': a reference to a volatile field will not be treated as volatile
 // This happens when you pass a _subcribers (a volatile field) to interlocked operations (which are byref). 
 // This was fixed in C# V6.  
 #pragma warning disable 0420
@@ -30,19 +31,13 @@ namespace System.Diagnostics
     /// 
     /// If you need to see 'everything' you can subscribe to the 'AllListeners' event that
     /// will fire for every live DiagnosticListener in the appdomain (past or present). 
+    /// 
+    /// Please See the DiagnosticSource Users Guide 
+    /// https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/DiagnosticSourceUsersGuide.md
+    /// for instructions on its use.  
     /// </summary>
     public class DiagnosticListener : DiagnosticSource, IObservable<KeyValuePair<string, object>>, IDisposable
     {
-#if false
-        /// <summary>
-        /// This is the DiagnosticListener that is used by default by the class library.   
-        /// Generally you don't want to make your own but rather have everyone use this one, which
-        /// ensures that everyone who wished to subscribe gets the callbacks.  
-        /// The main reason not to us this one is that you WANT isolation from other 
-        /// events in the system (e.g. multi-tenancy).  
-        /// </summary>
-        public static DiagnosticListener DefaultListener { get { return s_default; } }
-#endif 
         /// <summary>
         /// When you subscribe to this you get callbacks for all NotificationListeners in the appdomain
         /// as well as those that occurred in the past, and all future Listeners created in the future. 

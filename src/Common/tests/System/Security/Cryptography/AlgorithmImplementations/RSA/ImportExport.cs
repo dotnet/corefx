@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using System.Numerics;
@@ -52,18 +53,18 @@ namespace System.Security.Cryptography.Rsa.Tests
             // These two things, in combination, suggest that we ensure that all .NET
             // implementations of RSA export their keys to the fixed array size suggested by their
             // KeySize property.
-            RSAParameters diminishedDPParamaters = TestData.DiminishedDPParamaters;
+            RSAParameters diminishedDPParameters = TestData.DiminishedDPParameters;
             RSAParameters exported;
 
             using (RSA rsa = RSAFactory.Create())
             {
-                rsa.ImportParameters(diminishedDPParamaters);
+                rsa.ImportParameters(diminishedDPParameters);
                 exported = rsa.ExportParameters(true);
             }
 
             // DP is the most likely to fail, the rest just otherwise ensure that Export
             // isn't losing data.
-            AssertKeyEquals(ref diminishedDPParamaters, ref exported);
+            AssertKeyEquals(ref diminishedDPParameters, ref exported);
         }
 
         [Fact]

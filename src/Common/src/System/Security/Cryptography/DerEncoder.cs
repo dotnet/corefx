@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -249,7 +250,7 @@ namespace System.Security.Cryptography
             // The encoding that this follows is the DER encoding for NamedBitList, which is different than
             // (unnamed) BIT STRING.
             //
-            // X.690 (08/2015) setion 11.2.2 (Unused bits) says:
+            // X.690 (08/2015) section 11.2.2 (Unused bits) says:
             //    Where ITU-T Rec. X.680 | ISO/IEC 8824-1, 22.7, applies, the bitstring shall have all
             //    trailing 0 bits removed before it is encoded.
             //        NOTE 1 – In the case where a size constraint has been applied, the abstract value
@@ -268,7 +269,7 @@ namespace System.Security.Cryptography
             // should be { 00 01 }
             //
             // And, if 8 bits are defined, and only bit 6 is set, instead of { 00 02 } it should be { 01 02 },
-            // signifiying that the last bit was omitted.
+            // signifying that the last bit was omitted.
 
             int lastSetBit = -1;
 

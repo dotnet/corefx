@@ -1,13 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-//-----------------------------------------------------------------------------
-//
-// Description:
-//  This is a base abstract class for PackagePartCollection. This is a part of the 
-//  MMCF Packaging Layer
-//
-//-----------------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -18,28 +11,10 @@ namespace System.IO.Packaging
 {
     /// <summary>
     /// This class is used to get an enumerator for the Parts in a container. 
-    /// This is a part of the Packaging Layer APIs
+    /// This is a part of the MMCF Packaging Layer APIs
     /// </summary>   
     public class PackagePartCollection : IEnumerable<PackagePart>
     {
-        //------------------------------------------------------
-        //
-        //  Public Constructors
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Public Properties
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Public Methods
-        //
-        //------------------------------------------------------        
-
         #region Public Methods
 
         /// <summary>
@@ -62,7 +37,6 @@ namespace System.IO.Packaging
             return GetEnumerator();
         }
 
-
         /// <summary>
         /// Returns an enumerator over all the Parts in the Container
         /// </summary>
@@ -73,19 +47,7 @@ namespace System.IO.Packaging
             return _partList.Values.GetEnumerator();
         }
         #endregion Public Methods
-
-        //------------------------------------------------------
-        //
-        //  Public Events
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Constructors
-        //
-        //------------------------------------------------------
-
+        
         #region Internal Constructor
 
         internal PackagePartCollection(SortedList<PackUriHelper.ValidatedPartUri, PackagePart> partList)
@@ -95,37 +57,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Constructor
-
-        //------------------------------------------------------
-        //
-        //  Internal Properties
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Methods
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Events
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Private Methods
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Private Fields
-        //
-        //------------------------------------------------------
-
+        
         #region Private Members
 
         private SortedList<PackUriHelper.ValidatedPartUri, PackagePart> _partList;

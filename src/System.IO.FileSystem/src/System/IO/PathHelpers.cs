@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.IO
 {
@@ -21,11 +22,11 @@ namespace System.IO
         internal static void ThrowIfEmptyOrRootedPath(string path2)
         {
             if (path2 == null)
-                throw new ArgumentNullException("path2");
+                throw new ArgumentNullException(nameof(path2));
             if (path2.Length == 0)
-                throw new ArgumentException(SR.Argument_PathEmpty, "path2");
+                throw new ArgumentException(SR.Argument_PathEmpty, nameof(path2));
             if (Path.IsPathRooted(path2))
-                throw new ArgumentException(SR.Arg_Path2IsRooted, "path2");
+                throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(path2));
         }
 
         internal static bool IsRoot(string path)

@@ -1,7 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Diagnostics.CodeAnalysis;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Net.Sockets
 {
@@ -14,12 +13,12 @@ namespace System.Net.Sockets
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (remoteEndPoint == null)
             {
-                throw new ArgumentNullException("remoteEndPoint");
+                throw new ArgumentNullException(nameof(remoteEndPoint));
             }
 
             _buffer = buffer;

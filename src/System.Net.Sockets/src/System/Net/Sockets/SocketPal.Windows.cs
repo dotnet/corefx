@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections;
@@ -363,7 +364,7 @@ namespace System.Net.Sockets
             return SocketError.Success;
         }
 
-        public static SocketError Ioctl(SafeCloseSocket handle, int ioControlCode, byte[] optionInValue, byte[] optionOutValue, out int optionLength)
+        public static SocketError WindowsIoctl(SafeCloseSocket handle, int ioControlCode, byte[] optionInValue, byte[] optionOutValue, out int optionLength)
         {
             if (ioControlCode == Interop.Winsock.IoctlSocketConstants.FIONBIO)
             {
@@ -377,26 +378,6 @@ namespace System.Net.Sockets
                 optionInValue != null ? optionInValue.Length : 0,
                 optionOutValue,
                 optionOutValue != null ? optionOutValue.Length : 0,
-                out optionLength,
-                SafeNativeOverlapped.Zero,
-                IntPtr.Zero);
-            return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
-        }
-
-        public static SocketError IoctlInternal(SafeCloseSocket handle, IOControlCode ioControlCode, IntPtr optionInValue, int inValueLength, IntPtr optionOutValue, int outValueLength, out int optionLength)
-        {
-            if ((unchecked((int)ioControlCode)) == Interop.Winsock.IoctlSocketConstants.FIONBIO)
-            {
-                throw new InvalidOperationException(SR.net_sockets_useblocking);
-            }
-
-            SocketError errorCode = Interop.Winsock.WSAIoctl_Blocking_Internal(
-                handle.DangerousGetHandle(),
-                (uint)ioControlCode,
-                optionInValue,
-                inValueLength,
-                optionOutValue,
-                outValueLength,
                 out optionLength,
                 SafeNativeOverlapped.Zero,
                 IntPtr.Zero);
@@ -945,6 +926,11 @@ namespace System.Net.Sockets
             }
 
             return errorCode;
+        }
+
+        public static void CheckDualModeReceiveSupport(Socket socket)
+        {
+            // Dual-mode sockets support received packet info on Windows.
         }
     }
 }

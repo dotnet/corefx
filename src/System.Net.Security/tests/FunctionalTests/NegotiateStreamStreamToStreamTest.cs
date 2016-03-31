@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
+using System.Net.Test.Common;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,19 +12,19 @@ using Xunit;
 
 namespace System.Net.Security.Tests
 {
+    [PlatformSpecific(PlatformID.Windows)] // NegotiateStream only supports client-side functionality on Unix
     public class NegotiateStreamStreamToStreamTest
     {
         private readonly byte[] _sampleMsg = Encoding.UTF8.GetBytes("Sample Test Message");
 
-        [ActiveIssue(5284, PlatformID.Windows)]
+        [ActiveIssue(5284)]
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
         public void NegotiateStream_StreamToStream_Authentication_Success()
         {
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new NegotiateStream(clientStream))
             using (var server = new NegotiateStream(serverStream))
             {
@@ -67,17 +69,16 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [ActiveIssue(5284, PlatformID.Windows)]
+        [ActiveIssue(5284)]
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
         public void NegotiateStream_StreamToStream_Authentication_TargetName_Success()
         {
             string targetName = "testTargetName";
 
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new NegotiateStream(clientStream))
             using (var server = new NegotiateStream(serverStream))
             {
@@ -123,9 +124,8 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [ActiveIssue(5284, PlatformID.Windows)]
+        [ActiveIssue(5284)]
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
         public void NegotiateStream_StreamToStream_Authentication_EmptyCredentials_Fails()
         {
             string targetName = "testTargetName";
@@ -136,10 +136,10 @@ namespace System.Net.Security.Tests
             Assert.NotEqual(emptyNetworkCredential, CredentialCache.DefaultCredentials);
             Assert.NotEqual(emptyNetworkCredential, CredentialCache.DefaultNetworkCredentials);
 
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new NegotiateStream(clientStream))
             using (var server = new NegotiateStream(serverStream))
             {
@@ -152,6 +152,7 @@ namespace System.Net.Security.Tests
                 auth[1] = server.AuthenticateAsServerAsync();
 
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
+                Assert.True(finished, "Handshake completed in the allotted time");
 
                 // Expected Client property values:
                 Assert.True(client.IsAuthenticated);
@@ -187,16 +188,15 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [ActiveIssue(5283, PlatformID.Windows)]
+        [ActiveIssue(5283)]
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
         public void NegotiateStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
             byte[] recvBuf = new byte[_sampleMsg.Length];
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new NegotiateStream(clientStream))
             using (var server = new NegotiateStream(serverStream))
             {
@@ -222,16 +222,15 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [ActiveIssue(5284, PlatformID.Windows)]
+        [ActiveIssue(5284)]
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
         public void NegotiateStream_StreamToStream_Successive_ClientWrite_Async_Success()
         {
             byte[] recvBuf = new byte[_sampleMsg.Length];
-            MockNetwork network = new MockNetwork();
+            VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new FakeNetworkStream(false, network))
-            using (var serverStream = new FakeNetworkStream(true, network))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new NegotiateStream(clientStream))
             using (var server = new NegotiateStream(serverStream))
             {
@@ -257,13 +256,6 @@ namespace System.Net.Security.Tests
                 Assert.True(finished, "Send/receive completed in the allotted time");
                 Assert.True(_sampleMsg.SequenceEqual(recvBuf));
             }
-        }
-        
-        [Fact]
-        [PlatformSpecific(PlatformID.Linux | PlatformID.OSX)]
-        public void NegotiateStream_Ctor_Throws()
-        {
-            Assert.Throws<PlatformNotSupportedException>(() => new NegotiateStream(new FakeNetworkStream(false, null)));
         }
     }
 }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -19,6 +20,16 @@ namespace System.Reflection.Tests
             ParameterInfo pi = getParamInfo(typeof(MyClass), "Method1", 0);
             MemberInfo mi = pi.Member;
             Assert.NotNull(mi);
+
+            Type[] types = pi.GetOptionalCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            types = pi.GetRequiredCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            Assert.NotNull(pi.RawDefaultValue);
         }
 
 
@@ -29,6 +40,16 @@ namespace System.Reflection.Tests
             ParameterInfo pi = getParamInfo(typeof(MyClass), "virtualMethod", 0);
             MemberInfo mi = pi.Member;
             Assert.NotNull(mi);
+
+            Type[] types = pi.GetOptionalCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            types = pi.GetRequiredCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            Assert.NotNull(pi.RawDefaultValue);
         }
 
         //Verify Member 
@@ -38,6 +59,16 @@ namespace System.Reflection.Tests
             ParameterInfo pi = getParamInfo(typeof(MyClass), "MethodWithRefKW", 0);
             MemberInfo mi = pi.Member;
             Assert.NotNull(mi);
+
+            Type[] types = pi.GetOptionalCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            types = pi.GetRequiredCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            Assert.NotNull(pi.RawDefaultValue);
         }
 
 
@@ -48,6 +79,16 @@ namespace System.Reflection.Tests
             ParameterInfo pi = getParamInfo(typeof(MyClass), "MethodWithOutKW", 0);
             MemberInfo mi = pi.Member;
             Assert.NotNull(mi);
+
+            Type[] types = pi.GetOptionalCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            types = pi.GetRequiredCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            Assert.NotNull(pi.RawDefaultValue);
         }
 
 
@@ -58,6 +99,16 @@ namespace System.Reflection.Tests
             ParameterInfo pi = getParamInfo(typeof(GenericClass<string>), "genericMethod", 0);
             MemberInfo mi = pi.Member;
             Assert.NotNull(mi);
+
+            Type[] types = pi.GetOptionalCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            types = pi.GetRequiredCustomModifiers();
+            Assert.NotNull(types);
+            Assert.Equal(0, types.Length);
+
+            Assert.NotNull(pi.RawDefaultValue);
         }
 
 
@@ -284,6 +335,14 @@ namespace System.Reflection.Tests
             CustomAttributeData attribute = pi.CustomAttributes.SingleOrDefault(a => a.AttributeType.Equals(attrType));
 
             Assert.NotNull(attribute);
+
+            ICustomAttributeProvider prov = pi as ICustomAttributeProvider;
+            Assert.NotNull(prov.GetCustomAttributes(attrType, false).SingleOrDefault());
+            Assert.NotNull(prov.GetCustomAttributes(attrType, true).SingleOrDefault());
+            Assert.NotNull(prov.GetCustomAttributes(false).SingleOrDefault(a => a.GetType().Equals(attrType)));
+            Assert.NotNull(prov.GetCustomAttributes(true).SingleOrDefault(a => a.GetType().Equals(attrType)));
+            Assert.True(prov.IsDefined(attrType, false));
+            Assert.True(prov.IsDefined(attrType, true));
         }
 
 

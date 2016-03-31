@@ -10,7 +10,7 @@
     <ProjectGuid>{DCBB8805-4658-44BF-B5E8-B6714EC8936B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ResourcesSourceOutputDirectory>..\..\src\Resources\</ResourcesSourceOutputDirectory>
+    <ResourcesSourceOutputDirectory>../../src/Resources/</ResourcesSourceOutputDirectory>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
@@ -76,7 +76,6 @@
       <Link>Common\System\IO\RowConfigReader.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- TODO: Remove after the packages are not using System.Private.Networking. -->
   <ItemGroup>
     <ProjectReference Include="..\..\..\System.Net.NameResolution\src\System.Net.NameResolution.csproj">
       <Project>{1714448C-211E-48C1-8B7E-4EE667D336A1}</Project>
@@ -92,66 +91,64 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="NetworkFiles\rawhexint">
+    <Content Include="NetworkFiles\rawint">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\rawlong">
+    </Content>
+    <Content Include="NetworkFiles\rawhexint">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\rawint_maxvalue">
+    </Content>
+    <Content Include="NetworkFiles\rawlong">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\rawlong_maxvalue">
+    </Content>
+    <Content Include="NetworkFiles\rawint_maxvalue">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\resolv.conf">
+    </Content>
+    <Content Include="NetworkFiles\rawlong_maxvalue">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\smb.conf">
+    </Content>
+    <Content Include="NetworkFiles\resolv.conf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\dev">
+    </Content>
+    <Content Include="NetworkFiles\smb.conf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\ipv6_route">
+    </Content>
+    <Content Include="NetworkFiles\dev">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\route">
+    </Content>
+    <Content Include="NetworkFiles\ipv6_route">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\snmp">
+    </Content>
+    <Content Include="NetworkFiles\route">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\snmp6">
+    </Content>
+    <Content Include="NetworkFiles\snmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\sockstat">
+    </Content>
+    <Content Include="NetworkFiles\snmp6">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\sockstat6">
+    </Content>
+    <Content Include="NetworkFiles\sockstat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\tcp">
+    </Content>
+    <Content Include="NetworkFiles\sockstat6">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\tcp6">
+    </Content>
+    <Content Include="NetworkFiles\tcp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\udp">
+    </Content>
+    <Content Include="NetworkFiles\tcp6">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\udp6">
+    </Content>
+    <Content Include="NetworkFiles\udp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="NetworkFiles\dhclient.leases">
+    </Content>
+    <Content Include="NetworkFiles\udp6">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="NetworkFiles\dhclient.leases">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="project.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="NetworkFiles\rawint">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

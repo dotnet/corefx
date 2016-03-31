@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /**
 This is meant to contain useful utilities for IO related work in ReparsePoints
@@ -31,14 +32,14 @@ public static class MountHelper
     /// <summary>Creates a symbolic link using command line tools</summary>
     /// <param name="linkPath">The existing file</param>
     /// <param name="targetPath"></param>
-    public static bool CreateSymbolicLink(string linkPath, string targetPath)
+    public static bool CreateSymbolicLink(string linkPath, string targetPath, bool isDirectory)
     {
         Process symLinkProcess = null;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            symLinkProcess = Process.Start("cmd", string.Format("/c mklink \"{0}\" \"{1}\"", linkPath, targetPath));
+            symLinkProcess = Process.Start("cmd", string.Format("/c mklink{0} \"{1}\" \"{2}\"", isDirectory ? " /D" : "", linkPath, targetPath));
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        else
         {
             symLinkProcess = Process.Start("ln", string.Format("-s \"{0}\" \"{1}\"", targetPath, linkPath));
         }

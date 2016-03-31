@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -9,7 +10,7 @@ namespace System.Linq.Parallel.Tests
     public class SelectSelectManyTests
     {
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Select_Unordered(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -24,14 +25,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Select_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Select_Unordered(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Select(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -46,14 +47,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 4 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 4 }, MemberType = typeof(Sources))]
         public static void Select_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Select(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Select_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -65,14 +66,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Select_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Select_Unordered_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Select_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -88,7 +89,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 4 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 4 }, MemberType = typeof(Sources))]
         public static void Select_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Select_NotPipelined(labeled, count);
@@ -99,7 +100,7 @@ namespace System.Linq.Parallel.Tests
         // larger input sizes increases the probability that it will.
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Select_Indexed_Unordered(Labeled<ParallelQuery<int>> labeled, int count)
         {
             // For unordered collections, which element is at which index isn't actually guaranteed, but an effect of the implementation.
@@ -116,14 +117,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Select_Indexed_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Select_Indexed_Unordered(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Select_Indexed(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -138,14 +139,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 4 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 4 }, MemberType = typeof(Sources))]
         public static void Select_Indexed_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Select_Unordered(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
         public static void Select_Indexed_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             // For unordered collections, which element is at which index isn't actually guaranteed, but an effect of the implementation.
@@ -163,14 +164,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 4 }), MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024, 1024 * 4 }, MemberType = typeof(UnorderedSources))]
         public static void Select_Indexed_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Select_Indexed_Unordered_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Select_Indexed_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -186,7 +187,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024, 1024 * 4 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1024, 1024 * 4 }, MemberType = typeof(Sources))]
         public static void Select_Indexed_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Select_Indexed_NotPipelined(labeled, count);
@@ -241,7 +242,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Unordered(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -256,14 +257,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Unordered(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -278,14 +279,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -297,14 +298,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Unordered_NotPipelined(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -316,14 +317,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_NotPipelined(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Unordered_ResultSelector(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -339,14 +340,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Unordered_ResultSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Unordered_ResultSelector(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Unordered_ResultSelector_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -363,14 +364,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Unordered_ResultSelector_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Unordered_ResultSelector_NotPipelined(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_ResultSelector(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -386,14 +387,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_ResultSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_ResultSelector(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_ResultSelector_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -410,14 +411,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_ResultSelector_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_ResultSelector_NotPipelined(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Indexed_Unordered(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             // For unordered collections, which element is at which index isn't actually guaranteed, but an effect of the implementation.
@@ -435,14 +436,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Indexed_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Indexed_Unordered(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Indexed_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             // For unordered collections, which element is at which index isn't actually guaranteed, but an effect of the implementation.
@@ -461,14 +462,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Indexed_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Indexed_Unordered_NotPipelined(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Indexed(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -484,14 +485,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Indexed_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Indexed(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Indexed_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -508,14 +509,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Indexed_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Indexed_NotPipelined(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Indexed_Unordered_ResultSelector(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             // For unordered collections, which element is at which index isn't actually guaranteed, but an effect of the implementation.
@@ -535,14 +536,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Indexed_Unordered_ResultSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Indexed_Unordered_ResultSelector(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Indexed_Unordered_ResultSelector_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             // For unordered collections, which element is at which index isn't actually guaranteed, but an effect of the implementation.
@@ -563,14 +564,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyUnorderedData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyUnorderedData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Indexed_Unordered_ResultSelector_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Indexed_Unordered_ResultSelector_NotPipelined(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Indexed_ResultSelector(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -588,14 +589,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Indexed_ResultSelector_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Indexed_ResultSelector(labeled, count, expander, expansion);
         }
 
         [Theory]
-        [MemberData("SelectManyData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SelectManyData), new[] { 0, 1, 2, 16 })]
         public static void SelectMany_Indexed_ResultSelector_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -614,7 +615,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SelectManyData", (object)(new int[] { 1024, 1024 * 4 }))]
+        [MemberData(nameof(SelectManyData), new[] { 1024, 1024 * 4 })]
         public static void SelectMany_Indexed_ResultSelector_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, Labeled<Func<int, int, IEnumerable<int>>> expander, int expansion)
         {
             SelectMany_Indexed_ResultSelector_NotPipelined(labeled, count, expander, expansion);

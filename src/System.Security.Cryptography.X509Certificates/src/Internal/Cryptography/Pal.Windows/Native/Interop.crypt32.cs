@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Text;
@@ -109,7 +110,7 @@ internal static partial class Interop
         /// 
         /// To begin the enumeration, set pCertContext to null. Each iteration replaces pCertContext with
         /// the next certificate in the iteration. The final call sets pCertContext to an invalid SafeCertStoreHandle 
-        /// and returns "false" to indicate the the end of the store has been reached.
+        /// and returns "false" to indicate the end of the store has been reached.
         /// </summary>
         public static bool CertEnumCertificatesInStore(SafeCertStoreHandle hCertStore, ref SafeCertContextHandle pCertContext)
         {
@@ -231,7 +232,7 @@ internal static partial class Interop
         /// 
         /// To begin the enumeration, set pCertContext to null. Each iteration replaces pCertContext with
         /// the next certificate in the iteration. The final call sets pCertContext to an invalid SafeCertStoreHandle 
-        /// and returns "false" to indicate the the end of the store has been reached.
+        /// and returns "false" to indicate the end of the store has been reached.
         /// </summary>
         public static unsafe bool CertFindCertificateInStore(SafeCertStoreHandle hCertStore, CertFindType dwFindType, void* pvFindPara, ref SafeCertContextHandle pCertContext)
         {

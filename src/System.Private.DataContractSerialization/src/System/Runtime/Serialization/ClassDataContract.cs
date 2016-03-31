@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Runtime.Serialization
 {
@@ -26,21 +27,21 @@ namespace System.Runtime.Serialization
         /// Review - XmlDictionaryString(s) representing the XML namespaces for class members.
         ///          statically cached and used from IL generated code. should ideally be Critical.
         ///          marked SecurityRequiresReview to be callable from transparent IL generated code. 
-        ///          not changed to property to avoid regressing performance; any changes to initalization should be reviewed.
+        ///          not changed to property to avoid regressing performance; any changes to initialization should be reviewed.
         /// </SecurityNote>
         public XmlDictionaryString[] ContractNamespaces;
         /// <SecurityNote>
         /// Review - XmlDictionaryString(s) representing the XML element names for class members.
         ///          statically cached and used from IL generated code. should ideally be Critical.
         ///          marked SecurityRequiresReview to be callable from transparent IL generated code. 
-        ///          not changed to property to avoid regressing performance; any changes to initalization should be reviewed.
+        ///          not changed to property to avoid regressing performance; any changes to initialization should be reviewed.
         /// </SecurityNote>
         public XmlDictionaryString[] MemberNames;
         /// <SecurityNote>
         /// Review - XmlDictionaryString(s) representing the XML namespaces for class members.
         ///          statically cached and used when calling IL generated code. should ideally be Critical.
         ///          marked SecurityRequiresReview to be callable from transparent code. 
-        ///          not changed to property to avoid regressing performance; any changes to initalization should be reviewed.
+        ///          not changed to property to avoid regressing performance; any changes to initialization should be reviewed.
         /// </SecurityNote>
         public XmlDictionaryString[] MemberNamespaces;
         [SecurityCritical]
@@ -439,47 +440,51 @@ namespace System.Runtime.Serialization
             }
         }
 
-        private static string[] s_knownSerializableTypeNames = new string[] {
-                "System.Collections.Queue",
-                "System.Collections.Stack",
-                "System.Globalization.CultureInfo",
-                "System.Version",
-                "System.Collections.Generic.KeyValuePair`2",
-                "System.Collections.Generic.Queue`1",
-                "System.Collections.Generic.Stack`1",
-                "System.Collections.ObjectModel.ReadOnlyCollection`1",
-                "System.Collections.ObjectModel.ReadOnlyDictionary`2",
-                "System.Tuple`1",
-                "System.Tuple`2",
-                "System.Tuple`3",
-                "System.Tuple`4",
-                "System.Tuple`5",
-                "System.Tuple`6",
-                "System.Tuple`7",
-                "System.Tuple`8",
+        private static readonly Dictionary<string, string[]> s_knownSerializableTypeInfos = new Dictionary<string, string[]> {
+            { "System.Collections.Generic.KeyValuePair`2", Array.Empty<string>() },
+            { "System.Collections.Generic.Queue`1", new [] { "_syncRoot" } },
+            { "System.Collections.Generic.Stack`1", new [] {"_syncRoot" } },
+            { "System.Collections.ObjectModel.ReadOnlyCollection`1", new [] {"_syncRoot" } },
+            { "System.Collections.ObjectModel.ReadOnlyDictionary`2", new [] {"_syncRoot", "_keys","_values" } },
+            { "System.Tuple`1", Array.Empty<string>() },
+            { "System.Tuple`2", Array.Empty<string>() },
+            { "System.Tuple`3", Array.Empty<string>() },
+            { "System.Tuple`4", Array.Empty<string>() },
+            { "System.Tuple`5", Array.Empty<string>() },
+            { "System.Tuple`6", Array.Empty<string>() },
+            { "System.Tuple`7", Array.Empty<string>() },
+            { "System.Tuple`8", Array.Empty<string>() },
+            { "System.Collections.Queue", new [] {"_syncRoot" } },
+            { "System.Collections.Stack", new [] {"_syncRoot" } },
+            { "System.Globalization.CultureInfo", Array.Empty<string>() },
+            { "System.Version", Array.Empty<string>() },
         };
+
+        private static string GetGeneralTypeName(Type type)
+        {
+            TypeInfo typeInfo = type.GetTypeInfo();
+            return typeInfo.IsGenericType && !typeInfo.IsGenericParameter
+                ? typeInfo.GetGenericTypeDefinition().FullName
+                : type.FullName;
+        }
 
         internal static bool IsKnownSerializableType(Type type)
         {
             // Applies to known types that DCS understands how to serialize/deserialize
             //
+            string typeFullName = GetGeneralTypeName(type);
 
-            // Ajdust for generic type
-            if (type.GetTypeInfo().IsGenericType && !type.GetTypeInfo().IsGenericTypeDefinition)
-            {
-                type = type.GetGenericTypeDefinition();
-            }
+            return s_knownSerializableTypeInfos.ContainsKey(typeFullName)
+                || Globals.TypeOfException.IsAssignableFrom(type);
+        }
 
-            // Check for known types
-            if (Enumerable.Contains(s_knownSerializableTypeNames, type.FullName))
-            {
-                return true;
-            }
-            //Enable ClassDataContract to give support to Exceptions.
-            if (Globals.TypeOfException.IsAssignableFrom(type))
-                return true;
+        internal static bool IsNonSerializedMember(Type type, string memberName)
+        {
+            string typeFullName = GetGeneralTypeName(type);
 
-            return false;
+            string[] members;
+            return s_knownSerializableTypeInfos.TryGetValue(typeFullName, out members)
+                && members.Contains(memberName);
         }
 
         private XmlDictionaryString[] CreateChildElementNamespaces()
@@ -1073,8 +1078,7 @@ namespace System.Runtime.Serialization
 
             private static bool CanSerializeMember(FieldInfo field)
             {
-                return field != null && 
-                    field.FieldType != Globals.TypeOfObject; // Don't really know how to serialize plain System.Object instance;
+                return field != null && !ClassDataContract.IsNonSerializedMember(field.DeclaringType, field.Name);
             }
 
             private bool SetIfGetOnlyCollection(DataMember memberContract)

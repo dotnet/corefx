@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -102,7 +103,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("GenerateInvalidInputs")]
+        [MemberData(nameof(GenerateInvalidInputs))]
         public static void FindWithWrongTypeValue(X509FindType findType, Type badValueType)
         {
             object badValue;
@@ -132,7 +133,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("GenerateInvalidOidInputs")]
+        [MemberData(nameof(GenerateInvalidOidInputs))]
         public static void FindWithBadOids(X509FindType findType, string badOid)
         {
             RunExceptionTest<ArgumentException>(findType, badOid);
@@ -339,7 +340,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     TimeSpan gap = latestNotBefore - earliestNotAfter;
 
                     // If this assert fails it means our test data was rebuilt and the constraint
-                    // can no longer be satisifed
+                    // can no longer be satisfied
                     Assert.True(gap > TimeSpan.FromSeconds(1));
 
                     DateTime noMatchTime = earliestNotAfter + TimeSpan.FromSeconds(1);
@@ -379,7 +380,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     TimeSpan gap = latestNotBefore - earliestNotAfter;
 
                     // If this assert fails it means our test data was rebuilt and the constraint
-                    // can no longer be satisifed
+                    // can no longer be satisfied
                     Assert.True(gap > TimeSpan.FromSeconds(1));
 
                     // One second before the latest NotBefore, so one is valid, the other is not yet valid.
@@ -406,7 +407,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     TimeSpan gap = latestNotBefore - earliestNotAfter;
 
                     // If this assert fails it means our test data was rebuilt and the constraint
-                    // can no longer be satisifed
+                    // can no longer be satisfied
                     Assert.True(gap > TimeSpan.FromSeconds(1));
 
                     // One second after the latest NotBefore, both certificates are time-valid
@@ -433,7 +434,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     TimeSpan gap = latestNotBefore - earliestNotAfter;
 
                     // If this assert fails it means our test data was rebuilt and the constraint
-                    // can no longer be satisifed
+                    // can no longer be satisfied
                     Assert.True(gap > TimeSpan.FromSeconds(1));
 
                     // One second after the earliest NotAfter, so one is valid, the other is no longer valid.
@@ -460,7 +461,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     TimeSpan gap = latestNotBefore - earliestNotAfter;
 
                     // If this assert fails it means our test data was rebuilt and the constraint
-                    // can no longer be satisifed
+                    // can no longer be satisfied
                     Assert.True(gap > TimeSpan.FromSeconds(1));
 
                     // One second before the earliest NotAfter, so both certificates are valid
@@ -540,7 +541,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("GenerateWorkingFauxSerialNumbers")]
+        [MemberData(nameof(GenerateWorkingFauxSerialNumbers))]
         public static void TestBySerialNumber_Match_NonDecimalInput(string input)
         {
             RunSingleMatchTest_MsCer(X509FindType.FindBySerialNumber, input);

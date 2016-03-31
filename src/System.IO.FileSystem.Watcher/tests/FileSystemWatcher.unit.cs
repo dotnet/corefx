@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -553,4 +554,21 @@ public class FileSystemWatcherTests
         }
     }
 
+    [Fact]
+    public static void FileSystemWatcher_WatchingAliasedFolderResolvesToRealPathWhenWatching()
+    {
+        using (var dir = Utility.CreateTestDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())))
+        using (var fsw = new FileSystemWatcher(dir.Path))
+        {
+            AutoResetEvent are = Utility.WatchForEvents(fsw, WatcherChangeTypes.Created);
+
+            fsw.Filter = "*";
+            fsw.EnableRaisingEvents = true;
+
+            using (var temp = Utility.CreateTestDirectory(Path.Combine(dir.Path, "foo")))
+            {
+                Utility.ExpectEvent(are, "created");
+            }
+        }
+    }
 }

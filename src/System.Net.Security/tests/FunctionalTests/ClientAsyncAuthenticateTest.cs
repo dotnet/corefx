@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -53,35 +54,13 @@ namespace System.Net.Security.Tests
         }
 
         [Theory]
-        [MemberData("ProtocolMismatchData")]
+        [MemberData(nameof(ProtocolMismatchData))]
         public async Task ClientAsyncAuthenticate_MismatchProtocols_Fails(
             SslProtocols serverProtocol,
             SslProtocols clientProtocol,
             Type expectedException)
         {
             await Assert.ThrowsAsync(expectedException, () => ClientAsyncSslHelper(serverProtocol, clientProtocol));
-        }
-
-        [Theory]
-        [MemberData("ProtocolMismatchData_Tls11_Tls12_Windows_Linux")]
-        [PlatformSpecific(PlatformID.Windows | PlatformID.Linux)]
-        public async Task ClientAsyncAuthenticate_MismatchProtocols_Tls11_Tls12_Fails_Linux_Windows(
-            SslProtocols serverProtocol,
-            SslProtocols clientProtocol,
-            Type expectedException)
-        {
-            await Assert.ThrowsAsync(expectedException, () => ClientAsyncSslHelper(serverProtocol, clientProtocol));
-        }
-
-        [Theory]
-        [MemberData("ProtocolMismatchData_Tls11_Tls12_OSX")]
-        [PlatformSpecific(PlatformID.OSX)]
-        public async Task ClientAsyncAuthenticate_MismatchProtocols_Tls11_Tls12_Fails_OSX(
-            SslProtocols serverProtocols,
-            SslProtocols clientProtocols,
-            Type expectedException)
-        {
-            await Assert.ThrowsAsync(expectedException, () => ClientAsyncSslHelper(serverProtocols, clientProtocols));
         }
 
         [Fact]
@@ -128,16 +107,7 @@ namespace System.Net.Security.Tests
             yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls, typeof(AuthenticationException) };
             yield return new object[] { SslProtocols.Tls12, SslProtocols.Tls, typeof(AuthenticationException) };
             yield return new object[] { SslProtocols.Tls12, SslProtocols.Tls11, typeof(AuthenticationException) };
-        }
-
-        private static IEnumerable<object[]> ProtocolMismatchData_Tls11_Tls12_Windows_Linux()
-        {
             yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls12, typeof(IOException) };
-        }
-
-        private static IEnumerable<object[]> ProtocolMismatchData_Tls11_Tls12_OSX()
-        {
-            yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls12, typeof(AuthenticationException) };
         }
 
         #region Helpers
@@ -168,13 +138,11 @@ namespace System.Net.Security.Tests
                 await client.ConnectAsync(server.RemoteEndPoint.Address, server.RemoteEndPoint.Port);
                 using (SslStream sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null))
                 {
-                    Task async = sslStream.AuthenticateAsClientAsync("localhost", null, clientSslProtocols, false);
-                    Assert.True(((IAsyncResult)async).AsyncWaitHandle.WaitOne(TestConfiguration.PassingTestTimeoutMilliseconds), "Timed Out");
-                    async.GetAwaiter().GetResult();
+                    Task clientAuthTask = sslStream.AuthenticateAsClientAsync("localhost", null, clientSslProtocols, false);
+                    await clientAuthTask.TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
 
-                    _log.WriteLine("Client({0}) authenticated to server({1}) with encryption cipher: {2} {3}-bit strength",
-                        client.Client.LocalEndPoint, client.Client.RemoteEndPoint,
-                        sslStream.CipherAlgorithm, sslStream.CipherStrength);
+                    _log.WriteLine("Client authenticated to server({0}) with encryption cipher: {1} {2}-bit strength",
+                        server.RemoteEndPoint, sslStream.CipherAlgorithm, sslStream.CipherStrength);
                     Assert.True(sslStream.CipherAlgorithm != CipherAlgorithmType.Null, "Cipher algorithm should not be NULL");
                     Assert.True(sslStream.CipherStrength > 0, "Cipher strength should be greater than 0");
                 }

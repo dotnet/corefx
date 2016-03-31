@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 
@@ -7,12 +8,8 @@ namespace System.Net
 {
     // This class is used to determine if NTLM or
     // Kerberos are used in the context of a Negotiate handshake
-    internal class NegotiationInfoClass
+    internal partial class NegotiationInfoClass
     {
-        internal const string NTLM = "NTLM";
-        internal const string Kerberos = "Kerberos";
-        internal const string WDigest = "WDigest";
-        internal const string Negotiate = "Negotiate";
         internal string AuthenticationPackage;
 
         internal NegotiationInfoClass(SafeHandle safeHandle, int negotiationState)
@@ -55,10 +52,6 @@ namespace System.Net
                 else if (string.Compare(name, NTLM, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     AuthenticationPackage = NTLM;
-                }
-                else if (string.Compare(name, WDigest, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    AuthenticationPackage = WDigest;
                 }
                 else
                 {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -315,7 +316,7 @@ namespace System.Net.Http.Tests
             Assert.Equal("custom会", headers.GetValues("Server").First());
 
             headers.Clear();
-            // Note that "Server" uses whitespaces as separators, so the following is an invalid value
+            // Note that "Server" uses whitespace as separators, so the following is an invalid value
             headers.TryAddWithoutValidation("Server", "custom1, custom2");
             Assert.Null(headers.GetParsedValues("Server"));
             Assert.Equal(1, headers.GetValues("Server").Count());
@@ -504,7 +505,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(true, headers.TransferEncodingChunked);
 
             // Note that 'chunked' is already in the collection, we add 'chunked' again here. Therefore the total 
-            // number of headers is 4 (2x customm, 2x 'chunked').
+            // number of headers is 4 (2x custom, 2x 'chunked').
             headers.TryAddWithoutValidation("Transfer-Encoding", " , custom2, chunked ,");
             Assert.Equal(4, headers.TransferEncoding.Count);
             Assert.Equal(4, headers.GetValues("Transfer-Encoding").Count());

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Security.Authentication;
@@ -240,6 +241,26 @@ namespace System.Net.Security
         }
 
         public override void Write(byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal int EndRead(IAsyncResult asyncResult)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void EndWrite(IAsyncResult asyncResult)
         {
             throw new NotImplementedException();
         }

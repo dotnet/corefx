@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -26,27 +27,27 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public static void RawIntFileParsing()
         {
-            int val = StringParsingHelpers.ParseRawIntFile("rawint");
+            int val = StringParsingHelpers.ParseRawIntFile(FileUtil.TestFile("rawint"));
             Assert.Equal(12, val);
 
-            int max = StringParsingHelpers.ParseRawIntFile("rawint_maxvalue");
+            int max = StringParsingHelpers.ParseRawIntFile(FileUtil.TestFile("rawint_maxvalue"));
             Assert.Equal(int.MaxValue, max);
         }
 
         [Fact]
         public static void RawLongFileParsing()
         {
-            long val = StringParsingHelpers.ParseRawLongFile("rawlong");
+            long val = StringParsingHelpers.ParseRawLongFile(FileUtil.TestFile("rawlong"));
             Assert.Equal(3147483647L, val);
 
-            long max = StringParsingHelpers.ParseRawLongFile("rawlong_maxvalue");
+            long max = StringParsingHelpers.ParseRawLongFile(FileUtil.TestFile("rawlong_maxvalue"));
             Assert.Equal(long.MaxValue, max);
         }
 
         [Fact]
         public static void RawHexIntParsing()
         {
-            int val = StringParsingHelpers.ParseRawHexFileAsInt("rawhexint");
+            int val = StringParsingHelpers.ParseRawHexFileAsInt(FileUtil.TestFile("rawhexint"));
             Assert.Equal(10, val);
         }
     }

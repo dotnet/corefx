@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -224,7 +225,7 @@ namespace System.IO.Compression
                 if (_archive.Mode == ZipArchiveMode.Create && _everOpenedForWrite)
                     throw new IOException(SR.FrozenAfterWrite);
                 if (value.DateTime.Year < ZipHelper.ValidZipDate_YearMin || value.DateTime.Year > ZipHelper.ValidZipDate_YearMax)
-                    throw new ArgumentOutOfRangeException("value", SR.DateTimeOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.DateTimeOutOfRange);
 
                 _lastModified = value;
             }
@@ -282,7 +283,7 @@ namespace System.IO.Compression
         }
 
         /// <summary>
-        /// Opens the entry. If the archive that the entry belongs to was opened in Read mode, the returned stream will be readable, and it may or may not be seekable. If Create mode, the returned stream will be writeable and not seekable. If Update mode, the returned stream will be readable, writeable, seekable, and support SetLength.
+        /// Opens the entry. If the archive that the entry belongs to was opened in Read mode, the returned stream will be readable, and it may or may not be seekable. If Create mode, the returned stream will be writable and not seekable. If Update mode, the returned stream will be readable, writable, seekable, and support SetLength.
         /// </summary>
         /// <returns>A Stream that represents the contents of the entry.</returns>
         /// <exception cref="IOException">The entry is already currently open for writing. -or- The entry has been deleted from the archive. -or- The archive that this entry belongs to was opened in ZipArchiveMode.Create, and this entry has already been written to once.</exception>
@@ -1013,7 +1014,7 @@ namespace System.IO.Compression
              * correct size information in there. note that order of uncomp/comp is switched, and these are
              * 64-bit values
              * also, note that in order for this to be correct, we have to insure that the zip64 extra field
-             * is alwasy the first extra field that is written */
+             * is always the first extra field that is written */
             if (zip64HeaderUsed)
             {
                 _archive.ArchiveStream.Seek(_offsetOfLocalHeader + ZipLocalFileHeader.SizeOfLocalHeader
@@ -1218,11 +1219,11 @@ namespace System.IO.Compression
             {
                 //we can't pass the argument checking down a level
                 if (buffer == null)
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 if (offset < 0)
-                    throw new ArgumentOutOfRangeException("offset", SR.ArgumentNeedNonNegative);
+                    throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentNeedNonNegative);
                 if (count < 0)
-                    throw new ArgumentOutOfRangeException("count", SR.ArgumentNeedNonNegative);
+                    throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentNeedNonNegative);
                 if ((buffer.Length - offset) < count)
                     throw new ArgumentException(SR.OffsetLengthInvalid);
                 Contract.EndContractBlock();

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Reflection;
@@ -33,7 +34,7 @@ namespace OLEDB.Test.ModuleCore
             : base(function, desc)
         {
             //Note: The parent automatically gets setup on AddVariation so we don't 
-            //really need to pass in the testcase, left here for backward compatibilty 
+            //really need to pass in the testcase, left here for backward compatibility 
             //of inherited drivers.
         }
 
@@ -41,7 +42,7 @@ namespace OLEDB.Test.ModuleCore
             : base(null, desc)
         {
             //Note: The parent automatically gets setup on AddVariation so we don't 
-            //really need to pass in the testcase, left here for backward compatibilty 
+            //really need to pass in the testcase, left here for backward compatibility 
             //of inherited drivers.
             _pfunc = function;
         }

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using Xunit;
@@ -22,6 +23,37 @@ namespace SampleDynamicTests
             dynamic d = (MultiplyDelegate)del.Mul;
             int result = d(4, 6);
             Assert.Equal(24, result);
+        }
+
+        private static int Foo(string s, dynamic d, object o)
+        {
+            return s.Length + d.ToString().Length + o.ToString().Length;
+        }
+
+        private static void Bar(string s, dynamic d, object o)
+        {
+        }
+
+        [Fact]
+        public static void VariantFuncTest()
+        {
+            Func<string, dynamic, object, int> del = Foo;
+            Func<string, dynamic, string, int> func = del;
+
+            dynamic arg = "saw";
+
+            Assert.Equal(16, func("came", arg, "conquered"));
+        }
+
+        [Fact]
+        public static void VariantActTest()
+        {
+            Action<string, dynamic, object> del = Bar;
+            Action<string, dynamic, string> act = del;
+
+            dynamic arg = "saw";
+
+            act("came", arg, "conquered");
         }
     }
 }

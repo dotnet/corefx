@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Reflection.Internal;
@@ -209,7 +210,7 @@ namespace System.Reflection.Metadata
             //   ... bool '(' true | false ')' Boolean value stored in a single byte, 0 represents false, any non-zero value represents true ...
             // 
             // Chapter 23.3 "Custom attributes"
-            //   ... A bool is a single byte with value 0 reprseenting false and any non-zero value representing true ...
+            //   ... A bool is a single byte with value 0 representing false and any non-zero value representing true ...
             return ReadByte() != 0;
         }
 
@@ -493,7 +494,7 @@ namespace System.Reflection.Metadata
         /// Reads a string encoded as a compressed integer containing its length followed by
         /// its contents in UTF8. Null strings are encoded as a single 0xFF byte.
         /// </summary>
-        /// <remarks>Defined as a 'SerString' in the Ecma CLI specification.</remarks>
+        /// <remarks>Defined as a 'SerString' in the ECMA CLI specification.</remarks>
         /// <returns>String value or null.</returns>
         /// <exception cref="BadImageFormatException">If the encoding is invalid.</exception>
         public string ReadSerializedString()
@@ -615,7 +616,7 @@ namespace System.Reflection.Metadata
                     return null;
 
                 default:
-                    throw new ArgumentOutOfRangeException("typeCode");
+                    throw new ArgumentOutOfRangeException(nameof(typeCode));
             }
         }
 

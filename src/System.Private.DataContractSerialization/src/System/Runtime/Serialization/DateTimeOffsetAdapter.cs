@@ -1,7 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Reflection;
@@ -52,7 +51,7 @@ namespace System.Runtime.Serialization
 
                     //DateTimeKind.Utc and DateTimeKind.Local
                     //Read in deserialized DateTime portion of the DateTimeOffsetAdapter and convert DateTimeKind to Unspecified.
-                    //Apply ofset information read from OffsetMinutes portion of the DateTimeOffsetAdapter.
+                    //Apply offset information read from OffsetMinutes portion of the DateTimeOffsetAdapter.
                     //Return converted DateTimeoffset object.
                     default:
                         DateTimeOffset deserialized = new DateTimeOffset(value.UtcDateTime);

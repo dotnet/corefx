@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -46,13 +47,13 @@ namespace System.Xml.Schema
         /// </summary>
         public XsdDuration(bool isNegative, int years, int months, int days, int hours, int minutes, int seconds, int nanoseconds)
         {
-            if (years < 0) throw new ArgumentOutOfRangeException("years");
-            if (months < 0) throw new ArgumentOutOfRangeException("months");
-            if (days < 0) throw new ArgumentOutOfRangeException("days");
-            if (hours < 0) throw new ArgumentOutOfRangeException("hours");
-            if (minutes < 0) throw new ArgumentOutOfRangeException("minutes");
-            if (seconds < 0) throw new ArgumentOutOfRangeException("seconds");
-            if (nanoseconds < 0 || nanoseconds > 999999999) throw new ArgumentOutOfRangeException("nanoseconds");
+            if (years < 0) throw new ArgumentOutOfRangeException(nameof(years));
+            if (months < 0) throw new ArgumentOutOfRangeException(nameof(months));
+            if (days < 0) throw new ArgumentOutOfRangeException(nameof(days));
+            if (hours < 0) throw new ArgumentOutOfRangeException(nameof(hours));
+            if (minutes < 0) throw new ArgumentOutOfRangeException(nameof(minutes));
+            if (seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds));
+            if (nanoseconds < 0 || nanoseconds > 999999999) throw new ArgumentOutOfRangeException(nameof(nanoseconds));
 
             _years = years;
             _months = months;

@@ -1,5 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Reflection;
@@ -10,25 +11,25 @@ namespace System.Linq.Expressions.Tests
     public class PostDecrementAssignTests : IncDecAssignTests
     {
         [Theory]
-        [MemberData("Int16sAndDecrements")]
-        [MemberData("NullableInt16sAndDecrements")]
-        [MemberData("UInt16sAndDecrements")]
-        [MemberData("NullableUInt16sAndDecrements")]
-        [MemberData("Int32sAndDecrements")]
-        [MemberData("NullableInt32sAndDecrements")]
-        [MemberData("UInt32sAndDecrements")]
-        [MemberData("NullableUInt32sAndDecrements")]
-        [MemberData("Int64sAndDecrements")]
-        [MemberData("NullableInt64sAndDecrements")]
-        [MemberData("UInt64sAndDecrements")]
-        [MemberData("NullableUInt64sAndDecrements")]
-        [MemberData("DecimalsAndDecrements")]
-        [MemberData("NullableDecimalsAndDecrements")]
-        [MemberData("SinglesAndDecrements")]
-        [MemberData("NullableSinglesAndDecrements")]
-        [MemberData("DoublesAndDecrements")]
-        [MemberData("NullableDoublesAndDecrements")]
-        public void ReturnsCorrectValues(Type type, object value, object _)
+        [PerCompilationType(nameof(Int16sAndDecrements))]
+        [PerCompilationType(nameof(NullableInt16sAndDecrements))]
+        [PerCompilationType(nameof(UInt16sAndDecrements))]
+        [PerCompilationType(nameof(NullableUInt16sAndDecrements))]
+        [PerCompilationType(nameof(Int32sAndDecrements))]
+        [PerCompilationType(nameof(NullableInt32sAndDecrements))]
+        [PerCompilationType(nameof(UInt32sAndDecrements))]
+        [PerCompilationType(nameof(NullableUInt32sAndDecrements))]
+        [PerCompilationType(nameof(Int64sAndDecrements))]
+        [PerCompilationType(nameof(NullableInt64sAndDecrements))]
+        [PerCompilationType(nameof(UInt64sAndDecrements))]
+        [PerCompilationType(nameof(NullableUInt64sAndDecrements))]
+        [PerCompilationType(nameof(DecimalsAndDecrements))]
+        [PerCompilationType(nameof(NullableDecimalsAndDecrements))]
+        [PerCompilationType(nameof(SinglesAndDecrements))]
+        [PerCompilationType(nameof(NullableSinglesAndDecrements))]
+        [PerCompilationType(nameof(DoublesAndDecrements))]
+        [PerCompilationType(nameof(NullableDoublesAndDecrements))]
+        public void ReturnsCorrectValues(Type type, object value, object _, bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(type);
             BlockExpression block = Expression.Block(
@@ -36,29 +37,29 @@ namespace System.Linq.Expressions.Tests
                 Expression.Assign(variable, Expression.Constant(value, type)),
                 Expression.PostDecrementAssign(variable)
                 );
-            Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(Expression.Constant(value, type), block)).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(Expression.Constant(value, type), block)).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("Int16sAndDecrements")]
-        [MemberData("NullableInt16sAndDecrements")]
-        [MemberData("UInt16sAndDecrements")]
-        [MemberData("NullableUInt16sAndDecrements")]
-        [MemberData("Int32sAndDecrements")]
-        [MemberData("NullableInt32sAndDecrements")]
-        [MemberData("UInt32sAndDecrements")]
-        [MemberData("NullableUInt32sAndDecrements")]
-        [MemberData("Int64sAndDecrements")]
-        [MemberData("NullableInt64sAndDecrements")]
-        [MemberData("UInt64sAndDecrements")]
-        [MemberData("NullableUInt64sAndDecrements")]
-        [MemberData("DecimalsAndDecrements")]
-        [MemberData("NullableDecimalsAndDecrements")]
-        [MemberData("SinglesAndDecrements")]
-        [MemberData("NullableSinglesAndDecrements")]
-        [MemberData("DoublesAndDecrements")]
-        [MemberData("NullableDoublesAndDecrements")]
-        public void AssignsCorrectValues(Type type, object value, object result)
+        [PerCompilationType(nameof(Int16sAndDecrements))]
+        [PerCompilationType(nameof(NullableInt16sAndDecrements))]
+        [PerCompilationType(nameof(UInt16sAndDecrements))]
+        [PerCompilationType(nameof(NullableUInt16sAndDecrements))]
+        [PerCompilationType(nameof(Int32sAndDecrements))]
+        [PerCompilationType(nameof(NullableInt32sAndDecrements))]
+        [PerCompilationType(nameof(UInt32sAndDecrements))]
+        [PerCompilationType(nameof(NullableUInt32sAndDecrements))]
+        [PerCompilationType(nameof(Int64sAndDecrements))]
+        [PerCompilationType(nameof(NullableInt64sAndDecrements))]
+        [PerCompilationType(nameof(UInt64sAndDecrements))]
+        [PerCompilationType(nameof(NullableUInt64sAndDecrements))]
+        [PerCompilationType(nameof(DecimalsAndDecrements))]
+        [PerCompilationType(nameof(NullableDecimalsAndDecrements))]
+        [PerCompilationType(nameof(SinglesAndDecrements))]
+        [PerCompilationType(nameof(NullableSinglesAndDecrements))]
+        [PerCompilationType(nameof(DoublesAndDecrements))]
+        [PerCompilationType(nameof(NullableDoublesAndDecrements))]
+        public void AssignsCorrectValues(Type type, object value, object result, bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(type);
             LabelTarget target = Expression.Label(type);
@@ -69,11 +70,12 @@ namespace System.Linq.Expressions.Tests
                 Expression.Return(target, variable),
                 Expression.Label(target, Expression.Default(type))
                 );
-            Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(Expression.Constant(result, type), block)).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(Expression.Equal(Expression.Constant(result, type), block)).Compile(useInterpreter)());
         }
 
-        [Fact]
-        public void SingleNanToNan()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void SingleNanToNan(bool useInterpreter)
         {
             TestPropertyClass<float> instance = new TestPropertyClass<float>();
             instance.TestInstance = float.NaN;
@@ -86,13 +88,14 @@ namespace System.Linq.Expressions.Tests
                             "TestInstance"
                             )
                         )
-                    ).Compile()()
+                    ).Compile(useInterpreter)()
                 ));
             Assert.True(float.IsNaN(instance.TestInstance));
         }
 
-        [Fact]
-        public void DoubleNanToNan()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void DoubleNanToNan(bool useInterpreter)
         {
             TestPropertyClass<double> instance = new TestPropertyClass<double>();
             instance.TestInstance = double.NaN;
@@ -105,14 +108,14 @@ namespace System.Linq.Expressions.Tests
                             "TestInstance"
                             )
                         )
-                    ).Compile()()
+                    ).Compile(useInterpreter)()
                 ));
             Assert.True(double.IsNaN(instance.TestInstance));
         }
 
         [Theory]
-        [MemberData("DecrementOverflowingValues")]
-        public void OverflowingValuesThrow(object value)
+        [PerCompilationType(nameof(DecrementOverflowingValues))]
+        public void OverflowingValuesThrow(object value, bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(value.GetType());
             Action overflow = Expression.Lambda<Action>(
@@ -122,20 +125,21 @@ namespace System.Linq.Expressions.Tests
                     Expression.Assign(variable, Expression.Constant(value)),
                     Expression.PostDecrementAssign(variable)
                     )
-                ).Compile();
+                ).Compile(useInterpreter);
             Assert.Throws<OverflowException>(overflow);
         }
 
         [Theory]
-        [MemberData("UnincrementableAndUndecrementableTypes")]
+        [MemberData(nameof(UnincrementableAndUndecrementableTypes))]
         public void InvalidOperandType(Type type)
         {
             ParameterExpression variable = Expression.Variable(type);
             Assert.Throws<InvalidOperationException>(() => Expression.PostDecrementAssign(variable));
         }
 
-        [Fact]
-        public void MethodCorrectResult()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void MethodCorrectResult(bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(typeof(string));
             BlockExpression block = Expression.Block(
@@ -143,11 +147,12 @@ namespace System.Linq.Expressions.Tests
                 Expression.Assign(variable, Expression.Constant("hello")),
                 Expression.PostDecrementAssign(variable, typeof(IncDecAssignTests).GetTypeInfo().GetDeclaredMethod("SillyMethod"))
                 );
-            Assert.Equal("hello", Expression.Lambda<Func<string>>(block).Compile()());
+            Assert.Equal("hello", Expression.Lambda<Func<string>>(block).Compile(useInterpreter)());
         }
 
-        [Fact]
-        public void MethodCorrectAssign()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void MethodCorrectAssign(bool useInterpreter)
         {
             ParameterExpression variable = Expression.Variable(typeof(string));
             LabelTarget target = Expression.Label(typeof(string));
@@ -158,7 +163,7 @@ namespace System.Linq.Expressions.Tests
                 Expression.Return(target, variable),
                 Expression.Label(target, Expression.Default(typeof(string)))
                 );
-            Assert.Equal("Eggplant", Expression.Lambda<Func<string>>(block).Compile()());
+            Assert.Equal("Eggplant", Expression.Lambda<Func<string>>(block).Compile(useInterpreter)());
         }
 
         [Fact]
@@ -185,8 +190,9 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentException>(() => Expression.PostDecrementAssign(variable, method));
         }
 
-        [Fact]
-        public void StaticMemberAccessCorrect()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void StaticMemberAccessCorrect(bool useInterpreter)
         {
             TestPropertyClass<double>.TestStatic = 2.0;
             Assert.Equal(
@@ -195,13 +201,14 @@ namespace System.Linq.Expressions.Tests
                     Expression.PostDecrementAssign(
                         Expression.Property(null, typeof(TestPropertyClass<double>), "TestStatic")
                         )
-                    ).Compile()()
+                    ).Compile(useInterpreter)()
                 );
             Assert.Equal(1.0, TestPropertyClass<double>.TestStatic);
         }
 
-        [Fact]
-        public void InstanceMemberAccessCorrect()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void InstanceMemberAccessCorrect(bool useInterpreter)
         {
             TestPropertyClass<int> instance = new TestPropertyClass<int>();
             instance.TestInstance = 2;
@@ -215,13 +222,14 @@ namespace System.Linq.Expressions.Tests
                             "TestInstance"
                             )
                         )
-                    ).Compile()()
+                    ).Compile(useInterpreter)()
                 );
             Assert.Equal(1, instance.TestInstance);
         }
 
-        [Fact]
-        public void ArrayAccessCorrect()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void ArrayAccessCorrect(bool useInterpreter)
         {
             int[] array = new int[1];
             array[0] = 2;
@@ -231,7 +239,7 @@ namespace System.Linq.Expressions.Tests
                     Expression.PostDecrementAssign(
                         Expression.ArrayAccess(Expression.Constant(array), Expression.Constant(0))
                         )
-                    ).Compile()()
+                    ).Compile(useInterpreter)()
                 );
             Assert.Equal(1, array[0]);
         }

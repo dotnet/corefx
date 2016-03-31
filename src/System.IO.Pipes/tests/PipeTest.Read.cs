@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -123,6 +124,7 @@ namespace System.IO.Pipes.Tests
                 PipeStream pipe = pair.readablePipe;
                 Assert.True(pipe.IsConnected);
                 Assert.False(pipe.CanWrite);
+                Assert.False(pipe.CanSeek);
 
                 Assert.Throws<NotSupportedException>(() => pipe.Write(new byte[5], 0, 5));
 
@@ -191,6 +193,21 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
+        public void CopyToAsync_InvalidArgs_Throws()
+        {
+            using (ServerClientPair pair = CreateServerClientPair())
+            {
+                Assert.Throws<ArgumentNullException>("destination", () => { pair.readablePipe.CopyToAsync(null); });
+                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { pair.readablePipe.CopyToAsync(new MemoryStream(), 0); });
+                Assert.Throws<NotSupportedException>(() => { pair.readablePipe.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
+                if (!pair.writeablePipe.CanRead)
+                {
+                    Assert.Throws<NotSupportedException>(() => { pair.writeablePipe.CopyToAsync(new MemoryStream()); });
+                }
+            }
+        }
+
+        [Fact]
         public virtual async Task ReadFromPipeWithClosedPartner_ReadNoBytes()
         {
             using (ServerClientPair pair = CreateServerClientPair())
@@ -241,7 +258,7 @@ namespace System.IO.Pipes.Tests
                 Task.Run(() => { pair.writeablePipe.Write(sent, 0, sent.Length); });
                 Assert.Equal(sent.Length, pair.readablePipe.Read(received, 0, sent.Length));
                 Assert.Equal(sent, received);
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // WaitForPipeDrain isn't supported on Unix
                     pair.writeablePipe.WaitForPipeDrain();
             }
         }
@@ -260,8 +277,8 @@ namespace System.IO.Pipes.Tests
         }
 
         [Theory]
-        [MemberData("AsyncReadWriteChain_MemberData")]
-        public async Task AsyncReadWriteChain(int iterations, int writeBufferSize, int readBufferSize, bool cancelableToken)
+        [MemberData(nameof(AsyncReadWriteChain_MemberData))]
+        public async Task AsyncReadWriteChain_ReadWrite(int iterations, int writeBufferSize, int readBufferSize, bool cancelableToken)
         {
             var writeBuffer = new byte[writeBufferSize];
             var readBuffer = new byte[readBufferSize];
@@ -270,7 +287,7 @@ namespace System.IO.Pipes.Tests
 
             using (ServerClientPair pair = CreateServerClientPair())
             {
-                // Repeatedly and asynchronously write to the writeable pipe and read from the readable pipe,
+                // Repeatedly and asynchronously write to the writable pipe and read from the readable pipe,
                 // verifying that the correct data made it through.
                 for (int iter = 0; iter < iterations; iter++)
                 {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Net.Sockets;
@@ -8,7 +9,7 @@ namespace System.Net
 {
     /// <devdoc>
     ///   <para>
-    ///     Provides an internet protocol (IP) address.
+    ///     Provides an Internet Protocol (IP) address.
     ///   </para>
     /// </devdoc>
     public class IPAddress
@@ -109,7 +110,7 @@ namespace System.Net
         {
             if (newAddress < 0 || newAddress > 0x00000000FFFFFFFF)
             {
-                throw new ArgumentOutOfRangeException("newAddress");
+                throw new ArgumentOutOfRangeException(nameof(newAddress));
             }
 
             PrivateAddress = (uint)newAddress;
@@ -124,12 +125,12 @@ namespace System.Net
         {
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
 
             if (address.Length != IPAddressParserStatics.IPv6AddressBytes)
             {
-                throw new ArgumentException(SR.dns_bad_ip_address, "address");
+                throw new ArgumentException(SR.dns_bad_ip_address, nameof(address));
             }
 
             _numbers = new ushort[NumberOfLabels];
@@ -143,7 +144,7 @@ namespace System.Net
             //           addresses we could implement some more robust checking here
             if (scopeid < 0 || scopeid > 0x00000000FFFFFFFF)
             {
-                throw new ArgumentOutOfRangeException("scopeid");
+                throw new ArgumentOutOfRangeException(nameof(scopeid));
             }
 
             PrivateScopeId = (uint)scopeid;
@@ -166,11 +167,11 @@ namespace System.Net
         {
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
             if (address.Length != IPAddressParserStatics.IPv4AddressBytes && address.Length != IPAddressParserStatics.IPv6AddressBytes)
             {
-                throw new ArgumentException(SR.dns_bad_ip_address, "address");
+                throw new ArgumentException(SR.dns_bad_ip_address, nameof(address));
             }
 
             if (address.Length == IPAddressParserStatics.IPv4AddressBytes)
@@ -287,7 +288,7 @@ namespace System.Net
                 //           addresses we could implement some more robust checking here
                 if (value < 0 || value > 0x00000000FFFFFFFF)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 PrivateScopeId = (uint)value;
@@ -360,7 +361,7 @@ namespace System.Net
         {
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
 
             if (address.IsIPv6)

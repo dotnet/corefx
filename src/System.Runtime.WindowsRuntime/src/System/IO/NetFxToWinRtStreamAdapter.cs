@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -88,7 +89,7 @@ namespace System.IO
         internal static NetFxToWinRtStreamAdapter Create(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             StreamReadOperationOptimization readOptimization = StreamReadOperationOptimization.AbstractStream;
             if (stream.CanRead)
@@ -226,12 +227,12 @@ namespace System.IO
             if (buffer == null)
             {
                 // Mapped to E_POINTER.
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (count < 0 || Int32.MaxValue < count)
             {
-                ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException("count");
+                ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException(nameof(count));
                 ex.SetErrorCode(HResults.E_INVALIDARG);
                 throw ex;
             }
@@ -245,7 +246,7 @@ namespace System.IO
 
             if (!(options == InputStreamOptions.None || options == InputStreamOptions.Partial || options == InputStreamOptions.ReadAhead))
             {
-                ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException("options",
+                ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException(nameof(options),
                                                                                  SR.ArgumentOutOfRange_InvalidInputStreamOptionsEnumValue);
                 ex.SetErrorCode(HResults.E_INVALIDARG);
                 throw ex;
@@ -292,7 +293,7 @@ namespace System.IO
             if (buffer == null)
             {
                 // Mapped to E_POINTER.
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (buffer.Capacity < buffer.Length)

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -66,8 +67,8 @@ namespace System.Data.SqlClient
         internal const int KeywordsCount = (int)Keywords.KeywordsCount;
         internal const int DeprecatedKeywordsCount = 6;
 
-        private static readonly string[] s_validKeywords;
-        private static readonly Dictionary<string, Keywords> s_keywords;
+        private static readonly string[] s_validKeywords = CreateValidKeywords();
+        private static readonly Dictionary<string, Keywords> s_keywords = CreateKeywordsDictionary();
 
         private ApplicationIntent _applicationIntent = DbConnectionStringDefaults.ApplicationIntent;
         private string _applicationName = DbConnectionStringDefaults.ApplicationName;
@@ -100,8 +101,7 @@ namespace System.Data.SqlClient
         private bool _replication = DbConnectionStringDefaults.Replication;
         private bool _userInstance = DbConnectionStringDefaults.UserInstance;
 
-
-        static SqlConnectionStringBuilder()
+        private static string[] CreateValidKeywords()
         {
             string[] validKeywords = new string[KeywordsCount];
             validKeywords[(int)Keywords.ApplicationIntent] = DbConnectionStringKeywords.ApplicationIntent;
@@ -132,8 +132,11 @@ namespace System.Data.SqlClient
             validKeywords[(int)Keywords.WorkstationID] = DbConnectionStringKeywords.WorkstationID;
             validKeywords[(int)Keywords.ConnectRetryCount] = DbConnectionStringKeywords.ConnectRetryCount;
             validKeywords[(int)Keywords.ConnectRetryInterval] = DbConnectionStringKeywords.ConnectRetryInterval;
-            s_validKeywords = validKeywords;
+            return validKeywords;
+        }
 
+        private static Dictionary<string, Keywords> CreateKeywordsDictionary()
+        {
             Dictionary<string, Keywords> hash = new Dictionary<string, Keywords>(KeywordsCount + SqlConnectionString.SynonymCount, StringComparer.OrdinalIgnoreCase);
             hash.Add(DbConnectionStringKeywords.ApplicationIntent, Keywords.ApplicationIntent);
             hash.Add(DbConnectionStringKeywords.ApplicationName, Keywords.ApplicationName);
@@ -183,7 +186,7 @@ namespace System.Data.SqlClient
             hash.Add(DbConnectionStringSynonyms.User, Keywords.UserID);
             hash.Add(DbConnectionStringSynonyms.WSID, Keywords.WorkstationID);
             Debug.Assert((KeywordsCount + SqlConnectionString.SynonymCount) == hash.Count, "initial expected size is incorrect");
-            s_keywords = hash;
+            return hash;
         }
 
         public SqlConnectionStringBuilder() : this((string)null)

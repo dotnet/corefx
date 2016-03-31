@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_config.h"
 #include "pal_multi.h"
@@ -7,6 +8,7 @@
 
 #include <assert.h>
 
+static_assert(PAL_CURLM_CALL_MULTI_PERFORM == CURLM_CALL_MULTI_PERFORM, "");
 static_assert(PAL_CURLM_OK == CURLM_OK, "");
 static_assert(PAL_CURLM_BAD_HANDLE == CURLM_BAD_HANDLE, "");
 static_assert(PAL_CURLM_BAD_EASY_HANDLE == CURLM_BAD_EASY_HANDLE, "");

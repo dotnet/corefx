@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -39,7 +40,7 @@ namespace System.Dynamic
         /// <returns>The new set of binding restrictions.</returns>
         public BindingRestrictions Merge(BindingRestrictions restrictions)
         {
-            ContractUtils.RequiresNotNull(restrictions, "restrictions");
+            ContractUtils.RequiresNotNull(restrictions, nameof(restrictions));
             if (this == Empty)
             {
                 return restrictions;
@@ -59,8 +60,8 @@ namespace System.Dynamic
         /// <returns>The new binding restrictions.</returns>
         public static BindingRestrictions GetTypeRestriction(Expression expression, Type type)
         {
-            ContractUtils.RequiresNotNull(expression, "expression");
-            ContractUtils.RequiresNotNull(type, "type");
+            ContractUtils.RequiresNotNull(expression, nameof(expression));
+            ContractUtils.RequiresNotNull(type, nameof(type));
 
             return new TypeRestriction(expression, type);
         }
@@ -89,7 +90,7 @@ namespace System.Dynamic
         /// <returns>The new binding restrictions.</returns>
         public static BindingRestrictions GetInstanceRestriction(Expression expression, object instance)
         {
-            ContractUtils.RequiresNotNull(expression, "expression");
+            ContractUtils.RequiresNotNull(expression, nameof(expression));
 
             return new InstanceRestriction(expression, instance);
         }
@@ -97,7 +98,7 @@ namespace System.Dynamic
         /// <summary>
         /// Creates the binding restriction that checks the expression for arbitrary immutable properties.
         /// </summary>
-        /// <param name="expression">The expression expression the restrictions.</param>
+        /// <param name="expression">The expression expressing the restrictions.</param>
         /// <returns>The new binding restrictions.</returns>
         /// <remarks>
         /// By convention, the general restrictions created by this method must only test
@@ -105,8 +106,8 @@ namespace System.Dynamic
         /// </remarks>
         public static BindingRestrictions GetExpressionRestriction(Expression expression)
         {
-            ContractUtils.RequiresNotNull(expression, "expression");
-            ContractUtils.Requires(expression.Type == typeof(bool), "expression");
+            ContractUtils.RequiresNotNull(expression, nameof(expression));
+            ContractUtils.Requires(expression.Type == typeof(bool), nameof(expression));
             return new CustomRestriction(expression);
         }
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Test.Cryptography;
 using Xunit;
@@ -47,7 +48,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("WhitespaceBeforeCases")]
+        [MemberData(nameof(WhitespaceBeforeCases))]
         public static void QuoteWhitespaceBefore(string expected, string hexEncoded)
         {
             byte[] encoded = hexEncoded.HexToByteArray();
@@ -56,7 +57,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("WhitespaceBeforeCases")]
+        [MemberData(nameof(WhitespaceBeforeCases))]
         public static void NoQuoteWhitespaceBefore(string expectedQuoted, string hexEncoded)
         {
             string expected = expectedQuoted.Replace("\"", "");
@@ -67,7 +68,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("WhitespaceAfterCases")]
+        [MemberData(nameof(WhitespaceAfterCases))]
         public static void QuoteWhitespaceAfter(string expected, string hexEncoded)
         {
             byte[] encoded = hexEncoded.HexToByteArray();
@@ -76,7 +77,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("WhitespaceAfterCases")]
+        [MemberData(nameof(WhitespaceAfterCases))]
         public static void NoQuoteWhitespaceAfter(string expectedQuoted, string hexEncoded)
         {
             string expected = expectedQuoted.Replace("\"", "");
@@ -87,7 +88,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("QuotedContentsCases")]
+        [MemberData(nameof(QuotedContentsCases))]
         public static void QuoteByContents(string expected, string hexEncoded)
         {
             byte[] encoded = hexEncoded.HexToByteArray();
@@ -96,7 +97,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("QuotedContentsCases")]
+        [MemberData(nameof(QuotedContentsCases))]
         public static void NoQuoteByContents(string expectedQuoted, string hexEncoded)
         {
             string expected = expectedQuoted.Replace("\"", "");
@@ -107,7 +108,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("InternallyQuotedRDNs")]
+        [MemberData(nameof(InternallyQuotedRDNs))]
         public static void QuotedWithQuotes(string quoted, string notQuoted, string hexEncoded)
         {
             byte[] encoded = hexEncoded.HexToByteArray();
@@ -117,7 +118,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("InternallyQuotedRDNs")]
+        [MemberData(nameof(InternallyQuotedRDNs))]
         public static void NotQuotedWithQuotes(string quoted, string notQuoted, string hexEncoded)
         {
             byte[] encoded = hexEncoded.HexToByteArray();

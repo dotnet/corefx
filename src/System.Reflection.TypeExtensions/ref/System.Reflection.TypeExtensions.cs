@@ -1,10 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
 
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.BindingFlags))]
 namespace System.Reflection
 {
     public static partial class AssemblyExtensions
@@ -12,17 +14,6 @@ namespace System.Reflection
         public static System.Type[] GetExportedTypes(this System.Reflection.Assembly assembly) { return default(System.Type[]); }
         public static System.Reflection.Module[] GetModules(this System.Reflection.Assembly assembly) { return default(System.Reflection.Module[]); }
         public static System.Type[] GetTypes(this System.Reflection.Assembly assembly) { return default(System.Type[]); }
-    }
-    [System.FlagsAttribute]
-    public enum BindingFlags
-    {
-        DeclaredOnly = 2,
-        FlattenHierarchy = 64,
-        IgnoreCase = 1,
-        Instance = 4,
-        NonPublic = 32,
-        Public = 16,
-        Static = 8,
     }
     public static partial class EventInfoExtensions
     {

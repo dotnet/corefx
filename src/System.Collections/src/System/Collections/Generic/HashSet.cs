@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -108,7 +109,7 @@ namespace System.Collections.Generic
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
             Contract.EndContractBlock();
 
@@ -359,7 +360,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -387,7 +388,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -435,11 +436,11 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
-            // this is already the enpty set; return
+            // this is already the empty set; return
             if (_count == 0)
             {
                 return;
@@ -467,7 +468,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -519,7 +520,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -576,7 +577,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -635,7 +636,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -693,7 +694,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -744,7 +745,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -779,7 +780,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -826,20 +827,20 @@ namespace System.Collections.Generic
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
             Contract.EndContractBlock();
 
             // check array index valid index into array
             if (arrayIndex < 0)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             // also throw if count less than 0
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), count, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             // will array, starting at arrayIndex, be able to hold elements? Note: not
@@ -870,7 +871,7 @@ namespace System.Collections.Generic
         {
             if (match == null)
             {
-                throw new ArgumentNullException("match");
+                throw new ArgumentNullException(nameof(match));
             }
             Contract.EndContractBlock();
 
@@ -1012,8 +1013,6 @@ namespace System.Collections.Generic
         /// </summary>
         private void SetCapacity(int newSize, bool forceNewHashCodes)
         {
-            Debug.Assert(HashHelpers.IsPrime(newSize), "New size is not prime!");
-
             Debug.Assert(_buckets != null, "SetCapacity called on a set with no elements");
 
             Slot[] newSlots = new Slot[newSize];
@@ -1022,6 +1021,7 @@ namespace System.Collections.Generic
                 Array.Copy(_slots, 0, newSlots, 0, _lastIndex);
             }
 
+#if FEATURE_RANDOMIZED_STRING_HASHING
             if (forceNewHashCodes)
             {
                 for (int i = 0; i < _lastIndex; i++)
@@ -1032,6 +1032,10 @@ namespace System.Collections.Generic
                     }
                 }
             }
+#else
+            Debug.Assert(!forceNewHashCodes);
+#endif
+
 
             int[] newBuckets = new int[newSize];
             for (int i = 0; i < _lastIndex; i++)
@@ -1505,80 +1509,6 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
-        /// Copies this to an array. Used for DebugView
-        /// </summary>
-        /// <returns></returns>
-        internal T[] ToArray()
-        {
-            T[] newArray = new T[Count];
-            CopyTo(newArray);
-            return newArray;
-        }
-
-        /// <summary>
-        /// Internal method used for HashSetEqualityComparer. Compares set1 and set2 according 
-        /// to specified comparer.
-        /// 
-        /// Because items are hashed according to a specific equality comparer, we have to resort
-        /// to n^2 search if they're using different equality comparers.
-        /// </summary>
-        /// <param name="set1"></param>
-        /// <param name="set2"></param>
-        /// <param name="comparer"></param>
-        /// <returns></returns>
-        internal static bool HashSetEquals(HashSet<T> set1, HashSet<T> set2, IEqualityComparer<T> comparer)
-        {
-            // handle null cases first
-            if (set1 == null)
-            {
-                return (set2 == null);
-            }
-            else if (set2 == null)
-            {
-                // set1 != null
-                return false;
-            }
-
-            // all comparers are the same; this is faster
-            if (AreEqualityComparersEqual(set1, set2))
-            {
-                if (set1.Count != set2.Count)
-                {
-                    return false;
-                }
-                // suffices to check subset
-                foreach (T item in set2)
-                {
-                    if (!set1.Contains(item))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            else
-            {  // n^2 search because items are hashed according to their respective ECs
-                foreach (T set2Item in set2)
-                {
-                    bool found = false;
-                    foreach (T set1Item in set1)
-                    {
-                        if (comparer.Equals(set2Item, set1Item))
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-
-        /// <summary>
         /// Checks if equality comparers are equal. This is used for algorithms that can
         /// speed up if it knows the other item has unique elements. I.e. if they're using 
         /// different equality comparers, then uniqueness assumption between sets break.
@@ -1605,7 +1535,7 @@ namespace System.Collections.Generic
             return _comparer.GetHashCode(item) & Lower31BitMask;
         }
 
-        #endregion
+#endregion
 
         // used for set checking operations (using enumerables) that rely on counting
         internal struct ElementCount

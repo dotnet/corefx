@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -64,7 +65,7 @@ namespace System.Xml
         {
             if (key == null)
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
             int len = key.Length;
             if (len == 0)
@@ -72,7 +73,7 @@ namespace System.Xml
                 return string.Empty;
             }
             int hashCode = len + _hashCodeRandomizer;
-            // use key.Length to eliminate the rangecheck
+            // use key.Length to eliminate the range check
             for (int i = 0; i < key.Length; i++)
             {
                 hashCode += (hashCode << 7) ^ key[i];
@@ -134,7 +135,7 @@ namespace System.Xml
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             if (value.Length == 0)
             {
@@ -143,7 +144,7 @@ namespace System.Xml
 
             int len = value.Length + _hashCodeRandomizer;
             int hashCode = len;
-            // use value.Length to eliminate the rangecheck
+            // use value.Length to eliminate the range check
             for (int i = 0; i < value.Length; i++)
             {
                 hashCode += (hashCode << 7) ^ value[i];
@@ -219,7 +220,7 @@ namespace System.Xml
             Entry[] oldEntries = _entries;
             Entry[] newEntries = new Entry[newMask + 1];
 
-            // use oldEntries.Length to eliminate the rangecheck            
+            // use oldEntries.Length to eliminate the range check            
             for (int i = 0; i < oldEntries.Length; i++)
             {
                 Entry e = oldEntries[i];
@@ -243,7 +244,7 @@ namespace System.Xml
             {
                 return false;
             }
-            // use array.Length to eliminate the rangecheck
+            // use array.Length to eliminate the range check
             for (int i = 0; i < str1.Length; i++)
             {
                 if (str1[i] != str2[str2Start + i])

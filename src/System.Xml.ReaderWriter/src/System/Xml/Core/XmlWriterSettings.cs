@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -81,7 +82,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("Async");
+                CheckReadOnly(nameof(Async));
                 _useAsync = value;
             }
         }
@@ -95,7 +96,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("Encoding");
+                CheckReadOnly(nameof(Encoding));
                 _encoding = value;
             }
         }
@@ -109,7 +110,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("DontWriteEncodingTag");
+                CheckReadOnly(nameof(DontWriteEncodingTag));
                 dontWriteEncodingTag = value;
             }
         }
@@ -124,7 +125,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("OmitXmlDeclaration");
+                CheckReadOnly(nameof(OmitXmlDeclaration));
                 _omitXmlDecl = value;
             }
         }
@@ -138,11 +139,11 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("NewLineHandling");
+                CheckReadOnly(nameof(NewLineHandling));
 
                 if ((uint)value > (uint)NewLineHandling.None)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 _newLineHandling = value;
             }
@@ -157,11 +158,11 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("NewLineChars");
+                CheckReadOnly(nameof(NewLineChars));
 
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
                 _newLineChars = value;
             }
@@ -176,7 +177,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("Indent");
+                CheckReadOnly(nameof(Indent));
                 _indent = value ? TriState.True : TriState.False;
             }
         }
@@ -190,11 +191,11 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("IndentChars");
+                CheckReadOnly(nameof(IndentChars));
 
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
                 _indentChars = value;
             }
@@ -209,7 +210,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("NewLineOnAttributes");
+                CheckReadOnly(nameof(NewLineOnAttributes));
                 _newLineOnAttributes = value;
             }
         }
@@ -223,7 +224,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("CloseOutput");
+                CheckReadOnly(nameof(CloseOutput));
                 _closeOutput = value;
             }
         }
@@ -239,11 +240,11 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("ConformanceLevel");
+                CheckReadOnly(nameof(ConformanceLevel));
 
                 if ((uint)value > (uint)ConformanceLevel.Document)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 _conformanceLevel = value;
             }
@@ -258,7 +259,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("CheckCharacters");
+                CheckReadOnly(nameof(CheckCharacters));
                 _checkCharacters = value;
             }
         }
@@ -272,10 +273,10 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("NamespaceHandling");
+                CheckReadOnly(nameof(NamespaceHandling));
                 if ((uint)value > (uint)(NamespaceHandling.OmitDuplicates))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 _namespaceHandling = value;
             }
@@ -290,7 +291,7 @@ namespace System.Xml
             }
             set
             {
-                CheckReadOnly("WriteEndDocumentOnClose");
+                CheckReadOnly(nameof(WriteEndDocumentOnClose));
                 _writeEndDocumentOnClose = value;
             }
         }
@@ -301,7 +302,7 @@ namespace System.Xml
         //
         public void Reset()
         {
-            CheckReadOnly("Reset");
+            CheckReadOnly(nameof(Reset));
             Initialize();
         }
 
@@ -325,7 +326,7 @@ namespace System.Xml
         {
             if (output == null)
             {
-                throw new ArgumentNullException("output");
+                throw new ArgumentNullException(nameof(output));
             }
 
             XmlWriter writer;
@@ -372,7 +373,7 @@ namespace System.Xml
         {
             if (output == null)
             {
-                throw new ArgumentNullException("output");
+                throw new ArgumentNullException(nameof(output));
             }
 
             XmlWriter writer;
@@ -401,7 +402,7 @@ namespace System.Xml
         {
             if (output == null)
             {
-                throw new ArgumentNullException("output");
+                throw new ArgumentNullException(nameof(output));
             }
 
             return AddConformanceWrapper(output);

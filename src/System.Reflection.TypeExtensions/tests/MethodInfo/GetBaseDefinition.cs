@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using Xunit;
@@ -27,7 +28,7 @@ namespace System.Reflection.Tests
             Object var = null;
             Object obj = null;
 
-            // [A] Vanila: Class does not extend (other than Object)/implement
+            // [A] Vanilla: Class does not extend (other than Object)/implement
 
             type = Type.GetType("System.Reflection.Tests.Co4611_a3");
             Assert.NotNull(type);
@@ -67,7 +68,7 @@ namespace System.Reflection.Tests
             Assert.Equal(type, mInfo2.DeclaringType);
         }
 
-        // [B1] Abstract clss: abstract method obtained via abstract class;
+        // [B1] Abstract class: abstract method obtained via abstract class;
         // abstract class Ab_Co4611_a1
         [Fact]
         public void Test2()
@@ -247,7 +248,7 @@ namespace System.Reflection.Tests
     }
 
 
-    // classes to refelct upon: 
+    // classes to reflect upon: 
     // Scenario [A]
     internal class Co4611_a3
     {

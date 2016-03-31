@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -162,7 +163,7 @@ namespace System.Threading.Tasks
         /// <summary>
         /// Creates an IAsyncInfo from the Task object. The specified task represents the future encapsulated by this IAsyncInfo.
         /// The specified CancellationTokenSource and Progress are assumed to be the source of the specified Task's cancellation and
-        /// the Progress that receives reports from teh specified Task.
+        /// the Progress that receives reports from the specified Task.
         /// </summary>
         /// <param name="underlyingTask">The Task whose operation is represented by this IAsyncInfo</param>
         /// <param name="underlyingCancelTokenSource">The cancellation control for the cancellation token observed
@@ -173,7 +174,7 @@ namespace System.Threading.Tasks
                                         CancellationTokenSource underlyingCancelTokenSource, Progress<TProgressInfo> underlyingProgressDispatcher)
         {
             if (underlyingTask == null)
-                throw new ArgumentNullException("underlyingTask");
+                throw new ArgumentNullException(nameof(underlyingTask));
 
             // Throw InvalidOperation and not Argument for parity with the constructor that takes Delegate taskProvider:
             if (underlyingTask.Status == TaskStatus.Created)
@@ -290,7 +291,7 @@ namespace System.Threading.Tasks
                 return false;
 
             if (error == null)
-                throw new ArgumentNullException("error");
+                throw new ArgumentNullException(nameof(error));
 
             // Here we do not try to deal with the inherit races: Use this method only when constructing a synchronously
             // completed IAsyncInfo in a desired state when you understand the threading conditions well.
@@ -974,7 +975,7 @@ namespace System.Threading.Tasks
                 AggregateException aggregateException = task.Exception;
 
                 // By spec, if task.IsFaulted is true, then task.Exception must not be null and its InnerException must
-                // also not be null. However, in case something is unexpected on the Task side of the road, let’s be defensive
+                // also not be null. However, in case something is unexpected on the Task side of the road, let?s be defensive
                 // instead of failing with an inexplicable NullReferenceException:
 
                 if (aggregateException == null)

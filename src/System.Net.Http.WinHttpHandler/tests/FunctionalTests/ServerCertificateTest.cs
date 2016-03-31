@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
 using System.Net.Security;
-using System.Net.Tests;
+using System.Net.Test.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -118,7 +119,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
         {
                 Assert.Equal(SslPolicyErrors.None, _validationCallbackHistory.SslPolicyErrors);
                 Assert.True(_validationCallbackHistory.CertificateChain.Count > 0);
-                _output.WriteLine("Certificate.Subject: {0}", _validationCallbackHistory.Certificate.Subject);
+                _output.WriteLine("Certificate.Subject: {0}", _validationCallbackHistory.CertificateSubject);
                 _output.WriteLine("Expected HostName: {0}", expectedHostName);
         }
         
@@ -129,7 +130,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             SslPolicyErrors sslPolicyErrors)
         {
             _validationCallbackHistory.WasCalled = true;
-            _validationCallbackHistory.Certificate = certificate;
+            _validationCallbackHistory.CertificateSubject = certificate.Subject;
             foreach (var element in chain.ChainElements)
             {
                 _validationCallbackHistory.CertificateChain.Add(element.Certificate);
@@ -163,7 +164,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             public bool ReturnFailure;
             public bool WasCalled;
             public SslPolicyErrors SslPolicyErrors;
-            public X509Certificate2 Certificate;
+            public string CertificateSubject;
             public X509CertificateCollection CertificateChain;
             public X509ChainStatus[] ChainStatus;
 
@@ -173,7 +174,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
                 ReturnFailure = false;
                 WasCalled = false;
                 SslPolicyErrors = SslPolicyErrors.None;
-                Certificate = null;
+                CertificateSubject = null;
                 CertificateChain = new X509CertificateCollection();
                 ChainStatus = null;
             }

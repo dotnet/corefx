@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Reflection.Metadata;
@@ -27,12 +28,12 @@ namespace System.Reflection.Internal
         {
             if (length < 0)
             {
-                throw new ArgumentOutOfRangeException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
             }
 
             if (buffer == null && length != 0)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             // the reader performs little-endian specific operations
@@ -577,7 +578,7 @@ namespace System.Reflection.Internal
 
         /// <summary>
         /// In a table that specifies children via a list field (e.g. TypeDef.FieldList, TypeDef.MethodList), 
-        /// seaches for the parent given a reference to a child.
+        /// searches for the parent given a reference to a child.
         /// </summary>
         /// <returns>Returns row number [0..RowCount).</returns>
         internal int BinarySearchForSlot(
@@ -635,7 +636,7 @@ namespace System.Reflection.Internal
         }
 
         /// <summary>
-        /// In a table ordered by a column containing entity references seaches for a row with the specified reference.
+        /// In a table ordered by a column containing entity references searches for a row with the specified reference.
         /// </summary>
         /// <returns>Returns row number [0..RowCount) or -1 if not found.</returns>
         internal int BinarySearchReference(

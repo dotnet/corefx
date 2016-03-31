@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -419,7 +420,6 @@ namespace System.Net.Sockets
         public TcpClient(System.Net.Sockets.AddressFamily family) { }
         protected bool Active { get { return default(bool); } set { } }
         public int Available { get { return default(int); } }
-        public System.Net.Sockets.Socket Client { get { return default(System.Net.Sockets.Socket); } set { } }
         public bool Connected { get { return default(bool); } }
         public bool ExclusiveAddressUse { get { return default(bool); } set { } }
         public System.Net.Sockets.LingerOption LingerState { get { return default(System.Net.Sockets.LingerOption); } set { } }
@@ -460,7 +460,6 @@ namespace System.Net.Sockets
         public UdpClient(System.Net.Sockets.AddressFamily family) { }
         protected bool Active { get { return default(bool); } set { } }
         public int Available { get { return default(int); } }
-        public System.Net.Sockets.Socket Client { get { return default(System.Net.Sockets.Socket); } set { } }
         public bool DontFragment { get { return default(bool); } set { } }
         public bool EnableBroadcast { get { return default(bool); } set { } }
         public bool ExclusiveAddressUse { get { return default(bool); } set { } }

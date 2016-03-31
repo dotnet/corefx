@@ -20,6 +20,7 @@
     <Compile Include="BasicEventSourceTest\FuzzyTests.cs" />
     <Compile Include="BasicEventSourceTest\Harness\Listeners.cs" />
     <Compile Include="BasicEventSourceTest\TestEventCounter.cs" />
+    <Compile Include="BasicEventSourceTest\TestFilter.cs" />
     <Compile Include="BasicEventSourceTest\TestShutdown.cs" />
     <Compile Include="BasicEventSourceTest\TestsEventSourceLifetime.cs" />
     <Compile Include="BasicEventSourceTest\TestsManifestGeneration.cs" />
@@ -40,6 +41,14 @@
     <Compile Include="CustomEventSources\SimpleEventSource.cs" />
     <Compile Include="CustomEventSources\UseAbstractEventSource.cs" />
     <Compile Include="CustomEventSources\UseInterfaceEventSource.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\System.Diagnostics.Tracing.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

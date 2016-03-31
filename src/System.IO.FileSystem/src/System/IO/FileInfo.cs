@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -24,7 +25,7 @@ namespace System.IO
         public FileInfo(String fileName)
         {
             if (fileName == null)
-                throw new ArgumentNullException("fileName");
+                throw new ArgumentNullException(nameof(fileName));
             Contract.EndContractBlock();
 
             Init(fileName);
@@ -86,7 +87,7 @@ namespace System.IO
             }
         }
 
-        /* Creates an instance of the the parent directory */
+        /* Creates an instance of the parent directory */
         public DirectoryInfo Directory
         {
             get
@@ -145,9 +146,9 @@ namespace System.IO
         public FileInfo CopyTo(String destFileName)
         {
             if (destFileName == null)
-                throw new ArgumentNullException("destFileName", SR.ArgumentNull_FileName);
+                throw new ArgumentNullException(nameof(destFileName), SR.ArgumentNull_FileName);
             if (destFileName.Length == 0)
-                throw new ArgumentException(SR.Argument_EmptyFileName, "destFileName");
+                throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
             Contract.EndContractBlock();
 
             destFileName = File.InternalCopy(FullPath, destFileName, false);
@@ -167,9 +168,9 @@ namespace System.IO
         public FileInfo CopyTo(String destFileName, bool overwrite)
         {
             if (destFileName == null)
-                throw new ArgumentNullException("destFileName", SR.ArgumentNull_FileName);
+                throw new ArgumentNullException(nameof(destFileName), SR.ArgumentNull_FileName);
             if (destFileName.Length == 0)
-                throw new ArgumentException(SR.Argument_EmptyFileName, "destFileName");
+                throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
             Contract.EndContractBlock();
 
             destFileName = File.InternalCopy(FullPath, destFileName, overwrite);
@@ -261,9 +262,9 @@ namespace System.IO
         public void MoveTo(String destFileName)
         {
             if (destFileName == null)
-                throw new ArgumentNullException("destFileName");
+                throw new ArgumentNullException(nameof(destFileName));
             if (destFileName.Length == 0)
-                throw new ArgumentException(SR.Argument_EmptyFileName, "destFileName");
+                throw new ArgumentException(SR.Argument_EmptyFileName, nameof(destFileName));
             Contract.EndContractBlock();
 
             String fullDestFileName = Path.GetFullPath(destFileName);

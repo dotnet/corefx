@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Text;
-using System;
 
 namespace System.Collections.Specialized
 {
@@ -65,12 +65,11 @@ namespace System.Collections.Specialized
             }
             set
             {
-#if DEBUG
-                if ((value & section.Mask) != value)
-                {
-                    Debug.Fail("Value out of bounds on BitVector32 Section Set!");
-                }
-#endif
+                // The code should really have originally validated "(value & section.Mask) == value" with 
+                // an exception (it instead validated it with a Debug.Assert, which does little good in a
+                // public method when in a Release build).  We don't include such a check now as it would
+                // likely break things and for little benefit.
+
                 value <<= section.Offset;
                 int offsetMask = (0xFFFF & (int)section.Mask) << section.Offset;
                 _data = (_data & ~(uint)offsetMask) | ((uint)value & (uint)offsetMask);
@@ -169,13 +168,9 @@ namespace System.Collections.Specialized
         {
             if (maxValue < 1)
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidValue, "maxValue", 0), "maxValue");
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidValue, nameof(maxValue), 1), nameof(maxValue));
             }
-#if DEBUG
-            int maskCheck = CreateMaskFromHighValue(maxValue);
-            int offsetCheck = priorOffset + CountBitsSet(priorMask);
-            Debug.Assert(maskCheck <= short.MaxValue && offsetCheck < 32, "Overflow on BitVector32");
-#endif
+
             short offset = (short)(priorOffset + CountBitsSet(priorMask));
             if (offset >= 32)
             {
@@ -222,7 +217,7 @@ namespace System.Collections.Specialized
 
         public override string ToString()
         {
-            return BitVector32.ToString(this);
+            return ToString(this);
         }
 
         /// <devdoc>
@@ -291,7 +286,7 @@ namespace System.Collections.Specialized
 
             public override string ToString()
             {
-                return Section.ToString(this);
+                return ToString(this);
             }
         }
     }

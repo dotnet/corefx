@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -692,7 +693,7 @@ namespace System.Xml
         {
             CheckAsync();
             //since it is protected method, we can't call coreReader.Dispose(disposing). 
-            //Internal, it is always called to Dipose(true). So call coreReader.Dispose() is OK.
+            //Internal, it is always called to Dispose(true). So call coreReader.Dispose() is OK.
             _coreReader.Dispose();
         }
 

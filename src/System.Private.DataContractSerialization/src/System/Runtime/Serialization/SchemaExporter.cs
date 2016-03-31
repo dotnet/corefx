@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------
-//------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Runtime.Serialization
 {
@@ -87,10 +86,33 @@ namespace System.Runtime.Serialization
             return new Object();
         }
 
+        private static XmlSchemaComplexType CreateAnyType()
+        {
+            return new Object();
+        }
+
         internal static bool IsSpecialXmlType(Type type, out XmlQualifiedName typeName, out XmlSchemaType xsdType, out bool hasRoot)
         {
             xsdType = null;
             hasRoot = true;
+            if (type == Globals.TypeOfXmlElement || type == Globals.TypeOfXmlNodeArray)
+            {
+                string name = null;
+                if (type == Globals.TypeOfXmlElement)
+                {
+                    xsdType = CreateAnyElementType();
+                    name = "XmlElement";
+                    hasRoot = false;
+                }
+                else
+                {
+                    xsdType = CreateAnyType();
+                    name = "ArrayOfXmlNode";
+                    hasRoot = true;
+                }
+                typeName = new XmlQualifiedName(name, DataContract.GetDefaultStableNamespace(type));
+                return true;
+            }
             typeName = null;
             return false;
         }

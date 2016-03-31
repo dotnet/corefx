@@ -2,20 +2,18 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
+    <Project Include="System.Runtime.InteropServices.csproj" />
     <Project Include="System.Runtime.InteropServices.csproj">
-      <OSGroup>Linux</OSGroup>
+      <TargetGroup>net462</TargetGroup>
     </Project>
+    <!-- NETCore50 must redistribute binaries due to shared library
     <Project Include="System.Runtime.InteropServices.csproj">
-      <OSGroup>OSX</OSGroup>
+      <TargetGroup>netcore50aot</TargetGroup>
+    </Project> -->
+    <Project Include="redist\System.Runtime.InteropServices.depproj">
+      <TargetGroup>netcore50</TargetGroup>
     </Project>
-    <Project Include="System.Runtime.InteropServices.csproj">
-      <OSGroup>Windows_NT</OSGroup>
-    </Project>
-    <Project Include="System.Runtime.InteropServices.csproj">
-      <TargetGroup>net46</TargetGroup>
-    </Project>
-    <Project Include="System.Runtime.InteropServices.csproj">
-      <OSGroup>Windows_NT</OSGroup>
+    <Project Include="redist\System.Runtime.InteropServices.depproj">
       <TargetGroup>netcore50aot</TargetGroup>
     </Project>
   </ItemGroup>

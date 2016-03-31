@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Net.NetworkInformation
 {
@@ -38,7 +39,7 @@ namespace System.Net.NetworkInformation
         {
             if ((scopeLevel < 0) || ((int)scopeLevel >= _zoneIndices.Length))
             {
-                throw new ArgumentOutOfRangeException("scopeLevel");
+                throw new ArgumentOutOfRangeException(nameof(scopeLevel));
             }
 
             return _zoneIndices[(int)scopeLevel];

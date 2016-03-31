@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -103,7 +104,7 @@ namespace System.Xml
             XmlNode parentNode = this.ParentNode;
             int length = this.Length;
             if (offset > length)
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             //if the text node is out of the living tree, throw exception.
             if (parentNode == null)
                 throw new InvalidOperationException(SR.Xdom_TextNode_SplitText);

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using Test.Cryptography;
@@ -204,7 +205,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("BasicConstraintsData")]
+        [MemberData(nameof(BasicConstraintsData))]
         public static void BasicConstraintsExtensionEncode(
             bool certificateAuthority,
             bool hasPathLengthConstraint,
@@ -223,7 +224,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("BasicConstraintsData")]
+        [MemberData(nameof(BasicConstraintsData))]
         public static void BasicConstraintsExtensionDecode(
             bool certificateAuthority,
             bool hasPathLengthConstraint,
@@ -385,6 +386,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 false,
                 "0414a260a870be1145ed71e2bb5aa19463a4fe9dcc41".HexToByteArray(),
                 "A260A870BE1145ED71E2BB5AA19463A4FE9DCC41");
+        }
+
+        [Fact]
+        public static void ReadInvalidExtension_KeyUsage()
+        {
+            X509KeyUsageExtension keyUsageExtension =
+                new X509KeyUsageExtension(new AsnEncodedData(Array.Empty<byte>()), false);
+
+            Assert.ThrowsAny<CryptographicException>(() => keyUsageExtension.KeyUsages);
         }
 
         private static void TestKeyUsageExtension(X509KeyUsageFlags flags, bool critical, byte[] expectedDer)

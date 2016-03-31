@@ -1,10 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 
 namespace System.ComponentModel
 {
@@ -47,6 +49,8 @@ namespace System.ComponentModel
         {
             get
             {
+                Debug.Assert(Monitor.IsEntered(s_syncObject));
+
                 // It is not worth taking a lock for this -- worst case of a collision
                 // would build two tables, one that garbage collects very quickly.
                 //
@@ -146,8 +150,13 @@ namespace System.ComponentModel
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
+
+            // Check the cached TypeConverter dictionary for an exact match of the given type.
+            object ans = SearchIntrinsicTable_ExactTypeMatch(type);
+            if (ans != null)
+                return (TypeConverter)ans;
 
             // Obtaining attributes follows a very critical order: we must take care that
             // we merge attributes the right way.  Consider this:
@@ -164,7 +173,7 @@ namespace System.ComponentModel
             // [A1]
             // class Derived : Base, IDerived
             //
-            // We are retreving attributes in the following order:  A1 - A4.
+            // We are retrieving attributes in the following order:  A1 - A4.
             // Interfaces always lose to types, and interfaces and types
             // must be looked up in the same order.
             TypeConverterAttribute converterAttribute = ReflectTypeDescriptionProvider.GetTypeConverterAttributeIfAny(type);
@@ -207,7 +216,15 @@ namespace System.ComponentModel
                 if (converterType != null && typeof(TypeConverter).GetTypeInfo().IsAssignableFrom(converterType.GetTypeInfo()))
                 {
                     bool noTypeConstructor = true;
-                    return (TypeConverter)ReflectTypeDescriptionProvider.CreateInstance(converterType, type, ref noTypeConstructor);
+                    object instance = (TypeConverter)ReflectTypeDescriptionProvider.CreateInstance(converterType, type, ref noTypeConstructor);
+                    if (noTypeConstructor)
+                    {
+                        lock (s_syncObject)
+                        {
+                            ReflectTypeDescriptionProvider.IntrinsicTypeConverters[type] = instance;
+                        }
+                    }
+                    return (TypeConverter)instance;
                 }
             }
 
@@ -346,6 +363,36 @@ namespace System.ComponentModel
                     {
                         ReflectTypeDescriptionProvider.IntrinsicTypeConverters[callingType] = hashEntry;
                     }
+                }
+            }
+            return hashEntry;
+        }
+
+        private static object SearchIntrinsicTable_ExactTypeMatch(Type callingType)
+        {
+            object hashEntry = null;
+
+            // We take a lock on this table.  Nothing in this code calls out to
+            // other methods that lock, so it should be fairly safe to grab this
+            // lock.  Also, this allows multiple intrinsic tables to be searched
+            // at once.
+            //
+            lock (s_syncObject)
+            {
+                if (callingType != null && !IntrinsicTypeConverters.TryGetValue(callingType, out hashEntry))
+                    return null;
+
+                // If the entry is a type, create an instance of it and then
+                // replace the entry.  This way we only need to create once.
+                // We can only do this if the object doesn't want a type
+                // in its constructor.
+                Type type = hashEntry as Type;
+                if (type != null)
+                {
+                    bool noTypeConstructor = true;
+                    hashEntry = CreateInstance(type, callingType, ref noTypeConstructor);
+                    if (noTypeConstructor)
+                        IntrinsicTypeConverters[callingType] = hashEntry;
                 }
             }
             return hashEntry;

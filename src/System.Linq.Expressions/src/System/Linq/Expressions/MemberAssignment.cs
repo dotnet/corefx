@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Dynamic.Utils;
@@ -56,8 +57,8 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="MemberAssignment"/>.</returns>
         public static MemberAssignment Bind(MemberInfo member, Expression expression)
         {
-            ContractUtils.RequiresNotNull(member, "member");
-            RequiresCanRead(expression, "expression");
+            ContractUtils.RequiresNotNull(member, nameof(member));
+            RequiresCanRead(expression, nameof(expression));
             Type memberType;
             ValidateSettableFieldOrPropertyMember(member, out memberType);
             if (!memberType.IsAssignableFrom(expression.Type))
@@ -75,8 +76,8 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="MemberAssignment"/>.</returns>
         public static MemberAssignment Bind(MethodInfo propertyAccessor, Expression expression)
         {
-            ContractUtils.RequiresNotNull(propertyAccessor, "propertyAccessor");
-            ContractUtils.RequiresNotNull(expression, "expression");
+            ContractUtils.RequiresNotNull(propertyAccessor, nameof(propertyAccessor));
+            ContractUtils.RequiresNotNull(expression, nameof(expression));
             ValidateMethodInfo(propertyAccessor);
             return Bind(GetProperty(propertyAccessor), expression);
         }
@@ -90,7 +91,7 @@ namespace System.Linq.Expressions
                 PropertyInfo pi = member as PropertyInfo;
                 if (pi == null)
                 {
-                    throw Error.ArgumentMustBeFieldInfoOrPropertInfo();
+                    throw Error.ArgumentMustBeFieldInfoOrPropertyInfo();
                 }
                 if (!pi.CanWrite)
                 {

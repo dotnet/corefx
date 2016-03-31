@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -10,11 +11,6 @@ namespace System.IO.Tests
 {
     public class BinaryWriter_WriteTests
     {
-        protected virtual Stream CreateStream()
-        {
-            return new MemoryStream();
-        }
-
         [Fact]
         public void BinaryWriter_WriteBoolTest()
         {
@@ -141,6 +137,21 @@ namespace System.IO.Tests
                 "\0\0\0\t\t\tHey\"\"", "\u0022\u0011", str1, string.Empty };
 
             WriteTest(strArr, (bw, s) => bw.Write(s), (br) => br.ReadString());
+        }
+
+        [Fact]
+        public void BinaryWriter_WriteStringTest_Null()
+        {
+            using (Stream memStream = CreateStream())
+            using (BinaryWriter dw2 = new BinaryWriter(memStream))
+            {
+                Assert.Throws<ArgumentNullException>(() => dw2.Write((string)null));
+            }
+        }
+
+        protected virtual Stream CreateStream()
+        {
+            return new MemoryStream();
         }
 
         private void WriteTest<T>(T[] testElements, Action<BinaryWriter, T> write, Func<BinaryReader, T> read)

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -164,6 +165,15 @@ namespace System.Linq.Tests
         public void SkipExcessive()
         {
             Assert.Empty(Enumerable.Range(10, 10).Skip(20));
+        }
+
+        [Fact]
+        public void SkipTakeCanOnlyBeOne()
+        {
+            Assert.Equal(new[] { 1 }, Enumerable.Range(1, 10).Take(1));
+            Assert.Equal(new[] { 2 }, Enumerable.Range(1, 10).Skip(1).Take(1));
+            Assert.Equal(new[] { 3 }, Enumerable.Range(1, 10).Take(3).Skip(2));
+            Assert.Equal(new[] { 1 }, Enumerable.Range(1, 10).Take(3).Take(1));
         }
 
         [Fact]

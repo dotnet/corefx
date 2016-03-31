@@ -1,11 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
@@ -24,39 +25,64 @@ namespace System.Net.Http
 
             internal static void SetSslOptions(EasyRequest easy, ClientCertificateOption clientCertOption)
             {
+                Debug.Assert(clientCertOption == ClientCertificateOption.Automatic || clientCertOption == ClientCertificateOption.Manual);
+
+                // Disable SSLv2/SSLv3, allow TLSv1.*
+                easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSLVERSION, (long)Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1);
+
+                // Create a client certificate provider if client certs may be used.
+                X509Certificate2Collection clientCertificates = easy._handler._clientCertificates;
+                ClientCertificateProvider certProvider =
+                    clientCertOption == ClientCertificateOption.Automatic ? new ClientCertificateProvider(null) : // automatic
+                    clientCertificates?.Count > 0 ? new ClientCertificateProvider(clientCertificates) : // manual with certs
+                    null; // manual without certs
                 IntPtr userPointer = IntPtr.Zero;
-                if (clientCertOption == ClientCertificateOption.Automatic)
+                if (certProvider != null)
                 {
-                    ClientCertificateProvider certProvider = new ClientCertificateProvider();
+                    // The client cert provider needs to be passed through to the callback, and thus
+                    // we create a GCHandle to keep it rooted.  This handle needs to be cleaned up
+                    // when the request has completed, and a simple and pay-for-play way to do that
+                    // is by cleaning it up in a continuation off of the request.
                     userPointer = GCHandle.ToIntPtr(certProvider._gcHandle);
-                    easy.Task.ContinueWith((_, state) => ((IDisposable)state).Dispose(),
-                                           certProvider,
-                                           CancellationToken.None,
-                                           TaskContinuationOptions.ExecuteSynchronously,
-                                           TaskScheduler.Default);
-                }
-                else
-                {
-                    Debug.Assert(clientCertOption == ClientCertificateOption.Manual, "ClientCertificateOption is manual or automatic");
+                    easy.Task.ContinueWith((_, state) => ((IDisposable)state).Dispose(), certProvider,
+                        CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
                 }
 
+                // Register the callback with libcurl.  We need to register even if there's no user-provided
+                // server callback and even if there are no client certificates, because we support verifying
+                // server certificates against more than those known to OpenSSL.
                 CURLcode answer = easy.SetSslCtxCallback(s_sslCtxCallback, userPointer);
-
                 switch (answer)
                 {
                     case CURLcode.CURLE_OK:
-                        break;
-                    // Curl 7.38 and prior
-                    case CURLcode.CURLE_UNKNOWN_OPTION:
-                    // Curl 7.39 and later
-                    case CURLcode.CURLE_NOT_BUILT_IN:
-                        VerboseTrace("CURLOPT_SSL_CTX_FUNCTION is not supported, platform default https chain building in use");
-                        if (clientCertOption == ClientCertificateOption.Automatic)
+                        // We successfully registered.  If we'll be invoking a user-provided callback to verify the server
+                        // certificate as part of that, disable libcurl's verification of the host name.  The user's callback
+                        // needs to be given the opportunity to examine the cert, and our logic will determine whether
+                        // the host name matches and will inform the callback of that.
+                        if (easy._handler.ServerCertificateValidationCallback != null)
                         {
-                            throw new PlatformNotSupportedException(SR.net_http_unix_invalid_client_cert_option);
+                            easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSL_VERIFYHOST, 0); // don't verify the peer cert's hostname
+                            // We don't change the SSL_VERIFYPEER setting, as setting it to 0 will cause
+                            // SSL and libcurl to ignore the result of the server callback.
                         }
-
                         break;
+
+                    case CURLcode.CURLE_UNKNOWN_OPTION: // Curl 7.38 and prior
+                    case CURLcode.CURLE_NOT_BUILT_IN:   // Curl 7.39 and later
+                        // It's ok if we failed to register the callback if all of the defaults are in play
+                        // with relation to handling of certificates.  But if that's not the case, failing to 
+                        // register the callback will result in those options not being factored in, which is
+                        // a significant enough error that we need to fail.
+                        EventSourceTrace("CURLOPT_SSL_CTX_FUNCTION not supported: {0}", answer);
+                        if (certProvider != null ||
+                            easy._handler.ServerCertificateValidationCallback != null ||
+                            easy._handler.CheckCertificateRevocationList)
+                        {
+                            throw new PlatformNotSupportedException(
+                                SR.Format(SR.net_http_unix_invalid_certcallback_option, CurlVersionDescription, CurlSslVersionDescription));
+                        }
+                        break;
+
                     default:
                         ThrowIfCURLEError(answer);
                         break;
@@ -74,7 +100,7 @@ namespace System.Net.Http
 
                     if (userPointer == IntPtr.Zero)
                     {
-                        VerboseTrace("Not using client Certificate callback ");
+                        EventSourceTrace("Not using client certificate callback");
                     }
                     else
                     {
@@ -102,7 +128,7 @@ namespace System.Net.Http
                 return CURLcode.CURLE_OK;
             }
 
-            private static void AddChannelBindingToken(X509Certificate2 certificate, IntPtr curlPtr)
+            private static bool TryGetEasyRequest(IntPtr curlPtr, out EasyRequest easy)
             {
                 Debug.Assert(curlPtr != IntPtr.Zero, "curlPtr is not null");
                 IntPtr gcHandlePtr;
@@ -111,65 +137,125 @@ namespace System.Net.Http
                 if (getInfoResult == CURLcode.CURLE_OK)
                 {
                     GCHandle handle = GCHandle.FromIntPtr(gcHandlePtr);
-                    EasyRequest easy = handle.Target as EasyRequest;
+                    easy = handle.Target as EasyRequest;
                     Debug.Assert(easy != null, "Expected non-null EasyRequest in GCHandle");
-                    if (easy._requestContentStream != null)
-                    {
-                        easy._requestContentStream.SetChannelBindingToken(certificate);
-                    }
+                    return easy != null;
                 }
+
+                easy = null;
+                return false;
             }
 
-            private static int VerifyCertChain(IntPtr storeCtxPtr, IntPtr arg)
+            private static int VerifyCertChain(IntPtr storeCtxPtr, IntPtr curlPtr)
             {
-                List<X509Certificate2> otherCerts;
-                bool success;
-
-                using (SafeX509StoreCtxHandle storeCtx = new SafeX509StoreCtxHandle(storeCtxPtr, ownsHandle: false))
-                using (X509Chain chain = new X509Chain())
+                EasyRequest easy;
+                if (!TryGetEasyRequest(curlPtr, out easy))
                 {
-                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+                    EventSourceTrace("Could not find associated easy request: {0}", curlPtr);
+                    return 0;
+                }
 
+                using (var storeCtx = new SafeX509StoreCtxHandle(storeCtxPtr, ownsHandle: false))
+                {
                     IntPtr leafCertPtr = Interop.Crypto.X509StoreCtxGetTargetCert(storeCtx);
-
                     if (IntPtr.Zero == leafCertPtr)
                     {
-                        Debug.Fail("Invalid target certificate");
-                        return -1;
-                    }
-
-                    using (SafeSharedX509StackHandle extraStack = Interop.Crypto.X509StoreCtxGetSharedUntrusted(storeCtx))
-                    {
-                        int extraSize = extraStack.IsInvalid ? 0 : Interop.Crypto.GetX509StackFieldCount(extraStack);
-                        otherCerts = new List<X509Certificate2>(extraSize);
-
-                        for (int i = 0; i < extraSize; i++)
-                        {
-                            IntPtr certPtr = Interop.Crypto.GetX509StackField(extraStack, i);
-
-                            if (certPtr != IntPtr.Zero)
-                            {
-                                X509Certificate2 cert = new X509Certificate2(certPtr);
-                                otherCerts.Add(cert);
-                                chain.ChainPolicy.ExtraStore.Add(cert);
-                            }
-                        }
+                        EventSourceTrace("Invalid certificate pointer");
+                        return 0;
                     }
 
                     using (X509Certificate2 leafCert = new X509Certificate2(leafCertPtr))
                     {
-                        success = chain.Build(leafCert);
-                        AddChannelBindingToken(leafCert, arg);
+                        // Set up the CBT with this certificate.
+                        easy._requestContentStream?.SetChannelBindingToken(leafCert);
+
+                        // We need to respect the user's server validation callback if there is one.  If there isn't one,
+                        // we can start by first trying to use OpenSSL's verification, though only if CRL checking is disabled,
+                        // as OpenSSL doesn't do that.
+                        if (easy._handler.ServerCertificateValidationCallback == null &&
+                            !easy._handler.CheckCertificateRevocationList)
+                        {
+                            // Start by using the default verification provided directly by OpenSSL.
+                            // If it succeeds in verifying the cert chain, we're done. Employing this instead of 
+                            // our custom implementation will need to be revisited if we ever decide to introduce a 
+                            // "disallowed" store that enables users to "untrust" certs the system trusts.
+                            int sslResult = Interop.Crypto.X509VerifyCert(storeCtx);
+                            if (sslResult == 1)
+                            {
+                                return 1;
+                            }
+
+                            // X509_verify_cert can return < 0 in the case of programmer error
+                            Debug.Assert(sslResult == 0, "Unexpected error from X509_verify_cert: " + sslResult);
+                        }
+
+                        // Either OpenSSL verification failed, or there was a server validation callback.
+                        // Either way, fall back to manual and more expensive verification that includes 
+                        // checking the user's certs (not just the system store ones as OpenSSL does).
+                        X509Certificate2[] otherCerts;
+                        int otherCertsCount = 0;
+                        bool success;
+                        using (X509Chain chain = new X509Chain())
+                        {
+                            chain.ChainPolicy.RevocationMode = easy._handler.CheckCertificateRevocationList ? X509RevocationMode.Online : X509RevocationMode.NoCheck;
+                            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+
+                            using (SafeSharedX509StackHandle extraStack = Interop.Crypto.X509StoreCtxGetSharedUntrusted(storeCtx))
+                            {
+                                if (extraStack.IsInvalid)
+                                {
+                                    otherCerts = Array.Empty<X509Certificate2>();
+                                }
+                                else
+                                {
+                                    int extraSize = Interop.Crypto.GetX509StackFieldCount(extraStack);
+                                    otherCerts = new X509Certificate2[extraSize];
+
+                                    for (int i = 0; i < extraSize; i++)
+                                    {
+                                        IntPtr certPtr = Interop.Crypto.GetX509StackField(extraStack, i);
+                                        if (certPtr != IntPtr.Zero)
+                                        {
+                                            X509Certificate2 cert = new X509Certificate2(certPtr);
+                                            otherCerts[otherCertsCount++] = cert;
+                                            chain.ChainPolicy.ExtraStore.Add(cert);
+                                        }
+                                    }
+                                }
+                            }
+
+                            var serverCallback = easy._handler._serverCertificateValidationCallback;
+                            if (serverCallback == null)
+                            {
+                                SslPolicyErrors errors = CertificateValidation.BuildChainAndVerifyProperties(chain, leafCert,
+                                    checkCertName: false, hostName: null); // libcurl already verifies the host name
+                                success = errors == SslPolicyErrors.None;
+                            }
+                            else
+                            {
+                                SslPolicyErrors errors = CertificateValidation.BuildChainAndVerifyProperties(chain, leafCert,
+                                    checkCertName: true, hostName: easy._requestMessage.RequestUri.Host); // we disabled automatic host verification, so we do it here
+                                try
+                                {
+                                    success = serverCallback(easy._requestMessage, leafCert, chain, errors);
+                                }
+                                catch (Exception exc)
+                                {
+                                    EventSourceTrace("Server validation callback threw exception: {0}", exc);
+                                    easy.FailRequest(exc);
+                                    success = false;
+                                }
+                            }
+                        }
+
+                        for (int i = 0; i < otherCertsCount; i++)
+                        {
+                            otherCerts[i].Dispose();
+                        }
+
+                        return success ? 1 : 0;
                     }
                 }
-
-                foreach (X509Certificate2 otherCert in otherCerts)
-                {
-                    otherCert.Dispose();
-                }
-
-                return success ? 1 : 0;
             }
         }
     }

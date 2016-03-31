@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -47,7 +48,7 @@ namespace System.Xml
         // Constants
         private const int WriteNodeBufferSize = 1024;
 
-        // Returns the settings describing the features of the the writer. Returns null for V1 XmlWriters (XmlTextWriter).
+        // Returns the settings describing the features of the writer. Returns null for V1 XmlWriters (XmlTextWriter).
         public virtual XmlWriterSettings Settings
         {
             get
@@ -61,7 +62,7 @@ namespace System.Xml
 
         public abstract void WriteStartDocument();
 
-        //Writes out the XML declaration with the version "1.0" and the speficied standalone attribute.
+        //Writes out the XML declaration with the version "1.0" and the specified standalone attribute.
 
         public abstract void WriteStartDocument(bool standalone);
 
@@ -263,7 +264,7 @@ namespace System.Xml
         {
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             WriteString(XmlUntypedStringConverter.Instance.ToString(value, null));
         }
@@ -343,7 +344,7 @@ namespace System.Xml
         {
             if (null == reader)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             if (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.XmlDeclaration)
@@ -391,7 +392,7 @@ namespace System.Xml
         {
             if (null == reader)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             bool canReadChunk = reader.CanReadValueChunk;
@@ -549,7 +550,7 @@ namespace System.Xml
             }
             if (output == null)
             {
-                throw new ArgumentNullException("output");
+                throw new ArgumentNullException(nameof(output));
             }
             return settings.CreateWriter(new StringWriter(output, CultureInfo.InvariantCulture));
         }

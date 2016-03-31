@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -24,7 +25,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void Take_Unordered(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -40,14 +41,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 1024 * 32 })]
         public static void Take_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             Take_Unordered(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeData), new[] { 0, 1, 2, 16 })]
         public static void Take(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -61,14 +62,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeData), new[] { 1024 * 32 })]
         public static void Take_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             Take(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void Take_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -81,14 +82,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 1024 * 32 })]
         public static void Take_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             Take_Unordered_NotPipelined(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeData), new[] { 0, 1, 2, 16 })]
         public static void Take_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -99,7 +100,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeData), new[] { 1024 * 32 })]
         public static void Take_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             Take_NotPipelined(labeled, count, take);
@@ -125,7 +126,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_Unordered(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -141,14 +142,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 1024 * 32 })]
         public static void TakeWhile_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_Unordered(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -162,14 +163,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeData), new[] { 1024 * 32 })]
         public static void TakeWhile_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -182,14 +183,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 1024 * 32 })]
         public static void TakeWhile_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_Unordered_NotPipelined(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -200,14 +201,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeData), new[] { 1024 * 32 })]
         public static void TakeWhile_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_NotPipelined(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_Indexed_Unordered(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -223,14 +224,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 1024 * 32 })]
         public static void TakeWhile_Indexed_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_Indexed_Unordered(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_Indexed(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -244,14 +245,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeData), new[] { 1024 * 32 })]
         public static void TakeWhile_Indexed_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_Indexed(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_Indexed_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -264,14 +265,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 1024 * 32 })]
         public static void TakeWhile_Indexed_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_Indexed_Unordered_NotPipelined(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_Indexed_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -282,14 +283,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeData), new[] { 1024 * 32 })]
         public static void TakeWhile_Indexed_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_Indexed_NotPipelined(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_AllFalse(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -298,14 +299,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeUnorderedData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeUnorderedData), new[] { 1024 * 32 })]
         public static void TakeWhile_AllFalse_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_AllFalse(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(TakeData), new[] { 0, 1, 2, 16 })]
         public static void TakeWhile_AllTrue(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -316,14 +317,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeData), new[] { 1024 * 32 })]
         public static void TakeWhile_AllTrue_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int take)
         {
             TakeWhile_AllTrue(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeWhileData", (object)(new int[] { 2, 16 }))]
+        [MemberData(nameof(TakeWhileData), new[] { 2, 16 })]
         public static void TakeWhile_SomeTrue(Labeled<ParallelQuery<int>> labeled, int count, IEnumerable<int> take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -334,14 +335,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeWhileData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeWhileData), new[] { 1024 * 32 })]
         public static void TakeWhile_SomeTrue_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, IEnumerable<int> take)
         {
             TakeWhile_SomeTrue(labeled, count, take);
         }
 
         [Theory]
-        [MemberData("TakeWhileData", (object)(new int[] { 2, 16 }))]
+        [MemberData(nameof(TakeWhileData), new[] { 2, 16 })]
         public static void TakeWhile_SomeFalse(Labeled<ParallelQuery<int>> labeled, int count, IEnumerable<int> take)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -352,7 +353,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("TakeWhileData", (object)(new int[] { 1024 * 32 }))]
+        [MemberData(nameof(TakeWhileData), new[] { 1024 * 32 })]
         public static void TakeWhile_SomeFalse_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, IEnumerable<int> take)
         {
             TakeWhile_SomeFalse(labeled, count, take);

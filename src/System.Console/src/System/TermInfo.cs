@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,7 @@ namespace System
             Clear = 5,
             CursorAddress = 10,
             CursorLeft = 14,
-            CursorPositionRequest = 294,
+            CursorPositionReport = 294,
             OrigPairs = 297,
             OrigColors = 298,
             SetAnsiForeground = 359,
@@ -535,11 +536,11 @@ namespace System
             {
                 if (format == null)
                 {
-                    throw new ArgumentNullException("format");
+                    throw new ArgumentNullException(nameof(format));
                 }
                 if (args == null)
                 {
-                    throw new ArgumentNullException("args");
+                    throw new ArgumentNullException(nameof(args));
                 }
 
                 // Initialize the stack to use for processing.
@@ -746,7 +747,7 @@ namespace System
                             break;
 
                         // Some terminfo files appear to have a fairly liberal interpretation of %i. The spec states that %i increments the first two arguments, 
-                        // but some uses occur when there's only a single argument. To make sure we accomodate these files, we increment the values 
+                        // but some uses occur when there's only a single argument. To make sure we accommodate these files, we increment the values 
                         // of up to (but not requiring) two arguments.
                         case 'i':
                             if (args.Length > 0)

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -160,7 +161,6 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
         }
 
         [Fact]
-        [ActiveIssue(3952, PlatformID.AnyUnix)]
         public static void VerifyInPlaceDecryption()
         {
             byte[] key = "1ed2f625c187b993256a8b3ccf9dcbfa5b44b4795c731012f70e4e64732efd5d".HexToByteArray();

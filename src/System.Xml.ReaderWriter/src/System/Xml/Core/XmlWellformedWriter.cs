@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Text;
@@ -431,21 +432,21 @@ namespace System.Xml
                     {
                         if ((i = _xmlCharType.IsPublicId(pubid)) >= 0)
                         {
-                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(pubid, i)), "pubid");
+                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(pubid, i)), nameof(pubid));
                         }
                     }
                     if (sysid != null)
                     {
                         if ((i = _xmlCharType.IsOnlyCharData(sysid)) >= 0)
                         {
-                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(sysid, i)), "sysid");
+                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(sysid, i)), nameof(sysid));
                         }
                     }
                     if (subset != null)
                     {
                         if ((i = _xmlCharType.IsOnlyCharData(subset)) >= 0)
                         {
-                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(subset, i)), "subset");
+                            throw new ArgumentException(SR.Format(SR.Xml_InvalidCharacter, XmlException.BuildCharExceptionArgs(subset, i)), nameof(subset));
                         }
                     }
                 }
@@ -1129,19 +1130,19 @@ namespace System.Xml
             {
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
                 if (count < 0)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
                 if (count > buffer.Length - index)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
 
                 AdvanceState(Token.Text);
@@ -1167,19 +1168,19 @@ namespace System.Xml
             {
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
                 if (count < 0)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
                 if (count > buffer.Length - index)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
 
                 AdvanceState(Token.RawData);
@@ -1231,19 +1232,19 @@ namespace System.Xml
             {
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
                 if (count < 0)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
                 if (count > buffer.Length - index)
                 {
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
                 }
 
                 AdvanceState(Token.Base64);
@@ -1333,7 +1334,7 @@ namespace System.Xml
             {
                 if (ns == null)
                 {
-                    throw new ArgumentNullException("ns");
+                    throw new ArgumentNullException(nameof(ns));
                 }
                 for (int i = _nsTop; i >= 0; i--)
                 {
@@ -1754,7 +1755,7 @@ namespace System.Xml
         }
 
         // PushNamespaceExplicit is called when a namespace declaration is written out;
-        // It returs true if the namespace declaration should we written out, false if it should be omited (if OmitDuplicateNamespaceDeclarations is true)
+        // It returns true if the namespace declaration should we written out, false if it should be omitted (if OmitDuplicateNamespaceDeclarations is true)
         private bool PushNamespaceExplicit(string prefix, string ns)
         {
             bool writeItOut = true;
@@ -2188,7 +2189,7 @@ namespace System.Xml
             return new ArgumentException(SR.Format(SR.Xml_InvalidNameCharsDetail, args));
         }
 
-        // This method translates speficic state transition errors in more friendly error messages
+        // This method translates specific state transition errors in more friendly error messages
         private void ThrowInvalidStateTransition(Token token, State currentState)
         {
             string wrongTokenMessage = SR.Format(SR.Xml_WrongToken, tokenName[(int)token], GetStateName(currentState));

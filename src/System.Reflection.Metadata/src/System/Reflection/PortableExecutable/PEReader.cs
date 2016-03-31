@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -47,12 +48,12 @@ namespace System.Reflection.PortableExecutable
         {
             if (peImage == null)
             {
-                throw new ArgumentNullException("peImage");
+                throw new ArgumentNullException(nameof(peImage));
             }
 
             if (size < 0)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
 
             _peImage = new ExternalMemoryBlockProvider(peImage, size);
@@ -135,17 +136,17 @@ namespace System.Reflection.PortableExecutable
         {
             if (peStream == null)
             {
-                throw new ArgumentNullException("peStream");
+                throw new ArgumentNullException(nameof(peStream));
             }
 
             if (!peStream.CanRead || !peStream.CanSeek)
             {
-                throw new ArgumentException(SR.StreamMustSupportReadAndSeek, "peStream");
+                throw new ArgumentException(SR.StreamMustSupportReadAndSeek, nameof(peStream));
             }
 
             if (!options.IsValid())
             {
-                throw new ArgumentOutOfRangeException("options");
+                throw new ArgumentOutOfRangeException(nameof(options));
             }
 
             long start = peStream.Position;
@@ -206,7 +207,7 @@ namespace System.Reflection.PortableExecutable
         {
             if (peImage.IsDefault)
             {
-                throw new ArgumentNullException("peImage");
+                throw new ArgumentNullException(nameof(peImage));
             }
 
             _peImage = new ByteArrayMemoryProvider(peImage);
@@ -505,7 +506,7 @@ namespace System.Reflection.PortableExecutable
         }
 
         /// <summary>
-        /// Reads the data pointed to by the specifed Debug Directory entry and interprets them as CodeView.
+        /// Reads the data pointed to by the specified Debug Directory entry and interprets them as CodeView.
         /// </summary>
         /// <exception cref="ArgumentException"><paramref name="entry"/> is not a CodeView entry.</exception>
         /// <exception cref="BadImageFormatException">Bad format of the data.</exception>
@@ -513,7 +514,7 @@ namespace System.Reflection.PortableExecutable
         {
             if (entry.Type != DebugDirectoryEntryType.CodeView)
             {
-                throw new ArgumentException("entry");
+                throw new ArgumentException(SR.NotCodeViewEntry, nameof(entry));
             }
 
             using (AbstractMemoryBlock block = _peImage.GetMemoryBlock(entry.DataPointer, entry.DataSize))

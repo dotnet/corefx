@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -111,6 +112,26 @@ public static class XmlDictionaryWriterTest
             // let the first task complete
             ms.blockAsync(false);
             t1.Wait();
+        }
+    }
+
+    [Fact]
+    public static void XmlDictionaryWriter_InvalidUnicodeChar()
+    {
+        using (var ms = new MemoryStream())
+        {
+            var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+            writer.WriteStartDocument();
+            writer.WriteStartElement("data");
+
+            // This is an invalid char. Writing this char shouldn't
+            // throw exception.
+            writer.WriteString("\uDB1B");
+
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
+            writer.Flush();
+            ms.Position = 0;            
         }
     }
 

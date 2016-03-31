@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #pragma once
 
@@ -90,8 +91,9 @@ enum ProtocolType : int32_t
 
 enum MulticastOption : int32_t
 {
-    PAL_MULTICAST_ADD = 0, // IP{,V6}_ADD_MEMBERSHIP
-    PAL_MULTICAST_DROP = 1 // IP{,V6}_DROP_MEMBERSHIP
+    PAL_MULTICAST_ADD = 0,  // IP{,V6}_ADD_MEMBERSHIP
+    PAL_MULTICAST_DROP = 1, // IP{,V6}_DROP_MEMBERSHIP
+    PAL_MULTICAST_IF = 2    // IP_MULTICAST_IF
 };
 
 /*
@@ -363,6 +365,10 @@ extern "C" Error SystemNative_GetLingerOption(int32_t socket, LingerOption* opti
 
 extern "C" Error SystemNative_SetLingerOption(int32_t socket, LingerOption* option);
 
+extern "C" Error SystemNative_SetReceiveTimeout(int32_t socket, int32_t millisecondsTimeout);
+
+extern "C" Error SystemNative_SetSendTimeout(int32_t socket, int32_t millisecondsTimeout);
+
 extern "C" Error SystemNative_ReceiveMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* received);
 
 extern "C" Error SystemNative_SendMessage(int32_t socket, MessageHeader* messageHeader, int32_t flags, int64_t* sent);
@@ -391,11 +397,6 @@ extern "C" Error SystemNative_SetSockOpt(
 
 extern "C" Error SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t protocolType, int32_t* createdSocket);
 
-extern "C" int32_t SystemNative_FdSetSize();
-
-extern "C" Error SystemNative_Select(
-    int32_t fdCount, uint32_t* readFdSet, uint32_t* writeFdSet, uint32_t* errorFdSet, int32_t microseconds, int32_t* selected);
-
 extern "C" Error SystemNative_GetBytesAvailable(int32_t socket, int32_t* available);
 
 extern "C" Error SystemNative_CreateSocketEventPort(int32_t* port);
@@ -411,6 +412,8 @@ extern "C" Error SystemNative_TryChangeSocketEventRegistration(
 
 extern "C" Error SystemNative_WaitForSocketEvents(int32_t port, SocketEvent* buffer, int32_t* count);
 
-extern "C" int32_t SystemNative_PlatformSupportsMultipleConnectAttempts();
-
 extern "C" int32_t SystemNative_PlatformSupportsDualModeIPv4PacketInfo();
+
+extern "C" char* SystemNative_GetPeerUserName(intptr_t socket);
+
+extern "C" void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, int32_t* addressSize);

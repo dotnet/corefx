@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -96,14 +97,14 @@ namespace System.IO
         public FileSystemWatcher(string path, string filter)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
 
             if (filter == null)
-                throw new ArgumentNullException("filter");
+                throw new ArgumentNullException(nameof(filter));
 
             // Early check for directory parameter so that an exception can be thrown as early as possible.
             if (path.Length == 0 || !Directory.Exists(path))
-                throw new ArgumentException(SR.Format(SR.InvalidDirName, path), "path");
+                throw new ArgumentException(SR.Format(SR.InvalidDirName, path), nameof(path));
 
             _directory = path;
             _filter = filter;

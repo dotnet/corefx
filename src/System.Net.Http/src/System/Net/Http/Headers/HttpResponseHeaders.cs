@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,8 +13,8 @@ namespace System.Net.Http.Headers
         Justification = "This is not a collection")]
     public sealed class HttpResponseHeaders : HttpHeaders
     {
-        private static readonly Dictionary<string, HttpHeaderParser> s_parserStore;
-        private static readonly HashSet<string> s_invalidHeaders;
+        private static readonly Dictionary<string, HttpHeaderParser> s_parserStore = CreateParserStore();
+        private static readonly HashSet<string> s_invalidHeaders = CreateInvalidHeaders();
 
         private HttpGeneralHeaders _generalHeaders;
         private HttpHeaderValueCollection<string> _acceptRanges;
@@ -184,24 +185,31 @@ namespace System.Net.Http.Headers
             base.SetConfiguration(s_parserStore, s_invalidHeaders);
         }
 
-        static HttpResponseHeaders()
+        private static Dictionary<string, HttpHeaderParser> CreateParserStore()
         {
-            s_parserStore = new Dictionary<string, HttpHeaderParser>(StringComparer.OrdinalIgnoreCase);
+            var parserStore = new Dictionary<string, HttpHeaderParser>(StringComparer.OrdinalIgnoreCase);
 
-            s_parserStore.Add(HttpKnownHeaderNames.AcceptRanges, GenericHeaderParser.TokenListParser);
-            s_parserStore.Add(HttpKnownHeaderNames.Age, TimeSpanHeaderParser.Parser);
-            s_parserStore.Add(HttpKnownHeaderNames.ETag, GenericHeaderParser.SingleValueEntityTagParser);
-            s_parserStore.Add(HttpKnownHeaderNames.Location, UriHeaderParser.RelativeOrAbsoluteUriParser);
-            s_parserStore.Add(HttpKnownHeaderNames.ProxyAuthenticate, GenericHeaderParser.MultipleValueAuthenticationParser);
-            s_parserStore.Add(HttpKnownHeaderNames.RetryAfter, GenericHeaderParser.RetryConditionParser);
-            s_parserStore.Add(HttpKnownHeaderNames.Server, ProductInfoHeaderParser.MultipleValueParser);
-            s_parserStore.Add(HttpKnownHeaderNames.Vary, GenericHeaderParser.TokenListParser);
-            s_parserStore.Add(HttpKnownHeaderNames.WWWAuthenticate, GenericHeaderParser.MultipleValueAuthenticationParser);
+            parserStore.Add(HttpKnownHeaderNames.AcceptRanges, GenericHeaderParser.TokenListParser);
+            parserStore.Add(HttpKnownHeaderNames.Age, TimeSpanHeaderParser.Parser);
+            parserStore.Add(HttpKnownHeaderNames.ETag, GenericHeaderParser.SingleValueEntityTagParser);
+            parserStore.Add(HttpKnownHeaderNames.Location, UriHeaderParser.RelativeOrAbsoluteUriParser);
+            parserStore.Add(HttpKnownHeaderNames.ProxyAuthenticate, GenericHeaderParser.MultipleValueAuthenticationParser);
+            parserStore.Add(HttpKnownHeaderNames.RetryAfter, GenericHeaderParser.RetryConditionParser);
+            parserStore.Add(HttpKnownHeaderNames.Server, ProductInfoHeaderParser.MultipleValueParser);
+            parserStore.Add(HttpKnownHeaderNames.Vary, GenericHeaderParser.TokenListParser);
+            parserStore.Add(HttpKnownHeaderNames.WWWAuthenticate, GenericHeaderParser.MultipleValueAuthenticationParser);
 
-            HttpGeneralHeaders.AddParsers(s_parserStore);
+            HttpGeneralHeaders.AddParsers(parserStore);
 
-            s_invalidHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            HttpContentHeaders.AddKnownHeaders(s_invalidHeaders);
+            return parserStore;
+        }
+
+        private static HashSet<string> CreateInvalidHeaders()
+        {
+            var invalidHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HttpContentHeaders.AddKnownHeaders(invalidHeaders);
+            return invalidHeaders;
+
             // Note: Reserved request header names are allowed as custom response header names.  Reserved request
             // headers have no defined meaning or format when used on a response. This enables a client to accept
             // any headers sent from the server as either content headers or response headers.

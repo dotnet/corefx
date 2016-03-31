@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // The MatchCollection lists the successful matches that
 // result when searching a string for a regular expression.
@@ -33,7 +34,7 @@ namespace System.Text.RegularExpressions
         internal MatchCollection(Regex regex, string input, int beginning, int length, int startat)
         {
             if (startat < 0 || startat > input.Length)
-                throw new ArgumentOutOfRangeException("startat", SR.BeginIndexNotNegative);
+                throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
 
             _regex = regex;
             _input = input;
@@ -65,12 +66,12 @@ namespace System.Text.RegularExpressions
             get
             {
                 if (i < 0)
-                    throw new ArgumentOutOfRangeException("i");
+                    throw new ArgumentOutOfRangeException(nameof(i));
 
                 Match match = GetMatch(i);
 
                 if (match == null)
-                    throw new ArgumentOutOfRangeException("i");
+                    throw new ArgumentOutOfRangeException(nameof(i));
 
                 return match;
             }

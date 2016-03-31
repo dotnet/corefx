@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #include "pal_crypto_types.h"
 
@@ -67,6 +68,7 @@ enum class ExchangeAlgorithmType : int32_t
     // ExchangeAlgorithm constants which are not present in the managed ExchangeAlgorithmType enum.
     SSL_ECDH = 43525,
     SSL_ECDSA = 41475,
+    SSL_ECDHE = 44550,
     SSL_kPSK = 229390,
     SSL_kGOST = 229391,
     SSL_kSRP = 229392,
@@ -352,8 +354,9 @@ CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallba
 
 /*
 Sets the specified encryption policy on the SSL_CTX.
+Returns 1 if any cipher could be selected, and 0 if none were available.
 */
-extern "C" void CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy);
+extern "C" int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy);
 
 /*
 Shims the SSL_CTX_set_client_CA_list method.

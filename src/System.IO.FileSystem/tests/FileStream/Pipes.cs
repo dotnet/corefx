@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.IO.Pipes;
@@ -38,6 +39,30 @@ namespace System.IO.Tests
 
                 await serverTask;
             }
+        }
+
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public async Task FifoReadWriteViaFileStream()
+        {
+            string fifoPath = GetTestFilePath();
+            Assert.Equal(0, mkfifo(fifoPath, 666));
+
+            await Task.WhenAll(
+                Task.Run(() =>
+                {
+                    using (FileStream fs = File.OpenRead(fifoPath))
+                    {
+                        Assert.Equal(42, fs.ReadByte());
+                    }
+                }),
+                Task.Run(() =>
+                {
+                    using (FileStream fs = File.OpenWrite(fifoPath))
+                    {
+                        fs.WriteByte(42);
+                        fs.Flush();
+                    }
+                }));
         }
 
         [Theory]

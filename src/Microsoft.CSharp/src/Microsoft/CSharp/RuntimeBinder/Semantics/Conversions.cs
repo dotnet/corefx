@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
@@ -9,14 +10,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // Encapsulates all logic about convertibility between types.
     //
     // WARNING: These methods do not precisely match the spec.
-    // WARNING: For example most also return true for identiy conversions,
-    // WARNING: FExpRefConv includes all Implict and Explicit reference conversions.
+    // WARNING: For example most also return true for identity conversions,
+    // WARNING: FExpRefConv includes all Implicit and Explicit reference conversions.
 
     internal static class CConversions
     {
         // WARNING: These methods do not precisely match the spec.
-        // WARNING: For example most also return true for identiy conversions,
-        // WARNING: FExpRefConv includes all Implict and Explicit reference conversions.
+        // WARNING: For example most also return true for identity conversions,
+        // WARNING: FExpRefConv includes all Implicit and Explicit reference conversions.
 
         /***************************************************************************************************
             Determine whether there is an implicit reference conversion from typeSrc to typeDst. This is

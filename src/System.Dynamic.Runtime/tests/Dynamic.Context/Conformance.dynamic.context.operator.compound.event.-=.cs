@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -7,7 +8,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dlgate001.dlgate001;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate creation expression : with event accessor and rhs inside the invocation list
     // </Description>
@@ -75,7 +76,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dlgate002.dlgate002;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate creation expression : without event accessor and rhs inside the invocation list
     // </Description>
@@ -143,7 +144,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dlgate003.dlgate003;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate creation expression : with event accessor and rhs inside the invocation list
     // </Description>
@@ -218,7 +219,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dlgate004.dlgate004;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate creation expression : without event accessor and rhs outside the invocation list
     // </Description>
@@ -288,7 +289,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dynamic001.dynamic001;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is dynamic runtime delegate: with event accessor and rhs is inside the invocation list
     // </Description>
@@ -346,7 +347,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dynamic002.dynamic002;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is dynamic runtime delegate: without event accessor and rhs is inside the invocation list
     // </Description>
@@ -404,7 +405,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dynamic003.dynamic003;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is dynamic runtime delegate: with event accessor and rhs is outside the invocation list
     // </Description>
@@ -467,7 +468,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dynamic004.dynamic004;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is dynamic runtime delegate: without event accessor and rhs is outside the invocation list
     // </Description>
@@ -530,7 +531,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dynamic005.dynamic005;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // lhs is static typed and rhs is dynamic runtime delegate: with event accessor and rhs is inside the invocation list
     // </Description>
@@ -594,7 +595,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dynamic006.dynamic006;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // lhs is static typed and rhs is dynamic runtime delegate: without event accessor and rhs is inside the invocation list
     // </Description>
@@ -658,7 +659,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dynamic007.dynamic007;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // lhs is static typed and rhs is dynamic runtime delegate: with event accessor and rhs is outside the invocation list
     // </Description>
@@ -722,7 +723,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.dynamic008.dynamic008;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // lhs is static typed and rhs is dynamic runtime delegate: without event accessor and rhs is outside the invocation list
     // </Description>
@@ -785,7 +786,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.fieldproperty001.fieldproperty001;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is field/property of delegate type : with event accessor and field/property is inside the invocation list
     // </Description>
@@ -875,7 +876,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.fieldproperty002.fieldproperty002;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is field/property of delegate type : without event accessor and field/property is inside the invocation list
     // </Description>
@@ -965,7 +966,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.fieldproperty003.fieldproperty003;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is field/property of delegate type : with event accessor and field/property is outside the invocation list
     // </Description>
@@ -1056,7 +1057,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.fieldproperty004.fieldproperty004;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is field/property of delegate type : without event accessor and field/property is outside the invocation list
     // </Description>
@@ -1147,9 +1148,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.null001.null001;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
-    // Negtive: rhs is null literal: lhs is not runtime null.
+    // Negative: rhs is null literal: lhs is not runtime null.
     // </Description>
     // <RelatedBugs></RelatedBugs>
     // <Expects Status=success></Expects>
@@ -1202,9 +1203,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.null002.null002;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
-    // Negtive: rhs is null literal: lhs is runtime null.
+    // Negative: rhs is null literal: lhs is runtime null.
     // </Description>
     // <RelatedBugs></RelatedBugs>
     // <Expects Status=success></Expects>
@@ -1256,7 +1257,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.return001.return001;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate invocation return delegate : with event accessor and rhs is in invocation list
     // </Description>
@@ -1327,7 +1328,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.return002.return002;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate invocation return delegate : without event accessor and rhs is in invocation list
     // </Description>
@@ -1398,7 +1399,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.return003.return003;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate invocation return delegate : with event accessor and rhs is outside the invocation list
     // </Description>
@@ -1469,7 +1470,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.return004.return004;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate invocation return delegate : without event accessor and rhs is outside the invocation list
     // </Description>
@@ -1540,7 +1541,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compound.evnt.minuseql.return005.return005;
     // <Area> Dynamic -- compound operator</Area>
-    // <Title> compund operator +=/-= on event </Title>
+    // <Title> compound operator +=/-= on event </Title>
     // <Description>
     // rhs is delegate invocation return delegate : with event accessor and rhs is in invocation list
     // </Description>

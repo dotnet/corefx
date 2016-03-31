@@ -1,10 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Security
@@ -65,7 +67,7 @@ namespace System.Net.Security
         {
             if (encryptionPolicy != EncryptionPolicy.RequireEncryption && encryptionPolicy != EncryptionPolicy.AllowNoEncryption && encryptionPolicy != EncryptionPolicy.NoEncryption)
             {
-                throw new ArgumentException(SR.Format(SR.net_invalid_enum, "EncryptionPolicy"), "encryptionPolicy");
+                throw new ArgumentException(SR.Format(SR.net_invalid_enum, "EncryptionPolicy"), nameof(encryptionPolicy));
             }
 
             _userCertificateValidationCallback = userCertificateValidationCallback;
@@ -425,6 +427,11 @@ namespace System.Net.Security
             }
         }
 
+        public override int ReadByte()
+        {
+            return _sslState.SecureStream.ReadByte();
+        }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
             return _sslState.SecureStream.Read(buffer, offset, count);
@@ -438,6 +445,88 @@ namespace System.Net.Security
         public override void Write(byte[] buffer, int offset, int count)
         {
             _sslState.SecureStream.Write(buffer, offset, count);
+        }
+
+        private IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
+        {
+            return _sslState.SecureStream.BeginRead(buffer, offset, count, asyncCallback, asyncState);
+        }
+
+        private int EndRead(IAsyncResult asyncResult)
+        {
+            return _sslState.SecureStream.EndRead(asyncResult);
+        }
+
+        private IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
+        {
+            return _sslState.SecureStream.BeginWrite(buffer, offset, count, asyncCallback, asyncState);
+        }
+
+        private void EndWrite(IAsyncResult asyncResult)
+        {
+            _sslState.SecureStream.EndWrite(asyncResult);
+        }
+
+        // ReadAsync - provide async read functionality.
+        // 
+        // This method provides async read functionality. All we do is
+        // call through to the Begin/EndRead methods.
+        // 
+        // Input:
+        // 
+        //     buffer            - Buffer to read into.
+        //     offset            - Offset into the buffer where we're to read.
+        //     size              - Number of bytes to read.
+        //     cancellationToken - Token used to request cancellation of the operation
+        // 
+        // Returns:
+        // 
+        //     A Task<int> representing the read.
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled<int>(cancellationToken);
+            }
+
+            return Task.Factory.FromAsync(
+                (bufferArg, offsetArg, sizeArg, callback, state) => ((SslStream)state).BeginRead(bufferArg, offsetArg, sizeArg, callback, state),
+                iar => ((SslStream)iar.AsyncState).EndRead(iar),
+                buffer,
+                offset,
+                size,
+                this);
+        }
+
+        // WriteAsync - provide async write functionality.
+        // 
+        // This method provides async write functionality. All we do is
+        // call through to the Begin/EndWrite methods.
+        // 
+        // Input:
+        // 
+        //     buffer  - Buffer to write into.
+        //     offset  - Offset into the buffer where we're to write.
+        //     size    - Number of bytes to write.
+        //     cancellationToken - Token used to request cancellation of the operation
+        // 
+        // Returns:
+        // 
+        //     A Task representing the write.
+        public override Task WriteAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled<int>(cancellationToken);
+            }
+
+            return Task.Factory.FromAsync(
+                (bufferArg, offsetArg, sizeArg, callback, state) => ((SslStream)state).BeginWrite(bufferArg, offsetArg, sizeArg, callback, state),
+                iar => ((SslStream)iar.AsyncState).EndWrite(iar),
+                buffer,
+                offset,
+                size,
+                this);
         }
     }
 }

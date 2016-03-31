@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -69,7 +70,7 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection", SR.ConcurrentBag_Ctor_ArgumentNullException);
+                throw new ArgumentNullException(nameof(collection), SR.ConcurrentBag_Ctor_ArgumentNullException);
             }
             Initialize(collection);
         }
@@ -254,7 +255,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Local helper function to retrieve a thread local list by a thread object
         /// </summary>
-        /// <param name="forceCreate">Create a new list if the thread does ot exist</param>
+        /// <param name="forceCreate">Create a new list if the thread does not exist</param>
         /// <returns>The local list object</returns>
         private ThreadLocalList GetThreadList(bool forceCreate)
         {
@@ -435,12 +436,12 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array", SR.ConcurrentBag_CopyTo_ArgumentNullException);
+                throw new ArgumentNullException(nameof(array), SR.ConcurrentBag_CopyTo_ArgumentNullException);
             }
             if (index < 0)
             {
                 throw new ArgumentOutOfRangeException
-                    ("index", SR.ConcurrentBag_CopyTo_ArgumentOutOfRangeException);
+                    (nameof(index), SR.ConcurrentBag_CopyTo_ArgumentOutOfRangeException);
             }
 
             // Short path if the bag is empty
@@ -488,7 +489,7 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array", SR.ConcurrentBag_CopyTo_ArgumentNullException);
+                throw new ArgumentNullException(nameof(array), SR.ConcurrentBag_CopyTo_ArgumentNullException);
             }
 
             bool lockTaken = false;
@@ -513,7 +514,7 @@ namespace System.Collections.Concurrent
         {
             // Short path if the bag is empty
             if (_headList == null)
-                return new T[0];
+                return Array.Empty<T>();
 
             bool lockTaken = false;
             try
@@ -681,7 +682,7 @@ namespace System.Collections.Concurrent
         #region Freeze bag helper methods
         /// <summary>
         /// Local helper method to freeze all bag operations, it
-        /// 1- Acquire the global lock to prevent any other thread to freeze the bag, and also new new thread can be added
+        /// 1- Acquire the global lock to prevent any other thread to freeze the bag, and also new thread can be added
         /// to the dictionary
         /// 2- Then Acquire all local lists locks to prevent steal and synchronized operations
         /// 3- Wait for all un-synchronized operations to be done
@@ -855,7 +856,7 @@ namespace System.Collections.Concurrent
         /// </summary>
         internal class ThreadLocalList
         {
-            // Tead node in the list, null means the list is empty
+            // Head node in the list, null means the list is empty
             internal volatile Node _head;
 
             // Tail node for the list

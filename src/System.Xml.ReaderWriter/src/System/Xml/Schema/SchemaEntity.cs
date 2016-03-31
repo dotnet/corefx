@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace System.Xml.Schema
         private String _text;                 // Text for internal entity
         private XmlQualifiedName _ndata = XmlQualifiedName.Empty; // NDATA identifier
         private int _lineNumber;           // line number
-        private int _linePosition;         // character postion
+        private int _linePosition;         // character position
         private bool _isParameter;          // parameter entity flag
         private bool _isExternal;           // external entity flag
         private bool _parsingInProgress;      // whether entity is being parsed (DtdParser infinite recursion check)

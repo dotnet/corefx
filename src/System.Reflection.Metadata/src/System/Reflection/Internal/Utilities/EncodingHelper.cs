@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -148,12 +149,12 @@ namespace System.Reflection.Internal
 
             if (bytes == null)
             {
-                throw new ArgumentNullException("bytes");
+                throw new ArgumentNullException(nameof(bytes));
             }
 
             if (byteCount < 0)
             {
-                throw new ArgumentOutOfRangeException("byteCount");
+                throw new ArgumentOutOfRangeException(nameof(byteCount));
             }
 
             byte[] buffer = AcquireBuffer(byteCount);
@@ -252,12 +253,12 @@ namespace System.Reflection.Internal
 
             if (bytes == null)
             {
-                throw new ArgumentNullException("bytes");
+                throw new ArgumentNullException(nameof(bytes));
             }
 
             if (byteCount < 0)
             {
-                throw new ArgumentOutOfRangeException("byteCount");
+                throw new ArgumentOutOfRangeException(nameof(byteCount));
             }
 
             return createStringFromEncoding(bytes, byteCount, encoding);

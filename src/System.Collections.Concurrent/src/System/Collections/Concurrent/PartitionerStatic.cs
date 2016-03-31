@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -83,7 +84,7 @@ namespace System.Collections.Concurrent
         {
             if (list == null)
             {
-                throw new ArgumentNullException("list");
+                throw new ArgumentNullException(nameof(list));
             }
             if (loadBalance)
             {
@@ -114,7 +115,7 @@ namespace System.Collections.Concurrent
 
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
             if (loadBalance)
             {
@@ -164,11 +165,11 @@ namespace System.Collections.Concurrent
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
 
             if ((partitionerOptions & (~EnumerablePartitionerOptions.NoBuffering)) != 0)
-                throw new ArgumentOutOfRangeException("partitionerOptions");
+                throw new ArgumentOutOfRangeException(nameof(partitionerOptions));
 
             return (new DynamicPartitionerForIEnumerable<TSource>(source, partitionerOptions));
         }
@@ -186,7 +187,7 @@ namespace System.Collections.Concurrent
             // load balancing on a busy system if you make it higher than 1.
             int coreOversubscriptionRate = 3;
 
-            if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException("toExclusive");
+            if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException(nameof(toExclusive));
             long rangeSize = (toExclusive - fromInclusive) /
                 (PlatformHelper.ProcessorCount * coreOversubscriptionRate);
             if (rangeSize == 0) rangeSize = 1;
@@ -204,8 +205,8 @@ namespace System.Collections.Concurrent
         /// less than or equal to 0.</exception>
         public static OrderablePartitioner<Tuple<long, long>> Create(long fromInclusive, long toExclusive, long rangeSize)
         {
-            if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException("toExclusive");
-            if (rangeSize <= 0) throw new ArgumentOutOfRangeException("rangeSize");
+            if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException(nameof(toExclusive));
+            if (rangeSize <= 0) throw new ArgumentOutOfRangeException(nameof(rangeSize));
             return Partitioner.Create(CreateRanges(fromInclusive, toExclusive, rangeSize), EnumerablePartitionerOptions.NoBuffering); // chunk one range at a time
         }
 
@@ -243,7 +244,7 @@ namespace System.Collections.Concurrent
             // load balancing on a busy system if you make it higher than 1.
             int coreOversubscriptionRate = 3;
 
-            if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException("toExclusive");
+            if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException(nameof(toExclusive));
             int rangeSize = (toExclusive - fromInclusive) /
                 (PlatformHelper.ProcessorCount * coreOversubscriptionRate);
             if (rangeSize == 0) rangeSize = 1;
@@ -261,8 +262,8 @@ namespace System.Collections.Concurrent
         /// less than or equal to 0.</exception>
         public static OrderablePartitioner<Tuple<int, int>> Create(int fromInclusive, int toExclusive, int rangeSize)
         {
-            if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException("toExclusive");
-            if (rangeSize <= 0) throw new ArgumentOutOfRangeException("rangeSize");
+            if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException(nameof(toExclusive));
+            if (rangeSize <= 0) throw new ArgumentOutOfRangeException(nameof(rangeSize));
             return Partitioner.Create(CreateRanges(fromInclusive, toExclusive, rangeSize), EnumerablePartitionerOptions.NoBuffering); // chunk one range at a time
         }
 
@@ -509,7 +510,7 @@ namespace System.Collections.Concurrent
             {
                 if (partitionCount <= 0)
                 {
-                    throw new ArgumentOutOfRangeException("partitionCount");
+                    throw new ArgumentOutOfRangeException(nameof(partitionCount));
                 }
                 IEnumerator<KeyValuePair<long, TSource>>[] partitions
                     = new IEnumerator<KeyValuePair<long, TSource>>[partitionCount];
@@ -981,7 +982,7 @@ namespace System.Collections.Concurrent
 
                 override public void Dispose()
                 {
-                    // If this is static partitioning, ie. _activePartitionCount != null, since the current partition 
+                    // If this is static partitioning, i.e. _activePartitionCount != null, since the current partition 
                     // is disposed, we decrement the number of active partitions for the shared reader. 
                     if (_activePartitionCount != null && Interlocked.Decrement(ref _activePartitionCount.Value) == 0)
                     {
@@ -989,7 +990,7 @@ namespace System.Collections.Concurrent
                         // reader we created in the _enumerable object.
                         _enumerable.Dispose();
                     }
-                    // If this is dynamic partitioning, ie. _activePartitionCount != null, then _enumerable needs to
+                    // If this is dynamic partitioning, i.e. _activePartitionCount != null, then _enumerable needs to
                     // be disposed explicitly by the user, and we do not need to anything here
                 }
             }
@@ -1038,7 +1039,7 @@ namespace System.Collections.Concurrent
             {
                 if (partitionCount <= 0)
                 {
-                    throw new ArgumentOutOfRangeException("partitionCount");
+                    throw new ArgumentOutOfRangeException(nameof(partitionCount));
                 }
                 IEnumerator<KeyValuePair<long, TSource>>[] partitions
                     = new IEnumerator<KeyValuePair<long, TSource>>[partitionCount];
@@ -1401,7 +1402,7 @@ namespace System.Collections.Concurrent
             {
                 if (partitionCount <= 0)
                 {
-                    throw new ArgumentOutOfRangeException("partitionCount");
+                    throw new ArgumentOutOfRangeException(nameof(partitionCount));
                 }
 
                 int quotient, remainder;

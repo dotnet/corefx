@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +21,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [MemberData("GetContentBlobsWithType")]
+        [MemberData(nameof(GetContentBlobsWithType))]
         public static void TestBlobContentType(byte[] blob, X509ContentType contentType)
         {
             X509ContentType blobType = X509Certificate2.GetCertContentType(blob);

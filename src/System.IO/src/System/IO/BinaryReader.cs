@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Text;
 using System.Diagnostics;
@@ -35,11 +36,11 @@ namespace System.IO
         {
             if (input == null)
             {
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
             }
             if (encoding == null)
             {
-                throw new ArgumentNullException("encoding");
+                throw new ArgumentNullException(nameof(encoding));
             }
             if (!input.CanRead)
             {
@@ -335,15 +336,15 @@ namespace System.IO
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - index < count)
             {
@@ -450,7 +451,7 @@ namespace System.IO
 
             if (_charBytes == null)
             {
-                _charBytes = new byte[MaxCharBytesSize]; //REVIEW: We need atmost 2 bytes/char here? 
+                _charBytes = new byte[MaxCharBytesSize]; //REVIEW: We need at most 2 bytes/char here? 
             }
             if (_singleChar == null)
             {
@@ -521,7 +522,7 @@ namespace System.IO
         {
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (_stream == null)
             {
@@ -550,15 +551,15 @@ namespace System.IO
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             }
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - index < count)
             {
@@ -576,7 +577,7 @@ namespace System.IO
         {
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (_stream == null)
             {
@@ -617,7 +618,7 @@ namespace System.IO
         {
             if (_buffer != null && (numBytes < 0 || numBytes > _buffer.Length))
             {
-                throw new ArgumentOutOfRangeException("numBytes", SR.ArgumentOutOfRange_BinaryReaderFillBuffer);
+                throw new ArgumentOutOfRangeException(nameof(numBytes), SR.ArgumentOutOfRange_BinaryReaderFillBuffer);
             }
 
             int bytesRead = 0;

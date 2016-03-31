@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -230,7 +231,7 @@ namespace System.Linq.Tests
 
         /// <summary>
         /// Main method to measure performance.
-        /// Creates array of Int32 with length 'elementCount', wraps it by one of the wrapper, appies LINQ and measures materialization to Array
+        /// Creates array of Int32 with length 'elementCount', wraps it by one of the wrapper, applies LINQ and measures materialization to Array
         /// </summary>
         public static void Measure<TElement>(int elementCount, int iterationCount, WrapperType wrapperKind, Func<IEnumerable<int>, IEnumerable<TElement>> applyLINQ)
         {
@@ -243,7 +244,7 @@ namespace System.Linq.Tests
 
         /// <summary>
         /// Main method to measure performance.
-        /// Creates array of TSource with length 'elementCount', wraps it by one of the wrapper, appies LINQ and measures materialization to Array
+        /// Creates array of TSource with length 'elementCount', wraps it by one of the wrapper, applies LINQ and measures materialization to Array
         /// </summary>
         public static void Measure<TSource, TElement>(int elementCount, int iterationCount, TSource defaultValue, WrapperType wrapperKind, Func<IEnumerable<TSource>, IEnumerable<TElement>> applyLINQ)
         {

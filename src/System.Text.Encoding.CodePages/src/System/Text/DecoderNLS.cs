@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Text;
 using System;
@@ -89,13 +90,13 @@ namespace System.Text
         {
             // Validate Parameters
             if (bytes == null)
-                throw new ArgumentNullException("bytes", SR.ArgumentNull_Array);
+                throw new ArgumentNullException(nameof(bytes), SR.ArgumentNull_Array);
 
             if (index < 0 || count < 0)
                 throw new ArgumentOutOfRangeException((index < 0 ? "index" : "count"), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (bytes.Length - index < count)
-                throw new ArgumentOutOfRangeException("bytes", SR.ArgumentOutOfRange_IndexCountBuffer);
+                throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
 
             Contract.EndContractBlock();
 
@@ -113,10 +114,10 @@ namespace System.Text
         {
             // Validate parameters
             if (bytes == null)
-                throw new ArgumentNullException("bytes", SR.ArgumentNull_Array);
+                throw new ArgumentNullException(nameof(bytes), SR.ArgumentNull_Array);
 
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             Contract.EndContractBlock();
 
             // Remember the flush
@@ -145,10 +146,10 @@ namespace System.Text
                 throw new ArgumentOutOfRangeException((byteIndex < 0 ? "byteIndex" : "byteCount"), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (bytes.Length - byteIndex < byteCount)
-                throw new ArgumentOutOfRangeException("bytes", SR.ArgumentOutOfRange_IndexCountBuffer);
+                throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
 
             if (charIndex < 0 || charIndex > chars.Length)
-                throw new ArgumentOutOfRangeException("charIndex", SR.ArgumentOutOfRange_Index);
+                throw new ArgumentOutOfRangeException(nameof(charIndex), SR.ArgumentOutOfRange_Index);
 
             Contract.EndContractBlock();
 
@@ -206,10 +207,10 @@ namespace System.Text
                 throw new ArgumentOutOfRangeException((charIndex < 0 ? "charIndex" : "charCount"), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (bytes.Length - byteIndex < byteCount)
-                throw new ArgumentOutOfRangeException("bytes", SR.ArgumentOutOfRange_IndexCountBuffer);
+                throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
 
             if (chars.Length - charIndex < charCount)
-                throw new ArgumentOutOfRangeException("chars", SR.ArgumentOutOfRange_IndexCountBuffer);
+                throw new ArgumentOutOfRangeException(nameof(chars), SR.ArgumentOutOfRange_IndexCountBuffer);
 
             Contract.EndContractBlock();
 

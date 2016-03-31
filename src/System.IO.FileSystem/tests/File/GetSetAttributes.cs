@@ -1,6 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.IO.Tests
@@ -102,50 +104,37 @@ namespace System.IO.Tests
             Assert.Equal(FileAttributes.Normal, Get(path));
         }
 
-        // In some cases (such as when running without elevated privileges,
-        // the symbolic link may fail to create. Only run this test if it creates
-        // links successfully.
-        [ConditionalFact("CanCreateSymbolicLinks")]
+        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
         public void SymLinksAreReparsePoints()
         {
             var path = GetTestFilePath();
             var linkPath = GetTestFilePath();
+
             File.Create(path).Dispose();
-            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path));
+            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: false));
+
+            Assert.NotEqual(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & Get(path));
             Assert.Equal(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & Get(linkPath));
         }
 
-        // In some cases (such as when running without elevated privileges,
-        // the symbolic link may fail to create. Only run this test if it creates
-        // links successfully.
-        [ConditionalFact("CanCreateSymbolicLinks")]
-        public void SymLinksDoNotReflectTargetAttributes()
+        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
+        public void SymLinksReflectSymLinkAttributes()
         {
             var path = GetTestFilePath();
             var linkPath = GetTestFilePath();
+
             File.Create(path).Dispose();
-            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path));
+            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: false));
 
             Set(path, FileAttributes.ReadOnly);
-
-            Assert.Equal(FileAttributes.ReadOnly, Get(path));
-
-            // Can't assume that ReparsePoint is the only attribute because Windows will add Archive automatically
-            // Instead, just make sure that ReparsePoint is present and ReadOnly is not
-            Assert.Equal(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & Get(linkPath));
-            Assert.Equal((FileAttributes)0, FileAttributes.ReadOnly & Get(linkPath));
-        }
-
-        private static bool CanCreateSymbolicLinks
-        {
-            get
+            try
             {
-                var path = Path.GetTempFileName();
-                var linkPath = path + ".link";
-                var ret = MountHelper.CreateSymbolicLink(linkPath, path);
-                try { File.Delete(path); } catch { }
-                try { File.Delete(linkPath); } catch { }
-                return ret;
+                Assert.Equal(FileAttributes.ReadOnly, FileAttributes.ReadOnly & Get(path));
+                Assert.NotEqual(FileAttributes.ReadOnly, FileAttributes.ReadOnly & Get(linkPath));
+            }
+            finally
+            {
+                Set(path, Get(path) & ~FileAttributes.ReadOnly);
             }
         }
     }

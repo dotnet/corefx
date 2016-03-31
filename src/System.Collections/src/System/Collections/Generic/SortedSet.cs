@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*============================================================
 **
@@ -15,7 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace System.Collections.Generic
 {
     //
-    // A binary search tree is a red-black tree if it satifies the following red-black properties:
+    // A binary search tree is a red-black tree if it satisfies the following red-black properties:
     // 1. Every node is either red or black
     // 2. Every leaf (nil node) is black
     // 3. If a node is red, the both its children are black
@@ -83,7 +84,7 @@ namespace System.Collections.Generic
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
 
             // these are explicit type checks in the mould of HashSet. It would have worked better
@@ -374,7 +375,7 @@ namespace System.Collections.Generic
 
             //
             // Search for a node at bottom to insert the new node. 
-            // If we can guanratee the node we found is not a 4-node, it would be easy to do insertion.
+            // If we can guarantee the node we found is not a 4-node, it would be easy to do insertion.
             // We split 4-nodes along the search path.
             // 
             Node current = _root;
@@ -457,8 +458,8 @@ namespace System.Collections.Generic
             }
 
 
-            // Search for a node and then find its succesor. 
-            // Then copy the item from the succesor to the matching node and delete the successor. 
+            // Search for a node and then find its successor. 
+            // Then copy the item from the successor to the matching node and delete the successor. 
             // If a node doesn't have a successor, we can replace it with its left child (if not empty.) 
             // or delete the matching node.
             // 
@@ -489,7 +490,7 @@ namespace System.Collections.Generic
                         if (sibling.IsRed)
                         {
                             // If parent is a 3-node, flip the orientation of the red link. 
-                            // We can acheive this by a single rotation        
+                            // We can achieve this by a single rotation        
                             // This case is converted to one of other cased below.
                             Debug.Assert(!parent.IsRed, "parent must be a black node!");
                             if (parent.Right == sibling)
@@ -629,17 +630,17 @@ namespace System.Collections.Generic
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             // will array, starting at arrayIndex, be able to hold elements? Note: not
@@ -670,22 +671,22 @@ namespace System.Collections.Generic
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             if (array.Rank != 1)
             {
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             }
 
             if (array.GetLowerBound(0) != 0)
             {
-                throw new ArgumentException(SR.Arg_NonZeroLowerBound);
+                throw new ArgumentException(SR.Arg_NonZeroLowerBound, nameof(array));
             }
 
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             if (array.Length - index < Count)
@@ -703,7 +704,7 @@ namespace System.Collections.Generic
                 object[] objects = array as object[];
                 if (objects == null)
                 {
-                    throw new ArgumentException(SR.Argument_InvalidArrayType);
+                    throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
                 }
 
                 try
@@ -712,7 +713,7 @@ namespace System.Collections.Generic
                 }
                 catch (ArrayTypeMismatchException)
                 {
-                    throw new ArgumentException(SR.Argument_InvalidArrayType);
+                    throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
                 }
             }
         }
@@ -767,7 +768,7 @@ namespace System.Collections.Generic
                 newChildOfGreatGrandParent = currentIsOnRight ? RotateLeft(grandParent) : RotateRight(grandParent);
             }
             else
-            {  // different orientaton, double rotation
+            {  // different orientation, double rotation
                 newChildOfGreatGrandParent = currentIsOnRight ? RotateLeftRight(grandParent) : RotateRightLeft(grandParent);
                 // current node now becomes the child of greatgrandparent 
                 parent = greatGrandParent;
@@ -807,7 +808,7 @@ namespace System.Collections.Generic
 
         private static void Merge2Nodes(Node parent, Node child1, Node child2)
         {
-            Debug.Assert(IsRed(parent), "parent must be be red");
+            Debug.Assert(IsRed(parent), "parent must be red");
             // combing two 2-nodes into a 4-node
             parent.IsRed = false;
             child1.IsRed = true;
@@ -835,39 +836,39 @@ namespace System.Collections.Generic
             }
         }
 
-        // Replace the matching node with its succesor.
-        private void ReplaceNode(Node match, Node parentOfMatch, Node succesor, Node parentOfSuccesor)
+        // Replace the matching node with its successor.
+        private void ReplaceNode(Node match, Node parentOfMatch, Node successor, Node parentOfsuccessor)
         {
-            if (succesor == match)
+            if (successor == match)
             {  // this node has no successor, should only happen if right child of matching node is null.
                 Debug.Assert(match.Right == null, "Right child must be null!");
-                succesor = match.Left;
+                successor = match.Left;
             }
             else
             {
-                Debug.Assert(parentOfSuccesor != null, "parent of successor cannot be null!");
-                Debug.Assert(succesor.Left == null, "Left child of succesor must be null!");
-                Debug.Assert((succesor.Right == null && succesor.IsRed) || (succesor.Right.IsRed && !succesor.IsRed), "Succesor must be in valid state");
-                if (succesor.Right != null)
+                Debug.Assert(parentOfsuccessor != null, "parent of successor cannot be null!");
+                Debug.Assert(successor.Left == null, "Left child of successor must be null!");
+                Debug.Assert((successor.Right == null && successor.IsRed) || (successor.Right.IsRed && !successor.IsRed), "Successor must be in valid state");
+                if (successor.Right != null)
                 {
-                    succesor.Right.IsRed = false;
+                    successor.Right.IsRed = false;
                 }
 
-                if (parentOfSuccesor != match)
-                {   // detach succesor from its parent and set its right child
-                    parentOfSuccesor.Left = succesor.Right;
-                    succesor.Right = match.Right;
+                if (parentOfsuccessor != match)
+                {   // detach successor from its parent and set its right child
+                    parentOfsuccessor.Left = successor.Right;
+                    successor.Right = match.Right;
                 }
 
-                succesor.Left = match.Left;
+                successor.Left = match.Left;
             }
 
-            if (succesor != null)
+            if (successor != null)
             {
-                succesor.IsRed = match.IsRed;
+                successor.IsRed = match.IsRed;
             }
 
-            ReplaceChildOfNodeOrRoot(parentOfMatch, match, succesor);
+            ReplaceChildOfNodeOrRoot(parentOfMatch, match, successor);
         }
 
         internal virtual Node FindNode(T item)
@@ -1014,52 +1015,6 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Decides whether these sets are the same, given the comparer. If the EC's are the same, we can
-        /// just use SetEquals, but if they aren't then we have to manually check with the given comparer
-        /// </summary>        
-        internal static bool SortedSetEquals(SortedSet<T> set1, SortedSet<T> set2, IComparer<T> comparer)
-        {
-            // handle null cases first
-            if (set1 == null)
-            {
-                return (set2 == null);
-            }
-            else if (set2 == null)
-            {
-                // set1 != null
-                return false;
-            }
-
-            if (AreComparersEqual(set1, set2))
-            {
-                if (set1.Count != set2.Count)
-                    return false;
-
-                return set1.SetEquals(set2);
-            }
-            else
-            {
-                bool found = false;
-                foreach (T item1 in set1)
-                {
-                    found = false;
-                    foreach (T item2 in set2)
-                    {
-                        if (comparer.Compare(item1, item2) == 0)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                        return false;
-                }
-                return true;
-            }
-        }
-
-
         //This is a little frustrating because we can't support more sorted structures
         private static bool AreComparersEqual(SortedSet<T> set1, SortedSet<T> set2)
         {
@@ -1073,18 +1028,6 @@ namespace System.Collections.Generic
             node.Left.IsRed = false;
             node.Right.IsRed = false;
         }
-
-        /// <summary>
-        /// Copies this to an array. Used for DebugView
-        /// </summary>
-        /// <returns></returns>
-        internal T[] ToArray()
-        {
-            T[] newArray = new T[Count];
-            CopyTo(newArray);
-            return newArray;
-        }
-
 
         #endregion
 
@@ -1102,7 +1045,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             SortedSet<T> s = other as SortedSet<T>;
@@ -1262,7 +1205,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if (Count == 0)
@@ -1350,7 +1293,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if (_count == 0)
@@ -1398,7 +1341,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if (this.Count == 0)
@@ -1489,7 +1432,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if (Count == 0)
@@ -1505,7 +1448,7 @@ namespace System.Collections.Generic
             }
             else
             {
-                //worst case: mark every element in my set and see if i've counted all
+                //worst case: mark every element in my set and see if I've counted all
                 //O(MlogN)
 
                 ElementCount result = CheckUniqueAndUnfoundElements(other, false);
@@ -1534,7 +1477,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if ((other as ICollection) != null)
@@ -1554,7 +1497,7 @@ namespace System.Collections.Generic
             }
 
 
-            //worst case: mark every element in my set and see if i've counted all
+            //worst case: mark every element in my set and see if I've counted all
             //O(MlogN).
             ElementCount result = CheckUniqueAndUnfoundElements(other, false);
             return (result.uniqueCount == Count && result.unfoundCount > 0);
@@ -1570,7 +1513,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if ((other as ICollection) != null && (other as ICollection).Count == 0)
@@ -1604,7 +1547,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if (Count == 0)
@@ -1629,7 +1572,7 @@ namespace System.Collections.Generic
             }
 
 
-            //worst case: mark every element in my set and see if i've counted all
+            //worst case: mark every element in my set and see if I've counted all
             //O(MlogN)
             //slight optimization, put it into a HashSet and then check can do it in O(N+M)
             //but slower in better cases + wastes space
@@ -1648,7 +1591,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             SortedSet<T> asSorted = other as SortedSet<T>;
@@ -1670,7 +1613,7 @@ namespace System.Collections.Generic
                 return mineEnded && theirsEnded;
             }
 
-            //worst case: mark every element in my set and see if i've counted all
+            //worst case: mark every element in my set and see if I've counted all
             //O(N) by size of other            
             ElementCount result = CheckUniqueAndUnfoundElements(other, true);
             return (result.uniqueCount == Count && result.unfoundCount == 0);
@@ -1687,7 +1630,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if (this.Count == 0)
@@ -1814,7 +1757,7 @@ namespace System.Collections.Generic
         {
             if (match == null)
             {
-                throw new ArgumentNullException("match");
+                throw new ArgumentNullException(nameof(match));
             }
             List<T> matches = new List<T>(this.Count);
 
@@ -1885,7 +1828,7 @@ namespace System.Collections.Generic
         {
             if (Comparer.Compare(lowerValue, upperValue) > 0)
             {
-                throw new ArgumentException("lowerBound is greater than upperBound");
+                throw new ArgumentException(SR.SortedSet_LowerValueGreaterThanUpperValue, nameof(lowerValue));
             }
             return new TreeSubSet(this, lowerValue, upperValue, true, true);
         }
@@ -1949,7 +1892,7 @@ namespace System.Collections.Generic
             {
                 if (!IsWithinRange(item))
                 {
-                    throw new ArgumentOutOfRangeException("collection");
+                    throw new ArgumentOutOfRangeException(nameof(item));
                 }
 
                 bool ret = _underlying.AddIfNotPresent(item);
@@ -2171,12 +2114,12 @@ namespace System.Collections.Generic
                 if (_lBoundActive && Comparer.Compare(_min, lowerValue) > 0)
                 {
                     //lBound = min;
-                    throw new ArgumentOutOfRangeException("lowerValue");
+                    throw new ArgumentOutOfRangeException(nameof(lowerValue));
                 }
                 if (_uBoundActive && Comparer.Compare(_max, upperValue) < 0)
                 {
                     //uBound = max;
-                    throw new ArgumentOutOfRangeException("upperValue");
+                    throw new ArgumentOutOfRangeException(nameof(upperValue));
                 }
                 TreeSubSet ret = (TreeSubSet)_underlying.GetViewBetween(lowerValue, upperValue);
                 return ret;
@@ -2390,8 +2333,6 @@ namespace System.Collections.Generic
             }
         }
 
-
-
         internal struct ElementCount
         {
             internal int uniqueCount;
@@ -2414,76 +2355,5 @@ namespace System.Collections.Generic
         }
         #endregion
 
-
-    }
-
-    /// <summary>
-    /// A class that generates an IEqualityComparer for this SortedSet. Requires that the definition of
-    /// equality defined by the IComparer for this SortedSet be consistent with the default IEqualityComparer
-    /// for the type T. If not, such an IEqualityComparer should be provided through the constructor.
-    /// </summary>    
-    internal sealed class SortedSetEqualityComparer<T> : IEqualityComparer<SortedSet<T>>
-    {
-        private IComparer<T> _comparer;
-        private IEqualityComparer<T> _eqComparer;
-
-        public SortedSetEqualityComparer() : this(null, null) { }
-
-        public SortedSetEqualityComparer(IComparer<T> comparer) : this(comparer, null) { }
-
-        public SortedSetEqualityComparer(IEqualityComparer<T> memberEqualityComparer) : this(null, memberEqualityComparer) { }
-
-        /// <summary>
-        /// Create a new SetEqualityComparer, given a comparer for member order and another for member equality (these
-        /// must be consistent in their definition of equality)
-        /// </summary>        
-        public SortedSetEqualityComparer(IComparer<T> comparer, IEqualityComparer<T> memberEqualityComparer)
-        {
-            if (comparer == null)
-                _comparer = Comparer<T>.Default;
-            else
-                _comparer = comparer;
-            if (memberEqualityComparer == null)
-                _eqComparer = EqualityComparer<T>.Default;
-            else
-                _eqComparer = memberEqualityComparer;
-        }
-
-
-        // using comparer to keep equals properties in tact; don't want to choose one of the comparers
-        public bool Equals(SortedSet<T> x, SortedSet<T> y)
-        {
-            return SortedSet<T>.SortedSetEquals(x, y, _comparer);
-        }
-        //IMPORTANT: this part uses the fact that GetHashCode() is consistent with the notion of equality in
-        //the set
-        public int GetHashCode(SortedSet<T> obj)
-        {
-            int hashCode = 0;
-            if (obj != null)
-            {
-                foreach (T t in obj)
-                {
-                    hashCode = hashCode ^ (_eqComparer.GetHashCode(t) & 0x7FFFFFFF);
-                }
-            } // else returns hashcode of 0 for null HashSets
-            return hashCode;
-        }
-
-        // Equals method for the comparer itself. 
-        public override bool Equals(Object obj)
-        {
-            SortedSetEqualityComparer<T> comparer = obj as SortedSetEqualityComparer<T>;
-            if (comparer == null)
-            {
-                return false;
-            }
-            return (_comparer == comparer._comparer);
-        }
-
-        public override int GetHashCode()
-        {
-            return _comparer.GetHashCode() ^ _eqComparer.GetHashCode();
-        }
     }
 }

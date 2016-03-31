@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -65,11 +66,5 @@ namespace System.IO.Pipes.Tests
 
         // InOut pipes can be written/read from either direction
         public override void ReadOnWriteOnlyPipe_Throws_NotSupportedException() { }
-        public override void WriteToPipeWithClosedPartner_Throws_IOException()
-        {
-            // timeout on Unix: 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                base.WriteToPipeWithClosedPartner_Throws_IOException();
-        }
     }
 }

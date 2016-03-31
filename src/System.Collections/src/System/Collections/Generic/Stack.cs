@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*=============================================================================
 **
@@ -42,7 +43,7 @@ namespace System.Collections.Generic
         public Stack(int capacity)
         {
             if (capacity < 0)
-                throw new ArgumentOutOfRangeException("capacity", SR.ArgumentOutOfRange_NeedNonNegNumRequired);
+                throw new ArgumentOutOfRangeException(nameof(capacity), capacity, SR.ArgumentOutOfRange_NeedNonNegNum);
             _array = new T[capacity];
         }
 
@@ -53,7 +54,7 @@ namespace System.Collections.Generic
         public Stack(IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             _array = EnumerableHelpers.ToArray(collection, out _size);
         }
 
@@ -118,12 +119,12 @@ namespace System.Collections.Generic
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             if (arrayIndex < 0 || arrayIndex > array.Length)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, SR.ArgumentOutOfRange_Index);
             }
 
             if (array.Length - arrayIndex < _size)
@@ -131,41 +132,33 @@ namespace System.Collections.Generic
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
 
-            if (array != _array)
-            {
-                int srcIndex = 0;
-                int dstIndex = arrayIndex + _size;
-                for (int i = 0; i < _size; i++)
-                    array[--dstIndex] = _array[srcIndex++];
-            }
-            else
-            {
-                // Legacy fallback in case we ever end up copying within the same array.
-                Array.Copy(_array, 0, array, arrayIndex, _size);
-                Array.Reverse(array, arrayIndex, _size);
-            }
+            Debug.Assert(array != _array);
+            int srcIndex = 0;
+            int dstIndex = arrayIndex + _size;
+            for (int i = 0; i < _size; i++)
+                array[--dstIndex] = _array[srcIndex++];
         }
 
         void System.Collections.ICollection.CopyTo(Array array, int arrayIndex)
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             if (array.Rank != 1)
             {
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             }
 
             if (array.GetLowerBound(0) != 0)
             {
-                throw new ArgumentException(SR.Arg_NonZeroLowerBound);
+                throw new ArgumentException(SR.Arg_NonZeroLowerBound, nameof(array));
             }
 
             if (arrayIndex < 0 || arrayIndex > array.Length)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, SR.ArgumentOutOfRange_Index);
             }
 
             if (array.Length - arrayIndex < _size)
@@ -180,7 +173,7 @@ namespace System.Collections.Generic
             }
             catch (ArrayTypeMismatchException)
             {
-                throw new ArgumentException(SR.Argument_InvalidArrayType);
+                throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
             }
         }
 
@@ -252,6 +245,9 @@ namespace System.Collections.Generic
         // Copies the Stack to an array, in the same order Pop would return the items.
         public T[] ToArray()
         {
+            if (_size == 0)
+                return Array.Empty<T>();
+
             T[] objArray = new T[_size];
             int i = 0;
             while (i < _size)

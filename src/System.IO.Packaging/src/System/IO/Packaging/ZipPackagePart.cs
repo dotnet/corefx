@@ -1,13 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-//-----------------------------------------------------------------------------
-//
-// Description:
-//  This is a subclass for the abstract PackagePart class.
-//  This implementation is specific to Zip file format.
-//
-//-----------------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -17,28 +10,11 @@ namespace System.IO.Packaging
 {
     /// <summary>
     /// This class represents a Part within a Zip container.
-    /// This is a part of the Packaging Layer APIs
+    /// This is a part of the Packaging Layer APIs.
+    /// This implementation is specific to the Zip file format.
     /// </summary>
     public sealed class ZipPackagePart : PackagePart
     {
-        //------------------------------------------------------
-        //
-        //  Public Constructors
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Public Properties
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Public Methods
-        //
-        //------------------------------------------------------
-
         #region Public Methods
 
         /// <summary>
@@ -66,19 +42,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Public Methods
-
-        //------------------------------------------------------
-        //
-        //  Public Events
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Constructors
-        //
-        //------------------------------------------------------
-
+        
         #region Internal Constructors
 
         /// <summary>
@@ -110,12 +74,6 @@ namespace System.IO.Packaging
 
         #endregion Internal Constructors
 
-        //------------------------------------------------------
-        //
-        //  Internal Properties
-        //
-        //------------------------------------------------------
-
         #region Internal Properties
 
         /// <summary>
@@ -130,31 +88,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Properties
-
-        //------------------------------------------------------
-        //
-        //  Internal Methods
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Events
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Private Methods
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Private Fields
-        //
-        //------------------------------------------------------
-
+        
         #region Private Variables
 
         private ZipPackage _zipPackage;
@@ -163,7 +97,5 @@ namespace System.IO.Packaging
         private ZipStreamManager _zipStreamManager;
 
         #endregion Private Variables
-
-        //------------------------------------------------------
     }
 }

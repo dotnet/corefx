@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -41,5 +42,40 @@ namespace System
         // Members promoted from MemberInfo
         public abstract Type DeclaringType { get; }
         public abstract string Name { get; }
+    }
+}
+
+namespace System.Runtime.InteropServices
+{
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct GCHandle
+    {
+        public bool IsAllocated { get { return default(bool); } }
+        public object Target { [System.Security.SecurityCriticalAttribute]get { return default(object); } [System.Security.SecurityCriticalAttribute]set { } }
+        [System.Security.SecurityCriticalAttribute]
+        public System.IntPtr AddrOfPinnedObject() { return default(System.IntPtr); }
+        [System.Security.SecurityCriticalAttribute]
+        public static System.Runtime.InteropServices.GCHandle Alloc(object value) { return default(System.Runtime.InteropServices.GCHandle); }
+        [System.Security.SecurityCriticalAttribute]
+        public static System.Runtime.InteropServices.GCHandle Alloc(object value, System.Runtime.InteropServices.GCHandleType type) { return default(System.Runtime.InteropServices.GCHandle); }
+        public override bool Equals(object o) { return default(bool); }
+        [System.Security.SecurityCriticalAttribute]
+        public void Free() { }
+        [System.Security.SecurityCriticalAttribute]
+        public static System.Runtime.InteropServices.GCHandle FromIntPtr(System.IntPtr value) { return default(System.Runtime.InteropServices.GCHandle); }
+        public override int GetHashCode() { return default(int); }
+        public static bool operator ==(System.Runtime.InteropServices.GCHandle a, System.Runtime.InteropServices.GCHandle b) { return default(bool); }
+        [System.Security.SecurityCriticalAttribute]
+        public static explicit operator System.Runtime.InteropServices.GCHandle(System.IntPtr value) { return default(System.Runtime.InteropServices.GCHandle); }
+        public static explicit operator System.IntPtr(System.Runtime.InteropServices.GCHandle value) { return default(System.IntPtr); }
+        public static bool operator !=(System.Runtime.InteropServices.GCHandle a, System.Runtime.InteropServices.GCHandle b) { return default(bool); }
+        public static System.IntPtr ToIntPtr(System.Runtime.InteropServices.GCHandle value) { return default(System.IntPtr); }
+    }
+    public enum GCHandleType
+    {
+        Normal = 2,
+        Pinned = 3,
+        Weak = 0,
+        WeakTrackResurrection = 1,
     }
 }

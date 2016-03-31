@@ -1,13 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
-
 using Windows.Networking;
-using Windows.Networking.Connectivity;
 
 namespace System.Net.NetworkInformation
 {
@@ -36,7 +35,7 @@ namespace System.Net.NetworkInformation
         {
             Interop.IpHlpApi.FIXED_INFO fixedInfo = new Interop.IpHlpApi.FIXED_INFO();
 
-            IReadOnlyList<HostName> hostNamesList = Windows.Networking.Connectivity.NetworkInformation.GetHostNames();
+            IReadOnlyList<HostName> hostNamesList = global::Windows.Networking.Connectivity.NetworkInformation.GetHostNames();
 
             foreach (HostName entry in hostNamesList)
             {

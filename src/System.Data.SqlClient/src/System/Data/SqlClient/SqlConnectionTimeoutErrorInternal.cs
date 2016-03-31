@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 //------------------------------------------------------------------------------
@@ -20,7 +21,7 @@ namespace System.Data.SqlClient
         LoginBegin,                 // [LOGIN PHASE]            End of the pre-login phase; Start of the login phase; 
         ProcessConnectionAuth,      // [LOGIN PHASE]            Process SSPI or SQL Authenticate.
         PostLogin,                  // [POST-LOGIN PHASE]       End of the login phase; And post-login phase;
-        Complete,                   // Marker for the succesful completion of the connection
+        Complete,                   // Marker for the successful completion of the connection
         Count                       // ** This is to track the length of the enum. ** Do not add any phase after this. **
     }
 
@@ -44,7 +45,7 @@ namespace System.Data.SqlClient
 
         internal void StopCapture()
         {
-            //Debug.Assert(swDuration.IsRunning == true, "The stop opertaion of the stopwatch cannot be called when it is not running.");
+            //Debug.Assert(swDuration.IsRunning == true, "The stop operation of the stopwatch cannot be called when it is not running.");
             if (_swDuration.IsRunning == true)
                 _swDuration.Stop();
         }
@@ -195,7 +196,7 @@ namespace System.Data.SqlClient
 
             // This message is to be added only when within the various stages of a connection. 
             // In all other cases, it will default to the original error message.
-            if ((_currentPhase != SqlConnectionTimeoutErrorPhase.Undefined) || (_currentPhase != SqlConnectionTimeoutErrorPhase.Complete))
+            if ((_currentPhase != SqlConnectionTimeoutErrorPhase.Undefined) && (_currentPhase != SqlConnectionTimeoutErrorPhase.Complete))
             {
                 // NOTE: In case of a failover scenario, add a string that this failure occurred as part of the primary or secondary server
                 if (_isFailoverScenario)
@@ -215,13 +216,13 @@ namespace System.Data.SqlClient
                         _originalPhaseDurations[(int)SqlConnectionTimeoutErrorPhase.ProcessConnectionAuth].GetMilliSecondDuration(),
                         _originalPhaseDurations[(int)SqlConnectionTimeoutErrorPhase.PostLogin].GetMilliSecondDuration());
                 }
+            }
 
-                // NOTE: To display duration in each phase.
-                if (durationString != null)
-                {
-                    errorBuilder.Append("  ");
-                    errorBuilder.Append(durationString);
-                }
+            // NOTE: To display duration in each phase.
+            if (durationString != null)
+            {
+                errorBuilder.Append("  ");
+                errorBuilder.Append(durationString);
             }
 
             return errorBuilder.ToString();

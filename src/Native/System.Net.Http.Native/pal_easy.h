@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #pragma once
 
@@ -16,6 +17,7 @@ enum
 enum PAL_CURLoption : int32_t
 {
     PAL_CURLOPT_INFILESIZE = CurlOptionLongBase + 14,
+    PAL_CURLOPT_SSLVERSION = CurlOptionLongBase + 32,
     PAL_CURLOPT_VERBOSE = CurlOptionLongBase + 41,
     PAL_CURLOPT_NOBODY = CurlOptionLongBase + 44,
     PAL_CURLOPT_UPLOAD = CurlOptionLongBase + 46,
@@ -23,7 +25,9 @@ enum PAL_CURLoption : int32_t
     PAL_CURLOPT_FOLLOWLOCATION = CurlOptionLongBase + 52,
     PAL_CURLOPT_PROXYPORT = CurlOptionLongBase + 59,
     PAL_CURLOPT_POSTFIELDSIZE = CurlOptionLongBase + 60,
+    PAL_CURLOPT_SSL_VERIFYPEER = CurlOptionLongBase + 64,
     PAL_CURLOPT_MAXREDIRS = CurlOptionLongBase + 68,
+    PAL_CURLOPT_SSL_VERIFYHOST = CurlOptionLongBase + 81,
     PAL_CURLOPT_HTTP_VERSION = CurlOptionLongBase + 84,
     PAL_CURLOPT_NOSIGNAL = CurlOptionLongBase + 99,
     PAL_CURLOPT_PROXYTYPE = CurlOptionLongBase + 101,
@@ -55,8 +59,10 @@ enum PAL_CURLcode : int32_t
 {
     PAL_CURLE_OK = 0,
     PAL_CURLE_UNSUPPORTED_PROTOCOL = 1,
+    PAL_CURLE_FAILED_INIT = 2,
     PAL_CURLE_NOT_BUILT_IN = 4,
     PAL_CURLE_COULDNT_RESOLVE_HOST = 6,
+    PAL_CURLE_OUT_OF_MEMORY = 27,
     PAL_CURLE_ABORTED_BY_CALLBACK = 42,
     PAL_CURLE_UNKNOWN_OPTION = 48,
 };
@@ -75,6 +81,11 @@ enum PAL_CURL_HTTP_VERSION
     PAL_CURL_HTTP_VERSION_2_0 = 3
 };
 
+enum PAL_CURL_SSLVERSION
+{
+    PAL_CURL_SSLVERSION_TLSv1 = 1
+};
+
 enum PAL_CURLINFO : int32_t
 {
     PAL_CURLINFO_PRIVATE = CurlInfoStringBase + 21,
@@ -87,6 +98,7 @@ enum PAL_CURLAUTH : int64_t
     PAL_CURLAUTH_Basic = 1 << 0,
     PAL_CURLAUTH_Digest = 1 << 1,
     PAL_CURLAUTH_Negotiate = 1 << 2,
+    PAL_CURLAUTH_NTLM = 1 << 3,
 };
 
 enum PAL_CURLPROXYTYPE : int32_t
@@ -107,9 +119,22 @@ enum PAL_CurlSeekResult : int32_t
     PAL_CURL_SEEKFUNC_CANTSEEK = 2,
 };
 
+enum PAL_CurlInfoType : int32_t 
+{
+    PAL_CURLINFO_TEXT = 0,
+    PAL_CURLINFO_HEADER_IN = 1,
+    PAL_CURLINFO_HEADER_OUT = 2,
+    PAL_CURLINFO_DATA_IN = 3,
+    PAL_CURLINFO_DATA_OUT = 4,
+    PAL_CURLINFO_SSL_DATA_IN = 5,
+    PAL_CURLINFO_SSL_DATA_OUT = 6,
+};
+
 const uint64_t PAL_CURL_READFUNC_ABORT = 0x10000000;
 const uint64_t PAL_CURL_READFUNC_PAUSE = 0x10000001;
 const uint64_t PAL_CURL_WRITEFUNC_PAUSE = 0x10000001;
+
+const uint64_t PAL_CURL_MAX_HTTP_HEADER = 100 * 1024;
 
 /*
 Creates a new CURL instance.
@@ -170,6 +195,9 @@ typedef uint64_t (*ReadWriteCallback)(uint8_t* buffer, uint64_t bufferSize, uint
 // the function pointer definition for the callback used in RegisterSslCtxCallback
 typedef int32_t (*SslCtxCallback)(CURL* curl, void* sslCtx, void* userPointer);
 
+// the function pointer definition for the callback used for debugging callbacks
+typedef void(*DebugCallback)(CURL* curl, PAL_CurlInfoType type, char* data, uint64_t size, void* userPointer);
+
 /*
 The object that is returned from RegisterXXXCallback functions.
 This holds the data necessary to know what managed callback to invoke and with what args.
@@ -207,6 +235,18 @@ extern "C" int32_t HttpNative_RegisterSslCtxCallback(CURL* curl,
                                                      SslCtxCallback callback,
                                                      void* userPointer,
                                                      CallbackHandle** callbackHandle);
+
+/*
+Registers a callback in libcurl for outputting debug information.
+
+This callback function gets called by libcurl each time it has debug information to report.
+
+Returns a CURLcode that describes whether registering the callback was successful or not.
+*/
+extern "C" int32_t HttpNative_RegisterDebugCallback(CURL* curl, 
+                                                    DebugCallback callback,
+                                                    void* userPointer,
+                                                    CallbackHandle** callbackHandle);
 
 /*
 Frees the CallbackHandle created by a RegisterXXXCallback function.

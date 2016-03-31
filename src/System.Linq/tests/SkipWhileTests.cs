@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ namespace System.Linq.Tests
         [Fact]
         public void SkipErrorWhenSourceErrors()
         {
-            var source = Enumerable.Range(-2, 5).Select(i => (decimal)i).Select(m => 1 / m).Skip(4);
+            var source = NumberRangeGuaranteedNotCollectionType(-2, 5).Select(i => (decimal)i).Select(m => 1 / m).Skip(4);
             using(var en = source.GetEnumerator())
             {
                 Assert.Throws<DivideByZeroException>(() => en.MoveNext());
@@ -153,7 +154,7 @@ namespace System.Linq.Tests
         public void ForcedToEnumeratorDoesntEnumerate()
         {
             var iterator = NumberRangeGuaranteedNotCollectionType(0, 3).SkipWhile(e => true);
-            // Don't insist on this behaviour, but check its correct if it happens
+            // Don't insist on this behaviour, but check it's correct if it happens
             var en = iterator as IEnumerator<int>;
             Assert.False(en != null && en.MoveNext());
         }
@@ -162,7 +163,7 @@ namespace System.Linq.Tests
         public void ForcedToEnumeratorDoesntEnumerateIndexed()
         {
             var iterator = NumberRangeGuaranteedNotCollectionType(0, 3).SkipWhile((e, i) => true);
-            // Don't insist on this behaviour, but check its correct if it happens
+            // Don't insist on this behaviour, but check it's correct if it happens
             var en = iterator as IEnumerator<int>;
             Assert.False(en != null && en.MoveNext());
         }

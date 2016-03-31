@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -93,7 +94,7 @@ namespace System.Linq.Tests
         {
             string[] key = { "Chris", "Prakash", "Robert" };
             int[] element = { 50, 80, 100, 95, 99, 56 };
-            var source = new []
+            var source = new[]
             {
                 new { Name = key[0], Score = element[0] },
                 new { Name = key[1], Score = element[2] },
@@ -104,6 +105,24 @@ namespace System.Linq.Tests
             };
 
             AssertMatches(key, element, source.ToLookup(e => e.Name, e => e.Score, new AnagramEqualityComparer()));
+        }
+
+        [Fact]
+        public void Count()
+        {
+            string[] key = { "Chris", "Prakash", "Robert" };
+            int[] element = { 50, 80, 100, 95, 99, 56 };
+            var source = new[]
+            {
+                new { Name = key[0], Score = element[0] },
+                new { Name = key[1], Score = element[2] },
+                new { Name = key[2], Score = element[5] },
+                new { Name = key[1], Score = element[3] },
+                new { Name = key[0], Score = element[1] },
+                new { Name = key[1], Score = element[4] }
+            };
+
+            Assert.Equal(3, source.ToLookup(e => e.Name, e => e.Score).Count());
         }
 
         [Fact]

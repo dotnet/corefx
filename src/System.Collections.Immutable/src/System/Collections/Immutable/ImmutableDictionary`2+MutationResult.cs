@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Collections.Immutable
 {
@@ -40,7 +41,7 @@ namespace System.Collections.Immutable
             /// <param name="countAdjustment">The count adjustment.</param>
             internal MutationResult(SortedInt32KeyNode<HashBucket> root, int countAdjustment)
             {
-                Requires.NotNull(root, "root");
+                Requires.NotNull(root, nameof(root));
                 _root = root;
                 _countAdjustment = countAdjustment;
             }
@@ -68,7 +69,7 @@ namespace System.Collections.Immutable
             /// <returns>The new collection.</returns>
             internal ImmutableDictionary<TKey, TValue> Finalize(ImmutableDictionary<TKey, TValue> priorMap)
             {
-                Requires.NotNull(priorMap, "priorMap");
+                Requires.NotNull(priorMap, nameof(priorMap));
                 return priorMap.Wrap(this.Root, priorMap._count + this.CountAdjustment);
             }
         }

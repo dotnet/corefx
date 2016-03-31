@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -95,10 +96,10 @@ namespace System.Linq.Parallel
         //
 
         private void WrapPartitionedStreamHelper<TLeftKey, TRightKey>(
-            PartitionedStream<Pair, TLeftKey> leftHashStream, PartitionedStream<TRightInput, TRightKey> rightPartitionedStream,
+            PartitionedStream<Pair<TLeftInput,TKey>, TLeftKey> leftHashStream, PartitionedStream<TRightInput, TRightKey> rightPartitionedStream,
             IPartitionedStreamRecipient<TOutput> outputRecipient, int partitionCount, CancellationToken cancellationToken)
         {
-            PartitionedStream<Pair, int> rightHashStream = ExchangeUtilities.HashRepartition(
+            PartitionedStream<Pair<TRightInput,TKey>, int> rightHashStream = ExchangeUtilities.HashRepartition(
                 rightPartitionedStream, _rightKeySelector, _keyComparer, null, cancellationToken);
 
             PartitionedStream<TOutput, TLeftKey> outputStream = new PartitionedStream<TOutput, TLeftKey>(

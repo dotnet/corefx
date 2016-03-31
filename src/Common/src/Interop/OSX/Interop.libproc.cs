@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -312,7 +313,7 @@ internal static partial class Interop
             // Negative PIDs are invalid
             if (pid < 0)
             {
-                throw new ArgumentOutOfRangeException("pid");
+                throw new ArgumentOutOfRangeException(nameof(pid));
             }
 
             // Get the process information for the specified pid
@@ -335,13 +336,13 @@ internal static partial class Interop
             // Negative PIDs are invalid
             if (pid < 0)
             {
-                throw new ArgumentOutOfRangeException("pid");
+                throw new ArgumentOutOfRangeException(nameof(pid));
             }
 
             // Negative TIDs are invalid
             if (thread < 0)
             {
-                throw new ArgumentOutOfRangeException("thread");
+                throw new ArgumentOutOfRangeException(nameof(thread));
             }
 
             // Get the thread information for the specified thread in the specified process
@@ -356,7 +357,7 @@ internal static partial class Interop
             // Negative PIDs are invalid
             if (pid < 0)
             {
-                throw new ArgumentOutOfRangeException("pid");
+                throw new ArgumentOutOfRangeException(nameof(pid));
             }
 
             int result = 0;
@@ -364,7 +365,7 @@ internal static partial class Interop
             ulong[] threadIds = null;
             var threads = new List<KeyValuePair<ulong, proc_threadinfo?>>();
 
-            // We have no way of knowning how many threads the process has (and therefore how big our buffer should be)
+            // We have no way of knowing how many threads the process has (and therefore how big our buffer should be)
             // so while the return value of the function is the same as our buffer size (meaning it completely filled
             // our buffer), double our buffer size and try again. This ensures that we don't miss any threads
             do
@@ -428,7 +429,7 @@ internal static partial class Interop
             // Negative PIDs are invalid
             if (pid < 0)
             {
-                throw new ArgumentOutOfRangeException("pid", SR.NegativePidNotSupported);
+                throw new ArgumentOutOfRangeException(nameof(pid), SR.NegativePidNotSupported);
             }
 
             // The path is a fixed buffer size, so use that and trim it after
@@ -473,7 +474,7 @@ internal static partial class Interop
             // Negative PIDs are invalid
             if (pid < 0)
             {
-                throw new ArgumentOutOfRangeException("pid", SR.NegativePidNotSupported);
+                throw new ArgumentOutOfRangeException(nameof(pid), SR.NegativePidNotSupported);
             }
 
             rusage_info_v3 info = new rusage_info_v3();

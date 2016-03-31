@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Net.Sockets;
@@ -43,9 +44,8 @@ namespace System.Net.Security.Tests
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.RequireEncryption))
                 {
                     await sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false);
-                    _log.WriteLine("Client({0}) authenticated to server({1}) with encryption cipher: {2} {3}-bit strength",
-                        client.Client.LocalEndPoint, client.Client.RemoteEndPoint,
-                        sslStream.CipherAlgorithm, sslStream.CipherStrength);
+                    _log.WriteLine("Client authenticated to server({0}) with encryption cipher: {1} {2}-bit strength",
+                        serverRequireEncryption.RemoteEndPoint, sslStream.CipherAlgorithm, sslStream.CipherStrength);
                     Assert.True(sslStream.CipherAlgorithm != CipherAlgorithmType.Null, "Cipher algorithm should not be NULL");
                     Assert.True(sslStream.CipherStrength > 0, "Cipher strength should be greater than 0");
                 }
@@ -64,16 +64,15 @@ namespace System.Net.Security.Tests
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.AllowNoEncryption))
                 {
                     await sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false);
-                    _log.WriteLine("Client({0}) authenticated to server({1}) with encryption cipher: {2} {3}-bit strength",
-                        client.Client.LocalEndPoint, client.Client.RemoteEndPoint,
-                        sslStream.CipherAlgorithm, sslStream.CipherStrength);
+                    _log.WriteLine("Client authenticated to server({0}) with encryption cipher: {1} {2}-bit strength",
+                        serverRequireEncryption.RemoteEndPoint, sslStream.CipherAlgorithm, sslStream.CipherStrength);
                     Assert.True(sslStream.CipherAlgorithm != CipherAlgorithmType.Null, "Cipher algorithm should not be NULL");
                     Assert.True(sslStream.CipherStrength > 0, "Cipher strength should be greater than 0");
                 }
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsNullEncryption))]
         public async Task ServerRequireEncryption_ClientNoEncryption_NoConnect()
         {
             using (var serverRequireEncryption = new DummyTcpServer(
@@ -88,5 +87,7 @@ namespace System.Net.Security.Tests
                 }
             }
         }
+
+        private static bool SupportsNullEncryption => TestConfiguration.SupportsNullEncryption;
     }
 }

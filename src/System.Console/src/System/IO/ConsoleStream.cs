@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -76,7 +77,7 @@ namespace System.IO
         protected void ValidateRead(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             if (offset < 0 || count < 0)
                 throw new ArgumentOutOfRangeException((offset < 0 ? "offset" : "count"), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - offset < count)
@@ -88,7 +89,7 @@ namespace System.IO
         protected void ValidateWrite(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             if (offset < 0 || count < 0)
                 throw new ArgumentOutOfRangeException((offset < 0 ? "offset" : "count"), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - offset < count)

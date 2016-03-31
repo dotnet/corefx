@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -9,8 +10,8 @@ namespace System.Linq.Parallel.Tests
     public partial class ParallelQueryCombinationTests
     {
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Cast_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -23,8 +24,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Cast_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -33,8 +34,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void DefaultIfEmpty_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -46,8 +47,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void DefaultIfEmpty_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -56,8 +57,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Distinct_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -70,8 +71,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Distinct_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -81,8 +82,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Except_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -96,8 +97,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Except_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -108,8 +109,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void GetEnumerator_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -126,8 +127,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void GroupBy_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seenKey = new IntegerRangeSet(DefaultStart / GroupFactor, (DefaultSize + (GroupFactor - 1)) / GroupFactor);
@@ -142,8 +143,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void GroupBy_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seenKey = new IntegerRangeSet(DefaultStart / GroupFactor, (DefaultSize + (GroupFactor - 1)) / GroupFactor);
@@ -158,8 +159,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void GroupBy_ElementSelector_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seenKey = new IntegerRangeSet(DefaultStart / GroupFactor, (DefaultSize + (GroupFactor - 1)) / GroupFactor);
@@ -174,8 +175,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void GroupBy_ElementSelector_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seenKey = new IntegerRangeSet(DefaultStart / GroupFactor, (DefaultSize + (GroupFactor - 1)) / GroupFactor);
@@ -190,8 +191,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Intersect_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -205,8 +206,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Intersect_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -217,8 +218,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OfType_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -230,8 +231,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void OfType_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -240,8 +241,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Select_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize + 1, DefaultSize);
@@ -253,8 +254,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Select_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize + 1, DefaultSize);
@@ -263,8 +264,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Select_Index_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize + 1, DefaultSize);
@@ -278,8 +279,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Select_Index_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize + 1, DefaultSize);
@@ -290,8 +291,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SelectMany_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize * 2 + 1, DefaultSize * 2);
@@ -303,8 +304,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SelectMany_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize * 2 + 1, DefaultSize * 2);
@@ -313,8 +314,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SelectMany_Indexed_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize * 2 + 1, DefaultSize * 2);
@@ -328,8 +329,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SelectMany_Indexed_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize * 2 + 1, DefaultSize * 2);
@@ -340,8 +341,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SelectMany_ResultSelector_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize * 2 + 1, DefaultSize * 2);
@@ -353,8 +354,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SelectMany_ResultSelector_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize * 2 + 1, DefaultSize * 2);
@@ -363,8 +364,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SelectMany_Indexed_ResultSelector_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize * 2 + 1, DefaultSize * 2);
@@ -378,8 +379,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void SelectMany_Indexed_ResultSelector_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(-DefaultStart - DefaultSize * 2 + 1, DefaultSize * 2);
@@ -390,8 +391,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Skip_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -405,8 +406,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Skip_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -416,8 +417,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Take_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -431,8 +432,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Take_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -442,8 +443,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void ToArray_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -452,8 +453,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Where_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize / 2);
@@ -465,8 +466,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Where_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize / 2);
@@ -475,8 +476,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Where_Indexed_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize / 2);
@@ -488,8 +489,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Where_Indexed_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize / 2);
@@ -498,8 +499,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Zip_Unordered(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
@@ -513,8 +514,8 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("UnaryUnorderedOperators")]
-        [MemberData("BinaryUnorderedOperators")]
+        [MemberData(nameof(UnaryUnorderedOperators))]
+        [MemberData(nameof(BinaryUnorderedOperators))]
         public static void Zip_Unordered_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);

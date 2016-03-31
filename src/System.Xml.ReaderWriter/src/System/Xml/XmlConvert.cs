@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Text;
 using System.Globalization;
@@ -151,7 +152,7 @@ namespace System.Xml
                                 bufBld.Append(highChar);
                                 bufBld.Append(lowChar);
                             }
-                            //else bad ucs-4 char dont convert
+                            //else bad ucs-4 char don't convert
                         }
                         else
                         { //convert to single char
@@ -326,7 +327,7 @@ namespace System.Xml
         {
             if (s == null)
             {
-                throw new ArgumentNullException("s");
+                throw new ArgumentNullException(nameof(s));
             }
             return BinHexDecoder.Decode(s.ToCharArray(), allowOddCount);
         }
@@ -335,7 +336,7 @@ namespace System.Xml
         {
             if (inArray == null)
             {
-                throw new ArgumentNullException("inArray");
+                throw new ArgumentNullException(nameof(inArray));
             }
             return BinHexEncoder.Encode(inArray, 0, inArray.Length);
         }
@@ -352,11 +353,11 @@ namespace System.Xml
         {
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
             if (name.Length == 0)
             {
-                throw new ArgumentNullException("name", SR.Xml_EmptyName);
+                throw new ArgumentNullException(nameof(name), SR.Xml_EmptyName);
             }
 
             // parse name
@@ -376,7 +377,7 @@ namespace System.Xml
         {
             if (name == null || name.Length == 0)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             int colonPosition = -1;
@@ -403,11 +404,11 @@ namespace System.Xml
         {
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
             if (name.Length == 0)
             {
-                throw new ArgumentNullException("name", SR.Xml_EmptyLocalName);
+                throw new ArgumentNullException(nameof(name), SR.Xml_EmptyLocalName);
             }
 
             int end = ValidateNames.ParseNCName(name, 0);
@@ -436,7 +437,7 @@ namespace System.Xml
         {
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
             if (name.Length == 0)
             {
@@ -459,7 +460,7 @@ namespace System.Xml
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw new ArgumentNullException(nameof(content));
             }
             VerifyCharData(content, ExceptionType.XmlException);
             return content;
@@ -471,7 +472,7 @@ namespace System.Xml
         {
             if (publicId == null)
             {
-                throw new ArgumentNullException("publicId");
+                throw new ArgumentNullException(nameof(publicId));
             }
 
             // returns the position of invalid character or -1
@@ -490,7 +491,7 @@ namespace System.Xml
         {
             if (content == null)
             {
-                throw new ArgumentNullException("content");
+                throw new ArgumentNullException(nameof(content));
             }
 
             // returns the position of invalid character or -1
@@ -519,12 +520,12 @@ namespace System.Xml
 #endif
 
 
-        // Value convertors:
+        // Value converters:
         //
         // String representation of Base types in XML (xsd) sometimes differ from
         // one common language runtime offer and for all types it has to be locale independent.
         // o -- means that XmlConvert pass through to common language runtime converter with InvariantInfo FormatInfo
-        // x -- means we doing something special to make a convertion.
+        // x -- means we doing something special to make a conversion.
         //
         // From:  To: Bol Chr SBy Byt I16 U16 I32 U32 I64 U64 Sgl Dbl Dec Dat Tim Str uid
         // ------------------------------------------------------------------------------
@@ -760,7 +761,7 @@ namespace System.Xml
         {
             if (s == null)
             {
-                throw new ArgumentNullException("s");
+                throw new ArgumentNullException(nameof(s));
             }
             if (s.Length != 1)
             {
@@ -963,7 +964,7 @@ namespace System.Xml
         {
             if (s == null)
             {
-                throw new ArgumentNullException("s");
+                throw new ArgumentNullException(nameof(s));
             }
             XsdDateTime xsdDateTime = new XsdDateTime(s, XsdDateTimeFlags.AllXsd);
             DateTimeOffset dateTimeOffset = (DateTimeOffset)xsdDateTime;
@@ -974,7 +975,7 @@ namespace System.Xml
         {
             if (s == null)
             {
-                throw new ArgumentNullException("s");
+                throw new ArgumentNullException(nameof(s));
             }
             return DateTimeOffset.ParseExact(s, format, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite);
         }
@@ -983,7 +984,7 @@ namespace System.Xml
         {
             if (s == null)
             {
-                throw new ArgumentNullException("s");
+                throw new ArgumentNullException(nameof(s));
             }
             return DateTimeOffset.ParseExact(s, formats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite);
         }

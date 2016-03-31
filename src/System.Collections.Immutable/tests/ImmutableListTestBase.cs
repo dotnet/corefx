@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -394,7 +395,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [ActiveIssue(5067, PlatformID.Windows)]
         public void BinarySearch()
         {
             var basis = new List<int>(Enumerable.Range(1, 50).Select(n => n * 2));
@@ -420,7 +420,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [ActiveIssue(5067, PlatformID.Windows)]
         public void BinarySearchPartialSortedList()
         {
             var reverseSorted = ImmutableArray.CreateRange(Enumerable.Range(1, 150).Select(n => n * 2).Reverse());
@@ -431,8 +430,8 @@ namespace System.Collections.Immutable.Tests
 
         private void BinarySearchPartialSortedListHelper(ImmutableArray<int> inputData, int sortedIndex, int sortedLength)
         {
-            Requires.Range(sortedIndex >= 0, "sortedIndex");
-            Requires.Range(sortedLength > 0, "sortedLength");
+            Requires.Range(sortedIndex >= 0, nameof(sortedIndex));
+            Requires.Range(sortedLength > 0, nameof(sortedLength));
             inputData = inputData.Sort(sortedIndex, sortedLength, Comparer<int>.Default);
             int min = inputData[sortedIndex];
             int max = inputData[sortedIndex + sortedLength - 1];

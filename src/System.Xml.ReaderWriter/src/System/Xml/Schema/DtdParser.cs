@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -181,9 +182,9 @@ namespace System.Xml
         // Constructor
         //
 
+#if DEBUG
         static DtdParser()
         {
-#if DEBUG
             //  The absolute numbering is utilized in attribute type parsing
             Debug.Assert((int)Token.CDATA == (int)XmlTokenizedType.CDATA && (int)XmlTokenizedType.CDATA == 0);
             Debug.Assert((int)Token.ID == (int)XmlTokenizedType.ID && (int)XmlTokenizedType.ID == 1);
@@ -194,8 +195,8 @@ namespace System.Xml
             Debug.Assert((int)Token.NMTOKEN == (int)XmlTokenizedType.NMTOKEN && (int)XmlTokenizedType.NMTOKEN == 6);
             Debug.Assert((int)Token.NMTOKENS == (int)XmlTokenizedType.NMTOKENS && (int)XmlTokenizedType.NMTOKENS == 7);
             Debug.Assert((int)Token.NOTATION == (int)XmlTokenizedType.NOTATION && (int)XmlTokenizedType.NOTATION == 8);
+    }
 #endif
-        }
 
         private DtdParser()
         {
@@ -2935,13 +2936,13 @@ namespace System.Xml
         private string GetValueWithStrippedSpaces()
         {
             Debug.Assert(_curPos == 0 || _chars[_curPos - 1] == '"' || _chars[_curPos - 1] == '\'');
-            // We cannot StripSpaces directly in the buffer - we need the original value inthe buffer intact so that the internal subset value is correct
+            // We cannot StripSpaces directly in the buffer - we need the original value in the buffer intact so that the internal subset value is correct
             string val = (_stringBuilder.Length == 0) ? new string(_chars, _tokenStartPos, _curPos - _tokenStartPos - 1) : _stringBuilder.ToString();
             return StripSpaces(val);
         }
 
         //
-        // Parsing buffer maintainance methods
+        // Parsing buffer maintenance methods
         //
         private int ReadData()
         {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Match is the result class for a regex search.
 // It returns the location, length, and substring for
@@ -134,7 +135,7 @@ namespace System.Text.RegularExpressions
             RegexReplacement repl;
 
             if (replacement == null)
-                throw new ArgumentNullException("replacement");
+                throw new ArgumentNullException(nameof(replacement));
 
             if (_regex == null)
                 throw new NotSupportedException(SR.NoResultOnFailed);
@@ -184,7 +185,7 @@ namespace System.Text.RegularExpressions
         static internal Match Synchronized(Match inner)
         {
             if (inner == null)
-                throw new ArgumentNullException("inner");
+                throw new ArgumentNullException(nameof(inner));
 
             int numgroups = inner._matchcount.Length;
 

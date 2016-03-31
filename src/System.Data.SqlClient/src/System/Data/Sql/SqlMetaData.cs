@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //------------------------------------------------------------------------------
@@ -202,7 +203,7 @@ namespace Microsoft.SqlServer.Server
                     x_defaultColumnSortOrder, x_defaultSortOrdinal);
         }
 
-        // Most general constructor, should be able to intialize all SqlMetaData fields.(Used by SqlParameter)
+        // Most general constructor, should be able to initialize all SqlMetaData fields.(Used by SqlParameter)
         internal SqlMetaData(String name,
                               SqlDbType sqlDBType,
                               long maxLength,
@@ -407,7 +408,7 @@ namespace Microsoft.SqlServer.Server
 
             ValidateSortOrder(columnSortOrder, sortOrdinal);
 
-            // Check for absense of explicitly-allowed types to avoid unexpected additions when new types are added
+            // Check for absence of explicitly-allowed types to avoid unexpected additions when new types are added
             if (!(SqlDbType.BigInt == dbType ||
                     SqlDbType.Bit == dbType ||
                     SqlDbType.DateTime == dbType ||
@@ -941,7 +942,7 @@ namespace Microsoft.SqlServer.Server
                     {
                         byte[] rgbValue = value.Value;
                         byte[] rgbNewValue = new byte[MaxLength];
-                        Array.Copy(rgbValue, 0, rgbNewValue, 0, rgbValue.Length);
+                        Buffer.BlockCopy(rgbValue, 0, rgbNewValue, 0, rgbValue.Length);
                         Array.Clear(rgbNewValue, rgbValue.Length, rgbNewValue.Length - rgbValue.Length);
                         return new SqlBinary(rgbNewValue);
                     }
@@ -962,7 +963,7 @@ namespace Microsoft.SqlServer.Server
             {
                 byte[] rgbValue = value.Value;
                 byte[] rgbNewValue = new byte[MaxLength];
-                Array.Copy(rgbValue, 0, rgbNewValue, 0, (int)MaxLength);
+                Buffer.BlockCopy(rgbValue, 0, rgbNewValue, 0, (int)MaxLength);
                 value = new SqlBinary(rgbNewValue);
             }
 
@@ -1039,7 +1040,7 @@ namespace Microsoft.SqlServer.Server
                         if (value.MaxLength < MaxLength)
                         {
                             byte[] rgbNew = new byte[MaxLength];
-                            Array.Copy(value.Buffer, 0, rgbNew, 0, (int)oldLength);
+                            Buffer.BlockCopy(value.Buffer, 0, rgbNew, 0, (int)oldLength);
                             value = new SqlBytes(rgbNew);
                         }
 
@@ -1379,7 +1380,7 @@ namespace Microsoft.SqlServer.Server
                     if (value.Length < MaxLength)
                     {
                         byte[] rgbNewValue = new byte[MaxLength];
-                        Array.Copy(value, 0, rgbNewValue, 0, value.Length);
+                        Buffer.BlockCopy(value, 0, rgbNewValue, 0, value.Length);
                         Array.Clear(rgbNewValue, value.Length, (int)rgbNewValue.Length - value.Length);
                         return rgbNewValue;
                     }
@@ -1399,7 +1400,7 @@ namespace Microsoft.SqlServer.Server
             if (value.Length > MaxLength && Max != MaxLength)
             {
                 byte[] rgbNewValue = new byte[MaxLength];
-                Array.Copy(value, 0, rgbNewValue, 0, (int)MaxLength);
+                Buffer.BlockCopy(value, 0, rgbNewValue, 0, (int)MaxLength);
                 value = rgbNewValue;
             }
 

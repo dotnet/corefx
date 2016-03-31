@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -16,7 +17,7 @@ namespace System.Collections.ObjectModel.Tests
     public static class PublicMethodsTest
     {
         /// <summary>
-        /// Tests that is is possible to Add an item to the collection.
+        /// Tests that is possible to Add an item to the collection.
         /// </summary>
         [Fact]
         public static void AddTest()
@@ -351,7 +352,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(-1, collection.IndexOf("seven"));
             Assert.Equal(-1, collection.IndexOf(null));
 
-            // testing that the first occurance is the index returned.
+            // testing that the first occurrence is the index returned.
             ObservableCollection<int> intCol = new ObservableCollection<int>();
             for (int i = 0; i < 4; ++i)
                 intCol.Add(i % 2);

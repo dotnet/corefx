@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -139,7 +140,7 @@ namespace System.Numerics.Tests
         }
 
         /// <summary>
-        /// Test Log Method on Very Large BigInteger more than (1 &lt&lt Int.MaxValue) by base 2
+        /// Test Log Method on Very Large BigInteger more than (1 &lt;&lt; Int.MaxValue) by base 2
         /// Tested BigInteger are: pow(2, startShift + smallLoopShift * [1..smallLoopLimit] + Int32.MaxValue * [1..bigLoopLimit])
         /// Note: 
         /// ToString() can not operate such large values

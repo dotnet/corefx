@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -71,7 +72,7 @@ namespace System.Security.Principal
         {
             if (identity == null)
             {
-                throw new ArgumentNullException("identity");
+                throw new ArgumentNullException(nameof(identity));
             }
             Contract.EndContractBlock();
 
@@ -82,7 +83,7 @@ namespace System.Security.Principal
         {
             if (identity == null)
             {
-                throw new ArgumentNullException("identity");
+                throw new ArgumentNullException(nameof(identity));
             }
             Contract.EndContractBlock();
 
@@ -103,7 +104,7 @@ namespace System.Security.Principal
         {
             if (identity == null)
             {
-                throw new ArgumentNullException("identity");
+                throw new ArgumentNullException(nameof(identity));
             }
             Contract.EndContractBlock();
 
@@ -139,7 +140,7 @@ namespace System.Security.Principal
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
                 Contract.EndContractBlock();
 
@@ -164,7 +165,7 @@ namespace System.Security.Principal
         {
             if (targetType == null)
             {
-                throw new ArgumentNullException("targetType");
+                throw new ArgumentNullException(nameof(targetType));
             }
 
             //
@@ -173,7 +174,7 @@ namespace System.Security.Principal
 
             if (!targetType.GetTypeInfo().IsSubclassOf(typeof(IdentityReference)))
             {
-                throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, "targetType");
+                throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, nameof(targetType));
             }
             Contract.EndContractBlock();
 
@@ -405,7 +406,7 @@ namespace System.Security.Principal
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
             Contract.EndContractBlock();
 

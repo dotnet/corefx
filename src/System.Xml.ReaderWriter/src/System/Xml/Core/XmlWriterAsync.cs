@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ namespace System.Xml
             throw NotImplemented.ByDesign;
         }
 
-        //Writes out the XML declaration with the version "1.0" and the speficied standalone attribute.
+        //Writes out the XML declaration with the version "1.0" and the specified standalone attribute.
 
         public virtual Task WriteStartDocumentAsync(bool standalone)
         {
@@ -244,7 +245,7 @@ namespace System.Xml
         {
             if (null == reader)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             if (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.XmlDeclaration)
@@ -292,7 +293,7 @@ namespace System.Xml
         {
             if (null == reader)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             if (reader.Settings != null && reader.Settings.Async)

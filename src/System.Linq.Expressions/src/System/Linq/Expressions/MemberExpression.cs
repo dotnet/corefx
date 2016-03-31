@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -151,16 +152,16 @@ namespace System.Linq.Expressions
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames")]
         public static MemberExpression Field(Expression expression, FieldInfo field)
         {
-            ContractUtils.RequiresNotNull(field, "field");
+            ContractUtils.RequiresNotNull(field, nameof(field));
 
             if (field.IsStatic)
             {
-                if (expression != null) throw new ArgumentException(Strings.OnlyStaticFieldsHaveNullInstance, "expression");
+                if (expression != null) throw new ArgumentException(Strings.OnlyStaticFieldsHaveNullInstance, nameof(expression));
             }
             else
             {
-                if (expression == null) throw new ArgumentException(Strings.OnlyStaticFieldsHaveNullInstance, "field");
-                RequiresCanRead(expression, "expression");
+                if (expression == null) throw new ArgumentException(Strings.OnlyStaticFieldsHaveNullInstance, nameof(field));
+                RequiresCanRead(expression, nameof(expression));
                 if (!TypeUtils.AreReferenceAssignable(field.DeclaringType, expression.Type))
                 {
                     throw Error.FieldInfoNotDefinedForType(field.DeclaringType, field.Name, expression.Type);
@@ -177,7 +178,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="MemberExpression"/>.</returns>
         public static MemberExpression Field(Expression expression, string fieldName)
         {
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
 
             // bind to public names first
             FieldInfo fi = expression.Type.GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
@@ -203,7 +204,7 @@ namespace System.Linq.Expressions
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames")]
         public static MemberExpression Field(Expression expression, Type type, string fieldName)
         {
-            ContractUtils.RequiresNotNull(type, "type");
+            ContractUtils.RequiresNotNull(type, nameof(type));
 
             // bind to public names first
             FieldInfo fi = type.GetField(fieldName, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
@@ -230,8 +231,8 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="MemberExpression"/>.</returns>
         public static MemberExpression Property(Expression expression, string propertyName)
         {
-            RequiresCanRead(expression, "expression");
-            ContractUtils.RequiresNotNull(propertyName, "propertyName");
+            RequiresCanRead(expression, nameof(expression));
+            ContractUtils.RequiresNotNull(propertyName, nameof(propertyName));
             // bind to public names first
             PropertyInfo pi = expression.Type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
             if (pi == null)
@@ -254,8 +255,8 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="MemberExpression"/>.</returns>
         public static MemberExpression Property(Expression expression, Type type, string propertyName)
         {
-            ContractUtils.RequiresNotNull(type, "type");
-            ContractUtils.RequiresNotNull(propertyName, "propertyName");
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            ContractUtils.RequiresNotNull(propertyName, nameof(propertyName));
             // bind to public names first
             PropertyInfo pi = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
             if (pi == null)
@@ -278,7 +279,7 @@ namespace System.Linq.Expressions
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames")]
         public static MemberExpression Property(Expression expression, PropertyInfo property)
         {
-            ContractUtils.RequiresNotNull(property, "property");
+            ContractUtils.RequiresNotNull(property, nameof(property));
 
             MethodInfo mi = property.GetGetMethod(true);
 
@@ -302,12 +303,12 @@ namespace System.Linq.Expressions
 
             if (mi.IsStatic)
             {
-                if (expression != null) throw new ArgumentException(Strings.OnlyStaticPropertiesHaveNullInstance, "expression");
+                if (expression != null) throw new ArgumentException(Strings.OnlyStaticPropertiesHaveNullInstance, nameof(expression));
             }
             else
             {
-                if (expression == null) throw new ArgumentException(Strings.OnlyStaticPropertiesHaveNullInstance, "property");
-                RequiresCanRead(expression, "expression");
+                if (expression == null) throw new ArgumentException(Strings.OnlyStaticPropertiesHaveNullInstance, nameof(property));
+                RequiresCanRead(expression, nameof(expression));
                 if (!TypeUtils.IsValidInstanceType(property, expression.Type))
                 {
                     throw Error.PropertyNotDefinedForType(property, expression.Type);
@@ -325,7 +326,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="MemberExpression"/>.</returns>
         public static MemberExpression Property(Expression expression, MethodInfo propertyAccessor)
         {
-            ContractUtils.RequiresNotNull(propertyAccessor, "propertyAccessor");
+            ContractUtils.RequiresNotNull(propertyAccessor, nameof(propertyAccessor));
             ValidateMethodInfo(propertyAccessor);
             return Property(expression, GetProperty(propertyAccessor));
         }
@@ -377,7 +378,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="MemberExpression"/>.</returns>
         public static MemberExpression PropertyOrField(Expression expression, string propertyOrFieldName)
         {
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
             // bind to public names first
             PropertyInfo pi = expression.Type.GetProperty(propertyOrFieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
             if (pi != null)
@@ -403,7 +404,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="MemberExpression"/>.</returns>
         public static MemberExpression MakeMemberAccess(Expression expression, MemberInfo member)
         {
-            ContractUtils.RequiresNotNull(member, "member");
+            ContractUtils.RequiresNotNull(member, nameof(member));
 
             FieldInfo fi = member as FieldInfo;
             if (fi != null)

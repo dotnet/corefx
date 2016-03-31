@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Xml
 {
@@ -32,7 +33,7 @@ namespace System.Xml
         /// <include file='doc\XmlNameTable.uex' path='docs/doc[@for="XmlNameTable.Add"]/*' />
         /// <devdoc>
         ///    <para>Creates a new atom for the characters at the specified range
-        ///       of chararacters in the specified string.</para>
+        ///       of characters in the specified string.</para>
         /// </devdoc>
         public abstract String Add(char[] array, int offset, int length);
 

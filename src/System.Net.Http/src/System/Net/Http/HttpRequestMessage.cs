@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
@@ -33,7 +34,7 @@ namespace System.Net.Http
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
                 CheckDisposed();
 
@@ -72,7 +73,7 @@ namespace System.Net.Http
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
                 CheckDisposed();
 
@@ -87,7 +88,7 @@ namespace System.Net.Http
             {
                 if ((value != null) && (value.IsAbsoluteUri) && (!HttpUtilities.IsHttpUri(value)))
                 {
-                    throw new ArgumentException(SR.net_http_client_http_baseaddress_required, "value");
+                    throw new ArgumentException(SR.net_http_client_http_baseaddress_required, nameof(value));
                 }
                 CheckDisposed();
 
@@ -180,11 +181,11 @@ namespace System.Net.Http
         {
             if (method == null)
             {
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             }
             if ((requestUri != null) && (requestUri.IsAbsoluteUri) && (!HttpUtilities.IsHttpUri(requestUri)))
             {
-                throw new ArgumentException(SR.net_http_client_http_baseaddress_required, "requestUri");
+                throw new ArgumentException(SR.net_http_client_http_baseaddress_required, nameof(requestUri));
             }
 
             _method = method;

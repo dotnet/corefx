@@ -1,12 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-// -----------------------------------------------------------------------
-// Copyright © Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
 using System.Composition.Hosting.Util;
-using System.Composition.Runtime;
 using System.Linq;
 using System.Text;
 using Microsoft.Internal;
@@ -43,9 +40,9 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Satisfied(CompositionContract contract, ExportDescriptorPromise target, bool isPrerequisite, object site)
         {
-            Requires.NotNull(target, "target");
-            Requires.NotNull(site, "site");
-            Requires.NotNull(contract, "contract");
+            Requires.NotNull(target, nameof(target));
+            Requires.NotNull(site, nameof(site));
+            Requires.NotNull(contract, nameof(contract));
 
             return new CompositionDependency(contract, target, isPrerequisite, site);
         }
@@ -59,8 +56,8 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Missing(CompositionContract contract, object site)
         {
-            Requires.NotNull(contract, "contract");
-            Requires.NotNull(site, "site");
+            Requires.NotNull(contract, nameof(contract));
+            Requires.NotNull(site, nameof(site));
 
             return new CompositionDependency(contract, site);
         }
@@ -75,9 +72,9 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Oversupplied(CompositionContract contract, IEnumerable<ExportDescriptorPromise> targets, object site)
         {
-            Requires.NotNull(targets, "targets");
-            Requires.NotNull(site, "site");
-            Requires.NotNull(contract, "contract");
+            Requires.NotNull(targets, nameof(targets));
+            Requires.NotNull(site, nameof(site));
+            Requires.NotNull(contract, nameof(contract));
 
             return new CompositionDependency(contract, targets, site);
         }

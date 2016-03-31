@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Dynamic.Utils;
 
@@ -20,7 +21,7 @@ namespace System.Dynamic
         /// <param name="ignoreCase">true if the name should be matched ignoring case; false otherwise.</param>
         protected SetMemberBinder(string name, bool ignoreCase)
         {
-            ContractUtils.RequiresNotNull(name, "name");
+            ContractUtils.RequiresNotNull(name, nameof(name));
 
             _name = name;
             _ignoreCase = ignoreCase;
@@ -64,12 +65,12 @@ namespace System.Dynamic
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
         public sealed override DynamicMetaObject Bind(DynamicMetaObject target, DynamicMetaObject[] args)
         {
-            ContractUtils.RequiresNotNull(target, "target");
-            ContractUtils.RequiresNotNull(args, "args");
-            ContractUtils.Requires(args.Length == 1, "args");
+            ContractUtils.RequiresNotNull(target, nameof(target));
+            ContractUtils.RequiresNotNull(args, nameof(args));
+            ContractUtils.Requires(args.Length == 1, nameof(args));
 
             var arg0 = args[0];
-            ContractUtils.RequiresNotNull(arg0, "args");
+            ContractUtils.RequiresNotNull(arg0, nameof(args));
 
             return target.BindSetMember(this, arg0);
         }

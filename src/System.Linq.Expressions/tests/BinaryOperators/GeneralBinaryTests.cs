@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("NonBinaryTypesIncludingInvalidData")]
+        [MemberData(nameof(NonBinaryTypesIncludingInvalidData))]
         public void MakeBinaryInvalidType(ExpressionType type)
         {
             Assert.Throws<ArgumentException>(() => Expression.MakeBinary(type, Expression.Constant(0), Expression.Constant(0)));
@@ -49,7 +50,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("BinaryTypesData")]
+        [MemberData(nameof(BinaryTypesData))]
         public void MakeBinaryLeftNull(ExpressionType type)
         {
             Assert.Throws<ArgumentNullException>(() => Expression.MakeBinary(type, null, Expression.Constant(0)));
@@ -58,7 +59,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("BinaryTypesData")]
+        [MemberData(nameof(BinaryTypesData))]
         public void MakeBinaryRightNull(ExpressionType type)
         {
             Assert.Throws<ArgumentNullException>(() => Expression.MakeBinary(type, Expression.Variable(typeof(object)), null));

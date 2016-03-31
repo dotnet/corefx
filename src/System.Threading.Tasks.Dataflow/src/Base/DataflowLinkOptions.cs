@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -56,7 +57,7 @@ namespace System.Threading.Tasks.Dataflow
         private Boolean _propagateCompletion = false;
         /// <summary>The maximum number of messages that may be consumed across the link.</summary>
         private Int32 _maxNumberOfMessages = Unbounded;
-        /// <summary>Whether the link should be appended to the source’s list of links, or whether it should be prepended.</summary>
+        /// <summary>Whether the link should be appended to the source?s list of links, or whether it should be prepended.</summary>
         private Boolean _append = true;
 
         /// <summary>A default instance of <see cref="DataflowLinkOptions"/>.</summary>
@@ -94,12 +95,12 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default && this != UnlinkAfterOneAndPropagateCompletion, "Default and UnlinkAfterOneAndPropagateCompletion instances are supposed to be immutable.");
-                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _maxNumberOfMessages = value;
             }
         }
 
-        /// <summary>Gets or sets whether the link should be appended to the source’s list of links, or whether it should be prepended.</summary>
+        /// <summary>Gets or sets whether the link should be appended to the source?s list of links, or whether it should be prepended.</summary>
         public Boolean Append
         {
             get { return _append; }

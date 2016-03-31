@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Globalization;
@@ -303,7 +304,7 @@ public static class DoubleTests
 
         nfi.CurrencySymbol = "$";
         nfi.CurrencyGroupSeparator = ",";
-        Assert.True(double.TryParse("$1,000", NumberStyles.Currency, nfi, out i)); // Currency/Thousands postive
+        Assert.True(double.TryParse("$1,000", NumberStyles.Currency, nfi, out i)); // Currency/Thousands positive
         Assert.Equal(1000, i);
 
         Assert.False(double.TryParse("abc", NumberStyles.None, nfi, out i));       // Hex Number negative
@@ -311,7 +312,7 @@ public static class DoubleTests
         Assert.False(double.TryParse("678.90", NumberStyles.Integer, nfi, out i));  // Decimal
         Assert.False(double.TryParse(" 678 ", NumberStyles.None, nfi, out i));      // Trailing/Leading whitespace negative
 
-        Assert.True(double.TryParse("(135)", NumberStyles.AllowParentheses, nfi, out i)); // Parenthese postive
+        Assert.True(double.TryParse("(135)", NumberStyles.AllowParentheses, nfi, out i)); // Parentheses positive
         Assert.Equal(-135, i);
 
         Assert.True(double.TryParse("Infinity", NumberStyles.Any, NumberFormatInfo.InvariantInfo, out i));

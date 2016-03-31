@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Xml.XPath;
@@ -61,7 +62,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathDocumentElementChildIterator(XPathDocumentNavigator parent, string name, string namespaceURI) : base(parent)
         {
-            if (namespaceURI == null) throw new ArgumentNullException("namespaceURI");
+            if (namespaceURI == null) throw new ArgumentNullException(nameof(namespaceURI));
 
             _localName = parent.NameTable.Get(name);
             _namespaceUri = namespaceURI;
@@ -173,7 +174,7 @@ namespace MS.Internal.Xml.Cache
         /// </summary>
         public XPathDocumentElementDescendantIterator(XPathDocumentNavigator root, string name, string namespaceURI, bool matchSelf) : base(root)
         {
-            if (namespaceURI == null) throw new ArgumentNullException("namespaceURI");
+            if (namespaceURI == null) throw new ArgumentNullException(nameof(namespaceURI));
 
             _localName = root.NameTable.Get(name);
             _namespaceUri = namespaceURI;

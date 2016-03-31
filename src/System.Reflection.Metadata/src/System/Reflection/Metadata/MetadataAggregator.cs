@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -55,12 +56,12 @@ namespace System.Reflection.Metadata.Ecma335
             {
                 if (baseReader == null)
                 {
-                    throw new ArgumentNullException("baseReader");
+                    throw new ArgumentNullException(nameof(baseReader));
                 }
 
                 if (baseReader.GetTableRowCount(TableIndex.EncMap) != 0)
                 {
-                    throw new ArgumentException("Base reader must be a full metadata reader.", "baseReader");
+                    throw new ArgumentException("Base reader must be a full metadata reader.", nameof(baseReader));
                 }
 
                 CalculateBaseCounts(baseReader, out baseTableRowCounts, out baseHeapSizes);
@@ -70,30 +71,30 @@ namespace System.Reflection.Metadata.Ecma335
             {
                 if (baseTableRowCounts.Count != MetadataTokens.TableCount)
                 {
-                    throw new ArgumentException("Must have " + MetadataTokens.TableCount + " elements", "baseTableRowCounts");
+                    throw new ArgumentException("Must have " + MetadataTokens.TableCount + " elements", nameof(baseTableRowCounts));
                 }
 
                 if (baseHeapSizes == null)
                 {
-                    throw new ArgumentNullException("baseHeapSizes");
+                    throw new ArgumentNullException(nameof(baseHeapSizes));
                 }
 
                 if (baseHeapSizes.Count != MetadataTokens.HeapCount)
                 {
-                    throw new ArgumentException("Must have " + MetadataTokens.HeapCount + " elements", "baseTableRowCounts");
+                    throw new ArgumentException("Must have " + MetadataTokens.HeapCount + " elements", nameof(baseTableRowCounts));
                 }
             }
 
             if (deltaReaders == null || deltaReaders.Count == 0)
             {
-                throw new ArgumentException("Must not be empty.", "deltaReaders");
+                throw new ArgumentException("Must not be empty.", nameof(deltaReaders));
             }
 
             for (int i = 0; i < deltaReaders.Count; i++)
             {
                 if (deltaReaders[i].GetTableRowCount(TableIndex.EncMap) == 0 || !deltaReaders[i].IsMinimalDelta)
                 {
-                    throw new ArgumentException("All delta readers must be minimal delta metadata readers.", "deltaReaders");
+                    throw new ArgumentException("All delta readers must be minimal delta metadata readers.", nameof(deltaReaders));
                 }
             }
 
@@ -274,7 +275,7 @@ namespace System.Reflection.Metadata.Ecma335
 
                 if (generation >= sizes.Length)
                 {
-                    throw new ArgumentException(SR.HandleBelongsToFutureGeneration, "handle");
+                    throw new ArgumentException(SR.HandleBelongsToFutureGeneration, nameof(handle));
                 }
 
                 // GUID heap accumulates - previous heap is copied to the next generation 
@@ -307,7 +308,7 @@ namespace System.Reflection.Metadata.Ecma335
 
                     if (generation >= sizes.Length)
                     {
-                        throw new ArgumentException(SR.HandleBelongsToFutureGeneration, "handle");
+                        throw new ArgumentException(SR.HandleBelongsToFutureGeneration, nameof(handle));
                     }
                 }
 

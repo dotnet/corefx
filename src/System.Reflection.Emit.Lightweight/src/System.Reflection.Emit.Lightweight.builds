@@ -3,11 +3,11 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="System.Reflection.Emit.Lightweight.csproj" />
+    <!-- Net46 facade is currently inbox for 4.0 
     <Project Include="System.Reflection.Emit.Lightweight.csproj">
       <TargetGroup>net46</TargetGroup>
-    </Project>
+    </Project> -->
     <Project Include="System.Reflection.Emit.Lightweight.csproj">
-      <OSGroup>Windows_NT</OSGroup>
       <TargetGroup>netcore50</TargetGroup>
     </Project>
   </ItemGroup>

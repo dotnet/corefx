@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -141,8 +142,7 @@ namespace System.Net.Primitives.Functional.Tests
             //Doesn't throw, just returns
             cc.Remove(null, "authenticationType");
             cc.Remove(new Uri("http://some.com"), null);
-
-            Assert.Throws<KeyNotFoundException>(() => cc.Remove(new Uri("http://non.existant"), "invalid-authentication-type")); //No such credential
+            cc.Remove(new Uri("http://some.com"), "authenticationType");
         }
 
         [Fact]
@@ -163,8 +163,7 @@ namespace System.Net.Primitives.Functional.Tests
             cc.Remove(null, 500, "authenticationType");
             cc.Remove("host", 500, null);
             cc.Remove("host", -1, "authenticationType");
-
-            Assert.Throws<KeyNotFoundException>(() => cc.Remove("invalid-host", 500, "invalid-authentication-type")); //No such credential
+            cc.Remove("host", 500, "authenticationType");
         }
 
         [Fact]

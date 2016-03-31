@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -94,7 +95,7 @@ namespace System.Runtime.CompilerServices
         /// <param name="returnLabel">A LabelTarget used to return the result of the dynamic binding.</param>
         /// <returns>
         /// An Expression that performs tests on the dynamic operation arguments, and
-        /// performs the dynamic operation if hte tests are valid. If the tests fail on
+        /// performs the dynamic operation if the tests are valid. If the tests fail on
         /// subsequent occurrences of the dynamic operation, Bind will be called again
         /// to produce a new <see cref="Expression"/> for the new argument types.
         /// </returns>

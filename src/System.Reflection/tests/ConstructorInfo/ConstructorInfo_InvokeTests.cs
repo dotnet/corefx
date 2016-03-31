@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -131,7 +132,7 @@ namespace System.Reflection.Tests
             Assert.Throws<ArgumentException>(() => { obj = (ConstructorInfoInvokeSample)cis[1].Invoke(new object[] { "hello" }); });
         }
 
-        // calling a contstructor on an existing instance.  Note this should not produce
+        // calling a constructor on an existing instance.  Note this should not produce
         // a second object.  I suppose you would use this in a situation where you wanted to reset
         // the state of an object.
         //

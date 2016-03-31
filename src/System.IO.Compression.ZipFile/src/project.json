@@ -1,7 +1,9 @@
 {
   "frameworks": {
-    "dnxcore50": {
+    "netstandard1.3": {
       "dependencies": {
+        "Microsoft.NETCore.Platforms": "1.0.1-rc3-23931-00",
+        "System.Buffers": "4.0.0-rc3-23931-00",
         "System.Diagnostics.Contracts": "4.0.0",
         "System.Diagnostics.Debug": "4.0.10",
         "System.Diagnostics.Tools": "4.0.0",
@@ -13,11 +15,14 @@
         "System.Runtime": "4.0.20",
         "System.Runtime.Extensions": "4.0.10",
         "System.Text.Encoding": "4.0.10"
-      }
+      },
+      "imports": [
+        "dotnet5.4"
+      ]
     },
     "net46": {
       "dependencies": {
-        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.0"
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     }
   }

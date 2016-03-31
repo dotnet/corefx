@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -11,7 +12,7 @@ using Microsoft.Win32.SafeHandles;
 /*
  * Win32FileStream supports different modes of accessing the disk - async mode
  * and sync mode.  They are two completely different codepaths in the
- * sync & async methods (ie, Read/Write vs. ReadAsync/WriteAsync).  File
+ * sync & async methods (i.e. Read/Write vs. ReadAsync/WriteAsync).  File
  * handles in NT can be opened in only sync or overlapped (async) mode,
  * and we have to deal with this pain.  Stream has implementations of
  * the sync methods in terms of the async ones, so we'll
@@ -59,20 +60,19 @@ namespace System.IO
         private SafeFileHandle _handle;
         private long _pos;        // Cache current location in the file.
         private long _appendStart;// When appending, prevent overwriting file.
-        
-        private Task<int> _lastSynchronouslyCompletedTask = null;
-        private Task _activeBufferOperation = null;
+
+        private static unsafe IOCompletionCallback s_ioCallback = FileStreamCompletionSource.IOCallback;
+
+        private Task<int> _lastSynchronouslyCompletedTask = null; // cached task for read ops that complete synchronously
+        private Task _activeBufferOperation = null;               // tracks in-progress async ops using the buffer
+        private PreAllocatedOverlapped _preallocatedOverlapped;   // optimization for async ops to avoid per-op allocations
+        private FileStreamCompletionSource _currentOverlappedOwner; // async op currently using the preallocated overlapped
 
         [System.Security.SecuritySafeCritical]
         public Win32FileStream(String path, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent) : base(parent)
         {
             Interop.mincore.SECURITY_ATTRIBUTES secAttrs = GetSecAttrs(share);
-            Init(path, mode, access, share, bufferSize, options, secAttrs);
-        }
 
-        [System.Security.SecuritySafeCritical]
-        private void Init(String path, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, Interop.mincore.SECURITY_ATTRIBUTES secAttrs)
-        {
             _exposedHandle = false;
 
             int fAccess =
@@ -211,7 +211,7 @@ namespace System.IO
         {
             // To ensure we don't leak a handle, put it in a SafeFileHandle first
             if (handle.IsInvalid)
-                throw new ArgumentException(SR.Arg_InvalidHandle, "handle");
+                throw new ArgumentException(SR.Arg_InvalidHandle, nameof(handle));
             Contract.EndContractBlock();
 
             _handle = handle;
@@ -219,9 +219,9 @@ namespace System.IO
 
             // Now validate arguments.
             if (access < FileAccess.Read || access > FileAccess.ReadWrite)
-                throw new ArgumentOutOfRangeException("access", SR.ArgumentOutOfRange_Enum);
+                throw new ArgumentOutOfRangeException(nameof(access), SR.ArgumentOutOfRange_Enum);
             if (bufferSize <= 0)
-                throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedPosNum);
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
 
             int handleType = Interop.mincore.GetFileType(_handle);
             Debug.Assert(handleType == Interop.mincore.FileTypes.FILE_TYPE_DISK || handleType == Interop.mincore.FileTypes.FILE_TYPE_PIPE || handleType == Interop.mincore.FileTypes.FILE_TYPE_CHAR, "FileStream was passed an unknown file type!");
@@ -259,7 +259,7 @@ namespace System.IO
                 {
                     // If you passed in a synchronous handle and told us to use
                     // it asynchronously, throw here.
-                    throw new ArgumentException(SR.Arg_HandleNotAsync, "handle", ex);
+                    throw new ArgumentException(SR.Arg_HandleNotAsync, nameof(handle), ex);
                 }
             }
             else if (!_isAsync)
@@ -285,15 +285,15 @@ namespace System.IO
         }
 
         [System.Security.SecuritySafeCritical]  // auto-generated
-        private static Interop.mincore.SECURITY_ATTRIBUTES GetSecAttrs(FileShare share)
+        private unsafe static Interop.mincore.SECURITY_ATTRIBUTES GetSecAttrs(FileShare share)
         {
             Interop.mincore.SECURITY_ATTRIBUTES secAttrs = default(Interop.mincore.SECURITY_ATTRIBUTES);
             if ((share & FileShare.Inheritable) != 0)
             {
                 secAttrs = new Interop.mincore.SECURITY_ATTRIBUTES();
-                secAttrs.nLength = (uint)Marshal.SizeOf(secAttrs);
+                secAttrs.nLength = (uint)sizeof(Interop.mincore.SECURITY_ATTRIBUTES);
 
-                secAttrs.bInheritHandle = true;
+                secAttrs.bInheritHandle = Interop.BOOL.TRUE;
             }
             return secAttrs;
         }
@@ -416,7 +416,7 @@ namespace System.IO
             }
             set
             {
-                if (value < 0) throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
                 Contract.EndContractBlock();
                 if (_writePos > 0) FlushWrite(false);
                 _readPos = 0;
@@ -454,6 +454,9 @@ namespace System.IO
                 if (_handle != null && !_handle.IsClosed)
                     _handle.Dispose();
 
+                if (_preallocatedOverlapped != null)
+                    _preallocatedOverlapped.Dispose();
+
                 if (_handle.ThreadPoolBinding != null)
                     _handle.ThreadPoolBinding.Dispose();
 
@@ -461,7 +464,7 @@ namespace System.IO
                 _canWrite = false;
                 _canSeek = false;
                 // Don't set the buffer to null, to avoid a NullReferenceException
-                // when users have a race condition in their code (ie, they call
+                // when users have a race condition in their code (i.e. they call
                 // Close when calling another method on Stream like Read).
                 //_buffer = null;
                 base.Dispose(disposing);
@@ -602,7 +605,7 @@ namespace System.IO
         public override void SetLength(long value)
         {
             if (value < 0)
-                throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
             Contract.EndContractBlock();
 
             if (_handle.IsClosed) throw Error.GetFileNotOpen();
@@ -642,7 +645,7 @@ namespace System.IO
             {
                 int errorCode = Marshal.GetLastWin32Error();
                 if (errorCode == Interop.mincore.Errors.ERROR_INVALID_PARAMETER)
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_FileLengthTooBig);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_FileLengthTooBig);
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode);
             }
             // Return file pointer to where it was before setting length
@@ -659,11 +662,11 @@ namespace System.IO
         public override int Read([In, Out] byte[] array, int offset, int count)
         {
             if (array == null)
-                throw new ArgumentNullException("array", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (array.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen /*, no good single parameter name to pass*/);
             Contract.EndContractBlock();
@@ -688,14 +691,14 @@ namespace System.IO
                     _readLen = 0;
                     return n;
                 }
-                if (_buffer == null) _buffer = new byte[_bufferSize];
+                EnsureBufferAllocated();
                 n = ReadCore(_buffer, 0, _bufferSize);
                 if (n == 0) return 0;
                 isBlocked = n < _bufferSize;
                 _readPos = 0;
                 _readLen = n;
             }
-            // Now copy min of count or numBytesAvailable (ie, near EOF) to array.
+            // Now copy min of count or numBytesAvailable (i.e. near EOF) to array.
             if (n > count) n = count;
             Buffer.BlockCopy(_buffer, _readPos, array, offset, n);
             _readPos += n;
@@ -715,7 +718,7 @@ namespace System.IO
             {
                 // If we hit the end of the buffer and didn't have enough bytes, we must
                 // read some more from the underlying stream.  However, if we got
-                // fewer bytes from the underlying stream than we asked for (ie, we're 
+                // fewer bytes from the underlying stream than we asked for (i.e. we're 
                 // probably blocked), don't ask for more bytes.
                 if (n < count && !isBlocked)
                 {
@@ -779,7 +782,7 @@ namespace System.IO
         public override long Seek(long offset, SeekOrigin origin)
         {
             if (origin < SeekOrigin.Begin || origin > SeekOrigin.End)
-                throw new ArgumentException(SR.Argument_InvalidSeekOrigin, "origin");
+                throw new ArgumentException(SR.Argument_InvalidSeekOrigin, nameof(origin));
             Contract.EndContractBlock();
             if (_handle.IsClosed) throw Error.GetFileNotOpen();
             if (!_parent.CanSeek) throw Error.GetSeekNotSupported();
@@ -884,6 +887,26 @@ namespace System.IO
             return ret;
         }
 
+        private void EnsureBufferAllocated()
+        {
+            if (_buffer == null)
+            {
+                AllocateBuffer();
+            }
+        }
+
+        private void AllocateBuffer()
+        {
+            Debug.Assert(_buffer == null);
+            Debug.Assert(_preallocatedOverlapped == null);
+
+            _buffer = new byte[_bufferSize];
+            if (_isAsync)
+            {
+                _preallocatedOverlapped = new PreAllocatedOverlapped(s_ioCallback, this, _buffer);
+            }
+        }
+
         // Checks the position of the OS's handle equals what we expect it to.
         // This will fail if someone else moved the Win32FileStream's handle or if
         // our position updating code is incorrect.
@@ -915,11 +938,11 @@ namespace System.IO
         public override void Write(byte[] array, int offset, int count)
         {
             if (array == null)
-                throw new ArgumentNullException("array", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (array.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen /*, no good single parameter name to pass*/);
             Contract.EndContractBlock();
@@ -941,7 +964,7 @@ namespace System.IO
             // The assumption here is memcpy is cheaper than disk (or net) IO.
             // (10 milliseconds to disk vs. ~20-30 microseconds for a 4K memcpy)
             // So the extra copying will reduce the total number of writes, in 
-            // non-pathological cases (ie, write 1 byte, then write for the buffer 
+            // non-pathological cases (i.e. write 1 byte, then write for the buffer 
             // size repeatedly)
             if (_writePos > 0)
             {
@@ -978,7 +1001,7 @@ namespace System.IO
             }
             else if (count == 0)
                 return;  // Don't allocate a buffer then call memcpy for 0 bytes.
-            if (_buffer == null) _buffer = new byte[_bufferSize];
+            EnsureBufferAllocated();
             // Copy remaining bytes into buffer, to write at a later date.
             Buffer.BlockCopy(array, offset, _buffer, _writePos, count);
             _writePos = count;
@@ -1018,7 +1041,7 @@ namespace System.IO
                 else
                 {
                     // ERROR_INVALID_PARAMETER may be returned for writes
-                    // where the position is too large (ie, writing at Int64.MaxValue 
+                    // where the position is too large (i.e. writing at Int64.MaxValue 
                     // on Win9x) OR for synchronous writes to a handle opened 
                     // asynchronously.
                     if (errorCode == ERROR_INVALID_PARAMETER)
@@ -1091,7 +1114,7 @@ namespace System.IO
 
                 if (numBytes < _bufferSize)
                 {
-                    if (_buffer == null) _buffer = new byte[_bufferSize];
+                    EnsureBufferAllocated();
                     Task<int> readTask = ReadInternalCoreAsync(_buffer, 0, _bufferSize, 0, cancellationToken);
                     _readLen = readTask.GetAwaiter().GetResult();
                     int n = _readLen;
@@ -1150,7 +1173,7 @@ namespace System.IO
 
             // Create and store async stream class library specific data in the async result
 
-            FileStreamCompletionSource completionSource = new FileStreamCompletionSource(numBufferedBytesRead, bytes, _handle.ThreadPoolBinding, cancellationToken);
+            FileStreamCompletionSource completionSource = new FileStreamCompletionSource(this, numBufferedBytesRead, bytes, cancellationToken);
             NativeOverlapped* intOverlapped = completionSource.Overlapped;
 
             // Calculate position in the file we should be at after the read is done
@@ -1264,7 +1287,7 @@ namespace System.IO
             {
                 if (_writePos > 0) FlushWrite(false);
                 Debug.Assert(_bufferSize > 0, "_bufferSize > 0");
-                if (_buffer == null) _buffer = new byte[_bufferSize];
+                EnsureBufferAllocated();
                 _readLen = ReadCore(_buffer, 0, _bufferSize);
                 _readPos = 0;
             }
@@ -1311,8 +1334,7 @@ namespace System.IO
                 // In that case, just store it in the buffer.
                 if (numBytes < _bufferSize && !HasActiveBufferOperation && numBytes <= remainingBuffer)
                 {
-                    if (_buffer == null)
-                        _buffer = new byte[_bufferSize];
+                    EnsureBufferAllocated();
 
                     Buffer.BlockCopy(array, offset, _buffer, _writePos, numBytes);
                     _writePos += numBytes;
@@ -1399,7 +1421,7 @@ namespace System.IO
             Debug.Assert(numBytes >= 0, "numBytes is negative");
 
             // Create and store async stream class library specific data in the async result
-            FileStreamCompletionSource completionSource = new FileStreamCompletionSource(0, bytes, _handle.ThreadPoolBinding, cancellationToken);
+            FileStreamCompletionSource completionSource = new FileStreamCompletionSource(this, 0, bytes, cancellationToken);
             NativeOverlapped* intOverlapped = completionSource.Overlapped;
 
             if (_parent.CanSeek)
@@ -1507,7 +1529,7 @@ namespace System.IO
                 _readPos = 0;
                 _readLen = 0;
                 Debug.Assert(_bufferSize > 0, "_bufferSize > 0");
-                if (_buffer == null) _buffer = new byte[_bufferSize];
+                EnsureBufferAllocated();
             }
             if (_writePos == _bufferSize)
                 FlushWrite(false);

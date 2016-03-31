@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -138,7 +139,7 @@ namespace System.Text.Tests
             VerificationHelper(decoder, bytes, 0, bytes.Length / 2, true, expected, "007.1");
             VerificationHelper(decoder, bytes, 0, bytes.Length / 2, false, expected, "007.2");
             VerificationHelper(decoder, bytes, bytes.Length / 2, 0, true, 0, "007.3");
-            // Set index to 1, so some characters may be not coverted
+            // Set index to 1, so some characters may be not converted
             VerificationHelper(decoder, bytes, 1, bytes.Length / 2, false, expected, "007.4");
         }
 

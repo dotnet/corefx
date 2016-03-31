@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #pragma once
 
@@ -13,10 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <type_traits>
-
-#if HAVE_OPEN_MAX
-#include <sys/syslimits.h>
-#endif
+#include <unistd.h>
 
 /**
  * ResultOf<T> is shorthand for typename std::result_of<T>::type.
@@ -122,11 +120,7 @@ inline void SafeStringCopy(char* destination, int32_t destinationSize, const cha
 */
 inline static int ToFileDescriptor(intptr_t fd)
 {
-#if HAVE_OPEN_MAX
-    assert(0 <= fd && fd <= OPEN_MAX);
-#else
-    assert(0 <= fd && fd <= INT32_MAX);
-#endif
+    assert(0 <= fd && fd < sysconf(_SC_OPEN_MAX));
 
     return static_cast<int>(fd);
 }

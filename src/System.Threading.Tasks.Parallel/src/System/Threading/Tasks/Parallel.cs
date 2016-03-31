@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 // A helper class that contains parallel versions of various looping constructs.  This
@@ -90,7 +91,7 @@ namespace System.Threading.Tasks
             set
             {
                 if ((value == 0) || (value < -1))
-                    throw new ArgumentOutOfRangeException("MaxDegreeOfParallelism");
+                    throw new ArgumentOutOfRangeException(nameof(MaxDegreeOfParallelism));
                 _maxDegreeOfParallelism = value;
             }
         }
@@ -143,7 +144,7 @@ namespace System.Threading.Tasks
         internal const int DEFAULT_LOOP_STRIDE = 16;
 
         // Static variable to hold default parallel options
-        internal static ParallelOptions s_defaultParallelOptions = new ParallelOptions();
+        internal static readonly ParallelOptions s_defaultParallelOptions = new ParallelOptions();
 
         /// <summary>
         /// Executes each of the provided actions, possibly in parallel.
@@ -199,11 +200,11 @@ namespace System.Threading.Tasks
         {
             if (actions == null)
             {
-                throw new ArgumentNullException("actions");
+                throw new ArgumentNullException(nameof(actions));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             // On desktop, we throw an ODE if we're passed a disposed CancellationToken.
@@ -342,12 +343,14 @@ namespace System.Threading.Tasks
                     // One more check before we begin...
                     parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 
-                    // Launch all actions as tasks
-                    for (int i = 0; i < tasks.Length; i++)
+                    // Invoke all actions as tasks.  Queue N-1 of them, and run 1 synchronously.
+                    for (int i = 1; i < tasks.Length; i++)
                     {
                         tasks[i] = Task.Factory.StartNew(actionsCopy[i], parallelOptions.CancellationToken, TaskCreationOptions.None,
                                                          parallelOptions.EffectiveTaskScheduler);
                     }
+                    tasks[0] = new Task(actionsCopy[0], parallelOptions.CancellationToken, TaskCreationOptions.None);
+                    tasks[0].RunSynchronously(parallelOptions.EffectiveTaskScheduler);
 
                     // Now wait for the tasks to complete.  This will not unblock until all of
                     // them complete, and it will throw an exception if one or more of them also
@@ -393,7 +396,7 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return ForWorker<object>(
@@ -422,7 +425,7 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return ForWorker64<object>(
@@ -461,11 +464,11 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForWorker<object>(
@@ -504,11 +507,11 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForWorker64<object>(
@@ -560,7 +563,7 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return ForWorker<object>(
@@ -590,7 +593,7 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return ForWorker64<object>(
@@ -631,11 +634,11 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForWorker<object>(
@@ -677,11 +680,11 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForWorker64<object>(
@@ -735,15 +738,15 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
 
             return ForWorker(
@@ -797,15 +800,15 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
 
             return ForWorker64(
@@ -870,19 +873,19 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForWorker(
@@ -947,19 +950,19 @@ namespace System.Threading.Tasks
         {
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
 
@@ -1533,11 +1536,11 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return ForEachWorker<TSource, object>(
@@ -1578,15 +1581,15 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForEachWorker<TSource, object>(
@@ -1618,11 +1621,11 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return ForEachWorker<TSource, object>(
@@ -1665,15 +1668,15 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForEachWorker<TSource, object>(
@@ -1705,11 +1708,11 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return ForEachWorker<TSource, object>(
@@ -1752,15 +1755,15 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForEachWorker<TSource, object>(
@@ -1813,19 +1816,19 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
 
             return ForEachWorker<TSource, TLocal>(
@@ -1890,23 +1893,23 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForEachWorker<TSource, TLocal>(
@@ -1959,19 +1962,19 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
 
             return ForEachWorker<TSource, TLocal>(
@@ -2035,23 +2038,23 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return ForEachWorker<TSource, TLocal>(
@@ -2292,11 +2295,11 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return PartitionerForEachWorker<TSource, object>(source, s_defaultParallelOptions, body, null, null, null, null, null, null);
@@ -2351,11 +2354,11 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             return PartitionerForEachWorker<TSource, object>(source, s_defaultParallelOptions, null, body, null, null, null, null, null);
@@ -2413,11 +2416,11 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
             if (!source.KeysNormalized)
@@ -2497,19 +2500,19 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
 
             return PartitionerForEachWorker<TSource, TLocal>(source, s_defaultParallelOptions, null, null, null, body, null, localInit, localFinally);
@@ -2587,19 +2590,19 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
 
             if (!source.KeysNormalized)
@@ -2669,15 +2672,15 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return PartitionerForEachWorker<TSource, object>(source, parallelOptions, body, null, null, null, null, null, null);
@@ -2744,15 +2747,15 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return PartitionerForEachWorker<TSource, object>(source, parallelOptions, null, body, null, null, null, null, null);
@@ -2822,15 +2825,15 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             if (!source.KeysNormalized)
@@ -2922,23 +2925,23 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             return PartitionerForEachWorker<TSource, TLocal>(source, parallelOptions, null, null, null, body, null, localInit, localFinally);
@@ -3028,23 +3031,23 @@ namespace System.Threading.Tasks
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
             if (body == null)
             {
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
             if (localInit == null)
             {
-                throw new ArgumentNullException("localInit");
+                throw new ArgumentNullException(nameof(localInit));
             }
             if (localFinally == null)
             {
-                throw new ArgumentNullException("localFinally");
+                throw new ArgumentNullException(nameof(localFinally));
             }
             if (parallelOptions == null)
             {
-                throw new ArgumentNullException("parallelOptions");
+                throw new ArgumentNullException(nameof(parallelOptions));
             }
 
             if (!source.KeysNormalized)

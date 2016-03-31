@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -31,7 +32,7 @@ namespace System.Net.Http.Headers
             // The amount of seconds for 'delta' must be in the range 0..2^31
             if (delta.TotalSeconds > int.MaxValue)
             {
-                throw new ArgumentOutOfRangeException("delta");
+                throw new ArgumentOutOfRangeException(nameof(delta));
             }
 
             _delta = delta;
@@ -119,7 +120,7 @@ namespace System.Net.Http.Headers
 
             int current = startIndex;
 
-            // Caller must remove leading whitespaces.
+            // Caller must remove leading whitespace.
             DateTimeOffset date = DateTimeOffset.MinValue;
             int deltaSeconds = -1; // use -1 to indicate that the value was not set. 'delta' values are always >=0
 
@@ -159,7 +160,7 @@ namespace System.Net.Http.Headers
                     return 0;
                 }
 
-                // If we got a valid date, then the parser consumed the whole string (incl. trailing whitespaces).
+                // If we got a valid date, then the parser consumed the whole string (incl. trailing whitespace).
                 current = input.Length;
             }
 

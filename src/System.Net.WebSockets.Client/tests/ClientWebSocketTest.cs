@@ -1,8 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Net.Tests;
+using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -53,7 +54,7 @@ namespace System.Net.WebSockets.Client.Tests
         private static bool WebSocketsSupported { get { return WebSocketHelper.WebSocketsSupported; } }
 
 #region Connect
-        [ConditionalTheory("WebSocketsSupported"), MemberData("UnavailableWebSocketServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(UnavailableWebSocketServers))]
         public async Task ConnectAsync_NotWebSocketServer_ThrowsWebSocketExceptionWithMessage(Uri server)
         {
             using (var cws = new ClientWebSocket())
@@ -68,19 +69,19 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task EchoBinaryMessage_Success(Uri server)
         {
             await WebSocketHelper.TestEcho(server, WebSocketMessageType.Binary, TimeOutMilliseconds, _output);
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task EchoTextMessage_Success(Uri server)
         {
             await WebSocketHelper.TestEcho(server, WebSocketMessageType.Text, TimeOutMilliseconds, _output);
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoHeadersServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoHeadersServers))]
         public async Task ConnectAsync_AddCustomHeaders_Success(Uri server)
         {
             using (var cws = new ClientWebSocket())
@@ -117,7 +118,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ConnectAsync_PassNoSubProtocol_ServerRequires_ThrowsWebSocketExceptionWithMessage(Uri server)
         {
             const string AcceptedProtocol = "CustomProtocol";
@@ -138,7 +139,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ConnectAsync_PassMultipleSubProtocols_ServerRequires_ConnectionUsesAgreedSubProtocol(Uri server)
         {
             const string AcceptedProtocol = "AcceptedProtocol";
@@ -161,7 +162,7 @@ namespace System.Net.WebSockets.Client.Tests
 #endregion
 
 #region SendReceive
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_PartialMessage_Success(Uri server)
         {
             var sendBuffer = new byte[1024];
@@ -195,7 +196,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendAsync_SendCloseMessageType_ThrowsArgumentExceptionWithMessage(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
@@ -220,7 +221,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
         
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendAsync__MultipleOutstandingSendOperations_Throws(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
@@ -277,7 +278,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ReceiveAsync_MultipleOutstandingReceiveOperations_Throws(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
@@ -338,7 +339,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendAsync_SendZeroLengthPayloadAsEndOfMessage_Success(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
@@ -375,7 +376,7 @@ namespace System.Net.WebSockets.Client.Tests
 #endregion
 
 #region Close
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseAsync_ServerInitiatedClose_Success(Uri server)
         {
             const string closeWebSocketMetaCommand = ".close";
@@ -419,7 +420,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseAsync_ClientInitiatedClose_Success(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
@@ -438,7 +439,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseAsync_CloseDescriptionIsMaxLength_Success(Uri server)
         {
             string closeDescription = new string('C', CloseDescriptionMaxLength);
@@ -451,7 +452,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseAsync_CloseDescriptionIsMaxLengthPlusOne_ThrowsArgumentException(Uri server)
         {
             string closeDescription = new string('C', CloseDescriptionMaxLength + 1);
@@ -475,7 +476,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseAsync_CloseDescriptionHasUnicode_Success(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
@@ -492,7 +493,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
         
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseAsync_CloseDescriptionIsNull_Success(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
@@ -508,7 +509,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseOutputAsync_ClientInitiated_CanReceive_CanClose(Uri server)
         {
             string message = "Hello WebSockets!";
@@ -545,7 +546,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseOutputAsync_ServerInitiated_CanSend(Uri server)
         {
             string message = "Hello WebSockets!";
@@ -591,7 +592,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseOutputAsync_CloseDescriptionIsNull_Success(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
@@ -607,7 +608,7 @@ namespace System.Net.WebSockets.Client.Tests
 #endregion
 
 #region Abort
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public void Abort_ConnectAndAbort_ThrowsWebSocketExceptionWithmessage(Uri server)
         {
             using (var cws = new ClientWebSocket())
@@ -628,7 +629,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task Abort_SendAndAbort_Success(Uri server)
         {
             await TestCancellation(async (cws) => {
@@ -646,7 +647,7 @@ namespace System.Net.WebSockets.Client.Tests
             }, server);
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task Abort_ReceiveAndAbort_Success(Uri server)
         {
             await TestCancellation(async (cws) => {
@@ -668,7 +669,7 @@ namespace System.Net.WebSockets.Client.Tests
             }, server);
         }
         
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task Abort_CloseAndAbort_Success(Uri server)
         {
             await TestCancellation(async (cws) => {
@@ -690,7 +691,7 @@ namespace System.Net.WebSockets.Client.Tests
             }, server);
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ClientWebSocket_Abort_CloseOutputAsync(Uri server)
         {
             await TestCancellation(async (cws) => {
@@ -714,7 +715,7 @@ namespace System.Net.WebSockets.Client.Tests
 #endregion
 
 #region Cancellation
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ConnectAsync_Cancel_ThrowsWebSocketExceptionWithMessage(Uri server)
         {
             using (var cws = new ClientWebSocket())
@@ -734,7 +735,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendAsync_Cancel_Success(Uri server)
         {
             await TestCancellation((cws) => {
@@ -747,7 +748,7 @@ namespace System.Net.WebSockets.Client.Tests
             }, server);
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ReceiveAsync_Cancel_Success(Uri server)
         {
             await TestCancellation(async (cws) => {
@@ -767,7 +768,7 @@ namespace System.Net.WebSockets.Client.Tests
             }, server);
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseAsync_Cancel_Success(Uri server)
         {
             await TestCancellation(async (cws) => {
@@ -787,7 +788,7 @@ namespace System.Net.WebSockets.Client.Tests
             }, server);
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseOutputAsync_Cancel_Success(Uri server)
         {
             await TestCancellation(async (cws) => {
@@ -808,7 +809,7 @@ namespace System.Net.WebSockets.Client.Tests
             }, server);
         }
 
-        [ConditionalTheory("WebSocketsSupported"), MemberData("EchoServers")]
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ReceiveAsync_CancelAndReceive_ThrowsWebSocketExceptionWithMessage(Uri server)
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))

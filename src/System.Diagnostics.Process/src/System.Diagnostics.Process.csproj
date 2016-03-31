@@ -8,13 +8,17 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{63634289-90D7-4947-8BF3-DBBE98D76C85}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <RootNamespace>System.Diagnostics.Process</RootNamespace>
     <AssemblyName>System.Diagnostics.Process</AssemblyName>
-    <AssemblyVersion>4.1.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)'!='net46'">4.1.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)'=='net46'">4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFramework>dotnet5.5</PackageTargetFramework>
-    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+    <PackageTargetFramework Condition="'$(TargetGroup)'==''">netstandard1.4</PackageTargetFramework>
+    <PackageTargetRuntime Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' == ''">win7</PackageTargetRuntime>
+    <PackageTargetRuntime Condition="'$(TargetsLinux)' == 'true' and '$(TargetGroup)' == ''">linux</PackageTargetRuntime>
+    <PackageTargetRuntime Condition="'$(TargetsOSX)' == 'true' and '$(TargetGroup)' == ''">osx.10.10</PackageTargetRuntime>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='net46' OR '$(TargetGroup)'=='net461'">true</IsPartialFacadeAssembly>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.4</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
     <!-- Suppress unused field warnings when using PlatformNotSupportedException stubs -->
@@ -27,7 +31,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU'" />
-  <ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net461_Release|AnyCPU'" />
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)'!='true'">
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProcessHandle.cs" />
     <Compile Include="System\Diagnostics\AsyncStreamReader.cs" />
     <Compile Include="System\Diagnostics\DataReceivedEventArgs.cs" />
@@ -45,11 +53,8 @@
     <Compile Include="System\Diagnostics\ThreadPriorityLevel.cs" />
     <Compile Include="System\Diagnostics\ThreadState.cs" />
     <Compile Include="System\Diagnostics\ThreadWaitReason.cs" />
-    <Compile Include="$(CommonPath)\System\Text\EncodingHelper.cs">
-      <Link>Common\System\Text\EncodingHelper.cs</Link>
-    </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)'!='true'">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -179,6 +184,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateProcessWithLogon.cs">
       <Link>Common\Interop\Windows\Interop.CreateProcessWithLogon.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
       <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
@@ -203,6 +211,12 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.HandleOptions.cs">
       <Link>Common\Interop\Windows\Interop.ProcessOptions.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Text\ConsoleEncoding.cs">
+      <Link>Common\System\Text\ConsoleEncoding.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\EncodingHelper.cs">
+      <Link>Common\System\Text\EncodingHelper.cs</Link>
+    </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProcessHandle.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeThreadHandle.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeTokenHandle.cs" />
@@ -214,7 +228,7 @@
     <Compile Include="System\Diagnostics\ProcessThreadTimes.cs" />
     <Compile Include="System\Diagnostics\ProcessWaitHandle.Windows.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(IsPartialFacadeAssembly)'!='true'">
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProcessHandle.Unix.cs" />
     <Compile Include="System\Diagnostics\Process.Unix.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Unix.cs" />
@@ -243,11 +257,14 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ForkAndExecProcess.cs">
       <Link>Common\Interop\Unix\Interop.ForkAndExecProcess.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetSetPriority.cs">
-      <Link>Common\Interop\Unix\Interop.GetSetPriority.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetLine.cs">
+      <Link>Common\Interop\Unix\Interop.GetLine.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPid.cs">
       <Link>Common\Interop\Unix\Interop.GetPid.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetSetPriority.cs">
+      <Link>Common\Interop\Unix\Interop.GetSetPriority.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetSid.cs">
       <Link>Common\Interop\Unix\Interop.GetSid.cs</Link>
@@ -256,7 +273,7 @@
       <Link>Common\Interop\Unix\Interop.Kill.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ReadLink.cs">
-      <Link>Common\Interop\Unix\Interop.readlink.cs</Link>
+      <Link>Common\Interop\Unix\Interop.ReadLink.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ResourceLimits.cs">
       <Link>Common\Interop\Unix\Interop.ResourceLimits.cs</Link>
@@ -264,11 +281,14 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PathConf.cs">
       <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.POpen.cs">
+      <Link>Common\Interop\Unix\Interop.POpen.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.WaitPid.cs">
       <Link>Common\Interop\Unix\Interop.WaitPid.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' AND '$(IsPartialFacadeAssembly)'!='true'">
     <Compile Include="System\Diagnostics\Process.Linux.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Linux.cs" />
     <Compile Include="System\Diagnostics\ProcessThread.Linux.cs" />
@@ -285,7 +305,7 @@
       <Link>Common\System\Text\ReusableTextReader.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsOSX)' == 'true' AND '$(IsPartialFacadeAssembly)'!='true'">
     <Compile Include="System\Diagnostics\Process.OSX.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.OSX.cs" />
     <Compile Include="System\Diagnostics\ProcessThread.OSX.cs" />
@@ -295,11 +315,18 @@
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
       <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\StringExtensions.cs">
+      <Link>Common\System\StringExtensions.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
+  <ItemGroup Condition=" ('$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true') AND '$(IsPartialFacadeAssembly)'!='true'">
     <Compile Include="System\Diagnostics\Process.UnknownUnix.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.UnknownUnix.cs" />
     <Compile Include="System\Diagnostics\ProcessThread.UnknownUnix.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)'=='true'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

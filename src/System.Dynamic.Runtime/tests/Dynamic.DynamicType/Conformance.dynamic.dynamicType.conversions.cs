@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -3264,8 +3265,8 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.conversions
     // <Area> Dynamic -- implicit conversion</Area>
     // <Title> The conversion occurs in evaluating the type of null coalescing operator </Title>
     // <Description>
-    // Any type is implicitly convertable to dynamic
-    // and dynamic is implicitly convertable to any type.
+    // Any type is implicitly convertible to dynamic
+    // and dynamic is implicitly convertible to any type.
     // but previous should be high priority.
     // </Description>
     // <RelatedBugs></RelatedBugs>
@@ -3362,8 +3363,8 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.conversions
     // <Area> Dynamic -- implicit conversion</Area>
     // <Title> The conversion occurs in evaluating the type of conditional operator </Title>
     // <Description>
-    // Any type is implicitly convertable to dynamic
-    // and dynamic is implicitly convertable to any type.
+    // Any type is implicitly convertible to dynamic
+    // and dynamic is implicitly convertible to any type.
     // but previous should be high priority.
     // </Description>
     // <RelatedBugs></RelatedBugs>
@@ -4708,7 +4709,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.conversions
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.conversions.using001.using001;
     // <Title> Conversion </Title>
-    // <Description> These sceanrios are still using normal conversion
+    // <Description> These scenarios are still using normal conversion
     //    Let dynamic object to do the conversion to IDisposable is covered in IDO test cases
     // </Description>
     // <RelatedBugs></RelatedBugs>
