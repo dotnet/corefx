@@ -8,6 +8,11 @@ namespace System.Linq.Parallel.Tests
 {
     internal static class Sources
     {
+        // For outerloop, it's more important to saturate the processors/consumers and fill up buffers.
+        public static readonly int OuterLoopCount = 64 * 1024 * Environment.ProcessorCount;
+
+        private static readonly IEnumerable<int> OuterLoopCounts = new[] { OuterLoopCount };
+
         public static IEnumerable<object[]> Ranges(int start, IEnumerable<int> counts)
         {
             foreach (object[] parms in UnorderedSources.Ranges(start, counts))
@@ -17,6 +22,11 @@ namespace System.Linq.Parallel.Tests
         }
 
         // Wrapper for attribute calls
+        public static IEnumerable<object[]> OuterloopRanges()
+        {
+            foreach (object[] parms in Ranges(OuterLoopCounts)) yield return parms;
+        }
+
         public static IEnumerable<object[]> Ranges(int[] counts)
         {
             foreach (object[] parms in Ranges(counts.Cast<int>())) yield return parms;
