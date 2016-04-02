@@ -173,6 +173,11 @@
     <Compile Include="System\Data\SqlClient\SNI\SslOverTdsStream.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SNICommon.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
+    <Compile Include="$(CommonPath)\System\ValueTuple.cs">
+      <Link>Common\System\ValueTuple.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System.Data" />
