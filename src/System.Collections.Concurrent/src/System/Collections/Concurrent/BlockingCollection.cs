@@ -1578,7 +1578,22 @@ nameof(boundedCapacity), boundedCapacity,
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public void CopyTo(T[] array, int index)
         {
-            ((ICollection)this).CopyTo(array, index);
+            CheckDisposed();
+            
+            if (array == null)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
+            if (index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, SR.BlockingCollection_CopyTo_NonNegative);
+            }
+            if (_collection.Count + index > array.Length)
+            {
+                throw new ArgumentException(SR.BlockingCollection_CopyTo_TooManyElems, nameof(index));
+            }
+            
+            _collection.CopyTo(array, index);
         }
 
         /// <summary>Copies all of the items in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance 
