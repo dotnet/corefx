@@ -11,10 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
-using CURLAUTH = Interop.Http.CURLAUTH;
-using CURLcode = Interop.Http.CURLcode;
-using CURLMcode = Interop.Http.CURLMcode;
-using CURLoption = Interop.Http.CURLoption;
+using static Interop.Http;
 
 namespace System.Net.Http
 {
@@ -93,7 +90,7 @@ namespace System.Net.Http
             // curl_global_init call handled by Interop.LibCurl's cctor
 
             int age;
-            if (!Interop.Http.GetCurlVersionInfo(
+            if (!GetCurlVersionInfo(
                 out age, 
                 out s_supportsSSL, 
                 out s_supportsAutomaticDecompression, 

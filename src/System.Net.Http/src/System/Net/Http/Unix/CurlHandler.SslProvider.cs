@@ -11,8 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
-using CURLcode = Interop.Http.CURLcode;
-using CURLINFO = Interop.Http.CURLINFO;
+using static Interop.Http;
 
 namespace System.Net.Http
 {
@@ -20,7 +19,7 @@ namespace System.Net.Http
     {
         private static class SslProvider
         {
-            private static readonly Interop.Http.SslCtxCallback s_sslCtxCallback = SetSslCtxVerifyCallback;
+            private static readonly SslCtxCallback s_sslCtxCallback = SetSslCtxVerifyCallback;
             private static readonly Interop.Ssl.AppVerifyCallback s_sslVerifyCallback = VerifyCertChain;
 
             internal static void SetSslOptions(EasyRequest easy, ClientCertificateOption clientCertOption)
@@ -28,7 +27,7 @@ namespace System.Net.Http
                 Debug.Assert(clientCertOption == ClientCertificateOption.Automatic || clientCertOption == ClientCertificateOption.Manual);
 
                 // Disable SSLv2/SSLv3, allow TLSv1.*
-                easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSLVERSION, (long)Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1);
+                easy.SetCurlOption(CURLoption.CURLOPT_SSLVERSION, (long)CurlSslVersion.CURL_SSLVERSION_TLSv1);
 
                 // Create a client certificate provider if client certs may be used.
                 X509Certificate2Collection clientCertificates = easy._handler._clientCertificates;
@@ -61,8 +60,8 @@ namespace System.Net.Http
                         // the host name matches and will inform the callback of that.
                         if (easy._handler.ServerCertificateValidationCallback != null)
                         {
-                            easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSL_VERIFYPEER, 0); // don't verify the peer cert
-                            easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSL_VERIFYHOST, 0); // don't verify the peer cert's hostname
+                            easy.SetCurlOption(CURLoption.CURLOPT_SSL_VERIFYPEER, 0); // don't verify the peer cert
+                            easy.SetCurlOption(CURLoption.CURLOPT_SSL_VERIFYHOST, 0); // don't verify the peer cert's hostname
                         }
                         break;
 
@@ -137,7 +136,7 @@ namespace System.Net.Http
             {
                 Debug.Assert(curlPtr != IntPtr.Zero, "curlPtr is not null");
                 IntPtr gcHandlePtr;
-                CURLcode getInfoResult = Interop.Http.EasyGetInfoPointer(curlPtr, CURLINFO.CURLINFO_PRIVATE, out gcHandlePtr);
+                CURLcode getInfoResult = EasyGetInfoPointer(curlPtr, CURLINFO.CURLINFO_PRIVATE, out gcHandlePtr);
                 Debug.Assert(getInfoResult == CURLcode.CURLE_OK, "Failed to get info on a completing easy handle");
                 if (getInfoResult == CURLcode.CURLE_OK)
                 {

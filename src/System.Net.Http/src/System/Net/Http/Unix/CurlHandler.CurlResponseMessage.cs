@@ -181,12 +181,12 @@ namespace System.Net.Http
                     if (_remainingDataCount > 0)
                     {
                         EventSourceTrace("Pausing. Remaining bytes: {0}", _remainingDataCount);
-                        return Interop.Http.CURL_WRITEFUNC_PAUSE;
+                        return CURL_WRITEFUNC_PAUSE;
                     }
                     else if (_pendingReadRequest == null)
                     {
                         EventSourceTrace("Pausing. No pending read request");
-                        return Interop.Http.CURL_WRITEFUNC_PAUSE;
+                        return CURL_WRITEFUNC_PAUSE;
                     }
 
                     // There's no data in the buffer and there is a pending read request.  
