@@ -12,25 +12,26 @@ namespace System.Data
     internal static class Locale
     {
         // Maps between LCIDs and LocaleName+AnsiCodePages+Encodings
-        private static readonly ConcurrentDictionary<int, Tuple<string, int, Encoding>> s_cachedEncodings = new ConcurrentDictionary<int, Tuple<string, int, Encoding>>();
+        private static readonly ConcurrentDictionary<int, ValueTuple<string, int, Encoding>> s_cachedEncodings =
+            new ConcurrentDictionary<int, ValueTuple<string, int, Encoding>>();
 
         static Locale()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);            
         }
 
-        private static Tuple<string, int, Encoding> GetDetailsInternal(int lcid)
+        private static ValueTuple<string, int, Encoding> GetDetailsInternal(int lcid)
         {
             string localeName = LocaleMapper.LcidToLocaleNameInternal(lcid);
             int ansiCodePage = LocaleMapper.LocaleNameToAnsiCodePage(localeName);
-            return Tuple.Create(localeName, ansiCodePage, Encoding.GetEncoding(ansiCodePage));
+            return new ValueTuple<string, int, Encoding>(localeName, ansiCodePage, Encoding.GetEncoding(ansiCodePage));
         }
 
-        private static Tuple<string, int, Encoding> GetDetailsForLcid(int lcid)
+        private static ValueTuple<string, int, Encoding> GetDetailsForLcid(int lcid)
         {
             if (lcid < 0)
             {
-                throw ADP.ArgumentOutOfRange("lcid");
+                throw ADP.ArgumentOutOfRange(nameof(lcid));
             }
             return s_cachedEncodings.GetOrAdd(lcid, GetDetailsInternal);
         }
