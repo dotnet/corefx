@@ -59,7 +59,7 @@ internal static partial class Interop
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
-                Ssl.SetProtocolOptions(innerContext, protocols);
+                Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
 
                 // The logic in SafeSslHandle.Disconnect is simple because we are doing a quiet
                 // shutdown (we aren't negotiating for session close to enable later session
