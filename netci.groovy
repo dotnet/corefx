@@ -127,7 +127,7 @@ branchList.each { branchName ->
 
 			def newBuildJob = job(getJobName(Utilities.getFullJobName(project, newBuildJobName, isPR), branchName)) {
         		steps {
-            		batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:SkipTests=true")
+            		batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:OSGroup=Windows_NT /p:ConfigurationGroup=${configurationGroup} /p:SkipTests=true")
             		// Package up the results.
             		batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
         		}
@@ -157,6 +157,8 @@ branchList.each { branchName ->
 	                batchFile("PowerShell -command \"\"C:\\Packer\\unpacker.ps1 .\\bin\\build.pack .\\bin > .\\bin\\unpacker.log\"\"")
 	                // Run the tests
 	                batchFile("run-test.cmd .\\bin\\tests\\Windows_NT.AnyCPU.${configurationGroup}")
+                    // Run the tests
+                    batchFile("run-test.cmd .\\bin\\tests\\AnyOS.AnyCPU.${configurationGroup}")
             	}
 
             	parameters {
@@ -180,10 +182,10 @@ branchList.each { branchName ->
                     """)
             }
 
-            // Set the machine affinity.
-            Utilities.setMachineAffinity(newJob, os)
+            // Set the machine affinity to windows_nt, since git fails on Nano.
+            Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto')
             // Set up standard options.
-            Utilities.addStandardOptions(newJob, isPR)
+            Utilities.standardJobSetup(newJob, project, isPR, getFullBranchName(branchName))
 
             // Set up appropriate triggers.  PR on demand, otherwise nightly
             if (isPR) {
