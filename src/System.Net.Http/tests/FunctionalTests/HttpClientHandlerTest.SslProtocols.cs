@@ -98,20 +98,19 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_DisallowTls10_AllowTls11_AllowTls12()
         {
-            const SslProtocols allowedProtocols = SslProtocols.Tls11 | SslProtocols.Tls12;
             using (var handler = new HttpClientHandler())
             using (var client = new HttpClient(handler))
             {
+                handler.SslProtocols = SslProtocols.Tls11 | SslProtocols.Tls12;
                 if (BackendSupportsFineGrainedProtocols)
                 {
-                    handler.SslProtocols = allowedProtocols;
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(HttpTestServers.TLSv10RemoteServer));
                     using (await client.GetAsync(HttpTestServers.TLSv11RemoteServer)) { }
                     using (await client.GetAsync(HttpTestServers.TLSv12RemoteServer)) { }
                 }
                 else
                 {
-                    Assert.Throws<NotSupportedException>(() => handler.SslProtocols = allowedProtocols);
+                    await Assert.ThrowsAsync<NotSupportedException>(() => client.GetAsync(HttpTestServers.TLSv11RemoteServer));
                 }
             }
         }
