@@ -162,6 +162,7 @@ namespace System.IO.Tests
         /// deletes a non-empty directory after it has been enumerated.
         /// </summary>
         [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
         public void DeleteDirectoryDuringEnumeration()
         {
             string testDir = GetTestFilePath();
@@ -188,7 +189,6 @@ namespace System.IO.Tests
                 Assert.DoesNotContain(intermediateFile, results);
             }
         }
-
     }
 
     #endregion
