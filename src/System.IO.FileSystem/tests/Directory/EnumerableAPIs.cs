@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -135,6 +136,61 @@ namespace System.IO.Tests
         }
     }
 
+    public class Directory_EnumFSE_str_str_so_alldirs : Directory_GetFileSystemEntries_str_str_so_alldirs
+    {
+        #region Utilities
+
+        public override string[] GetEntries(string dirName)
+        {
+            return Directory.EnumerateFileSystemEntries(dirName, "*", SearchOption.AllDirectories).ToArray();
+        }
+
+        public override string[] GetEntries(string dirName, string searchPattern)
+        {
+            return Directory.EnumerateFileSystemEntries(dirName, searchPattern, SearchOption.AllDirectories).ToArray();
+        }
+
+        public override string[] GetEntries(string dirName, string searchPattern, SearchOption option)
+        {
+            return Directory.EnumerateFileSystemEntries(dirName, searchPattern, option).ToArray();
+        }
+
+        #endregion
+
+        /// <summary>
+        /// This test performs enumeration on a directory using AllDirectories as the SearchOption and then
+        /// deletes a non-empty directory after it has been enumerated.
+        /// </summary>
+        [Fact]
+        public void DeleteDirectoryDuringEnumeration()
+        {
+            string testDir = GetTestFilePath();
+            string firstLevelDir = Path.Combine(testDir, GetTestFileName());
+            string firstLevelFile = Path.Combine(testDir, GetTestFileName());
+            string intermediateFile = Path.Combine(testDir, firstLevelDir, GetTestFileName());
+            string intermediateDir = Path.Combine(testDir, firstLevelDir, GetTestFileName());
+            Directory.CreateDirectory(firstLevelDir);
+            Directory.CreateDirectory(testDir);
+            using (File.Create(firstLevelFile))
+            using (File.Create(intermediateFile))
+            {
+                IEnumerable<string> enumerator = Directory.EnumerateFileSystemEntries(testDir);
+                List<string> results = new List<string>();
+                foreach (string entry in enumerator)
+                {
+                    if (entry.Equals(firstLevelDir))
+                    {
+                        Directory.Delete(firstLevelDir, true);
+                    }
+                    results.Add(entry);
+                }
+                Assert.DoesNotContain(intermediateDir, results);
+                Assert.DoesNotContain(intermediateFile, results);
+            }
+        }
+
+    }
+
     #endregion
 
     #region EnumerateDirectories
@@ -177,6 +233,5 @@ namespace System.IO.Tests
             return Directory.EnumerateDirectories(dirName, searchPattern, option).ToArray();
         }
     }
-
     #endregion
 }
