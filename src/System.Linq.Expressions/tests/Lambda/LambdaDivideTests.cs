@@ -175,9 +175,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal> f1 = e1.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f1());
+            }
             else
+            {
                 Assert.Equal(expected, f1());
+            }
 
             // verify with values passed to make parameters
             Expression<Func<decimal, decimal, Func<decimal>>> e2 =
@@ -189,9 +193,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal, decimal, Func<decimal>> f2 = e2.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f2(a, b)());
+            }
             else
+            {
                 Assert.Equal(expected, f2(a, b)());
+            }
 
             // verify with values directly passed
             Expression<Func<Func<decimal, decimal, decimal>>> e3 =
@@ -207,9 +215,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal, decimal, decimal> f3 = e3.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f3(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f3(a, b));
+            }
 
             // verify as a function generator
             Expression<Func<Func<decimal, decimal, decimal>>> e4 =
@@ -221,9 +233,13 @@ namespace System.Linq.Expressions.Tests
             Func<Func<decimal, decimal, decimal>> f4 = e4.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f4()(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f4()(a, b));
+            }
 
             // verify with currying
             Expression<Func<decimal, Func<decimal, decimal>>> e5 =
@@ -235,9 +251,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal, Func<decimal, decimal>> f5 = e5.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f5(a)(b));
+            }
             else
+            {
                 Assert.Equal(expected, f5(a)(b));
+            }
 
             // verify with one parameter
             Expression<Func<Func<decimal, decimal>>> e6 =
@@ -253,9 +273,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal, decimal> f6 = e6.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f6(b));
+            }
             else
+            {
                 Assert.Equal(expected, f6(b));
+            }
         }
 
         #endregion
@@ -455,9 +479,13 @@ namespace System.Linq.Expressions.Tests
             ResultType outcome;
             int expected = 0;
             if (b == 0)
+            {
                 outcome = ResultType.DivideByZero;
+            }
             else if (a == int.MinValue && b == -1)
+            {
                 outcome = ResultType.Overflow;
+            }
             else
             {
                 expected = a / b;
@@ -624,9 +652,13 @@ namespace System.Linq.Expressions.Tests
             ResultType outcome;
             long expected = 0;
             if (b == 0)
+            {
                 outcome = ResultType.DivideByZero;
+            }
             else if (a == long.MinValue && b == -1)
+            {
                 outcome = ResultType.Overflow;
+            }
             else
             {
                 expected = a / b;
@@ -822,9 +854,13 @@ namespace System.Linq.Expressions.Tests
             Func<short> f1 = e1.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f1());
+            }
             else
+            {
                 Assert.Equal(expected, f1());
+            }
 
             // verify with values passed to make parameters
             Expression<Func<short, short, Func<short>>> e2 =
@@ -836,9 +872,13 @@ namespace System.Linq.Expressions.Tests
             Func<short, short, Func<short>> f2 = e2.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f2(a, b)());
+            }
             else
+            {
                 Assert.Equal(expected, f2(a, b)());
+            }
 
             // verify with values directly passed
             Expression<Func<Func<short, short, short>>> e3 =
@@ -854,9 +894,13 @@ namespace System.Linq.Expressions.Tests
             Func<short, short, short> f3 = e3.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f3(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f3(a, b));
+            }
 
             // verify as a function generator
             Expression<Func<Func<short, short, short>>> e4 =
@@ -868,9 +912,13 @@ namespace System.Linq.Expressions.Tests
             Func<Func<short, short, short>> f4 = e4.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f4()(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f4()(a, b));
+            }
 
             // verify with currying
             Expression<Func<short, Func<short, short>>> e5 =
@@ -882,9 +930,13 @@ namespace System.Linq.Expressions.Tests
             Func<short, Func<short, short>> f5 = e5.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f5(a)(b));
+            }
             else
+            {
                 Assert.Equal(expected, f5(a)(b));
+            }
 
             // verify with one parameter
             Expression<Func<Func<short, short>>> e6 =
@@ -900,9 +952,13 @@ namespace System.Linq.Expressions.Tests
             Func<short, short> f6 = e6.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f6(b));
+            }
             else
+            {
                 Assert.Equal(expected, f6(b));
+            }
         }
 
         #endregion
@@ -944,9 +1000,13 @@ namespace System.Linq.Expressions.Tests
             Func<uint> f1 = e1.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f1());
+            }
             else
+            {
                 Assert.Equal(expected, f1());
+            }
 
             // verify with values passed to make parameters
             Expression<Func<uint, uint, Func<uint>>> e2 =
@@ -958,9 +1018,13 @@ namespace System.Linq.Expressions.Tests
             Func<uint, uint, Func<uint>> f2 = e2.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f2(a, b)());
+            }
             else
+            {
                 Assert.Equal(expected, f2(a, b)());
+            }
 
             // verify with values directly passed
             Expression<Func<Func<uint, uint, uint>>> e3 =
@@ -976,9 +1040,13 @@ namespace System.Linq.Expressions.Tests
             Func<uint, uint, uint> f3 = e3.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f3(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f3(a, b));
+            }
 
             // verify as a function generator
             Expression<Func<Func<uint, uint, uint>>> e4 =
@@ -990,9 +1058,13 @@ namespace System.Linq.Expressions.Tests
             Func<Func<uint, uint, uint>> f4 = e4.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f4()(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f4()(a, b));
+            }
 
             // verify with currying
             Expression<Func<uint, Func<uint, uint>>> e5 =
@@ -1004,9 +1076,13 @@ namespace System.Linq.Expressions.Tests
             Func<uint, Func<uint, uint>> f5 = e5.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f5(a)(b));
+            }
             else
+            {
                 Assert.Equal(expected, f5(a)(b));
+            }
 
             // verify with one parameter
             Expression<Func<Func<uint, uint>>> e6 =
@@ -1022,9 +1098,13 @@ namespace System.Linq.Expressions.Tests
             Func<uint, uint> f6 = e6.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f6(b));
+            }
             else
+            {
                 Assert.Equal(expected, f6(b));
+            }
         }
 
         #endregion
@@ -1066,9 +1146,13 @@ namespace System.Linq.Expressions.Tests
             Func<ulong> f1 = e1.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f1());
+            }
             else
+            {
                 Assert.Equal(expected, f1());
+            }
 
             // verify with values passed to make parameters
             Expression<Func<ulong, ulong, Func<ulong>>> e2 =
@@ -1080,9 +1164,13 @@ namespace System.Linq.Expressions.Tests
             Func<ulong, ulong, Func<ulong>> f2 = e2.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f2(a, b)());
+            }
             else
+            {
                 Assert.Equal(expected, f2(a, b)());
+            }
 
             // verify with values directly passed
             Expression<Func<Func<ulong, ulong, ulong>>> e3 =
@@ -1098,9 +1186,13 @@ namespace System.Linq.Expressions.Tests
             Func<ulong, ulong, ulong> f3 = e3.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f3(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f3(a, b));
+            }
 
             // verify as a function generator
             Expression<Func<Func<ulong, ulong, ulong>>> e4 =
@@ -1112,9 +1204,13 @@ namespace System.Linq.Expressions.Tests
             Func<Func<ulong, ulong, ulong>> f4 = e4.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f4()(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f4()(a, b));
+            }
 
             // verify with currying
             Expression<Func<ulong, Func<ulong, ulong>>> e5 =
@@ -1126,9 +1222,13 @@ namespace System.Linq.Expressions.Tests
             Func<ulong, Func<ulong, ulong>> f5 = e5.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f5(a)(b));
+            }
             else
+            {
                 Assert.Equal(expected, f5(a)(b));
+            }
 
             // verify with one parameter
             Expression<Func<Func<ulong, ulong>>> e6 =
@@ -1144,9 +1244,13 @@ namespace System.Linq.Expressions.Tests
             Func<ulong, ulong> f6 = e6.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f6(b));
+            }
             else
+            {
                 Assert.Equal(expected, f6(b));
+            }
         }
 
         #endregion
@@ -1189,9 +1293,13 @@ namespace System.Linq.Expressions.Tests
             Func<ushort> f1 = e1.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f1());
+            }
             else
+            {
                 Assert.Equal(expected, f1());
+            }
 
             // verify with values passed to make parameters
             Expression<Func<ushort, ushort, Func<ushort>>> e2 =
@@ -1203,9 +1311,13 @@ namespace System.Linq.Expressions.Tests
             Func<ushort, ushort, Func<ushort>> f2 = e2.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f2(a, b)());
+            }
             else
+            {
                 Assert.Equal(expected, f2(a, b)());
+            }
 
             // verify with values directly passed
             Expression<Func<Func<ushort, ushort, ushort>>> e3 =
@@ -1221,9 +1333,13 @@ namespace System.Linq.Expressions.Tests
             Func<ushort, ushort, ushort> f3 = e3.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f3(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f3(a, b));
+            }
 
             // verify as a function generator
             Expression<Func<Func<ushort, ushort, ushort>>> e4 =
@@ -1235,9 +1351,13 @@ namespace System.Linq.Expressions.Tests
             Func<Func<ushort, ushort, ushort>> f4 = e4.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f4()(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f4()(a, b));
+            }
 
             // verify with currying
             Expression<Func<ushort, Func<ushort, ushort>>> e5 =
@@ -1249,9 +1369,13 @@ namespace System.Linq.Expressions.Tests
             Func<ushort, Func<ushort, ushort>> f5 = e5.Compile(useInterpreter);
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f5(a)(b));
+            }
             else
+            {
                 Assert.Equal(expected, f5(a)(b));
+            }
 
             // verify with one parameter
             Expression<Func<Func<ushort, ushort>>> e6 =
@@ -1267,9 +1391,13 @@ namespace System.Linq.Expressions.Tests
             Func<ushort, ushort> f6 = e6.Compile(useInterpreter)();
 
             if (divideByZero)
+            {
                 Assert.Throws<DivideByZeroException>(() => f6(b));
+            }
             else
+            {
                 Assert.Equal(expected, f6(b));
+            }
         }
 
         #endregion

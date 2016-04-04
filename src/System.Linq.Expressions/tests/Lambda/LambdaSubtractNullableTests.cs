@@ -166,9 +166,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal?> f1 = e1.Compile(useInterpreter);
 
             if (overflowed)
+            {
                 Assert.Throws<OverflowException>(() => f1());
+            }
             else
+            {
                 Assert.Equal(expected, f1());
+            }
 
             // verify with values passed to make parameters
             Expression<Func<decimal?, decimal?, Func<decimal?>>> e2 =
@@ -180,9 +184,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal?, decimal?, Func<decimal?>> f2 = e2.Compile(useInterpreter);
 
             if (overflowed)
+            {
                 Assert.Throws<OverflowException>(() => f2(a, b)());
+            }
             else
+            {
                 Assert.Equal(expected, f2(a, b)());
+            }
 
             // verify with values directly passed
             Expression<Func<Func<decimal?, decimal?, decimal?>>> e3 =
@@ -198,9 +206,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal?, decimal?, decimal?> f3 = e3.Compile(useInterpreter)();
 
             if (overflowed)
+            {
                 Assert.Throws<OverflowException>(() => f3(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f3(a, b));
+            }
 
             // verify as a function generator
             Expression<Func<Func<decimal?, decimal?, decimal?>>> e4 =
@@ -212,9 +224,13 @@ namespace System.Linq.Expressions.Tests
             Func<Func<decimal?, decimal?, decimal?>> f4 = e4.Compile(useInterpreter);
 
             if (overflowed)
+            {
                 Assert.Throws<OverflowException>(() => f4()(a, b));
+            }
             else
+            {
                 Assert.Equal(expected, f4()(a, b));
+            }
 
             // verify with currying
             Expression<Func<decimal?, Func<decimal?, decimal?>>> e5 =
@@ -226,9 +242,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal?, Func<decimal?, decimal?>> f5 = e5.Compile(useInterpreter);
 
             if (overflowed)
+            {
                 Assert.Throws<OverflowException>(() => f5(a)(b));
+            }
             else
+            {
                 Assert.Equal(expected, f5(a)(b));
+            }
 
             // verify with one parameter
             Expression<Func<Func<decimal?, decimal?>>> e6 =
@@ -244,9 +264,13 @@ namespace System.Linq.Expressions.Tests
             Func<decimal?, decimal?> f6 = e6.Compile(useInterpreter)();
 
             if (overflowed)
+            {
                 Assert.Throws<OverflowException>(() => f6(b));
+            }
             else
+            {
                 Assert.Equal(expected, f6(b));
+            }
         }
 
         #endregion
