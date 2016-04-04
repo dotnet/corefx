@@ -236,7 +236,7 @@ namespace System.Data.SqlClient
                 { // If new value...
                     if (cachedAsyncState.PendingAsyncOperation)
                     { // If in pending async state, throw.
-                        throw SQL.CannotModifyPropertyAsyncOperationInProgress(SQL.Connection);
+                        throw SQL.CannotModifyPropertyAsyncOperationInProgress();
                     }
                 }
 
@@ -320,7 +320,7 @@ namespace System.Data.SqlClient
                 { // If new value...
                     if (cachedAsyncState.PendingAsyncOperation)
                     { // If in pending async state, throw
-                        throw SQL.CannotModifyPropertyAsyncOperationInProgress(SQL.Transaction);
+                        throw SQL.CannotModifyPropertyAsyncOperationInProgress();
                     }
                 }
 
@@ -542,7 +542,7 @@ namespace System.Data.SqlClient
             else
             {
                 // Validate the command outside of the try\catch to avoid putting the _stateObj on error
-                ValidateCommand(ADP.Prepare, false /*not async*/);
+                ValidateCommand(nameof(Prepare), async: false);
 
                 bool processFinallyBlock = true;
                 try
@@ -748,7 +748,7 @@ namespace System.Data.SqlClient
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
                 SqlDataReader ds;
-                ds = RunExecuteReader(0, RunBehavior.ReturnImmediately, true, ADP.ExecuteScalar);
+                ds = RunExecuteReader(0, RunBehavior.ReturnImmediately, true, nameof(ExecuteScalar));
                 return CompleteExecuteScalar(ds, false);
             }
             finally
@@ -797,7 +797,7 @@ namespace System.Data.SqlClient
             try
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
-                InternalExecuteNonQuery(null, ADP.ExecuteNonQuery, false, CommandTimeout);
+                InternalExecuteNonQuery(null, nameof(ExecuteNonQuery), false, CommandTimeout);
                 return _rowsAffected;
             }
             finally
@@ -832,7 +832,7 @@ namespace System.Data.SqlClient
                     Task execNQ = InternalExecuteNonQuery(completion, ADP.BeginExecuteNonQuery, false, timeout, asyncWrite);
 
                     // must finish caching information before ReadSni which can activate the callback before returning
-                    cachedAsyncState.SetActiveConnectionAndResult(completion, ADP.EndExecuteNonQuery, _activeConnection);
+                    cachedAsyncState.SetActiveConnectionAndResult(completion, nameof(EndExecuteNonQuery), _activeConnection);
                     if (execNQ != null)
                     {
                         AsyncHelper.ContinueTask(execNQ, completion, () => BeginExecuteNonQueryInternalReadStage(completion));
@@ -889,13 +889,13 @@ namespace System.Data.SqlClient
             }
         }
 
-        private void VerifyEndExecuteState(Task completionTask, String endMethod)
+        private void VerifyEndExecuteState(Task asyncResult, String endMethod)
         {
-            if (null == completionTask)
+            if (null == asyncResult)
             {
-                throw ADP.ArgumentNull("asyncResult");
+                throw ADP.ArgumentNull(nameof(asyncResult));
             }
-            if (completionTask.IsCanceled)
+            if (asyncResult.IsCanceled)
             {
                 if (_stateObj != null)
                 {
@@ -909,9 +909,9 @@ namespace System.Data.SqlClient
                     throw SQL.CR_ReconnectionCancelled();
                 }
             }
-            else if (completionTask.IsFaulted)
+            else if (asyncResult.IsFaulted)
             {
-                throw completionTask.Exception.InnerException;
+                throw asyncResult.Exception.InnerException;
             }
             if (cachedAsyncState.EndMethodName == null)
             {
@@ -989,7 +989,7 @@ namespace System.Data.SqlClient
             try
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
-                VerifyEndExecuteState((Task)asyncResult, ADP.EndExecuteNonQuery);
+                VerifyEndExecuteState((Task)asyncResult, nameof(EndExecuteNonQuery));
                 WaitForAsyncResults(asyncResult);
 
                 bool processFinallyBlock = true;
@@ -1119,7 +1119,7 @@ namespace System.Data.SqlClient
 
                 // use the reader to consume metadata
                 SqlDataReader ds;
-                ds = RunExecuteReader(CommandBehavior.SequentialAccess, RunBehavior.ReturnImmediately, true, ADP.ExecuteXmlReader);
+                ds = RunExecuteReader(CommandBehavior.SequentialAccess, RunBehavior.ReturnImmediately, true, nameof(ExecuteXmlReader));
                 return CompleteXmlReader(ds);
             }
             finally
@@ -1289,7 +1289,7 @@ namespace System.Data.SqlClient
 
         override protected DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
-            return ExecuteReader(behavior, ADP.ExecuteReader);
+            return ExecuteReader(behavior, nameof(ExecuteReader));
         }
 
         new public SqlDataReader ExecuteReader()
@@ -1298,7 +1298,7 @@ namespace System.Data.SqlClient
             try
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
-                return ExecuteReader(CommandBehavior.Default, ADP.ExecuteReader);
+                return ExecuteReader(CommandBehavior.Default, nameof(ExecuteReader));
             }
             finally
             {
@@ -1308,7 +1308,7 @@ namespace System.Data.SqlClient
 
         new public SqlDataReader ExecuteReader(CommandBehavior behavior)
         {
-            return ExecuteReader(behavior, ADP.ExecuteReader);
+            return ExecuteReader(behavior, nameof(ExecuteReader));
         }
 
 
