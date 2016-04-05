@@ -38,12 +38,17 @@ enum PAL_GssFlags : uint32_t
     PAL_GSS_C_EXTENDED_ERROR_FLAG = 0x4000,
     PAL_GSS_C_DELEG_POLICY_FLAG = 0x8000
 };
-
+/*
+Tracking PR: #7511 (length typecasts size_t to uint64_t which causes padded warning)
+*/
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
 struct PAL_GssBuffer
 {
     uint64_t length;
     uint8_t* data;
 };
+#pragma clang diagnostic pop
 
 /*
 Shims the gss_release_buffer method.
