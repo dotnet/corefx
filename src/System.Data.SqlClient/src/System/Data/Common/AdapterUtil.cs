@@ -831,6 +831,7 @@ namespace System.Data.Common
         internal const string BeginExecuteNonQuery = "BeginExecuteNonQuery";
         internal const string BeginExecuteReader = "BeginExecuteReader";
         internal const string BeginExecuteXmlReader = "BeginExecuteXmlReader";
+        internal const string EndExecuteNonQuery = "EndExecuteNonQuery";
         internal const string EndExecuteReader = "EndExecuteReader";
         internal const string EndExecuteXmlReader = "EndExecuteXmlReader";
         internal const string Parameter = "Parameter";

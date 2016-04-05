@@ -2,13 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-
-//------------------------------------------------------------------------------
-
 using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -748,7 +745,7 @@ namespace System.Data.SqlClient
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
                 SqlDataReader ds;
-                ds = RunExecuteReader(0, RunBehavior.ReturnImmediately, true, nameof(ExecuteScalar));
+                ds = RunExecuteReader(0, RunBehavior.ReturnImmediately, returnStream: true);
                 return CompleteExecuteScalar(ds, false);
             }
             finally
@@ -832,7 +829,7 @@ namespace System.Data.SqlClient
                     Task execNQ = InternalExecuteNonQuery(completion, ADP.BeginExecuteNonQuery, false, timeout, asyncWrite);
 
                     // must finish caching information before ReadSni which can activate the callback before returning
-                    cachedAsyncState.SetActiveConnectionAndResult(completion, nameof(EndExecuteNonQuery), _activeConnection);
+                    cachedAsyncState.SetActiveConnectionAndResult(completion, ADP.EndExecuteNonQuery, _activeConnection);
                     if (execNQ != null)
                     {
                         AsyncHelper.ContinueTask(execNQ, completion, () => BeginExecuteNonQueryInternalReadStage(completion));
@@ -889,13 +886,11 @@ namespace System.Data.SqlClient
             }
         }
 
-        private void VerifyEndExecuteState(Task asyncResult, String endMethod)
+        private void VerifyEndExecuteState(Task completionTask, String endMethod)
         {
-            if (null == asyncResult)
-            {
-                throw ADP.ArgumentNull(nameof(asyncResult));
-            }
-            if (asyncResult.IsCanceled)
+            Debug.Assert(completionTask != null);
+
+            if (completionTask.IsCanceled)
             {
                 if (_stateObj != null)
                 {
@@ -909,9 +904,9 @@ namespace System.Data.SqlClient
                     throw SQL.CR_ReconnectionCancelled();
                 }
             }
-            else if (asyncResult.IsFaulted)
+            else if (completionTask.IsFaulted)
             {
-                throw asyncResult.Exception.InnerException;
+                throw completionTask.Exception.InnerException;
             }
             if (cachedAsyncState.EndMethodName == null)
             {
@@ -937,17 +932,6 @@ namespace System.Data.SqlClient
             }
             _stateObj._networkPacketTaskSource = null;
             _activeConnection.GetOpenTdsConnection().DecrementAsyncCount();
-        }
-
-        public int EndExecuteNonQuery(IAsyncResult asyncResult)
-        {
-            try
-            {
-                return EndExecuteNonQueryInternal(asyncResult);
-            }
-            finally
-            {
-            }
         }
 
         private void ThrowIfReconnectionHasBeenCanceled()
@@ -989,7 +973,7 @@ namespace System.Data.SqlClient
             try
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
-                VerifyEndExecuteState((Task)asyncResult, nameof(EndExecuteNonQuery));
+                VerifyEndExecuteState((Task)asyncResult, ADP.EndExecuteNonQuery);
                 WaitForAsyncResults(asyncResult);
 
                 bool processFinallyBlock = true;
@@ -1119,7 +1103,7 @@ namespace System.Data.SqlClient
 
                 // use the reader to consume metadata
                 SqlDataReader ds;
-                ds = RunExecuteReader(CommandBehavior.SequentialAccess, RunBehavior.ReturnImmediately, true, nameof(ExecuteXmlReader));
+                ds = RunExecuteReader(CommandBehavior.SequentialAccess, RunBehavior.ReturnImmediately, returnStream: true);
                 return CompleteXmlReader(ds);
             }
             finally
@@ -1289,7 +1273,7 @@ namespace System.Data.SqlClient
 
         override protected DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
-            return ExecuteReader(behavior, nameof(ExecuteReader));
+            return ExecuteReader(behavior);
         }
 
         new public SqlDataReader ExecuteReader()
@@ -1298,7 +1282,7 @@ namespace System.Data.SqlClient
             try
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
-                return ExecuteReader(CommandBehavior.Default, nameof(ExecuteReader));
+                return ExecuteReader(CommandBehavior.Default);
             }
             finally
             {
@@ -1307,12 +1291,6 @@ namespace System.Data.SqlClient
         }
 
         new public SqlDataReader ExecuteReader(CommandBehavior behavior)
-        {
-            return ExecuteReader(behavior, nameof(ExecuteReader));
-        }
-
-
-        internal SqlDataReader ExecuteReader(CommandBehavior behavior, string method)
         {
             // Reset _pendingCancel upon entry into any Execute - used to synchronize state
             // between entry into Execute* API and the thread obtaining the stateObject.
@@ -1323,7 +1301,7 @@ namespace System.Data.SqlClient
             try
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
-                return RunExecuteReader(behavior, RunBehavior.ReturnImmediately, true, method);
+                return RunExecuteReader(behavior, RunBehavior.ReturnImmediately, returnStream: true);
             }
             finally
             {
@@ -1866,7 +1844,7 @@ namespace System.Data.SqlClient
         }
 
 
-        internal SqlDataReader RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, string method)
+        internal SqlDataReader RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, [CallerMemberName] string method = "")
         {
             Task unused; // sync execution 
             SqlDataReader reader = RunExecuteReader(cmdBehavior, runBehavior, returnStream, method, completion: null, timeout: CommandTimeout, task: out unused);
