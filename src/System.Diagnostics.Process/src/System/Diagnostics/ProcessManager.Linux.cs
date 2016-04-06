@@ -26,7 +26,7 @@ namespace System.Diagnostics
             int[] procIds = GetProcessIds(machineName);
 
             // Iterate through all process IDs to load information about each process
-            var reusableReader = new ReusableTextReader();
+            var reusableReader = new ReusableTextReader(Encoding.UTF8);
             var processes = new List<ProcessInfo>(procIds.Length);
             foreach (int pid in procIds)
             {
@@ -88,13 +88,8 @@ namespace System.Diagnostics
         /// <summary>
         /// Creates a ProcessInfo from the specified process ID.
         /// </summary>
-        internal static ProcessInfo CreateProcessInfo(int pid, ReusableTextReader reusableReader = null)
+        internal static ProcessInfo CreateProcessInfo(int pid, ReusableTextReader reusableReader)
         {
-            if (reusableReader == null)
-            {
-                reusableReader = new ReusableTextReader();
-            }
-
             Interop.procfs.ParsedStat stat;
             return Interop.procfs.TryReadStatFile(pid, out stat, reusableReader) ?
                 CreateProcessInfo(stat, reusableReader) :
