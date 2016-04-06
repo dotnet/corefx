@@ -93,9 +93,18 @@ namespace System.Diagnostics
                         CaseSensitiveEnvironmentVariables ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
 #pragma warning restore 0429
 
-                    foreach (DictionaryEntry entry in envVars)
+                    IDictionaryEnumerator e = envVars.GetEnumerator();
+                    try
                     {
-                        _environmentVariables.Add((string)entry.Key, (string)entry.Value);
+                        while (e.MoveNext())
+                        {
+                            DictionaryEntry entry = e.Entry;
+                            _environmentVariables.Add((string)entry.Key, (string)entry.Value);
+                        }
+                    }
+                    finally
+                    {
+                        (e as IDisposable)?.Dispose();
                     }
                 }
                 return _environmentVariables;
