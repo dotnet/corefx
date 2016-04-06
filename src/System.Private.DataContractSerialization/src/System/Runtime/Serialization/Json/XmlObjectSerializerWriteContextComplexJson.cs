@@ -236,6 +236,7 @@ namespace System.Runtime.Serialization.Json
                     // Convert non-generic dictionary to generic dictionary
                     IDictionary dictionaryObj = obj as IDictionary;
                     Dictionary<object, object> genericDictionaryObj = new Dictionary<object, object>(dictionaryObj.Count);
+                    // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
                     IDictionaryEnumerator e = dictionaryObj.GetEnumerator();
                     try
                     {

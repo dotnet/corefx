@@ -89,6 +89,7 @@ namespace System.Runtime.Serialization.Json
         {
             sb.Append('{');
             bool isFirstElement = true;
+            // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
             IDictionaryEnumerator e = o.GetEnumerator();
             try
             {
