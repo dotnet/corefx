@@ -16,7 +16,7 @@ param(
     [string]$GitHubProject='corefx',
     [string]$GitHubUpstreamBranch='master',
     # a semi-colon delimited list of GitHub users to notify on the PR
-    [string]$GitHubPullRequestNotifications='')
+    [string]$GitHubPullRequestNotifications='stephentoub;ericstj;ellismg;weshaggard;joshfree')
 
 $CoreFxLatestVersion = Invoke-WebRequest $CoreFxVersionUrl -UseBasicParsing
 $CoreFxLatestVersion = $CoreFxLatestVersion.ToString().Trim()
