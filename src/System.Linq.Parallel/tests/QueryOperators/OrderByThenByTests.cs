@@ -17,7 +17,7 @@ namespace System.Linq.Parallel.Tests
         // Get ranges from 0 to each count.  The data is random, seeded from the size of the range.
         public static IEnumerable<object[]> OrderByRandomData(int[] counts)
         {
-            foreach (int count in counts.Cast<int>())
+            foreach (int count in counts)
             {
                 int[] randomInput = GetRandomInput(count);
                 yield return new object[] { Labeled.Label("Array-Random", randomInput.AsParallel()), count };
@@ -40,11 +40,11 @@ namespace System.Linq.Parallel.Tests
         // Get a set of ranges, from 0 to each count, and an additional parameter denoting degree of parallelism.
         public static IEnumerable<object[]> OrderByThreadedData(int[] counts, int[] degrees)
         {
-            foreach (object[] results in UnorderedSources.Ranges(counts.Cast<int>(), x => degrees.Cast<int>()))
+            foreach (object[] results in UnorderedSources.Ranges(counts, x => degrees))
             {
                 yield return results;
             }
-            foreach (object[] results in Sources.Ranges(counts.Cast<int>(), x => degrees.Cast<int>()))
+            foreach (object[] results in Sources.Ranges(counts, x => degrees))
             {
                 yield return results;
             }
@@ -529,9 +529,9 @@ namespace System.Linq.Parallel.Tests
         // Thenby
         //
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenBy(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = 0;
@@ -563,9 +563,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenBy_Reversed(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = GroupFactor - 1;
@@ -597,9 +597,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenByDescending(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = GroupFactor - 1;
@@ -631,9 +631,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenByDescending_Reversed(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = 0;
@@ -665,9 +665,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenBy_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = 0;
@@ -700,9 +700,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenBy_Reversed_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = GroupFactor - 1;
@@ -735,9 +735,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenByDescending_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = GroupFactor - 1;
@@ -770,9 +770,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenByDescending_Reversed_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = 0;
@@ -805,9 +805,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenBy_CustomComparer(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = 0;
@@ -839,9 +839,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenByDescending_CustomComparer(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = GroupFactor - 1;
@@ -873,9 +873,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenBy_NotPipelined_CustomComparer(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = 0;
@@ -908,9 +908,9 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
-        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(OrderByRandomData), new[] { 0, 1, 2, GroupFactor * 2 })]
+        [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, GroupFactor * 2 }, MemberType = typeof(UnorderedSources))]
         public static void ThenByDescending_NotPipelined_CustomComparer(Labeled<ParallelQuery<int>> labeled, int count)
         {
             int prevPrimary = GroupFactor - 1;

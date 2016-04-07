@@ -88,6 +88,17 @@ namespace System.Linq.Parallel.Tests
         }
 
         /// <summary>
+        /// Get a set of ranges, starting at 0, and having OuterLoopCount elements.
+        /// </summary>
+        /// <returns>Entries for test data.
+        /// The first element is the Labeled{ParallelQuery{int}} range,
+        /// and the second element is the count</returns>
+        public static IEnumerable<object[]> OuterLoopRanges()
+        {
+            foreach (object[] parms in Ranges(new[] { Sources.OuterLoopCount })) yield return parms;
+        }
+
+        /// <summary>
         /// Get a set of ranges, starting at `start`, and running for each count in `counts`.
         /// </summary>
         /// <remarks>This version is a wrapper for use from the MemberData attribute.</remarks>
@@ -178,19 +189,12 @@ namespace System.Linq.Parallel.Tests
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
         /// the second element is the count, and one additional element for each modifier.</returns>
-        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, params Func<int, T>[] modifiers)
+        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, Func<int, T> modifiers)
         {
-            if (modifiers == null || !modifiers.Any())
+            foreach (object[] parms in Ranges(counts))
             {
-                foreach (object[] parms in Ranges(counts)) yield return parms;
-            }
-            else
-            {
-                foreach (object[] parms in Ranges(counts))
-                {
-                    int count = (int)parms[1];
-                    yield return parms.Concat(modifiers.Select(f => f(count)).Cast<object>()).ToArray();
-                }
+                int count = (int)parms[1];
+                yield return parms.Concat(new object[] { modifiers(count) }).ToArray();
             }
         }
 
@@ -207,23 +211,22 @@ namespace System.Linq.Parallel.Tests
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
         /// the second element is the count, and one additional element for each modifier.</returns>
-        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, params Func<int, IEnumerable<T>>[] modifiers)
+        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, Func<int, IEnumerable<T>> modifiers)
         {
-            if (modifiers == null || !modifiers.Any())
+            foreach (object[] parms in Ranges(counts))
             {
-                foreach (object[] parms in Ranges(counts)) yield return parms;
-            }
-            else
-            {
-                foreach (object[] parms in Ranges(counts))
+                foreach (T mod in modifiers((int)parms[1]))
                 {
-                    IEnumerable<IEnumerable<T>> mod = modifiers.Select(f => f((int)parms[1]));
-
-                    for (int i = 0, count = mod.Max(e => e.Count()); i < count; i++)
-                    {
-                        yield return parms.Concat(mod.Select(e => e.ElementAt(i % e.Count())).Cast<object>()).ToArray();
-                    }
+                    yield return parms.Concat(new object[] { mod }).ToArray();
                 }
+            }
+        }
+
+        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, Func<int, T[]> modifiers)
+        {
+            foreach (object[] parms in Ranges(counts, i => modifiers(i).Cast<T>()))
+            {
+                yield return parms;
             }
         }
 

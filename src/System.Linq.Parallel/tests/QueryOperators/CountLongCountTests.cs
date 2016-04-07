@@ -7,11 +7,11 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class CountLongCountTests
+    public static class CountLongCountTests
     {
         public static IEnumerable<object[]> OnlyOneData(int[] counts)
         {
-            foreach (int count in counts)
+            foreach (int count in counts.DefaultIfEmpty(Sources.OuterLoopCount))
             {
                 foreach (int position in new[] { 0, count / 2, Math.Max(0, count - 1) }.Distinct())
                 {
@@ -34,13 +34,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(count, ParallelEnumerable.Range(0, count).Count(i => i < count));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Count_All_Longrunning(int count)
+        public static void Count_All_Longrunning()
         {
-            Count_All(count);
+            Count_All(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -54,13 +52,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(count, ParallelEnumerable.Range(0, count).LongCount(i => i < count));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void LongCount_All_Longrunning(int count)
+        public static void LongCount_All_Longrunning()
         {
-            LongCount_All(count);
+            LongCount_All(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -73,13 +69,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(0, ParallelEnumerable.Range(0, count).Count(i => i == -1));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Count_None_Longrunning(int count)
+        public static void Count_None_Longrunning()
         {
-            Count_None(count);
+            Count_None(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -92,13 +86,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(0, ParallelEnumerable.Range(0, count).LongCount(i => i == -1));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void LongCount_None_Longrunning(int count)
+        public static void LongCount_None_Longrunning()
         {
-            LongCount_None(count);
+            LongCount_None(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -110,7 +102,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(OnlyOneData), new[] { 1024 * 1024, 1024 * 1024 * 4 })]
+        [MemberData(nameof(OnlyOneData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Count_One_Longrunning(int count, int position)
         {
             Count_One(count, position);
@@ -125,7 +117,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(OnlyOneData), new[] { 1024 * 1024, 1024 * 1024 * 4 })]
+        [MemberData(nameof(OnlyOneData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void LongCount_One_Longrunning(int count, long position)
         {
             LongCount_One(count, position);

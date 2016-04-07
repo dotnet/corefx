@@ -19,13 +19,11 @@ namespace System.Linq.Parallel.Tests
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void ForAll_Longrunning(int count)
+        public static void ForAll_Longrunning()
         {
-            ForAll(count);
+            ForAll(Sources.OuterLoopCount);
         }
 
         [Fact]

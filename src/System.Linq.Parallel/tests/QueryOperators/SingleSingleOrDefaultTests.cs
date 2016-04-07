@@ -11,7 +11,7 @@ namespace System.Linq.Parallel.Tests
     {
         public static IEnumerable<object[]> SingleSpecificData(int[] counts)
         {
-            foreach (int count in counts)
+            foreach (int count in counts.DefaultIfEmpty(Sources.OuterLoopCount))
             {
                 foreach (int position in new[] { 0, count / 2, Math.Max(0, count - 1) }.Distinct())
                 {
@@ -64,13 +64,11 @@ namespace System.Linq.Parallel.Tests
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 4)]
-        [InlineData(1024 * 1024)]
-        public static void Single_NoMatch_Longrunning(int count)
+        public static void Single_NoMatch_Longrunning()
         {
-            Single_NoMatch(count);
+            Single_NoMatch(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -85,13 +83,11 @@ namespace System.Linq.Parallel.Tests
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 4)]
-        [InlineData(1024 * 1024)]
-        public static void SingleOrDefault_NoMatch_Longrunning(int count)
+        public static void SingleOrDefault_NoMatch_Longrunning()
         {
-            SingleOrDefault_NoMatch(count);
+            SingleOrDefault_NoMatch(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -102,13 +98,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Throws<InvalidOperationException>(() => ParallelEnumerable.Range(0, count).Single(x => true));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 4)]
-        [InlineData(1024 * 1024)]
-        public static void Single_AllMatch_Longrunning(int count)
+        public static void Single_AllMatch_Longrunning()
         {
-            Single_AllMatch(count);
+            Single_AllMatch(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -119,13 +113,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Throws<InvalidOperationException>(() => ParallelEnumerable.Range(0, count).SingleOrDefault(x => true));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 4)]
-        [InlineData(1024 * 1024)]
-        public static void SingleOrDefault_AllMatch_Longrunning(int count)
+        public static void SingleOrDefault_AllMatch_Longrunning()
         {
-            SingleOrDefault_AllMatch(count);
+            SingleOrDefault_AllMatch(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -139,7 +131,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(SingleSpecificData), new[] { 1024 * 4, 1024 * 1024 })]
+        [MemberData(nameof(SingleSpecificData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Single_OneMatch_Longrunning(int count, int element)
         {
             Single_OneMatch(count, element);
@@ -156,7 +148,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(SingleSpecificData), new[] { 1024 * 4, 1024 * 1024 })]
+        [MemberData(nameof(SingleSpecificData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void SingleOrDefault_OneMatch_Longrunning(int count, int element)
         {
             SingleOrDefault_OneMatch(count, element);

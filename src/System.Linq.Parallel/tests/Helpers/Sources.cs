@@ -22,7 +22,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         // Wrapper for attribute calls
-        public static IEnumerable<object[]> OuterloopRanges()
+        public static IEnumerable<object[]> OuterLoopRanges()
         {
             foreach (object[] parms in Ranges(OuterLoopCounts)) yield return parms;
         }
@@ -37,11 +37,21 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in Ranges(0, counts)) yield return parms;
         }
 
-        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, params Func<int, IEnumerable<T>>[] modifiers)
+        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, Func<int, IEnumerable<T>> modifiers)
         {
-            foreach (object[] parms in UnorderedSources.Ranges(counts, modifiers))
+            foreach (object[] parms in Ranges(counts))
             {
-                parms[0] = ((Labeled<ParallelQuery<int>>)parms[0]).Order();
+                foreach (T mod in modifiers((int)parms[1]))
+                {
+                    yield return parms.Concat(new object[] { mod }).ToArray();
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, Func<int, T[]> modifiers)
+        {
+            foreach (object[] parms in Ranges(counts, i => modifiers(i).Cast<T>()))
+            {
                 yield return parms;
             }
         }

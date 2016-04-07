@@ -12,10 +12,12 @@ namespace System.Linq.Parallel.Tests
         // Get a set of ranges from 0 to each count, with an extra parameter for a minimum where each item is negated (-x).
         public static IEnumerable<object[]> MinData(int[] counts)
         {
+            counts = counts.DefaultIfEmpty(Sources.OuterLoopCount).ToArray();
+
             Func<int, int> min = x => 1 - x;
             foreach (int count in counts)
             {
-                yield return new object[] { Labeled.Label("Default", ParallelEnumerable.Range(0, count)), count, min(count) };
+                yield return new object[] { Labeled.Label("Default", UnorderedSources.Default(count)), count, min(count) };
             }
 
             // A source with data explicitly created out of order
@@ -48,7 +50,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MinData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Min_Int_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             Min_Int(labeled, count, min);
@@ -85,7 +87,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MinData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Min_Long_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, long min)
         {
             Min_Long(labeled, count, min);
@@ -126,7 +128,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MinData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Min_Float_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, float min)
         {
             Min_Float(labeled, count, min);
@@ -182,7 +184,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MinData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Min_Double_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, double min)
         {
             Min_Double(labeled, count, min);
@@ -234,7 +236,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MinData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Min_Decimal_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, decimal min)
         {
             Min_Decimal(labeled, count, min);
@@ -269,7 +271,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MinData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MinData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Min_Other_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int min)
         {
             Min_Other(labeled, count, min);

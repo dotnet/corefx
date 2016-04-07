@@ -12,10 +12,12 @@ namespace System.Linq.Parallel.Tests
         // Get a set of ranges from 0 to each count, having an extra parameter describing the maximum (count - 1)
         public static IEnumerable<object[]> MaxData(int[] counts)
         {
+            counts = counts.DefaultIfEmpty(Sources.OuterLoopCount).ToArray();
+
             Func<int, int> max = x => x - 1;
             foreach (int count in counts)
             {
-                yield return new object[] { Labeled.Label("Default", ParallelEnumerable.Range(0, count)), count, max(count) };
+                yield return new object[] { Labeled.Label("Default", UnorderedSources.Default(0, count)), count, max(count) };
             }
 
             // A source with data explicitly created out of order
@@ -49,7 +51,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MaxData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MaxData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Max_Int_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int max)
         {
             Max_Int(labeled, count, max);
@@ -86,7 +88,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MaxData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MaxData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Max_Long_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, long max)
         {
             Max_Long(labeled, count, max);
@@ -125,7 +127,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MaxData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MaxData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Max_Float_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, float max)
         {
             Max_Float(labeled, count, max);
@@ -164,7 +166,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MaxData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MaxData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Max_Double_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, double max)
         {
             Max_Double(labeled, count, max);
@@ -201,7 +203,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MaxData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MaxData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Max_Decimal_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, decimal max)
         {
             Max_Decimal(labeled, count, max);
@@ -236,7 +238,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(MaxData), new[] { 1024 * 32, 1024 * 1024 })]
+        [MemberData(nameof(MaxData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Max_Other_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int max)
         {
             Max_Other(labeled, count, max);

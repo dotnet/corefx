@@ -9,16 +9,22 @@ namespace System.Linq.Parallel.Tests
 {
     public class FirstFirstOrDefaultTests
     {
+        private static Func<int, IEnumerable<int>> s_positions = x => new[] { 0, x / 2, Math.Max(0, x - 1) }.Distinct();
+
         public static IEnumerable<object[]> FirstUnorderedData(int[] counts)
         {
-            Func<int, IEnumerable<int>> positions = x => new[] { 0, x / 2, Math.Max(0, x - 1) }.Distinct();
-            foreach (object[] results in UnorderedSources.Ranges(counts.Cast<int>(), positions)) yield return results;
+            foreach (int count in counts.DefaultIfEmpty(Sources.OuterLoopCount))
+            {
+                foreach (int position in s_positions(count))
+                {
+                    yield return new object[] { Labeled.Label("UnorderedDefault", UnorderedSources.Default(count)), count, position };
+                }
+            }
         }
 
         public static IEnumerable<object[]> FirstData(int[] counts)
         {
-            Func<int, IEnumerable<int>> positions = x => new[] { 0, x / 2, Math.Max(0, x - 1) }.Distinct();
-            foreach (object[] results in Sources.Ranges(counts.Cast<int>(), positions)) yield return results;
+            foreach (object[] results in Sources.Ranges(counts.Cast<int>(), s_positions)) yield return results;
         }
 
         //
@@ -38,8 +44,8 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(FirstUnorderedData), new[] { 1024 * 4, 1024 * 1024 })]
-        [MemberData(nameof(FirstData), new[] { 1024 * 4, 1024 * 1024 })]
+        [MemberData(nameof(FirstUnorderedData), new int[] { /* Sources.OuterLoopCount */ })]
+        [MemberData(nameof(FirstData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void First_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int position)
         {
             First(labeled, count, position);
@@ -59,8 +65,8 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(FirstUnorderedData), new[] { 1024 * 4, 1024 * 1024 })]
-        [MemberData(nameof(FirstData), new[] { 1024 * 4, 1024 * 1024 })]
+        [MemberData(nameof(FirstUnorderedData), new int[] { /* Sources.OuterLoopCount */ })]
+        [MemberData(nameof(FirstData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void FirstOrDefault_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int position)
         {
             FirstOrDefault(labeled, count, position);
@@ -97,8 +103,8 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(FirstUnorderedData), new[] { 1024 * 4, 1024 * 1024 })]
-        [MemberData(nameof(FirstData), new[] { 1024 * 4, 1024 * 1024 })]
+        [MemberData(nameof(FirstUnorderedData), new int[] { /* Sources.OuterLoopCount */ })]
+        [MemberData(nameof(FirstData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void First_NoMatch_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int position)
         {
             First_NoMatch(labeled, count, position);
@@ -117,8 +123,8 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(FirstUnorderedData), new[] { 1024 * 4, 1024 * 1024 })]
-        [MemberData(nameof(FirstData), new[] { 1024 * 4, 1024 * 1024 })]
+        [MemberData(nameof(FirstUnorderedData), new int[] { /* Sources.OuterLoopCount */ })]
+        [MemberData(nameof(FirstData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void FirstOrDefault_NoMatch_Longrunning(Labeled<ParallelQuery<int>> labeled, int count, int position)
         {
             FirstOrDefault_NoMatch(labeled, count, position);
@@ -150,12 +156,11 @@ namespace System.Linq.Parallel.Tests
             AssertThrows.AlreadyCanceled(source => source.FirstOrDefault(x => true));
         }
 
-        [Theory]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1 }, MemberType = typeof(UnorderedSources))]
-        public static void First_AggregateException(Labeled<ParallelQuery<int>> labeled, int count)
+        [Fact]
+        public static void First_AggregateException()
         {
-            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.First(x => { throw new DeliberateTestException(); }));
-            AssertThrows.Wrapped<DeliberateTestException>(() => labeled.Item.FirstOrDefault(x => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(1).First(x => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(1).FirstOrDefault(x => { throw new DeliberateTestException(); }));
         }
 
         [Fact]

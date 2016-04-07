@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class AsSequentialTests
+    public static class AsSequentialTests
     {
         [Theory]
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]
@@ -21,7 +21,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(UnorderedSources.Ranges), new[] { 1024 * 1024, 1024 * 1024 * 4 }, MemberType = typeof(UnorderedSources))]
+        [MemberData(nameof(UnorderedSources.OuterLoopRanges), MemberType = typeof(UnorderedSources))]
         public static void AsSequential_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             AsSequential_Unordered(labeled, count);
@@ -39,7 +39,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(Sources.Ranges), new[] { 1024 * 4, 1024 * 128 }, MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.OuterLoopRanges), MemberType = typeof(Sources))]
         public static void AsSequential_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             AsSequential(labeled, count);

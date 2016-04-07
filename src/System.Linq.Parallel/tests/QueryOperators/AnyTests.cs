@@ -7,11 +7,11 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class AnyTests
+    public static class AnyTests
     {
         public static IEnumerable<object[]> OnlyOneData(int[] counts)
         {
-            foreach (int count in counts)
+            foreach (int count in counts.DefaultIfEmpty(Sources.OuterLoopCount))
             {
                 foreach (int position in new[] { 0, count / 2, Math.Max(0, count - 1) }.Distinct())
                 {
@@ -30,16 +30,14 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Any_Contents(int count)
         {
-            Assert.Equal(count > 0, ParallelEnumerable.Range(0, count).Any());
+            Assert.Equal(count > 0, UnorderedSources.Default(count).Any());
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Any_Contents_Longrunning(int count)
+        public static void Any_Contents_Longrunning()
         {
-            Any_Contents(count);
+            Any_Contents(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -50,17 +48,15 @@ namespace System.Linq.Parallel.Tests
         public static void Any_AllFalse(int count)
         {
             IntegerRangeSet seen = new IntegerRangeSet(0, count);
-            Assert.False(ParallelEnumerable.Range(0, count).Any(x => !seen.Add(x)));
+            Assert.False(UnorderedSources.Default(count).Any(x => !seen.Add(x)));
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Any_AllFalse_Longrunning(int count)
+        public static void Any_AllFalse_Longrunning()
         {
-            Any_AllFalse(count);
+            Any_AllFalse(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -70,28 +66,26 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Any_AllTrue(int count)
         {
-            Assert.Equal(count > 0, ParallelEnumerable.Range(0, count).Any(x => x >= 0));
+            Assert.Equal(count > 0, UnorderedSources.Default(count).Any(x => x >= 0));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Any_AllTrue_Longrunning(int count)
+        public static void Any_AllTrue_Longrunning()
         {
-            Any_AllTrue(count);
+            Any_AllTrue(Sources.OuterLoopCount);
         }
 
         [Theory]
         [MemberData(nameof(OnlyOneData), new[] { 2, 16 })]
         public static void Any_OneFalse(int count, int position)
         {
-            Assert.True(ParallelEnumerable.Range(0, count).Any(x => !(x == position)));
+            Assert.True(UnorderedSources.Default(count).Any(x => !(x == position)));
         }
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(OnlyOneData), new[] { 1024 * 1024, 1024 * 1024 * 4 })]
+        [MemberData(nameof(OnlyOneData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Any_OneFalse_Longrunning(int count, int position)
         {
             Any_OneFalse(count, position);
@@ -101,12 +95,12 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(OnlyOneData), new[] { 2, 16 })]
         public static void Any_OneTrue(int count, int position)
         {
-            Assert.True(ParallelEnumerable.Range(0, count).Any(x => x == position));
+            Assert.True(UnorderedSources.Default(count).Any(x => x == position));
         }
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(OnlyOneData), new[] { 1024 * 1024, 1024 * 1024 * 4 })]
+        [MemberData(nameof(OnlyOneData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Any_OneTrue_Longrunning(int count, int position)
         {
             Any_OneTrue(count, position);
@@ -145,8 +139,8 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Any_AggregateException()
         {
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 1).Any(x => { throw new DeliberateTestException(); }));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 1).Select((Func<int, int>)(x => { throw new DeliberateTestException(); })).Any());
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(1).Any(x => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(1).Select((Func<int, int>)(x => { throw new DeliberateTestException(); })).Any());
         }
 
         [Fact]

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class AggregateTests
+    public static class AggregateTests
     {
         private const int ResultFuncModifier = 17;
 
@@ -20,16 +20,14 @@ namespace System.Linq.Parallel.Tests
         {
             // The operation will overflow for long-running sizes, but that's okay:
             // The helper is overflowing too!
-            Assert.Equal(Functions.SumRange(0, count), ParallelEnumerable.Range(0, count).Aggregate((x, y) => x + y));
+            Assert.Equal(Functions.SumRange(0, count), UnorderedSources.Default(count).Aggregate((x, y) => x + y));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Sum_Longrunning(int count)
+        public static void Aggregate_Sum_Longrunning()
         {
-            Aggregate_Sum(count);
+            Aggregate_Sum(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -39,16 +37,14 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Aggregate_Sum_Seed(int count)
         {
-            Assert.Equal(Functions.SumRange(0, count), ParallelEnumerable.Range(0, count).Aggregate(0, (x, y) => x + y));
+            Assert.Equal(Functions.SumRange(0, count), UnorderedSources.Default(count).Aggregate(0, (x, y) => x + y));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Sum_Seed_Longrunning(int count)
+        public static void Aggregate_Sum_Seed_Longrunning()
         {
-            Aggregate_Sum_Seed(count);
+            Aggregate_Sum_Seed(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -63,13 +59,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(Functions.ProductRange(1, count), ParallelEnumerable.Range(1, count).Aggregate(1L, (x, y) => x * y));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Product_Seed_Longrunning(int count)
+        public static void Aggregate_Product_Seed_Longrunning()
         {
-            Aggregate_Product_Seed(count);
+            Aggregate_Product_Seed(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -79,16 +73,15 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Aggregate_Collection_Seed(int count)
         {
-            Assert.Equal(Enumerable.Range(0, count), ParallelEnumerable.Range(0, count).Aggregate(ImmutableList<int>.Empty, (l, x) => l.Add(x)).OrderBy(x => x));
+            Assert.Equal(Enumerable.Range(0, count), UnorderedSources.Default(count).Aggregate(ImmutableList<int>.Empty, (l, x) => l.Add(x)).OrderBy(x => x));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(512)]
-        [InlineData(1024 * 16)]
-        public static void Aggregate_Collection_Seed_Longrunning(int count)
+        public static void Aggregate_Collection_Seed_Longrunning()
         {
-            Aggregate_Collection_Seed(count);
+            // Given the cost of using an object, reduce count.
+            Aggregate_Collection_Seed(Sources.OuterLoopCount / 2);
         }
 
         [Theory]
@@ -98,16 +91,14 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Aggregate_Sum_Result(int count)
         {
-            Assert.Equal(Functions.SumRange(0, count) + ResultFuncModifier, ParallelEnumerable.Range(0, count).Aggregate(0, (x, y) => x + y, result => result + ResultFuncModifier));
+            Assert.Equal(Functions.SumRange(0, count) + ResultFuncModifier, UnorderedSources.Default(count).Aggregate(0, (x, y) => x + y, result => result + ResultFuncModifier));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Sum_Result_Longrunning(int count)
+        public static void Aggregate_Sum_Result_Longrunning()
         {
-            Aggregate_Sum_Result(count);
+            Aggregate_Sum_Result(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -120,13 +111,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(Functions.ProductRange(1, count) + ResultFuncModifier, ParallelEnumerable.Range(1, count).Aggregate(1L, (x, y) => x * y, result => result + ResultFuncModifier));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Product_Results_Longrunning(int count)
+        public static void Aggregate_Product_Results_Longrunning()
         {
-            Aggregate_Product_Result(count);
+            Aggregate_Product_Result(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -136,16 +125,14 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Aggregate_Collection_Results(int count)
         {
-            Assert.Equal(Enumerable.Range(0, count), ParallelEnumerable.Range(0, count).Aggregate(ImmutableList<int>.Empty, (l, x) => l.Add(x), l => l.OrderBy(x => x)));
+            Assert.Equal(Enumerable.Range(0, count), UnorderedSources.Default(count).Aggregate(ImmutableList<int>.Empty, (l, x) => l.Add(x), l => l.OrderBy(x => x)));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(512)]
-        [InlineData(1024 * 16)]
-        public static void Aggregate_Collection_Results_Longrunning(int count)
+        public static void Aggregate_Collection_Results_Longrunning()
         {
-            Aggregate_Collection_Results(count);
+            Aggregate_Collection_Results(Sources.OuterLoopCount / 2);
         }
 
         [Theory]
@@ -155,7 +142,7 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Aggregate_Sum_Accumulator(int count)
         {
-            ParallelQuery<int> query = ParallelEnumerable.Range(0, count);
+            ParallelQuery<int> query = UnorderedSources.Default(count);
             int actual = query.Aggregate(
                 0,
                 (accumulator, x) => accumulator + x,
@@ -164,13 +151,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(Functions.SumRange(0, count) + ResultFuncModifier, actual);
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Sum_Accumulator_Longrunning(int count)
+        public static void Aggregate_Sum_Accumulator_Longrunning()
         {
-            Aggregate_Sum_Accumulator(count);
+            Aggregate_Sum_Accumulator(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -189,13 +174,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(Functions.ProductRange(1, count) + ResultFuncModifier, actual);
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Product_Accumulator_Longrunning(int count)
+        public static void Aggregate_Product_Accumulator_Longrunning()
         {
-            Aggregate_Product_Accumulator(count);
+            Aggregate_Product_Accumulator(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -205,7 +188,7 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Aggregate_Collection_Accumulator(int count)
         {
-            ParallelQuery<int> query = ParallelEnumerable.Range(0, count);
+            ParallelQuery<int> query = UnorderedSources.Default(count);
             IList<int> actual = query.Aggregate(
                 ImmutableList<int>.Empty,
                 (accumulator, x) => accumulator.Add(x),
@@ -214,13 +197,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(Enumerable.Range(0, count), actual);
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(512)]
-        [InlineData(1024 * 16)]
-        public static void Aggregate_Collection_Accumulator_Longrunning(int count)
+        public static void Aggregate_Collection_Accumulator_Longrunning()
         {
-            Aggregate_Collection_Accumulator(count);
+            Aggregate_Collection_Accumulator(Sources.OuterLoopCount / 2);
         }
 
         [Theory]
@@ -230,7 +211,7 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Aggregate_Sum_SeedFunction(int count)
         {
-            ParallelQuery<int> query = ParallelEnumerable.Range(0, count);
+            ParallelQuery<int> query = UnorderedSources.Default(count);
             int actual = query.Aggregate(
                 () => 0,
                 (accumulator, x) => accumulator + x,
@@ -239,13 +220,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(Functions.SumRange(0, count) + ResultFuncModifier, actual);
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Sum_SeedFunction_Longrunning(int count)
+        public static void Aggregate_Sum_SeedFunction_Longrunning()
         {
-            Aggregate_Sum_SeedFunction(count);
+            Aggregate_Sum_SeedFunction(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -264,13 +243,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(Functions.ProductRange(1, count) + ResultFuncModifier, actual);
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Aggregate_Product_SeedFunction_Longrunning(int count)
+        public static void Aggregate_Product_SeedFunction_Longrunning()
         {
-            Aggregate_Product_SeedFunction(count);
+            Aggregate_Product_SeedFunction(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -280,7 +257,7 @@ namespace System.Linq.Parallel.Tests
         [InlineData(16)]
         public static void Aggregate_Collection_SeedFunction(int count)
         {
-            ParallelQuery<int> query = ParallelEnumerable.Range(0, count);
+            ParallelQuery<int> query = UnorderedSources.Default(count);
             IList<int> actual = query.Aggregate(
                 () => ImmutableList<int>.Empty,
                 (accumulator, x) => accumulator.Add(x),
@@ -289,13 +266,11 @@ namespace System.Linq.Parallel.Tests
             Assert.Equal(Enumerable.Range(0, count), actual);
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(512)]
-        [InlineData(1024 * 16)]
-        public static void Aggregate_Collection_SeedFunction_Longrunning(int count)
+        public static void Aggregate_Collection_SeedFunction_Longrunning()
         {
-            Aggregate_Collection_SeedFunction(count);
+            Aggregate_Collection_SeedFunction(Sources.OuterLoopCount / 2);
         }
 
         [Fact]
@@ -347,19 +322,19 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Aggregate_AggregateException()
         {
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate((i, j) => { throw new DeliberateTestException(); }));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate(0, (i, j) => { throw new DeliberateTestException(); }));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate(0, (i, j) => { throw new DeliberateTestException(); }, i => i));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate<int, int, int>(0, (i, j) => i, i => { throw new DeliberateTestException(); }));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate(0, (i, j) => { throw new DeliberateTestException(); }, (i, j) => i, i => i));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate<int, int, int>(0, (i, j) => i, (i, j) => i, i => { throw new DeliberateTestException(); }));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate<int, int, int>(() => { throw new DeliberateTestException(); }, (i, j) => i, (i, j) => i, i => i));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate(() => 0, (i, j) => { throw new DeliberateTestException(); }, (i, j) => i, i => i));
-            AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate<int, int, int>(() => 0, (i, j) => i, (i, j) => i, i => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate((i, j) => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate(0, (i, j) => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate(0, (i, j) => { throw new DeliberateTestException(); }, i => i));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate<int, int, int>(0, (i, j) => i, i => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate(0, (i, j) => { throw new DeliberateTestException(); }, (i, j) => i, i => i));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate<int, int, int>(0, (i, j) => i, (i, j) => i, i => { throw new DeliberateTestException(); }));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate<int, int, int>(() => { throw new DeliberateTestException(); }, (i, j) => i, (i, j) => i, i => i));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate(() => 0, (i, j) => { throw new DeliberateTestException(); }, (i, j) => i, i => i));
+            AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate<int, int, int>(() => 0, (i, j) => i, (i, j) => i, i => { throw new DeliberateTestException(); }));
             if (Environment.ProcessorCount >= 2)
             {
-                AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate(0, (i, j) => i, (i, j) => { throw new DeliberateTestException(); }, i => i));
-                AssertThrows.Wrapped<DeliberateTestException>(() => ParallelEnumerable.Range(0, 2).Aggregate(() => 0, (i, j) => i, (i, j) => { throw new DeliberateTestException(); }, i => i));
+                AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate(0, (i, j) => i, (i, j) => { throw new DeliberateTestException(); }, i => i));
+                AssertThrows.Wrapped<DeliberateTestException>(() => UnorderedSources.Default(2).Aggregate(() => 0, (i, j) => i, (i, j) => { throw new DeliberateTestException(); }, i => i));
             }
         }
 
@@ -367,25 +342,25 @@ namespace System.Linq.Parallel.Tests
         public static void Aggregate_ArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).Aggregate((i, j) => i));
-            Assert.Throws<ArgumentNullException>("func", () => ParallelEnumerable.Range(0, 1).Aggregate(null));
+            Assert.Throws<ArgumentNullException>("func", () => UnorderedSources.Default(1).Aggregate(null));
 
             Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).Aggregate(0, (i, j) => i));
-            Assert.Throws<ArgumentNullException>("func", () => ParallelEnumerable.Range(0, 1).Aggregate(0, null));
+            Assert.Throws<ArgumentNullException>("func", () => UnorderedSources.Default(1).Aggregate(0, null));
 
             Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).Aggregate(0, (i, j) => i, i => i));
-            Assert.Throws<ArgumentNullException>("func", () => ParallelEnumerable.Range(0, 1).Aggregate(0, null, i => i));
-            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).Aggregate<int, int, int>(0, (i, j) => i, null));
+            Assert.Throws<ArgumentNullException>("func", () => UnorderedSources.Default(1).Aggregate(0, null, i => i));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => UnorderedSources.Default(1).Aggregate<int, int, int>(0, (i, j) => i, null));
 
             Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).Aggregate(0, (i, j) => i, (i, j) => i, i => i));
-            Assert.Throws<ArgumentNullException>("updateAccumulatorFunc", () => ParallelEnumerable.Range(0, 1).Aggregate(0, null, (i, j) => i, i => i));
-            Assert.Throws<ArgumentNullException>("combineAccumulatorsFunc", () => ParallelEnumerable.Range(0, 1).Aggregate(0, (i, j) => i, null, i => i));
-            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).Aggregate<int, int, int>(0, (i, j) => i, (i, j) => i, null));
+            Assert.Throws<ArgumentNullException>("updateAccumulatorFunc", () => UnorderedSources.Default(1).Aggregate(0, null, (i, j) => i, i => i));
+            Assert.Throws<ArgumentNullException>("combineAccumulatorsFunc", () => UnorderedSources.Default(1).Aggregate(0, (i, j) => i, null, i => i));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => UnorderedSources.Default(1).Aggregate<int, int, int>(0, (i, j) => i, (i, j) => i, null));
 
             Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).Aggregate(() => 0, (i, j) => i, (i, j) => i, i => i));
-            Assert.Throws<ArgumentNullException>("seedFactory", () => ParallelEnumerable.Range(0, 1).Aggregate<int, int, int>(null, (i, j) => i, (i, j) => i, i => i));
-            Assert.Throws<ArgumentNullException>("updateAccumulatorFunc", () => ParallelEnumerable.Range(0, 1).Aggregate(() => 0, null, (i, j) => i, i => i));
-            Assert.Throws<ArgumentNullException>("combineAccumulatorsFunc", () => ParallelEnumerable.Range(0, 1).Aggregate(() => 0, (i, j) => i, null, i => i));
-            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).Aggregate<int, int, int>(() => 0, (i, j) => i, (i, j) => i, null));
+            Assert.Throws<ArgumentNullException>("seedFactory", () => UnorderedSources.Default(1).Aggregate<int, int, int>(null, (i, j) => i, (i, j) => i, i => i));
+            Assert.Throws<ArgumentNullException>("updateAccumulatorFunc", () => UnorderedSources.Default(1).Aggregate(() => 0, null, (i, j) => i, i => i));
+            Assert.Throws<ArgumentNullException>("combineAccumulatorsFunc", () => UnorderedSources.Default(1).Aggregate(() => 0, (i, j) => i, null, i => i));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => UnorderedSources.Default(1).Aggregate<int, int, int>(() => 0, (i, j) => i, (i, j) => i, null));
         }
     }
 }

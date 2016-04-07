@@ -17,7 +17,7 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> DegreeData(int[] counts, int[] degrees)
         {
-            foreach (object[] results in UnorderedSources.Ranges(counts.Cast<int>(), x => degrees.Cast<int>().DefaultIfEmpty(x)))
+            foreach (object[] results in UnorderedSources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), x => degrees.DefaultIfEmpty(x)))
             {
                 yield return results;
             }
@@ -70,7 +70,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(DegreeData), new[] { 128 * 1024 }, new[] { 1, 4, 64, 512 })]
+        [MemberData(nameof(DegreeData), new int[] { /* Sources.OuterLoopCount */ }, new[] { 1, 4, 64, 512 })]
         [OuterLoop]
         public static void DegreeOfParallelism_Pipelining(Labeled<ParallelQuery<int>> labeled, int count, int degree)
         {

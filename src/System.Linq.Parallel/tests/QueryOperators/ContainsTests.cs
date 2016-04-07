@@ -7,11 +7,11 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ContainsTests
+    public static class ContainsTests
     {
         public static IEnumerable<object[]> OnlyOneData(int[] counts)
         {
-            foreach (int count in counts)
+            foreach (int count in counts.DefaultIfEmpty(Sources.OuterLoopCount))
             {
                 foreach (int position in new[] { 0, count / 2, Math.Max(0, count - 1) }.Distinct())
                 {
@@ -32,32 +32,28 @@ namespace System.Linq.Parallel.Tests
         {
             Assert.False(ParallelEnumerable.Range(0, count).Contains(count));
             Assert.False(ParallelEnumerable.Range(0, count).Contains(count, null));
-            Assert.False(ParallelEnumerable.Range(0, count).Contains(count, new ModularCongruenceComparer(count + 1)));
+            Assert.False(ParallelEnumerable.Range(0, count).Contains(count, DelegatingComparer.Create<int>((l, r) => false, i => 0)));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Contains_NoMatching_Longrunning(int count)
+        public static void Contains_NoMatching_Longrunning()
         {
-            Contains_NoMatching(count);
+            Contains_NoMatching(Sources.OuterLoopCount);
         }
 
         [Theory]
         [InlineData(16)]
         public static void Contains_MultipleMatching(int count)
         {
-            Assert.True(ParallelEnumerable.Range(0, count).Contains(count, new ModularCongruenceComparer(2)));
+            Assert.True(ParallelEnumerable.Range(0, count).Contains(count, DelegatingComparer.Create<int>((l, r) => (l % 2) == (r % 2), i => i % 2)));
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [InlineData(1024 * 1024)]
-        [InlineData(1024 * 1024 * 4)]
-        public static void Contains_MultipleMatching_Longrunning(int count)
+        public static void Contains_MultipleMatching_Longrunning()
         {
-            Contains_MultipleMatching(count);
+            Contains_MultipleMatching(Sources.OuterLoopCount);
         }
 
         [Theory]
@@ -66,12 +62,12 @@ namespace System.Linq.Parallel.Tests
         {
             Assert.True(ParallelEnumerable.Range(0, count).Contains(position));
             Assert.True(ParallelEnumerable.Range(0, count).Contains(position, null));
-            Assert.True(ParallelEnumerable.Range(0, count).Contains(position, new ModularCongruenceComparer(count)));
+            Assert.True(ParallelEnumerable.Range(0, count).Contains(position, DelegatingComparer.Create<int>((l, r) => l == position && r == position, i => i.GetHashCode())));
         }
 
         [Theory]
         [OuterLoop]
-        [MemberData(nameof(OnlyOneData), new[] { 1024 * 1024, 1024 * 1024 * 4 })]
+        [MemberData(nameof(OnlyOneData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Contains_OneMatching_Longrunning(int count, int position)
         {
             Contains_OneMatching(count, position);
