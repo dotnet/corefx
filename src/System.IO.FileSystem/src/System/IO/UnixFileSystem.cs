@@ -544,11 +544,11 @@ namespace System.IO
                         dirHandle = null;
                     }
 
-                    if (toExplore != null && toExplore.Count > 0)
+                    while (toExplore != null && toExplore.Count > 0 && dirHandle == null)
                     {
                         // Open the next directory.
                         dirPath = toExplore.Pop();
-                        dirHandle = OpenDirectory(dirPath.FullPath);
+                        dirHandle = OpenDirectory(dirPath.FullPath, throwOnError: false);
                     }
                 }
             }
@@ -566,12 +566,15 @@ namespace System.IO
                 return searchPattern;
             }
 
-            private static Microsoft.Win32.SafeHandles.SafeDirectoryHandle OpenDirectory(string fullPath)
+            private static Microsoft.Win32.SafeHandles.SafeDirectoryHandle OpenDirectory(string fullPath, bool throwOnError = true)
             {
                 Microsoft.Win32.SafeHandles.SafeDirectoryHandle handle = Interop.Sys.OpenDir(fullPath);
                 if (handle.IsInvalid)
                 {
-                    throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo(), fullPath, isDirectory: true);
+                    if (throwOnError)
+                        throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo(), fullPath, isDirectory: true);
+                    else
+                        return null;
                 }
                 return handle;
             }
