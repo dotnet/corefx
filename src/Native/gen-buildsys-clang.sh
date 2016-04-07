@@ -49,6 +49,11 @@ fi
 
 cmake_extra_defines="-DCMAKE_BUILD_TYPE=$buildtype"
 
+# Add cmake definition to indicate arm softfp build
+if [ "$build_arch" == "arm-softfp" ]; then
+  cmake_extra_defines="$cmake_extra_defines -DARM_SOFTFP=1"
+fi
+
 if [[ -n "$LLDB_LIB_DIR" ]]; then
     cmake_extra_defines="$cmake_extra_defines -DWITH_LLDB_LIBS=$LLDB_LIB_DIR"
 fi

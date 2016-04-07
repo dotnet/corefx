@@ -3,11 +3,12 @@
 usage()
 {
     echo "Usage: $0 [BuildArch]"
-    echo "BuildArch can be: arm, arm64"
+    echo "BuildArch can be: arm, arm-softfp, arm64"
 
     exit 1
 }
 
+__UbuntuCodeName=trusty
 __CrossDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 __InitialDir=$PWD
 __BuildArch=arm
@@ -31,6 +32,14 @@ for i in "$@"
         __UbuntuPackages="build-essential libunwind8-dev gettext symlinks liblttng-ust-dev libicu-dev openssl libcurl4-openssl-dev zlib1g zlib1g-dev"
         __MachineTriple=arm-linux-gnueabihf
         ;;
+        arm-softfp)
+        __BuildArch=arm-softfp
+        __UbuntuArch=armel
+        __UbuntuRepo="http://ftp.debian.org/debian/"
+        __UbuntuPackages="build-essential libunwind8-dev gettext symlinks liblttng-ust-dev libicu-dev openssl libcurl4-openssl-dev zlib1g zlib1g-dev libkrb5-dev libssl-dev"
+        __MachineTriple=arm-linux-gnueabi
+        __UbuntuCodeName=jessie
+        ;;
         arm64)
         __BuildArch=arm64
         __UbuntuArch=arm64
@@ -51,7 +60,7 @@ fi
 
 umount $__RootfsDir/*
 rm -rf $__RootfsDir
-qemu-debootstrap --arch $__UbuntuArch trusty $__RootfsDir $__UbuntuRepo
+qemu-debootstrap --arch $__UbuntuArch $__UbuntuCodeName $__RootfsDir $__UbuntuRepo
 cp $__CrossDir/$__BuildArch/sources.list $__RootfsDir/etc/apt/sources.list
 chroot $__RootfsDir apt-get update
 chroot $__RootfsDir apt-get -y install $__UbuntuPackages
