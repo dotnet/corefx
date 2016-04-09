@@ -42,14 +42,15 @@ public static class AttributeTests
 
     [Theory]
     [MemberData(nameof(Equals_TestData))]
-    public static void TestEquals(Attribute a1, object obj, bool expected, bool hashEqualityExpected)
+    public static void TestEquals(Attribute attr1, object obj, bool expected, bool hashEqualityExpected)
     {
-        if (obj is Attribute)
+        Assert.Equal(expected, attr1.Equals(obj));
+
+        Attribute attr2 = obj as Attribute;
+        if (attr2 != null)
         {
-            Attribute a2 = (Attribute)obj;
-            Assert.Equal(hashEqualityExpected, a1.GetHashCode().Equals(a2.GetHashCode()));
+            Assert.Equal(hashEqualityExpected, attr1.GetHashCode() == attr2.GetHashCode());
         }
-        Assert.Equal(expected, a1.Equals(obj));
     }
 
     [AttributeUsage(AttributeTargets.Method)]

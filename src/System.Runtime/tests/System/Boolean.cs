@@ -63,6 +63,7 @@ public static class BooleanTests
 
         bool result;
         Assert.False(bool.TryParse(value, out result));
+        Assert.False(result);
     }
 
     [Fact]
@@ -97,7 +98,7 @@ public static class BooleanTests
     [InlineData(false, "false")]
     private static void TestCompareTo_Invalid(IComparable b, object obj)
     {
-        Assert.Throws<ArgumentException>(() => b.CompareTo(obj));
+        Assert.Throws<ArgumentException>(null, () => b.CompareTo(obj));
     }
 
     [Theory]
