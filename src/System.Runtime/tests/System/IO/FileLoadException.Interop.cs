@@ -37,8 +37,7 @@ public static class FileLoadExceptionInteropTests
     [InlineData(HResults.ERROR_FILE_INVALID)]
     public static void TestFom_HR(int hr)
     {
-        var exception = Marshal.GetExceptionForHR(hr) as FileLoadException;
-        var fileLoadException = exception as FileLoadException;
+        var fileLoadException = Marshal.GetExceptionForHR(hr) as FileLoadException;
         Assert.NotNull(fileLoadException);
 
         // Don't validate the message.  Currently .NET Native does not produce HR-specific messages
