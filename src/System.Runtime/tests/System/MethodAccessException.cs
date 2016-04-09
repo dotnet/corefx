@@ -7,14 +7,14 @@ using Xunit;
 
 public static class MethodAccessExceptionTests
 {
-    private const int MethodAccessHResult = unchecked((int)0x80131510);
+    private const int COR_E_METHODACCESS = unchecked((int)0x80131510);
 
     [Fact]
     public static void TestCtor_Empty()
     {
         var exception = new MethodAccessException();
         Assert.NotEmpty(exception.Message);
-        Assert.Equal(MethodAccessHResult, exception.HResult);
+        Assert.Equal(COR_E_METHODACCESS, exception.HResult);
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public static class MethodAccessExceptionTests
         string message = "Created MethodAccessException";
         var exception = new MethodAccessException(message);
         Assert.Equal(message, exception.Message);
-        Assert.Equal(MethodAccessHResult, exception.HResult);
+        Assert.Equal(COR_E_METHODACCESS, exception.HResult);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public static class MethodAccessExceptionTests
         var innerException = new Exception("Created inner exception");
         var exception = new MethodAccessException(message, innerException);
         Assert.Equal(message, exception.Message);
-        Assert.Equal(MethodAccessHResult, exception.HResult);
+        Assert.Equal(COR_E_METHODACCESS, exception.HResult);
         Assert.Same(innerException, exception.InnerException);
         Assert.Equal(innerException.HResult, exception.InnerException.HResult);
     }
