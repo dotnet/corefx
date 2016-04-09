@@ -12,8 +12,8 @@ public static class EnumTests
     [InlineData(" Red", false, SimpleEnum.Red)]
     [InlineData("Red ", false, SimpleEnum.Red)]
     [InlineData(" red ", true, SimpleEnum.Red)]
-    [InlineData("Yellow", false, SimpleEnum.Yellow)]
-    [InlineData("Yellow,Yellow", false, SimpleEnum.Yellow)]
+    [InlineData("B", false, SimpleEnum.B)]
+    [InlineData("B,B", false, SimpleEnum.B)]
     [InlineData(" Red , Blue ", false, SimpleEnum.Red | SimpleEnum.Blue)]
     [InlineData("Blue,Red,Green", false, SimpleEnum.Red | SimpleEnum.Blue | SimpleEnum.Green)]
     [InlineData("Blue,Red,Red,Red,Green", false, SimpleEnum.Red | SimpleEnum.Blue | SimpleEnum.Green)]
@@ -24,6 +24,7 @@ public static class EnumTests
     [InlineData("99", false, (SimpleEnum)99)]
     [InlineData("-42", false, (SimpleEnum)(-42))]
     [InlineData("   -42", false, (SimpleEnum)(-42))]
+    [InlineData("   -42 ", false, (SimpleEnum)(-42))]
     public static void TestParse(string value, bool ignoreCase, Enum expected)
     {
         SimpleEnum result;
@@ -242,8 +243,8 @@ public static class EnumTests
     [Fact]
     public static void TestCompareTo_Invalid()
     {
-        Assert.Throws<ArgumentException>(() => SimpleEnum.Red.CompareTo((sbyte)1)); // Target is not an enum type
-        Assert.Throws<ArgumentException>(() => SimpleEnum.Red.CompareTo(Int32Enum.One)); //Target is a different enum type
+        Assert.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo((sbyte)1)); // Target is not an enum type
+        Assert.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo(Int32Enum.One)); //Target is a different enum type
     }
 
     [Theory]
@@ -269,8 +270,8 @@ public static class EnumTests
 
     [Theory]
     [InlineData(typeof(SimpleEnum),
-            new string[] { "Red", "Blue", "Green", "Green_a", "Green_b", "Yellow" },
-            new SimpleEnum[] { SimpleEnum.Red, SimpleEnum.Blue, SimpleEnum.Green, SimpleEnum.Green_a, SimpleEnum.Green_b, SimpleEnum.Yellow })]
+            new string[] { "Red", "Blue", "Green", "Green_a", "Green_b", "B" },
+            new SimpleEnum[] { SimpleEnum.Red, SimpleEnum.Blue, SimpleEnum.Green, SimpleEnum.Green_a, SimpleEnum.Green_b, SimpleEnum.B })]
 
     [InlineData(typeof(ByteEnum),
             new string[] { "Min", "One", "Two", "Max" },
@@ -460,6 +461,7 @@ public static class EnumTests
             Assert.Equal(expected, e.ToString(null));
         }
         // Format string is non-case-sensitive
+        Assert.Equal(expected, e.ToString(format));
         Assert.Equal(expected, e.ToString(format.ToUpperInvariant()));
         Assert.Equal(expected, e.ToString(format.ToLowerInvariant()));
     }
@@ -529,7 +531,7 @@ public static class EnumTests
         Green = 3,
         Green_a = 3,
         Green_b = 3,
-        Yellow
+        B = 4
     }
 
     private enum ByteEnum : byte
