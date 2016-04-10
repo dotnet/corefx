@@ -8,20 +8,21 @@ using Xunit;
 
 public static class BufferTests
 {
-    public static IEnumerable<object[]> BlockCopy_TestData()
+    [Fact]
+    public static void TestBlockCopy()
     {
-        yield return new object[] { new byte[] { 0x1a, 0x2b, 0x3c, 0x4d }, 0, new byte[] { 0x6f, 0x6f, 0x6f, 0x6f, 0x6f, 0x6f }, 1, 4, new byte[] { 0x6f, 0x1a, 0x2b, 0x3c, 0x4d, 0x6f } };
-
-        var dst = new byte[] { 0x1a, 0x2b, 0x3c, 0x4d, 0x5e };
-        yield return new object[] { dst, 1, dst, 2, 2, new byte[] { 0x1a, 0x2b, 0x2b, 0x3c, 0x5e } };
+        byte[] src = new byte[] { 0x1a, 0x2b, 0x3c, 0x4d };
+        byte[] dst = new byte[] { 0x6f, 0x6f, 0x6f, 0x6f, 0x6f, 0x6f };
+        Buffer.BlockCopy(src, 0, dst, 1, 4);
+        Assert.Equal(new byte[] { 0x6f, 0x1a, 0x2b, 0x3c, 0x4d, 0x6f }, dst);
     }
 
-    [Theory]
-    [MemberData(nameof(BlockCopy_TestData))]
-    public static void TestBlockCopy(Array src, int srcOffset, Array dst, int dstOffset, int count, Array expected)
+    [Fact]
+    public static void BlockCopy_SameDestinationAndSourceArray()
     {
-        Buffer.BlockCopy(src, srcOffset, dst, dstOffset, count);
-        Assert.Equal(expected, dst);
+        byte[] dst = new byte[] { 0x1a, 0x2b, 0x3c, 0x4d, 0x5e };
+        Buffer.BlockCopy(dst, 1, dst, 2, 2);
+        Assert.Equal(new byte[] { 0x1a, 0x2b, 0x2b, 0x3c, 0x5e }, dst);
     }
 
     [Fact]
@@ -105,66 +106,66 @@ public static class BufferTests
     }
 
     [Theory]
-    [InlineData(0, 0)]
-    [InlineData(0, 5000)]
-    [InlineData(5000, 6000)]
-    public static unsafe void TestMemoryCopy_Long(int sourceIndexOffset, int destinationIndexOffset)
+    [InlineData(25000, 0, 30000, 0, 25000)]
+    [InlineData(25000, 0, 30000, 5000, 25000)]
+    [InlineData(25000, 5000, 30000, 6000, 20000)]
+    [InlineData(25000, 5000, 30000, 6000, 4000)]
+    [InlineData(100, 0, 100, 0, 0)]
+    [InlineData(100, 0, 100, 0, 1)]
+    [InlineData(100, 0, 100, 0, 2)]
+    [InlineData(100, 0, 100, 0, 3)]
+    [InlineData(100, 0, 100, 0, 4)]
+    public static unsafe void TestMemoryCopy(int sourceLength, int sourceIndexOffset, int destinationLength, int destinationIndexOffset, int sourceBytesToCopy)
     {
-        var sourceArray = new int[25000];
+        var sourceArray = new int[sourceLength];
         for (int i = 0; i < sourceArray.Length; i++)
         {
             sourceArray[i] = i;
         }
 
-        var destinationArray = new int[30000];
+        var destinationArray = new int[destinationLength];
+        for (int i = 0; i < destinationArray.Length; i++)
+        {
+            destinationArray[i] = i * 2;
+        }
         fixed (int* sourceBase = sourceArray, destinationBase = destinationArray)
         {
-            Buffer.MemoryCopy(sourceBase + sourceIndexOffset, destinationBase + destinationIndexOffset, 30000 * 4, (25000 - sourceIndexOffset) * 4);
+            Buffer.MemoryCopy(sourceBase + sourceIndexOffset, destinationBase + destinationIndexOffset, destinationLength * 4, sourceBytesToCopy * 4);
         }
 
-        for (int i = sourceIndexOffset; i < sourceArray.Length; i++)
+        for (int i = 0; i < destinationIndexOffset; i++)
         {
-            Assert.Equal(sourceArray[i], destinationArray[i + destinationIndexOffset - sourceIndexOffset]);
+            Assert.Equal(i * 2, destinationArray[i]);
+        }
+        for (int i = 0; i < sourceBytesToCopy; i++)
+        {
+            Assert.Equal(sourceArray[i + sourceIndexOffset], destinationArray[i + destinationIndexOffset]);
+        }
+        for (int i = destinationIndexOffset + sourceBytesToCopy; i < destinationArray.Length; i++)
+        {
+            Assert.Equal(i * 2, destinationArray[i]);
         }
     }
-
-    [Fact]
-    public static unsafe void TestMemoryCopy_OverlappingBuffers()
+    
+    [Theory]
+    [InlineData(200, 50, 100)]
+    [InlineData(200, 5, 15)]
+    public static unsafe void TestMemoryCopy_OverlappingBuffers(int sourceLength, int destinationIndexOffset, int sourceBytesToCopy)
     {
-        var array = new int[200];
-        for (int g = 0; g < array.Length; g++)
+        var array = new int[sourceLength];
+        for (int i = 0; i < array.Length; i++)
         {
-            array[g] = g;
+            array[i] = i;
         }
 
         fixed (int* arrayBase = array)
         {
-            Buffer.MemoryCopy(arrayBase, arrayBase + 50, 200 * 4, 100 * 4);
+            Buffer.MemoryCopy(arrayBase, arrayBase + destinationIndexOffset, sourceLength * 4, sourceBytesToCopy * 4);
         }
 
-        for (int g = 0; g < 100; g++)
+        for (int i = 0; i < sourceBytesToCopy; i++)
         {
-            Assert.Equal(g, array[g + 50]);
-        }
-    }
-
-    [Fact]
-    public static unsafe void TestMemoryCopy_OverlappingBuffersSmallCopy()
-    {
-        var array = new int[200];
-        for (int g = 0; g < array.Length; g++)
-        {
-            array[g] = g;
-        }
-
-        fixed (int* arrayBase = array)
-        {
-            Buffer.MemoryCopy(arrayBase, arrayBase + 5, 200 * 4, 15 * 4);
-        }
-
-        for (int g = 0; g < 15; g++)
-        {
-            Assert.Equal(g, array[g + 5]);
+            Assert.Equal(i, array[i + destinationIndexOffset]);
         }
     }
 
