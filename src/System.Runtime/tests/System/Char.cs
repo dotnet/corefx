@@ -32,58 +32,63 @@ public static class CharTests
     }
 
     [Fact]
-    public static void TestConvertFromUtf32()
+    public static void TestConvertFromUtf32_InvalidChar()
     {
-        VerifyConvertFromUtf32(0x10000, "\uD800\uDC00");
-        VerifyConvertFromUtf32(0x103FF, "\uD800\uDFFF");
-        VerifyConvertFromUtf32(0xFFFFF, "\uDBBF\uDFFF");
-        VerifyConvertFromUtf32(0x10FC00, "\uDBFF\uDC00");
-        VerifyConvertFromUtf32(0x10FFFF, "\uDBFF\uDFFF");
-        VerifyConvertFromUtf32(0, "\0");
-        VerifyConvertFromUtf32(0x3FF, "\u03FF");
-        VerifyConvertFromUtf32(0xE000, "\uE000");
-        VerifyConvertFromUtf32(0xFFFF, "\uFFFF");
+        // TODO: add this as [InlineData] when #7166 is fixed
+        TestConvertFromUtf32(0xFFFF, "\uFFFF");
     }
 
-    private static void VerifyConvertFromUtf32(int utf32, string expected)
+    [Theory]
+    [InlineData(0x10000, "\uD800\uDC00")]
+    [InlineData(0x103FF, "\uD800\uDFFF")]
+    [InlineData(0xFFFFF, "\uDBBF\uDFFF")]
+    [InlineData(0x10FC00, "\uDBFF\uDC00")]
+    [InlineData(0x10FFFF, "\uDBFF\uDFFF")]
+    [InlineData(0, "\0")]
+    [InlineData(0x3FF, "\u03FF")]
+    [InlineData(0xE000, "\uE000")]
+    public static void TestConvertFromUtf32(int utf32, string expected)
     {
+        // TODO: add this as [InlineData] when #7166 is fixed
         Assert.Equal(expected, char.ConvertFromUtf32(utf32));
     }
 
-    [Fact]
-    public static void TestConvertFromUtf32_Invalid()
+    [Theory]
+    [InlineData(0xD800)]
+    [InlineData(0xDC00)]
+    [InlineData(0xDFFF)]
+    [InlineData(0x110000)]
+    [InlineData(-1)]
+    [InlineData(int.MaxValue)]
+    [InlineData(int.MinValue)]
+    public static void TestConvertFromUtf32_Invalid(int utf32)
     {
-        Assert.Throws<ArgumentOutOfRangeException>("utf32", () => char.ConvertFromUtf32(0xD800));
-        Assert.Throws<ArgumentOutOfRangeException>("utf32", () => char.ConvertFromUtf32(0xDC00));
-        Assert.Throws<ArgumentOutOfRangeException>("utf32", () => char.ConvertFromUtf32(0xDFFF));
-        Assert.Throws<ArgumentOutOfRangeException>("utf32", () => char.ConvertFromUtf32(-1));
-        Assert.Throws<ArgumentOutOfRangeException>("utf32", () => char.ConvertFromUtf32(int.MaxValue));
-        Assert.Throws<ArgumentOutOfRangeException>("utf32", () => char.ConvertFromUtf32(int.MinValue));
+        Assert.Throws<ArgumentOutOfRangeException>("utf32", () => char.ConvertFromUtf32(utf32));
     }
     
     [Fact]
     public static void TestConvertToUtf32_String_Int()
     {
-        VerifyConvertToUtf32("\uD800\uDC00", 0, 0x10000);
-        VerifyConvertToUtf32("\uD800\uD800\uDFFF", 1, 0x103FF);
-        VerifyConvertToUtf32("\uDBBF\uDFFF", 0, 0xFFFFF);
-        VerifyConvertToUtf32("\uDBFF\uDC00", 0, 0x10FC00);
-        VerifyConvertToUtf32("\uDBFF\uDFFF", 0, 0x10FFFF);
-
-        // Not surrogate pairs
-        VerifyConvertToUtf32("\u0000\u0001", 0, 0);
-        VerifyConvertToUtf32("\u0000\u0001", 1, 1);
-        VerifyConvertToUtf32("\u0000", 0, 0);
-        VerifyConvertToUtf32("\u0020\uD7FF", 0, 32);
-        VerifyConvertToUtf32("\u0020\uD7FF", 1, 0xD7FF);
-        VerifyConvertToUtf32("abcde", 4, 'e');
-
-        VerifyConvertToUtf32("\uD800\uD7FF", 1, 0xD7FF);  // High, non-surrogate
-        VerifyConvertToUtf32("\uD800\u0000", 1, 0);  // High, non-surrogate
-        VerifyConvertToUtf32("\uDF01\u0000", 1, 0);  // Low, non-surrogate
+        // TODO: add this as [InlineData] when #7166 is fixed
+        TestConvertToUtf32_String_Int("\uD800\uD800\uDFFF", 1, 0x103FF);
+        TestConvertToUtf32_String_Int("\uD800\uD7FF", 1, 0xD7FF);  // High, non-surrogate
+        TestConvertToUtf32_String_Int("\uD800\u0000", 1, 0);  // High, non-surrogate
+        TestConvertToUtf32_String_Int("\uDF01\u0000", 1, 0);  // Low, non-surrogate
     }
 
-    private static void VerifyConvertToUtf32(string s, int index, int expected)
+    [Theory]
+    [InlineData("\uD800\uDC00", 0, 0x10000)]
+    [InlineData("\uDBBF\uDFFF", 0, 0xFFFFF)]
+    [InlineData("\uDBBF\uDFFF", 0, 0xFFFFF)]
+    [InlineData("\uDBFF\uDC00", 0, 0x10FC00)]
+    [InlineData("\uDBFF\uDFFF", 0, 0x10FFFF)]
+    [InlineData("\u0000\u0001", 0, 0)]
+    [InlineData("\u0000\u0001", 1, 1)]
+    [InlineData("\u0000", 0, 0)]
+    [InlineData("\u0020\uD7FF", 0, 32)]
+    [InlineData("\u0020\uD7FF", 1, 0xD7FF)]
+    [InlineData("abcde", 4, 'e')]
+    public static void TestConvertToUtf32_String_Int(string s, int index, int expected)
     {
         Assert.Equal(expected, char.ConvertToUtf32(s, index));
     }
@@ -94,15 +99,15 @@ public static class CharTests
         Assert.Throws<ArgumentNullException>("s", () => char.ConvertToUtf32(null, 0)); // String is null
 
         Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uD800\uD800", 0)); // High, high
+        Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uD800\uD800", 1)); // High, high
         Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uD800\uD7FF", 0)); // High, non-surrogate
         Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uD800\u0000", 0)); // High, non-surrogate
-        Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uD800\uD800", 1)); // High, high
 
         Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uDC01\uD940", 0)); // Low, high
-        Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uDD00\uDE00", 0)); // Low, low
-        Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uDF01\u0000", 0)); // Low, non-surrogate
         Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uDC01\uD940", 1)); // Low, high
-        Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uDD00\uDE00", 1)); // Low, high
+        Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uDD00\uDE00", 0)); // Low, low
+        Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uDD00\uDE00", 1)); // Low, hig
+        Assert.Throws<ArgumentException>("s", () => char.ConvertToUtf32("\uDF01\u0000", 0)); // Low, non-surrogateh
 
         Assert.Throws<ArgumentOutOfRangeException>("index", () => char.ConvertToUtf32("abcde", -1)); // Index < 0
         Assert.Throws<ArgumentOutOfRangeException>("index", () => char.ConvertToUtf32("abcde", 5)); // Index >= string.Length
@@ -112,15 +117,16 @@ public static class CharTests
     [Fact]
     public static void TestConvertToUtf32_Char_Char()
     {
-        VerifyConvertToUtf32('\uD800', '\uDC00', 0x10000);
-        VerifyConvertToUtf32('\uD800', '\uDC00', 0x10000);
-        VerifyConvertToUtf32('\uD800', '\uDFFF', 0x103FF);
-        VerifyConvertToUtf32('\uDBBF', '\uDFFF', 0xFFFFF);
-        VerifyConvertToUtf32('\uDBFF', '\uDC00', 0x10FC00);
-        VerifyConvertToUtf32('\uDBFF', '\uDFFF', 0x10FFFF);
+        // TODO: add this as [InlineData] when #7166 is fixed
+        TestConvertToUtf32_Char_Char('\uD800', '\uDC00', 0x10000);
+        TestConvertToUtf32_Char_Char('\uD800', '\uDC00', 0x10000);
+        TestConvertToUtf32_Char_Char('\uD800', '\uDFFF', 0x103FF);
+        TestConvertToUtf32_Char_Char('\uDBBF', '\uDFFF', 0xFFFFF);
+        TestConvertToUtf32_Char_Char('\uDBFF', '\uDC00', 0x10FC00);
+        TestConvertToUtf32_Char_Char('\uDBFF', '\uDFFF', 0x10FFFF);
     }
 
-    private static void VerifyConvertToUtf32(char highSurrogate, char lowSurrogate, int expected)
+    private static void TestConvertToUtf32_Char_Char(char highSurrogate, char lowSurrogate, int expected)
     {
         Assert.Equal(expected, char.ConvertToUtf32(highSurrogate, lowSurrogate));
     }
@@ -746,8 +752,8 @@ public static class CharTests
 
         // Some control chars are also considered whitespace for legacy reasons.
         // if ((c >= '\x0009' && c <= '\x000d') || c == '\x0085')
-        Assert.True(char.IsWhiteSpace('\u000b'));
-        Assert.True(char.IsWhiteSpace('\u0085'));
+        Assert.True(char.IsWhiteSpace("\u000b", 0));
+        Assert.True(char.IsWhiteSpace("\u0085", 0));
 
         foreach (char c in GetTestCharsNotInCategory(categories))
         {
@@ -882,18 +888,6 @@ public static class CharTests
     [InlineData("\ue001", '\ue001')] // Private use codepoint
     public static void TestParse(string s, char expected)
     {
-        VerifyParse(s, expected);
-    }
-
-    [Fact]
-    public static void TestParse_Surrogate()
-    {
-        VerifyParse("\ud801", '\ud801'); // High surrogate
-        VerifyParse("\udc01", '\udc01'); // Low surrogate
-    }
-
-    private static void VerifyParse(string s, char expected)
-    {
         char c;
         Assert.True(char.TryParse(s, out c));
         Assert.Equal(expected, c);
@@ -901,6 +895,14 @@ public static class CharTests
         Assert.Equal(expected, char.Parse(s));
     }
 
+    [Fact]
+    public static void TestParse_Surrogate()
+    {
+        // TODO: add this as [InlineData] when #7166 is fixed
+        TestParse("\ud801", '\ud801'); // High surrogate
+        TestParse("\udc01", '\udc01'); // Low surrogate
+    }
+    
     [Theory]
     [InlineData(null, typeof(ArgumentNullException))]
     [InlineData("", typeof(FormatException))]
