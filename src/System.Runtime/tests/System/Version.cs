@@ -104,10 +104,8 @@ public class VersionTests
 
     [Theory]
     [MemberData(nameof(CompareToTestData))]
-    public static void TestCompareTo(Version version1, object obj, int expectedSign)
+    public static void TestCompareTo(Version version1, Version version2, int expectedSign)
     {
-        Version version2 = obj as Version;
-
         Assert.Equal(expectedSign, Math.Sign(version1.CompareTo(version2)));
         if (version1 != null && version2 != null)
         {
@@ -134,7 +132,7 @@ public class VersionTests
         }
 
         IComparable comparable = version1;
-        Assert.Equal(expectedSign, Math.Sign(comparable.CompareTo(obj)));
+        Assert.Equal(expectedSign, Math.Sign(comparable.CompareTo(version2)));
     }
 
     [Fact]
@@ -170,6 +168,7 @@ public class VersionTests
         yield return new object[] { new Version(2, 3, 0), new Version(2, 3), false };
         yield return new object[] { new Version(2, 3, 4, 0), new Version(2, 3, 4), false };
 
+        yield return new object[] { new Version(2, 3, 4, 5), new TimeSpan(), false };
         yield return new object[] { new Version(2, 3, 4, 5), null, false };
     }
 
@@ -196,6 +195,7 @@ public class VersionTests
         yield return new object[] { "1.2", new Version(1, 2) };
         yield return new object[] { "1.2.3", new Version(1, 2, 3) };
         yield return new object[] { "1.2.3.4", new Version(1, 2, 3, 4) };
+        yield return new object[] { "2  .3.    4.  \t\r\n15  ", new Version(2, 3, 4, 15) };
         yield return new object[] { "   2  .3.    4.  \t\r\n15  ", new Version(2, 3, 4, 15) };
         yield return new object[] { "+1.+2.+3.+4", new Version(1, 2, 3, 4) };
     }
