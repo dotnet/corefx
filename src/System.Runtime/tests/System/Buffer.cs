@@ -115,35 +115,48 @@ public static class BufferTests
     [InlineData(100, 0, 100, 0, 2)]
     [InlineData(100, 0, 100, 0, 3)]
     [InlineData(100, 0, 100, 0, 4)]
-    public static unsafe void TestMemoryCopy(int sourceLength, int sourceIndexOffset, int destinationLength, int destinationIndexOffset, int sourceBytesToCopy)
+    [InlineData(100, 0, 100, 0, 5)]
+    [InlineData(100, 0, 100, 0, 6)]
+    [InlineData(100, 0, 100, 0, 7)]
+    [InlineData(100, 0, 100, 0, 8)]
+    [InlineData(100, 0, 100, 0, 9)]
+    [InlineData(100, 0, 100, 0, 10)]
+    [InlineData(100, 0, 100, 0, 11)]
+    [InlineData(100, 0, 100, 0, 12)]
+    [InlineData(100, 0, 100, 0, 13)]
+    [InlineData(100, 0, 100, 0, 14)]
+    [InlineData(100, 0, 100, 0, 15)]
+    [InlineData(100, 0, 100, 0, 16)]
+    [InlineData(100, 0, 100, 0, 17)]
+    public static unsafe void TestMemoryCopy(int sourceLength, int sourceIndexOffset, int destinationLength, int destinationIndexOffset, long sourceBytesToCopy)
     {
-        var sourceArray = new int[sourceLength];
+        var sourceArray = new byte[sourceLength];
         for (int i = 0; i < sourceArray.Length; i++)
         {
-            sourceArray[i] = i;
+            sourceArray[i] = (byte)i;
         }
 
-        var destinationArray = new int[destinationLength];
+        var destinationArray = new byte[destinationLength];
         for (int i = 0; i < destinationArray.Length; i++)
         {
-            destinationArray[i] = i * 2;
+            destinationArray[i] = (byte)(i * 2);
         }
-        fixed (int* sourceBase = sourceArray, destinationBase = destinationArray)
+        fixed (byte* sourceBase = sourceArray, destinationBase = destinationArray)
         {
-            Buffer.MemoryCopy(sourceBase + sourceIndexOffset, destinationBase + destinationIndexOffset, destinationLength * 4, sourceBytesToCopy * 4);
+            Buffer.MemoryCopy(sourceBase + sourceIndexOffset, destinationBase + destinationIndexOffset, destinationLength, sourceBytesToCopy);
         }
 
         for (int i = 0; i < destinationIndexOffset; i++)
         {
-            Assert.Equal(i * 2, destinationArray[i]);
+            Assert.Equal((byte)(i * 2), destinationArray[i]);
         }
         for (int i = 0; i < sourceBytesToCopy; i++)
         {
             Assert.Equal(sourceArray[i + sourceIndexOffset], destinationArray[i + destinationIndexOffset]);
         }
-        for (int i = destinationIndexOffset + sourceBytesToCopy; i < destinationArray.Length; i++)
+        for (long i = destinationIndexOffset + sourceBytesToCopy; i < destinationArray.Length; i++)
         {
-            Assert.Equal(i * 2, destinationArray[i]);
+            Assert.Equal((byte)(i * 2), destinationArray[i]);
         }
     }
     
