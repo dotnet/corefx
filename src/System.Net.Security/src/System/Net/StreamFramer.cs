@@ -175,13 +175,8 @@ namespace System.Net
             {
                 ReadFrameComplete(transportResult);
             }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OutOfMemoryException))
             {
-                if (e is OutOfMemoryException)
-                {
-                    throw;
-                }
-
                 if (!(e is IOException))
                 {
                     e = new System.IO.IOException(SR.Format(SR.net_io_readfailure, e.Message), e);
@@ -415,13 +410,8 @@ namespace System.Net
             {
                 BeginWriteComplete(transportResult);
             }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OutOfMemoryException))
             {
-                if (e is OutOfMemoryException)
-                {
-                    throw;
-                }
-
                 workerResult.InvokeCallback(e);
             }
         }
