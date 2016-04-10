@@ -81,12 +81,20 @@ namespace System.Diagnostics
             return modules.ToArray();
         }
 
+        /// <summary>
+        /// Creates a ProcessInfo from the specified process ID.
+        /// </summary>
+        internal static ProcessInfo CreateProcessInfo(int pid)
+        {
+            return CreateProcessInfo(pid, new ReusableTextReader(Encoding.UTF8));
+        }
+
         // -----------------------------
         // ---- PAL layer ends here ----
         // -----------------------------
 
         /// <summary>
-        /// Creates a ProcessInfo from the specified process ID.
+        /// Creates a ProcessInfo from the specified process ID and ReusableTextReader.
         /// </summary>
         internal static ProcessInfo CreateProcessInfo(int pid, ReusableTextReader reusableReader)
         {
