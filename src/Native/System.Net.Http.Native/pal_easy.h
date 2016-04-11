@@ -18,6 +18,8 @@ enum
 enum PAL_CURLoption : int32_t
 {
     PAL_CURLOPT_INFILESIZE = CurlOptionLongBase + 14,
+    PAL_CURLOPT_LOW_SPEED_LIMIT = CurlOptionLongBase + 19,
+    PAL_CURLOPT_LOW_SPEED_TIME = CurlOptionLongBase + 20,
     PAL_CURLOPT_SSLVERSION = CurlOptionLongBase + 32,
     PAL_CURLOPT_VERBOSE = CurlOptionLongBase + 41,
     PAL_CURLOPT_NOBODY = CurlOptionLongBase + 44,
