@@ -6,8 +6,6 @@
 // ------------------------------------------------------------------------------
 
 
-using System.Collections;
-
 namespace System
 {
     public sealed partial class DBNull
@@ -395,13 +393,6 @@ namespace System.Data.Common
         public abstract object GetValue(int i);
         public abstract int GetValues(object[] values);
         public abstract bool IsDBNull(int i);
-    }
-    public partial class DbEnumerator : System.Collections.IEnumerator {
-        public DbEnumerator(System.Data.Common.DbDataReader reader) { }
-        public DbEnumerator(System.Data.Common.DbDataReader reader, bool closeReader) { }
-        public object Current { get { return default(object); } }
-        public bool MoveNext() { return default(bool); }
-        public void Reset() { }
     }
     public abstract partial class DbException : System.Exception
     {
