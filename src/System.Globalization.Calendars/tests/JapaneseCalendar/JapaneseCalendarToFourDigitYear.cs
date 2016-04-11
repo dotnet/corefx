@@ -15,6 +15,7 @@ namespace System.Globalization.CalendarsTests
         public void ToFourDigitYear(int year)
         {
             Calendar calendar = new JapaneseCalendar();
+            calendar.TwoDigitYearMax = 99;
             Assert.Equal(year, calendar.ToFourDigitYear(year));
         }
     }
