@@ -20,7 +20,8 @@ internal static partial class Interop
             Interop.NetSecurityNative.GssFlags inFlags,
             byte[] buffer,
             out byte[] outputBuffer,
-            out uint outFlags)
+            out uint outFlags,
+            out int isNtlmUsed)
         {
             outputBuffer = null;
             outFlags = 0;
@@ -48,7 +49,8 @@ internal static partial class Interop
                                                           buffer,
                                                           (buffer == null) ? 0 : buffer.Length,
                                                           ref token,
-                                                          out outFlags);
+                                                          out outFlags,
+                                                          out isNtlmUsed);
 
                 if ((status != NetSecurityNative.Status.GSS_S_COMPLETE) && (status != NetSecurityNative.Status.GSS_S_CONTINUE_NEEDED))
                 {

@@ -13,16 +13,65 @@ namespace System.Net.Security
     internal sealed class SafeFreeNegoCredentials : SafeFreeCredentials
     {
         private SafeGssCredHandle _credential;
+        private readonly bool _isNtlm;
+        private readonly string _userName;
+        private readonly bool _isDefault;
 
         public SafeGssCredHandle GssCredential
         {
             get { return _credential; }
         }
 
-        public SafeFreeNegoCredentials(string username, string password, string domain) : base(IntPtr.Zero, true)
+        public bool IsNtlm
         {
+            get { return _isNtlm; }
+        }
+
+        public string UserName
+        {
+            get { return _userName; }
+        }
+
+        public bool IsDefault
+        {
+            get { return _isDefault; }
+        }
+
+        public SafeFreeNegoCredentials(bool isNtlm, string username, string password, string domain)
+            : base(IntPtr.Zero, true)
+        {
+            Debug.Assert(username != null && password != null, "Username and Password can not be null");
+            const char At = '@';
+            const char Backwhack = '\\';
+
+            int index = username.IndexOf(Backwhack);
+            if (index > 0 && username.IndexOf(Backwhack, index + 1) < 0 && string.IsNullOrEmpty(domain))
+            {
+                domain = username.Substring(0, index);
+                username = username.Substring(index + 1);
+            }
+
+            //remove any leading and trailing whitespace
+            if (domain != null)
+            {
+                domain = domain.Trim();
+            }
+
+            if (username != null)
+            {
+                username = username.Trim();
+            }
+
+            if ((username.IndexOf(At) < 0) && !string.IsNullOrEmpty(domain))
+            {
+                username += At + domain;
+            }
+
             bool ignore = false;
-            _credential = SafeGssCredHandle.Create(username, password, domain);
+            _isNtlm = isNtlm;
+            _userName = username;
+            _isDefault = string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password);
+            _credential = SafeGssCredHandle.Create(username, password, isNtlm);
             _credential.DangerousAddRef(ref ignore);
         }
 
@@ -43,10 +92,16 @@ namespace System.Net.Security
     {
         private SafeGssNameHandle _targetName;
         private SafeGssContextHandle _context;
+        private bool _isNtlm;
 
         public SafeGssNameHandle TargetName
         {
             get { return _targetName; }
+        }
+
+        public bool IsNtlm
+        {
+            get { return _isNtlm; }
         }
 
         public SafeGssContextHandle GssContext
@@ -73,6 +128,12 @@ namespace System.Net.Security
         {
             Debug.Assert(!context.IsInvalid, "Invalid context passed to SafeDeleteNegoContext");
             _context = context;
+        }
+
+        public void SetAuthenticationPackage(int isNtlm)
+        {
+            Debug.Assert(isNtlm == 0 || isNtlm == 1, "Invalid isNtlm value passed to SafeDeleteNegoContext");
+            _isNtlm = isNtlm == 1;
         }
 
         protected override void Dispose(bool disposing)
