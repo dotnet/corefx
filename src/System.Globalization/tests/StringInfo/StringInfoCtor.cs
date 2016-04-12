@@ -19,6 +19,7 @@ namespace System.Globalization.Tests
 
         public static IEnumerable<object[]> Ctor_String_TestData()
         {
+            yield return new object[] { new string('a', 256), 256 };
             yield return new object[] { "\u4f00\u302a\ud800\udc00\u4f01", 3 };
             yield return new object[] { "abcdefgh", 8 };
             yield return new object[] { "zj\uDBFF\uDFFFlk", 5 };
