@@ -91,6 +91,8 @@ internal static partial class Interop
         internal enum CURLoption
         {
             CURLOPT_INFILESIZE = CurlOptionLongBase + 14,
+            CURLOPT_LOW_SPEED_LIMIT = CurlOptionLongBase + 19,
+            CURLOPT_LOW_SPEED_TIME = CurlOptionLongBase + 20,
             CURLOPT_SSLVERSION = CurlOptionLongBase + 32,
             CURLOPT_VERBOSE = CurlOptionLongBase + 41,
             CURLOPT_NOBODY = CurlOptionLongBase + 44,

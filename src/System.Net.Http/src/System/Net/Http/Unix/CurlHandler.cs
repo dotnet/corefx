@@ -76,29 +76,49 @@ namespace System.Net.Http
         private volatile bool _anyOperationStarted;
         private volatile bool _disposed;
 
-        private IWebProxy _proxy = null;
-        private ICredentials _serverCredentials = null;
+        // Proxy-related fields
         private bool _useProxy = HttpHandlerDefaults.DefaultUseProxy;
         private ICredentials _defaultProxyCredentials = CredentialCache.DefaultCredentials;
-        private DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
+        private IWebProxy _proxy = null;
+
+        // Credential-related fields
         private bool _preAuthenticate = HttpHandlerDefaults.DefaultPreAuthenticate;
         private CredentialCache _credentialCache = null; // protected by LockObject
+        private ICredentials _serverCredentials = null;
+
+        // Cookie-related fields
         private CookieContainer _cookieContainer = new CookieContainer();
         private bool _useCookie = HttpHandlerDefaults.DefaultUseCookies;
-        private TimeSpan _connectTimeout = Timeout.InfiniteTimeSpan; // TODO: Use the WinHttp default once we determine how to expose this. HttpHandlerDefaults.DefaultConnectTimeout;
+
+        // Compression-related fields
+        private DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
+
+        // Timeout-related fields
+        private TimeSpan _connectTimeout = Timeout.InfiniteTimeSpan;
+        private TimeSpan _sendTimeout = Timeout.InfiniteTimeSpan;
+        private TimeSpan _receiveHeadersTimeout = Timeout.InfiniteTimeSpan;
+        private TimeSpan _receiveDataTimeout = Timeout.InfiniteTimeSpan;
+        private bool _hasSendReceiveTimeout;
+
+        // Redirection-related fields
         private bool _automaticRedirection = HttpHandlerDefaults.DefaultAutomaticRedirection;
         private int _maxAutomaticRedirections = HttpHandlerDefaults.DefaultMaxAutomaticRedirections;
+
+        // Other "max" fields
         private int _maxConnectionsPerServer = HttpHandlerDefaults.DefaultMaxConnectionsPerServer;
         private int _maxResponseHeadersLength = HttpHandlerDefaults.DefaultMaxResponseHeaderLength;
+
+        // Certificate-related fields
         private ClientCertificateOption _clientCertificateOption = HttpHandlerDefaults.DefaultClientCertificateOption;
         private X509Certificate2Collection _clientCertificates;
         private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> _serverCertificateValidationCallback;
         private bool _checkCertificateRevocationList;
         private SslProtocols _sslProtocols = SecurityProtocol.DefaultSecurityProtocols;
 
-        private object LockObject { get { return _agent; } }
+        // Lock to use to protect this instance
+        private object LockObject => _agent;
 
-        #endregion        
+        #endregion
 
         static CurlHandler()
         {
@@ -264,19 +284,28 @@ namespace System.Net.Http
             }
         }
 
-        public TimeSpan ConnectTimeout
+        internal TimeSpan ConnectTimeout
         {
             get { return _connectTimeout; }
-            set
-            {
-                if (value != Timeout.InfiniteTimeSpan && (value <= TimeSpan.Zero || value > s_maxTimeout))
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
+            set { SetTimeout(value, ref _connectTimeout); }
+        }
 
-                CheckDisposedOrStarted();
-                _connectTimeout = value;
-            }
+        internal TimeSpan SendTimeout
+        {
+            get { return _sendTimeout; }
+            set { SetTimeout(value, ref _sendTimeout); }
+        }
+
+        internal TimeSpan ReceiveHeadersTimeout
+        {
+            get { return _receiveHeadersTimeout; }
+            set { SetTimeout(value, ref _receiveHeadersTimeout); }
+        }
+
+        internal TimeSpan ReceiveDataTimeout
+        {
+            get { return _receiveDataTimeout; }
+            set { SetTimeout(value, ref _receiveDataTimeout); }
         }
 
         internal int MaxAutomaticRedirections
@@ -430,6 +459,22 @@ namespace System.Net.Http
             {
                 _anyOperationStarted = true;
             }
+        }
+
+        private void SetTimeout(TimeSpan value, ref TimeSpan timeoutField)
+        {
+            if (value != Timeout.InfiniteTimeSpan && (value <= TimeSpan.Zero || value > s_maxTimeout))
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+
+            CheckDisposedOrStarted();
+            timeoutField = value;
+
+            _hasSendReceiveTimeout =
+                _sendTimeout != Timeout.InfiniteTimeSpan ||
+                _receiveHeadersTimeout != Timeout.InfiniteTimeSpan ||
+                _receiveDataTimeout != Timeout.InfiniteTimeSpan;
         }
 
         private KeyValuePair<NetworkCredential, CURLAUTH> GetCredentials(Uri requestUri)

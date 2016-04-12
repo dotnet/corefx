@@ -112,6 +112,24 @@ namespace System.Net.Http
             set { _curlHandler.ConnectTimeout = value; }
         }
 
+        public TimeSpan SendTimeout
+        {
+            get { return _curlHandler.SendTimeout; }
+            set { _curlHandler.SendTimeout = value; }
+        }
+
+        public TimeSpan ReceiveHeadersTimeout
+        {
+            get { return _curlHandler.ReceiveHeadersTimeout; }
+            set { _curlHandler.ReceiveHeadersTimeout = value; }
+        }
+
+        public TimeSpan ReceiveDataTimeout
+        {
+            get { return _curlHandler.ReceiveDataTimeout; }
+            set { _curlHandler.ReceiveDataTimeout = value; }
+        }
+
         public int MaxAutomaticRedirections
         {
             get { return _curlHandler.MaxAutomaticRedirections; }

@@ -703,6 +703,8 @@ namespace System.Net.Http
                     CurlHandler.EventSourceTrace("Size: {0}", size, easy: easy);
                     try
                     {
+                        SetLowSpeedLimit(easy, easy._handler.ReceiveHeadersTimeout);
+
                         CurlResponseMessage response = easy._responseMessage;
                         CurlResponseHeaderReader reader = new CurlResponseHeaderReader(buffer, size);
 
@@ -778,6 +780,8 @@ namespace System.Net.Http
                     {
                         if (!(easy.Task.IsCanceled || easy.Task.IsFaulted))
                         {
+                            SetLowSpeedLimit(easy, easy._handler.ReceiveDataTimeout);
+
                             // Complete the task if it hasn't already been.  This will make the
                             // stream available to consumers.  A previous write callback
                             // may have already completed the task to publish the response.
@@ -819,6 +823,8 @@ namespace System.Net.Http
 
                     try
                     {
+                        SetLowSpeedLimit(easy, easy._handler.SendTimeout);
+
                         // Transfer data from the request's content stream to libcurl
                         return TransferDataFromRequestStream(buffer, length, easy);
                     }
@@ -831,6 +837,39 @@ namespace System.Net.Http
                 // Something went wrong.
                 CurlHandler.EventSourceTrace("Aborting request", easy: easy);
                 return Interop.Http.CURL_READFUNC_ABORT;
+            }
+
+            private static void SetLowSpeedLimit(EasyRequest easy, TimeSpan timeout)
+            {
+                // If there's no send/receive timeout on the handler, the defaults will
+                // remain disabled, and we don't need to worry about setting or resetting.
+                if (!easy._handler._hasSendReceiveTimeout)
+                {
+                    return;
+                }
+
+                // We need to ensure the timeout is set appropriately, which may include
+                // disabling a timeout currently set if one was.
+
+                long limit = 0, time = 0; // 0 == disable
+
+                if (timeout != Timeout.InfiniteTimeSpan)
+                {
+                    double secs = timeout.TotalSeconds;
+                    if (secs >= 1)
+                    {
+                        limit = 1;
+                        time = (long)Math.Ceiling(secs);
+                    }
+                    else
+                    {
+                        limit = (long)Math.Ceiling(1 / secs);
+                        time = 1;
+                    }
+                }
+
+                easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_LOW_SPEED_LIMIT, limit);
+                easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_LOW_SPEED_TIME, time);
             }
 
             /// <summary>
