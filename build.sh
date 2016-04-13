@@ -112,7 +112,7 @@ prepare_native_build()
     # Generate version.c if specified, else have an empty one.
     __versionSourceFile=$__scriptpath/bin/obj/version.c
     if [ $__generateversionsource == true ]; then
-        $__scriptpath/Tools/corerun $__scriptpath/Tools/MSBuild.exe "$__scriptpath/build.proj" /t:GenerateVersionSourceFile /p:NativeVersionSourceFile=$__scriptpath/bin/obj/version.c /p:GenerateVersionSourceFile=true /v:minimal
+        $__scriptpath/Tools/corerun $__scriptpath/Tools/MSBuild.exe "$__scriptpath/build.proj" /t:GenerateVersionSourceFile /p:NativeVersionSourceFile=$__scriptpath/bin/obj/version.c /p:GenerateVersionSourceFile=true /v:minimal $__UnprocessedBuildArgs
     else
         __versionSourceLine="static char sccsid[] __attribute__((used)) = \"@(#)No version information produced\";"
         echo $__versionSourceLine > $__versionSourceFile
