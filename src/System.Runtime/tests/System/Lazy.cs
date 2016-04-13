@@ -109,29 +109,35 @@ namespace System.Tests
             string lazilyAllocatedValue = "abc";
 
             int x = 0;
-            var lazy = new Lazy<string>(delegate
-            {
-                return x++ < 5 ? lazy.Value : "Test";
-            }, true);
+            Lazy<string> lazy = null;
+            lazy = new Lazy<string>(() =>  x++ < 5 ? lazy.Value : "Test", true);
 
             Assert.Throws<InvalidOperationException>(() => lazilyAllocatedValue = lazy.Value);
+            Assert.Equal("abc", lazilyAllocatedValue);
+        }
+
+        [Theory]
+        [InlineData(LazyThreadSafetyMode.ExecutionAndPublication)]
+        [InlineData(LazyThreadSafetyMode.None)]
+        public static void TestValue_ThrownException_DoesntCreateValue(LazyThreadSafetyMode mode)
+        {
+            var lazy = new Lazy<string>(() => { throw new DivideByZeroException(); }, mode);
+
+            Exception exception1 = Assert.Throws<DivideByZeroException>(() => lazy.Value);
+            Exception exception2 = Assert.Throws<DivideByZeroException>(() => lazy.Value);
+            Assert.Same(exception1, exception2);
+
+            Assert.False(lazy.IsValueCreated);
         }
 
         [Fact]
-        public static void TestValue_ThrownException_DoesntCreateValue()
+        public static void TestValue_ThrownException_DoesntCreateValue_PublicationOnly()
         {
-            var lazy = new Lazy<string>(() =>
-            {
-                int zero = 0;
-                int x = 1 / zero;
-                return "";
-            }, true);
+            var lazy = new Lazy<string>(() => { throw new DivideByZeroException(); }, LazyThreadSafetyMode.PublicationOnly);
 
-            string value1;
-            string value2;
-            Assert.Throws<DivideByZeroException>(() => value1 = lazy.Value);
-            Assert.Throws<DivideByZeroException>(() => value2 = lazy.Value);
-            Assert.Same(value1, value2);
+            Exception exception1 = Assert.Throws<DivideByZeroException>(() => lazy.Value);
+            Exception exception2 = Assert.Throws<DivideByZeroException>(() => lazy.Value);
+            Assert.NotSame(exception1, exception2);
 
             Assert.False(lazy.IsValueCreated);
         }
