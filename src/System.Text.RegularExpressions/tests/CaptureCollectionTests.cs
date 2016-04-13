@@ -80,6 +80,10 @@ namespace System.Text.RegularExpressions.Tests
             RegularExpressions.Capture[] copy = new RegularExpressions.Capture[collection.Count + index];
             collection.CopyTo(copy, index);
 
+            for (int i = 0; i < index; i++)
+            {
+                Assert.Null(copy[i]);
+            }
             for (int i = index; i < copy.Length; i++)
             {
                 Assert.Same(captures[i - index], copy[i]);

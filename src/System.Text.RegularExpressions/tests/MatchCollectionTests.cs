@@ -79,6 +79,10 @@ namespace System.Text.RegularExpressions.Tests
             Match[] copy = new Match[collection.Count + index];
             collection.CopyTo(copy, index);
 
+            for (int i = 0; i < index; i++)
+            {
+                Assert.Null(copy[i]);
+            }
             for (int i = index; i < copy.Length; i++)
             {
                 Assert.Same(matches[i - index], copy[i]);
@@ -93,7 +97,7 @@ namespace System.Text.RegularExpressions.Tests
 
             Assert.Throws<ArgumentNullException>("dest", () => collection.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => collection.CopyTo(new Match[collection.Count], -1));
-            Assert.Throws<ArgumentException>("", () => collection.CopyTo(new Match[collection.Count], collection.Count));
+            Assert.Throws<ArgumentException>(string.Empty, () => collection.CopyTo(new Match[collection.Count], collection.Count));
         }
     }
 }

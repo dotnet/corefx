@@ -25,7 +25,7 @@ namespace System.Text.RegularExpressions.Tests
             //public [] operator calling internal GetGroup()
             //should return internal _emptygroup thus making
             //call to Success() false
-           Assert.False(matchNeg.Groups[0].Success);
+            Assert.False(matchNeg.Groups[0].Success);
         }
 
         [Fact]
@@ -103,7 +103,10 @@ namespace System.Text.RegularExpressions.Tests
 
             Group[] copy = new Group[collection.Count + index];
             collection.CopyTo(copy, index);
-
+            for (int i = 0; i < index; i++)
+            {
+                Assert.Null(copy[i]);
+            }
             for (int i = index; i < copy.Length; i++)
             {
                 Assert.Same(groups[i - index], copy[i]);
