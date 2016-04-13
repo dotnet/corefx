@@ -37,7 +37,7 @@ namespace System.Collections.Tests
             BitArray bitArrayNot = bitArray.Not();
             Assert.Equal(bitArray.Length, bitArrayNot.Length);
             Assert.Same(bitArray, bitArrayNot);
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < bitArray.Length; i++)
             {
                 if (i <= 1 || i >= length - 2)
                 {
@@ -45,7 +45,7 @@ namespace System.Collections.Tests
                 }
                 else
                 {
-                    Assert.False(bitArrayNot[i]);
+                    Assert.True(bitArrayNot[i]);
                 }
             }
         }
