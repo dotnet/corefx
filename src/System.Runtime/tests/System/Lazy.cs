@@ -19,13 +19,12 @@ namespace System.Tests
             VerifyLazy(lazyObject, 0, true);
         }
 
-        [Fact]
-        public static void TestCtor_Bool()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void TestCtor_Bool(bool isThreadSafe)
         {
-            var lazyString = new Lazy<string>(true);
-            VerifyLazy(lazyString, "", false);
-
-            lazyString = new Lazy<string>(false);
+            var lazyString = new Lazy<string>(isThreadSafe);
             VerifyLazy(lazyString, "", false);
         }
 
@@ -59,18 +58,17 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>("mode", () => new Lazy<string>(LazyThreadSafetyMode.ExecutionAndPublication + 1)); // Invalid thread saftety mode
         }
 
-        [Fact]
-        public static void TestCtor_ValueFactor_Bool()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void TestCtor_ValueFactor_Bool(bool isThreadSafe)
         {
-            var lazyString = new Lazy<string>(() => "foo", false);
+            var lazyString = new Lazy<string>(() => "foo", isThreadSafe);
             VerifyLazy(lazyString, "foo", true);
-
-            var lazyInt = new Lazy<int>(() => 1, false);
-            VerifyLazy(lazyInt, 1, true);
         }
 
         [Fact]
-        public static void TestCtor_ValueFactory_Bool_Invalid()
+        public static void TestCtor_ValueFactory_Bool_NullValueFactory_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("valueFactory", () => new Lazy<object>(null, false)); // Value factory is null
         }
@@ -108,24 +106,15 @@ namespace System.Tests
         [Fact]
         public static void TestValue_Invalid()
         {
-            string value = "Test";
-            var lazy = new Lazy<string>(() => value);
-            string lazilyAllocatedValue;
+            string lazilyAllocatedValue = "abc";
 
-            Assert.Throws<InvalidOperationException>(() =>
+            int x = 0;
+            var lazy = new Lazy<string>(delegate
             {
-                int x = 0;
+                return x++ < 5 ? lazy.Value : "Test";
+            }, true);
 
-                lazy = new Lazy<string>(delegate
-                {
-                    if (x++ < 5)
-                        return lazy.Value;
-                    else
-                        return "Test";
-                }, true);
-
-                lazilyAllocatedValue = lazy.Value;
-            });
+            Assert.Throws<InvalidOperationException>(() => lazilyAllocatedValue = lazy.Value);
         }
 
         [Fact]
@@ -138,8 +127,11 @@ namespace System.Tests
                 return "";
             }, true);
 
-            Assert.Throws<DivideByZeroException>(() => lazy.Value);
-            Assert.Throws<DivideByZeroException>(() => lazy.Value);
+            string value1;
+            string value2;
+            Assert.Throws<DivideByZeroException>(() => value1 = lazy.Value);
+            Assert.Throws<DivideByZeroException>(() => value2 = lazy.Value);
+            Assert.Same(value1, value2);
 
             Assert.False(lazy.IsValueCreated);
         }
@@ -153,21 +145,25 @@ namespace System.Tests
             // Activator.CreateInstance (uninitialized).
             HasDefaultCtor a = null;
             Assert.NotNull(LazyInitializer.EnsureInitialized(ref a));
+            Assert.Same(a, LazyInitializer.EnsureInitialized(ref a));
             Assert.NotNull(a);
 
             // Activator.CreateInstance (already initialized).
             HasDefaultCtor b = hdcTemplate;
             Assert.Equal(hdcTemplate, LazyInitializer.EnsureInitialized(ref b));
+            Assert.Same(b, LazyInitializer.EnsureInitialized(ref b));
             Assert.Equal(hdcTemplate, b);
 
             // Func based initialization (uninitialized).
             string c = null;
             Assert.Equal(strTemplate, LazyInitializer.EnsureInitialized(ref c, () => strTemplate));
+            Assert.Same(c, LazyInitializer.EnsureInitialized(ref c));
             Assert.Equal(strTemplate, c);
 
             // Func based initialization (already initialized).
             string d = strTemplate;
             Assert.Equal(strTemplate, LazyInitializer.EnsureInitialized(ref d, () => strTemplate + "bar"));
+            Assert.Same(d, LazyInitializer.EnsureInitialized(ref d));
             Assert.Equal(strTemplate, d);
         }
 
@@ -306,9 +302,9 @@ namespace System.Tests
             public int f;
             public LIX(int f) { this.f = f; }
 
-            public override bool Equals(object other) { return other is LIX && ((LIX)other).f == f; }
-            public override int GetHashCode() { return f.GetHashCode(); }
-            public override string ToString() { return "LIX<" + f + ">"; }
+            public override bool Equals(object other) => other is LIX && ((LIX)other).f == f;
+            public override int GetHashCode() => f.GetHashCode();
+            public override string ToString() => "LIX<" + f + ">";
         }
     }
 }
