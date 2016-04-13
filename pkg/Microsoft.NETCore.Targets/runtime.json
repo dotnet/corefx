@@ -10,6 +10,12 @@
                 "win10-arm-aot"
             ]
         },
+        "net45.app": {
+            "net45": [
+                "win-x86",
+                "win-x64"
+            ]
+        },
         "net46.app": {
             "net46": [
                 "win-x86",
