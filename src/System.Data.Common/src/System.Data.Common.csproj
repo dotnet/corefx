@@ -8,7 +8,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.0</NuGetTargetMoniker>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net45'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net451'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <ItemGroup Condition="'$(PackageTargetFramework)' == ''">
     <PackageDestination Include="lib/netstandard1.0">
@@ -22,9 +22,9 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net45_Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net451_Debug|AnyCPU' ">
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net45_Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net451_Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="System\DBNull.cs" />
@@ -66,7 +66,7 @@
     <Compile Include="System\Data\IDbDataParameter.cs" />
     <Compile Include="System\Data\IDbTransaction.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net45'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'net451'">
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System.Data" />
     <Compile Include="System\Data\Common\DbDataReaderExtensions.Facade.cs" />
