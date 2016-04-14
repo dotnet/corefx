@@ -89,7 +89,7 @@ namespace System.Linq.Parallel.Tests
                 var partitionedRanges = new Labeled<ParallelQuery<int>>[]
                 {
                     Labeled.Label("ParallelEnumerable.Range", ParallelEnumerable.Range(0, count)),
-                    Labeled.Label("Partitioner.Create", Partitioner.Create(UnorderedSources.GetRangeArray(0, count), loadBalance: false).AsParallel())
+                    Labeled.Label("Partitioner.Create", Partitioner.Create(Enumerable.Range(0, count).ToArray(), loadBalance: false).AsParallel())
                 };
 
                 // For each source and mode, get both unordered and ordered queries that should easily parallelize for all execution modes

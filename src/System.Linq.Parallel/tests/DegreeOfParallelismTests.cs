@@ -30,7 +30,7 @@ namespace System.Linq.Parallel.Tests
                 Labeled<ParallelQuery<int>> query = (Labeled<ParallelQuery<int>>)results[0];
                 if (query.ToString().StartsWith("Partitioner"))
                 {
-                    yield return new object[] { Labeled.Label(query.ToString(), Partitioner.Create(UnorderedSources.GetRangeArray(0, (int)results[1]), false).AsParallel()), results[1], results[2] };
+                    yield return new object[] { Labeled.Label(query.ToString(), Partitioner.Create(Enumerable.Range(0, (int)results[1]).ToArray(), false).AsParallel()), results[1], results[2] };
                 }
                 else if (query.ToString().StartsWith("Enumerable.Range"))
                 {

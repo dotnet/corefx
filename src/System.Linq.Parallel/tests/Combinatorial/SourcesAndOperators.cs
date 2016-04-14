@@ -24,10 +24,10 @@ namespace System.Linq.Parallel.Tests
             // Specifically, start/count won't be known until the nesting level is resolved at runtime.
             yield return Label("ParallelEnumerable.Range", (start, count, ignore) => ParallelEnumerable.Range(start, count));
             yield return Label("Enumerable.Range", (start, count, ignore) => Enumerable.Range(start, count).AsParallel());
-            yield return Label("Array", (start, count, ignore) => UnorderedSources.GetRangeArray(start, count).AsParallel());
-            yield return Label("Partitioner", (start, count, ignore) => Partitioner.Create(UnorderedSources.GetRangeArray(start, count)).AsParallel());
-            yield return Label("List", (start, count, ignore) => UnorderedSources.GetRangeArray(start, count).ToList().AsParallel());
-            yield return Label("ReadOnlyCollection", (start, count, ignore) => new ReadOnlyCollection<int>(UnorderedSources.GetRangeArray(start, count).ToList()).AsParallel());
+            yield return Label("Array", (start, count, ignore) => Enumerable.Range(start, count).ToArray().AsParallel());
+            yield return Label("Partitioner", (start, count, ignore) => Partitioner.Create(Enumerable.Range(start, count).ToArray()).AsParallel());
+            yield return Label("List", (start, count, ignore) => Enumerable.Range(start, count).ToList().AsParallel());
+            yield return Label("ReadOnlyCollection", (start, count, ignore) => new ReadOnlyCollection<int>(Enumerable.Range(start, count).ToList()).AsParallel());
         }
 
         private static IEnumerable<LabeledOperation> RangeSources()

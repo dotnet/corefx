@@ -45,7 +45,6 @@ namespace System.Linq.Parallel.Tests
             return ParallelEnumerable.Range(start, count);
         }
 
-        public const int AdditionalTypeLimit = 1024;
 
         // Get a set of ranges, of each count in `counts`.
         // The start of each range is determined by passing the count into the `start` predicate.
@@ -241,22 +240,12 @@ namespace System.Linq.Parallel.Tests
         {
             yield return Labeled.Label("ParallelEnumerable.Range", ParallelEnumerable.Range(start, count));
             yield return Labeled.Label("Enumerable.Range", Enumerable.Range(start, count).AsParallel());
-            int[] rangeArray = GetRangeArray(start, count);
+            int[] rangeArray = Enumerable.Range(start, count).ToArray();
             yield return Labeled.Label("Array", rangeArray.AsParallel());
             IList<int> rangeList = rangeArray.ToList();
             yield return Labeled.Label("List", rangeList.AsParallel());
-            if (count < AdditionalTypeLimit + 1)
-            {
-                yield return Labeled.Label("Partitioner", Partitioner.Create(rangeArray).AsParallel());
-                yield return Labeled.Label("ReadOnlyCollection", new ReadOnlyCollection<int>(rangeList).AsParallel());
-            }
-        }
-
-        internal static int[] GetRangeArray(int start, int count)
-        {
-            int[] range = new int[count];
-            for (int i = 0; i < count; i++) range[i] = start + i;
-            return range;
+            yield return Labeled.Label("Partitioner", Partitioner.Create(rangeArray).AsParallel());
+            yield return Labeled.Label("ReadOnlyCollection", new ReadOnlyCollection<int>(rangeList).AsParallel());
         }
     }
 }
