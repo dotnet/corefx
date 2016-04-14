@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
 using System.Globalization;
+using System.Text;
 using System.Threading;
+using static System.UriParser;
 
 namespace System
 {
@@ -41,7 +42,7 @@ namespace System
             }
             else
             {
-                uri = Uri.UriSchemeHttp + Uri.SchemeDelimiter + uri;
+                uri = UriSchemeHttp + Uri.SchemeDelimiter + uri;
                 Init(new Uri(uri));
             }
         }
