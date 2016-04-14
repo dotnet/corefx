@@ -4,13 +4,14 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Threading.Tests
 {
     static class MonitorTests
     {
-        // Attempts a single recursive acqusition/release cycle of a newly-created lock.
+        // Attempts a single recursive acquisition/release cycle of a newly-created lock.
         [Fact]
         public static void BasicRecursion(ref string message)
         {
@@ -21,6 +22,10 @@ namespace System.Threading.Tests
             Assert.True(Monitor.IsEntered(obj));
             Monitor.Enter(obj);
             Assert.True(Monitor.IsEntered(obj));
+            Monitor.Exit(obj);
+            Assert.True(Monitor.IsEntered(obj));
+            Monitor.Exit(obj);
+            Assert.False(Monitor.IsEntered(obj));
         }
 
         // Attempts to overflow the recursion count of a newly-created lock.
@@ -60,16 +65,53 @@ namespace System.Threading.Tests
         }
 
         [Fact]
+        public static void IsEntered_WhenHeldBySomeoneElse_ThrowsSynchronizationLockException()
+        {
+            var obj = new object();
+            var b = new Barrier(2);
+
+            Task t = Task.Run(() =>
+            {
+                lock (obj)
+                {
+                    b.SignalAndWait();
+                    Assert.True(Monitor.IsEntered(obj));
+                    b.SignalAndWait();
+                }
+            });
+
+            b.SignalAndWait();
+            Assert.False(Monitor.IsEntered(obj));
+            b.SignalAndWait();
+
+            t.Wait();
+        }
+
+        [Fact]
+        public static void Enter_SetsLockTaken()
+        {
+            bool lockTaken = false;
+            var obj = new object();
+
+            Monitor.Enter(obj, ref lockTaken);
+            Assert.True(lockTaken);
+            Monitor.Exit(obj);
+            Assert.False(lockTaken);
+        }
+
+        [Fact]
         public static void Enter_Invalid()
         {
             bool lockTaken = false;
             var obj = new object();
 
-            Assert.Throws<ArgumentNullException>(() => Monitor.Enter(null));
-            Assert.Throws<ArgumentNullException>(() => Monitor.Enter(null, ref lockTaken));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.Enter(null));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.Enter(null, ref lockTaken));
+            Assert.False(lockTaken);
 
             lockTaken = true;
-            Assert.Throws<ArgumentException>(() => Monitor.Enter(obj, ref lockTaken));
+            Assert.Throws<ArgumentException>("lockTaken", () => Monitor.Enter(obj, ref lockTaken));
+            Assert.False(lockTaken);
         }
 
         [Fact]
@@ -77,7 +119,7 @@ namespace System.Threading.Tests
         {
             var obj = new object();
             int valueType = 1;
-            Assert.Throws<ArgumentNullException>(() => Monitor.Exit(null));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.Exit(null));
 
             Assert.Throws<SynchronizationLockException>(() => Monitor.Exit(obj));
             Assert.Throws<SynchronizationLockException>(() => Monitor.Exit(new object()));
@@ -85,24 +127,58 @@ namespace System.Threading.Tests
         }
 
         [Fact]
+        public static void Exit_WhenHeldBySomeoneElse_ThrowsSynchronizationLockException()
+        {
+            var obj = new object();
+            var b = new Barrier(2);
+
+            Task t = Task.Run(() =>
+            {
+                lock (obj)
+                {
+                    b.SignalAndWait();
+                    b.SignalAndWait();
+                }
+            });
+
+            b.SignalAndWait();
+            Assert.Throws<SynchronizationLockException>(() => Monitor.Exit(obj));
+            b.SignalAndWait();
+
+            t.Wait();
+        }
+
+        [Fact]
         public static void IsEntered_Invalid()
         {
             var obj = new object();
-            Assert.Throws<ArgumentNullException>(() => Monitor.IsEntered(null));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.IsEntered(null));
         }
 
         [Fact]
         public static void Pulse_Invalid()
         {
             var obj = new object();
-            Assert.Throws<ArgumentNullException>(() => Monitor.Pulse(null));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.Pulse(null));
         }
 
         [Fact]
         public static void PulseAll_Invalid()
         {
             var obj = new object();
-            Assert.Throws<ArgumentNullException>(() => Monitor.PulseAll(null));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.PulseAll(null));
+        }
+
+        [Fact]
+        public static void TryEnter_SetsLockTaken()
+        {
+            bool lockTaken = false;
+            var obj = new object();
+
+            Monitor.TryEnter(obj, ref lockTaken);
+            Assert.True(lockTaken);
+            Monitor.Exit(obj);
+            Assert.False(lockTaken);
         }
 
         [Fact]
@@ -111,35 +187,35 @@ namespace System.Threading.Tests
             bool lockTaken = false;
             var obj = new object();
 
-            Assert.Throws<ArgumentNullException>(() => Monitor.TryEnter(null));
-            Assert.Throws<ArgumentNullException>(() => Monitor.TryEnter(null, ref lockTaken));
-            Assert.Throws<ArgumentNullException>(() => Monitor.TryEnter(null, 1));
-            Assert.Throws<ArgumentNullException>(() => Monitor.TryEnter(null, 1, ref lockTaken));
-            Assert.Throws<ArgumentNullException>(() => Monitor.TryEnter(null, TimeSpan.Zero));
-            Assert.Throws<ArgumentNullException>(() => Monitor.TryEnter(null, TimeSpan.Zero, ref lockTaken));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.TryEnter(null));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.TryEnter(null, ref lockTaken));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.TryEnter(null, 1));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.TryEnter(null, 1, ref lockTaken));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.TryEnter(null, TimeSpan.Zero));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.TryEnter(null, TimeSpan.Zero, ref lockTaken));
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => Monitor.TryEnter(null, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => Monitor.TryEnter(null, -1, ref lockTaken));
-            Assert.Throws<ArgumentOutOfRangeException>(() => Monitor.TryEnter(null, TimeSpan.FromMilliseconds(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>(() => Monitor.TryEnter(null, TimeSpan.FromMilliseconds(-1), ref lockTaken));
+            Assert.Throws<ArgumentOutOfRangeException>("millisecondsTimeout", () => Monitor.TryEnter(null, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("millisecondsTimeout", () => Monitor.TryEnter(null, -1, ref lockTaken));
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => Monitor.TryEnter(null, TimeSpan.FromMilliseconds(-1)));
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => Monitor.TryEnter(null, TimeSpan.FromMilliseconds(-1), ref lockTaken));
 
             lockTaken = true;
-            Assert.Throws<ArgumentException>(() => Monitor.TryEnter(obj, ref lockTaken));
+            Assert.Throws<ArgumentException>("lockTaken", () => Monitor.TryEnter(obj, ref lockTaken));
             lockTaken = true;
-            Assert.Throws<ArgumentException>(() => Monitor.TryEnter(obj, 0, ref lockTaken));
+            Assert.Throws<ArgumentException>("lockTaken", () => Monitor.TryEnter(obj, 0, ref lockTaken));
             lockTaken = true;
-            Assert.Throws<ArgumentException>(() => Monitor.TryEnter(obj, TimeSpan.Zero, ref lockTaken));
+            Assert.Throws<ArgumentException>("lockTaken", () => Monitor.TryEnter(obj, TimeSpan.Zero, ref lockTaken));
         }
 
         [Fact]
         public static void Wait_Invalid()
         {
             var obj = new object();
-            Assert.Throws<ArgumentNullException>(() => Monitor.Wait(null));
-            Assert.Throws<ArgumentNullException>(() => Monitor.Wait(null, 1));
-            Assert.Throws<ArgumentNullException>(() => Monitor.Wait(null, TimeSpan.Zero));
-            Assert.Throws<ArgumentOutOfRangeException>(() => Monitor.Wait(null, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => Monitor.Wait(null, TimeSpan.FromMilliseconds(-1)));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.Wait(null));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.Wait(null, 1));
+            Assert.Throws<ArgumentNullException>("obj", () => Monitor.Wait(null, TimeSpan.Zero));
+            Assert.Throws<ArgumentOutOfRangeException>("millisecondsTimeout", () => Monitor.Wait(null, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => Monitor.Wait(null, TimeSpan.FromMilliseconds(-1)));
         }
     }
 }
