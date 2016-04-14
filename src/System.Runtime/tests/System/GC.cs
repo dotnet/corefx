@@ -380,8 +380,6 @@ public static class GCTests
     [Theory]
     [InlineData(GCLatencyMode.Batch)]
     [InlineData(GCLatencyMode.Interactive)]
-    //[InlineData(GCLatencyMode.LowLatency)] Concurent GC is not enabled on Unix
-    //[InlineData(GCLatencyMode.SustainedLowLatency)] 
     public static void TestLatencyRoundtrips(GCLatencyMode value)
     {
         GCLatencyMode orig = GCSettings.LatencyMode;
@@ -396,4 +394,10 @@ public static class GCTests
             Assert.Equal(orig, GCSettings.LatencyMode);
         }
     }
+
+    [Theory]
+    [PlatformSpecific(PlatformID.Windows)] //Concurent GC is not enabled on Unix. Recombine to TestLatencyRoundTrips once addressed.
+    [InlineData(GCLatencyMode.LowLatency)]
+    [InlineData(GCLatencyMode.SustainedLowLatency)]
+    public static void TestLatencyRoundtrips_LowLatency(GCLatencyMode value) => TestLatencyRoundtrips(value);
 }
