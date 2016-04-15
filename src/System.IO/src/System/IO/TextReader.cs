@@ -257,7 +257,7 @@ namespace System.IO
 
             public override Task<int> ReadAsync(char[] buffer, int index, int count)
             {
-                return Task.FromResult(0);
+                return TaskCache.Zero;
             }
 
             public override int ReadBlock(char[] buffer, int index, int count)
@@ -267,7 +267,7 @@ namespace System.IO
 
             public override Task<int> ReadBlockAsync(char[] buffer, int index, int count)
             {
-                return Task.FromResult(0);
+                return TaskCache.Zero;
             }
 
             public override string ReadLine()
@@ -277,7 +277,7 @@ namespace System.IO
 
             public override Task<string> ReadLineAsync()
             {
-                return Task.FromResult<string>(null);
+                return TaskCache.NullString;
             }
 
             public override string ReadToEnd()
@@ -287,7 +287,7 @@ namespace System.IO
 
             public override Task<string> ReadToEndAsync()
             {
-                return Task.FromResult(string.Empty);
+                return TaskCache.EmptyString;
             }
         }
     }

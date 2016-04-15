@@ -58,6 +58,9 @@
     <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
       <Link>Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskCache.cs">
+      <Link>Common\System\Threading\Tasks\TaskCache.cs</Link>
+    </Compile>
     <Compile Include="$(Commonpath)\System\SR.Core.cs" Condition="'$(TargetGroup)' == 'netcore50aot'">
       <Link>Common\System\SR.Core.cs</Link>
     </Compile>

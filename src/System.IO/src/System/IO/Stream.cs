@@ -428,7 +428,7 @@ namespace System.IO
             public override async Task<int> ReadAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                return Task.FromResult(0);
+                return TaskCache.Zero;
             }
 
             public override int ReadByte()
