@@ -10,7 +10,6 @@ set __IntermediatesDir=""
 set __BuildArch=x64
 set __VCBuildArch=x86_amd64
 set CMAKE_BUILD_TYPE=Debug
-set OfficialBuildIdArg=
 
 :Arg_Loop
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
@@ -29,9 +28,6 @@ if /i [%1] == [/p:Platform]    (
     if /i [%2] == [x64]     (set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
     echo Error: Invalid platform args "%1 and %2"
     exit /b 1
-)
-if /i [%1] == [/p:OfficialBuildId] (
-    set OfficialBuildIdArg=/p:OfficialBuildId=%2
 )
 if /i [%1] == [-intermediateDir]    (
     set __IntermediatesDir=%2
@@ -115,9 +111,6 @@ echo See: https://github.com/dotnet/coreclr/blob/master/Documentation/project-do
 exit /b 1
 
 :GenVSSolution
-:: Generate Version file
-msbuild /t:GenerateVersionHeader build.proj /p:NativeVersionHeaderFile="%__binDir%\obj\_version.h" /p:GenerateVersionHeader=true %OfficialBuildIdArg%
-
 :: Regenerate the VS solution
 pushd "%__IntermediatesDir%"
 call "%__sourceDir%\gen-buildsys-win.bat" %__sourceDir% %__VSVersion% %__BuildArch%
