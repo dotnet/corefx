@@ -203,7 +203,10 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
 
-            return Task.FromResult(ReadBlock(buffer, index, count));
+            int read = ReadBlock(buffer, index, count);
+            return read == 0 ?
+                TaskCache.Zero : // Return a cached Task if the end has been reached
+                Task.FromResult(read);
         }
 
         public override Task<int> ReadAsync(char[] buffer, int index, int count)
@@ -221,7 +224,10 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
 
-            return Task.FromResult(Read(buffer, index, count));
+            int read = Read(buffer, index, count);
+            return read == 0 ?
+                TaskCache.Zero : // Return a cached Task if the end has been reached
+                Task.FromResult(read);
         }
         #endregion
     }
