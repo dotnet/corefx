@@ -22,7 +22,7 @@ namespace System.IO
         private byte[] _buffer;    // Either allocated internally or externally.
         private int _origin;       // For user-provided arrays, start at this origin
         private int _position;     // read/write head.
-        [ContractPublicPropertyName("Length")]
+        [ContractPublicPropertyName(nameof(Length))]
         private int _length;       // Number of bytes within the memory stream
         private int _capacity;     // length of usable portion of buffer for stream
         // Note that _capacity == _buffer.Length for non-user-provided byte[]'s
@@ -193,14 +193,12 @@ namespace System.IO
         {
         }
 
-#pragma warning disable 1998 //async method with no await operators
         public override async Task FlushAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
             Flush();
+            return Task.CompletedTask;
         }
-#pragma warning restore 1998
 
         public virtual bool TryGetBuffer(out ArraySegment<byte> buffer)
         {
@@ -439,15 +437,14 @@ namespace System.IO
             return ReadAsyncImpl(buffer, offset, count, cancellationToken);
         }
 
-#pragma warning disable 1998 //async method with no await operators
-        private async Task<int> ReadAsyncImpl(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private Task<int> ReadAsyncImpl(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            return Read(buffer, offset, count);
+            int read = Read(buffer, offset, count);
+            return read == 0 ?
+                TaskCache.Zero : // Return a cached Task if the end has been reached
+                Task.FromResult(read);
         }
-#pragma warning restore 1998
-
 
         public override int ReadByte()
         {
@@ -507,7 +504,7 @@ namespace System.IO
             return CopyToAsyncImpl(destination, bufferSize, cancellationToken);
         }
 
-        private async Task CopyToAsyncImpl(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        private Task CopyToAsyncImpl(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -522,11 +519,12 @@ namespace System.IO
             MemoryStream memStrDest = destination as MemoryStream;
             if (memStrDest == null)
             {
-                await destination.WriteAsync(_buffer, pos, n, cancellationToken).ConfigureAwait(false);
+                return destination.WriteAsync(_buffer, pos, n, cancellationToken);
             }
             else
             {
                 memStrDest.Write(_buffer, pos, n);
+                return Task.CompletedTask;
             }
         }
 
@@ -724,14 +722,12 @@ namespace System.IO
             return WriteAsyncImpl(buffer, offset, count, cancellationToken);
         }
 
-#pragma warning disable 1998 //async method with no await operators
-        private async Task WriteAsyncImpl(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private Task WriteAsyncImpl(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
             Write(buffer, offset, count);
+            return Task.CompletedTask;
         }
-#pragma warning restore 1998
 
         public override void WriteByte(byte value)
         {
