@@ -28,19 +28,19 @@ if /I [%1] == [managed] (
     goto Next
 )
 
-if /I [%1] == [officialbuildid] (
+if /I [%1] == [/p:OfficialBuildId] (
     if /I [%2]==[] (
         echo Error: officialbuildid arg should have a value
         exit /b 1
     )
-    set processedArgs=!processedArgs! %1 %2
+    set processedArgs=!processedArgs! %1=%2
     set OfficialBuildIdArg=/p:OfficialBuildId=%2
     shift /1
     goto Next
 )
 
 if [!processedArgs!]==[] (
-  set unprocessedBuildArgs=!allargs!
+  call set unprocessedBuildArgs=!__args!
 ) else (
   call set unprocessedBuildArgs=%%__args:*!processedArgs!=%%
 )

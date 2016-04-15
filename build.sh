@@ -371,15 +371,6 @@ while :; do
         skiptests)
             __SkipTests=true
             ;;
-        officialbuildid)
-            if [ -n "$2" ]; then
-                __OfficialBuildIdArg="/p:OfficialBuildId=$2"
-                shift
-            else
-                echo "ERROR: 'officialbuildid' requires a non-empty option argument"
-                exit 1
-            fi
-            ;;
         cmakeargs)
             if [ -n "$2" ]; then
                 __CMakeExtraArgs="$2"
@@ -390,7 +381,11 @@ while :; do
             fi
             ;;
         *)
-          __UnprocessedBuildArgs="$__UnprocessedBuildArgs $1"
+          if [[ $1 == "/p:OfficialBuildId="* ]]; then
+            __OfficialBuildIdArg=$1
+          else
+            __UnprocessedBuildArgs="$__UnprocessedBuildArgs $1"
+          fi
     esac
 
     shift
