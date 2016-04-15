@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection;
 using System;
 using System.Text;
 
@@ -28,7 +27,7 @@ namespace System.Xml.Serialization
             {
                 if (mapping.Members[i].TypeDesc.Type != null)
                 {
-                    key.Append(GenerateKey(mapping.Members[i].TypeDesc.Type, null, null));
+                    key.Append(GenerateKey(mapping.Members[i].TypeDesc.Type.SystemType, null, null));
                     key.Append(":");
                 }
                 _mappings[i] = new XmlMemberMapping(mapping.Members[i]);

@@ -22,7 +22,9 @@
     <ProjectJson>netcore50/project.json</ProjectJson>
     <ProjectLockJson>netcore50/project.lock.json</ProjectLockJson>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Release|AnyCPU'" />
@@ -46,7 +48,7 @@
     <Compile Include="System\Collections\InternalHashtable.cs" />
     <Compile Include="System\Xml\Serialization\CodeIdentifier.cs" />
     <Compile Include="System\Xml\Serialization\CodeIdentifiers.cs" />
-    <Compile Include="System\Xml\Serialization\Compilation.cs" />
+    <Compile Include="System\Xml\Serialization\TempAssembly.cs" />
     <Compile Include="System\Xml\Serialization\Globals.cs" />
     <Compile Include="System\Xml\Serialization\Mappings.cs" />
     <Compile Include="System\Xml\Serialization\Models.cs" />
@@ -101,6 +103,47 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Xml\Serialization\Emit\AssemblyReference.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ExceptionUtilities.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ModuleReference.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ParameterInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\Type.cs" />
+    <Compile Include="System\Xml\Serialization\ReflectionUtilities.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\FieldReference.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\LocalVariableInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ConstructorReference.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\MethodReference.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\MethodInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ParameterBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\GenericTypeParameterBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\EnumBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\EventBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\Module.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\Assembly.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\AssemblyBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ConstructorInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ConstructorBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\CustomAttributeBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\FieldBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ILGenerator.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\Label.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\LocalBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\FieldInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\MemberInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\MethodBase.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\MethodBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\ModuleBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\EventInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\PropertyReference.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\PropertyInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\PropertyBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\TypeReference.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\Extensions.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\TypeInfo.cs" />
+    <Compile Include="System\Xml\Serialization\Emit\TypeBuilder.cs" />
+    <Compile Include="System\Xml\Serialization\WellKnownTypes.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

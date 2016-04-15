@@ -2,26 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Xml.Extensions;
+using System.Xml.Schema;
+// this[key] api throws KeyNotFoundException
+using Hashtable = System.Collections.InternalHashtable;
+using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
+using XmlSchemaFacet = System.Object;
+using XmlSchemaSimpleType = System.Xml.Schema.XmlSchemaType;
+
 namespace System.Xml.Serialization
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Reflection;
-    using System.Linq;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Globalization;
-    using System.Xml.Extensions;
-    // this[key] api throws KeyNotFoundException
-    using Hashtable = System.Collections.InternalHashtable;
-    using DictionaryEntry = System.Collections.Generic.KeyValuePair<object, object>;
-    using XmlSchema = System.ServiceModel.Dispatcher.XmlSchemaConstants;
-    using XmlSchemaFacet = System.Object;
-    using XmlSchemaSimpleType = System.Xml.Schema.XmlSchemaType;
-
     // These classes provide a higher level view on reflection specific to 
     // Xml serialization, for example:
     // - allowing one to talk about types w/o having them compiled yet
@@ -81,7 +76,7 @@ namespace System.Xml.Serialization
         private TypeDesc _nullableTypeDesc;
         private TypeKind _kind;
         private XmlSchemaType _dataType;
-        private Type _type;
+        private Emit.TypeReference _type;
         private TypeDesc _baseTypeDesc;
         private TypeFlags _flags;
         private string _formatterName;
@@ -114,13 +109,13 @@ namespace System.Xml.Serialization
             : this(type.Name, type.FullName, dataType, TypeKind.Primitive, (TypeDesc)null, flags, formatterName)
         {
             _isXsdType = isXsdType;
-            _type = type;
+            _type = type.ToReference();
         }
         internal TypeDesc(Type type, string name, string fullName, TypeKind kind, TypeDesc baseTypeDesc, TypeFlags flags, TypeDesc arrayElementTypeDesc)
             : this(name, fullName, null, kind, baseTypeDesc, flags, null)
         {
             _arrayElementTypeDesc = arrayElementTypeDesc;
-            _type = type;
+            _type = type.ToReference();
         }
 
         public override string ToString()
@@ -171,7 +166,7 @@ namespace System.Xml.Serialization
             get { return _dataType; }
         }
 
-        internal Type Type
+        internal Emit.TypeReference Type
         {
             get { return _type; }
         }
@@ -348,7 +343,7 @@ namespace System.Xml.Serialization
             if (_nullableTypeDesc == null)
             {
                 _nullableTypeDesc = new TypeDesc("NullableOf" + _name, "System.Nullable`1[" + _fullName + "]", null, TypeKind.Struct, this, _flags | TypeFlags.OptionalValue, _formatterName);
-                _nullableTypeDesc._type = type;
+                _nullableTypeDesc._type = type.ToReference();
             }
 
             return _nullableTypeDesc;
@@ -888,174 +883,6 @@ namespace System.Xml.Serialization
             }
             else
                 return null;
-        }
-
-        internal static MemberMapping[] GetAllMembers(StructMapping mapping)
-        {
-            if (mapping.BaseMapping == null)
-                return mapping.Members;
-            ArrayList list = new ArrayList();
-            GetAllMembers(mapping, list);
-            return (MemberMapping[])list.ToArray(typeof(MemberMapping));
-        }
-
-        internal static void GetAllMembers(StructMapping mapping, ArrayList list)
-        {
-            if (mapping.BaseMapping != null)
-            {
-                GetAllMembers(mapping.BaseMapping, list);
-            }
-            for (int i = 0; i < mapping.Members.Length; i++)
-            {
-                list.Add(mapping.Members[i]);
-            }
-        }
-
-        internal static MemberMapping[] GetAllMembers(StructMapping mapping, System.Collections.Generic.Dictionary<string, MemberInfo> memberInfos)
-        {
-            MemberMapping[] mappings = GetAllMembers(mapping);
-            PopulateMemberInfos(mapping, mappings, memberInfos);
-            return mappings;
-        }
-
-        internal static MemberMapping[] GetSettableMembers(StructMapping structMapping)
-        {
-            ArrayList list = new ArrayList();
-            GetSettableMembers(structMapping, list);
-            return (MemberMapping[])list.ToArray(typeof(MemberMapping));
-        }
-
-        private static void GetSettableMembers(StructMapping mapping, ArrayList list)
-        {
-            if (mapping.BaseMapping != null)
-            {
-                GetSettableMembers(mapping.BaseMapping, list);
-            }
-
-            if (mapping.Members != null)
-            {
-                foreach (MemberMapping memberMapping in mapping.Members)
-                {
-                    MemberInfo memberInfo = memberMapping.MemberInfo;
-                    PropertyInfo propertyInfo = memberInfo as PropertyInfo;
-                    if (propertyInfo != null && !CanWriteProperty(propertyInfo, memberMapping.TypeDesc))
-                    {
-                        throw new InvalidOperationException(SR.Format(SR.XmlReadOnlyPropertyError, propertyInfo.DeclaringType, propertyInfo.Name));
-                    }
-                    list.Add(memberMapping);
-                }
-            }
-        }
-
-        private static bool CanWriteProperty(PropertyInfo propertyInfo, TypeDesc typeDesc)
-        {
-            // If the property is a collection, we don't need a setter.
-            if (typeDesc.Kind == TypeKind.Collection || typeDesc.Kind == TypeKind.Enumerable)
-            {
-                return true;
-            }
-            // Else the property needs a public setter.
-            return propertyInfo.SetMethod != null && propertyInfo.SetMethod.IsPublic;
-        }
-
-        internal static MemberMapping[] GetSettableMembers(StructMapping mapping, System.Collections.Generic.Dictionary<string, MemberInfo> memberInfos)
-        {
-            MemberMapping[] mappings = GetSettableMembers(mapping);
-            PopulateMemberInfos(mapping, mappings, memberInfos);
-            return mappings;
-        }
-
-        private static void PopulateMemberInfos(StructMapping structMapping, MemberMapping[] memberMappings, System.Collections.Generic.Dictionary<string, MemberInfo> memberInfos)
-        {
-            memberInfos.Clear();
-            for (int i = 0; i < memberMappings.Length; ++i)
-            {
-                memberInfos[memberMappings[i].Name] = memberMappings[i].MemberInfo;
-                if (memberMappings[i].ChoiceIdentifier != null)
-                    memberInfos[memberMappings[i].ChoiceIdentifier.MemberName] = memberMappings[i].ChoiceIdentifier.MemberInfo;
-                if (memberMappings[i].CheckSpecifiedMemberInfo != null)
-                    memberInfos[memberMappings[i].Name + "Specified"] = memberMappings[i].CheckSpecifiedMemberInfo;
-            }
-
-            // The scenario here is that user has one base class A and one derived class B and wants to serialize/deserialize an object of B.
-            // There's one virtual property defined in A and overrided by B. Without the replacing logic below, the code generated will always
-            // try to access the property defined in A, rather than B.
-            // The logic here is to:
-            // 1) Check current members inside memberInfos dictionary and figure out whether there's any override or new properties defined in the derived class.
-            //    If so, replace the one on the base class with the one on the derived class.
-            // 2) Do the same thing for the memberMapping array. Note that we need to create a new copy of MemberMapping object since the old one could still be referenced
-            //    by the StructMapping of the baseclass, so updating it directly could lead to other issues.
-            Dictionary<string, MemberInfo> replaceList = null;
-            MemberInfo replacedInfo = null;
-            foreach (KeyValuePair<string, MemberInfo> pair in memberInfos)
-            {
-                if (ShouldBeReplaced(pair.Value, structMapping.TypeDesc.Type, out replacedInfo))
-                {
-                    if (replaceList == null)
-                    {
-                        replaceList = new Dictionary<string, MemberInfo>();
-                    }
-
-                    replaceList.Add(pair.Key, replacedInfo);
-                }
-            }
-
-            if (replaceList != null)
-            {
-                foreach (KeyValuePair<string, MemberInfo> pair in replaceList)
-                {
-                    memberInfos[pair.Key] = pair.Value;
-                }
-                for (int i = 0; i < memberMappings.Length; i++)
-                {
-                    MemberInfo mi;
-                    if (replaceList.TryGetValue(memberMappings[i].Name, out mi))
-                    {
-                        MemberMapping newMapping = memberMappings[i].Clone();
-                        newMapping.MemberInfo = mi;
-                        memberMappings[i] = newMapping;
-                    }
-                }
-            }
-        }
-
-        private static bool ShouldBeReplaced(MemberInfo memberInfoToBeReplaced, Type derivedType, out MemberInfo replacedInfo)
-        {
-            replacedInfo = memberInfoToBeReplaced;
-            Type currentType = derivedType;
-            Type typeToBeReplaced = memberInfoToBeReplaced.DeclaringType;
-
-            if (typeToBeReplaced.IsAssignableFrom(currentType))
-            {
-                while (currentType != typeToBeReplaced)
-                {
-                    TypeInfo currentInfo = currentType.GetTypeInfo();
-
-                    foreach (PropertyInfo info in currentInfo.DeclaredProperties)
-                    {
-                        if (info.Name == memberInfoToBeReplaced.Name)
-                        {
-                            // we have a new modifier situation: property names are the same but the declaring types are different
-                            replacedInfo = info;
-                            break;
-                        }
-                    }
-                    foreach (FieldInfo info in currentInfo.DeclaredFields)
-                    {
-                        if (info.Name == memberInfoToBeReplaced.Name)
-                        {
-                            // we have a new modifier situation: field names are the same but the declaring types are different
-                            replacedInfo = info;
-                            break;
-                        }
-                    }
-
-                    // we go one level down and try again
-                    currentType = currentType.GetTypeInfo().BaseType;
-                }
-            }
-
-            return replacedInfo != memberInfoToBeReplaced;
         }
 
         private static TypeFlags GetConstructorFlags(Type type, ref Exception exception)

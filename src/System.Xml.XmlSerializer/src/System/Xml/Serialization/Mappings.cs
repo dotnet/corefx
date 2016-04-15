@@ -2,17 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection;
+using System.Collections.Generic;
+using System.Xml.Schema;
+
 namespace System.Xml.Serialization
 {
-    using System.Reflection;
-    using System.Collections;
-    using System.Xml.Schema;
-    using System;
-    using System.Text;
-    using System.ComponentModel;
-    using System.Xml;
-    using System.CodeDom.Compiler;
-    using IComparer = System.Collections.Generic.IComparer<object>;
+    using Emit;
 
     // These classes represent a mapping between classes and a particular XML format.
     // There are two class of mapping information: accessors (such as elements and
@@ -608,6 +604,175 @@ namespace System.Xml.Serialization
             get { return _isSequence && !TypeDesc.IsRoot; }
             set { _isSequence = value; }
         }
+
+        internal MemberMapping[] GetAllMembers()
+        {
+            if (BaseMapping == null)
+                return Members;
+
+            var list = new List<MemberMapping>();
+            GetAllMembers(list);
+            return list.ToArray();
+        }
+
+        internal void GetAllMembers(List<MemberMapping> list)
+        {
+            if (BaseMapping != null)
+            {
+                BaseMapping.GetAllMembers(list);
+            }
+            for (int i = 0; i < Members.Length; i++)
+            {
+                list.Add(Members[i]);
+            }
+        }
+
+        internal MemberMapping[] GetAllMembers(Dictionary<string, MemberInfo> memberInfos)
+        {
+            MemberMapping[] mappings = GetAllMembers();
+            PopulateMemberInfos(mappings, memberInfos);
+            return mappings;
+        }
+
+        internal MemberMapping[] GetSettableMembers()
+        {
+            var list = new List<MemberMapping>();
+            GetSettableMembers(list);
+            return list.ToArray();
+        }
+
+        private void GetSettableMembers(List<MemberMapping> list)
+        {
+            if (BaseMapping != null)
+            {
+                BaseMapping.GetSettableMembers(list);
+            }
+
+            if (Members != null)
+            {
+                foreach (MemberMapping memberMapping in Members)
+                {
+                    MemberInfo memberInfo = memberMapping.MemberInfo;
+                    PropertyInfo propertyInfo = memberInfo as PropertyInfo;
+                    if (propertyInfo != null && !CanWriteProperty(propertyInfo, memberMapping.TypeDesc))
+                    {
+                        throw new InvalidOperationException(SR.Format(SR.XmlReadOnlyPropertyError, propertyInfo.DeclaringType, propertyInfo.Name));
+                    }
+                    list.Add(memberMapping);
+                }
+            }
+        }
+
+        private static bool CanWriteProperty(PropertyInfo propertyInfo, TypeDesc typeDesc)
+        {
+            // If the property is a collection, we don't need a setter.
+            if (typeDesc.Kind == TypeKind.Collection || typeDesc.Kind == TypeKind.Enumerable)
+            {
+                return true;
+            }
+            // Else the property needs a public setter.
+            return propertyInfo.SetMethod != null && propertyInfo.SetMethod.IsPublic;
+        }
+
+        internal MemberMapping[] GetSettableMembers(Dictionary<string, MemberInfo> memberInfos)
+        {
+            MemberMapping[] mappings = GetSettableMembers();
+            PopulateMemberInfos(mappings, memberInfos);
+            return mappings;
+        }
+
+        private void PopulateMemberInfos(MemberMapping[] memberMappings, Dictionary<string, MemberInfo> memberInfos)
+        {
+            memberInfos.Clear();
+            for (int i = 0; i < memberMappings.Length; ++i)
+            {
+                memberInfos[memberMappings[i].Name] = memberMappings[i].MemberInfo;
+                if (memberMappings[i].ChoiceIdentifier != null)
+                    memberInfos[memberMappings[i].ChoiceIdentifier.MemberName] = memberMappings[i].ChoiceIdentifier.MemberInfo;
+                if (memberMappings[i].CheckSpecifiedMemberInfo != null)
+                    memberInfos[memberMappings[i].Name + "Specified"] = memberMappings[i].CheckSpecifiedMemberInfo;
+            }
+
+            // The scenario here is that user has one base class A and one derived class B and wants to serialize/deserialize an object of B.
+            // There's one virtual property defined in A and overrided by B. Without the replacing logic below, the code generated will always
+            // try to access the property defined in A, rather than B.
+            // The logic here is to:
+            // 1) Check current members inside memberInfos dictionary and figure out whether there's any override or new properties defined in the derived class.
+            //    If so, replace the one on the base class with the one on the derived class.
+            // 2) Do the same thing for the memberMapping array. Note that we need to create a new copy of MemberMapping object since the old one could still be referenced
+            //    by the StructMapping of the baseclass, so updating it directly could lead to other issues.
+            Dictionary<string, MemberInfo> replaceList = null;
+            MemberInfo replacedInfo = null;
+            foreach (KeyValuePair<string, MemberInfo> pair in memberInfos)
+            {
+                if (ShouldBeReplaced(pair.Value, TypeDesc.Type, out replacedInfo))
+                {
+                    if (replaceList == null)
+                    {
+                        replaceList = new Dictionary<string, MemberInfo>();
+                    }
+
+                    replaceList.Add(pair.Key, replacedInfo);
+                }
+            }
+
+            if (replaceList != null)
+            {
+                foreach (KeyValuePair<string, MemberInfo> pair in replaceList)
+                {
+                    memberInfos[pair.Key] = pair.Value;
+                }
+                for (int i = 0; i < memberMappings.Length; i++)
+                {
+                    MemberInfo mi;
+                    if (replaceList.TryGetValue(memberMappings[i].Name, out mi))
+                    {
+                        MemberMapping newMapping = memberMappings[i].Clone();
+                        newMapping.MemberInfo = mi;
+                        memberMappings[i] = newMapping;
+                    }
+                }
+            }
+        }
+
+        private static bool ShouldBeReplaced(MemberInfo memberInfoToBeReplaced, Type derivedType, out MemberInfo replacedInfo)
+        {
+            replacedInfo = memberInfoToBeReplaced;
+            Type currentType = derivedType;
+            Type typeToBeReplaced = memberInfoToBeReplaced.DeclaringType;
+
+            if (typeToBeReplaced.IsAssignableFrom(currentType))
+            {
+                while (currentType != typeToBeReplaced)
+                {
+                    TypeInfo currentInfo = currentType.GetTypeInfo();
+
+                    foreach (PropertyInfo info in currentInfo.DeclaredProperties)
+                    {
+                        if (info.Name == memberInfoToBeReplaced.Name)
+                        {
+                            // we have a new modifier situation: property names are the same but the declaring types are different
+                            replacedInfo = info;
+                            break;
+                        }
+                    }
+                    foreach (FieldInfo info in currentInfo.DeclaredFields)
+                    {
+                        if (info.Name == memberInfoToBeReplaced.Name)
+                        {
+                            // we have a new modifier situation: field names are the same but the declaring types are different
+                            replacedInfo = info;
+                            break;
+                        }
+                    }
+
+                    // we go one level down and try again
+                    currentType = currentType.GetTypeInfo().BaseType;
+                }
+            }
+
+            return replacedInfo != memberInfoToBeReplaced;
+        }
     }
 
     internal abstract class AccessorMapping : Mapping
@@ -675,7 +840,7 @@ namespace System.Xml.Serialization
             Array.Sort(elements, new AccessorComparer());
         }
 
-        internal class AccessorComparer : IComparer
+        internal class AccessorComparer : IComparer<object>
         {
             public int Compare(object o1, object o2)
             {
@@ -792,13 +957,12 @@ namespace System.Xml.Serialization
         }
     }
 
-    internal class MemberMappingComparer : IComparer
+    internal class MemberMappingComparer : IComparer<MemberMapping>
     {
-        public int Compare(object o1, object o2)
-        {
-            MemberMapping m1 = (MemberMapping)o1;
-            MemberMapping m2 = (MemberMapping)o2;
+        public static readonly MemberMappingComparer Instance = new MemberMappingComparer();
 
+        public int Compare(MemberMapping m1, MemberMapping m2)
+        {
             bool m1Text = m1.IsText;
             if (m1Text)
             {
@@ -993,7 +1157,7 @@ namespace System.Xml.Serialization
                     return true;
                 if (_getSchemaMethod == null)
                     return false;
-                if (_needSchema && typeof(XmlSchemaType).IsAssignableFrom(_getSchemaMethod.ReturnType))
+                if (_needSchema && WellKnownTypes.XmlSchemaType.IsAssignableFrom(_getSchemaMethod.ReturnType))
                     return false;
                 RetrieveSerializableSchema();
                 return _any;
@@ -1033,7 +1197,7 @@ namespace System.Xml.Serialization
                     return _xsiType;
                 if (_getSchemaMethod == null)
                     return null;
-                if (typeof(XmlSchemaType).IsAssignableFrom(_getSchemaMethod.ReturnType))
+                if (WellKnownTypes.XmlSchemaType.IsAssignableFrom(_getSchemaMethod.ReturnType))
                     return null;
                 RetrieveSerializableSchema();
                 return _xsiType;
@@ -1055,11 +1219,11 @@ namespace System.Xml.Serialization
 
                     if (typeInfo != null)
                     {
-                        if (typeof(XmlSchemaType).IsAssignableFrom(_getSchemaMethod.ReturnType))
+                        if (WellKnownTypes.XmlSchemaType.IsAssignableFrom(_getSchemaMethod.ReturnType))
                         {
                             throw Globals.NotSupported("No XmlSchemaType in SL");
                         }
-                        else if (typeof(XmlQualifiedName).IsAssignableFrom(_getSchemaMethod.ReturnType))
+                        else if (WellKnownTypes.XmlQualifiedName.IsAssignableFrom(_getSchemaMethod.ReturnType))
                         {
                             _xsiType = (XmlQualifiedName)typeInfo;
                             if (_xsiType.IsEmpty)

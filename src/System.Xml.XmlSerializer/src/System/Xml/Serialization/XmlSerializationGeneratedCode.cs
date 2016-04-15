@@ -4,16 +4,6 @@
 
 namespace System.Xml.Serialization
 {
-    using System;
-    using System.IO;
-    using System.Collections;
-    using System.ComponentModel;
-    using System.Threading;
-    using System.Reflection;
-    using System.Security;
-    using System.Globalization;
-    using Hashtable = System.Collections.Generic.Dictionary<object, object>;
-
     /// <include file='doc\XmlSerializationGeneratedCode.uex' path='docs/doc[@for="XmlSerializationGeneratedCode"]/*' />
     ///<internalonly/>
     public abstract class XmlSerializationGeneratedCode

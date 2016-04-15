@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using System;
-using System.ComponentModel;
-using System.Globalization;
 
 namespace System.Xml.Serialization
 {
@@ -61,7 +58,7 @@ namespace System.Xml.Serialization
         {
             get
             {
-                return System.Xml.Serialization.Accessor.UnescapeName(Accessor.Name);
+                return Serialization.Accessor.UnescapeName(Accessor.Name);
             }
         }
 

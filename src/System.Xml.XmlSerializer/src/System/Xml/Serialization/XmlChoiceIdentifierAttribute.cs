@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Xml.Schema;
 using System.Reflection;
-
 
 namespace System.Xml.Serialization
 {
@@ -14,7 +11,7 @@ namespace System.Xml.Serialization
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
-    public class XmlChoiceIdentifierAttribute : System.Attribute
+    public class XmlChoiceIdentifierAttribute : Attribute
     {
         private string _name;
         private MemberInfo _memberInfo;

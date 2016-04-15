@@ -2,29 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
-
+using System.Reflection.Emit;
+using Stack = System.Collections.Generic.Stack<object>;
 
 #if !NET_NATIVE
 namespace System.Xml.Serialization
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Xml;
-    using System.Reflection;
-    using System.Reflection.Emit;
-    using System.IO;
-    using System.Security;
-    using System.Text.RegularExpressions;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Xml.Extensions;
-    using Stack = System.Collections.Generic.Stack<object>;
+    using Emit;
 
     internal class CodeGenerator
     {
@@ -177,7 +166,7 @@ namespace System.Xml.Serialization
             else if (var is LocalBuilder)
                 return ((LocalBuilder)var).LocalType;
             else
-                return var.GetType();
+                return var.GetType().ToReference();
         }
 
         internal object GetVariable(string name)
@@ -308,9 +297,9 @@ namespace System.Xml.Serialization
                 else
                 {
 #if DEBUG
-                    CodeGenerator.AssertHasInterface(varType, typeof(ICollection));
+                    CodeGenerator.AssertHasInterface(varType, WellKnownTypes.ICollection);
 #endif
-                    MethodInfo ICollection_get_Count = typeof(ICollection).GetMethod(
+                    MethodInfo ICollection_get_Count = WellKnownTypes.ICollection.GetMethod(
                           "get_Count",
                           CodeGenerator.InstanceBindingFlags,
                           Array.Empty<Type>()
@@ -459,10 +448,10 @@ namespace System.Xml.Serialization
         internal void StoreArrayElement(object obj, object arrayIndex, object value)
         {
             Type arrayType = GetVariableType(obj);
-            if (arrayType == typeof(Array))
+            if (arrayType == WellKnownTypes.Array)
             {
                 Load(obj);
-                Call(typeof(Array).GetMethod("SetValue", new Type[] { typeof(object), typeof(int) }));
+                Call(WellKnownTypes.Array.GetMethod("SetValue", new Type[] { WellKnownTypes.Object, WellKnownTypes.Int32 }));
             }
             else
             {
@@ -776,11 +765,11 @@ namespace System.Xml.Serialization
 
         internal void Ldc(object o)
         {
-            Type valueType = o.GetType();
+            System.Type valueType = o.GetType();
             if (o is Type)
             {
                 Ldtoken((Type)o);
-                Call(typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Static | BindingFlags.Public, new Type[] { typeof(RuntimeTypeHandle) }));
+                Call(WellKnownTypes.Type.GetMethod("GetTypeFromHandle", BindingFlags.Static | BindingFlags.Public, new Type[] { WellKnownTypes.RuntimeTypeHandle }));
             }
             else if (valueType.GetTypeInfo().IsEnum)
             {
@@ -824,9 +813,9 @@ namespace System.Xml.Serialization
                         Ldstr((string)o);
                         break;
                     case TypeCode.Decimal:
-                        ConstructorInfo Decimal_ctor = typeof(Decimal).GetConstructor(
+                        ConstructorInfo Decimal_ctor = WellKnownTypes.Decimal.GetConstructor(
                              CodeGenerator.InstanceBindingFlags,
-                             new Type[] { typeof(Int32), typeof(Int32), typeof(Int32), typeof(Boolean), typeof(Byte) }
+                             new Type[] { WellKnownTypes.Int32, WellKnownTypes.Int32, WellKnownTypes.Int32, WellKnownTypes.Boolean, WellKnownTypes.UInt8 }
                              );
                         int[] bits = Decimal.GetBits((decimal)o);
                         Ldc(bits[0]); // digit
@@ -837,9 +826,9 @@ namespace System.Xml.Serialization
                         New(Decimal_ctor);
                         break;
                     case TypeCode.DateTime:
-                        ConstructorInfo DateTime_ctor = typeof(DateTime).GetConstructor(
+                        ConstructorInfo DateTime_ctor = WellKnownTypes.DateTime.GetConstructor(
                             CodeGenerator.InstanceBindingFlags,
-                            new Type[] { typeof(Int64) }
+                            new Type[] { WellKnownTypes.Int64 }
                             );
                         Ldc(((DateTime)o).Ticks); // ticks
                         New(DateTime_ctor);
@@ -1107,7 +1096,7 @@ namespace System.Xml.Serialization
         {
             if (arrayElementType.GetTypeInfo().IsEnum)
             {
-                Ldelem(Enum.GetUnderlyingType(arrayElementType));
+                Ldelem(arrayElementType.GetEnumUnderlyingType());
             }
             else
             {
@@ -1188,7 +1177,7 @@ namespace System.Xml.Serialization
         internal void Stelem(Type arrayElementType)
         {
             if (arrayElementType.GetTypeInfo().IsEnum)
-                Stelem(Enum.GetUnderlyingType(arrayElementType));
+                Stelem(arrayElementType.GetEnumUnderlyingType());
             else
             {
                 OpCode opCode = GetStelemOpCode(arrayElementType.GetTypeCode());
@@ -1329,6 +1318,11 @@ namespace System.Xml.Serialization
             //}
         }
 
+        internal LocalBuilder DeclareLocal(object type, string v)
+        {
+            throw new NotImplementedException();
+        }
+
         private void InternalConvert(Type source, Type target, bool isAddress)
         {
             if (target == source)
@@ -1402,6 +1396,7 @@ namespace System.Xml.Serialization
         {
             return assemblyBuilder.DefineDynamicModule(name);
         }
+
         static internal TypeBuilder CreateTypeBuilder(ModuleBuilder moduleBuilder, string name, TypeAttributes attributes, Type parent, Type[] interfaces)
         {
             // parent is nullable if no base class
@@ -1557,6 +1552,11 @@ namespace System.Xml.Serialization
         {
             WhileState whileState = (WhileState)_whileStack.Peek();
             Brtrue(whileState.StartLabel);
+        }
+
+        internal LocalBuilder DeclareOrGetLocal(object stringBuilder, string v)
+        {
+            throw new NotImplementedException();
         }
     }
 
