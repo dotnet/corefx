@@ -187,8 +187,6 @@ public static class DoubleTests
                 Assert.Equal(expected, d1 == d2);
                 Assert.Equal(!expected, d1 != d2);
             }
-
-            Assert.NotEqual(0, d1.GetHashCode());
             Assert.Equal(expected, d1.GetHashCode().Equals(d2.GetHashCode()));
         }
         Assert.Equal(expected, d1.Equals(value));
@@ -211,22 +209,25 @@ public static class DoubleTests
         yield return new object[] { (double)2468, "N", emptyFormat, string.Format("{0:N}", 2468.00) };
 
         // Changing the negative pattern doesn't do anything without also passing in a format string
-        var customFormat1 = new NumberFormatInfo();
-        customFormat1.NumberNegativePattern = 0;
-        yield return new object[] { (double)-6310, "G", customFormat1, "-6310" };
+        var customNegativePattern = new NumberFormatInfo() { NumberNegativePattern = 0 };
+        yield return new object[] { (double)-6310, "G", customNegativePattern, "-6310" };
 
-        var customFormat2 = new NumberFormatInfo();
-        customFormat2.NegativeSign = "#";
-        customFormat2.NumberDecimalSeparator = "~";
-        customFormat2.NumberGroupSeparator = "*";
-        yield return new object[] { (double)-2468, "N", customFormat2, "#2*468~00" };
-        yield return new object[] { (double)2468, "N", customFormat2, "2*468~00" };
+        var customNegativeSignDecimalGroupSeparator = new NumberFormatInfo()
+        {
+            NegativeSign = "#",
+            NumberDecimalSeparator = "~",
+            NumberGroupSeparator = "*"
+        };
+        yield return new object[] { (double)-2468, "N", customNegativeSignDecimalGroupSeparator, "#2*468~00" };
+        yield return new object[] { (double)2468, "N", customNegativeSignDecimalGroupSeparator, "2*468~00" };
 
-        var customFormat3 = new NumberFormatInfo();
-        customFormat3.NegativeSign = "xx"; // Set to trash to make sure it doesn't show up
-        customFormat3.NumberGroupSeparator = "*";
-        customFormat3.NumberNegativePattern = 0;
-        yield return new object[] { (double)-2468, "N", customFormat3, "(2*468.00)" };
+        var customNegativeSignGroupSeparatorNegativePattern = new NumberFormatInfo()
+        {
+            NegativeSign = "xx", // Set to trash to make sure it doesn't show up
+            NumberGroupSeparator = "*",
+            NumberNegativePattern = 0,
+        };
+        yield return new object[] { (double)-2468, "N", customNegativeSignGroupSeparatorNegativePattern, "(2*468.00)" };
 
         var invariantFormat = NumberFormatInfo.InvariantInfo;
         yield return new object[] { double.Epsilon, "G", invariantFormat, "4.94065645841247E-324" };
@@ -276,12 +277,16 @@ public static class DoubleTests
 
         var emptyFormat = new NumberFormatInfo();
 
-        var customFormat1 = new NumberFormatInfo();
-        customFormat1.CurrencySymbol = "$";
-        customFormat1.CurrencyGroupSeparator = ",";
+        var dollarSignCommaSeparatorFormat = new NumberFormatInfo()
+        {
+            CurrencySymbol = "$",
+            CurrencyGroupSeparator = ","
+        };
 
-        var customFormat2 = new NumberFormatInfo();
-        customFormat2.NumberDecimalSeparator = ".";
+        var decimalSeparatorFormat = new NumberFormatInfo()
+        {
+            NumberDecimalSeparator = "."
+        };
 
         NumberFormatInfo invariantFormat = NumberFormatInfo.InvariantInfo;
 
@@ -299,10 +304,10 @@ public static class DoubleTests
         yield return new object[] { "123", NumberStyles.Any, emptyFormat, (double)123 };
         yield return new object[] { "123.567", NumberStyles.Any, emptyFormat, 123.567 };
         yield return new object[] { "123", NumberStyles.Float, emptyFormat, (double)123 };
-        yield return new object[] { "$1,000", NumberStyles.Currency, customFormat1, (double)1000 };
-        yield return new object[] { "$1000", NumberStyles.Currency, customFormat1, (double)1000 };
-        yield return new object[] { "123.123", NumberStyles.Float, customFormat2, 123.123 };
-        yield return new object[] { "(123)", NumberStyles.AllowParentheses, customFormat2, -123 };
+        yield return new object[] { "$1,000", NumberStyles.Currency, dollarSignCommaSeparatorFormat, (double)1000 };
+        yield return new object[] { "$1000", NumberStyles.Currency, dollarSignCommaSeparatorFormat, (double)1000 };
+        yield return new object[] { "123.123", NumberStyles.Float, decimalSeparatorFormat, 123.123 };
+        yield return new object[] { "(123)", NumberStyles.AllowParentheses, decimalSeparatorFormat, -123 };
 
         yield return new object[] { "NaN", NumberStyles.Any, invariantFormat, double.NaN };
         yield return new object[] { "Infinity", NumberStyles.Any, invariantFormat, double.PositiveInfinity };
@@ -346,9 +351,11 @@ public static class DoubleTests
         NumberFormatInfo nullFormat = null;
         NumberStyles defaultStyle = NumberStyles.Float;
 
-        var customFormat = new NumberFormatInfo();
-        customFormat.CurrencySymbol = "$";
-        customFormat.NumberDecimalSeparator = ".";
+        var dollarSignDecimalSeparatorFormat = new NumberFormatInfo()
+        {
+            CurrencySymbol = "$",
+            NumberDecimalSeparator = "."
+        };
 
         yield return new object[] { null, defaultStyle, nullFormat, typeof(ArgumentNullException) };
         yield return new object[] { "", defaultStyle, nullFormat, typeof(FormatException) };
