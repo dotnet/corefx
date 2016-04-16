@@ -29,7 +29,6 @@
     <Compile Include="Combinatorial\FailingParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\LabeledOperation.cs" />
     <Compile Include="Combinatorial\ParallelQueryCombinationTests.cs" />
-    <Compile Include="Combinatorial\ReverseOrderedParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\SourcesAndOperators.cs" />
     <Compile Include="Combinatorial\UnorderedParallelQueryCombinationTests.cs" />
     <Compile Include="Helpers\AssertThrows.cs" />

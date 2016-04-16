@@ -133,7 +133,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1332)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Concat(LabeledOperation source, LabeledOperation operation)
@@ -148,7 +147,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [ActiveIssue(1332)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Concat_NotPipelined(LabeledOperation source, LabeledOperation operation)
