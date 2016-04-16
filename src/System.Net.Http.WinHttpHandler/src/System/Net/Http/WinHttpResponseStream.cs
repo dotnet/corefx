@@ -127,36 +127,35 @@ namespace System.Net.Http
             
             _state.TcsQueryDataAvailable.Task.ContinueWith((previousTask, state) => 
             {
-                var self = (WinHttpResponseStream)state;
+                var tuple = (Tuple<WinHttpResponseStream, byte[], int, int, CancellationToken>)state;
+                
+                var self = tuple.Item1;
                 WinHttpRequestState requestState = self._state;
                 SafeWinHttpHandle requestHandle = self._requestHandle;
+                
+                byte[] array = tuple.Item2;
+                int index = tuple.Item3;
+                int length = tuple.Item4;
+                CancellationToken cancellationToken = tuple.Item5;
                 
                 if (previousTask.IsFaulted)
                 {
                     requestState.TcsReadFromResponseStream.TrySetException(previousTask.Exception.InnerException);
                 }
-                else if (previousTask.IsCanceled || token.IsCancellationRequested)
+                else if (previousTask.IsCanceled || cancellationToken.IsCancellationRequested)
                 {
-                    requestState.TcsReadFromResponseStream.TrySetCanceled(token);
+                    requestState.TcsReadFromResponseStream.TrySetCanceled(cancellationToken);
                 }
                 else
                 {
-                    int bytesToRead;
                     int bytesAvailable = previousTask.Result;
-                    if (bytesAvailable > count)
-                    {
-                        bytesToRead = count;
-                    }
-                    else
-                    {
-                        bytesToRead = bytesAvailable;
-                    }
+                    int bytesToRead = Math.Min(length, bytesAvailable);
                     
                     lock (requestState.Lock)
                     {
                         if (!Interop.WinHttp.WinHttpReadData(
                             requestHandle,
-                            Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset),
+                            Marshal.UnsafeAddrOfPinnedArrayElement(array, index),
                             (uint)bytesToRead,
                             IntPtr.Zero))
                         {
@@ -166,7 +165,8 @@ namespace System.Net.Http
                     }
                 }
             },
-            this, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+            Tuple.Create(this, buffer, offset, count, token),
+            CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
 
             // TODO: Issue #2165. Register callback on cancellation token to cancel WinHTTP operation.
                 
