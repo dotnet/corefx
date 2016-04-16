@@ -47,40 +47,46 @@ namespace System.Net.Http
 
                 // We schedule a continuation task once the inner handler completes in order to trigger the response
                 // processing method. ProcessResponse() is only called if the task wasn't canceled before.
-                sendAsyncTask.ContinueWithStandard(task =>
+                var tuple = Tuple.Create(this, tcs, cancellationToken);
+                sendAsyncTask.ContinueWithStandard(tuple, (task, state) =>
                 {
+                    var t = (Tuple<MessageProcessingHandler, TaskCompletionSource<HttpResponseMessage>, CancellationToken>)state;
+                    MessageProcessingHandler self = t.Item1;
+                    TaskCompletionSource<HttpResponseMessage> source = t.Item2;
+                    CancellationToken token = t.Item3;
+                    
                     if (task.IsFaulted)
                     {
-                        tcs.TrySetException(task.Exception.GetBaseException());
+                        source.TrySetException(task.Exception.GetBaseException());
                         return;
                     }
 
                     if (task.IsCanceled)
                     {
-                        tcs.TrySetCanceled();
+                        source.TrySetCanceled();
                         return;
                     }
 
                     if (task.Result == null)
                     {
-                        tcs.TrySetException(new InvalidOperationException(SR.net_http_handler_noresponse));
+                        source.TrySetException(new InvalidOperationException(SR.net_http_handler_noresponse));
                         return;
                     }
 
                     try
                     {
-                        HttpResponseMessage responseMessage = ProcessResponse(task.Result, cancellationToken);
-                        tcs.TrySetResult(responseMessage);
+                        HttpResponseMessage responseMessage = self.ProcessResponse(task.Result, token);
+                        source.TrySetResult(responseMessage);
                     }
                     catch (OperationCanceledException e)
                     {
                         // If ProcessResponse() throws an OperationCanceledException check whether it is related to
                         // the cancellation token we received from the user. If so, cancel the Task.
-                        HandleCanceledOperations(cancellationToken, tcs, e);
+                        HandleCanceledOperations(token, source, e);
                     }
                     catch (Exception e)
                     {
-                        tcs.TrySetException(e);
+                        source.TrySetException(e);
                     }
                     // We don't pass the cancellation token to the continuation task, since we want to get called even
                     // if the operation was canceled: We'll set the Task returned to the user to canceled. Passing the
