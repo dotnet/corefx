@@ -12,7 +12,7 @@ namespace System.Collections.Tests
     {
         [Fact]
         public static void And_EmptyArray()
-        {            
+        {
             BitArray bitArray1 = new BitArray(0);
             BitArray bitArray2 = new BitArray(0);
             
