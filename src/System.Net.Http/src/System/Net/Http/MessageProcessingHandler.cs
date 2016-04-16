@@ -13,22 +13,6 @@ namespace System.Net.Http
 {
     public abstract class MessageProcessingHandler : DelegatingHandler
     {
-        // Private class used to capture the SendAsync state in
-        // a closure, while simultaneously avoiding a tuple allocation.
-        private class SendState : TaskCompletionSource<HttpResponseMessage>
-        {
-            public MessageProcessingHandler self;
-            public CancellationToken token;
-            
-            public SendState(MessageProcessingHandler self, CancellationToken token)
-            {
-                Debug.Assert(self != null, "The captured reference to this should never be null!");
-                
-                this.self = self;
-                this.token = token;
-            }
-        }
-        
         protected MessageProcessingHandler()
         {
         }
@@ -67,8 +51,8 @@ namespace System.Net.Http
                 sendAsyncTask.ContinueWithStandard(tcs, (task, state) =>
                 {
                     var sendState = (SendState)state;
-                    MessageProcessingHandler self = sendState.self;
-                    CancellationToken token = sendState.token;
+                    MessageProcessingHandler self = sendState._handler;
+                    CancellationToken token = sendState._token;
                     
                     if (task.IsFaulted)
                     {
@@ -135,6 +119,22 @@ namespace System.Net.Http
             else
             {
                 tcs.TrySetException(e);
+            }
+        }
+        
+        // Private class used to capture the SendAsync state in
+        // a closure, while simultaneously avoiding a tuple allocation.
+        private sealed class SendState : TaskCompletionSource<HttpResponseMessage>
+        {
+            public readonly MessageProcessingHandler _handler;
+            public readonly CancellationToken _token;
+            
+            public SendState(MessageProcessingHandler handler, CancellationToken token)
+            {
+                Debug.Assert(handler != null);
+                
+                _handler = handler;
+                _token = token;
             }
         }
     }
