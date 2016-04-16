@@ -505,20 +505,21 @@ namespace System.Data.SqlClient
             {
                 Debug.Assert(_isAsyncBulkCopy, "Execution pended when not doing async bulk copy");
                 result = null;
-                return executeTask.ContinueWith<BulkCopySimpleResultSet>(t =>
+                return executeTask.ContinueWith((t, state) =>
                 {
                     Debug.Assert(!t.IsCanceled, "Execution task was canceled");
                     if (t.IsFaulted)
                     {
                         throw t.Exception.InnerException;
                     }
-                    else
-                    {
-                        var internalResult = new BulkCopySimpleResultSet();
-                        RunParserReliably(internalResult);
-                        return internalResult;
-                    }
-                }, TaskScheduler.Default);
+                    
+                    var self = (SqlBulkCopy)state;
+                    
+                    var internalResult = new BulkCopySimpleResultSet();
+                    self.RunParserReliably(internalResult);
+                    return internalResult;
+                },
+                this, TaskScheduler.Default);
             }
         }
 
@@ -746,18 +747,18 @@ namespace System.Data.SqlClient
             else
             {
                 Debug.Assert(_isAsyncBulkCopy, "Execution pended when not doing async bulk copy");
-                return executeTask.ContinueWith(t =>
+                return executeTask.ContinueWith((t, state) =>
                 {
                     Debug.Assert(!t.IsCanceled, "Execution task was canceled");
                     if (t.IsFaulted)
                     {
                         throw t.Exception.InnerException;
                     }
-                    else
-                    {
-                        RunParserReliably();
-                    }
-                }, TaskScheduler.Default);
+                    
+                    var self = (SqlBulkCopy)state;
+                    self.RunParserReliably();
+                },
+                this, TaskScheduler.Default);
             }
         }
 
@@ -951,14 +952,16 @@ namespace System.Data.SqlClient
             if (_isAsyncBulkCopy)
             {
                 //This will call ReadAsync for DbDataReader (for SqlDataReader it will be truly async read; for non-SqlDataReader it may block.) 
-                return _DbDataReaderRowSource.ReadAsync(cts).ContinueWith((t) =>
+                return _DbDataReaderRowSource.ReadAsync(cts).ContinueWith((t, state) =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion)
                     {
-                        _hasMoreRowToCopy = t.Result;
+                        var self = (SqlBulkCopy)state;
+                        self._hasMoreRowToCopy = t.Result;
                     }
-                    return t;
-                }, TaskScheduler.Default).Unwrap();
+                    return t.Result;
+                },
+                this, TaskScheduler.Default);
             }
             else
             { //this will call Read for DataRows, DataTable and IDataReader (this includes all IDataReader except DbDataReader)
@@ -1453,19 +1456,26 @@ namespace System.Data.SqlClient
             {
                 if (_isAsyncBulkCopy)
                 {
-                    TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-                    reconnectTask.ContinueWith((t) =>
+                    var tcs = new TaskCompletionSource<object>();
+                    reconnectTask.ContinueWith((t, state) =>
                     {
-                        Task writeTask = WriteRowSourceToServerAsync(columnCount, ctoken);
+                        var tuple = (Tuple<SqlBulkCopy, int, CancellationToken, TaskCompletionSource<object>>)state;
+                        SqlBulkCopy self = tuple.Item1;
+                        int capturedColumnCount = tuple.Item2;
+                        CancellationToken token = tuple.Item3;
+                        TaskCompletionSource<object> source = tuple.Item4;
+                        
+                        Task writeTask = self.WriteRowSourceToServerAsync(capturedColumnCount, token);
                         if (writeTask == null)
                         {
-                            tcs.SetResult(null);
+                            source.SetResult(null);
                         }
                         else
                         {
-                            AsyncHelper.ContinueTask(writeTask, tcs, () => tcs.SetResult(null));
+                            AsyncHelper.ContinueTask(writeTask, source, () => source.SetResult(null));
                         }
-                    }, ctoken); // we do not need to propagate exception etc. from reconnect task, we just need to wait for it to finish
+                    },
+                    Tuple.Create(this, columnCount, ctoken, tcs), ctoken); // we do not need to propagate exception etc. from reconnect task, we just need to wait for it to finish
                     return tcs.Task;
                 }
                 else
@@ -1491,21 +1501,24 @@ namespace System.Data.SqlClient
                 if (resultTask != null)
                 {
                     finishedSynchronously = false;
-                    return resultTask.ContinueWith((t) =>
+                    return resultTask.ContinueWith((t, state) =>
                     {
-                        AbortTransaction(); // if there is one, on success transactions will be committed
-                        _isBulkCopyingInProgress = false;
-                        if (_parser != null)
+                        var self = (SqlBulkCopy)state;
+                        
+                        self.AbortTransaction(); // if there is one, on success transactions will be committed
+                        self._isBulkCopyingInProgress = false;
+                        if (self._parser != null)
                         {
-                            _parser._asyncWrite = false;
+                            self._parser._asyncWrite = false;
                         }
-                        if (_parserLock != null)
+                        if (self._parserLock != null)
                         {
-                            _parserLock.Release();
-                            _parserLock = null;
+                            self._parserLock.Release();
+                            self._parserLock = null;
                         }
-                        return t;
-                    }, TaskScheduler.Default).Unwrap();
+                        return t.Result;
+                    },
+                    this, TaskScheduler.Default);
                 }
                 return null;
             }
