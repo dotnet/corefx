@@ -440,6 +440,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void GroupJoin(LabeledOperation source, LabeledOperation operation)
@@ -449,14 +450,15 @@ namespace System.Linq.Parallel.Tests
                 .GroupJoin(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (k, g) => new KeyValuePair<int, IEnumerable<int>>(k, g)))
             {
                 Assert.Equal(seenKey++, group.Key);
-                IntegerRangeSet elements = new IntegerRangeSet(group.Key * GroupFactor, GroupFactor);
-                Assert.All(group.Value, x => elements.Add(x));
-                elements.AssertComplete();
+                int seenElement = group.Key * GroupFactor;
+                Assert.All(group.Value, x => Assert.Equal(seenElement++, x));
+                Assert.Equal((group.Key + 1) * GroupFactor, seenElement);
             }
             Assert.Equal((DefaultStart + DefaultSize) / GroupFactor, seenKey);
         }
 
         [Theory]
+        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void GroupJoin_NotPipelined(LabeledOperation source, LabeledOperation operation)
@@ -466,9 +468,9 @@ namespace System.Linq.Parallel.Tests
                 .GroupJoin(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (k, g) => new KeyValuePair<int, IEnumerable<int>>(k, g)).ToList())
             {
                 Assert.Equal(seenKey++, group.Key);
-                IntegerRangeSet elements = new IntegerRangeSet(group.Key * GroupFactor, GroupFactor);
-                Assert.All(group.Value, x => elements.Add(x));
-                elements.AssertComplete();
+                int seenElement = group.Key * GroupFactor;
+                Assert.All(group.Value, x => Assert.Equal(seenElement++, x));
+                Assert.Equal((group.Key + 1) * GroupFactor, seenElement);
             }
             Assert.Equal((DefaultStart + DefaultSize) / GroupFactor, seenKey);
         }
