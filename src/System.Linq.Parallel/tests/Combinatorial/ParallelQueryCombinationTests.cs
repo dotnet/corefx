@@ -503,47 +503,37 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Join(LabeledOperation source, LabeledOperation operation)
         {
-            int keySeen = 0;
-            IntegerRangeSet elements = new IntegerRangeSet(0, 0);
+            int seen = DefaultStart;
             ParallelQuery<KeyValuePair<int, int>> query = operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
                   .Join(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (x, y) => new KeyValuePair<int, int>(x, y));
             foreach (KeyValuePair<int, int> p in query)
             {
-                if (keySeen % GroupFactor == 0)
-                {
-                    elements.AssertComplete();
-                    elements = new IntegerRangeSet(p.Key * GroupFactor, GroupFactor);
-                }
-                Assert.Equal((DefaultStart + keySeen++) / GroupFactor, p.Key);
-                elements.Add(p.Value);
+                Assert.Equal(seen++, p.Value);
+                Assert.Equal(p.Key, p.Value / GroupFactor);
             }
-            Assert.Equal(DefaultSize, keySeen);
+            Assert.Equal(DefaultStart + DefaultSize, seen);
         }
 
         [Theory]
+        [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
         public static void Join_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
-            int keySeen = 0;
-            IntegerRangeSet elements = new IntegerRangeSet(0, 0);
+            int seen = DefaultStart;
             ParallelQuery<KeyValuePair<int, int>> query = operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
                  .Join(operation.Item(DefaultStart, DefaultSize, source.Item), x => x, y => y / GroupFactor, (x, y) => new KeyValuePair<int, int>(x, y));
             foreach (KeyValuePair<int, int> p in query.ToList())
             {
-                if (keySeen % GroupFactor == 0)
-                {
-                    elements.AssertComplete();
-                    elements = new IntegerRangeSet(p.Key * GroupFactor, GroupFactor);
-                }
-                Assert.Equal((DefaultStart + keySeen++) / GroupFactor, p.Key);
-                elements.Add(p.Value);
+                Assert.Equal(seen++, p.Value);
+                Assert.Equal(p.Key, p.Value / GroupFactor);
             }
-            Assert.Equal(DefaultSize, keySeen);
+            Assert.Equal(DefaultStart + DefaultSize, seen);
         }
 
         [Theory]
