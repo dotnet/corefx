@@ -102,6 +102,12 @@ set _binclashLoggerDll=%~dp0Tools\net45\Microsoft.DotNet.Build.Tasks.dll
 set _binclashlog=%~dp0binclash.log
 set _buildprefix=echo
 set _buildpostfix=^> "%_buildlog%"
+
+IF EXIST "%~dp0CustomSetup.cmd" (
+    call %~dp0CustomSetup.cmd %*
+    set _customSetupReturnCode=!ERRORLEVEL!
+)
+
 call :build %__args%
 
 :: Build
@@ -114,7 +120,7 @@ goto :AfterBuild
 
 :build
 %_buildprefix% msbuild "%_buildproj%" /nologo /maxcpucount /v:minimal /clp:Summary /nodeReuse:false /flp:v=normal;LogFile="%_buildlog%";Append "/l:BinClashLogger,%_binclashLoggerDll%;LogFile=%_binclashlog%" !unprocessedBuildArgs! %_buildpostfix% %OfficialBuildIdArg%
-set BUILDERRORLEVEL=%ERRORLEVEL%
+set BUILDERRORLEVEL=!ERRORLEVEL!
 goto :eof
 
 :AfterBuild
@@ -123,5 +129,9 @@ echo.
 :: Pull the build summary from the log file
 findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%_buildlog%"
 echo [%time%] Build Exit Code = %BUILDERRORLEVEL%
+
+IF EXIST "%~dp0CustomCleanup.cmd" (
+    call %~dp0CustomCleanup.cmd !_customSetupReturnCode!
+)
 
 exit /b %BUILDERRORLEVEL%
