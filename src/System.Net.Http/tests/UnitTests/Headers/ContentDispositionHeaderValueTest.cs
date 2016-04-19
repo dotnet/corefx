@@ -192,8 +192,6 @@ namespace System.Net.Http.Tests
         [Theory]
         [InlineData("no_quotes")]
         [InlineData("one'quote")]
-        [InlineData(@"double""quote")]
-        [InlineData(@"two""double""quotes")]
         [InlineData("'triple'quotes'")]
         public void FileNameStar_NotTwoQuotes_IsNull(string value)
         {
