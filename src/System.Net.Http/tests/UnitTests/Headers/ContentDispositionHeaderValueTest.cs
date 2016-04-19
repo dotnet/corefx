@@ -188,6 +188,24 @@ namespace System.Net.Http.Tests
             contentDisposition.Parameters.Remove(fileNameStar);
             Assert.Null(contentDisposition.FileNameStar);
         }
+        
+        [Theory]
+        [InlineData("no_quotes")]
+        [InlineData("one'quote")]
+        [InlineData(@"double""quote")]
+        [InlineData(@"two""double""quotes")]
+        [InlineData("'triple'quotes'")]
+        public void FileNameStar_NotTwoQuotes_IsNull(string value)
+        {
+            ContentDispositionHeaderValue contentDisposition = new ContentDispositionHeaderValue("inline");
+
+            // Note that uppercase letters are used. Comparison should happen case-insensitive.
+            NameValueHeaderValue fileNameStar = new NameValueHeaderValue("FILENAME*", value);
+            contentDisposition.Parameters.Add(fileNameStar);
+            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Same(fileNameStar, contentDisposition.Parameters.First());
+            Assert.Null(contentDisposition.FileNameStar); // Decode failure
+        }
 
         [Fact]
         public void FileNameStar_NeedsEncoding_EncodedAndDecodedCorrectly()
@@ -213,8 +231,7 @@ namespace System.Net.Http.Tests
             NameValueHeaderValue fileNameStar = new NameValueHeaderValue("FILENAME*", "utf-99'lang'File%CZName.bat");
             contentDisposition.Parameters.Add(fileNameStar);
             Assert.Equal(1, contentDisposition.Parameters.Count);
-            Assert.Equal("FILENAME*", contentDisposition.Parameters.First().Name);
-            Assert.Equal("utf-99'lang'File%CZName.bat", contentDisposition.Parameters.First().Value);
+            Assert.Same(fileNameStar, contentDisposition.Parameters.First());
             Assert.Null(contentDisposition.FileNameStar); // Decode failure
 
             contentDisposition.FileNameStar = "new_name";
