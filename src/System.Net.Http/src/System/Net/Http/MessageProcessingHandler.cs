@@ -126,8 +126,8 @@ namespace System.Net.Http
         // a closure, while simultaneously avoiding a tuple allocation.
         private sealed class SendState : TaskCompletionSource<HttpResponseMessage>
         {
-            public readonly MessageProcessingHandler _handler;
-            public readonly CancellationToken _token;
+            internal readonly MessageProcessingHandler _handler;
+            internal readonly CancellationToken _token;
             
             public SendState(MessageProcessingHandler handler, CancellationToken token)
             {
