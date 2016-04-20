@@ -204,10 +204,7 @@ namespace System.Linq.Parallel.Tests
                     Label("Where-Index", (start, count, s) => s(start, count).Where((x, index) => {throw new DeliberateTestException(); })),
                     })
             {
-                foreach (LabeledOperation source in UnorderedRangeSources())
-                {
-                    yield return new object[] { source, operation };
-                }
+                yield return new object[] { LabeledDefaultSource, operation };
             }
 
             foreach (LabeledOperation operation in UnaryOperations().Select(i => i[0]).Cast<LabeledOperation>().Concat(SkipTakeOperations()))
@@ -348,28 +345,24 @@ namespace System.Linq.Parallel.Tests
         public static IEnumerable<object[]> BinaryFailingOperators()
         {
             LabeledOperation failing = Label("Failing", (start, count, s) => s(start, count).Select<int, int>(x => { throw new DeliberateTestException(); }));
-            LabeledOperation source = UnorderedRangeSources().First();
 
-            foreach (LabeledOperation operation in BinaryOperations(UnorderedRangeSources().First()))
+            foreach (LabeledOperation operation in BinaryOperations(LabeledDefaultSource))
             {
-                foreach (LabeledOperation other in UnorderedRangeSources())
-                {
-                    yield return new object[] { other.Append(failing), operation };
-                }
+                yield return new object[] { LabeledDefaultSource.Append(failing), operation };
                 yield return new object[] { Failing, operation };
             }
 
             foreach (LabeledOperation operation in new[]
                 {
-                     Label("Except-Fail", (start, count, s) => s(start, count).Except(source.Item(start, count), new FailingEqualityComparer<int>())),
-                     Label("GroupJoin-Fail", (start, count, s) => s(start, count).GroupJoin(source.Item(start, count), x => x, y => y, (x, g) => x, new FailingEqualityComparer<int>())),
-                     Label("Intersect-Fail", (start, count, s) => s(start, count).Intersect(source.Item(start, count), new FailingEqualityComparer<int>())),
-                     Label("Join-Fail", (start, count, s) => s(start, count).Join(source.Item(start, count), x => x, y => y, (x, y) => x, new FailingEqualityComparer<int>())),
-                     Label("Union-Fail", (start, count, s) => s(start, count).Union(source.Item(start, count), new FailingEqualityComparer<int>())),
-                     Label("Zip-Fail", (start, count, s) => s(start, count).Zip<int, int, int>(source.Item(start, count), (x, y) => { throw new DeliberateTestException(); })),
+                     Label("Except-Fail", (start, count, s) => s(start, count).Except(DefaultSource(start, count), new FailingEqualityComparer<int>())),
+                     Label("GroupJoin-Fail", (start, count, s) => s(start, count).GroupJoin(DefaultSource(start, count), x => x, y => y, (x, g) => x, new FailingEqualityComparer<int>())),
+                     Label("Intersect-Fail", (start, count, s) => s(start, count).Intersect(DefaultSource(start, count), new FailingEqualityComparer<int>())),
+                     Label("Join-Fail", (start, count, s) => s(start, count).Join(DefaultSource(start, count), x => x, y => y, (x, y) => x, new FailingEqualityComparer<int>())),
+                     Label("Union-Fail", (start, count, s) => s(start, count).Union(DefaultSource(start, count), new FailingEqualityComparer<int>())),
+                     Label("Zip-Fail", (start, count, s) => s(start, count).Zip<int, int, int>(DefaultSource(start, count), (x, y) => { throw new DeliberateTestException(); })),
                 })
             {
-                yield return new object[] { source, operation };
+                yield return new object[] { LabeledDefaultSource, operation };
             }
         }
 
@@ -395,6 +388,7 @@ namespace System.Linq.Parallel.Tests
         #region operators
 
         private static Operation DefaultSource = (start, count, ignore) => ParallelEnumerable.Range(start, count);
+        private static LabeledOperation LabeledDefaultSource = Label("Default", DefaultSource);
 
         private static LabeledOperation Failing = Label("ThrowOnFirstEnumeration", (start, count, source) => Enumerables<int>.ThrowOnEnumeration().AsParallel());
 
