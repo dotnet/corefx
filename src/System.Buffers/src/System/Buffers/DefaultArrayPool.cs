@@ -10,6 +10,8 @@ namespace System.Buffers
         private const int DefaultMaxArrayLength = 1024 * 1024;
         /// <summary>The default maximum number of arrays per bucket that are available for rent.</summary>
         private const int DefaultMaxNumberOfArraysPerBucket = 50;
+        /// <summary>Lazily-allocated empty array used when arrays of length 0 are requested.</summary>
+        private static T[] s_emptyArray; // we support contracts earlier than those with Array.Empty<T>()
 
         private readonly Bucket[] _buckets;
 
@@ -62,6 +64,12 @@ namespace System.Buffers
             if (minimumLength < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(minimumLength));
+            }
+            else if (minimumLength == 0)
+            {
+                // No need for events with the empty array.  Our pool is effectively infinite
+                // and we'll never allocate fo rents and never store for returns.
+                return s_emptyArray ?? (s_emptyArray = new T[0]);
             }
 
             var log = ArrayPoolEventSource.Log;
@@ -116,6 +124,11 @@ namespace System.Buffers
             if (array == null)
             {
                 throw new ArgumentNullException(nameof(array));
+            }
+            else if (array.Length == 0)
+            {
+                // Throw away empty arrays.
+                return;
             }
 
             // Determine with what bucket this array length is associated

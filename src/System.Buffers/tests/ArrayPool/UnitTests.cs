@@ -77,18 +77,6 @@ namespace System.Buffers.ArrayPool.Tests
             Assert.Throws<ArgumentOutOfRangeException>("minimumLength", () => pool.Rent(length));
         }
 
-        [Theory]
-        [InlineData(0, 16)]
-        [InlineData(100, 128)]
-        public static void RentingAValidSizeArraySucceeds(int minimumLength, int expectedLength)
-        {
-            var pool = ArrayPool<byte>.Create();
-            byte[] arr = pool.Rent(minimumLength);
-            Assert.Equal(expectedLength, arr.Length);
-            pool.Return(arr);
-            Assert.Same(arr, pool.Rent(minimumLength));
-        }
-
         [Fact]
         public static void RentingGiganticArraySucceedsOrOOMs()
         {
@@ -100,6 +88,26 @@ namespace System.Buffers.ArrayPool.Tests
                 Assert.True(buffer.Length >= len);
             }
             catch (OutOfMemoryException) { }
+        }
+
+        [Fact]
+        public static void Renting0LengthArrayReturnsSingleton()
+        {
+            byte[] zero0 = ArrayPool<byte>.Shared.Rent(0);
+            byte[] zero1 = ArrayPool<byte>.Shared.Rent(0);
+            byte[] zero2 = ArrayPool<byte>.Shared.Rent(0);
+            byte[] one = ArrayPool<byte>.Shared.Rent(1);
+
+            Assert.Same(zero0, zero1);
+            Assert.Same(zero1, zero2);
+            Assert.NotSame(zero2, one);
+
+            ArrayPool<byte>.Shared.Return(zero0);
+            ArrayPool<byte>.Shared.Return(zero1);
+            ArrayPool<byte>.Shared.Return(zero2);
+            ArrayPool<byte>.Shared.Return(one);
+
+            Assert.Same(zero0, ArrayPool<byte>.Shared.Rent(0));
         }
 
         [Fact]
@@ -406,6 +414,7 @@ namespace System.Buffers.ArrayPool.Tests
             Assert.Equal(60, RunWithListener(() =>
             {
                 for (int i = 0; i < 10; i++) pool.Return(pool.Rent(16)); // 10 rents + 10 allocations, 10 returns
+                for (int i = 0; i < 10; i++) pool.Return(pool.Rent(0)); // 0 events for empty arrays
                 for (int i = 0; i < 10; i++) pool.Rent(16); // 10 rents
                 for (int i = 0; i < 10; i++) pool.Rent(16); // 10 rents + 10 allocations
             }, EventLevel.Verbose, list.Add));
@@ -414,7 +423,6 @@ namespace System.Buffers.ArrayPool.Tests
             Assert.Equal(20, list.Where(e => e.EventId == 2).Count()); // allocations
             Assert.Equal(10, list.Where(e => e.EventId == 3).Count()); // returns
         }
-
 
         [Fact]
         public static void ReturningANonPooledBufferOfDifferentSizeToThePoolThrows()
