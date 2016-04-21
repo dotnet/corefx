@@ -124,7 +124,7 @@ namespace System.Linq.Expressions.Tests
         {
             Func<int> throwCatchAsObject = Expression.Lambda<Func<int>>(
                 Expression.TryCatch(
-                    Expression.Throw(Expression.Constant(new Exception()), typeof(int)),
+                    Expression.Throw(Expression.Constant(new TestException()), typeof(int)),
                     Expression.Catch(typeof(ArgumentException), Expression.Constant(1)),
                     Expression.Catch(typeof(object), Expression.Constant(2))
                     )
