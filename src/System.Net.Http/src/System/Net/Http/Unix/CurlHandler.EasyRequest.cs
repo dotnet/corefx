@@ -652,7 +652,7 @@ namespace System.Net.Http
 
                 internal SendTransferState(int bufferLength)
                 {
-                    Debug.Assert(bufferLength > 0 && bufferLength <= RequestBufferSize, $"Expected 0 < bufferLength <= {RequestBufferSize}, got {bufferLength}");
+                    Debug.Assert(bufferLength > 0 && bufferLength <= MaxRequestBufferSize, $"Expected 0 < bufferLength <= {MaxRequestBufferSize}, got {bufferLength}");
                     _buffer = new byte[bufferLength];
                 }
 
