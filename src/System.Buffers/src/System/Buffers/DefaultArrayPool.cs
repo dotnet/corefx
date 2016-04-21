@@ -68,7 +68,7 @@ namespace System.Buffers
             else if (minimumLength == 0)
             {
                 // No need for events with the empty array.  Our pool is effectively infinite
-                // and we'll never allocate fo rents and never store for returns.
+                // and we'll never allocate for rents and never store for returns.
                 return s_emptyArray ?? (s_emptyArray = new T[0]);
             }
 
@@ -127,7 +127,8 @@ namespace System.Buffers
             }
             else if (array.Length == 0)
             {
-                // Throw away empty arrays.
+                // Ignore empty arrays.  When a zero-length array is rented, we return a singleton
+                // rather than actually taking a buffer out of the lowest bucket.
                 return;
             }
 

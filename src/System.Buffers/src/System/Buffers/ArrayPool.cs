@@ -43,6 +43,7 @@ namespace System.Buffers
         }
 
         /// <summary>Ensures that <see cref="s_sharedInstance"/> has been initialized to a pool and returns it.</summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static ArrayPool<T> EnsureSharedCreated()
         {
             Interlocked.CompareExchange(ref s_sharedInstance, Create(), null);
