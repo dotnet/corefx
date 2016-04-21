@@ -676,8 +676,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void OrderBy_Initial(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -693,8 +691,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void OrderBy_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -707,8 +703,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void OrderBy_OtherDirection(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -724,8 +718,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void OrderBy_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -738,8 +730,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void OrderByDescending_Initial(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -755,8 +745,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void OrderByDescending_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -769,8 +757,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void OrderByDescending_OtherDirection(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -786,8 +772,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void OrderByDescending_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -971,8 +955,6 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void SequenceEqual_Self(LabeledOperation source, LabeledOperation operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).SequenceEqual(operation.Item(DefaultStart, DefaultSize, source.Item)));
@@ -1169,8 +1151,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void ThenBy_Initial(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1186,8 +1166,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void ThenBy_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1200,8 +1178,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void ThenBy_OtherDirection(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -1217,8 +1193,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void ThenBy_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -1231,8 +1205,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void ThenByDescending_Initial(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1248,8 +1220,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void ThenByDescending_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart;
@@ -1262,8 +1232,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void ThenByDescending_OtherDirection(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
@@ -1279,8 +1247,6 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        [MemberData(nameof(UnaryReversedOperators))]
-        [MemberData(nameof(BinaryReversedOperators))]
         public static void ThenByDescending_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
         {
             int seen = DefaultStart + DefaultSize;
