@@ -211,6 +211,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [ActiveIssue(1155)]
         [OuterLoop]
         [MemberData(nameof(GroupJoinData), new[] { 1024 * 4, 1024 * 8 }, new[] { 0, 1, 1024 * 4, 1024 * 8 })]
         public static void GroupJoin_Multiple_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
@@ -282,6 +283,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
+        [ActiveIssue(1155)]
         [OuterLoop]
         [MemberData(nameof(GroupJoinData), new[] { 512, 1024 }, new[] { 0, 1, 1024, 1024 * 4 })]
         public static void GroupJoin_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
