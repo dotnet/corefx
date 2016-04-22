@@ -94,7 +94,7 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Deleted, true)]
         [InlineData(WatcherChangeTypes.Renamed, false)]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        [ActiveIssue(3215, PlatformID.OSX)] // failing for Changed, false
+        //[ActiveIssue(3215, PlatformID.OSX)] // failing for Changed, false
         public void Unix_File_Move_In_Nested_Directory_Triggers_Event(WatcherChangeTypes eventType, bool moveRaisesEvent)
         {
             MoveAndCheck_NestedDirectory(eventType, moveRaisesEvent);

@@ -23,8 +23,8 @@ namespace System.IO.Tests
                 ManualResetEvent unblockHandler = new ManualResetEvent(false);
                 watcher.Changed += (o, e) =>
                 {
-                // block the handling thread
-                unblockHandler.WaitOne();
+                    // block the handling thread
+                    unblockHandler.WaitOne();
                 };
 
                 AutoResetEvent eventOccurred = new AutoResetEvent(false);

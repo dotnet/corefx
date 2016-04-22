@@ -85,7 +85,8 @@ namespace System.IO.Tests
             });
         }
 
-        [Fact, OuterLoop]
+        [Fact]
+        [OuterLoop]
         // Note: Can't use the TestNestedDirectoriesHelper since we need access to the root
         public void FileSystemWatcher_Moved_NestedDirectoryRoot()
         {

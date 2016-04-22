@@ -20,7 +20,7 @@ namespace System.IO.Tests
         // going to fail the test.  If we don't expect an event to occur, then we need
         // to keep the timeout short, as in a successful run we'll end up waiting for
         // the entire timeout specified.
-        public const int WaitForExpectedEventTimeout = 30000;
+        public const int WaitForExpectedEventTimeout = 3000;
         public const int WaitForUnexpectedEventTimeout = 500;
 
         public static AutoResetEvent WatchForEvents(FileSystemWatcher watcher, WatcherChangeTypes actions)

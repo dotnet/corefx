@@ -11,7 +11,7 @@ namespace System.IO.Tests
     public partial class IncludeSubdirectoriesTests : FileSystemWatcherTest
     {
         [Fact]
-        [ActiveIssue(1657)]
+        //[ActiveIssue(1657)]
         public void FileSystemWatcher_IncludeSubDirectories_File()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -43,7 +43,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(1657)]
+        //[ActiveIssue(1657)]
         public void FileSystemWatcher_IncludeSubDirectories_Directory()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))

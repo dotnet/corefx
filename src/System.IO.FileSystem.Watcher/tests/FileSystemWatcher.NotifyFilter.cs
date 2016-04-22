@@ -13,7 +13,7 @@ namespace System.IO.Tests
     public partial class NotifyFilterTests : FileSystemWatcherTest
     {
         [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_NotifyFilter_Attributes()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -37,7 +37,7 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows | PlatformID.OSX)]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_NotifyFilter_CreationTime()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -79,7 +79,7 @@ namespace System.IO.Tests
 
 
         [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_NotifyFilter_LastAccessTime()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -99,7 +99,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_NotifyFilter_LastWriteTime()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -119,7 +119,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_NotifyFilter_Size()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -189,7 +189,7 @@ namespace System.IO.Tests
 
 
         [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_NotifyFilter_Negative()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))

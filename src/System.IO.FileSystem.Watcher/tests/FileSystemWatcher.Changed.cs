@@ -12,7 +12,7 @@ namespace System.IO.Tests
     public class ChangedTests : FileSystemWatcherTest
     {
         [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_Changed_LastWrite_File()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -31,7 +31,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_Changed_LastWrite_Directory()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -81,22 +81,22 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact, ActiveIssue(2279)]
+        [Fact]
+        //[ActiveIssue(2279)]
         public void FileSystemWatcher_Changed_WatchedFolder()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher())
+            using (var watcher = new FileSystemWatcher(dir.Path))
             {
                 watcher.Path = Path.GetFullPath(dir.Path);
                 watcher.Filter = "*";
                 AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Changed);
 
                 watcher.EnableRaisingEvents = true;
+                Directory.SetLastWriteTime(dir.Path, DateTime.Now + TimeSpan.FromSeconds(10));
 
-                Directory.SetLastAccessTime(watcher.Path, DateTime.Now);
-
-                ExpectEvent(eventOccurred, "changed");
+                ExpectNoEvent(eventOccurred, "changed");
             }
         }
 

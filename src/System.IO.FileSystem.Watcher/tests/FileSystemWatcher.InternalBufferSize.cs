@@ -12,9 +12,8 @@ namespace System.IO.Tests
     public class InternalBufferSizeTests : FileSystemWatcherTest
     {
         [Fact]
-        [ActiveIssue(1165)]
         [PlatformSpecific(PlatformID.Windows)]
-        public void FileSystemWatcher_InternalBufferSize_File()
+        public void FileSystemWatcher_InternalBufferSize_Error()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
@@ -24,8 +23,43 @@ namespace System.IO.Tests
                 ManualResetEvent unblockHandler = new ManualResetEvent(false);
                 watcher.Changed += (o, e) =>
                 {
-                // block the handling thread
-                unblockHandler.WaitOne();
+                    // block the handling thread
+                    unblockHandler.WaitOne();
+                };
+
+                AutoResetEvent eventOccurred = new AutoResetEvent(false);
+                watcher.Error += (o, e) =>
+                {
+                    eventOccurred.Set();
+                };
+                watcher.EnableRaisingEvents = true;
+
+                // See note in FileSystemWatcher_Error_File
+                int originalInternalBufferOperationCapacity = watcher.InternalBufferSize / (12 + 2 * (file.Path.Length + 1));
+                for (int i = 1; i < originalInternalBufferOperationCapacity * 4; i++)
+                {
+                    File.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(i));
+                }
+
+                unblockHandler.Set();
+                ExpectEvent(eventOccurred, "error");
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void FileSystemWatcher_InternalBufferSize_Set()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path))
+            {
+                watcher.Filter = Path.GetFileName(file.Path);
+                ManualResetEvent unblockHandler = new ManualResetEvent(false);
+                watcher.Changed += (o, e) =>
+                {
+                    // block the handling thread
+                    unblockHandler.WaitOne();
                 };
 
                 AutoResetEvent eventOccurred = new AutoResetEvent(false);
@@ -37,20 +71,10 @@ namespace System.IO.Tests
 
                 // See note in FileSystemWatcher_Error_File
                 int originalInternalBufferOperationCapacity = watcher.InternalBufferSize / (16 + 2 * (file.Path.Length + 1));
-                for (int i = 1; i < originalInternalBufferOperationCapacity * 2; i++)
-                {
-                    File.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(i));
-                }
-
-                unblockHandler.Set();
-                ExpectEvent(eventOccurred, "error");
-
-                // Update InternalBufferSize to accommodate the data
-                watcher.InternalBufferSize = watcher.InternalBufferSize * 2;
-                unblockHandler.Reset();
+                watcher.InternalBufferSize = watcher.InternalBufferSize * 5;
 
                 // Send the same number of events.
-                for (int i = 1; i < originalInternalBufferOperationCapacity * 2; i++)
+                for (int i = 1; i < originalInternalBufferOperationCapacity * 4; i++)
                 {
                     File.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(i));
                 }

@@ -73,7 +73,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
+        //[ActiveIssue(2011, PlatformID.OSX)]
         public void FileSystemWatcher_Created_MoveDirectory()
         {
             // create two test directories
@@ -159,7 +159,8 @@ namespace System.IO.Tests
 
         // This can potentially fail, depending on where the test is run from, due to 
         // the MAX_PATH limitation. When issue 645 is closed, this shouldn't be a problem
-        [Fact, ActiveIssue(645, PlatformID.Any)]
+        [Fact]
+        [ActiveIssue(645, PlatformID.Any)]
         public void FileSystemWatcher_Created_DeepDirectoryStructure()
         {
             // List of created directories
@@ -198,7 +199,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(CanCreateSymbolicLinks))]
-        [ActiveIssue(3215, PlatformID.OSX)]
+        //[ActiveIssue(3215, PlatformID.OSX)]
         public void FileSystemWatcher_Created_WatcherDoesntFollowSymLinkToFile()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
