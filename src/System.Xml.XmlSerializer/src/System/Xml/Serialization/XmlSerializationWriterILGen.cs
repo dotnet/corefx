@@ -61,16 +61,15 @@ namespace System.Xml.Serialization
                 WriteEnumMethod((EnumMapping)mapping);
             }
         }
-        internal Type GenerateEnd()
+        internal TypeBuilder GenerateEnd(out ConstructorBuilder defaultCtor)
         {
             GenerateReferencedMethods();
             GenerateInitCallbacksMethod();
-            this.typeBuilder.DefineDefaultConstructor(
-                CodeGenerator.PublicMethodAttributes);
-            return this.typeBuilder.CreateTypeInfo().AsType();
+            defaultCtor = this.typeBuilder.DefineDefaultConstructor(CodeGenerator.PublicMethodAttributes);
+            return this.typeBuilder;
         }
 
-        internal string GenerateElement(XmlMapping xmlMapping)
+        internal MethodBuilder GenerateElement(XmlMapping xmlMapping)
         {
             if (!xmlMapping.IsWriteable)
                 return null;
@@ -347,7 +346,7 @@ namespace System.Xml.Serialization
             WriteTag("WriteEmptyTag", name, ns);
         }
 
-        private string GenerateMembersElement(XmlMembersMapping xmlMembersMapping)
+        private MethodBuilder GenerateMembersElement(XmlMembersMapping xmlMembersMapping)
         {
             ElementAccessor element = xmlMembersMapping.Accessor;
             MembersMapping mapping = (MembersMapping)element.Mapping;
@@ -538,11 +537,11 @@ namespace System.Xml.Serialization
             {
                 WriteEndElement();
             }
-            ilg.EndMethod();
-            return methodName;
+
+            return ilg.EndMethod();
         }
 
-        private string GenerateTypeElement(XmlTypeMapping xmlTypeMapping)
+        private MethodBuilder GenerateTypeElement(XmlTypeMapping xmlTypeMapping)
         {
             ElementAccessor element = xmlTypeMapping.Accessor;
             TypeMapping mapping = element.Mapping;
@@ -587,8 +586,7 @@ namespace System.Xml.Serialization
 
             WriteMember(new SourceInfo("o", "o", null, typeof(object), ilg), null, new ElementAccessor[] { element }, null, null, mapping.TypeDesc, true);
 
-            ilg.EndMethod();
-            return methodName;
+            return ilg.EndMethod();
         }
 
         private string NextMethodName(string name)

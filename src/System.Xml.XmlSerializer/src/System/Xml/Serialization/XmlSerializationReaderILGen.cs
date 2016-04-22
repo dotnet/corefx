@@ -238,7 +238,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        internal void GenerateEnd(string[] methods, XmlMapping[] xmlMappings, Type[] types)
+        internal TypeBuilder GenerateEnd(out ConstructorBuilder defaultCtor)
         {
             GenerateReferencedMethods();
             GenerateInitCallbacksMethod();
@@ -274,13 +274,13 @@ namespace System.Xml.Serialization
             }
             ilg.EndMethod();
 
-            this.typeBuilder.DefineDefaultConstructor(
+            defaultCtor = this.typeBuilder.DefineDefaultConstructor(
                 CodeGenerator.PublicMethodAttributes);
-            Type readerType = this.typeBuilder.CreateTypeInfo().AsType();
-            CreatedTypes.Add(readerType.Name, readerType);
+
+            return typeBuilder;
         }
 
-        internal string GenerateElement(XmlMapping xmlMapping)
+        internal MethodBuilder GenerateElement(XmlMapping xmlMapping)
         {
             if (!xmlMapping.IsReadable)
                 return null;
@@ -388,7 +388,7 @@ namespace System.Xml.Serialization
         }
 
 
-        private string GenerateMembersElement(XmlMembersMapping xmlMembersMapping)
+        private MethodBuilder GenerateMembersElement(XmlMembersMapping xmlMembersMapping)
         {
             return GenerateLiteralMembersElement(xmlMembersMapping);
         }
@@ -422,7 +422,7 @@ namespace System.Xml.Serialization
             return RaCodeGen.GetStringForMember(parent, mapping.ChoiceIdentifier.MemberName, parentTypeDesc);
         }
 
-        private string GenerateLiteralMembersElement(XmlMembersMapping xmlMembersMapping)
+        private MethodBuilder GenerateLiteralMembersElement(XmlMembersMapping xmlMembersMapping)
         {
             ElementAccessor element = xmlMembersMapping.Accessor;
             MemberMapping[] mappings = ((MembersMapping)element.Mapping).Members;
@@ -647,9 +647,7 @@ namespace System.Xml.Serialization
             }
 
             ilg.Ldloc(ilg.GetLocal("p"));
-            ilg.EndMethod();
-
-            return methodName;
+            return ilg.EndMethod();
         }
 
         private void InitializeValueTypes(string arrayName, MemberMapping[] mappings)
@@ -667,7 +665,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        private string GenerateTypeElement(XmlTypeMapping xmlTypeMapping)
+        private MethodBuilder GenerateTypeElement(XmlTypeMapping xmlTypeMapping)
         {
             ElementAccessor element = xmlTypeMapping.Accessor;
             TypeMapping mapping = element.Mapping;
@@ -708,8 +706,7 @@ namespace System.Xml.Serialization
             // for code compat as compiler does
             ilg.Stloc(ilg.ReturnLocal);
             ilg.Ldloc(ilg.ReturnLocal);
-            ilg.EndMethod();
-            return methodName;
+            return ilg.EndMethod();
         }
 
         private string NextMethodName(string name)
