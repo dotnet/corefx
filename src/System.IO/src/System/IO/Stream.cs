@@ -159,28 +159,7 @@ namespace System.IO
         // the current position.
         public void CopyTo(Stream destination)
         {
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-            if (!CanRead && !CanWrite)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
-            }
-            if (!destination.CanRead && !destination.CanWrite)
-            {
-                throw new ObjectDisposedException(nameof(destination), SR.ObjectDisposed_StreamClosed);
-            }
-            if (!CanRead)
-            {
-                throw new NotSupportedException(SR.NotSupported_UnreadableStream);
-            }
-            if (!destination.CanWrite)
-            {
-                throw new NotSupportedException(SR.NotSupported_UnwritableStream);
-            }
-
-            InternalCopyTo(destination, DefaultCopyBufferSize);
+            CopyTo(destination, DefaultCopyBufferSize);
         }
 
         public void CopyTo(Stream destination, int bufferSize)
