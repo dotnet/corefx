@@ -126,7 +126,7 @@ if /I [%clean_successful%] == [true] (
   echo. >> %cleanlog% && echo Clean completed successfully. >> %cleanlog%
   exit /b 0
 ) else (
-  echo An error occured while cleaning; see %cleanlog% for more details.
+  echo An error occured while cleaning; see %cleanlog% for more details.>&2
   echo. >> %cleanlog% && echo Clean completed with errors. >> %cleanlog%
   exit /b 1
 )

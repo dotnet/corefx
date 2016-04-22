@@ -57,8 +57,8 @@ if not defined VisualStudioVersion (
         goto :Build
     )
 
-    echo Error: build.cmd requires Visual Studio 2015.
-    echo        Please see https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md for build instructions.
+    echo Error: build.cmd requires Visual Studio 2015.>&2
+    echo        Please see https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md for build instructions.>&2
     exit /b 1
 )
 
@@ -79,7 +79,7 @@ msbuild "%~dp0build.proj" /nologo /t:GenerateVersionHeader /p:NativeVersionHeade
 IF EXIST "%~dp0src\native\Windows\build-native.cmd" (
     call %~dp0src\native\Windows\build-native.cmd %__args% >nativebuild.log
     IF ERRORLEVEL 1 (
-        echo Native component build failed see nativebuild.log for more details.
+        echo Native component build failed see nativebuild.log for more details.>&2
     ) else (
         echo [%time%] Successfully built Native Libraries.
     )
@@ -120,8 +120,14 @@ goto :eof
 :AfterBuild
 
 echo.
-:: Pull the build summary from the log file
-findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%_buildlog%"
-echo [%time%] Build Exit Code = %BUILDERRORLEVEL%
-
+if NOT [%ERRORLEVEL%]==[0] (
+  :: Pull the build summary from the log file
+  findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%_buildlog%">&2
+  echo [%time%] Build Exit Code = %BUILDERRORLEVEL%>&2
+  echo ERROR: An error occurred while building, see %_buildlog% for more details.>&2
+) else (
+  :: Pull the build summary from the log file
+  findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%_buildlog%"
+  echo [%time%] Build Exit Code = %BUILDERRORLEVEL%
+)
 exit /b %BUILDERRORLEVEL%
