@@ -25,16 +25,25 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [OuterLoop]
-        [ActiveIssue(8024)]
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, false)]
-        [InlineData(WatcherChangeTypes.Deleted, false)]
-        [InlineData(WatcherChangeTypes.Renamed, true)]
+        [InlineData(WatcherChangeTypes.Deleted, true)]
+        [InlineData(WatcherChangeTypes.Renamed, false)]
         [PlatformSpecific(PlatformID.Windows)]
-        public void Windows_File_Move_To_Different_Directory_Triggers_Event(WatcherChangeTypes eventType, bool moveRaisesEvent)
+        public void Windows_File_Move_To_Different_Unwatched_Directory_Triggers_Event(WatcherChangeTypes eventType, bool moveRaisesEvent)
         {
-            MoveAndCheck_DifferentDirectory(eventType, moveRaisesEvent);
+            MoveAndCheck_DifferentUnwatchedDirectory(eventType, moveRaisesEvent);
+        }
+
+        [Theory]
+        [InlineData(WatcherChangeTypes.Changed, true)]
+        [InlineData(WatcherChangeTypes.Created, false)]
+        [InlineData(WatcherChangeTypes.Deleted, false)]
+        [InlineData(WatcherChangeTypes.Renamed, false)]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void Windows_File_Move_To_Different_Watched_Directory_Triggers_Event(WatcherChangeTypes eventType, bool moveRaisesEvent)
+        {
+            MoveAndCheck_DifferentWatchedDirectory(eventType, moveRaisesEvent);
         }
 
         [Theory]
@@ -75,17 +84,25 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [OuterLoop]
-        [ActiveIssue(8024)]
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, true)]
         [InlineData(WatcherChangeTypes.Deleted, true)]
         [InlineData(WatcherChangeTypes.Renamed, false)]
         [PlatformSpecific(PlatformID.AnyUnix)]
-        public void Unix_File_Move_To_Different_Directory_Triggers_Event(WatcherChangeTypes eventType, bool moveRaisesEvent)
+        public void Unix_File_Move_To_Different_Unwatched_Directory_Triggers_Event(WatcherChangeTypes eventType, bool moveRaisesEvent)
         {
-            MoveAndCheck_DifferentDirectory(eventType, moveRaisesEvent);
+            MoveAndCheck_DifferentUnwatchedDirectory(eventType, moveRaisesEvent);
+        }
 
+        [Theory]
+        [InlineData(WatcherChangeTypes.Changed, false)]
+        [InlineData(WatcherChangeTypes.Created, true)]
+        [InlineData(WatcherChangeTypes.Deleted, true)]
+        [InlineData(WatcherChangeTypes.Renamed, false)]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void Unix_File_Move_To_Different_Watched_Directory_Triggers_Event(WatcherChangeTypes eventType, bool moveRaisesEvent)
+        {
+            MoveAndCheck_DifferentWatchedDirectory(eventType, moveRaisesEvent);
         }
 
         [Theory, OuterLoop]
@@ -158,25 +175,54 @@ namespace System.IO.Tests
         /// This test checks for when the file being moved has a destination directory that is outside of
         /// the path of the FileSystemWatcher.
         /// </summary>
-        private void MoveAndCheck_DifferentDirectory(WatcherChangeTypes eventType, bool moveRaisesEvent)
+        private void MoveAndCheck_DifferentUnwatchedDirectory(WatcherChangeTypes eventType, bool moveRaisesEvent)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, GetTestFileName())))
             using (var dir_unwatched = new TempDirectory(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
+            using (var watcher = new FileSystemWatcher(dir.Path, "*.*"))
             {
-                // put everything in our own directory to avoid collisions
-                watcher.Path = Path.GetFullPath(dir.Path);
-                watcher.Filter = "*.*";
-
                 // create a file
                 using (var testFile = new TempFile(Path.Combine(dir.Path, "file")))
                 {
                     watcher.EnableRaisingEvents = true;
                     AutoResetEvent eventOccurred = WatchForEvents(watcher, eventType);
 
-                    // Move the testFile to a different name in the same directory
+                    // Move the testFile to a different directory
                     File.Move(testFile.Path, Path.Combine(dir_unwatched.Path, Path.GetFileName(testFile.Path) + "_" + eventType.ToString()));
+
+                    // Test which events are thrown
+                    if (moveRaisesEvent)
+                        ExpectEvent(eventOccurred, eventType.ToString());
+                    else
+                        ExpectNoEvent(eventOccurred, eventType.ToString());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets up watchers for the type given before performing a File.Move operation and checking for
+        /// events. If moveRaisesEvent is true, we make sure that the given event type is observed. If false,
+        /// we ensure that it is not observed.
+        /// 
+        /// This test checks for when the file being moved has a destination directory that is inside the
+        /// bounds of the watcher but parallel to its original directory.
+        /// </summary>
+        private void MoveAndCheck_DifferentWatchedDirectory(WatcherChangeTypes eventType, bool moveRaisesEvent)
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, GetTestFileName())))
+            using (var dir_adjacent = new TempDirectory(Path.Combine(testDirectory.Path, GetTestFileName())))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*.*"))
+            {
+                // create a file
+                using (var testFile = new TempFile(Path.Combine(dir.Path, "file")))
+                {
+                    watcher.EnableRaisingEvents = true;
+                    AutoResetEvent eventOccurred = WatchForEvents(watcher, eventType);
+
+                    // Move the testFile to a different directory
+                    File.Move(testFile.Path, Path.Combine(dir_adjacent.Path, Path.GetFileName(testFile.Path) + "_" + eventType.ToString()));
 
                     // Test which events are thrown
                     if (moveRaisesEvent)

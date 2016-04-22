@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public partial class ErrorTests : FileSystemWatcherTest
+    public class ErrorTests : FileSystemWatcherTest
     {
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]

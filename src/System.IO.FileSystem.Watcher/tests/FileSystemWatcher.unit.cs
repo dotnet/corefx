@@ -147,7 +147,6 @@ namespace System.IO.Tests
             }
         }
 
-
         [Fact]
         public void FileSystemWatcher_Error()
         {
@@ -204,7 +203,6 @@ namespace System.IO.Tests
             watcher.Filter = "ABC.DLL";
             Assert.Equal("ABC.DLL", watcher.Filter);
         }
-
 
         [Fact]
         public void FileSystemWatcher_IncludeSubdirectories()

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public partial class RenamedTests : FileSystemWatcherTest
+    public class RenamedTests : FileSystemWatcherTest
     {
         [Fact]
         public void FileSystemWatcher_Renamed_Directory()

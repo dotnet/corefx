@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public partial class NotifyFilterTests : FileSystemWatcherTest
+    public class NotifyFilterTests : FileSystemWatcherTest
     {
         [Fact]
         //[ActiveIssue(2011, PlatformID.OSX)]
@@ -76,7 +76,6 @@ namespace System.IO.Tests
                 ExpectEvent(eventOccurred, "changed");
             }
         }
-
 
         [Fact]
         //[ActiveIssue(2011, PlatformID.OSX)]

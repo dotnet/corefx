@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public partial class RenamedEventArgsTests
+    public class RenamedEventArgsTests
     {
         [Theory]
         [InlineData(WatcherChangeTypes.Changed, "C:", "foo.txt", "bar.txt")]

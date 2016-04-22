@@ -6,9 +6,10 @@ using System;
 using System.IO;
 using System.Threading;
 using Xunit;
+
 namespace System.IO.Tests
 {
-    public partial class IncludeSubdirectoriesTests : FileSystemWatcherTest
+    public class IncludeSubdirectoriesTests : FileSystemWatcherTest
     {
         [Fact]
         //[ActiveIssue(1657)]
