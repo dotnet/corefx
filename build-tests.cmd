@@ -19,7 +19,7 @@ call %~dp0init-tools.cmd
 echo msbuild.exe %~dp0src\tests.builds !options! !allargs! >> %buildTests%
 call msbuild.exe %~dp0src\tests.builds !options! !allargs!
 if NOT [%ERRORLEVEL%]==[0] (
-  echo ERROR: An error occurred while building the tests, see %buildTests% for more details.
+  echo ERROR: An error occurred while building the tests, see %buildTests% for more details.>&2
   exit /b
 )
 

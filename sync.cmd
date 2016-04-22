@@ -64,7 +64,7 @@ if [%src%] == [true] (
   echo Fetching git database from remote repos ...
   call git fetch --all -p -v >> %synclog% 2>&1
   if NOT [!ERRORLEVEL!]==[0] (
-    echo ERROR: An error occurred while fetching remote source code, see %synclog% for more details.
+    echo ERROR: An error occurred while fetching remote source code, see %synclog% for more details.>&2
     exit /b
   )
 )
@@ -74,7 +74,7 @@ if [%azureBlobs%] == [true] (
   echo msbuild.exe %~dp0src\syncAzure.proj !options! !unprocessedBuildArgs! >> %synclog%
   call msbuild.exe %~dp0src\syncAzure.proj !options! !unprocessedBuildArgs!
   if NOT [!ERRORLEVEL!]==[0] (
-    echo ERROR: An error occurred while downloading packages from Azure BLOB, see %synclog% for more details. There may have been networking problems so please try again in a few minutes.
+    echo ERROR: An error occurred while downloading packages from Azure BLOB, see %synclog% for more details. There may have been networking problems so please try again in a few minutes.>&2
     exit /b
   )
 )
@@ -90,7 +90,7 @@ if [%packages%] == [true] (
   echo msbuild.exe %~dp0build.proj !options! !unprocessedBuildArgs! >> %synclog%
   call msbuild.exe %~dp0build.proj !options! !unprocessedBuildArgs!
   if NOT [!ERRORLEVEL!]==[0] (
-    echo ERROR: An error occurred while syncing packages, see %synclog% for more details. There may have been networking problems so please try again in a few minutes.
+    echo ERROR: An error occurred while syncing packages, see %synclog% for more details. There may have been networking problems so please try again in a few minutes.>&2
     exit /b
   )
 )
