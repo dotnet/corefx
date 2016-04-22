@@ -6,12 +6,41 @@ using System.Net.Sockets;
 
 namespace System.Net.Internals
 {
-    internal class SocketExceptionFactory
+    internal static partial class SocketExceptionFactory
     {
+        private class ExtendedSocketException : SocketException
+        {
+            private readonly EndPoint _endPoint;
+
+            public ExtendedSocketException(int errorCode, EndPoint endPoint)
+                : base(errorCode)
+            {
+                _endPoint = endPoint;
+            }
+
+            public ExtendedSocketException(SocketError socketError, int platformError)
+                : base((int)socketError)
+            {
+                HResult = platformError;
+            }
+
+            public override string Message
+            {
+                get
+                {
+                    if (_endPoint != null)
+                    {
+                        return base.Message + " " + _endPoint.ToString();
+                    }
+
+                    return base.Message;
+                }
+            }
+        }
+
         public static SocketException CreateSocketException(int socketError, EndPoint endPoint)
         {
-            // TODO (#7873): expose SocketException(int, EndPoint) to maintain exception Message compatibility.
-            return new SocketException(socketError);
+            return new ExtendedSocketException(socketError, endPoint);
         }
     }
 }
