@@ -40,7 +40,7 @@ namespace System.Net.Http
             // to catch the exception since the caller doesn't expect exceptions when calling SendAsync(): The 
             // expectation is that the returned task will get faulted on errors, but the async call to SendAsync() 
             // should complete.
-            SendState tcs = new SendState(this, cancellationToken);
+            var tcs = new SendState(this, cancellationToken);
             try
             {
                 HttpRequestMessage newRequestMessage = ProcessRequest(request, cancellationToken);
