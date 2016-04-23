@@ -28,36 +28,6 @@ namespace System.IO
             // WaitHandle, we don't need to worry about Disposing it.
             return LazyInitializer.EnsureInitialized(ref _asyncActiveSemaphore, () => new SemaphoreSlim(1, 1));
         }
-        
-        // This method is used by CopyTo, CopyToAsync,
-        // and NullStream's override of the latter.
-        internal void ValidateCopyToArguments(Stream destination, int bufferSize)
-        {
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-            if (bufferSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
-            }
-            if (!CanRead && !CanWrite)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
-            }
-            if (!destination.CanRead && !destination.CanWrite)
-            {
-                throw new ObjectDisposedException(nameof(destination), SR.ObjectDisposed_StreamClosed);
-            }
-            if (!CanRead)
-            {
-                throw new NotSupportedException(SR.NotSupported_UnreadableStream);
-            }
-            if (!destination.CanWrite)
-            {
-                throw new NotSupportedException(SR.NotSupported_UnwritableStream);
-            }
-        }
 
         public abstract bool CanRead
         {
@@ -312,6 +282,34 @@ namespace System.IO
             byte[] oneByteArray = new byte[1];
             oneByteArray[0] = value;
             Write(oneByteArray, 0, 1);
+        }
+        
+        internal void ValidateCopyToArguments(Stream destination, int bufferSize)
+        {
+            if (destination == null)
+            {
+                throw new ArgumentNullException(nameof(destination));
+            }
+            if (bufferSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
+            }
+            if (!CanRead && !CanWrite)
+            {
+                throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
+            }
+            if (!destination.CanRead && !destination.CanWrite)
+            {
+                throw new ObjectDisposedException(nameof(destination), SR.ObjectDisposed_StreamClosed);
+            }
+            if (!CanRead)
+            {
+                throw new NotSupportedException(SR.NotSupported_UnreadableStream);
+            }
+            if (!destination.CanWrite)
+            {
+                throw new NotSupportedException(SR.NotSupported_UnwritableStream);
+            }
         }
 
         private sealed class NullStream : Stream
