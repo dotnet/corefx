@@ -121,13 +121,12 @@ namespace System.IO.Tests
             Assert.Equal(0, source.Position);
         }
         
-        [Theory]
-        [InlineData(3)]
-        public static void TestNullStream_WriteByte(byte data)
+        [Fact]
+        public static void TestNullStream_WriteByte()
         {
             Stream source = Stream.Null;
             
-            source.WriteByte(data);
+            source.WriteByte(3);
             Assert.Equal(0, source.Position);
         }
 
