@@ -118,7 +118,7 @@ namespace System.IO.Tests
             {
                 using (var nestedFile = new TempFile(Path.Combine(ttd.Path, "nestedFile")))
                 {
-                    Directory.SetLastAccessTime(nestedFile.Path, DateTime.Now);
+                    Directory.SetLastAccessTime(nestedFile.Path, DateTime.Now.Subtract(TimeSpan.FromDays(2)));
                     ExpectEvent(are, "changed");
                 }
             },
