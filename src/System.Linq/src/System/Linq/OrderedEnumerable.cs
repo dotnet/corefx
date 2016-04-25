@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace System.Linq
 {
@@ -26,10 +28,22 @@ namespace System.Linq
             Buffer<TElement> buffer = new Buffer<TElement>(_source);
             if (buffer._count > 0)
             {
-                int[] map = SortedMap(buffer);
-                for (int i = 0; i < buffer._count; i++)
+                int[] map = null;
+                try
                 {
-                    yield return buffer._items[map[i]];
+                    map = SortedMap(buffer);
+                    for (int i = 0; i < buffer._count; i++)
+                    {
+                        yield return buffer._items[map[i]];
+                    }
+                }
+                finally
+                {
+                    var rentedMap = Interlocked.Exchange(ref map, null);
+                    if (rentedMap != null)
+                    {
+                        ArrayPool<int>.Shared.Return(rentedMap);
+                    }
                 }
             }
         }
@@ -51,6 +65,8 @@ namespace System.Linq
                 array[i] = buffer._items[map[i]];
             }
 
+            ArrayPool<int>.Shared.Return(map);
+
             return array;
         }
 
@@ -66,6 +82,8 @@ namespace System.Linq
                 {
                     list.Add(buffer._items[map[i]]);
                 }
+
+                ArrayPool<int>.Shared.Return(map);
             }
 
             return list;
@@ -99,11 +117,23 @@ namespace System.Linq
                 }
                 else
                 {
-                    int[] map = SortedMap(buffer, minIdx, maxIdx);
-                    while (minIdx <= maxIdx)
+                    int[] map = null;
+                    try
                     {
-                        yield return buffer._items[map[minIdx]];
-                        ++minIdx;
+                        map = SortedMap(buffer, minIdx, maxIdx);
+                        while (minIdx <= maxIdx)
+                        {
+                            yield return buffer._items[map[minIdx]];
+                            ++minIdx;
+                        }
+                    }
+                    finally
+                    {
+                        var rentedMap = Interlocked.Exchange(ref map, null);
+                        if (rentedMap != null)
+                        {
+                            ArrayPool<int>.Shared.Return(rentedMap);
+                        }
                     }
                 }
             }
@@ -137,6 +167,7 @@ namespace System.Linq
                 ++idx;
                 ++minIdx;
             }
+            ArrayPool<int>.Shared.Return(map);
 
             return array;
         }
@@ -167,6 +198,8 @@ namespace System.Linq
                 list.Add(buffer._items[map[minIdx]]);
                 ++minIdx;
             }
+
+            ArrayPool<int>.Shared.Return(map);
 
             return list;
         }
@@ -587,7 +620,7 @@ namespace System.Linq
         private int[] ComputeMap(TElement[] elements, int count)
         {
             ComputeKeys(elements, count);
-            int[] map = new int[count];
+            int[] map = ArrayPool<int>.Shared.Rent(count);
             for (int i = 0; i < count; i++)
             {
                 map[i] = i;
@@ -612,7 +645,12 @@ namespace System.Linq
 
         internal TElement ElementAt(TElement[] elements, int count, int idx)
         {
-            return elements[QuickSelect(ComputeMap(elements, count), count - 1, idx)];
+            int[] map = ComputeMap(elements, count);
+            var index = QuickSelect(map, count - 1, idx);
+
+            ArrayPool<int>.Shared.Return(map);
+
+            return elements[index];
         }
 
         private int CompareKeys(int index1, int index2)
