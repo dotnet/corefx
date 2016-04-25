@@ -8,7 +8,7 @@ namespace System.Net.Internals
 {
     internal static partial class SocketExceptionFactory
     {
-        private class ExtendedSocketException : SocketException
+        private sealed class ExtendedSocketException : SocketException
         {
             private readonly EndPoint _endPoint;
 
@@ -24,18 +24,8 @@ namespace System.Net.Internals
                 HResult = platformError;
             }
 
-            public override string Message
-            {
-                get
-                {
-                    if (_endPoint != null)
-                    {
-                        return base.Message + " " + _endPoint.ToString();
-                    }
-
-                    return base.Message;
-                }
-            }
+            public override string Message => 
+                (_endPoint == null) ? base.Message : base.Message + " " + _endPoint.ToString();
         }
 
         public static SocketException CreateSocketException(int socketError, EndPoint endPoint)
