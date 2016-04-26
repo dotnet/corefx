@@ -26,24 +26,49 @@ namespace System.Linq
         public IEnumerator<TElement> GetEnumerator()
         {
             Buffer<TElement> buffer = new Buffer<TElement>(_source);
-            if (buffer._count > 0)
+            if (buffer._count >= 32)
             {
-                int[] map = null;
-                try
+                return GetLargeEnumerator(buffer);
+            }
+            else if (buffer._count > 0)
+            {
+                return GetSmallEnumerator(buffer);
+            }
+
+            return GetEmptyEnumerator();
+        }
+
+        private IEnumerator<TElement> GetEmptyEnumerator()
+        {
+            yield break;
+        }
+
+        private IEnumerator<TElement> GetSmallEnumerator(Buffer<TElement> buffer)
+        {
+            int[] map = SortedMap(buffer);
+            for (int i = 0; i < buffer._count; i++)
+            {
+                yield return buffer._items[map[i]];
+            }
+        }
+
+        private IEnumerator<TElement> GetLargeEnumerator(Buffer<TElement> buffer)
+        {
+            int[] map = null;
+            try
+            {
+                map = SortedMap(buffer);
+                for (int i = 0; i < buffer._count; i++)
                 {
-                    map = SortedMap(buffer);
-                    for (int i = 0; i < buffer._count; i++)
-                    {
-                        yield return buffer._items[map[i]];
-                    }
+                    yield return buffer._items[map[i]];
                 }
-                finally
+            }
+            finally
+            {
+                var rentedMap = Interlocked.Exchange(ref map, null);
+                if (rentedMap != null)
                 {
-                    var rentedMap = Interlocked.Exchange(ref map, null);
-                    if (rentedMap != null)
-                    {
-                        ArrayPool<int>.Shared.Return(rentedMap);
-                    }
+                    ArrayPool<int>.Shared.Return(rentedMap);
                 }
             }
         }
@@ -65,7 +90,10 @@ namespace System.Linq
                 array[i] = buffer._items[map[i]];
             }
 
-            ArrayPool<int>.Shared.Return(map);
+            if (count >= 32)
+            {
+                ArrayPool<int>.Shared.Return(map);
+            }
 
             return array;
         }
@@ -83,7 +111,10 @@ namespace System.Linq
                     list.Add(buffer._items[map[i]]);
                 }
 
-                ArrayPool<int>.Shared.Return(map);
+                if (count >= 32)
+                {
+                    ArrayPool<int>.Shared.Return(map);
+                }
             }
 
             return list;
@@ -113,32 +144,55 @@ namespace System.Linq
 
                 if (minIdx == maxIdx)
                 {
-                    yield return GetEnumerableSorter().ElementAt(buffer._items, count, minIdx);
+                    return GetSingleEnumerator(buffer, count, minIdx);
                 }
-                else
+                else if (count >= 32)
                 {
-                    int[] map = null;
-                    try
-                    {
-                        map = SortedMap(buffer, minIdx, maxIdx);
-                        while (minIdx <= maxIdx)
-                        {
-                            yield return buffer._items[map[minIdx]];
-                            ++minIdx;
-                        }
-                    }
-                    finally
-                    {
-                        var rentedMap = Interlocked.Exchange(ref map, null);
-                        if (rentedMap != null)
-                        {
-                            ArrayPool<int>.Shared.Return(rentedMap);
-                        }
-                    }
+                    return GetLargeEnumerator(buffer, count, minIdx, maxIdx);
                 }
+
+                return GetSmallEnumerator(buffer, count, minIdx, maxIdx);
+            }
+
+            return GetEmptyEnumerator();
+        }
+
+        private IEnumerator<TElement> GetSingleEnumerator(Buffer<TElement> buffer, int count, int minIdx)
+        {
+            yield return GetEnumerableSorter().ElementAt(buffer._items, count, minIdx);
+        }
+
+        private IEnumerator<TElement> GetSmallEnumerator(Buffer<TElement> buffer, int count, int minIdx, int maxIdx)
+        {
+            int[] map = SortedMap(buffer, minIdx, maxIdx);
+            while (minIdx <= maxIdx)
+            {
+                yield return buffer._items[map[minIdx]];
+                ++minIdx;
             }
         }
 
+        private IEnumerator<TElement> GetLargeEnumerator(Buffer<TElement> buffer, int count, int minIdx, int maxIdx)
+        {
+            int[] map = null;
+            try
+            {
+                map = SortedMap(buffer, minIdx, maxIdx);
+                while (minIdx <= maxIdx)
+                {
+                    yield return buffer._items[map[minIdx]];
+                    ++minIdx;
+                }
+            }
+            finally
+            {
+                var rentedMap = Interlocked.Exchange(ref map, null);
+                if (rentedMap != null)
+                {
+                    ArrayPool<int>.Shared.Return(rentedMap);
+                }
+            }
+        }
         internal TElement[] ToArray(int minIdx, int maxIdx)
         {
             Buffer<TElement> buffer = new Buffer<TElement>(_source);
@@ -167,7 +221,11 @@ namespace System.Linq
                 ++idx;
                 ++minIdx;
             }
-            ArrayPool<int>.Shared.Return(map);
+
+            if (idx >= 32)
+            {
+                ArrayPool<int>.Shared.Return(map);
+            }
 
             return array;
         }
@@ -199,7 +257,10 @@ namespace System.Linq
                 ++minIdx;
             }
 
-            ArrayPool<int>.Shared.Return(map);
+            if (list.Count >= 32)
+            {
+                ArrayPool<int>.Shared.Return(map);
+            }
 
             return list;
         }
@@ -620,7 +681,7 @@ namespace System.Linq
         private int[] ComputeMap(TElement[] elements, int count)
         {
             ComputeKeys(elements, count);
-            int[] map = ArrayPool<int>.Shared.Rent(count);
+            int[] map = count >= 32 ? ArrayPool<int>.Shared.Rent(count) : new int[count];
             for (int i = 0; i < count; i++)
             {
                 map[i] = i;
@@ -648,7 +709,10 @@ namespace System.Linq
             int[] map = ComputeMap(elements, count);
             var index = QuickSelect(map, count - 1, idx);
 
-            ArrayPool<int>.Shared.Return(map);
+            if (count >= 32)
+            {
+                ArrayPool<int>.Shared.Return(map);
+            }
 
             return elements[index];
         }
