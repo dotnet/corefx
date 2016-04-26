@@ -150,8 +150,12 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Parse_Valid_TestData()
         {
-            NumberStyles defaultStyle = NumberStyles.Integer;
-            
+            NumberFormatInfo samePositiveNegativeFormat = new NumberFormatInfo()
+            {
+                PositiveSign = "|",
+                NegativeSign = "|"
+            };
+
             // None
             yield return new object[] { "0", NumberStyles.None, null, 0 };
             yield return new object[] { "123", NumberStyles.None, null, 123 };
@@ -185,19 +189,17 @@ namespace System.Tests
             yield return new object[] { "+0", NumberStyles.AllowLeadingSign, null, 0 };
             yield return new object[] { "-0", NumberStyles.AllowLeadingSign, null, 0 };
             yield return new object[] { "+123", NumberStyles.AllowLeadingSign, null, 123 };
+            
+            // If PositiveSign and NegativeSign are the same, PositiveSign is preferred
+            yield return new object[] { "|123", NumberStyles.AllowLeadingSign, samePositiveNegativeFormat, 123 };
 
             // AllowTrailingSign
             yield return new object[] { "123", NumberStyles.AllowTrailingSign, null, 123 };
             yield return new object[] { "123+", NumberStyles.AllowTrailingSign, null, 123 };
             yield return new object[] { "123-", NumberStyles.AllowTrailingSign, null, -123 };
 
-            // If PositiveSign and NegativeSign are the same, PositiveSign is preferred 
-            NumberFormatInfo samePositiveNegativeFormat = new NumberFormatInfo()
-            {
-                PositiveSign = "|",
-                NegativeSign = "|"
-            };
-            yield return new object[] { "|123", defaultStyle, samePositiveNegativeFormat, 123 };
+            // If PositiveSign and NegativeSign are the same, PositiveSign is preferred
+            yield return new object[] { "123|", NumberStyles.AllowTrailingSign, samePositiveNegativeFormat, 123 };
 
             // AllowLeadingWhite and AllowTrailingWhite
             yield return new object[] { "123  ", NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, null, 123 };
@@ -236,7 +238,7 @@ namespace System.Tests
         {
             bool isDefaultProvider = provider == null || provider == new NumberFormatInfo();
             int result;
-            if (style == NumberStyles.Integer)
+            if ((style & ~NumberStyles.Integer) == 0 && style != NumberStyles.None)
             {
                 // Use Parse(string) or Parse(string, IFormatProvider)
                 if (isDefaultProvider)
@@ -268,28 +270,32 @@ namespace System.Tests
         }
 
         public static IEnumerable<object[]> Parse_Invalid_TestData()
-        {
-            NumberStyles defaultStyle = NumberStyles.Integer;
-            
+        {            
             // Garbage strings
-            yield return new object[] { null, defaultStyle, null, typeof(ArgumentNullException) };
-            yield return new object[] { "", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { " \t \n \r ", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "Garbage", defaultStyle, null, typeof(FormatException) };
+            yield return new object[] { null, NumberStyles.Integer, null, typeof(ArgumentNullException) };
+            yield return new object[] { null, NumberStyles.Any, null, typeof(ArgumentNullException) };
+            yield return new object[] { "", NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { null, NumberStyles.Any, null, typeof(ArgumentNullException) };
+            yield return new object[] { " \t \n \r ", NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { null, NumberStyles.Any, null, typeof(ArgumentNullException) };
+            yield return new object[] { "Garbage", NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { "Garbage", NumberStyles.Any, null, typeof(FormatException) };
 
-            // DefaultStyle doesn't allow hex, exponents, paretheses, currency, thousands, decimal
-            yield return new object[] { "abc", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "1E23", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "(123)", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { 1000.ToString("C0"), defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { 1000.ToString("N0"), defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { 678.90.ToString("F2"), defaultStyle, null, typeof(FormatException) };
+            // Integer doesn't allow hex, exponents, paretheses, currency, thousands, decimal
+            yield return new object[] { "abc", NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { "1E23", NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { "(123)", NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { 1000.ToString("C0"), NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { 1000.ToString("N0"), NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { 678.90.ToString("F2"), NumberStyles.Integer, null, typeof(FormatException) };
             
             // HexNumber
             yield return new object[] { "0xabc", NumberStyles.HexNumber, null, typeof(FormatException) };
             yield return new object[] { "&habc", NumberStyles.HexNumber, null, typeof(FormatException) };
             yield return new object[] { "G1", NumberStyles.HexNumber, null, typeof(FormatException) };
             yield return new object[] { "g1", NumberStyles.HexNumber, null, typeof(FormatException) };
+            yield return new object[] { "+abc", NumberStyles.HexNumber, null, typeof(FormatException) };
+            yield return new object[] { "-abc", NumberStyles.HexNumber, null, typeof(FormatException) };
 
             // None doesn't allow hex or leading or trailing whitespace
             yield return new object[] { "abc", NumberStyles.None, null, typeof(FormatException) };
@@ -298,14 +304,12 @@ namespace System.Tests
             yield return new object[] { "  123  ", NumberStyles.None, null, typeof(FormatException) };
 
             // AllowLeadingSign
-            yield return new object[] { "+", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "-", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "+-123", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "-+123", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "+abc", NumberStyles.HexNumber, null, typeof(FormatException) };
-            yield return new object[] { "-abc", NumberStyles.HexNumber, null, typeof(FormatException) };
-            yield return new object[] { "- 123", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "+ 123", defaultStyle, null, typeof(FormatException) };
+            yield return new object[] { "+", NumberStyles.AllowLeadingSign, null, typeof(FormatException) };
+            yield return new object[] { "-", NumberStyles.AllowLeadingSign, null, typeof(FormatException) };
+            yield return new object[] { "+-123", NumberStyles.AllowLeadingSign, null, typeof(FormatException) };
+            yield return new object[] { "-+123", NumberStyles.AllowLeadingSign, null, typeof(FormatException) };
+            yield return new object[] { "- 123", NumberStyles.AllowLeadingSign, null, typeof(FormatException) };
+            yield return new object[] { "+ 123", NumberStyles.AllowLeadingSign, null, typeof(FormatException) };
 
             // AllowTrailingSign
             yield return new object[] { "123-+", NumberStyles.AllowTrailingSign, null, typeof(FormatException) };
@@ -342,8 +346,10 @@ namespace System.Tests
             yield return new object[] { "67.90", NumberStyles.AllowDecimalPoint, null, typeof(OverflowException) };
 
             // Not in range of Int32
-            yield return new object[] { "2147483648", defaultStyle, null, typeof(OverflowException) };
-            yield return new object[] { "-2147483649", defaultStyle, null, typeof(OverflowException) };
+            yield return new object[] { "2147483648", NumberStyles.Any, null, typeof(OverflowException) };
+            yield return new object[] { "2147483648", NumberStyles.Integer, null, typeof(OverflowException) };
+            yield return new object[] { "-2147483649", NumberStyles.Any, null, typeof(OverflowException) };
+            yield return new object[] { "-2147483649", NumberStyles.Integer, null, typeof(OverflowException) };
             yield return new object[] { "2147483649-", NumberStyles.AllowTrailingSign, null, typeof(OverflowException) };
             yield return new object[] { "(2147483649)", NumberStyles.AllowParentheses, null, typeof(OverflowException) };
         }
@@ -354,7 +360,7 @@ namespace System.Tests
         {
             bool isDefaultProvider = provider == null || provider == new NumberFormatInfo();
             int result;
-            if (style == NumberStyles.Integer)
+            if ((style & ~NumberStyles.Integer) == 0 && style != NumberStyles.None && (style & NumberStyles.AllowLeadingWhite) == (style & NumberStyles.AllowTrailingWhite))
             {
                 // Use Parse(string) or Parse(string, IFormatProvider)
                 if (isDefaultProvider)
