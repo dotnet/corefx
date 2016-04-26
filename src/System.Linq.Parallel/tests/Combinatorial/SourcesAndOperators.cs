@@ -18,6 +18,11 @@ namespace System.Linq.Parallel.Tests
         private const int CountFactor = 8;
         private const int GroupFactor = 8;
 
+        private static readonly Operation DefaultSource = (start, count, ignore) => ParallelEnumerable.Range(start, count);
+        private static readonly Labeled<Operation> LabeledDefaultSource = Label("Default", DefaultSource);
+
+        private static readonly Labeled<Operation> Failing = Label("ThrowOnFirstEnumeration", (start, count, source) => Enumerables<int>.ThrowOnEnumeration().AsParallel());
+
         private static IEnumerable<Labeled<Operation>> UnorderedRangeSources()
         {
             // The difference between this and the existing sources is more control is needed over the range creation.
@@ -82,15 +87,10 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> OrderCancelingOperators()
         {
-            foreach (var operation in new Labeled<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>[] {
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("OrderBy-Comparer", (source, cancel) => source.OrderBy(x => x, new CancelingComparer(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("OrderByDescending-Comparer", (source, cancel) => source.OrderByDescending(x => x, new CancelingComparer(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("ThenBy-Comparer", (source, cancel) => source.OrderBy(x => 0).ThenBy(x => x, new CancelingComparer(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("ThenByDescending-Comparer", (source, cancel) => source.OrderBy(x => 0).ThenByDescending(x => x, new CancelingComparer(cancel))),
-                })
-            {
-                yield return new object[] { operation };
-            }
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("OrderBy-Comparer", (source, cancel) => source.OrderBy(x => x, new CancelingComparer(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("OrderByDescending-Comparer", (source, cancel) => source.OrderByDescending(x => x, new CancelingComparer(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("ThenBy-Comparer", (source, cancel) => source.OrderBy(x => 0).ThenBy(x => x, new CancelingComparer(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("ThenByDescending-Comparer", (source, cancel) => source.OrderBy(x => 0).ThenByDescending(x => x, new CancelingComparer(cancel))) };
         }
 
         public static IEnumerable<object[]> UnaryOperations()
@@ -223,23 +223,18 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> UnaryCancelingOperators()
         {
-            foreach (var operation in new Labeled<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>[] {
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Distinct", (source,cancel) => source.Distinct(new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("GroupBy-Comparer", (source,cancel) => source.GroupBy(x => x, new CancelingEqualityComparer<int>(cancel)).Select(g => g.Key)),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SelectMany", (source,cancel) => source.SelectMany(x => { cancel(); return new[] { x }; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SelectMany-Index", (source,cancel) => source.SelectMany((x, index) => { cancel(); return new[] { x }; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SelectMany-ResultSelector", (source,cancel) => source.SelectMany(x => new [] { x }, (group, elem) => { cancel(); return elem; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SelectMany-Index-ResultSelector", (source,cancel) => source.SelectMany((x, index) => new [] { x }, (group, elem) => { cancel(); return elem; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SkipWhile", (source,cancel) => source.SkipWhile(x => { cancel(); return true; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SkipWhile-Index", (source,cancel) => source.SkipWhile((x, index) => { cancel(); return true; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("TakeWhile", (source,cancel) => source.TakeWhile(x => { cancel(); return true; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("TakeWhile-Index", (source,cancel) => source.TakeWhile((x, index) => { cancel(); return true; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Where", (source,cancel) => source.Where(x => { cancel(); return true; })),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Where-Index", (source,cancel) => source.Where((x, index) => { cancel(); return true; })),
-                    })
-            {
-                yield return new object[] { operation };
-            }
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Distinct", (source, cancel) => source.Distinct(new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("GroupBy-Comparer", (source, cancel) => source.GroupBy(x => x, new CancelingEqualityComparer<int>(cancel)).Select(g => g.Key)) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SelectMany", (source, cancel) => source.SelectMany(x => { cancel(); return new[] { x }; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SelectMany-Index", (source, cancel) => source.SelectMany((x, index) => { cancel(); return new[] { x }; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SelectMany-ResultSelector", (source, cancel) => source.SelectMany(x => new[] { x }, (group, elem) => { cancel(); return elem; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SelectMany-Index-ResultSelector", (source, cancel) => source.SelectMany((x, index) => new[] { x }, (group, elem) => { cancel(); return elem; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SkipWhile", (source, cancel) => source.SkipWhile(x => { cancel(); return true; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("SkipWhile-Index", (source, cancel) => source.SkipWhile((x, index) => { cancel(); return true; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("TakeWhile", (source, cancel) => source.TakeWhile(x => { cancel(); return true; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("TakeWhile-Index", (source, cancel) => source.TakeWhile((x, index) => { cancel(); return true; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Where", (source, cancel) => source.Where(x => { cancel(); return true; })) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Where-Index", (source, cancel) => source.Where((x, index) => { cancel(); return true; })) };
         }
 
         private static IEnumerable<Labeled<Operation>> BinaryOperations(Labeled<Operation> otherSource)
@@ -274,31 +269,7 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> BinaryOperations()
         {
-            string label = "Default";
-
-            yield return new object[] { Label("Concat-Right:" + label, (start, count, source) => source(start, count / 2).Concat(DefaultSource(start + count / 2, count / 2 + count % 2))) };
-            yield return new object[] { Label("Concat-Left:" + label, (start, count, source) => DefaultSource(start, count / 2).Concat(source(start + count / 2, count / 2 + count % 2))) };
-
-            // Comparator needs to cover _source_ size, as which of two "equal" items is returned is undefined for unordered collections.
-            yield return new object[] { Label("Except-Right:" + label, (start, count, source) => source(start, count + count / 2).Except(DefaultSource(start + count, count), new ModularCongruenceComparer(count * 2))) };
-            yield return new object[] { Label("Except-Left:" + label, (start, count, source) => DefaultSource(start, count + count / 2).Except(source(start + count, count), new ModularCongruenceComparer(count * 2))) };
-
-            yield return new object[] { Label("GroupJoin-Right:" + label, (start, count, source) => source(start, count).GroupJoin(DefaultSource(start, count * CountFactor), x => x, y => y % count, (x, g) => g.Min(), new ModularCongruenceComparer(count))) };
-            yield return new object[] { Label("GroupJoin-Left:" + label, (start, count, source) => DefaultSource(start, count).GroupJoin(source(start, count * CountFactor), x => x, y => y % count, (x, g) => g.Min(), new ModularCongruenceComparer(count))) };
-
-            // Comparator needs to cover _source_ size, as which of two "equal" items is returned is undefined.
-            yield return new object[] { Label("Intersect-Right:" + label, (start, count, source) => source(start, count + count / 2).Intersect(DefaultSource(start - count / 2, count + count / 2), new ModularCongruenceComparer(count * 2))) };
-            yield return new object[] { Label("Intersect-Left:" + label, (start, count, source) => DefaultSource(start, count + count / 2).Intersect(source(start - count / 2, count + count / 2), new ModularCongruenceComparer(count * 2))) };
-
-            yield return new object[] { Label("Join-Right:" + label, (start, count, source) => source(0, count).Join(DefaultSource(start, count), x => x, y => y - start, (x, y) => x + start, new ModularCongruenceComparer(count))) };
-            yield return new object[] { Label("Join-Left:" + label, (start, count, source) => DefaultSource(0, count).Join(source(start, count), x => x, y => y - start, (x, y) => x + start, new ModularCongruenceComparer(count))) };
-
-            yield return new object[] { Label("Union-Right:" + label, (start, count, source) => source(start, count * 3 / 4).Union(DefaultSource(start + count / 2, count / 2 + count % 2), new ModularCongruenceComparer(count))) };
-            yield return new object[] { Label("Union-Left:" + label, (start, count, source) => DefaultSource(start, count * 3 / 4).Union(source(start + count / 2, count / 2 + count % 2), new ModularCongruenceComparer(count))) };
-
-            // When both sources are unordered any element can be matched to any DefaultSource, so a different check is required.
-            yield return new object[] { Label("Zip-Unordered-Right:" + label, (start, count, source) => source(0, count).Zip(DefaultSource(start * 2, count), (x, y) => x + start)) };
-            yield return new object[] { Label("Zip-Unordered-Left:" + label, (start, count, source) => DefaultSource(start * 2, count).Zip(source(0, count), (x, y) => y + start)) };
+            return BinaryOperations(LabeledDefaultSource).Select(op => new object[] { op });
         }
 
         public static IEnumerable<object[]> BinaryUnorderedOperators()
@@ -332,7 +303,10 @@ namespace System.Linq.Parallel.Tests
                 }
 
                 // Zip is the same as Concat, but has a special check for matching indices (as compared to unordered)
-                foreach (Labeled<Operation> operation in Zip_Ordered_Operation(LabeledDefaultSource))
+                foreach (Labeled<Operation> operation in new[] {
+                    Label("Zip-Ordered-Right", (start, count, s) => s(0, count).Zip(DefaultSource(start * 2, count).AsOrdered(), (x, y) => (x + y) / 2)),
+                    Label("Zip-Ordered-Left", (start, count, s) => DefaultSource(start * 2, count).AsOrdered().Zip(s(0, count), (x, y) => (x + y) / 2))
+                })
                 {
                     yield return new object[] { source, operation };
                 }
@@ -374,37 +348,17 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> BinaryCancelingOperators()
         {
-            foreach (var operation in new Labeled<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>[] {
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Except", (source, cancel) => source.Except(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Except-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).Except(source, new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("GroupJoin", (source, cancel) => source.GroupJoin(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), x => x, y => y, (x, g) => x, new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("GroupJoin-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).GroupJoin(source, x => x, y => y, (x, g) => x, new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Intersect", (source, cancel) => source.Intersect(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Intersect-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).Intersect(source, new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Join", (source, cancel) => source.Join(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), x => x, y => y, (x, y) => x, new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Join-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).Join(source, x => x, y => y, (x, y) => x, new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Union", (source, cancel) => source.Union(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), new CancelingEqualityComparer<int>(cancel))),
-                Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Union-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).Union(source, new CancelingEqualityComparer<int>(cancel))),
-                    })
-            {
-                yield return new object[] { operation };
-            }
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Except", (source, cancel) => source.Except(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Except-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).Except(source, new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("GroupJoin", (source, cancel) => source.GroupJoin(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), x => x, y => y, (x, g) => x, new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("GroupJoin-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).GroupJoin(source, x => x, y => y, (x, g) => x, new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Intersect", (source, cancel) => source.Intersect(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Intersect-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).Intersect(source, new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Join", (source, cancel) => source.Join(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), x => x, y => y, (x, y) => x, new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Join-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).Join(source, x => x, y => y, (x, y) => x, new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Union", (source, cancel) => source.Union(ParallelEnumerable.Range(DefaultStart, EventualCancellationSize), new CancelingEqualityComparer<int>(cancel))) };
+            yield return new object[] { Labeled.Label<Func<ParallelQuery<int>, Action, ParallelQuery<int>>>("Union-Right", (source, cancel) => ParallelEnumerable.Range(DefaultStart, EventualCancellationSize).Union(source, new CancelingEqualityComparer<int>(cancel))) };
         }
-
-        #region operators
-
-        private static Operation DefaultSource = (start, count, ignore) => ParallelEnumerable.Range(start, count);
-        private static Labeled<Operation> LabeledDefaultSource = Label("Default", DefaultSource);
-
-        private static Labeled<Operation> Failing = Label("ThrowOnFirstEnumeration", (start, count, source) => Enumerables<int>.ThrowOnEnumeration().AsParallel());
-
-        // There are two implementations here to help check that the 1st element is matched to the 1st element.
-        private static Func<Labeled<Operation>, IEnumerable<Labeled<Operation>>> Zip_Ordered_Operation = sOther => new[] {
-            Label("Zip-Ordered-Right:" + sOther.ToString(), (start, count, source) => source(0, count).Zip(sOther.Item(start * 2, count), (x, y) => (x + y) / 2)),
-            Label("Zip-Ordered-Left:" + sOther.ToString(), (start, count, source) => sOther.Item(start * 2, count).Zip(source(0, count), (x, y) => (x + y) / 2))
-        };
-
-        #endregion operators
 
         public delegate ParallelQuery<int> Operation(int start, int count, Operation source = null);
 
