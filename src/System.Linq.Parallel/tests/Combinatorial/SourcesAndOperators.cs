@@ -34,7 +34,8 @@ namespace System.Linq.Parallel.Tests
         {
             foreach (Labeled<Operation> source in UnorderedRangeSources())
             {
-                foreach (Labeled<Operation> ordering in new[] { AsOrdered }.Concat(OrderOperators()))
+                yield return source.AsOrdered();
+                foreach (Labeled<Operation> ordering in OrderOperators())
                 {
                     yield return source.Append(ordering);
                 }
@@ -43,24 +44,22 @@ namespace System.Linq.Parallel.Tests
 
         private static IEnumerable<Labeled<Operation>> OrderOperators()
         {
-            yield return Label("OrderBy", (start, count, source) => source(start, count).OrderBy(x => -x, ReverseComparer.Instance));
-            yield return Label("OrderByDescending", (start, count, source) => source(start, count).OrderByDescending(x => x, ReverseComparer.Instance));
-            yield return Label("ThenBy", (start, count, source) => source(start, count).OrderBy(x => 0).ThenBy(x => -x, ReverseComparer.Instance));
-            yield return Label("ThenByDescending", (start, count, source) => source(start, count).OrderBy(x => 0).ThenByDescending(x => x, ReverseComparer.Instance));
+            yield return Label("OrderBy", (start, count, source) => source(start, count).OrderBy(x => x));
+            yield return Label("OrderByDescending", (start, count, source) => source(start, count).OrderByDescending(x => -x));
+            yield return Label("ThenBy", (start, count, source) => source(start, count).OrderBy(x => 0).ThenBy(x => x));
+            yield return Label("ThenByDescending", (start, count, source) => source(start, count).OrderBy(x => 0).ThenByDescending(x => -x));
         }
 
         private static IEnumerable<Labeled<Operation>> ReverseOrderOperators()
         {
-            yield return Label("OrderBy", (start, count, source) => source(start, count).OrderBy(x => x, ReverseComparer.Instance));
-            yield return Label("OrderByDescending", (start, count, source) => source(start, count).OrderByDescending(x => -x, ReverseComparer.Instance));
-            yield return Label("ThenBy", (start, count, source) => source(start, count).OrderBy(x => 0).ThenBy(x => x, ReverseComparer.Instance));
-            yield return Label("ThenByDescending", (start, count, source) => source(start, count).OrderBy(x => 0).ThenByDescending(x => -x, ReverseComparer.Instance));
+            yield return Label("OrderBy-Reversed", (start, count, source) => source(start, count).OrderBy(x => x, ReverseComparer.Instance));
+            yield return Label("OrderByDescending-Reversed", (start, count, source) => source(start, count).OrderByDescending(x => -x, ReverseComparer.Instance));
+            yield return Label("ThenBy-Reversed", (start, count, source) => source(start, count).OrderBy(x => 0).ThenBy(x => x, ReverseComparer.Instance));
+            yield return Label("ThenByDescending-Reversed", (start, count, source) => source(start, count).OrderBy(x => 0).ThenByDescending(x => -x, ReverseComparer.Instance));
         }
 
         public static IEnumerable<object[]> OrderFailingOperators()
         {
-            Labeled<Operation> source = UnorderedRangeSources().First();
-
             foreach (Labeled<Operation> operation in new[] {
                     Label("OrderBy", (start, count, s) => s(start, count).OrderBy<int, int>(x => {throw new DeliberateTestException(); })),
                     Label("OrderBy-Comparer", (start, count, s) => s(start, count).OrderBy(x => x, new FailingComparer())),
@@ -72,7 +71,7 @@ namespace System.Linq.Parallel.Tests
                     Label("ThenByDescending-Comparer", (start, count, s) => s(start, count).OrderBy(x => 0).ThenByDescending(x => x, new FailingComparer())),
                 })
             {
-                yield return new object[] { source, operation };
+                yield return new object[] { LabeledDefaultSource, operation };
             }
 
             foreach (Labeled<Operation> operation in OrderOperators())
@@ -100,7 +99,7 @@ namespace System.Linq.Parallel.Tests
             yield return new object[] { Label("DefaultIfEmpty", (start, count, source) => source(start, count).DefaultIfEmpty()) };
             yield return new object[] { Label("Distinct", (start, count, source) => source(start * 2, count * 2).Select(x => x / 2).Distinct(new ModularCongruenceComparer(count))) };
             yield return new object[] { Label("OfType", (start, count, source) => source(start, count).OfType<int>()) };
-            yield return new object[] { Label("Reverse", (start, count, source) => source(start, count).Select(x => (start + count - 1) - (x - start)).Reverse()) };
+            yield return new object[] { Label("Reverse", (start, count, source) => source(start, count).Reverse()) };
 
             yield return new object[] { Label("GroupBy", (start, count, source) => source(start, count * CountFactor).GroupBy(x => (x - start) % count, new ModularCongruenceComparer(count)).Select(g => g.Key + start)) };
             yield return new object[] { Label("GroupBy-ElementSelector", (start, count, source) => source(start, count * CountFactor).GroupBy(x => x % count, y => y + 1, new ModularCongruenceComparer(count)).Select(g => g.Min() - 1)) };
@@ -158,9 +157,18 @@ namespace System.Linq.Parallel.Tests
             // Apply an ordered source to each operation
             foreach (Labeled<Operation> source in RangeSources())
             {
-                foreach (Labeled<Operation> operation in UnaryOperations().Select(i => i[0]))
+                foreach (Labeled<Operation> operation in UnaryOperations().Select(i => i[0]).Where(op => !op.ToString().Contains("Reverse")))
                 {
                     yield return new object[] { source, operation };
+                }
+            }
+
+            Labeled<Operation> reverse = UnaryOperations().Select(i => (Labeled<Operation>)i[0]).Where(op => op.ToString().Contains("Reverse")).Single();
+            foreach (Labeled<Operation> source in UnorderedRangeSources())
+            {
+                foreach (Labeled<Operation> ordering in ReverseOrderOperators())
+                {
+                    yield return new object[] { source.Append(ordering), reverse };
                 }
             }
 
@@ -295,11 +303,10 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> BinaryUnorderedOperators()
         {
-            Labeled<Operation> otherSource = UnorderedRangeSources().First();
             foreach (Labeled<Operation> source in UnorderedRangeSources())
             {
                 // Operations having multiple paths to check.
-                foreach (Labeled<Operation> operation in BinaryOperations(otherSource))
+                foreach (Labeled<Operation> operation in BinaryOperations(LabeledDefaultSource))
                 {
                     yield return new object[] { source, operation };
                 }
@@ -308,13 +315,12 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> BinaryOperators()
         {
-            Labeled<Operation> unordered = UnorderedRangeSources().First();
             foreach (Labeled<Operation> source in RangeSources())
             {
                 // Each binary can work differently, depending on which of the two source queries (or both) is ordered.
 
                 // For most, only the ordering of the first query is important
-                foreach (Labeled<Operation> operation in BinaryOperations(unordered).Where(op => !(op.ToString().StartsWith("Union") || op.ToString().StartsWith("Zip") || op.ToString().StartsWith("Concat")) && op.ToString().Contains("Right")))
+                foreach (Labeled<Operation> operation in BinaryOperations(LabeledDefaultSource).Where(op => !(op.ToString().StartsWith("Union") || op.ToString().StartsWith("Zip") || op.ToString().StartsWith("Concat")) && op.ToString().Contains("Right")))
                 {
                     yield return new object[] { source, operation };
                 }
@@ -326,7 +332,7 @@ namespace System.Linq.Parallel.Tests
                 }
 
                 // Zip is the same as Concat, but has a special check for matching indices (as compared to unordered)
-                foreach (Labeled<Operation> operation in Zip_Ordered_Operation(unordered))
+                foreach (Labeled<Operation> operation in Zip_Ordered_Operation(LabeledDefaultSource))
                 {
                     yield return new object[] { source, operation };
                 }
@@ -392,8 +398,6 @@ namespace System.Linq.Parallel.Tests
 
         private static Labeled<Operation> Failing = Label("ThrowOnFirstEnumeration", (start, count, source) => Enumerables<int>.ThrowOnEnumeration().AsParallel());
 
-        private static Labeled<Operation> AsOrdered = Label("AsOrdered", (start, count, source) => source(start, count).AsOrdered());
-
         // There are two implementations here to help check that the 1st element is matched to the 1st element.
         private static Func<Labeled<Operation>, IEnumerable<Labeled<Operation>>> Zip_Ordered_Operation = sOther => new[] {
             Label("Zip-Ordered-Right:" + sOther.ToString(), (start, count, source) => source(0, count).Zip(sOther.Item(start * 2, count), (x, y) => (x + y) / 2)),
@@ -406,7 +410,7 @@ namespace System.Linq.Parallel.Tests
 
         public static Labeled<Operation> Label(string label, Operation item)
         {
-            return Labeled.Label<Operation>(label, item);
+            return Labeled.Label(label, item);
         }
 
         public static Labeled<Operation> Append(this Labeled<Operation> item, Labeled<Operation> next)
@@ -414,6 +418,11 @@ namespace System.Linq.Parallel.Tests
             Operation op = item.Item;
             Operation nxt = next.Item;
             return Label(item.ToString() + "|" + next.ToString(), (start, count, source) => nxt(start, count, (s, c, ignore) => op(s, c, source)));
+        }
+
+        public static Labeled<Operation> AsOrdered(this Labeled<Operation> query)
+        {
+            return query.Append(Label("AsOrdered", (start, count, source) => source(start, count).AsOrdered()));
         }
     }
 }
