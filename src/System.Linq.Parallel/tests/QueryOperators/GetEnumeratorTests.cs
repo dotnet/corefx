@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class GetEnumeratorTests
+    public static class GetEnumeratorTests
     {
         [Theory]
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]

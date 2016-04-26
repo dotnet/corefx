@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ExchangeTests
+    public static class ExchangeTests
     {
         private static readonly ParallelMergeOptions[] Options = new[] {
             ParallelMergeOptions.AutoBuffered,

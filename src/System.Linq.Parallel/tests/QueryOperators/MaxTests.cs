@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class MaxTests
+    public static class MaxTests
     {
         // Get a set of ranges from 0 to each count, having an extra parameter describing the maximum (count - 1)
         public static IEnumerable<object[]> MaxData(int[] counts)

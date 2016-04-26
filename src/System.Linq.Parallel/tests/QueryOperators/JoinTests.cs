@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class JoinTests
+    public static class JoinTests
     {
         private const int KeyFactor = 8;
 

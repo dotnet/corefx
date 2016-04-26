@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class MinTests
+    public static class MinTests
     {
         // Get a set of ranges from 0 to each count, with an extra parameter for a minimum where each item is negated (-x).
         public static IEnumerable<object[]> MinData(int[] counts)

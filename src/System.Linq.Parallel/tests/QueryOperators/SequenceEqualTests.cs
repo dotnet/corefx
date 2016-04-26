@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class SequenceEqualTests
+    public static class SequenceEqualTests
     {
         private const int DuplicateFactor = 8;
 

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class GroupByTests
+    public static class GroupByTests
     {
         private const int GroupFactor = 8;
 

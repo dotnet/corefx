@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class SingleSingleOrDefaultTests
+    public static class SingleSingleOrDefaultTests
     {
         public static IEnumerable<object[]> SingleSpecificData(int[] counts)
         {

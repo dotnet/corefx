@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ToDictionaryTests
+    public static class ToDictionaryTests
     {
         [Theory]
         [InlineData(0)]

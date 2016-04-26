@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class OrderByThenByTests
+    public static class OrderByThenByTests
     {
         private const int KeyFactor = 4;
         private const int GroupFactor = 8;

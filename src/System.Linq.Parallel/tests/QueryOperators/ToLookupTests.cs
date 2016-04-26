@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ToLookupTests
+    public static class ToLookupTests
     {
         [Theory]
         [MemberData(nameof(UnorderedSources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(UnorderedSources))]

@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ForAllTests
+    public static class ForAllTests
     {
         [Theory]
         [InlineData(1)]

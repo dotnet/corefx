@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class UnionTests
+    public static class UnionTests
     {
         private const int DuplicateFactor = 8;
 

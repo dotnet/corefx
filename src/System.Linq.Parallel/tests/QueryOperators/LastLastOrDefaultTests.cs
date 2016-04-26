@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class LastLastOrDefaultTests
+    public static class LastLastOrDefaultTests
     {
         private static Func<int, IEnumerable<int>> s_positions = x => new[] { 1, x / 2 + 1, Math.Max(1, x - 1) }.Distinct();
 

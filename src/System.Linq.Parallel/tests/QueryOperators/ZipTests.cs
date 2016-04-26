@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ZipTests
+    public static class ZipTests
     {
         //
         // Zip

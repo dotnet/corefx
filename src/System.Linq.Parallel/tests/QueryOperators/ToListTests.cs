@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ToListTests
+    public static class ToListTests
     {
         [Theory]
         [InlineData(0)]

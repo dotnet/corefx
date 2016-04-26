@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ParallelEnumerableTests
+    public static class ParallelEnumerableTests
     {
         //
         // Null query

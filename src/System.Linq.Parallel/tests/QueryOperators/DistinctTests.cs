@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class DistinctTests
+    public static class DistinctTests
     {
         private const int DuplicateFactor = 4;
 

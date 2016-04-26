@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class TakeTakeWhileTests
+    public static class TakeTakeWhileTests
     {
         private static readonly Func<int, IEnumerable<int>> TakePosition = x => new[] { -x, -1, 0, 1, x / 2, x, x * 2 }.Distinct();
 

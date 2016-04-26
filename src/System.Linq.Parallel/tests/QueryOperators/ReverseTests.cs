@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ReverseTests
+    public static class ReverseTests
     {
         [Theory]
         [InlineData(0)]

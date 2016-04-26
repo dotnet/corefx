@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class SelectSelectManyTests
+    public static class SelectSelectManyTests
     {
         [Theory]
         [InlineData(0)]

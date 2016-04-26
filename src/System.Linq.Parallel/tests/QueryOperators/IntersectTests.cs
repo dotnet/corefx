@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class IntersectTests
+    public static class IntersectTests
     {
         private const int DuplicateFactor = 4;
 

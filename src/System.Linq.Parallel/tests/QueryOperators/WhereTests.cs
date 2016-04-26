@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class WhereTests
+    public static class WhereTests
     {
         [Theory]
         [InlineData(0)]

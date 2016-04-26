@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class SumTests
+    public static class SumTests
     {
         //
         // Sum

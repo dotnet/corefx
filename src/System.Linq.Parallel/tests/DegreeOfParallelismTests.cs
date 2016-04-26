@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class DegreeOfParallelismTests
+    public static class DegreeOfParallelismTests
     {
         // If ThreadPool becomes available, uncomment the below
         //private static ThreadPoolManager _poolManager = new ThreadPoolManager();
