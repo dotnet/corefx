@@ -109,7 +109,7 @@ namespace System.Linq.Expressions.Compiler
 
                 for (int i = 0; i < types.Length; i++)
                 {
-                    if (types[i].IsByRef)
+                    if (types[i].IsByRef || types[i].IsPointer)
                     {
                         needCustom = true;
                         break;
