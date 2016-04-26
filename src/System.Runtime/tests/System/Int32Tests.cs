@@ -174,6 +174,7 @@ namespace System.Tests
             yield return new object[] { "$1000", NumberStyles.Currency, currencyFormat, 1000 };
             yield return new object[] { "$   1000", NumberStyles.Currency, currencyFormat, 1000 };
             yield return new object[] { "1000", NumberStyles.Currency, currencyFormat, 1000 };
+            yield return new object[] { "$(1000)", NumberStyles.Currency, currencyFormat, -1000};
 
             // Any
             yield return new object[] { "123", NumberStyles.Any, null, 123 };
@@ -283,11 +284,7 @@ namespace System.Tests
             yield return new object[] { 1000.ToString("C0"), defaultStyle, null, typeof(FormatException) };
             yield return new object[] { 1000.ToString("N0"), defaultStyle, null, typeof(FormatException) };
             yield return new object[] { 678.90.ToString("F2"), defaultStyle, null, typeof(FormatException) };
-
-            // Currency
-            NumberFormatInfo currencyFormat = new NumberFormatInfo() { CurrencySymbol = "$" };
-            yield return new object[] { "$(1000)", NumberStyles.Currency, null, typeof(FormatException) };
-
+            
             // HexNumber
             yield return new object[] { "0xabc", NumberStyles.HexNumber, null, typeof(FormatException) };
             yield return new object[] { "&habc", NumberStyles.HexNumber, null, typeof(FormatException) };
