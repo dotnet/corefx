@@ -7,12 +7,12 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public partial class ParallelQueryCombinationTests
+    public static partial class ParallelQueryCombinationTests
     {
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Aggregate(LabeledOperation operation)
+        public static void Aggregate(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
                 operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate((x, y) => x + y));
@@ -21,7 +21,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Aggregate_Seed(LabeledOperation operation)
+        public static void Aggregate_Seed(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
                 operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate(0, (x, y) => x + y));
@@ -30,7 +30,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Aggregate_Result(LabeledOperation operation)
+        public static void Aggregate_Result(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
                 operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate(0, (x, y) => x + y, r => r));
@@ -39,7 +39,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Aggregate_Accumulator(LabeledOperation operation)
+        public static void Aggregate_Accumulator(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
                 operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate(0, (a, x) => a + x, (l, r) => l + r, r => r));
@@ -48,7 +48,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Aggregate_SeedFactory(LabeledOperation operation)
+        public static void Aggregate_SeedFactory(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize),
                 operation.Item(DefaultStart, DefaultSize, DefaultSource).Aggregate(() => 0, (a, x) => a + x, (l, r) => l + r, r => r));
@@ -57,7 +57,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void All_False(LabeledOperation operation)
+        public static void All_False(Labeled<Operation> operation)
         {
             Assert.False(operation.Item(DefaultStart, DefaultSize, DefaultSource).All(x => false));
         }
@@ -65,7 +65,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void All_True(LabeledOperation operation)
+        public static void All_True(Labeled<Operation> operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
             Assert.True(operation.Item(DefaultStart, DefaultSize, DefaultSource).All(x => seen.Add(x)));
@@ -75,7 +75,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Any_False(LabeledOperation operation)
+        public static void Any_False(Labeled<Operation> operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
             Assert.False(operation.Item(DefaultStart, DefaultSize, DefaultSource).Any(x => !seen.Add(x)));
@@ -85,7 +85,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Any_True(LabeledOperation operation)
+        public static void Any_True(Labeled<Operation> operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, DefaultSource).Any(x => true));
         }
@@ -93,7 +93,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Average(LabeledOperation operation)
+        public static void Average(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize) / (double)DefaultSize,
                 operation.Item(DefaultStart, DefaultSize, DefaultSource).Average());
@@ -102,7 +102,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Average_Nullable(LabeledOperation operation)
+        public static void Average_Nullable(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize) / (double?)DefaultSize,
                 operation.Item(DefaultStart, DefaultSize, DefaultSource).Average(x => (int?)x));
@@ -111,7 +111,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Cast(LabeledOperation source, LabeledOperation operation)
+        public static void Cast(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int? i in operation.Item(DefaultStart, DefaultSize, source.Item).Cast<int?>())
@@ -125,7 +125,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Cast_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Cast_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).Cast<int?>().ToList(), x => Assert.Equal(seen++, x));
@@ -135,7 +135,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Concat(LabeledOperation source, LabeledOperation operation)
+        public static void Concat(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize / 2, source.Item)
@@ -149,7 +149,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Concat_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Concat_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(
@@ -163,7 +163,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Contains_True(LabeledOperation operation)
+        public static void Contains_True(Labeled<Operation> operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, DefaultSource).Contains(DefaultStart + DefaultSize / 2));
         }
@@ -171,7 +171,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Contains_False(LabeledOperation operation)
+        public static void Contains_False(Labeled<Operation> operation)
         {
             Assert.False(operation.Item(DefaultStart, DefaultSize, DefaultSource).Contains(DefaultStart + DefaultSize));
         }
@@ -179,7 +179,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Count_Elements(LabeledOperation operation)
+        public static void Count_Elements(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultSize, operation.Item(DefaultStart, DefaultSize, DefaultSource).Count());
         }
@@ -187,7 +187,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Count_Predicate_Some(LabeledOperation operation)
+        public static void Count_Predicate_Some(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, DefaultSource).Count(x => x < DefaultStart + DefaultSize / 2));
         }
@@ -195,7 +195,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Count_Predicate_None(LabeledOperation operation)
+        public static void Count_Predicate_None(Labeled<Operation> operation)
         {
             Assert.Equal(0, operation.Item(DefaultStart, DefaultSize, DefaultSource).Count(x => x < DefaultStart));
         }
@@ -203,7 +203,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void DefaultIfEmpty(LabeledOperation source, LabeledOperation operation)
+        public static void DefaultIfEmpty(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).DefaultIfEmpty())
@@ -216,7 +216,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void DefaultIfEmpty_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void DefaultIfEmpty_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).DefaultIfEmpty().ToList(), x => Assert.Equal(seen++, x));
@@ -226,7 +226,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Distinct(LabeledOperation source, LabeledOperation operation)
+        public static void Distinct(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<int> query = operation.Item(DefaultStart * 2, DefaultSize * 2, source.Item).Select(x => x / 2).Distinct();
@@ -240,7 +240,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Distinct_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Distinct_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<int> query = operation.Item(DefaultStart * 2, DefaultSize * 2, source.Item).Select(x => x / 2).Distinct();
@@ -251,7 +251,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void ElementAt(LabeledOperation source, LabeledOperation operation)
+        public static void ElementAt(Labeled<Operation> source, Labeled<Operation> operation)
         {
             ParallelQuery<int> query = operation.Item(DefaultStart, DefaultSize, source.Item);
 
@@ -266,7 +266,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void ElementAtOrDefault(LabeledOperation source, LabeledOperation operation)
+        public static void ElementAtOrDefault(Labeled<Operation> source, Labeled<Operation> operation)
         {
             ParallelQuery<int> query = operation.Item(DefaultStart, DefaultSize, source.Item);
 
@@ -282,7 +282,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Except(LabeledOperation source, LabeledOperation operation)
+        public static void Except(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<int> query = operation.Item(DefaultStart, DefaultSize + DefaultSize / 2, source.Item)
@@ -297,7 +297,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Except_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Except_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<int> query = operation.Item(DefaultStart, DefaultSize + DefaultSize / 2, source.Item)
@@ -309,7 +309,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void First(LabeledOperation source, LabeledOperation operation)
+        public static void First(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, source.Item).First());
         }
@@ -317,7 +317,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void First_Predicate(LabeledOperation source, LabeledOperation operation)
+        public static void First_Predicate(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).First(x => x >= DefaultStart + DefaultSize / 2));
         }
@@ -325,7 +325,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void FirstOrDefault(LabeledOperation source, LabeledOperation operation)
+        public static void FirstOrDefault(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault());
         }
@@ -333,7 +333,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void FirstOrDefault_Predicate(LabeledOperation source, LabeledOperation operation)
+        public static void FirstOrDefault_Predicate(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault(x => x >= DefaultStart + DefaultSize / 2));
         }
@@ -341,7 +341,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void FirstOrDefault_Predicate_None(LabeledOperation source, LabeledOperation operation)
+        public static void FirstOrDefault_Predicate_None(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(default(int), operation.Item(DefaultStart, DefaultSize, source.Item).FirstOrDefault(x => false));
         }
@@ -349,7 +349,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void ForAll(LabeledOperation source, LabeledOperation operation)
+        public static void ForAll(Labeled<Operation> source, Labeled<Operation> operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
             operation.Item(DefaultStart, DefaultSize, source.Item).ForAll(x => seen.Add(x));
@@ -359,7 +359,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void GetEnumerator(LabeledOperation source, LabeledOperation operation)
+        public static void GetEnumerator(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             IEnumerator<int> enumerator = operation.Item(DefaultStart, DefaultSize, source.Item).GetEnumerator();
@@ -378,7 +378,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void GroupBy(LabeledOperation source, LabeledOperation operation)
+        public static void GroupBy(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seenKey = DefaultStart / GroupFactor;
             foreach (IGrouping<int, int> group in operation.Item(DefaultStart, DefaultSize, source.Item).GroupBy(x => x / GroupFactor))
@@ -394,7 +394,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void GroupBy_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void GroupBy_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seenKey = DefaultStart / GroupFactor;
             foreach (IGrouping<int, int> group in operation.Item(DefaultStart, DefaultSize, source.Item).GroupBy(x => x / GroupFactor).ToList())
@@ -410,7 +410,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void GroupBy_ElementSelector(LabeledOperation source, LabeledOperation operation)
+        public static void GroupBy_ElementSelector(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seenKey = DefaultStart / GroupFactor;
             foreach (IGrouping<int, int> group in operation.Item(DefaultStart, DefaultSize, source.Item).GroupBy(x => x / GroupFactor, y => -y))
@@ -426,7 +426,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void GroupBy_ElementSelector_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void GroupBy_ElementSelector_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seenKey = DefaultStart / GroupFactor;
             foreach (IGrouping<int, int> group in operation.Item(DefaultStart, DefaultSize, source.Item).GroupBy(x => x / GroupFactor, y => -y).ToList())
@@ -443,7 +443,7 @@ namespace System.Linq.Parallel.Tests
         [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void GroupJoin(LabeledOperation source, LabeledOperation operation)
+        public static void GroupJoin(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seenKey = DefaultStart / GroupFactor;
             foreach (KeyValuePair<int, IEnumerable<int>> group in operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
@@ -461,7 +461,7 @@ namespace System.Linq.Parallel.Tests
         [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void GroupJoin_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void GroupJoin_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seenKey = DefaultStart / GroupFactor;
             foreach (KeyValuePair<int, IEnumerable<int>> group in operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
@@ -478,7 +478,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Intersect(LabeledOperation source, LabeledOperation operation)
+        public static void Intersect(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<int> query = operation.Item(DefaultStart - DefaultSize / 2, DefaultSize + DefaultSize / 2, source.Item)
@@ -493,7 +493,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Intersect_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Intersect_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<int> query = operation.Item(DefaultStart - DefaultSize / 2, DefaultSize + DefaultSize / 2, source.Item)
@@ -506,7 +506,7 @@ namespace System.Linq.Parallel.Tests
         [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Join(LabeledOperation source, LabeledOperation operation)
+        public static void Join(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<KeyValuePair<int, int>> query = operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
@@ -523,7 +523,7 @@ namespace System.Linq.Parallel.Tests
         [ActiveIssue(1155)]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Join_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Join_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<KeyValuePair<int, int>> query = operation.Item(DefaultStart / GroupFactor, DefaultSize / GroupFactor, source.Item)
@@ -539,7 +539,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Last(LabeledOperation source, LabeledOperation operation)
+        public static void Last(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, source.Item).Last());
         }
@@ -547,7 +547,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Last_Predicate(LabeledOperation source, LabeledOperation operation)
+        public static void Last_Predicate(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart + DefaultSize / 2 - 1, operation.Item(DefaultStart, DefaultSize, source.Item).Last(x => x < DefaultStart + DefaultSize / 2));
         }
@@ -555,7 +555,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void LastOrDefault(LabeledOperation source, LabeledOperation operation)
+        public static void LastOrDefault(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault());
         }
@@ -563,7 +563,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void LastOrDefault_Predicate(LabeledOperation source, LabeledOperation operation)
+        public static void LastOrDefault_Predicate(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart + DefaultSize / 2 - 1, operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault(x => x < DefaultStart + DefaultSize / 2));
         }
@@ -571,7 +571,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void LastOrDefault_Predicate_None(LabeledOperation source, LabeledOperation operation)
+        public static void LastOrDefault_Predicate_None(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Equal(default(int), operation.Item(DefaultStart, DefaultSize, source.Item).LastOrDefault(x => false));
         }
@@ -579,7 +579,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void LongCount_Elements(LabeledOperation operation)
+        public static void LongCount_Elements(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultSize, operation.Item(DefaultStart, DefaultSize, DefaultSource).LongCount());
         }
@@ -587,7 +587,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void LongCount_Predicate_Some(LabeledOperation operation)
+        public static void LongCount_Predicate_Some(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, DefaultSource).LongCount(x => x < DefaultStart + DefaultSize / 2));
         }
@@ -595,7 +595,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void LongCount_Predicate_None(LabeledOperation operation)
+        public static void LongCount_Predicate_None(Labeled<Operation> operation)
         {
             Assert.Equal(0, operation.Item(DefaultStart, DefaultSize, DefaultSource).LongCount(x => x < DefaultStart));
         }
@@ -603,7 +603,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Max(LabeledOperation operation)
+        public static void Max(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, DefaultSource).Max());
         }
@@ -611,7 +611,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Max_Nullable(LabeledOperation operation)
+        public static void Max_Nullable(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart + DefaultSize - 1, operation.Item(DefaultStart, DefaultSize, DefaultSource).Max(x => (int?)x));
         }
@@ -619,7 +619,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Min(LabeledOperation operation)
+        public static void Min(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, DefaultSource).Min());
         }
@@ -627,7 +627,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Min_Nullable(LabeledOperation operation)
+        public static void Min_Nullable(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, DefaultSize, DefaultSource).Min(x => (int?)x));
         }
@@ -635,7 +635,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void OfType(LabeledOperation source, LabeledOperation operation)
+        public static void OfType(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OfType<int>())
@@ -648,7 +648,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void OfType_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void OfType_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OfType<int>().ToList(), x => Assert.Equal(seen++, x));
@@ -658,7 +658,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void OfType_Other(LabeledOperation source, LabeledOperation operation)
+        public static void OfType_Other(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Empty(operation.Item(DefaultStart, DefaultSize, source.Item).OfType<long>());
         }
@@ -666,7 +666,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void OfType_Other_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void OfType_Other_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.Empty(operation.Item(DefaultStart, DefaultSize, source.Item).OfType<long>().ToList());
         }
@@ -676,7 +676,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void OrderBy_Initial(LabeledOperation source, LabeledOperation operation)
+        public static void OrderBy_Initial(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => x))
@@ -691,7 +691,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void OrderBy_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void OrderBy_Initial_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => x).ToList(), x => Assert.Equal(seen++, x));
@@ -703,7 +703,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void OrderBy_OtherDirection(LabeledOperation source, LabeledOperation operation)
+        public static void OrderBy_OtherDirection(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => -x))
@@ -718,7 +718,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void OrderBy_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void OrderBy_OtherDirection_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => -x).ToList(), x => Assert.Equal(--seen, x));
@@ -730,7 +730,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void OrderByDescending_Initial(LabeledOperation source, LabeledOperation operation)
+        public static void OrderByDescending_Initial(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OrderByDescending(x => -x))
@@ -745,7 +745,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void OrderByDescending_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void OrderByDescending_Initial_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OrderByDescending(x => -x).ToList(), x => Assert.Equal(seen++, x));
@@ -757,7 +757,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void OrderByDescending_OtherDirection(LabeledOperation source, LabeledOperation operation)
+        public static void OrderByDescending_OtherDirection(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OrderByDescending(x => x))
@@ -772,7 +772,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void OrderByDescending_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void OrderByDescending_OtherDirection_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OrderByDescending(x => x).ToList(), x => Assert.Equal(--seen, x));
@@ -782,7 +782,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Reverse(LabeledOperation source, LabeledOperation operation)
+        public static void Reverse(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).Reverse())
@@ -795,7 +795,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Reverse_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Reverse_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).Reverse().ToList())
@@ -808,7 +808,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Select(LabeledOperation source, LabeledOperation operation)
+        public static void Select(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).Select(x => -x))
@@ -821,7 +821,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Select_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Select_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).Select(x => -x).ToList(), x => Assert.Equal(seen--, x));
@@ -831,7 +831,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Select_Indexed(LabeledOperation source, LabeledOperation operation)
+        public static void Select_Indexed(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).Select((x, index) => { Assert.Equal(DefaultStart + index, x); return -x; }))
@@ -844,7 +844,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Select_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Select_Indexed_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).Select((x, index) => { Assert.Equal(DefaultStart + index, x); return -x; }).ToList(), x => Assert.Equal(seen--, x));
@@ -854,7 +854,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SelectMany(LabeledOperation source, LabeledOperation operation)
+        public static void SelectMany(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             foreach (int i in operation.Item(0, DefaultSize, source.Item).SelectMany(x => new[] { 0, -1 }.Select(y => y + -DefaultStart - 2 * x)))
@@ -867,7 +867,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SelectMany_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void SelectMany_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             Assert.All(operation.Item(0, DefaultSize, source.Item).SelectMany(x => new[] { 0, -1 }.Select(y => y + -DefaultStart - 2 * x)).ToList(), x => Assert.Equal(seen--, x));
@@ -877,7 +877,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SelectMany_Indexed(LabeledOperation source, LabeledOperation operation)
+        public static void SelectMany_Indexed(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             foreach (int i in operation.Item(0, DefaultSize, source.Item).SelectMany((x, index) => { Assert.Equal(index, x); return new[] { 0, -1 }.Select(y => y + -DefaultStart - 2 * x); }))
@@ -890,7 +890,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SelectMany_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void SelectMany_Indexed_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             Assert.All(operation.Item(0, DefaultSize, source.Item).SelectMany((x, index) => { Assert.Equal(index, x); return new[] { 0, -1 }.Select(y => y + -DefaultStart - 2 * x); }).ToList(), x => Assert.Equal(seen--, x));
@@ -900,7 +900,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SelectMany_ResultSelector(LabeledOperation source, LabeledOperation operation)
+        public static void SelectMany_ResultSelector(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             foreach (int i in operation.Item(0, DefaultSize, source.Item).SelectMany(x => new[] { 0, -1 }, (x, y) => y + -DefaultStart - 2 * x))
@@ -913,7 +913,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SelectMany_ResultSelector_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void SelectMany_ResultSelector_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             Assert.All(operation.Item(0, DefaultSize, source.Item).SelectMany(x => new[] { 0, -1 }, (x, y) => y + -DefaultStart - 2 * x).ToList(), x => Assert.Equal(seen--, x));
@@ -923,7 +923,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SelectMany_Indexed_ResultSelector(LabeledOperation source, LabeledOperation operation)
+        public static void SelectMany_Indexed_ResultSelector(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             foreach (int i in operation.Item(0, DefaultSize, source.Item).SelectMany((x, index) => { Assert.Equal(index, x); return new[] { 0, -1 }; }, (x, y) => y + -DefaultStart - 2 * x))
@@ -936,7 +936,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SelectMany_Indexed_ResultSelector_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void SelectMany_Indexed_ResultSelector_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = -DefaultStart;
             Assert.All(operation.Item(0, DefaultSize, source.Item).SelectMany((x, index) => { Assert.Equal(index, x); return new[] { 0, -1 }; }, (x, y) => y + -DefaultStart - 2 * x).ToList(), x => Assert.Equal(seen--, x));
@@ -946,7 +946,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SequenceEqual(LabeledOperation source, LabeledOperation operation)
+        public static void SequenceEqual(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).SequenceEqual(ParallelEnumerable.Range(DefaultStart, DefaultSize).AsOrdered()));
             Assert.True(ParallelEnumerable.Range(DefaultStart, DefaultSize).AsOrdered().SequenceEqual(operation.Item(DefaultStart, DefaultSize, source.Item)));
@@ -955,7 +955,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SequenceEqual_Self(LabeledOperation source, LabeledOperation operation)
+        public static void SequenceEqual_Self(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Assert.True(operation.Item(DefaultStart, DefaultSize, source.Item).SequenceEqual(operation.Item(DefaultStart, DefaultSize, source.Item)));
         }
@@ -963,7 +963,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Single(LabeledOperation operation)
+        public static void Single(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, 1, DefaultSource).Single());
             Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, DefaultSource).Single(x => x == DefaultStart + DefaultSize / 2));
@@ -972,7 +972,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void SingleOrDefault(LabeledOperation operation)
+        public static void SingleOrDefault(Labeled<Operation> operation)
         {
             Assert.Equal(DefaultStart, operation.Item(DefaultStart, 1, DefaultSource).SingleOrDefault());
             Assert.Equal(DefaultStart + DefaultSize / 2, operation.Item(DefaultStart, DefaultSize, DefaultSource).SingleOrDefault(x => x == DefaultStart + DefaultSize / 2));
@@ -987,7 +987,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Skip(LabeledOperation source, LabeledOperation operation)
+        public static void Skip(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).Skip(DefaultSize / 2))
@@ -1000,7 +1000,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Skip_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Skip_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).Skip(DefaultSize / 2).ToList(), x => Assert.Equal(seen++, x));
@@ -1010,7 +1010,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SkipWhile(LabeledOperation source, LabeledOperation operation)
+        public static void SkipWhile(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).SkipWhile(x => x < DefaultStart + DefaultSize / 2))
@@ -1023,7 +1023,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SkipWhile_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void SkipWhile_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).SkipWhile(x => x < DefaultStart + DefaultSize / 2).ToList(), x => Assert.Equal(seen++, x));
@@ -1033,7 +1033,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SkipWhile_Indexed(LabeledOperation source, LabeledOperation operation)
+        public static void SkipWhile_Indexed(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).SkipWhile((x, index) => index < DefaultSize / 2))
@@ -1046,7 +1046,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void SkipWhile_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void SkipWhile_Indexed_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize / 2;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).SkipWhile((x, index) => index < DefaultSize / 2).ToList(), x => Assert.Equal(seen++, x));
@@ -1056,7 +1056,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Sum(LabeledOperation operation)
+        public static void Sum(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize), operation.Item(DefaultStart, DefaultSize, DefaultSource).Sum());
         }
@@ -1064,7 +1064,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void Sum_Nullable(LabeledOperation operation)
+        public static void Sum_Nullable(Labeled<Operation> operation)
         {
             Assert.Equal(Functions.SumRange(DefaultStart, DefaultSize), operation.Item(DefaultStart, DefaultSize, DefaultSource).Sum(x => (int?)x));
         }
@@ -1072,7 +1072,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Take(LabeledOperation source, LabeledOperation operation)
+        public static void Take(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).Take(DefaultSize / 2))
@@ -1085,7 +1085,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Take_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Take_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).Take(DefaultSize / 2).ToList(), x => Assert.Equal(seen++, x));
@@ -1095,7 +1095,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void TakeWhile(LabeledOperation source, LabeledOperation operation)
+        public static void TakeWhile(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).TakeWhile(x => x < DefaultStart + DefaultSize / 2))
@@ -1108,7 +1108,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void TakeWhile_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void TakeWhile_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).TakeWhile(x => x < DefaultStart + DefaultSize / 2).ToList(), x => Assert.Equal(seen++, x));
@@ -1118,7 +1118,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void TakeWhile_Indexed(LabeledOperation source, LabeledOperation operation)
+        public static void TakeWhile_Indexed(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).TakeWhile((x, index) => index < DefaultSize / 2))
@@ -1131,7 +1131,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void TakeWhile_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void TakeWhile_Indexed_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).TakeWhile((x, index) => index < DefaultSize / 2).ToList(), x => Assert.Equal(seen++, x));
@@ -1143,7 +1143,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ThenBy_Initial(LabeledOperation source, LabeledOperation operation)
+        public static void ThenBy_Initial(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => 0).ThenBy(x => x))
@@ -1158,7 +1158,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ThenBy_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void ThenBy_Initial_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => 0).ThenBy(x => x).ToList(), x => Assert.Equal(seen++, x));
@@ -1170,7 +1170,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ThenBy_OtherDirection(LabeledOperation source, LabeledOperation operation)
+        public static void ThenBy_OtherDirection(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => 0).ThenBy(x => -x))
@@ -1185,7 +1185,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ThenBy_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void ThenBy_OtherDirection_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => 0).ThenBy(x => -x).ToList(), x => Assert.Equal(--seen, x));
@@ -1197,7 +1197,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ThenByDescending_Initial(LabeledOperation source, LabeledOperation operation)
+        public static void ThenByDescending_Initial(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => 0).ThenByDescending(x => -x))
@@ -1212,7 +1212,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ThenByDescending_Initial_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void ThenByDescending_Initial_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => 0).ThenByDescending(x => -x).ToList(), x => Assert.Equal(seen++, x));
@@ -1224,7 +1224,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ThenByDescending_OtherDirection(LabeledOperation source, LabeledOperation operation)
+        public static void ThenByDescending_OtherDirection(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => 0).ThenByDescending(x => x))
@@ -1239,7 +1239,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ThenByDescending_OtherDirection_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void ThenByDescending_OtherDirection_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart + DefaultSize;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).OrderBy(x => 0).ThenByDescending(x => x).ToList(), x => Assert.Equal(--seen, x));
@@ -1249,7 +1249,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void ToArray(LabeledOperation source, LabeledOperation operation)
+        public static void ToArray(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).ToArray(), x => Assert.Equal(seen++, x));
@@ -1259,7 +1259,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void ToDictionary(LabeledOperation operation)
+        public static void ToDictionary(Labeled<Operation> operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
             Assert.All(operation.Item(DefaultStart, DefaultSize, DefaultSource).ToDictionary(x => x * 2),
@@ -1274,7 +1274,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
-        public static void ToDictionary_ElementSelector(LabeledOperation operation)
+        public static void ToDictionary_ElementSelector(Labeled<Operation> operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
             Assert.All(operation.Item(DefaultStart, DefaultSize, DefaultSource).ToDictionary(x => x, y => y * 2),
@@ -1289,7 +1289,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void ToList(LabeledOperation source, LabeledOperation operation)
+        public static void ToList(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).ToList(), x => Assert.Equal(seen++, x));
@@ -1301,7 +1301,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ToLookup(LabeledOperation source, LabeledOperation operation)
+        public static void ToLookup(Labeled<Operation> source, Labeled<Operation> operation)
         {
             IntegerRangeSet seenOuter = new IntegerRangeSet(0, 2);
             ILookup<int, int> lookup = operation.Item(DefaultStart, DefaultSize, source.Item).ToLookup(x => x % 2);
@@ -1322,7 +1322,7 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(BinaryOperators))]
         [MemberData(nameof(UnaryUnorderedOperators))]
         [MemberData(nameof(BinaryUnorderedOperators))]
-        public static void ToLookup_ElementSelector(LabeledOperation source, LabeledOperation operation)
+        public static void ToLookup_ElementSelector(Labeled<Operation> source, Labeled<Operation> operation)
         {
             IntegerRangeSet seenOuter = new IntegerRangeSet(0, 2);
             ILookup<int, int> lookup = operation.Item(DefaultStart, DefaultSize, source.Item).ToLookup(x => x % 2, y => -y);
@@ -1341,7 +1341,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Where(LabeledOperation source, LabeledOperation operation)
+        public static void Where(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).Where(x => x < DefaultStart + DefaultSize / 2))
@@ -1354,7 +1354,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Where_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Where_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).Where(x => x < DefaultStart + DefaultSize / 2).ToList(), x => Assert.Equal(seen++, x));
@@ -1364,7 +1364,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Where_Indexed(LabeledOperation source, LabeledOperation operation)
+        public static void Where_Indexed(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             foreach (int i in operation.Item(DefaultStart, DefaultSize, source.Item).Where((x, index) => index < DefaultSize / 2))
@@ -1377,7 +1377,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Where_Indexed_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Where_Indexed_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             Assert.All(operation.Item(DefaultStart, DefaultSize, source.Item).Where((x, index) => index < DefaultSize / 2).ToList(), x => Assert.Equal(seen++, x));
@@ -1387,7 +1387,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Zip(LabeledOperation source, LabeledOperation operation)
+        public static void Zip(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<int> query = operation.Item(DefaultStart * 2, DefaultSize, source.Item)
@@ -1402,7 +1402,7 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        public static void Zip_NotPipelined(LabeledOperation source, LabeledOperation operation)
+        public static void Zip_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;
             ParallelQuery<int> query = operation.Item(0, DefaultSize, source.Item)
