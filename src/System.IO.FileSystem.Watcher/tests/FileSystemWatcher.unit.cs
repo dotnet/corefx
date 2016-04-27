@@ -600,44 +600,35 @@ namespace System.IO.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(PlatformID.Linux)]
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void FileSystemWatcher_CreateManyConcurrentWatches(bool enableBeforeCreatingWatches)
+        public void FileSystemWatcher_CreateManyConcurrentWatches()
         {
             int maxUserWatches = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_watches"));
 
             using (var dir = new TempDirectory(GetTestFilePath()))
             using (var watcher = new FileSystemWatcher(dir.Path) { IncludeSubdirectories = true, NotifyFilter = NotifyFilters.FileName })
             {
-                Exception exc = null;
-                ManualResetEventSlim mres = new ManualResetEventSlim();
-                watcher.Error += (s, e) =>
+                Action action = () =>
                 {
-                    exc = e.GetException();
-                    mres.Set();
+                    // Create enough directories to exceed the number of allowed watches
+                    for (int i = 0; i <= maxUserWatches; i++)
+                    {
+                        Directory.CreateDirectory(Path.Combine(dir.Path, i.ToString()));
+                    }
+                };
+                Action cleanup = () =>
+                {
+                    for (int i = 0; i <= maxUserWatches; i++)
+                    {
+                        Directory.Delete(Path.Combine(dir.Path, i.ToString()));
+                    }
                 };
 
-                if (enableBeforeCreatingWatches)
-                    watcher.EnableRaisingEvents = true;
-
-                // Create enough directories to exceed the number of allowed watches
-                for (int i = 0; i <= maxUserWatches; i++)
-                {
-                    Directory.CreateDirectory(Path.Combine(dir.Path, i.ToString()));
-                }
-
-                if (!enableBeforeCreatingWatches)
-                    watcher.EnableRaisingEvents = true;
-
-                Assert.True(mres.Wait(WaitForExpectedEventTimeout));
-                Assert.IsType<IOException>(exc);
+                ExpectError(watcher, action, cleanup);
 
                 // Make sure existing watches still work even after we've had one or more failures
-                AutoResetEvent are = WatchForEvents(watcher, WatcherChangeTypes.Created);
-                new TempFile(Path.Combine(dir.Path, Path.GetRandomFileName())).Dispose();
-                ExpectEvent(are, "file created");
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => new TempFile(Path.Combine(dir.Path, Path.GetRandomFileName())).Dispose());
             }
         }
 
