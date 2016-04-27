@@ -173,7 +173,7 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.Size || filter == NotifyFilters.LastWrite)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForModify) > 0))
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
