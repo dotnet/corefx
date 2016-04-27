@@ -45,9 +45,9 @@ namespace System.IO.Tests
 
         [Theory]
         [InlineData(WatcherChangeTypes.Changed, false)]
-        [InlineData(WatcherChangeTypes.Created, true)]
+        [InlineData(WatcherChangeTypes.Created, false)]
         [InlineData(WatcherChangeTypes.Deleted, false)]
-        [InlineData(WatcherChangeTypes.Renamed, false)]
+        [InlineData(WatcherChangeTypes.Renamed, true)]
         [PlatformSpecific(PlatformID.Windows)]
         public void Windows_Directory_Move_From_Unwatched_To_Watched(WatcherChangeTypes eventType, bool raisesEvent)
         {
