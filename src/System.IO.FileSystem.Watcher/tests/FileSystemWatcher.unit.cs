@@ -486,11 +486,11 @@ namespace System.IO.Tests
         public void FileSystemWatcher_Windows_OnRenameGivesExpectedFullPath()
         {
             using (var dir = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(dir.Path, GetTestFileName())))
+            using (var file = new TempFile(Path.Combine(dir.Path, "file")))
             using (var fsw = new FileSystemWatcher(dir.Path))
             {
                 AutoResetEvent eventOccurred = WatchForEvents(fsw, WatcherChangeTypes.Renamed);
-                string newPath = Path.Combine(dir.Path, GetTestFileName());
+                string newPath = Path.Combine(dir.Path, "newPath");
 
                 fsw.Renamed += (o, e) =>
                 {
@@ -501,25 +501,6 @@ namespace System.IO.Tests
                 fsw.EnableRaisingEvents = true;
                 File.Move(file.Path, newPath);
                 ExpectEvent(eventOccurred, "renamed");
-            }
-        }
-
-        [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)] // Unix FSW don't trigger on a file rename.
-        public void FileSystemWatcher_Unix_RenameDoesntTrigger()
-        {
-            using (var dir = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(dir.Path, GetTestFileName())))
-            using (var fsw = new FileSystemWatcher(dir.Path))
-            {
-                AutoResetEvent eventOccurred = WatchForEvents(fsw, WatcherChangeTypes.Renamed);
-                string newPathInSameDir = Path.Combine(dir.Path, GetTestFileName());
-
-                fsw.EnableRaisingEvents = true;
-                File.Move(file.Path, newPathInSameDir);
-                File.Move(newPathInSameDir, file.Path);
-                File.Move(file.Path, newPathInSameDir);
-                ExpectNoEvent(eventOccurred, "renamed");
             }
         }
 
@@ -700,7 +681,7 @@ namespace System.IO.Tests
         public void FileSystemWatcher_WatchingAliasedFolderResolvesToRealPathWhenWatching()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, GetTestFileName())))
+            using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var fsw = new FileSystemWatcher(dir.Path))
             {
                 AutoResetEvent are = WatchForEvents(fsw, WatcherChangeTypes.Created);

@@ -20,8 +20,9 @@ namespace System.IO.Tests
         // going to fail the test.  If we don't expect an event to occur, then we need
         // to keep the timeout short, as in a successful run we'll end up waiting for
         // the entire timeout specified.
-        public const int WaitForExpectedEventTimeout = 3000;
-        public const int WaitForUnexpectedEventTimeout = 500;
+        public const int WaitForExpectedEventTimeout = 10;
+        public const int WaitForExpectedEventTimeout_NoRetry = 3000;
+        public const int WaitForUnexpectedEventTimeout = 10;
 
         public static AutoResetEvent WatchForEvents(FileSystemWatcher watcher, WatcherChangeTypes actions)
         {
@@ -66,48 +67,113 @@ namespace System.IO.Tests
             return eventOccurred;
         }
 
-        public static void ExpectEvent(WaitHandle eventOccurred, string eventName, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectEvent(WaitHandle eventOccurred, string eventName, int timeout = WaitForExpectedEventTimeout_NoRetry)
         {
             string message = String.Format("Didn't observe a {0} event within {1}ms", eventName, timeout);
             Assert.True(eventOccurred.WaitOne(timeout), message);
         }
 
-        public static void ExpectNoEvent(WaitHandle eventOccurred, string eventName, int timeout = WaitForUnexpectedEventTimeout)
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts = 3, int timeout = WaitForExpectedEventTimeout)
         {
-            string message = String.Format("Should not observe a {0} event within {1}ms", eventName, timeout);
-            Assert.False(eventOccurred.WaitOne(timeout), message);
+            string message = string.Format("Didn't observe a {0} event within {1}ms and {2} attempts.", changeType, timeout, attempts);
+            Assert.True(TryEvent(watcher, changeType, action, attempts, timeout, expected: true), message);
         }
 
-        public static void TestNestedDirectoriesHelper(
-            string testDirectory,
-            WatcherChangeTypes change,
-            Action<AutoResetEvent, TempDirectory> action,
-            NotifyFilters changeFilers = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName)
+        public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts = 1, int timeout = WaitForExpectedEventTimeout)
         {
-            using (var dir = new TempDirectory(testDirectory))
-            using (var watcher = new FileSystemWatcher())
-            {
-                AutoResetEvent createdOccurred = WatchForEvents(watcher, WatcherChangeTypes.Created); // not "using" to avoid race conditions with FSW callbacks
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, change);
+            string message = string.Format("Should not observe a {0} event within {1}ms. Attempted {2} times and received the event each time.", changeType, timeout, attempts);
+            Assert.False(TryEvent(watcher, changeType, action, attempts, timeout, expected: false), message);
+        }
 
-                watcher.Path = Path.GetFullPath(dir.Path);
-                watcher.Filter = "*";
-                watcher.NotifyFilter = changeFilers;
-                watcher.IncludeSubdirectories = true;
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts = 3, int timeout = WaitForExpectedEventTimeout)
+        {
+            string message = string.Format("Didn't observe a {0} event within {1}ms and {2} attempts.", changeType, timeout, attempts);
+            Assert.True(TryEvent(watcher, changeType, action, cleanup, attempts, timeout, expected: true), message);
+        }
+
+        public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts = 1, int timeout = WaitForExpectedEventTimeout)
+        {
+            string message = string.Format("Should not observe a {0} event within {1}ms. Attempted {2} times and received the event each time.", changeType, timeout, attempts);
+            Assert.False(TryEvent(watcher, changeType, action, cleanup, attempts, timeout, expected:false), message);
+        }
+
+        public static void ExpectError(FileSystemWatcher watcher, Action action, Action cleanup, int attempts = 1, int timeout = WaitForExpectedEventTimeout)
+        {
+            string message = string.Format("Did not observe an error event within {0}ms and {1} attempts.", timeout, attempts);
+            Assert.True(TryErrorEvent(watcher, action, cleanup, attempts, timeout, expected: true), message);
+        }
+
+        public static void ExpectNoError(FileSystemWatcher watcher, Action action, Action cleanup, int attempts = 1, int timeout = WaitForExpectedEventTimeout)
+        {
+            string message = string.Format("Should not observe an error event within {0}ms. Attempted {1} times and received the event each time.", timeout, attempts);
+            Assert.False(TryErrorEvent(watcher, action, cleanup, attempts, timeout, expected: true), message);
+        }
+
+        private static bool TryEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts, int timeout, bool expected)
+        {
+            AutoResetEvent eventOccurred = WatchForEvents(watcher, changeType);
+            bool result = !expected;
+            int attemptsCompleted = 0;
+            while (result != expected && attemptsCompleted++ < attempts)
+            {
+                watcher.EnableRaisingEvents = false;
                 watcher.EnableRaisingEvents = true;
 
-                using (var firstDir = new TempDirectory(Path.Combine(dir.Path, "dir1")))
+                action();
+                result = eventOccurred.WaitOne(timeout);
+            }
+            return result;
+        }
+
+        private static bool TryEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts, int timeout, bool expected)
+        {
+            AutoResetEvent eventOccurred = WatchForEvents(watcher, changeType);
+            bool result = !expected;
+            int attemptsCompleted = 0;
+            while (result != expected && attemptsCompleted++ < attempts)
+            {
+                watcher.EnableRaisingEvents = false;
+                watcher.EnableRaisingEvents = true;
+
+                try
                 {
-                    ExpectEvent(createdOccurred, "dir1 created");
-
-                    using (var nestedDir = new TempDirectory(Path.Combine(firstDir.Path, "nested")))
-                    {
-                        ExpectEvent(createdOccurred, "nested created");
-
-                        action(eventOccurred, nestedDir);
-                    }
+                    action();
+                    result = eventOccurred.WaitOne(timeout);
+                }
+                finally
+                {
+                    cleanup();
                 }
             }
+            return result;
+        }
+
+        public static bool TryErrorEvent(FileSystemWatcher watcher, Action action, Action cleanup, int attempts, int timeout, bool expected)
+        {
+            AutoResetEvent errorOccured = new AutoResetEvent(false);
+            watcher.Error += (o, e) =>
+            {
+                errorOccured.Set();
+            };
+
+            bool result = !expected;
+            int attemptsCompleted = 0;
+            while (result != expected && attemptsCompleted++ < attempts)
+            {
+                watcher.EnableRaisingEvents = false;
+                watcher.EnableRaisingEvents = true;
+
+                try
+                {
+                    action();
+                    result = errorOccured.WaitOne(timeout);
+                }
+                finally
+                {
+                    cleanup();
+                }
+            }
+            return result;
         }
 
         // In some cases (such as when running without elevated privileges),
@@ -133,12 +199,12 @@ namespace System.IO.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 symLinkProcess.StartInfo.FileName = "cmd";
-                symLinkProcess.StartInfo.Arguments = string.Format("/c mklink{0} \"{1}\" \"{2}\"", isDirectory ? " /D" : "", linkPath, targetPath);
+                symLinkProcess.StartInfo.Arguments = string.Format("/c mklink{0} \"{1}\" \"{2}\"", isDirectory ? " /D" : "", Path.GetFullPath(linkPath), Path.GetFullPath(targetPath));
             }
             else
             {
                 symLinkProcess.StartInfo.FileName = "ln";
-                symLinkProcess.StartInfo.Arguments = string.Format("-s \"{0}\" \"{1}\"", targetPath, linkPath);
+                symLinkProcess.StartInfo.Arguments = string.Format("-s \"{0}\" \"{1}\"", Path.GetFullPath(targetPath), Path.GetFullPath(linkPath));
             }
             symLinkProcess.StartInfo.RedirectStandardOutput = true;
             symLinkProcess.Start();

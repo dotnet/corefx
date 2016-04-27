@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
 using Xunit;
 
 namespace System.IO.Tests
@@ -11,7 +9,6 @@ namespace System.IO.Tests
     public class RenamedEventArgsTests
     {
         [Theory]
-        [InlineData(WatcherChangeTypes.Changed, "C:", "foo.txt", "bar.txt")]
         [InlineData(WatcherChangeTypes.Changed, "C:", "foo.txt", "bar.txt")]
         [InlineData(WatcherChangeTypes.All, "C:", "foo.txt", "bar.txt")]
         [InlineData(0, "", "", "")]
