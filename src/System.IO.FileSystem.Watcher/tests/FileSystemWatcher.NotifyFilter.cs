@@ -36,6 +36,17 @@ namespace System.IO.Tests
                 yield return new object[] { filter };
         }
 
+        public const NotifyFilters LinuxFiltersForAttribute =   NotifyFilters.Attributes |
+                                                                NotifyFilters.CreationTime |
+                                                                NotifyFilters.LastAccess |
+                                                                NotifyFilters.LastWrite |
+                                                                NotifyFilters.Security |
+                                                                NotifyFilters.Size;
+        public const NotifyFilters LinuxFiltersForModify =  NotifyFilters.LastAccess |
+                                                            NotifyFilters.LastWrite |
+                                                            NotifyFilters.Security |
+                                                            NotifyFilters.Size;
+
         [Theory]
         [MemberData(nameof(FilterTypes))]
         //[ActiveIssue(2011, PlatformID.OSX)]
@@ -53,6 +64,8 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.Attributes)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
             }
@@ -72,8 +85,8 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.CreationTime)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
-                else if (filter == NotifyFilters.LastAccess && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action); // Unix FS sets LastAccess on SetCreationTime.
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
             }
@@ -96,6 +109,8 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.DirectoryName)
                     ExpectEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && (filter == NotifyFilters.FileName))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
             }
@@ -115,6 +130,8 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.LastAccess)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
             }
@@ -133,6 +150,8 @@ namespace System.IO.Tests
                 Action action = () => File.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
 
                 if (filter == NotifyFilters.LastWrite)
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
@@ -154,6 +173,8 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.Size || filter == NotifyFilters.LastWrite)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
             }
