@@ -65,7 +65,7 @@ namespace System.IO.Tests
                 if (filter == NotifyFilters.Attributes)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
             }
@@ -110,7 +110,7 @@ namespace System.IO.Tests
                 if (filter == NotifyFilters.DirectoryName)
                     ExpectEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && (filter == NotifyFilters.FileName))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                    ExpectEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
             }
@@ -174,7 +174,7 @@ namespace System.IO.Tests
                 if (filter == NotifyFilters.Size || filter == NotifyFilters.LastWrite)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
             }
