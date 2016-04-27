@@ -86,9 +86,9 @@ namespace System.IO.Tests
 
         [Theory]
         [InlineData(WatcherChangeTypes.Changed, false)]
-        [InlineData(WatcherChangeTypes.Created, true)]
-        [InlineData(WatcherChangeTypes.Deleted, true)]
-        [InlineData(WatcherChangeTypes.Renamed, false)]
+        [InlineData(WatcherChangeTypes.Created, false)]
+        [InlineData(WatcherChangeTypes.Deleted, false)]
+        [InlineData(WatcherChangeTypes.Renamed, true)]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void Unix_Directory_Move_To_Same_Directory(WatcherChangeTypes eventType, bool raisesEvent)
         {
@@ -99,7 +99,7 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, false)]
         [InlineData(WatcherChangeTypes.Deleted, true)]
-        [InlineData(WatcherChangeTypes.Renamed, false)]
+        [InlineData(WatcherChangeTypes.Renamed, true)]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void Unix_Directory_Move_To_Different_Unwatched_Directory(WatcherChangeTypes eventType, bool raisesEvent)
         {
@@ -108,8 +108,8 @@ namespace System.IO.Tests
 
         [Theory]
         [InlineData(WatcherChangeTypes.Changed, false)]
-        [InlineData(WatcherChangeTypes.Created, true)]
-        [InlineData(WatcherChangeTypes.Deleted, true)]
+        [InlineData(WatcherChangeTypes.Created, false)]
+        [InlineData(WatcherChangeTypes.Deleted, false)]
         [InlineData(WatcherChangeTypes.Renamed, false)]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void Unix_Directory_Move_To_Different_Watched_Directory(WatcherChangeTypes eventType, bool raisesEvent)
@@ -119,7 +119,7 @@ namespace System.IO.Tests
 
         [Theory]
         [InlineData(WatcherChangeTypes.Changed, false)]
-        [InlineData(WatcherChangeTypes.Created, true)]
+        [InlineData(WatcherChangeTypes.Created, false)]
         [InlineData(WatcherChangeTypes.Deleted, false)]
         [InlineData(WatcherChangeTypes.Renamed, false)]
         [PlatformSpecific(PlatformID.AnyUnix)]
@@ -130,9 +130,9 @@ namespace System.IO.Tests
 
         [Theory]
         [InlineData(WatcherChangeTypes.Changed, false, true)]
-        [InlineData(WatcherChangeTypes.Created, true, true)]
-        [InlineData(WatcherChangeTypes.Deleted, true, true)]
-        [InlineData(WatcherChangeTypes.Renamed, false, true)]
+        [InlineData(WatcherChangeTypes.Created, false, true)]
+        [InlineData(WatcherChangeTypes.Deleted, false, true)]
+        [InlineData(WatcherChangeTypes.Renamed, true, true)]
         [InlineData(WatcherChangeTypes.Changed, false, false)]
         [InlineData(WatcherChangeTypes.Created, true, false)]
         [InlineData(WatcherChangeTypes.Deleted, true, false)]
@@ -147,8 +147,8 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, false)]
-        [InlineData(WatcherChangeTypes.Deleted, true)]
-        [InlineData(WatcherChangeTypes.Renamed, false)]
+        [InlineData(WatcherChangeTypes.Deleted, false)]
+        [InlineData(WatcherChangeTypes.Renamed, true)]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void Unix_Directory_Move_With_Set_NotifyFilter(WatcherChangeTypes eventType, bool raisesEvent)
         {
