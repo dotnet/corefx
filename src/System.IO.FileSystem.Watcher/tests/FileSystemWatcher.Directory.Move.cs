@@ -48,7 +48,7 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Created, true)]
         [InlineData(WatcherChangeTypes.Deleted, false)]
         [InlineData(WatcherChangeTypes.Renamed, false)]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(PlatformID.Windows)]
         public void Windows_Directory_Move_From_Unwatched_To_Watched(WatcherChangeTypes eventType, bool raisesEvent)
         {
             DirectoryMove_FromUnwatchedToWatched(eventType, raisesEvent);
@@ -99,7 +99,7 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, false)]
         [InlineData(WatcherChangeTypes.Deleted, true)]
-        [InlineData(WatcherChangeTypes.Renamed, true)]
+        [InlineData(WatcherChangeTypes.Renamed, false)]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void Unix_Directory_Move_To_Different_Unwatched_Directory(WatcherChangeTypes eventType, bool raisesEvent)
         {
@@ -121,7 +121,7 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, false)]
         [InlineData(WatcherChangeTypes.Deleted, false)]
-        [InlineData(WatcherChangeTypes.Renamed, false)]
+        [InlineData(WatcherChangeTypes.Renamed, true)]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void Unix_Directory_Move_From_Unwatched_To_Watched(WatcherChangeTypes eventType, bool raisesEvent)
         {
@@ -134,8 +134,8 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Deleted, false, true)]
         [InlineData(WatcherChangeTypes.Renamed, true, true)]
         [InlineData(WatcherChangeTypes.Changed, false, false)]
-        [InlineData(WatcherChangeTypes.Created, true, false)]
-        [InlineData(WatcherChangeTypes.Deleted, true, false)]
+        [InlineData(WatcherChangeTypes.Created, false, false)]
+        [InlineData(WatcherChangeTypes.Deleted, false, false)]
         [InlineData(WatcherChangeTypes.Renamed, false, false)]
         [PlatformSpecific(PlatformID.AnyUnix)]
         //[ActiveIssue(3215, PlatformID.OSX)] // failing for Changed, false

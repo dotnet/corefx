@@ -95,7 +95,7 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, false)]
         [InlineData(WatcherChangeTypes.Deleted, false)]
-        [InlineData(WatcherChangeTypes.Renamed, true)]
+        [InlineData(WatcherChangeTypes.Renamed, false)]
         [PlatformSpecific(PlatformID.AnyUnix)]
         public void Unix_File_Move_To_Different_Watched_Directory(WatcherChangeTypes eventType, bool raisesEvent)
         {
