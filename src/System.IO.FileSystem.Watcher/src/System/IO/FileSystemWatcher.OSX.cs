@@ -375,13 +375,21 @@ namespace System.IO
                         {
                             // OS X is wonky where it can give back kFSEventStreamEventFlagItemCreated and kFSEventStreamEventFlagItemRemoved
                             // for the same item. The only option we have is to stat and see if the item exists; if so send created, otherwise send deleted.
-                            if ((IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated)) ||
+                            if ((IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated)) &&
                                 (IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved)))
                             {
                                 WatcherChangeTypes wct = DoesItemExist(eventPaths[i], IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)) ?
                                     WatcherChangeTypes.Created : 
                                     WatcherChangeTypes.Deleted;
                                 watcher.NotifyFileSystemEventArgs(wct, relativePath);
+                            }
+                            else if (IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated))
+                            {
+                                watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
+                            }
+                            else if (IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved))
+                            {
+                                watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
                             }
 
                             if (IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemInodeMetaMod) ||
