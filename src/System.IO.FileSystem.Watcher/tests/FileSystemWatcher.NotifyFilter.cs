@@ -64,7 +64,7 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.Attributes)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ((filter & LinuxFiltersForAttribute) > 0))
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
@@ -85,7 +85,7 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.CreationTime)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ((filter & LinuxFiltersForAttribute) > 0))
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
@@ -109,7 +109,7 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.DirectoryName)
                     ExpectEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && (filter == NotifyFilters.FileName))
+                else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (filter == NotifyFilters.FileName))
                     ExpectEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
@@ -130,7 +130,7 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.LastAccess)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ((filter & LinuxFiltersForAttribute) > 0))
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
@@ -151,7 +151,7 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.LastWrite)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ((filter & LinuxFiltersForAttribute) > 0))
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
@@ -173,7 +173,7 @@ namespace System.IO.Tests
 
                 if (filter == NotifyFilters.Size || filter == NotifyFilters.LastWrite)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForModify) > 0))
+                else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && ((filter & LinuxFiltersForModify) > 0))
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
