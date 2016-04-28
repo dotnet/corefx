@@ -93,9 +93,9 @@ namespace System.IO.Tests
                 if (filter == NotifyFilters.CreationTime)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
             }
@@ -140,9 +140,9 @@ namespace System.IO.Tests
                 if (filter == NotifyFilters.LastAccess)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
             }
@@ -163,9 +163,9 @@ namespace System.IO.Tests
                 if (filter == NotifyFilters.LastWrite)
                     ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
-                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
                 else
                     ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
             }
