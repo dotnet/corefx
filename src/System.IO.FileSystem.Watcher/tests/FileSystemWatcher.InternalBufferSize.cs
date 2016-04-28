@@ -48,7 +48,7 @@ namespace System.IO.Tests
             using (var file = new TempFile(Path.Combine(testDirectory.Path, "file")))
             using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(file.Path)))
             {
-                int internalBufferOperationCapacity = watcher.InternalBufferSize / (16 + 2 * (Path.GetFileName(file.Path).Length + 1));
+                int internalBufferOperationCapacity = watcher.InternalBufferSize / (17 + Path.GetFileName(file.Path).Length);
 
                 // Set the capacity high to ensure no error events arise.
                 if (setToHigherCapacity)

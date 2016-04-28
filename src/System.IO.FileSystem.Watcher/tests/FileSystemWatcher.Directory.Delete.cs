@@ -74,11 +74,8 @@ namespace System.IO.Tests
 
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
-            using (var watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*.*"))
+            using (var watcher = new FileSystemWatcher(dir.Path, "*"))
             {
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Created);
-
-                // put everything in our own directory to avoid collisions
                 watcher.IncludeSubdirectories = true;
 
                 // Priming directory
@@ -105,7 +102,7 @@ namespace System.IO.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(CanCreateSymbolicLinks))]
         //[ActiveIssue(3215, PlatformID.OSX)]
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, false)]
@@ -116,7 +113,7 @@ namespace System.IO.Tests
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var tempDir = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*.*"))
+            using (var watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*"))
             {
                 // Make the symlink in our path (to the temp folder) and make sure an event is raised
                 string symLinkPath = Path.Combine(dir.Path, "link");

@@ -88,7 +88,7 @@ namespace System.IO.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(CanCreateSymbolicLinks))]
         [InlineData(WatcherChangeTypes.Changed, false)]
         [InlineData(WatcherChangeTypes.Created, false)]
         [InlineData(WatcherChangeTypes.Deleted, false)]

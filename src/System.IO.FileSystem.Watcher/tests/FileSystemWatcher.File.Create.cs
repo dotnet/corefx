@@ -102,9 +102,6 @@ namespace System.IO.Tests
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*.*"))
             {
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Created);
-
-                // put everything in our own directory to avoid collisions
                 watcher.IncludeSubdirectories = true;
 
                 // Priming directory
