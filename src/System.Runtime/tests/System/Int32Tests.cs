@@ -189,7 +189,7 @@ namespace System.Tests
             NumberFormatInfo emptyCurrencyFormat = new NumberFormatInfo() { CurrencySymbol = "" };
             yield return new object[] { "100", NumberStyles.Currency, emptyCurrencyFormat, 100 };
 
-            // If CurrencySymbol and Negative  are the same, NegativeSign is preferred
+            // If CurrencySymbol and Negative are the same, NegativeSign is preferred
             NumberFormatInfo sameCurrencyNegativeSignFormat = new NumberFormatInfo()
             {
                 NegativeSign = "|",
@@ -399,9 +399,9 @@ namespace System.Tests
                 PositiveInfinitySymbol = "Infinity",
                 NegativeInfinitySymbol = "-Infinity"
             };
-            yield return new object[] { "NaN", NumberStyles.Any, null, typeof(FormatException) };
-            yield return new object[] { "Infinity", NumberStyles.Any, null, typeof(FormatException) };
-            yield return new object[] { "-Infinity", NumberStyles.Any, null, typeof(FormatException) };
+            yield return new object[] { "NaN", NumberStyles.Any, doubleFormat, typeof(FormatException) };
+            yield return new object[] { "Infinity", NumberStyles.Any, doubleFormat, typeof(FormatException) };
+            yield return new object[] { "-Infinity", NumberStyles.Any, doubleFormat, typeof(FormatException) };
 
             // NumberFormatInfo has a custom property with length > 1
             NumberFormatInfo integerCurrencyFormat = new NumberFormatInfo() { CurrencySymbol = "123" };
