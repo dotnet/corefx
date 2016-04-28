@@ -2,229 +2,212 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public partial class NotifyFilterTests : FileSystemWatcherTest
+    public class NotifyFilterTests : FileSystemWatcherTest
     {
-        [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
-        public void FileSystemWatcher_NotifyFilter_Attributes()
-        {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
-            {
-                watcher.NotifyFilter = NotifyFilters.Attributes;
-                watcher.Filter = Path.GetFileName(file.Path);
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Changed);
-
-                watcher.EnableRaisingEvents = true;
-
-                var attributes = File.GetAttributes(file.Path);
-                attributes |= FileAttributes.ReadOnly;
-
-                File.SetAttributes(file.Path, attributes);
-
-                ExpectEvent(eventOccurred, "changed");
-            }
-        }
-
-        [Fact]
-        [PlatformSpecific(PlatformID.Windows | PlatformID.OSX)]
-        [ActiveIssue(2011, PlatformID.OSX)]
-        public void FileSystemWatcher_NotifyFilter_CreationTime()
-        {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
-            {
-                watcher.NotifyFilter = NotifyFilters.CreationTime;
-                watcher.Filter = Path.GetFileName(file.Path);
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Changed);
-
-                watcher.EnableRaisingEvents = true;
-
-                File.SetCreationTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
-
-                ExpectEvent(eventOccurred, "changed");
-            }
-        }
-
-        [Fact]
-        public void FileSystemWatcher_NotifyFilter_DirectoryName()
-        {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
-            {
-                watcher.NotifyFilter = NotifyFilters.DirectoryName;
-                watcher.Filter = Path.GetFileName(dir.Path);
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Renamed);
-
-                string newName = Path.Combine(testDirectory.Path, GetTestFileName());
-
-                watcher.EnableRaisingEvents = true;
-
-                Directory.Move(dir.Path, newName);
-
-                ExpectEvent(eventOccurred, "changed");
-            }
-        }
-
-
-        [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
-        public void FileSystemWatcher_NotifyFilter_LastAccessTime()
-        {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
-            {
-                watcher.NotifyFilter = NotifyFilters.LastAccess;
-                watcher.Filter = Path.GetFileName(file.Path);
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Changed);
-
-                watcher.EnableRaisingEvents = true;
-
-                File.SetLastAccessTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
-
-                ExpectEvent(eventOccurred, "changed");
-            }
-        }
-
-        [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
-        public void FileSystemWatcher_NotifyFilter_LastWriteTime()
-        {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
-            {
-                watcher.NotifyFilter = NotifyFilters.LastWrite;
-                watcher.Filter = Path.GetFileName(file.Path);
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Changed);
-
-                watcher.EnableRaisingEvents = true;
-
-                File.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
-
-                ExpectEvent(eventOccurred, "changed");
-            }
-        }
-
-        [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
-        public void FileSystemWatcher_NotifyFilter_Size()
-        {
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
-            {
-                watcher.NotifyFilter = NotifyFilters.Size;
-                watcher.Filter = Path.GetFileName(file.Path);
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Changed);
-
-                watcher.EnableRaisingEvents = true;
-
-                byte[] buffer = new byte[16 * 1024];
-                File.WriteAllBytes(file.Path, buffer);
-
-                ExpectEvent(eventOccurred, "changed");
-            }
-        }
-
         [DllImport(
-                "api-ms-win-security-provider-l1-1-0.dll",
-                EntryPoint = "SetNamedSecurityInfoW",
-                CallingConvention = CallingConvention.Winapi,
-                SetLastError = true,
-                ExactSpelling = true,
-                CharSet = CharSet.Unicode)]
+        "api-ms-win-security-provider-l1-1-0.dll",
+        EntryPoint = "SetNamedSecurityInfoW",
+        CallingConvention = CallingConvention.Winapi,
+        SetLastError = true,
+        ExactSpelling = true,
+        CharSet = CharSet.Unicode)]
         private static extern uint SetSecurityInfoByHandle(
-                string name,
-                uint objectType,
-                uint securityInformation,
-                IntPtr owner,
-                IntPtr group,
-                IntPtr dacl,
-                IntPtr sacl);
+        string name,
+        uint objectType,
+        uint securityInformation,
+        IntPtr owner,
+        IntPtr group,
+        IntPtr dacl,
+        IntPtr sacl);
 
         private const uint ERROR_SUCCESS = 0;
         private const uint DACL_SECURITY_INFORMATION = 0x00000004;
         private const uint SE_FILE_OBJECT = 0x1;
 
-        [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
-        public void FileSystemWatcher_NotifyFilter_Security()
+        public static IEnumerable<object[]> FilterTypes()
+        {
+            foreach (NotifyFilters filter in Enum.GetValues(typeof(NotifyFilters)))
+                yield return new object[] { filter };
+        }
+
+        public const NotifyFilters LinuxFiltersForAttribute =   NotifyFilters.Attributes |
+                                                                NotifyFilters.CreationTime |
+                                                                NotifyFilters.LastAccess |
+                                                                NotifyFilters.LastWrite |
+                                                                NotifyFilters.Security |
+                                                                NotifyFilters.Size;
+        public const NotifyFilters LinuxFiltersForModify =  NotifyFilters.LastAccess |
+                                                            NotifyFilters.LastWrite |
+                                                            NotifyFilters.Security |
+                                                            NotifyFilters.Size;
+        public const NotifyFilters OSXFiltersForModify = NotifyFilters.Attributes |
+                                                        NotifyFilters.CreationTime |
+                                                        NotifyFilters.LastAccess |
+                                                        NotifyFilters.LastWrite |
+                                                        NotifyFilters.Size;
+
+        [Theory]
+        [MemberData(nameof(FilterTypes))]
+        //[ActiveIssue(2011, PlatformID.OSX)]
+        public void FileSystemWatcher_NotifyFilter_Attributes(NotifyFilters filter)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
+            using (var file = new TempFile(Path.Combine(testDirectory.Path, "file")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(file.Path)))
             {
-                watcher.NotifyFilter = NotifyFilters.Security;
-                watcher.Filter = Path.GetFileName(file.Path);
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.Changed);
+                watcher.NotifyFilter = filter;
+                var attributes = File.GetAttributes(file.Path);
 
-                watcher.EnableRaisingEvents = true;
+                Action action = () => File.SetAttributes(file.Path, attributes | FileAttributes.ReadOnly);
+                Action cleanup = () => File.SetAttributes(file.Path, attributes);
 
-                // ACL support is not yet available, so pinvoke directly.
-                uint result = SetSecurityInfoByHandle(file.Path,
-                    SE_FILE_OBJECT,
-                    DACL_SECURITY_INFORMATION, // Only setting the DACL
-                    owner: IntPtr.Zero,
-                    group: IntPtr.Zero,
-                    dacl: IntPtr.Zero, // full access to everyone
-                    sacl: IntPtr.Zero);
-                Assert.Equal(ERROR_SUCCESS, result);
-
-                ExpectEvent(eventOccurred, "changed");
+                if (filter == NotifyFilters.Attributes)
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else
+                    ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
             }
         }
 
-
-        [Fact]
-        [ActiveIssue(2011, PlatformID.OSX)]
-        public void FileSystemWatcher_NotifyFilter_Negative()
+        [Theory]
+        [MemberData(nameof(FilterTypes))]
+        //[ActiveIssue(2011, PlatformID.OSX)]
+        public void FileSystemWatcher_NotifyFilter_CreationTime(NotifyFilters filter)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var file = new TempFile(Path.Combine(testDirectory.Path, GetTestFileName())))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path))
+            using (var file = new TempFile(Path.Combine(testDirectory.Path, "file")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(file.Path)))
             {
-                // only detect name.
-                watcher.NotifyFilter = NotifyFilters.FileName;
-                watcher.Filter = Path.GetFileName(file.Path);
-                AutoResetEvent eventOccurred = WatchForEvents(watcher, WatcherChangeTypes.All);
+                watcher.NotifyFilter = filter;
+                Action action = () => File.SetCreationTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
 
-                string newName = Path.Combine(testDirectory.Path, GetTestFileName());
-                watcher.EnableRaisingEvents = true;
+                if (filter == NotifyFilters.CreationTime)
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else
+                    ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
+            }
+        }
 
-                // Change attributes
-                var attributes = File.GetAttributes(file.Path);
-                File.SetAttributes(file.Path, attributes | FileAttributes.ReadOnly);
-                File.SetAttributes(file.Path, attributes);
+        [Theory]
+        [MemberData(nameof(FilterTypes))]
+        public void FileSystemWatcher_NotifyFilter_DirectoryName(NotifyFilters filter)
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(dir.Path)))
+            {
+                string sourcePath = dir.Path;
+                string targetPath = Path.Combine(testDirectory.Path, "targetDir");
+                watcher.NotifyFilter = filter;
 
-                // Change creation time
-                File.SetCreationTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
+                Action action = () => Directory.Move(sourcePath, targetPath);
+                Action cleanup = () => Directory.Move(targetPath, sourcePath);
 
-                // Change access time
-                File.SetLastAccessTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
+                if (filter == NotifyFilters.DirectoryName)
+                    ExpectEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && (filter == NotifyFilters.FileName))
+                    ExpectEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
+                else
+                    ExpectNoEvent(watcher, WatcherChangeTypes.Renamed, action, cleanup);
+            }
+        }
 
-                // Change write time
-                File.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
+        [Theory]
+        [MemberData(nameof(FilterTypes))]
+        //[ActiveIssue(2011, PlatformID.OSX)]
+        public void FileSystemWatcher_NotifyFilter_LastAccessTime(NotifyFilters filter)
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var file = new TempFile(Path.Combine(testDirectory.Path, "file")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(file.Path)))
+            {
+                watcher.NotifyFilter = filter;
+                Action action = () => File.SetLastAccessTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
 
-                // Change size
-                byte[] buffer = new byte[16 * 1024];
-                File.WriteAllBytes(file.Path, buffer);
+                if (filter == NotifyFilters.LastAccess)
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else
+                    ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
+            }
+        }
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        [Theory]
+        [MemberData(nameof(FilterTypes))]
+        //[ActiveIssue(2011, PlatformID.OSX)]
+        public void FileSystemWatcher_NotifyFilter_LastWriteTime(NotifyFilters filter)
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var file = new TempFile(Path.Combine(testDirectory.Path, "file")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(file.Path)))
+            {
+                watcher.NotifyFilter = filter;
+                Action action = () => File.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
+
+                if (filter == NotifyFilters.LastWrite)
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action);
+                else
+                    ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(FilterTypes))]
+        //[ActiveIssue(2011, PlatformID.OSX)]
+        public void FileSystemWatcher_NotifyFilter_Size(NotifyFilters filter)
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var file = new TempFile(Path.Combine(testDirectory.Path, "file")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(file.Path)))
+            {
+                watcher.NotifyFilter = filter;
+                Action action = () => File.WriteAllText(file.Path, "longText!");
+                Action cleanup = () => File.WriteAllText(file.Path, "short");
+
+                if (filter == NotifyFilters.Size || filter == NotifyFilters.LastWrite)
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForModify) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else
+                    ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(FilterTypes))]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void FileSystemWatcher_NotifyFilter_Security(NotifyFilters filter)
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var file = new TempFile(Path.Combine(testDirectory.Path, "file")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(file.Path)))
+            {
+                watcher.NotifyFilter = filter;
+                Action action = () =>
                 {
-                    // Change security
+                    // ACL support is not yet available, so pinvoke directly.
                     uint result = SetSecurityInfoByHandle(file.Path,
                         SE_FILE_OBJECT,
                         DACL_SECURITY_INFORMATION, // Only setting the DACL
@@ -233,10 +216,18 @@ namespace System.IO.Tests
                         dacl: IntPtr.Zero, // full access to everyone
                         sacl: IntPtr.Zero);
                     Assert.Equal(ERROR_SUCCESS, result);
-                }
+                };
+                Action cleanup = () =>
+                {
+                    // Recreate the file.
+                    File.Delete(file.Path);
+                    File.WriteAllText(file.Path, "text");
+                };
 
-                // None of these should trigger any events
-                ExpectNoEvent(eventOccurred, "any");
+                if (filter == NotifyFilters.Security)
+                    ExpectEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
+                else
+                    ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, cleanup);
             }
         }
     }
