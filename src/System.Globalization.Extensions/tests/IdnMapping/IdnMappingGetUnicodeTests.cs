@@ -9,6 +9,27 @@ namespace System.Globalization.Tests
 {
     public class IdnMappingGetUnicodeTests
     {
+        public static IEnumerable<object[]> GetAscii_TestData()
+        {
+            yield return new object[] { "xn--yda", 0, 7, "\u0101", };
+            yield return new object[] { "axn--ydab", 1, 7, "\u0101" };
+        }
+
+        [Theory]
+        [MemberData(nameof(GetAscii_TestData))]
+        public void GetUnicode(string ascii, int index, int count, string expected)
+        {
+            if (index + count == ascii.Length)
+            {
+                if (index == 0)
+                {
+                    Assert.Equal(expected, new IdnMapping().GetUnicode(ascii));
+                }
+                Assert.Equal(expected, new IdnMapping().GetUnicode(ascii, index));
+            }
+            Assert.Equal(expected, new IdnMapping().GetUnicode(ascii, index, count));
+        }
+
         public static IEnumerable<object[]> GetUnicode_Invalid_TestData()
         {
             // Ascii is null
