@@ -24,7 +24,7 @@ namespace System.IO.Tests
         public const int WaitForExpectedEventTimeout_NoRetry = 3000;
         public const int WaitForUnexpectedEventTimeout = 10;
 
-        public static AutoResetEvent WatchForEvents(FileSystemWatcher watcher, WatcherChangeTypes actions)
+        public static AutoResetEvent WatchForEvents(FileSystemWatcher watcher, WatcherChangeTypes actions, string expectedPath = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
@@ -33,6 +33,10 @@ namespace System.IO.Tests
                 watcher.Changed += (o, e) =>
                 {
                     Assert.Equal(WatcherChangeTypes.Changed, e.ChangeType);
+                    if (expectedPath != null)
+                    {
+                        Assert.Equal(Path.GetFullPath(expectedPath), Path.GetFullPath(e.FullPath));
+                    }
                     eventOccurred.Set();
                 };
             }
@@ -42,6 +46,10 @@ namespace System.IO.Tests
                 watcher.Created += (o, e) =>
                 {
                     Assert.Equal(WatcherChangeTypes.Created, e.ChangeType);
+                    if (expectedPath != null)
+                    {
+                        Assert.Equal(Path.GetFullPath(expectedPath), Path.GetFullPath(e.FullPath));
+                    }
                     eventOccurred.Set();
                 };
             }
@@ -51,6 +59,10 @@ namespace System.IO.Tests
                 watcher.Deleted += (o, e) =>
                 {
                     Assert.Equal(WatcherChangeTypes.Deleted, e.ChangeType);
+                    if (expectedPath != null)
+                    {
+                        Assert.Equal(Path.GetFullPath(expectedPath), Path.GetFullPath(e.FullPath));
+                    }
                     eventOccurred.Set();
                 };
             }
@@ -60,6 +72,10 @@ namespace System.IO.Tests
                 watcher.Renamed += (o, e) =>
                 {
                     Assert.Equal(WatcherChangeTypes.Renamed, e.ChangeType);
+                    if (expectedPath != null)
+                    {
+                        Assert.Equal(Path.GetFullPath(expectedPath), Path.GetFullPath(e.FullPath));
+                    }
                     eventOccurred.Set();
                 };
             }
@@ -73,28 +89,28 @@ namespace System.IO.Tests
             Assert.True(eventOccurred.WaitOne(timeout), message);
         }
 
-        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts = 5, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, string expectedPath = null, int attempts = 5, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Didn't observe a {0} event within {1}ms and {2} attempts.", changeType, timeout, attempts);
-            Assert.True(TryEvent(watcher, changeType, action, attempts, timeout, expected: true), message);
+            Assert.True(TryEvent(watcher, changeType, action, attempts, timeout, true, expectedPath), message);
         }
 
         public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts = 2, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Should not observe a {0} event within {1}ms. Attempted {2} times and received the event each time.", changeType, timeout, attempts);
-            Assert.False(TryEvent(watcher, changeType, action, attempts, timeout, expected: false), message);
+            Assert.False(TryEvent(watcher, changeType, action, attempts, timeout, false, null), message);
         }
 
-        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts = 5, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, string expectedPath = null, int attempts = 5, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Didn't observe a {0} event within {1}ms and {2} attempts.", changeType, timeout, attempts);
-            Assert.True(TryEvent(watcher, changeType, action, cleanup, attempts, timeout, expected: true), message);
+            Assert.True(TryEvent(watcher, changeType, action, cleanup, attempts, timeout, true, expectedPath), message);
         }
 
         public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts = 2, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Should not observe a {0} event within {1}ms. Attempted {2} times and received the event each time.", changeType, timeout, attempts);
-            Assert.False(TryEvent(watcher, changeType, action, cleanup, attempts, timeout, expected:false), message);
+            Assert.False(TryEvent(watcher, changeType, action, cleanup, attempts, timeout, false, null), message);
         }
 
         public static void ExpectError(FileSystemWatcher watcher, Action action, Action cleanup, int attempts = 2, int timeout = WaitForExpectedEventTimeout)
@@ -109,9 +125,9 @@ namespace System.IO.Tests
             Assert.False(TryErrorEvent(watcher, action, cleanup, attempts, timeout, expected: true), message);
         }
 
-        private static bool TryEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts, int timeout, bool expected)
+        private static bool TryEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts, int timeout, bool expected, string expectedPath)
         {
-            AutoResetEvent eventOccurred = WatchForEvents(watcher, changeType);
+            AutoResetEvent eventOccurred = WatchForEvents(watcher, changeType, expectedPath);
             bool result = !expected;
             int attemptsCompleted = 0;
             while (result != expected && attemptsCompleted++ < attempts)
@@ -125,9 +141,9 @@ namespace System.IO.Tests
             return result;
         }
 
-        private static bool TryEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts, int timeout, bool expected)
+        private static bool TryEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts, int timeout, bool expected, string expectedPath)
         {
-            AutoResetEvent eventOccurred = WatchForEvents(watcher, changeType);
+            AutoResetEvent eventOccurred = WatchForEvents(watcher, changeType, expectedPath);
             bool result = !expected;
             int attemptsCompleted = 0;
             while (result != expected && attemptsCompleted++ < attempts)

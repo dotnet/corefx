@@ -172,7 +172,9 @@ namespace System.IO.Tests
                 Action cleanup = () => Directory.Move(targetPath, sourcePath);
 
                 // Test that the event is observed or not observed
-                if (raisesEvent)
+                if (raisesEvent && eventType == WatcherChangeTypes.Renamed)
+                    ExpectEvent(watcher, eventType, action, cleanup);
+                else if (raisesEvent)
                     ExpectEvent(watcher, eventType, action, cleanup);
                 else
                     ExpectNoEvent(watcher, eventType, action, cleanup);

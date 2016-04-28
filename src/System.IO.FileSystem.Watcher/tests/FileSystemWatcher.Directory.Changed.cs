@@ -23,7 +23,7 @@ namespace System.IO.Tests
                 Action action = () => Directory.SetLastWriteTime(dir.Path, DateTime.Now + TimeSpan.FromSeconds(10));
 
                 if (raisesEvent)
-                    ExpectEvent(watcher, eventType, action);
+                    ExpectEvent(watcher, eventType, action, dir.Path);
                 else
                     ExpectNoEvent(watcher, eventType, action);
             }
@@ -44,7 +44,7 @@ namespace System.IO.Tests
                 Action action = () => Directory.SetLastWriteTime(dir.Path, DateTime.Now + TimeSpan.FromSeconds(10));
 
                 if (raisesEvent)
-                    ExpectEvent(watcher, eventType, action);
+                    ExpectEvent(watcher, eventType, action, dir.Path);
                 else
                     ExpectNoEvent(watcher, eventType, action);
             }
@@ -74,7 +74,7 @@ namespace System.IO.Tests
                 Action cleanup = () => File.SetAttributes(nestedDir.Path, attributes);
 
                 if (raisesEvent)
-                    ExpectEvent(watcher, eventType, action, cleanup);
+                    ExpectEvent(watcher, eventType, action, cleanup, nestedDir.Path);
                 else
                     ExpectNoEvent(watcher, eventType, action, cleanup);
             }
@@ -102,9 +102,9 @@ namespace System.IO.Tests
                 Action cleanup = () => File.WriteAllText(file.Path, "short");
 
                 if (raisesEvent)
-                    ExpectEvent(watcher, eventType, action, cleanup);
+                    ExpectEvent(watcher, eventType, action, cleanup, dir.Path);
                 else
-                    ExpectNoEvent(watcher, eventType, action);
+                    ExpectNoEvent(watcher, eventType, action, cleanup);
             }
         }
     }

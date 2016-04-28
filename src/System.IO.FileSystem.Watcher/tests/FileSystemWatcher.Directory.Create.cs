@@ -119,7 +119,7 @@ namespace System.IO.Tests
 
                 // Test that the event is observed or not observed
                 if (raisesEvent)
-                    ExpectEvent(watcher, eventType, action, cleanup);
+                    ExpectEvent(watcher, eventType, action, cleanup, symLinkPath);
                 else
                     ExpectNoEvent(watcher, eventType, action, cleanup);
             }
