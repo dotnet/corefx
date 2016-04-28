@@ -73,37 +73,37 @@ namespace System.IO.Tests
             Assert.True(eventOccurred.WaitOne(timeout), message);
         }
 
-        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts = 3, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts = 5, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Didn't observe a {0} event within {1}ms and {2} attempts.", changeType, timeout, attempts);
             Assert.True(TryEvent(watcher, changeType, action, attempts, timeout, expected: true), message);
         }
 
-        public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts = 1, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, int attempts = 2, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Should not observe a {0} event within {1}ms. Attempted {2} times and received the event each time.", changeType, timeout, attempts);
             Assert.False(TryEvent(watcher, changeType, action, attempts, timeout, expected: false), message);
         }
 
-        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts = 3, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts = 5, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Didn't observe a {0} event within {1}ms and {2} attempts.", changeType, timeout, attempts);
             Assert.True(TryEvent(watcher, changeType, action, cleanup, attempts, timeout, expected: true), message);
         }
 
-        public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts = 1, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes changeType, Action action, Action cleanup, int attempts = 2, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Should not observe a {0} event within {1}ms. Attempted {2} times and received the event each time.", changeType, timeout, attempts);
             Assert.False(TryEvent(watcher, changeType, action, cleanup, attempts, timeout, expected:false), message);
         }
 
-        public static void ExpectError(FileSystemWatcher watcher, Action action, Action cleanup, int attempts = 1, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectError(FileSystemWatcher watcher, Action action, Action cleanup, int attempts = 2, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Did not observe an error event within {0}ms and {1} attempts.", timeout, attempts);
             Assert.True(TryErrorEvent(watcher, action, cleanup, attempts, timeout, expected: true), message);
         }
 
-        public static void ExpectNoError(FileSystemWatcher watcher, Action action, Action cleanup, int attempts = 1, int timeout = WaitForExpectedEventTimeout)
+        public static void ExpectNoError(FileSystemWatcher watcher, Action action, Action cleanup, int attempts = 2, int timeout = WaitForExpectedEventTimeout)
         {
             string message = string.Format("Should not observe an error event within {0}ms. Attempted {1} times and received the event each time.", timeout, attempts);
             Assert.False(TryErrorEvent(watcher, action, cleanup, attempts, timeout, expected: true), message);
@@ -120,7 +120,7 @@ namespace System.IO.Tests
                 watcher.EnableRaisingEvents = true;
 
                 action();
-                result = eventOccurred.WaitOne(timeout);
+                result = eventOccurred.WaitOne(timeout * ((attemptsCompleted - 1) * 10));
             }
             return result;
         }
@@ -138,7 +138,7 @@ namespace System.IO.Tests
                 try
                 {
                     action();
-                    result = eventOccurred.WaitOne(timeout);
+                    result = eventOccurred.WaitOne(timeout * ((attemptsCompleted - 1) * 10));
                 }
                 finally
                 {
