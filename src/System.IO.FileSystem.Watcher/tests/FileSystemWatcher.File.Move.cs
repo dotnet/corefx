@@ -140,7 +140,7 @@ namespace System.IO.Tests
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
-            using (var watcher = new FileSystemWatcher(dir.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(dir.Path, "*"))
             using (var testFile = new TempFile(Path.Combine(dir.Path, "file")))
             {
                 string sourcePath = testFile.Path;
@@ -171,7 +171,7 @@ namespace System.IO.Tests
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var dir_unwatched = new TempDirectory(Path.Combine(testDirectory.Path, "dir_unwatched")))
-            using (var watcher = new FileSystemWatcher(dir.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(dir.Path, "*"))
             using (var testFile = new TempFile(Path.Combine(dir.Path, "file")))
             {
                 string sourcePath = testFile.Path;
@@ -202,7 +202,7 @@ namespace System.IO.Tests
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var dir_adjacent = new TempDirectory(Path.Combine(testDirectory.Path, "dir_adj")))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*"))
             using (var testFile = new TempFile(Path.Combine(dir.Path, "file")))
             {
                 string sourcePath = testFile.Path;

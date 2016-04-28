@@ -104,7 +104,7 @@ namespace System.IO.Tests
 
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
-            using (var watcher = new FileSystemWatcher(dir.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(dir.Path, "*"))
             {
                 watcher.IncludeSubdirectories = true;
                 watcher.NotifyFilter = NotifyFilters.FileName;
@@ -137,7 +137,7 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Created, false)]
         [InlineData(WatcherChangeTypes.Deleted, true)]
         [InlineData(WatcherChangeTypes.Renamed, false)]
-        public void FileSystemWatcher_File_Delete_WatcherDoesntFollowSymLinkToFile(WatcherChangeTypes eventType, bool raisesEvent)
+        public void FileSystemWatcher_File_Delete_SymLink(WatcherChangeTypes eventType, bool raisesEvent)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))

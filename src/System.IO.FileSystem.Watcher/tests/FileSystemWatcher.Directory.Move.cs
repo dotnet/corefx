@@ -162,7 +162,7 @@ namespace System.IO.Tests
         private void DirectoryMove_SameDirectory(WatcherChangeTypes eventType, bool raisesEvent)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*"))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             {
                 string sourcePath = dir.Path;
@@ -185,7 +185,7 @@ namespace System.IO.Tests
             using (var sourceDir = new TempDirectory(Path.Combine(testDirectory.Path, "source")))
             using (var adjacentDir = new TempDirectory(Path.Combine(testDirectory.Path, "adj")))
             using (var dir = new TempDirectory(Path.Combine(sourceDir.Path, "dir")))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*"))
             {
                 string sourcePath = dir.Path;
                 string targetPath = Path.Combine(adjacentDir.Path, "target");
@@ -207,7 +207,7 @@ namespace System.IO.Tests
             using (var watchedTestDirectory = new TempDirectory(GetTestFilePath()))
             using (var unwatchedTestDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(watchedTestDirectory.Path, "dir")))
-            using (var watcher = new FileSystemWatcher(watchedTestDirectory.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(watchedTestDirectory.Path, "*"))
             {
                 string sourcePath = dir.Path;
                 string targetPath = Path.Combine(unwatchedTestDirectory.Path, "target");
@@ -229,7 +229,7 @@ namespace System.IO.Tests
             using (var watchedTestDirectory = new TempDirectory(GetTestFilePath()))
             using (var unwatchedTestDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(watchedTestDirectory.Path, "dir")))
-            using (var watcher = new FileSystemWatcher(watchedTestDirectory.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(watchedTestDirectory.Path, "*"))
             {
                 string sourcePath = dir.Path;
                 string targetPath = Path.Combine(watchedTestDirectory.Path, "target");
@@ -274,7 +274,7 @@ namespace System.IO.Tests
         private void DirectoryMove_WithNotifyFilter(WatcherChangeTypes eventType, bool raisesEvent)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*"))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             {
                 watcher.NotifyFilter = NotifyFilters.DirectoryName;

@@ -69,17 +69,13 @@ namespace System.IO.Tests
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*"))
-            using (var file = File.Create(Path.Combine(dir.Path, "testfile.txt")))
             {
+                string fileName = Path.Combine(dir.Path, "testFile.txt");
                 watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
 
-                Action action = () =>
-                {
-                    // Change the nested file and verify we get the changed event
-                    byte[] bt = new byte[4096];
-                    file.Write(bt, 0, bt.Length);
-                    file.Flush();
-                };
+                Action action = () => File.WriteAllText(fileName, "longlonglong!");
+                Action cleanup = () => File.WriteAllText(fileName, "short");
+                cleanup(); // Initially create the short file.
 
                 if (raisesEvent)
                     ExpectEvent(watcher, eventType, action);

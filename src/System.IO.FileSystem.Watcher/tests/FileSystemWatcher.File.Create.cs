@@ -100,7 +100,7 @@ namespace System.IO.Tests
 
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
-            using (var watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*.*"))
+            using (var watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*"))
             {
                 watcher.IncludeSubdirectories = true;
 
@@ -133,12 +133,12 @@ namespace System.IO.Tests
         [InlineData(WatcherChangeTypes.Created, true)]
         [InlineData(WatcherChangeTypes.Deleted, false)]
         [InlineData(WatcherChangeTypes.Renamed, false)]
-        public void FileSystemWatcher_File_Create_WatcherDoesntFollowSymLinkToFile(WatcherChangeTypes eventType, bool raisesEvent)
+        public void FileSystemWatcher_File_Create_SymLink(WatcherChangeTypes eventType, bool raisesEvent)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var temp = new TempFile(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(dir.Path, "*.*"))
+            using (var watcher = new FileSystemWatcher(dir.Path, "*"))
             {
                 // Make the symlink in our path (to the temp file) and make sure an event is raised
                 string symLinkPath = Path.Combine(dir.Path, Path.GetFileName(temp.Path));

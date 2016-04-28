@@ -170,7 +170,7 @@ namespace System.IO.Tests
 
             Assert.Equal("*.*", watcher.Filter);
 
-            // Null and empty should be mapped to "*.*"
+            // Null and empty should be mapped to "*"
             watcher.Filter = null;
             Assert.Equal("*.*", watcher.Filter);
 
