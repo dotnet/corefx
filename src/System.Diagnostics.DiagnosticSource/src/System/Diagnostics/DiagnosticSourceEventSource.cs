@@ -40,11 +40,11 @@ namespace System.Diagnostics
     ///       * DIAGNOSTIC_SOURCE_NAME / DIAGNOSTC_EVENT_NAME   
     ///       * DIAGNOSTIC_SOURCE_NAME    - which wildcards every event in the Diagnostic source or 
     ///       * EMPTY                     - which turns on all sources
-    ///   * TRANSFORM_SPEC is a semicolon separted list of TRANSFORM_SPEC, which can be 
+    ///   * TRANSFORM_SPEC is a semicolon separated list of TRANSFORM_SPEC, which can be 
     ///       * - TRANSFORM_SPEC               - the '-' indicates that implicit payload elements should be suppressed 
     ///       * VARIABLE_NAME = PROPERTY_SPEC  - indicates that a payload element 'VARIABLE_NAME' is created from PROPERTY_SPEC
     ///       * PROPERTY_SPEC                  - This is a shortcut where VARIABLE_NAME is the LAST property name
-    ///   * a PROPERTY_SPEC can be (wich is basically alist of names separated by '.').  
+    ///   * a PROPERTY_SPEC is basically a list of names separated by '.'  
     ///       * PROPERTY_NAME                  - fetches a property from the DiagnosticSource payload object
     ///       * PROPERTY_NAME . PROPERTY NAME  - fetches a sub-property of the object. 
     /// 
