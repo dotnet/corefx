@@ -4,7 +4,7 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal enum SYMKIND
+    internal enum SymbolKind
     {
         SK_NamespaceSymbol,
         SK_NamespaceDeclaration,

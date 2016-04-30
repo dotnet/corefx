@@ -52,36 +52,36 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             fHadUndisplayableStringInError = false;
         }
 
-        protected void ErrSK(out string psz, SYMKIND sk)
+        protected void ErrSK(out string psz, SymbolKind sk)
         {
             MessageID id;
             switch (sk)
             {
-                case SYMKIND.SK_MethodSymbol:
+                case SymbolKind.SK_MethodSymbol:
                     id = MessageID.SK_METHOD;
                     break;
-                case SYMKIND.SK_AggregateSymbol:
+                case SymbolKind.SK_AggregateSymbol:
                     id = MessageID.SK_CLASS;
                     break;
-                case SYMKIND.SK_NamespaceSymbol:
+                case SymbolKind.SK_NamespaceSymbol:
                     id = MessageID.SK_NAMESPACE;
                     break;
-                case SYMKIND.SK_FieldSymbol:
+                case SymbolKind.SK_FieldSymbol:
                     id = MessageID.SK_FIELD;
                     break;
-                case SYMKIND.SK_LocalVariableSymbol:
+                case SymbolKind.SK_LocalVariableSymbol:
                     id = MessageID.SK_VARIABLE;
                     break;
-                case SYMKIND.SK_PropertySymbol:
+                case SymbolKind.SK_PropertySymbol:
                     id = MessageID.SK_PROPERTY;
                     break;
-                case SYMKIND.SK_EventSymbol:
+                case SymbolKind.SK_EventSymbol:
                     id = MessageID.SK_EVENT;
                     break;
-                case SYMKIND.SK_TypeParameterSymbol:
+                case SymbolKind.SK_TypeParameterSymbol:
                     id = MessageID.SK_TYVAR;
                     break;
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
+                case SymbolKind.SK_AssemblyQualifiedNamespaceSymbol:
                     Debug.Assert(false, "Illegal sk");
                     id = MessageID.SK_ALIAS;
                     break;
@@ -418,20 +418,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             switch (sym.getKind())
             {
-                case SYMKIND.SK_NamespaceDeclaration:
+                case SymbolKind.SK_NamespaceDeclaration:
                     // for namespace declarations just convert the namespace
                     ErrAppendSym(sym.AsNamespaceDeclaration().NameSpace(), null);
                     break;
 
-                case SYMKIND.SK_GlobalAttributeDeclaration:
+                case SymbolKind.SK_GlobalAttributeDeclaration:
                     ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_AggregateDeclaration:
+                case SymbolKind.SK_AggregateDeclaration:
                     ErrAppendSym(sym.AsAggregateDeclaration().Agg(), pctx);
                     break;
 
-                case SYMKIND.SK_AggregateSymbol:
+                case SymbolKind.SK_AggregateSymbol:
                     {
                         // Check for a predefined class with a special "nice" name for
                         // error reported.
@@ -455,20 +455,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         break;
                     }
 
-                case SYMKIND.SK_MethodSymbol:
+                case SymbolKind.SK_MethodSymbol:
                     ErrAppendMethod(sym.AsMethodSymbol(), pctx, fArgs);
                     break;
 
-                case SYMKIND.SK_PropertySymbol:
+                case SymbolKind.SK_PropertySymbol:
                     ErrAppendProperty(sym.AsPropertySymbol(), pctx);
                     break;
 
-                case SYMKIND.SK_EventSymbol:
+                case SymbolKind.SK_EventSymbol:
                     ErrAppendEvent(sym.AsEventSymbol(), pctx);
                     break;
 
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
-                case SYMKIND.SK_NamespaceSymbol:
+                case SymbolKind.SK_AssemblyQualifiedNamespaceSymbol:
+                case SymbolKind.SK_NamespaceSymbol:
                     if (sym == getBSymmgr().GetRootNS())
                     {
                         ErrAppendId(MessageID.GlobalNamespace);
@@ -480,12 +480,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case SYMKIND.SK_FieldSymbol:
+                case SymbolKind.SK_FieldSymbol:
                     ErrAppendParentSym(sym, pctx);
                     ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_TypeParameterSymbol:
+                case SymbolKind.SK_TypeParameterSymbol:
                     if (null == sym.name)
                     {
                         // It's a standard type variable.
@@ -498,15 +498,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_LocalVariableSymbol:
-                case SYMKIND.SK_LabelSymbol:
-                case SYMKIND.SK_TransparentIdentifierMemberSymbol:
+                case SymbolKind.SK_LocalVariableSymbol:
+                case SymbolKind.SK_LabelSymbol:
+                case SymbolKind.SK_TransparentIdentifierMemberSymbol:
                     // Generate symbol name.
                     ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_Scope:
-                case SYMKIND.SK_LambdaScope:
+                case SymbolKind.SK_Scope:
+                case SymbolKind.SK_LambdaScope:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, "Bad symbol kind");
