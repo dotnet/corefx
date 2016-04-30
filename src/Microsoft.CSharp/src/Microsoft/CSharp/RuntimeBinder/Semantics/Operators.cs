@@ -3242,13 +3242,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 switch (type.GetTypeKind())
                 {
-                    case TypeKind.TK_NullableType:
+                    case TypeKind.NullableType:
                         type = type.StripNubs();
                         break;
-                    case TypeKind.TK_TypeParameterType:
+                    case TypeKind.TypeParameterType:
                         type = type.AsTypeParameterType().GetEffectiveBaseClass();
                         break;
-                    case TypeKind.TK_AggregateType:
+                    case TypeKind.AggregateType:
                         if ((type.isClassType() || type.isStructType()) && !type.AsAggregateType().getAggregate().IsSkipUDOps())
                         {
                             return type.AsAggregateType();

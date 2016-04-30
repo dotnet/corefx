@@ -137,29 +137,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     default:
                         VSFAIL("Bad type kind");
                         return false;
-                    case TypeKind.TK_VoidType:
+                    case TypeKind.VoidType:
                         return false; // Can't convert to a method group or anon method.
-                    case TypeKind.TK_NullType:
+                    case TypeKind.NullType:
                         return false;  // Can never convert TO the null type.
-                    case TypeKind.TK_TypeParameterType:
+                    case TypeKind.TypeParameterType:
                         if (bindExplicitConversionToTypeVar())
                         {
                             return true;
                         }
                         break;
-                    case TypeKind.TK_ArrayType:
+                    case TypeKind.ArrayType:
                         if (bindExplicitConversionToArray(_typeDest.AsArrayType()))
                         {
                             return true;
                         }
                         break;
-                    case TypeKind.TK_PointerType:
+                    case TypeKind.PointerType:
                         if (bindExplicitConversionToPointer())
                         {
                             return true;
                         }
                         break;
-                    case TypeKind.TK_AggregateType:
+                    case TypeKind.AggregateType:
                         {
                             AggCastResult result = bindExplicitConversionToAggregate(_typeDest.AsAggregateType());
 

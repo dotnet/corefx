@@ -1065,13 +1065,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         LAgain:
             switch (typeSrc.GetTypeKind())
             {
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     typeSrc = typeSrc.StripNubs();
                     goto LAgain;
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     typeSrc = typeSrc.AsTypeParameterType().GetEffectiveBaseClass();
                     goto LAgain;
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     if (!typeSrc.isClassType() && !typeSrc.isStructType() || typeSrc.AsAggregateType().getAggregate().IsSkipUDOps())
                         return null;
                     break;
