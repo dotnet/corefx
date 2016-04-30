@@ -421,7 +421,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                 /*
-                case SK_AggregateType:
+                case AggregateType:
                     return ((Symbol)this.AsAggregateType().getAggregate()).getInputFile();
                  */
 
@@ -429,7 +429,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return this.AsAggregateDeclaration().getInputFile();
 
                 /*
-                case SK_TypeParameterType:
+                case TypeParameterType:
                     if (this.AsTypeParameterType().GetOwningSymbol().IsAggregateSymbol())
                     {
                         ASSERT(0);
@@ -464,12 +464,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return this.AsEventSymbol().containingDeclaration().getInputFile();
 
                 /*
-                case SK_PointerType:
-                case SK_NullableType:
-                case SK_ArrayType:
-                case SK_PinnedType:
-                case SK_ParameterModifierType:
-                case SK_OptionalModifierType:
+                case PointerType:
+                case NullableType:
+                case ArrayType:
+                case PinnedType:
+                case ParameterModifierType:
+                case OptionalModifierType:
                     return AsType().GetBaseOrParameterOrElementType().getInputFile();
                  */
 
@@ -477,8 +477,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return parent.getInputFile();
 
                 /*
-                case SK_NullType:
-                case SK_VoidType:
+                case NullType:
+                case VoidType:
                     return null;
                  */
 
