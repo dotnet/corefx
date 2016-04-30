@@ -178,13 +178,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (typeSym.GetTypeKind())
             {
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     return typeSym.AsAggregateType();
-                case TypeKind.TK_ArrayType:
+                case TypeKind.ArrayType:
                     return GetReqPredefType(PredefinedType.PT_ARRAY);
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     return typeSym.AsTypeParameterType().GetEffectiveBaseClass();
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     return typeSym.AsNullableType().GetAts(ErrorContext);
             }
             Debug.Assert(false, "Bad typeSym!");
