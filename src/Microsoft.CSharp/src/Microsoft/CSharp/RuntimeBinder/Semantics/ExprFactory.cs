@@ -183,7 +183,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 pType = GetTypes().GetErrorSym();
             }
 
-            return CreateMemGroup(0, pName, mwi.TypeArgs, methProp != null ? methProp.getKind() : SymbolKind.SK_MethodSymbol, mwi.GetType(), methProp, pObject, new CMemberLookupResults(GetGlobalSymbols().AllocParams(1, new CType[] { pType }), pName));
+            return CreateMemGroup(0, pName, mwi.TypeArgs, methProp != null ? methProp.getKind() : SymbolKind.MethodSymbol, mwi.GetType(), methProp, pObject, new CMemberLookupResults(GetGlobalSymbols().AllocParams(1, new CType[] { pType }), pName));
         }
 
         public EXPRUSERDEFINEDCONVERSION CreateUserDefinedConversion(EXPR arg, EXPR call, MethWithInst mwi)

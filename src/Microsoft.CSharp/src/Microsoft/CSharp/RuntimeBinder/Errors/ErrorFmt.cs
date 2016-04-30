@@ -82,7 +82,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         }
         public ErrArg(SymbolKind sk)
         {
-            Debug.Assert(sk != SymbolKind.SK_AssemblyQualifiedNamespaceSymbol);
+            Debug.Assert(sk != SymbolKind.AssemblyQualifiedNamespaceSymbol);
             this.eaf = ErrArgFlags.None;
             this.eak = ErrArgKind.SymKind;
             this.sk = sk;
@@ -294,18 +294,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             eak = ErrArgKind.SymKind;
             eaf = ErrArgFlags.None;
             sk = sym.getKind();
-            if (sk == SymbolKind.SK_AssemblyQualifiedNamespaceSymbol)
+            if (sk == SymbolKind.AssemblyQualifiedNamespaceSymbol)
             {
                 if (!String.IsNullOrEmpty(sym.AsAssemblyQualifiedNamespaceSymbol().GetNS().name.Text))
                 {
                     // Non-empty namespace name means it's not the root
                     // so treat it like a namespace instead of an alias
-                    sk = SymbolKind.SK_NamespaceSymbol;
+                    sk = SymbolKind.NamespaceSymbol;
                 }
                 else
                 {
                     // An empty namespace name means it's just an alias for the root
-                    sk = SymbolKind.SK_ExternalAliasDefinitionSymbol;
+                    sk = SymbolKind.ExternalAliasDefinitionSymbol;
                 }
             }
         }

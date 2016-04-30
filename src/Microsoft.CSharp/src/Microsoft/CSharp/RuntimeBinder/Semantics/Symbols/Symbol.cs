@@ -165,8 +165,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (this.getKind())
             {
-                case SymbolKind.SK_PropertySymbol:
-                case SymbolKind.SK_MethodSymbol:
+                case SymbolKind.PropertySymbol:
+                case SymbolKind.MethodSymbol:
                     {
                         MethodOrPropertySymbol meth = this.AsMethodOrPropertySymbol();
 
@@ -185,12 +185,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 /*
-                case SymbolKind.SK_ParameterModifierType:
-                case SymbolKind.SK_OptionalModifierType:
-                case SymbolKind.SK_PointerType:
-                case SymbolKind.SK_ArrayType:
-                case SymbolKind.SK_NullableType:
-                case SymbolKind.SK_PinnedType:
+                case SymbolKind.ParameterModifierType:
+                case SymbolKind.OptionalModifierType:
+                case SymbolKind.PointerType:
+                case SymbolKind.ArrayType:
+                case SymbolKind.NullableType:
+                case SymbolKind.PinnedType:
                     if (this.AsType().GetBaseOrParameterOrElementType() != null)
                     {
                         fBogus = this.AsType().GetBaseOrParameterOrElementType().computeCurrentBogusState();
@@ -198,14 +198,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
                     */
 
-                case SymbolKind.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     if (this.AsEventSymbol().type != null)
                     {
                         fBogus = this.AsEventSymbol().type.computeCurrentBogusState();
                     }
                     break;
 
-                case SymbolKind.SK_FieldSymbol:
+                case SymbolKind.FieldSymbol:
                     if (this.AsFieldSymbol().GetType() != null)
                     {
                         fBogus = this.AsFieldSymbol().GetType().computeCurrentBogusState();
@@ -213,11 +213,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 /*
-                case SymbolKind.SK_ErrorType:
+                case SymbolKind.ErrorType:
                     this.setBogus(false);
                     break;
 
-                case SymbolKind.SK_AggregateType:
+                case SymbolKind.AggregateType:
                     fBogus = this.AsAggregateType().getAggregate().computeCurrentBogusState();
                     for (int i = 0; !fBogus && i < this.AsAggregateType().GetTypeArgsAll().size; i++)
                     {
@@ -226,27 +226,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
                  */
 
-                case SymbolKind.SK_TypeParameterSymbol:
+                case SymbolKind.TypeParameterSymbol:
                 /*
-            case SymbolKind.SK_TypeParameterType:
-            case SymbolKind.SK_VoidType:
-            case SymbolKind.SK_NullType:
-            case SymbolKind.SK_OpenTypePlaceholderType:
-            case SymbolKind.SK_ArgumentListType:
-            case SymbolKind.SK_NaturalIntegerType:
+            case SymbolKind.TypeParameterType:
+            case SymbolKind.VoidType:
+            case SymbolKind.NullType:
+            case SymbolKind.OpenTypePlaceholderType:
+            case SymbolKind.ArgumentListType:
+            case SymbolKind.NaturalIntegerType:
                  */
-                case SymbolKind.SK_LocalVariableSymbol:
+                case SymbolKind.LocalVariableSymbol:
                     this.setBogus(false);
                     break;
 
-                case SymbolKind.SK_AggregateSymbol:
+                case SymbolKind.AggregateSymbol:
                     fBogus = this.hasBogus() && this.checkBogus();
                     break;
 
-                case SymbolKind.SK_Scope:
-                case SymbolKind.SK_LambdaScope:
-                case SymbolKind.SK_NamespaceSymbol:
-                case SymbolKind.SK_NamespaceDeclaration:
+                case SymbolKind.Scope:
+                case SymbolKind.LambdaScope:
+                case SymbolKind.NamespaceSymbol:
+                case SymbolKind.NamespaceDeclaration:
                 default:
                     Debug.Assert(false, "CheckBogus with invalid Symbol kind");
                     this.setBogus(false);
@@ -262,16 +262,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return this.hasBogus() && this.checkBogus();
         }
 
-        public bool IsNamespaceSymbol() { return _kind == SymbolKind.SK_NamespaceSymbol; }
-        public bool IsNamespaceDeclaration() { return _kind == SymbolKind.SK_NamespaceDeclaration; }
-        public bool IsAggregateSymbol() { return _kind == SymbolKind.SK_AggregateSymbol; }
-        public bool IsAggregateDeclaration() { return _kind == SymbolKind.SK_AggregateDeclaration; }
-        public bool IsFieldSymbol() { return _kind == SymbolKind.SK_FieldSymbol; }
-        public bool IsLocalVariableSymbol() { return _kind == SymbolKind.SK_LocalVariableSymbol; }
-        public bool IsMethodSymbol() { return _kind == SymbolKind.SK_MethodSymbol; }
-        public bool IsPropertySymbol() { return _kind == SymbolKind.SK_PropertySymbol; }
-        public bool IsTypeParameterSymbol() { return _kind == SymbolKind.SK_TypeParameterSymbol; }
-        public bool IsEventSymbol() { return _kind == SymbolKind.SK_EventSymbol; }
+        public bool IsNamespaceSymbol() { return _kind == SymbolKind.NamespaceSymbol; }
+        public bool IsNamespaceDeclaration() { return _kind == SymbolKind.NamespaceDeclaration; }
+        public bool IsAggregateSymbol() { return _kind == SymbolKind.AggregateSymbol; }
+        public bool IsAggregateDeclaration() { return _kind == SymbolKind.AggregateDeclaration; }
+        public bool IsFieldSymbol() { return _kind == SymbolKind.FieldSymbol; }
+        public bool IsLocalVariableSymbol() { return _kind == SymbolKind.LocalVariableSymbol; }
+        public bool IsMethodSymbol() { return _kind == SymbolKind.MethodSymbol; }
+        public bool IsPropertySymbol() { return _kind == SymbolKind.PropertySymbol; }
+        public bool IsTypeParameterSymbol() { return _kind == SymbolKind.TypeParameterSymbol; }
+        public bool IsEventSymbol() { return _kind == SymbolKind.EventSymbol; }
 
         public bool IsMethodOrPropertySymbol()
         {
@@ -330,20 +330,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (_kind)
             {
-                case SymbolKind.SK_MethodSymbol:
-                case SymbolKind.SK_PropertySymbol:
-                case SymbolKind.SK_FieldSymbol:
-                case SymbolKind.SK_EventSymbol:
-                case SymbolKind.SK_TypeParameterSymbol:
+                case SymbolKind.MethodSymbol:
+                case SymbolKind.PropertySymbol:
+                case SymbolKind.FieldSymbol:
+                case SymbolKind.EventSymbol:
+                case SymbolKind.TypeParameterSymbol:
                     return parent.AsAggregateSymbol().AssociatedAssembly;
 
-                case SymbolKind.SK_AggregateDeclaration:
+                case SymbolKind.AggregateDeclaration:
                     return this.AsAggregateDeclaration().GetAssembly();
-                case SymbolKind.SK_AggregateSymbol:
+                case SymbolKind.AggregateSymbol:
                     return this.AsAggregateSymbol().AssociatedAssembly;
-                case SymbolKind.SK_NamespaceDeclaration:
-                case SymbolKind.SK_NamespaceSymbol:
-                case SymbolKind.SK_AssemblyQualifiedNamespaceSymbol:
+                case SymbolKind.NamespaceDeclaration:
+                case SymbolKind.NamespaceSymbol:
+                case SymbolKind.AssemblyQualifiedNamespaceSymbol:
                 default:
                     // Should never call this with any other kind.
                     Debug.Assert(false, "GetAssemblyID called on bad sym kind");
@@ -358,21 +358,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (_kind)
             {
-                case SymbolKind.SK_MethodSymbol:
-                case SymbolKind.SK_PropertySymbol:
-                case SymbolKind.SK_FieldSymbol:
-                case SymbolKind.SK_EventSymbol:
-                case SymbolKind.SK_TypeParameterSymbol:
+                case SymbolKind.MethodSymbol:
+                case SymbolKind.PropertySymbol:
+                case SymbolKind.FieldSymbol:
+                case SymbolKind.EventSymbol:
+                case SymbolKind.TypeParameterSymbol:
                     return parent.AsAggregateSymbol().InternalsVisibleTo(assembly);
 
-                case SymbolKind.SK_AggregateDeclaration:
+                case SymbolKind.AggregateDeclaration:
                     return this.AsAggregateDeclaration().Agg().InternalsVisibleTo(assembly);
-                case SymbolKind.SK_AggregateSymbol:
+                case SymbolKind.AggregateSymbol:
                     return this.AsAggregateSymbol().InternalsVisibleTo(assembly);
-                case SymbolKind.SK_NamespaceDeclaration:
-                case SymbolKind.SK_ExternalAliasDefinitionSymbol:
-                case SymbolKind.SK_NamespaceSymbol:
-                case SymbolKind.SK_AssemblyQualifiedNamespaceSymbol:
+                case SymbolKind.NamespaceDeclaration:
+                case SymbolKind.ExternalAliasDefinitionSymbol:
+                case SymbolKind.NamespaceSymbol:
+                case SymbolKind.AssemblyQualifiedNamespaceSymbol:
                 default:
                     // Should never call this with any other kind.
                     Debug.Assert(false, "InternalsVisibleTo called on bad sym kind");
@@ -396,17 +396,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (_kind)
             {
-                case SymbolKind.SK_NamespaceSymbol:
-                case SymbolKind.SK_AssemblyQualifiedNamespaceSymbol:
+                case SymbolKind.NamespaceSymbol:
+                case SymbolKind.AssemblyQualifiedNamespaceSymbol:
                     // namespaces don't have input files
                     // call with a NamespaceDeclaration instead
                     Debug.Assert(false);
                     return null;
 
-                case SymbolKind.SK_NamespaceDeclaration:
+                case SymbolKind.NamespaceDeclaration:
                     return null;
 
-                case SymbolKind.SK_AggregateSymbol:
+                case SymbolKind.AggregateSymbol:
                     {
 #if !CSEE
                         AggregateSymbol AggregateSymbol = this.AsAggregateSymbol();
@@ -425,7 +425,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return ((Symbol)this.AsAggregateType().getAggregate()).getInputFile();
                  */
 
-                case SymbolKind.SK_AggregateDeclaration:
+                case SymbolKind.AggregateDeclaration:
                     return this.AsAggregateDeclaration().getInputFile();
 
                 /*
@@ -441,7 +441,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return AsTypeParameterType().GetOwningSymbol().AsMethodSymbol().getInputFile();
                     }
                  */
-                case SymbolKind.SK_TypeParameterSymbol:
+                case SymbolKind.TypeParameterSymbol:
                     if (this.parent.IsAggregateSymbol())
                     {
                         // Because an AggregateSymbol that isn't metadata can be defined across multiple
@@ -454,13 +454,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false);
                     break;
 
-                case SymbolKind.SK_FieldSymbol:
+                case SymbolKind.FieldSymbol:
                     return this.AsFieldSymbol().containingDeclaration().getInputFile();
-                case SymbolKind.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     return this.AsMethodSymbol().containingDeclaration().getInputFile();
-                case SymbolKind.SK_PropertySymbol:
+                case SymbolKind.PropertySymbol:
                     return this.AsPropertySymbol().containingDeclaration().getInputFile();
-                case SymbolKind.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     return this.AsEventSymbol().containingDeclaration().getInputFile();
 
                 /*
@@ -473,7 +473,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AsType().GetBaseOrParameterOrElementType().getInputFile();
                  */
 
-                case SymbolKind.SK_GlobalAttributeDeclaration:
+                case SymbolKind.GlobalAttributeDeclaration:
                     return parent.getInputFile();
 
                 /*
@@ -496,11 +496,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (_kind)
             {
-                case SymbolKind.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     return this.AsMethodSymbol().isVirtual;
-                case SymbolKind.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     return this.AsEventSymbol().methAdd != null && this.AsEventSymbol().methAdd.isVirtual;
-                case SymbolKind.SK_PropertySymbol:
+                case SymbolKind.PropertySymbol:
                     return (this.AsPropertySymbol().methGet != null && this.AsPropertySymbol().methGet.isVirtual) ||
                            (this.AsPropertySymbol().methSet != null && this.AsPropertySymbol().methSet.isVirtual);
                 default:
@@ -512,10 +512,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (_kind)
             {
-                case SymbolKind.SK_MethodSymbol:
-                case SymbolKind.SK_PropertySymbol:
+                case SymbolKind.MethodSymbol:
+                case SymbolKind.PropertySymbol:
                     return this.AsMethodOrPropertySymbol().isOverride;
-                case SymbolKind.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     return this.AsEventSymbol().isOverride;
                 default:
                     return false;
@@ -526,10 +526,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (_kind)
             {
-                case SymbolKind.SK_MethodSymbol:
-                case SymbolKind.SK_PropertySymbol:
+                case SymbolKind.MethodSymbol:
+                case SymbolKind.PropertySymbol:
                     return this.AsMethodOrPropertySymbol().isHideByName;
-                case SymbolKind.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     return this.AsEventSymbol().methAdd != null && this.AsEventSymbol().methAdd.isHideByName;
                 default:
                     return true;
@@ -541,10 +541,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (_kind)
             {
-                case SymbolKind.SK_MethodSymbol:
-                case SymbolKind.SK_PropertySymbol:
+                case SymbolKind.MethodSymbol:
+                case SymbolKind.PropertySymbol:
                     return this.AsMethodOrPropertySymbol().swtSlot.Sym;
-                case SymbolKind.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                 default:
                     return null;
             }
@@ -557,7 +557,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             switch (_kind)
             {
-                case SymbolKind.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     return this.AsMethodSymbol().isUserCallable();
                 default:
                     break;
