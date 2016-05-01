@@ -239,6 +239,13 @@ namespace System.Net.Primitives.Functional.Tests
             c.Value = null;
             Assert.Equal(string.Empty, c.Value);
         }
+        
+        [Fact]
+        public static void Value_StringEmptyIfNullPassedIn()
+        {
+            var cookie = new Cookie("SomeName", null);
+            Assert.Equal(string.Empty, cookie.Value)
+        }
 
         [Fact]
         public static void Version_GetSet_Success()
