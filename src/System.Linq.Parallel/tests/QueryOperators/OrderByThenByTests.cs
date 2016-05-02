@@ -40,11 +40,11 @@ namespace System.Linq.Parallel.Tests
         // Get a set of ranges, from 0 to each count, and an additional parameter denoting degree of parallelism.
         public static IEnumerable<object[]> OrderByThreadedData(int[] counts, int[] degrees)
         {
-            foreach (object[] results in UnorderedSources.Ranges(counts, x => degrees))
+            foreach (object[] results in UnorderedSources.Ranges(counts, x => degrees.Cast<int>()))
             {
                 yield return results;
             }
-            foreach (object[] results in Sources.Ranges(counts, x => degrees))
+            foreach (object[] results in Sources.Ranges(counts, x => degrees.Cast<int>()))
             {
                 yield return results;
             }

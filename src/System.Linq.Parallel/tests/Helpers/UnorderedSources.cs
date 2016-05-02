@@ -222,14 +222,6 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        public static IEnumerable<object[]> Ranges<T>(IEnumerable<int> counts, Func<int, T[]> modifiers)
-        {
-            foreach (object[] parms in Ranges(counts, i => modifiers(i).Cast<T>()))
-            {
-                yield return parms;
-            }
-        }
-
         // Return an enumerable which throws on first MoveNext.
         // Useful for testing promptness of cancellation.
         public static IEnumerable<object[]> ThrowOnFirstEnumeration()
