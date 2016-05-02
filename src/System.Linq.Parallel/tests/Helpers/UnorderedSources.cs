@@ -147,9 +147,10 @@ namespace System.Linq.Parallel.Tests
         /// the third element is the right Labeled{ParallelQuery{int}} range, and the fourth element is the right count.</returns>
         public static IEnumerable<object[]> BinaryRanges(IEnumerable<int> leftCounts, IEnumerable<int> rightCounts)
         {
+            IEnumerable<object[]> rightRanges = Ranges(rightCounts);
             foreach (object[] left in Ranges(leftCounts))
             {
-                foreach (object[] right in Ranges(rightCounts))
+                foreach (object[] right in rightRanges)
                 {
                     yield return left.Concat(right).ToArray();
                 }
@@ -193,7 +194,7 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in Ranges(counts))
             {
                 int count = (int)parms[1];
-                yield return parms.Concat(new object[] { modifiers(count) }).ToArray();
+                yield return parms.Append(modifiers(count)).ToArray();
             }
         }
 
@@ -216,7 +217,7 @@ namespace System.Linq.Parallel.Tests
             {
                 foreach (T mod in modifiers((int)parms[1]))
                 {
-                    yield return parms.Concat(new object[] { mod }).ToArray();
+                    yield return parms.Append(mod).ToArray();
                 }
             }
         }

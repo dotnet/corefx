@@ -9,24 +9,24 @@ namespace System.Linq.Parallel.Tests
 {
     public static class ElementAtElementAtOrDefaultTests
     {
-        private static readonly Func<int, IEnumerable<int>> positions = x => new[] { 0, x / 2, Math.Max(0, x - 1) }.Distinct();
-        private static readonly Func<int, IEnumerable<int>> invalidPositions = x => new[] { -1, x, x * 2 }.Distinct();
+        private static readonly Func<int, IEnumerable<int>> Positions = x => new[] { 0, x / 2, Math.Max(0, x - 1) }.Distinct();
+        private static readonly Func<int, IEnumerable<int>> InvalidPositions = x => new[] { -1, x, x * 2 }.Distinct();
 
         public static IEnumerable<object[]> ElementAtUnorderedData(int[] counts)
         {
             // A deliberate decision was made here to test with all types, because this reflects partitioning/indexing
-            foreach (object[] results in UnorderedSources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), positions)) yield return results;
+            foreach (object[] results in UnorderedSources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), Positions)) yield return results;
         }
 
         public static IEnumerable<object[]> ElementAtData(int[] counts)
         {
-            foreach (object[] results in Sources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), positions)) yield return results;
+            foreach (object[] results in Sources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), Positions)) yield return results;
         }
 
         public static IEnumerable<object[]> ElementAtOutOfRangeData(int[] counts)
         {
-            foreach (object[] results in UnorderedSources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), invalidPositions)) yield return results;
-            foreach (object[] results in Sources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), invalidPositions)) yield return results;
+            foreach (object[] results in UnorderedSources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), InvalidPositions)) yield return results;
+            foreach (object[] results in Sources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), InvalidPositions)) yield return results;
         }
 
         //

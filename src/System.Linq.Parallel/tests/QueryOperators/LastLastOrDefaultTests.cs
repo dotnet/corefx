@@ -9,13 +9,13 @@ namespace System.Linq.Parallel.Tests
 {
     public static class LastLastOrDefaultTests
     {
-        private static Func<int, IEnumerable<int>> s_positions = x => new[] { 1, x / 2 + 1, Math.Max(1, x - 1) }.Distinct();
+        private static Func<int, IEnumerable<int>> Positions = x => new[] { 1, x / 2 + 1, Math.Max(1, x - 1) }.Distinct();
 
         public static IEnumerable<object[]> LastUnorderedData(int[] counts)
         {
             foreach (int count in counts.DefaultIfEmpty(Sources.OuterLoopCount))
             {
-                foreach (int position in s_positions(count))
+                foreach (int position in Positions(count))
                 {
                     yield return new object[] { Labeled.Label("UnorderedDefault", UnorderedSources.Default(count)), count, position };
                 }
@@ -24,7 +24,7 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> LastData(int[] counts)
         {
-            foreach (object[] results in Sources.Ranges(counts.Cast<int>(), s_positions)) yield return results;
+            foreach (object[] results in Sources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount), Positions)) yield return results;
         }
 
         //
