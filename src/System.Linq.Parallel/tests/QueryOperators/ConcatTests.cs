@@ -57,6 +57,9 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(ConcatData), new[] { 0, 1, 2, 16 })]
         public static void Concat(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
+            // The ordering of Concat is only guaranteed when both operands are ordered,
+            // however the current implementation manages to perform ordering if either operand is ordered _in most cases_.
+            // If this test starts failing, consider revising the operators and mention the change in release notes.
             ParallelQuery<int> leftQuery = left.Item;
             ParallelQuery<int> rightQuery = right.Item;
             int seen = 0;
@@ -95,6 +98,9 @@ namespace System.Linq.Parallel.Tests
         [MemberData(nameof(ConcatData), new[] { 0, 1, 2, 16 })]
         public static void Concat_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
+            // The ordering of Concat is only guaranteed when both operands are ordered,
+            // however the current implementation manages to perform ordering if either operand is ordered _in most cases_.
+            // If this test starts failing, consider revising the operators and mention the change in release notes.
             ParallelQuery<int> leftQuery = left.Item;
             ParallelQuery<int> rightQuery = right.Item;
             int seen = 0;
