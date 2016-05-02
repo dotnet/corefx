@@ -102,7 +102,6 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [MemberData(nameof(UnionData), new[] { 0, 1, 2, 16 })]
-        [MemberData(nameof(UnionData), new[] { 512, 1024 * 8 })]
         public static void Union(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -324,78 +323,6 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData(nameof(UnionFirstOrderedData), new[] { 0, 1, 2, 16 })]
-        public static void Union_FirstOrdered_Distinct(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
-        {
-            ParallelQuery<int> leftQuery = left.Item;
-            ParallelQuery<int> rightQuery = right.Item;
-            leftCount = Math.Min(DuplicateFactor, leftCount);
-            rightCount = Math.Min(DuplicateFactor, rightCount);
-            int offset = leftCount - Math.Min(leftCount, rightCount) / 2;
-            int expectedCount = Math.Max(leftCount, rightCount) + (Math.Min(leftCount, rightCount) + 1) / 2;
-
-            IntegerRangeSet seenUnordered = new IntegerRangeSet(leftCount, expectedCount - leftCount);
-            int seen = 0;
-            foreach (int i in leftQuery.Select(x => x % DuplicateFactor).Union(rightQuery.Select(x => (x - leftCount) % DuplicateFactor + offset), new ModularCongruenceComparer(DuplicateFactor + DuplicateFactor / 2)))
-            {
-                if (i < leftCount)
-                {
-                    Assert.Equal(seen++, i);
-                }
-                else
-                {
-                    Assert.Equal(leftCount, seen);
-                    seenUnordered.Add(i);
-                }
-            }
-            seenUnordered.AssertComplete();
-        }
-
-        [Theory]
-        [OuterLoop]
-        [MemberData(nameof(UnionFirstOrderedData), new[] { 512, 1024 * 8 })]
-        public static void Union_FirstOrdered_Distinct_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
-        {
-            Union_FirstOrdered_Distinct(left, leftCount, right, rightCount);
-        }
-
-        [Theory]
-        [MemberData(nameof(UnionSecondOrderedData), new[] { 0, 1, 2, 16 })]
-        public static void Union_SecondOrdered_Distinct(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
-        {
-            ParallelQuery<int> leftQuery = left.Item;
-            ParallelQuery<int> rightQuery = right.Item;
-            leftCount = Math.Min(DuplicateFactor, leftCount);
-            rightCount = Math.Min(DuplicateFactor, rightCount);
-            int offset = leftCount - Math.Min(leftCount, rightCount) / 2;
-            int expectedCount = Math.Max(leftCount, rightCount) + (Math.Min(leftCount, rightCount) + 1) / 2;
-
-            IntegerRangeSet seenUnordered = new IntegerRangeSet(0, leftCount);
-            int seen = leftCount;
-            foreach (int i in leftQuery.Select(x => x % DuplicateFactor).Union(rightQuery.Select(x => (x - leftCount) % DuplicateFactor + offset), new ModularCongruenceComparer(DuplicateFactor + DuplicateFactor / 2)))
-            {
-                if (i >= leftCount)
-                {
-                    seenUnordered.AssertComplete();
-                    Assert.Equal(seen++, i);
-                }
-                else
-                {
-                    seenUnordered.Add(i);
-                }
-            }
-            Assert.Equal(expectedCount, seen);
-        }
-
-        [Theory]
-        [OuterLoop]
-        [MemberData(nameof(UnionSecondOrderedData), new[] { 512, 1024 * 8 })]
-        public static void Union_SecondOrdered_Distinct_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
-        {
-            Union_SecondOrdered_Distinct(left, leftCount, right, rightCount);
-        }
-
-        [Theory]
         [MemberData(nameof(UnionUnorderedCountData), new[] { 0, 1, 2, 16 })]
         public static void Union_Unordered_Distinct_NotPipelined(int leftCount, int rightCount)
         {
@@ -479,64 +406,6 @@ namespace System.Linq.Parallel.Tests
         public static void Union_SourceMultiple_Longrunning(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
         {
             Union_SourceMultiple(leftQuery, leftCount, rightQuery, rightCount, count);
-        }
-
-        [Theory]
-        [MemberData(nameof(UnionSourceMultipleData), new[] { 0, 1, 2, DuplicateFactor * 2 })]
-        public static void Union_FirstOrdered_SourceMultiple(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
-        {
-            IntegerRangeSet seenUnordered = new IntegerRangeSet(leftCount, count - leftCount);
-            int seen = 0;
-            foreach (int i in leftQuery.AsOrdered().Union(rightQuery))
-            {
-                if (i < leftCount)
-                {
-                    Assert.Equal(seen++, i);
-                }
-                else
-                {
-                    seenUnordered.Add(i);
-                }
-            }
-            Assert.Equal(leftCount, seen);
-            seenUnordered.AssertComplete();
-        }
-
-        [Theory]
-        [OuterLoop]
-        [MemberData(nameof(UnionSourceMultipleData), new[] { 512, 1024 * 8 })]
-        public static void Union_FirstOrdered_SourceMultiple_Longrunning(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
-        {
-            Union_FirstOrdered_SourceMultiple(leftQuery, leftCount, rightQuery, rightCount, count);
-        }
-
-        [Theory]
-        [MemberData(nameof(UnionSourceMultipleData), new[] { 0, 1, 2, DuplicateFactor * 2 })]
-        public static void Union_SecondOrdered_SourceMultiple(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
-        {
-            IntegerRangeSet seenUnordered = new IntegerRangeSet(0, leftCount);
-            int seen = leftCount;
-            foreach (int i in leftQuery.Union(rightQuery.AsOrdered()))
-            {
-                if (i >= leftCount)
-                {
-                    Assert.Equal(seen++, i);
-                }
-                else
-                {
-                    seenUnordered.Add(i);
-                }
-            }
-            Assert.Equal(count, seen);
-            seenUnordered.AssertComplete();
-        }
-
-        [Theory]
-        [OuterLoop]
-        [MemberData(nameof(UnionSourceMultipleData), new[] { 512, 1024 * 8 })]
-        public static void Union_SecondOrdered_SourceMultiple_Longrunning(ParallelQuery<int> leftQuery, int leftCount, ParallelQuery<int> rightQuery, int rightCount, int count)
-        {
-            Union_SecondOrdered_SourceMultiple(leftQuery, leftCount, rightQuery, rightCount, count);
         }
 
         [Fact]
