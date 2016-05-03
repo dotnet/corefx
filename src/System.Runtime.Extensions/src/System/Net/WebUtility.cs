@@ -373,7 +373,7 @@ namespace System.Net
             byte[] newBytes = new byte[byteCount + byteIndex];
             Encoding.UTF8.GetBytes(value, 0, value.Length, newBytes, byteIndex);
             
-            GetEncodedBytes(newBytes, byteIndex, newBytes.Length - byteIndex, newBytes);
+            GetEncodedBytes(newBytes, byteIndex, byteCount, newBytes);
             return Encoding.UTF8.GetString(newBytes);
         }
 
