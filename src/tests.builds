@@ -12,5 +12,6 @@
       <FilterToOSGroup Condition="'$(_OriginalOSGroup)' == ''">$(OSEnvironment)</FilterToOSGroup>
     </Project>
   </ItemGroup>
+  <Import Project="$(ToolsDir)CloudTest.Targets" Condition="'$(EnableCloudTest)'=='true'" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
