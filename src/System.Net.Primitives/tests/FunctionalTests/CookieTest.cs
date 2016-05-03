@@ -240,6 +240,8 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(string.Empty, c.Value);
         }
         
+        // NOTE: This test is expected to fail on the full desktop.
+        // The behavior this tests was only recently added in #8206.
         [Fact]
         public static void Value_PassNullToCtor_GetReturnsEmptyString()
         {
