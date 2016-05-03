@@ -241,7 +241,7 @@ namespace System.Net.Primitives.Functional.Tests
         }
         
         [Fact]
-        public static void Value_StringEmptyIfNullPassedIn()
+        public static void Value_PassNullToCtor_GetReturnsEmptyString()
         {
             var cookie = new Cookie("SomeName", null);
             Assert.Equal(string.Empty, cookie.Value);
