@@ -380,8 +380,8 @@ namespace System.Net
                 return null;
             }
 
-            int cSpaces = 0;
-            int cUnsafe = 0;
+            bool foundSpaces = false;
+            int unsafeCount = 0;
 
             // count them first
             for (int i = 0; i < count; i++)
@@ -389,13 +389,13 @@ namespace System.Net
                 char ch = (char)value[offset + i];
 
                 if (ch == ' ')
-                    cSpaces++;
+                    foundSpaces = true;
                 else if (!IsUrlSafeChar(ch))
-                    cUnsafe++;
+                    unsafeCount++;
             }
 
             // nothing to expand?
-            if (cSpaces == 0 && cUnsafe == 0)
+            if (!foundSpaces && unsafeCount == 0)
             {
                 var subarray = new byte[count];
                 Buffer.BlockCopy(value, offset, subarray, 0, count);
@@ -403,7 +403,7 @@ namespace System.Net
             }
 
             // expand not 'safe' characters into %XX, spaces to +s
-            byte[] expandedBytes = new byte[count + cUnsafe * 2];
+            byte[] expandedBytes = new byte[count + unsafeCount * 2];
             GetEncodedBytes(value, offset, count, expandedBytes);
             return expandedBytes;
         }
