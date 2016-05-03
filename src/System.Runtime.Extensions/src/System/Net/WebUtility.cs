@@ -362,12 +362,12 @@ namespace System.Net
             int unsafeByteCount = byteCount - unexpandedCount;
             int byteIndex = unsafeByteCount * 2;
 
-            // Instead of allocating one array of length Encoding.UTF8.GetByteCount(value) to store
+            // Instead of allocating one array of length byteCount to store
             // the UTF8 encoded bytes and then a second array of length 
-            // unexpandedCount + 3 * (Encoding.UTF8.GetByteCount(value) - unexpandedCount) 
+            // unexpandedCount + 3 * (byteCount - unexpandedCount) 
             // to store the URL encoded UTF8 bytes, we allocate a single array of length
-            // unexpandedCount + 3 * Encoding.UTF8.GetByteCount(value), 
-            // saving Encoding.UTF8.GetByteCount(value) - 3 * (unexpandedCount) bytes allocated.
+            // unexpandedCount + 3 * byteCount, 
+            // saving byteCount - 3 * unexpandedCount bytes allocated.
             // We encode the UTF8 to the end of this array, and then URL encode to the
             // beginning of the array.
             byte[] newBytes = new byte[byteCount + byteIndex];
