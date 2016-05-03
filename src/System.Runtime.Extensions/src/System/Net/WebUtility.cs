@@ -335,10 +335,14 @@ namespace System.Net
             for (int i = 0; i < value.Length; i++)
             {
                 char ch = value[i];
-                if (ch == ' ' || IsUrlSafeChar(ch))
+                if (IsUrlSafeChar(ch))
                 {
                     unexpandedCount++;
-                    foundSpaces = ch == ' ';
+                }
+                else if (ch == ' ')
+                {
+                    unexpandedCount++;
+                    foundSpaces = true;
                 }
             }
 
