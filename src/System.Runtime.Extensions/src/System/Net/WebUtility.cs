@@ -397,16 +397,9 @@ namespace System.Net
             // nothing to expand?
             if (cSpaces == 0 && cUnsafe == 0)
             {
-                if (offset == 0 && value.Length == count)
-                {
-                    return (byte[])value.Clone();
-                }
-                else
-                {
-                    var subarray = new byte[count];
-                    Buffer.BlockCopy(value, offset, subarray, 0, count);
-                    return subarray;
-                }
+                var subarray = new byte[count];
+                Buffer.BlockCopy(value, offset, subarray, 0, count);
+                return subarray;
             }
 
             // expand not 'safe' characters into %XX, spaces to +s
