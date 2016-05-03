@@ -360,10 +360,10 @@ namespace System.Net
 
             // Instead of allocating one array of length Encoding.UTF8.GetByteCount(value) to store
             // the UTF8 encoded bytes and then a second array of length 
-            // cSafe + cSpaces + 3 * (Encoding.UTF8.GetByteCount(value) - cSafe - cSpaces) 
+            // unexpandedCount + 3 * (Encoding.UTF8.GetByteCount(value) - unexpandedCount) 
             // to store the URL encoded UTF8 bytes, we allocate a single array of length
-            // cSafe + cSpaces + 3 * Encoding.UTF8.GetByteCount(value), 
-            // saving Encoding.UTF8.GetByteCount(value) - 3 * (cSafe +cSpaces) bytes allocated.
+            // unexpandedCount + 3 * Encoding.UTF8.GetByteCount(value), 
+            // saving Encoding.UTF8.GetByteCount(value) - 3 * (unexpandedCount) bytes allocated.
             // We encode the UTF8 to the end of this array, and then URL encode to the
             // beginning of the array.
             byte[] newBytes = new byte[byteCount + byteIndex];
