@@ -330,24 +330,21 @@ namespace System.Net
             if (string.IsNullOrEmpty(value))
                 return value;
 
-            int cSafe = 0;
-            int cSpaces = 0;
+            int unexpandedCount = 0;
+            bool foundSpaces = false;
             for (int i = 0; i < value.Length; i++)
             {
                 char ch = value[i];
-                if (IsUrlSafeChar(ch))
+                if (ch == ' ' || IsUrlSafeChar(ch))
                 {
-                    cSafe++;
-                }
-                else if (ch == ' ')
-                {
-                    cSpaces++;
+                    unexpandedCount++;
+                    foundSpaces = ch == ' ';
                 }
             }
 
-            if (cSafe + cSpaces == value.Length)
+            if (unexpandedCount == value.Length)
             {
-                if (cSpaces != 0)
+                if (foundSpaces)
                 {
                     // Only spaces to encode
                     return value.Replace(' ', '+');
@@ -357,7 +354,8 @@ namespace System.Net
                 return value;
             }
 
-            int unsafeByteCount = Encoding.UTF8.GetByteCount(value) - cSafe - cSpaces;
+            int byteCount = Encoding.UTF8.GetByteCount(value);
+            int unsafeByteCount = byteCount - unexpandedCount;
             int byteIndex = unsafeByteCount * 2;
 
             // Instead of allocating one array of length Encoding.UTF8.GetByteCount(value) to store
@@ -368,7 +366,7 @@ namespace System.Net
             // saving Encoding.UTF8.GetByteCount(value) - 3 * (cSafe +cSpaces) bytes allocated.
             // We encode the UTF8 to the end of this array, and then URL encode to the
             // beginning of the array.
-            byte[] newBytes = new byte[cSafe + cSpaces + unsafeByteCount + byteIndex];
+            byte[] newBytes = new byte[byteCount + byteIndex];
             Encoding.UTF8.GetBytes(value, 0, value.Length, newBytes, byteIndex);
             
             GetEncodedBytes(newBytes, byteIndex, newBytes.Length - byteIndex, newBytes);
