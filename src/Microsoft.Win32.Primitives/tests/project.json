@@ -7,15 +7,26 @@
     "System.Runtime.InteropServices": "4.1.0-rc3-24102-00",
     "System.Text.RegularExpressions": "4.1.0-rc3-24102-00",
     "xunit": "2.1.0",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00312-04",
-    "test-runtime": {
-      "target": "project",
-      "exclude": "compile"
-    }
+    "xunit.netcore.extensions": "1.0.0-prerelease-00312-04"
   },
   "frameworks": {
     "dnxcore50": {
+      "dependencies": {
+        "test-runtime": {
+          "target": "project",
+          "exclude": "compile"
+        }
+      },
       "imports": "portable-net45+win8"
+    },
+    "net46": {
+      "dependencies": {
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1",
+        "net46-test-runtime": {
+          "target": "project",
+          "exclude": "compile"
+        }
+      }
     }
   },
   "runtimes": {

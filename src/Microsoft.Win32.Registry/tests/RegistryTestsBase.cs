@@ -24,7 +24,13 @@ namespace Microsoft.Win32.RegistryTests
             RemoveKeyIfExists(TestRegistryKeyName);
 
             // Then create the key.
+#if net46
+            // on desktop, RegistryKeyPermissionCheck.ReadWriteSubTree has to be set to get write permission.
+            // in net core RegistryKeyPermissionCheck is fully eleminated
+            TestRegistryKey = Registry.CurrentUser.CreateSubKey(TestRegistryKeyName, RegistryKeyPermissionCheck.ReadWriteSubTree);
+#else            
             TestRegistryKey = Registry.CurrentUser.CreateSubKey(TestRegistryKeyName);
+#endif // net46            
             Assert.NotNull(TestRegistryKey);
         }
 

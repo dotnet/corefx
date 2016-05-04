@@ -16,10 +16,10 @@
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Win32Exception.cs" />
   </ItemGroup>
@@ -28,6 +28,10 @@
       <Project>{8ffe99c0-22f8-4462-b839-970eac1b3472}</Project>
       <Name>Microsoft.Win32.Primitives</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='net46'">
+    <TargetingPackReference Include="System" />
+    <TargetingPackReference Include="System.Runtime" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

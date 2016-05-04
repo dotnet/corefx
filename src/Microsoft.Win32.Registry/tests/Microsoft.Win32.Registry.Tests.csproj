@@ -11,10 +11,13 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Win32.Registry.Tests</RootNamespace>
     <AssemblyName>Microsoft.Win32.Registry.Tests</AssemblyName>
+    <DefineConstants Condition="'$(TargetGroup)' == 'net46'">$(DefineConstants);net46</DefineConstants>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -55,6 +58,11 @@
     <Compile Include="RegistryTestsBase.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='net46'">
+    <TargetingPackReference Include="System.Runtime" />
+    <TargetingPackReference Include="System.Core" />
+    <TargetingPackReference Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
