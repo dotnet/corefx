@@ -399,21 +399,10 @@ namespace System.Net
             }
 
             // nothing to expand?
-            if (unsafeCount == 0)
+            if (!foundSpaces && unsafeCount == 0)
             {
                 var subarray = new byte[count];
-                if (foundSpaces)
-                {
-                    for (int i = 0; i < count; i++) 
-                    {
-                        byte b = value[i];
-                        subarray[i] = b == ' ' ? (byte)'+' : b;
-                    }
-                }
-                else
-                {
-                    Buffer.BlockCopy(value, offset, subarray, 0, count);
-                }
+                Buffer.BlockCopy(value, offset, subarray, 0, count);
                 return subarray;
             }
 
