@@ -12,7 +12,6 @@ namespace System.ComponentModel
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
     }
-
     public partial class DoWorkEventArgs : System.EventArgs
     {
         public bool Cancel { get { return false; } set { } }
