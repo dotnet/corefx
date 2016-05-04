@@ -23,7 +23,7 @@ namespace System.Globalization.Tests
                     {
                         yield return new object[] { ascii, 0, 1, ascii.ToLower() };
                     }
-                    else if (c != '-')
+                    else if (c != '-' && (c != '.' || !RuntimeInformation.IsOSPlatform(OSPlatform.OSX)))
                     {
                         yield return new object[] { ascii, 0, 1, ascii };
                     }
@@ -102,9 +102,13 @@ namespace System.Globalization.Tests
             // [ActiveIssue(8242, PlatformId.AnyUnix)]
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    yield return new object[] { ".", 0, 1, typeof(ArgumentException) };
+                }
                 yield return new object[] { "-", 0, 1, typeof(ArgumentException) };
             }
-            else 
+            else
             {                
                 yield return new object[] { ".", 0, 1, typeof(ArgumentException) };
             }
