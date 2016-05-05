@@ -125,9 +125,23 @@ namespace System.IO
                 PathInternal.CheckInvalidPathChars(path);
 
                 int length = path.Length;
-                if ((length >= 1 && PathInternal.IsDirectorySeparator(path[0])) || 
+                if ((length >= 1 && PathInternal.IsDirectorySeparator(path[0])) ||
                     (length >= 2 && path[1] == VolumeSeparatorChar))
                     return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Tests if the given path starts with a root that is not equal to the 
+        /// forward slash.
+        /// </summary>
+        private static bool IsVolumeRooted(string path)
+        {
+            if (path != null)
+            {
+                PathInternal.CheckInvalidPathChars(path);
+                return !PathInternal.IsPartiallyQualified(path);
             }
             return false;
         }

@@ -41,7 +41,7 @@ namespace System.IO
             PathInternal.CheckInvalidPathChars(path);
 
             // Expand with current directory if necessary
-            if (!IsPathRooted(path))
+            if (path[0] != DirectorySeparatorChar)
             {
                 path = Combine(Interop.Sys.GetCwd(), path);
             }
@@ -206,9 +206,16 @@ namespace System.IO
             return path.Length > 0 && path[0] == DirectorySeparatorChar;
         }
 
+        /// <summary>
+        /// Tests if the given path starts with a root that is not equal to the
+        /// forward slash.
+        /// </summary>
+        private static bool IsVolumeRooted(string path) => false;
+
         public static string GetPathRoot(string path)
         {
-            if (path == null) return null;
+            if (path == null)
+                return null;
             return IsPathRooted(path) ? DirectorySeparatorCharAsString : String.Empty;
         }
 
