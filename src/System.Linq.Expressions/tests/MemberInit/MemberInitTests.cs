@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -12,25 +11,20 @@ namespace System.Linq.Expressions.Tests
     {
         #region Test methods
 
-        [Fact] // [Issue(4018, "https://github.com/dotnet/corefx/issues/4018")]
-        public static void CheckMemberInitTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckMemberInitTest(bool useInterpreter)
         {
-            VerifyMemberInit(() => new X { Y = { Z = 42, YS = { 2, 3 } }, XS = { 5, 7 } }, x => x.Y.Z == 42 && x.XS.Sum() == 5 + 7 && x.Y.YS.Sum() == 2 + 3);
+            VerifyMemberInit(() => new X { Y = { Z = 42, YS = { 2, 3 } }, XS = { 5, 7 } }, x => x.Y.Z == 42 && x.XS.Sum() == 5 + 7 && x.Y.YS.Sum() == 2 + 3, useInterpreter);
         }
 
         #endregion
 
         #region Test verifiers
 
-        private static void VerifyMemberInit<T>(Expression<Func<T>> expr, Func<T, bool> check)
+        private static void VerifyMemberInit<T>(Expression<Func<T>> expr, Func<T, bool> check, bool useInterpreter)
         {
-            Func<T> c = expr.Compile();
+            Func<T> c = expr.Compile(useInterpreter);
             Assert.True(check(c()));
-
-#if FEATURE_INTERPRET
-            Func<T> i = expr.Compile(true);
-            Assert.True(check(i()));
-#endif
         }
 
         #endregion

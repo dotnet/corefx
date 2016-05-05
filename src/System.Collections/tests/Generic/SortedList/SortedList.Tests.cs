@@ -1,5 +1,4 @@
-﻿// Copyright (c) Justin Van Patten. All rights reserved.
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -36,7 +35,7 @@ namespace System.Collections.Tests
         #region IDictionary tests
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void IDictionary_NonGeneric_ItemSet_NullValueWhenDefaultValueIsNonNull(int count)
         {
             IDictionary dictionary = new SortedList<string, int>();
@@ -44,7 +43,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void IDictionary_NonGeneric_ItemSet_KeyOfWrongType(int count)
         {
             if (!IsReadOnly)
@@ -56,7 +55,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void IDictionary_NonGeneric_ItemSet_ValueOfWrongType(int count)
         {
             if (!IsReadOnly)
@@ -69,7 +68,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void IDictionary_NonGeneric_Add_KeyOfWrongType(int count)
         {
             if (!IsReadOnly)
@@ -82,7 +81,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void IDictionary_NonGeneric_Add_ValueOfWrongType(int count)
         {
             if (!IsReadOnly)
@@ -95,7 +94,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void IDictionary_NonGeneric_Add_NullValueWhenDefaultTValueIsNonNull(int count)
         {
             if (!IsReadOnly)
@@ -108,7 +107,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void IDictionary_NonGeneric_Contains_KeyOfWrongType(int count)
         {
             if (!IsReadOnly)
@@ -118,12 +117,20 @@ namespace System.Collections.Tests
             }
         }
 
+        [Fact]
+        public void CantAcceptDuplicateKeysFromSourceDictionary()
+        {
+            Dictionary<string, int> source = new Dictionary<string, int> { { "a", 1 }, { "A", 1 } };
+            Assert.Throws<ArgumentException>(null, () => new SortedList<string, int>(source, StringComparer.OrdinalIgnoreCase));
+        }
+
+
         #endregion
 
         #region ICollection tests
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectKeyValuePairType(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -132,7 +139,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_ArrayOfCorrectKeyValuePairType(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);

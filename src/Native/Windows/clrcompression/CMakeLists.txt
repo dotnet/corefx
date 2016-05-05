@@ -56,10 +56,23 @@ if ($ENV{__VSVersion} STREQUAL vs2015)
     add_definitions(-DHAVE_VSNPRINTF)
 endif ()
 
+# Include 'bin/obj' dir since it contains _version.h
+include_directories("${CMAKE_BINARY_DIR}/../../")
+
 add_library(clrcompression
     SHARED
     ${NATIVECOMPRESSION_SOURCES}
+    # This will add versioning to the library
+    ${CMAKE_SOURCE_DIR}/../../../Tools/NativeVersion.rc
 )
+
+# Allow specification of arguments that should be passed to the linker
+SET_TARGET_PROPERTIES(clrcompression PROPERTIES LINK_FLAGS ${__LinkArgs})
+
+# Allow specification of libraries that should be linked against
+# CMake doesn't like space delimiters as input to target_link_libraries
+separate_arguments(linker_libs_sanitized WINDOWS_COMMAND ${__LinkLibraries})
+target_link_libraries(clrcompression ${linker_libs_sanitized})
 
 GENERATE_EXPORT_HEADER( clrcompression
      BASE_NAME clrcompression
@@ -69,3 +82,5 @@ GENERATE_EXPORT_HEADER( clrcompression
 )
 
 install (TARGETS clrcompression DESTINATION .)
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/clrcompression.pdb DESTINATION .)
+

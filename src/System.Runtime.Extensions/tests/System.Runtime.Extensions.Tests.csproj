@@ -78,6 +78,9 @@
     <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
     <!-- Performance Tests -->
     <Compile Include="Performance\Perf.Environment.cs" />
     <Compile Include="Performance\Perf.Path.cs" />
@@ -117,10 +120,6 @@
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Diagnostics.Process\src\System.Diagnostics.Process.csproj">
-      <Project>{63634289-90D7-4947-8BF3-DBBE98D76C85}</Project>
-      <Name>System.Diagnostics.Process</Name>
     </ProjectReference>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>

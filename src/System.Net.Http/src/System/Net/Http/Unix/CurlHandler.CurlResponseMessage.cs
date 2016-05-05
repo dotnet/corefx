@@ -15,22 +15,17 @@ namespace System.Net.Http
     {
         private sealed class CurlResponseMessage : HttpResponseMessage
         {
-            internal readonly EasyRequest _easy;
-            private readonly CurlResponseStream _responseStream;
+            internal uint _headerBytesReceived;
 
             internal CurlResponseMessage(EasyRequest easy)
             {
                 Debug.Assert(easy != null, "Expected non-null EasyRequest");
-                _easy = easy;
-                _responseStream = new CurlResponseStream(easy);
                 RequestMessage = easy._requestMessage;
-                Content = new StreamContent(_responseStream);
+                ResponseStream = new CurlResponseStream(easy);
+                Content = new StreamContent(ResponseStream);
             }
 
-            internal CurlResponseStream ResponseStream
-            {
-                get { return _responseStream; }
-            }
+            internal CurlResponseStream ResponseStream { get; }
         }
 
         /// <summary>
@@ -99,9 +94,9 @@ namespace System.Net.Http
                 _easy = easy;
             }
 
-            public override bool CanRead { get { return !_disposed; } }
-            public override bool CanWrite { get { return false; } }
-            public override bool CanSeek { get { return false; } }
+            public override bool CanRead => !_disposed;
+            public override bool CanWrite => false;
+            public override bool CanSeek => false;
 
             public override long Length
             {
@@ -303,7 +298,7 @@ namespace System.Net.Http
                     if (cancellationToken.CanBeCanceled)
                     {
                         // If the cancellation token is cancelable, then we need to register for cancellation.
-                        // We creat a special CancelableReadState that carries with it additional info:
+                        // We create a special CancelableReadState that carries with it additional info:
                         // the cancellation token and the registration with that token.  When cancellation
                         // is requested, we schedule a work item that tries to remove the read state
                         // from being pending, canceling it in the process.  This needs to happen under the
@@ -340,12 +335,13 @@ namespace System.Net.Http
                     }
 
                     _easy._associatedMultiAgent.RequestUnpause(_easy);
+                    _easy._selfStrongToWeakReference.MakeStrong(); // convert from a weak to a strong ref to keep the easy alive during the read
                     return _pendingReadRequest.Task;
                 }
             }
 
             /// <summary>Notifies the stream that no more data will be written.</summary>
-            internal void SignalComplete(Exception error = null)
+            internal void SignalComplete(Exception error = null, bool forceCancel = false)
             {
                 lock (_lockObject)
                 {
@@ -361,6 +357,17 @@ namespace System.Net.Http
                     _completed = error != null ?
                         error :
                         s_completionSentinel;
+
+                    // If the request wasn't already completed, and if requested, send a cancellation
+                    // request to ensure that the connection gets cleaned up.  This is only necessary
+                    // to do if this method is being called for a reason other than the request/response
+                    // completing naturally, e.g. if the response stream is being disposed of before
+                    // all of the response has been downloaded.
+                    if (forceCancel)
+                    {
+                        EventSourceTrace("Completing the response stream prematurely.");
+                        _easy._associatedMultiAgent.RequestCancel(_easy);
+                    }
 
                     // If there's a pending read request, complete it, either with 0 bytes for success
                     // or with the exception/CancellationToken for failure.
@@ -389,32 +396,44 @@ namespace System.Net.Http
                 }
             }
 
-            /// <summary>Clears a pending read request, making sure any cancellation registration is unregistered.</summary>
+            /// <summary>
+            /// Clears a pending read request, making sure any cancellation registration is unregistered and
+            /// ensuring that the EasyRequest has dropped its strong reference to itself, which should only
+            /// exist while an active async operation is going.
+            /// </summary>
             private void ClearPendingReadRequest()
             {
                 Debug.Assert(Monitor.IsEntered(_lockObject), "Lock object must be held to manipulate _pendingReadRequest");
                 Debug.Assert(_pendingReadRequest != null, "Should only be clearing the pending read request if there is one");
+                Debug.Assert(_pendingReadRequest.Task.IsCompleted, "The pending request should have been completed");
 
-                var crs = _pendingReadRequest as CancelableReadState;
-                if (crs != null)
-                {
-                    crs._registration.Dispose();
-                }
-
+                (_pendingReadRequest as CancelableReadState)?._registration.Dispose();
                 _pendingReadRequest = null;
+
+                // The async operation has completed.  We no longer want to be holding a strong reference.
+                _easy._selfStrongToWeakReference.MakeWeak();
+            }
+
+            ~CurlResponseStream()
+            {
+                Dispose(disposing: false);
             }
 
             protected override void Dispose(bool disposing)
             {
-                if (disposing && !_disposed)
+                // disposing is ignored.  We need to SignalComplete whether this is due to Dispose
+                // or due to finalization, so that we don't leave Tasks uncompleted, don't leave
+                // connections paused, etc.
+
+                if (!_disposed)
                 {
                     _disposed = true;
-                    SignalComplete();
+                    SignalComplete(forceCancel: true);
                 }
 
                 base.Dispose(disposing);
             }
-
+            
             private void CheckDisposed()
             {
                 if (_disposed)

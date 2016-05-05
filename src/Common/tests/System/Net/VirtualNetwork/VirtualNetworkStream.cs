@@ -107,30 +107,16 @@ namespace System.Net.Test.Common
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            try
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                int bytesRead = Read(buffer, offset, count);
-                return Task.FromResult<int>(bytesRead);
-            }
-            catch (Exception e)
-            {
-                return Task.FromException<int>(e);
-            }
+            return cancellationToken.IsCancellationRequested ?
+                Task.FromCanceled<int>(cancellationToken) :
+                Task.Run(() => Read(buffer, offset, count));
         }
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            try
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                Write(buffer, offset, count);
-                return Task.CompletedTask;
-            }
-            catch (Exception e)
-            {
-                return Task.FromException(e);
-            }
+            return cancellationToken.IsCancellationRequested ?
+                Task.FromCanceled<int>(cancellationToken) :
+                Task.Run(() => Write(buffer, offset, count));
         }
     }
 }

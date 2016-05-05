@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 
 namespace System.ComponentModel
 {
@@ -48,6 +49,8 @@ namespace System.ComponentModel
         {
             get
             {
+                Debug.Assert(Monitor.IsEntered(s_syncObject));
+
                 // It is not worth taking a lock for this -- worst case of a collision
                 // would build two tables, one that garbage collects very quickly.
                 //
@@ -80,6 +83,7 @@ namespace System.ComponentModel
                     temp[typeof(Array)] = typeof(ArrayConverter);
                     temp[typeof(ICollection)] = typeof(CollectionConverter);
                     temp[typeof(Enum)] = typeof(EnumConverter);
+                    temp[typeof(Uri)] = typeof(UriTypeConverter);
 
                     // Special cases for things that are not bound to a specific type
                     //
@@ -170,7 +174,7 @@ namespace System.ComponentModel
             // [A1]
             // class Derived : Base, IDerived
             //
-            // We are retreving attributes in the following order:  A1 - A4.
+            // We are retrieving attributes in the following order:  A1 - A4.
             // Interfaces always lose to types, and interfaces and types
             // must be looked up in the same order.
             TypeConverterAttribute converterAttribute = ReflectTypeDescriptionProvider.GetTypeConverterAttributeIfAny(type);
@@ -215,7 +219,12 @@ namespace System.ComponentModel
                     bool noTypeConstructor = true;
                     object instance = (TypeConverter)ReflectTypeDescriptionProvider.CreateInstance(converterType, type, ref noTypeConstructor);
                     if (noTypeConstructor)
-                        ReflectTypeDescriptionProvider.IntrinsicTypeConverters[type] = instance;
+                    {
+                        lock (s_syncObject)
+                        {
+                            ReflectTypeDescriptionProvider.IntrinsicTypeConverters[type] = instance;
+                        }
+                    }
                     return (TypeConverter)instance;
                 }
             }

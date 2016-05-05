@@ -112,6 +112,29 @@ namespace System.IO.Tests
             });
         }
 
+        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
+        public void SymLinksMayExistIndependentlyOfTarget()
+        {
+            var path = GetTestFilePath();
+            var linkPath = GetTestFilePath();
+
+            File.Create(path).Dispose();
+            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: false));
+
+            // Both the symlink and the target exist
+            Assert.True(File.Exists(path), "path should exist");
+            Assert.True(File.Exists(linkPath), "linkPath should exist");
+
+            // Delete the target.  The symlink should still exist
+            File.Delete(path);
+            Assert.False(File.Exists(path), "path should now not exist");
+            Assert.True(File.Exists(linkPath), "linkPath should still exist");
+
+            // Now delete the symlink.
+            File.Delete(linkPath);
+            Assert.False(File.Exists(linkPath), "linkPath should no longer exist");
+        }
+
         #endregion
 
         #region PlatformSpecific
@@ -128,7 +151,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows | PlatformID.OSX)]
+        [PlatformSpecific(CaseInsensitivePlatforms)]
         public void DoesCaseInsensitiveInvariantComparions()
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
@@ -139,7 +162,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux | PlatformID.FreeBSD)]
+        [PlatformSpecific(CaseSensitivePlatforms)]
         public void DoesCaseSensitiveComparions()
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
@@ -200,6 +223,15 @@ namespace System.IO.Tests
             {
                 Assert.False(Exists(component));
             });
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void FalseForNonRegularFile()
+        {
+            string fileName = GetTestFilePath();
+            Assert.Equal(0, mkfifo(fileName, 0));
+            Assert.True(File.Exists(fileName));
         }
 
         #endregion

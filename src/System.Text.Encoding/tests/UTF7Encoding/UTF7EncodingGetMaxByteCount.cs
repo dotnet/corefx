@@ -8,34 +8,18 @@ namespace System.Text.Tests
 {
     public class UTF7EncodingGetMaxByteCount
     {
-        // PosTest1: Verify method GetMaxByteCount using 0
-        [Fact]
-        public void PosTest1()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(8)]
+        [InlineData(10)]
+        [InlineData(715827881)]
+        [InlineData((int.MaxValue - 2) / 3)]
+        public void GetMaxByteCount(int charCount)
         {
-            UTF7Encoding utf7 = new UTF7Encoding();
-            int charCount = 0;
-            int maxByteCount = utf7.GetMaxByteCount(charCount);
-        }
-
-        // PosTest2: Verify method GetMaxByteCount using an integer
-        [Fact]
-        public void PosTest2()
-        {
-            int charCount = 8;
-            UTF7Encoding utf7 = new UTF7Encoding();
-            int maxByteCount = utf7.GetMaxByteCount(charCount);
-        }
-
-        // NegTest1: ArgumentOutOfRangeException is not thrown when charCount is less than zero.
-        [Fact]
-        public void NegTest1()
-        {
-            UTF7Encoding utf7 = new UTF7Encoding();
-            int charCount = -1;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                int maxByteCount = utf7.GetMaxByteCount(charCount);
-            });
+            int expected = charCount * 3 + 2;
+            Assert.Equal(expected, new UTF7Encoding(true).GetMaxByteCount(charCount));
+            Assert.Equal(expected, new UTF7Encoding(false).GetMaxByteCount(charCount));
         }
     }
 }

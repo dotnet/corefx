@@ -3,13 +3,16 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="System.Data.SqlClient.csproj">
-      <OSGroup>Linux</OSGroup>
+      <OSGroup>Unix</OSGroup>
     </Project>
     <Project Include="System.Data.SqlClient.csproj">
       <OSGroup>Windows_NT</OSGroup>
     </Project>
     <Project Include="System.Data.SqlClient.csproj">
-      <TargetGroup>net45</TargetGroup>
+      <TargetGroup>net451</TargetGroup>
+    </Project>
+    <Project Include="System.Data.SqlClient.csproj">
+      <TargetGroup>net46</TargetGroup>
     </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />

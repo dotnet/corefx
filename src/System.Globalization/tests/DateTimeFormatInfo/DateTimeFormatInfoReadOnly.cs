@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Xunit;
 
 namespace System.Globalization.Tests
@@ -14,24 +12,33 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> ReadOnly_TestData()
         {
             yield return new object[] { DateTimeFormatInfo.InvariantInfo, true };
+            yield return new object[] { DateTimeFormatInfo.ReadOnly(new DateTimeFormatInfo()), true };
             yield return new object[] { new DateTimeFormatInfo(), false };
             yield return new object[] { new CultureInfo("en-US").DateTimeFormat, false };
         }
 
         [Theory]
         [MemberData(nameof(ReadOnly_TestData))]
-        public void ReadOnly(DateTimeFormatInfo format, bool expected)
+        public void ReadOnly(DateTimeFormatInfo format, bool originalFormatIsReadOnly)
         {
-            Assert.Equal(expected, format.IsReadOnly);
+            Assert.Equal(originalFormatIsReadOnly, format.IsReadOnly);
 
             DateTimeFormatInfo readOnlyFormat = DateTimeFormatInfo.ReadOnly(format);
+            if (originalFormatIsReadOnly) 
+            {
+            	Assert.Same(format, readOnlyFormat);
+            }
+            else 
+            {
+            	Assert.NotSame(format, readOnlyFormat);
+            }
             Assert.True(readOnlyFormat.IsReadOnly);
         }
 
         [Fact]
-        public void ReadOnly_Invalid()
+        public void ReadOnly_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => DateTimeFormatInfo.ReadOnly(null)); // Dtfi is null
+            Assert.Throws<ArgumentNullException>("dtfi", () => DateTimeFormatInfo.ReadOnly(null)); // Dtfi is null
         }
     }
 }

@@ -75,12 +75,21 @@ namespace System.Linq.Expressions
             return new ArgumentException(Strings.BoundsCannotBeLessThanOne);
         }
         /// <summary>
-        /// ArgumentException with message like "type must not be ByRef"
+        /// ArgumentException with message like "Type must not be ByRef"
         /// </summary>
         internal static Exception TypeMustNotBeByRef()
         {
             return new ArgumentException(Strings.TypeMustNotBeByRef);
         }
+
+        /// <summary>
+        /// ArgumentException with message like "Type must not be a pointer type"
+        /// </summary>
+        internal static Exception TypeMustNotBePointer()
+        {
+            return new ArgumentException(Strings.TypeMustNotBePointer, "type");
+        }
+
         /// <summary>
         /// ArgumentException with message like "Type doesn't have constructor with a given signature"
         /// </summary>
@@ -98,9 +107,9 @@ namespace System.Linq.Expressions
         /// <summary>
         /// ArgumentException with message like "Property type must match the value type of setter"
         /// </summary>
-        internal static Exception PropertyTyepMustMatchSetter()
+        internal static Exception PropertyTypeMustMatchSetter()
         {
-            return new ArgumentException(Strings.PropertyTyepMustMatchSetter);
+            return new ArgumentException(Strings.PropertyTypeMustMatchSetter);
         }
         /// <summary>
         /// ArgumentException with message like "Both accessors must be static."
@@ -425,13 +434,6 @@ namespace System.Linq.Expressions
             return Dynamic.Utils.Error.ExpressionTypeDoesNotMatchMethodParameter(p0, p1, p2);
         }
         /// <summary>
-        /// ArgumentException with message like "Expression of type '{0}' cannot be used for parameter of type '{1}'"
-        /// </summary>
-        internal static Exception ExpressionTypeDoesNotMatchParameter(object p0, object p1)
-        {
-            return Dynamic.Utils.Error.ExpressionTypeDoesNotMatchParameter(p0, p1);
-        }
-        /// <summary>
         /// ArgumentException with message like "Expression of type '{0}' cannot be used for return type '{1}'"
         /// </summary>
         internal static Exception ExpressionTypeDoesNotMatchReturn(object p0, object p1)
@@ -488,13 +490,6 @@ namespace System.Linq.Expressions
             return new ArgumentException(Strings.IncorrectNumberOfIndexes);
         }
         /// <summary>
-        /// InvalidOperationException with message like "Incorrect number of arguments supplied for lambda invocation"
-        /// </summary>
-        internal static Exception IncorrectNumberOfLambdaArguments()
-        {
-            return Dynamic.Utils.Error.IncorrectNumberOfLambdaArguments();
-        }
-        /// <summary>
         /// ArgumentException with message like "Incorrect number of parameters supplied for lambda declaration"
         /// </summary>
         internal static Exception IncorrectNumberOfLambdaDeclarationParameters()
@@ -530,7 +525,7 @@ namespace System.Linq.Expressions
             return new ArgumentException(Strings.IncorrectNumberOfArgumentsForMembers);
         }
         /// <summary>
-        /// ArgumentException with message like "Lambda type parameter must be derived from System.Delegate"
+        /// ArgumentException with message like "Lambda type parameter must be derived from System.MulticastDelegate"
         /// </summary>
         internal static Exception LambdaTypeMustBeDerivedFromSystemDelegate()
         {
@@ -656,13 +651,7 @@ namespace System.Linq.Expressions
         {
             return new ArgumentException(Strings.TypeMissingDefaultConstructor(p0));
         }
-        /// <summary>
-        /// ArgumentException with message like "List initializers must contain at least one initializer"
-        /// </summary>
-        internal static Exception ListInitializerWithZeroMembers()
-        {
-            return new ArgumentException(Strings.ListInitializerWithZeroMembers);
-        }
+
         /// <summary>
         /// ArgumentException with message like "Element initializer method must be named 'Add'"
         /// </summary>
@@ -839,13 +828,6 @@ namespace System.Linq.Expressions
             return new ArgumentException(Strings.ArgumentCannotBeOfTypeVoid);
         }
         /// <summary>
-        /// ArgumentException with message like "Invalid operation: '{0}'"
-        /// </summary>
-        internal static Exception InvalidOperation(object p0)
-        {
-            return new ArgumentException(Strings.InvalidOperation(p0));
-        }
-        /// <summary>
         /// ArgumentOutOfRangeException with message like "{0} must be greater than or equal to {1}"
         /// </summary>
         internal static Exception OutOfRange(object p0, object p1)
@@ -932,7 +914,7 @@ namespace System.Linq.Expressions
         /// <summary>
         /// InvalidOperationException with message like "Invalid lvalue for assignment: {0}."
         /// </summary>
-        internal static Exception InvalidLvalue(object p0)
+        internal static Exception InvalidLvalue(ExpressionType p0)
         {
             return new InvalidOperationException(Strings.InvalidLvalue(p0));
         }
@@ -1021,7 +1003,7 @@ namespace System.Linq.Expressions
             return new InvalidOperationException(Strings.MustRewriteChildToSameType(p0, p1, p2));
         }
         /// <summary>
-        /// InvalidOperationException with message like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is is intentional, override '{1}' and change it to allow this rewrite."
+        /// InvalidOperationException with message like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is intentional, override '{1}' and change it to allow this rewrite."
         /// </summary>
         internal static Exception MustRewriteWithoutMethod(object p0, object p1)
         {
@@ -1043,11 +1025,11 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// InvalidOperationException with message like "Dynamic operations can only be performed in homogenous AppDomain."
+        /// InvalidOperationException with message like "Dynamic operations can only be performed in homogeneous AppDomain."
         /// </summary>
-        internal static Exception HomogenousAppDomainRequired()
+        internal static Exception HomogeneousAppDomainRequired()
         {
-            return new InvalidOperationException(Strings.HomogenousAppDomainRequired);
+            return new InvalidOperationException(Strings.HomogeneousAppDomainRequired);
         }
         /// <summary>
         /// ArgumentException with message like "Test value of type '{0}' cannot be used for the comparison method parameter of type '{1}'"
@@ -1069,14 +1051,6 @@ namespace System.Linq.Expressions
         internal static Exception PdbGeneratorNeedsExpressionCompiler()
         {
             return new NotSupportedException(Strings.PdbGeneratorNeedsExpressionCompiler);
-        }
-
-        /// <summary>
-        /// The exception that is thrown when a null reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument.
-        /// </summary>
-        internal static Exception ArgumentNull(string paramName)
-        {
-            return new ArgumentNullException(paramName);
         }
 
         /// <summary>

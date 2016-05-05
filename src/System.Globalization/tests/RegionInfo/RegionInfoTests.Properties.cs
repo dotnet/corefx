@@ -3,13 +3,31 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
-
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class RegionInfoPropertyTests
-    {        
+    {
+        [Fact]
+        public void CurrentRegion()
+        {
+            CultureInfo oldThreadCulture = CultureInfo.CurrentCulture;
+
+            try
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+
+                RegionInfo ri = new RegionInfo(new RegionInfo(CultureInfo.CurrentCulture.Name).TwoLetterISORegionName);
+                Assert.True(RegionInfo.CurrentRegion.Equals(ri) || RegionInfo.CurrentRegion.Equals(new RegionInfo(CultureInfo.CurrentCulture.Name)));
+                Assert.Same(RegionInfo.CurrentRegion, RegionInfo.CurrentRegion);
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = oldThreadCulture;
+            }
+        }
+
         [Theory]
         [InlineData("en-US", "United States")]
         public void DisplayName(string name, string expected)

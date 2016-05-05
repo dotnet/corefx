@@ -111,7 +111,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "type must not be ByRef"
+        /// A string like "Type must not be ByRef"
         /// </summary>
         internal static string TypeMustNotBeByRef
         {
@@ -120,6 +120,11 @@ namespace System.Linq.Expressions
                 return SR.TypeMustNotBeByRef;
             }
         }
+
+        /// <summary>
+        /// A string like "Type must not be a pointer type"
+        /// </summary>
+        internal static string TypeMustNotBePointer => SR.TypeMustNotBePointer;
 
         /// <summary>
         /// A string like "Type doesn't have constructor with a given signature"
@@ -146,11 +151,11 @@ namespace System.Linq.Expressions
         /// <summary>
         /// A string like "Property type must match the value type of setter"
         /// </summary>
-        internal static string PropertyTyepMustMatchSetter
+        internal static string PropertyTypeMustMatchSetter
         {
             get
             {
-                return SR.PropertyTyepMustMatchSetter;
+                return SR.PropertyTypeMustMatchSetter;
             }
         }
 
@@ -740,7 +745,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Lambda type parameter must be derived from System.Delegate"
+        /// A string like "Lambda type parameter must be derived from System.MulticastDelegate"
         /// </summary>
         internal static string LambdaTypeMustBeDerivedFromSystemDelegate
         {
@@ -885,17 +890,6 @@ namespace System.Linq.Expressions
         internal static string TypeMissingDefaultConstructor(object p0)
         {
             return SR.Format(SR.TypeMissingDefaultConstructor, p0);
-        }
-
-        /// <summary>
-        /// A string like "List initializers must contain at least one initializer"
-        /// </summary>
-        internal static string ListInitializerWithZeroMembers
-        {
-            get
-            {
-                return SR.ListInitializerWithZeroMembers;
-            }
         }
 
         /// <summary>
@@ -1123,14 +1117,6 @@ namespace System.Linq.Expressions
             {
                 return SR.ArgumentCannotBeOfTypeVoid;
             }
-        }
-
-        /// <summary>
-        /// A string like "Invalid operation: '{0}'"
-        /// </summary>
-        internal static string InvalidOperation(object p0)
-        {
-            return SR.Format(SR.InvalidOperation, p0);
         }
 
         /// <summary>
@@ -1365,7 +1351,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is is intentional, override '{1}' and change it to allow this rewrite."
+        /// A string like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is intentional, override '{1}' and change it to allow this rewrite."
         /// </summary>
         internal static string MustRewriteWithoutMethod(object p0, object p1)
         {
@@ -1389,13 +1375,13 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Dynamic operations can only be performed in homogenous AppDomain."
+        /// A string like "Dynamic operations can only be performed in homogeneous AppDomain."
         /// </summary>
-        internal static string HomogenousAppDomainRequired
+        internal static string HomogeneousAppDomainRequired
         {
             get
             {
-                return SR.HomogenousAppDomainRequired;
+                return SR.HomogeneousAppDomainRequired;
             }
         }
 

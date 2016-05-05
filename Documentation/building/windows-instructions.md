@@ -14,6 +14,8 @@ The following free downloads are compatible:
 
 Note: In order to build our C++ projects be sure to select "Programming Languages | Visual C++ | Common Tools for Visual C++ 2015" while installing VS 2015 (or modify your install to include it).
 
+We also require that [Visual Studio 2015 Update 1](https://www.visualstudio.com/en-us/news/vs2015-update1-vs.aspx) be installed.
+
 [CMake](https://cmake.org/) is required to build the native libraries for Windows. To build these libraries cmake must be installed from [the CMake download page](https://cmake.org/download/) and added to your path.
 
 ## Building From the Command Line
@@ -24,12 +26,33 @@ the core tests for the project. Visual Studio Solution (.sln) files exist for
 related groups of libraries. These can be loaded to build, debug and test inside
 the Visual Studio IDE.
 
-By default building from the root will only build the libraries for the OS you are running on. One can
-build for another OS by specifying `/p:FilterOSGroup=[Windows_NT|Linux|OSX|FreeBSD]` or build for all by specifying
+### Building individual DLLs of the CoreFX
+
+Under the src directory is a set of directories, each of which represents a particular assembly in CoreFX.  
+For example the src\System.Diagnostics.DiagnosticSource directory holds the source code for the System.Diagnostics.DiagnosticSource.dll assembly.   Each of these directories has a .sln solution 
+file that typically includes two projects, one for the DLL being built and one for the tests.   Thus
+you can build both the DLL and Tests for System.Diagnostics.DiagnosticSource.dll by going to 
+src\System.Diagnostics.DiagnosticSource and typing `msbuild`. You can build just the System.Diagnostics.DiagnosticSource.dll (without the tests) by going to the src\System.Diagnostics.DiagnosticsSource\src directory and again typing `msbuild`. The DLL ends up as  bin\AnyOS.AnyCPU.Debug\System.Diagnostics.DiagnosticSource\System.DiagnosticSource.dll.
+
+There is also a pkg directory, and if you go into it and type `msbuild`, it will build the DLL (if needed)
+and then also build the Nuget package for it.   The Nuget package ends up in the bin\pkg directory.  
+
+### Building other OSes
+
+By default, building from the root will only build the libraries for the OS you are running on. One can
+build for another OS by specifying `/p:FilterToOSGroup=[Windows_NT|Linux|OSX|FreeBSD]` or build for all by specifying
 `/p:BuildAllOSGroups=true`.
 
-
 [Building CoreFX on FreeBSD, Linux and OS X](unix-instructions.md)
+
+### Building in Release or Debug
+
+By default, building from the root or within a project will build the libraries in Debug mode. One can build in Debug or Release mode by specifying `/p:ConfigurationGroup=[Debug|Release]` after the `msbuild` command.
+
+### Building other Architectures
+
+One can build 32 or 64 bit binaries or for any architecture by specifying `/p:Platform=[x86|x64|AnyCPU]` after the `msbuild` command.
+
 ## Tests
 
 We use the OSS testing framework [xunit](http://xunit.github.io/).
@@ -58,7 +81,13 @@ Tests participate in the incremental build.  This means that if tests have alrea
 The tests can also be filtered based on xunit trait attributes defined in [`xunit.netcore.extensions`](https://github.com/dotnet/buildtools/tree/master/src/xunit.netcore.extensions). These attributes are to be specified over the test method. The available attributes are:
 
 _**`OuterLoop`:**_
-This attribute applies the 'outerloop' category; to run outerloop tests, use the following commandline
+Tests marked as ```Outerloop``` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through msbuild but can be enabled manually by adding the  ```/p:Outerloop=true``` property e.g. 
+
+```cmd
+build.cmd *.csproj /p:Outerloop=true
+```
+
+To run <b>only</b> the Outerloop tests, use the following command:
 ```cmd
 xunit.console.netcore.exe *.dll -trait category=outerloop
 build.cmd *.csproj /p:WithCategories=OuterLoop
@@ -106,12 +135,7 @@ xunit.console.netcore.exe *.dll -notrait category=nonosxtests -trait category=Ou
 xunit.console.netcore.exe *.dll -notrait category=nonlinuxtests -trait category=failing
 ```
 
-All the required dlls to run a test project can be found in `bin\tests\{Flavor}\{Project}.Tests\aspnetcore50\` which should be created when the test project is built.
-
-To skip an entire test project on a specific platform, for example, to skip running registry tests on Linux and Mac OS X, use the `<UnsupportedPlatforms>` MSBuild property in the csproj. Valid platform values are
-```xml
-<UnsupportedPlatforms>Windows_NT;Linux;OSX</UnsupportedPlatforms>
-```
+All the required dlls to run a test project can be found in `bin\tests\{Configration}\{Project}.Tests\dnxcore50\` which should be created when the test project is built.
 
 ### Running tests from Visual Studio
 

@@ -237,6 +237,47 @@ namespace System
                               & (ControlKeyState.LeftAltPressed | ControlKeyState.RightAltPressed)) != 0;
         }
 
+        private const int NumberLockVKCode = 0x90;
+        private const int CapsLockVKCode = 0x14;
+
+        public static bool NumberLock
+        {
+            get
+            {
+                try
+                {
+                    short s = Interop.mincore.GetKeyState(NumberLockVKCode);
+                    return (s & 1) == 1;
+                }
+                catch (Exception)
+                {
+                    // Since we depend on an extension api-set here
+                    // it is not guaranteed to work across the board.
+                    // In case of exception we simply throw PNSE
+                    throw new PlatformNotSupportedException();
+                }
+            }
+        }
+
+        public static bool CapsLock
+        {
+            get
+            {
+                try
+                {
+                    short s = Interop.mincore.GetKeyState(CapsLockVKCode);
+                    return (s & 1) == 1;
+                }
+                catch (Exception)
+                {
+                    // Since we depend on an extension api-set here
+                    // it is not guaranteed to work across the board.
+                    // In case of exception we simply throw PNSE
+                    throw new PlatformNotSupportedException();
+                }
+            }
+        }
+
         public static bool KeyAvailable
         {
             get
@@ -374,6 +415,43 @@ namespace System
             return info;
         }
 
+        public static bool TreatControlCAsInput
+        {
+            get
+            {
+                IntPtr handle = InputHandle;
+                if (handle == s_InvalidHandleValue)
+                    throw new IOException(SR.IO_NoConsole);
+
+                int mode = 0;
+                if (!Interop.mincore.GetConsoleMode(handle, out mode))
+                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+
+                return (mode & Interop.mincore.ENABLE_PROCESSED_INPUT) == 0;
+            }
+            set
+            {
+                IntPtr handle = InputHandle;
+                if (handle == s_InvalidHandleValue)
+                    throw new IOException(SR.IO_NoConsole);
+
+                int mode = 0;
+                Interop.mincore.GetConsoleMode(handle, out mode); // failure ignored in full framework
+
+                if (value)
+                {
+                    mode &= ~Interop.mincore.ENABLE_PROCESSED_INPUT;
+                }
+                else
+                {
+                    mode |= Interop.mincore.ENABLE_PROCESSED_INPUT;
+                }
+
+                if (!Interop.mincore.SetConsoleMode(handle, mode))
+                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+            }
+        }
+
         // For ResetColor
         private static volatile bool _haveReadDefaultColors;
         private static volatile byte _defaultColors;
@@ -446,12 +524,15 @@ namespace System
 
         public static void ResetColor()
         {
-            bool succeeded;
-            Interop.mincore.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo(false, out succeeded);
-            if (!succeeded)
-                return; // For code that may be used from Windows app w/ no console
+            if (!_haveReadDefaultColors) // avoid the costs of GetBufferInfo if we already know we checked it
+            {
+                bool succeeded;
+                GetBufferInfo(false, out succeeded);
+                if (!succeeded)
+                    return; // For code that may be used from Windows app w/ no console
 
-            Debug.Assert(_haveReadDefaultColors, "Resetting color before we've read the default foreground color!");
+                Debug.Assert(_haveReadDefaultColors, "Resetting color before we've read the default foreground color!");
+            }
 
             // Ignore errors here - there are some scenarios for running code that wants
             // to print in colors to the console in a Windows application.
@@ -1021,7 +1102,7 @@ namespace System
                 // Fetch the default foreground and background color for the ResetColor method.
                 Debug.Assert((int)Interop.mincore.Color.ColorMask == 0xff, "Make sure one byte is large enough to store a Console color value!");
                 _defaultColors = (byte)(csbi.wAttributes & (short)Interop.mincore.Color.ColorMask);
-                _haveReadDefaultColors = true;
+                _haveReadDefaultColors = true; // also used by ResetColor to know when GetBufferInfo has been called successfully
             }
 
             succeeded = true;

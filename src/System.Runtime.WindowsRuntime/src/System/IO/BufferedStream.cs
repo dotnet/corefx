@@ -342,7 +342,7 @@ namespace System.IO
     public override Task FlushAsync(CancellationToken cancellationToken) {
 
         if (cancellationToken.IsCancellationRequested)
-            return Task.FromCancellation<Int32>(cancellationToken);
+            return Task.FromCanceled<Int32>(cancellationToken);
 
         EnsureNotClosed();
 
@@ -355,7 +355,7 @@ namespace System.IO
 
         // We bring instance fields down as local parameters to this async method becasue BufferedStream is derived from MarshalByRefObject.
         // Field access would be from the async state machine i.e., not via the this pointer and would require runtime checking to see
-        // if we are talking to a remote object, whcih is currently very slow (Dev11 bug #365921).
+        // if we are talking to a remote object, which is currently very slow (Dev11 bug #365921).
         // Field access from whithin Asserts is, of course, irrelevant.
         Debug.Assert(stream != null);
 
@@ -687,7 +687,7 @@ namespace System.IO
 
         // Fast path check for cancellation already requested
         if (cancellationToken.IsCancellationRequested)
-            return Task.FromCancellation<Int32>(cancellationToken);
+            return Task.FromCanceled<Int32>(cancellationToken);
 
         EnsureNotClosed();
         EnsureCanRead();
@@ -1111,7 +1111,7 @@ namespace System.IO
 
             // Fast path check for cancellation already requested
             if (cancellationToken.IsCancellationRequested)
-                return Task.FromCancellation<Int32>(cancellationToken);
+                return Task.FromCanceled<Int32>(cancellationToken);
 
             EnsureNotClosed();
             EnsureCanWrite();

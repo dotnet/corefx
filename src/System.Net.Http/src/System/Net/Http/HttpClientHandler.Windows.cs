@@ -5,6 +5,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -134,9 +136,26 @@ namespace System.Net.Http
             // 'Transfer-Encoding: chunked'. The handler will never automatically buffer in the request content.
             get { return 0; }
             
-            // TODO: Add message/link to exception explaining the deprecation. 
+            // TODO (#7879): Add message/link to exception explaining the deprecation. 
             // Update corresponding exception in HttpClientHandler.Unix.cs if/when this is updated.
             set { throw new PlatformNotSupportedException(); }
+        }
+
+        public X509CertificateCollection ClientCertificates
+        {
+            get { return _winHttpHandler.ClientCertificates; }
+        }
+
+        public Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateCustomValidationCallback
+        {
+            get { return _winHttpHandler.ServerCertificateValidationCallback; }
+            set { _winHttpHandler.ServerCertificateValidationCallback = value; }
+        }
+
+        public bool CheckCertificateRevocationList
+        {
+            get { return _winHttpHandler.CheckCertificateRevocationList; }
+            set { _winHttpHandler.CheckCertificateRevocationList = value; }
         }
 
         #endregion Properties

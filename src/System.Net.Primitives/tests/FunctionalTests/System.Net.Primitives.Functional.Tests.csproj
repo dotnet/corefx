@@ -9,11 +9,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4FE5ECEE-ACC5-4558-A946-573426599B73}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <UnsupportedPlatforms>FreeBSD</UnsupportedPlatforms>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="CookieTest.cs" />
     <Compile Include="CookieCollectionTest.cs" />

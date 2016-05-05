@@ -8,8 +8,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Runtime.csproj" />
-
-    <ProjectReference Include="..\..\..\System.Private.Uri\pkg\System.Private.Uri.pkgproj"/>
+    <ProjectReference Include="..\..\src\redist\System.Runtime.depproj">
+      <TargetGroup>netcore50</TargetGroup>
+    </ProjectReference>
 
     <!-- AOT implementation comes from AOT package -->
     <File Include="$(PlaceholderFile)">

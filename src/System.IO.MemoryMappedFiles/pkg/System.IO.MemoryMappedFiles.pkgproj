@@ -3,14 +3,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.IO.MemoryMappedFiles.csproj">
-      <SupportedFramework>net46;netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>net46;netcore50;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.IO.MemoryMappedFiles.csproj">
-      <AdditionalProperties>TargetGroup=net46</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="win\System.IO.MemoryMappedFiles.pkgproj" />
-    <ProjectReference Include="linux\System.IO.MemoryMappedFiles.pkgproj" />
-    <ProjectReference Include="osx\System.IO.MemoryMappedFiles.pkgproj" />
+    <ProjectReference Include="..\src\System.IO.MemoryMappedFiles.builds" />
   </ItemGroup>
   <ItemGroup>
     <InboxOnTargetFramework Include="MonoAndroid10" />

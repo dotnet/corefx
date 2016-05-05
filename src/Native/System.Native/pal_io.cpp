@@ -70,6 +70,7 @@ static_assert(PAL_S_IFCHR == S_IFCHR, "");
 static_assert(PAL_S_IFDIR == S_IFDIR, "");
 static_assert(PAL_S_IFREG == S_IFREG, "");
 static_assert(PAL_S_IFLNK == S_IFLNK, "");
+static_assert(PAL_S_IFSOCK == S_IFSOCK, "");
 
 // Validate that our enum for inode types is the same as what is
 // declared by the dirent.h header on the local system.
@@ -102,6 +103,7 @@ static_assert(PAL_SEEK_END == SEEK_END, "");
 
 // Validate our PollFlags enum values are correct for the platform
 static_assert(PAL_POLLIN == POLLIN, "");
+static_assert(PAL_POLLPRI == POLLPRI, "");
 static_assert(PAL_POLLOUT == POLLOUT, "");
 static_assert(PAL_POLLERR == POLLERR, "");
 static_assert(PAL_POLLHUP == POLLHUP, "");
@@ -494,10 +496,10 @@ extern "C" int32_t SystemNative_ChMod(const char* path, int32_t mode)
     return result;
 }
 
-extern "C" int32_t SystemNative_MkFifo(const char* path, int32_t mode)
+extern "C" int32_t SystemNative_FChMod(intptr_t fd, int32_t mode)
 {
     int32_t result;
-    while (CheckInterrupted(result = mkfifo(path, static_cast<mode_t>(mode))));
+    while (CheckInterrupted(result = fchmod(ToFileDescriptor(fd), static_cast<mode_t>(mode))));
     return result;
 }
 
@@ -833,6 +835,17 @@ extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_
 #endif
 }
 
+extern "C" char* SystemNative_GetLine(FILE* stream)
+{
+    assert(stream != nullptr);
+
+    char* lineptr = nullptr;
+    size_t n = 0;
+    ssize_t length = getline(&lineptr, &n, stream);
+    
+    return length >= 0 ? lineptr : nullptr;
+}
+
 extern "C" int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize)
 {
     assert(buffer != nullptr || bufferSize == 0);
@@ -1091,4 +1104,10 @@ extern "C" int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd)
     errno = ENOTSUP;
     return -1;
 #endif
+}
+
+extern "C" char* SystemNative_RealPath(const char* path)
+{
+    assert(path != nullptr);
+    return realpath(path, nullptr);
 }

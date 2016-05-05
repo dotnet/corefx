@@ -14,21 +14,17 @@
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <PropertyGroup>
-    <UnsupportedPlatforms>FreeBSD</UnsupportedPlatforms>
-  </PropertyGroup>
   <PropertyGroup>
     <!-- SYSTEM_NET_PRIMITIVES_DLL is required to allow source-level code sharing for types defined within the 
          System.Net.Internals namespace. -->
     <DefineConstants>$(DefineConstants);SYSTEM_NET_PRIMITIVES_DLL</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CookieCollectionTest.cs" />
     <Compile Include="CookieContainerTest.cs" />
     <Compile Include="CookieInternalTest.cs" />
     <Compile Include="Fakes\GlobalLog.cs" />
@@ -87,6 +83,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
       <Link>ProductionCode\Common\System\Net\UriScheme.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
+      <Link>Common\System\IO\StringBuilderCache.cs</Link>
     </Compile>
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Shims\TraceSource.cs">

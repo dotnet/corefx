@@ -3,10 +3,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Text.Encoding.CodePages.csproj">
-      <SupportedFramework>net46;netcore50;netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>net46;netcore50;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="win\System.Text.Encoding.CodePages.pkgproj" />
-    <ProjectReference Include="unix\System.Text.Encoding.CodePages.pkgproj" />
+    <ProjectReference Include="..\src\System.Text.Encoding.CodePages.builds" />
   </ItemGroup>
   <ItemGroup>
     <InboxOnTargetFramework Include="MonoAndroid10" />

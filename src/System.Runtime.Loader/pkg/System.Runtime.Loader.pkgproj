@@ -4,11 +4,10 @@
   
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Runtime.Loader.csproj">
-      <SupportedFramework>netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>netcoreapp1.0</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Runtime.Loader.builds"/>
     
-    <NotSupportedOnTargetFramework Include="netcore50" />
     <NotSupportedOnTargetFramework Include="net462" />
   </ItemGroup>
   

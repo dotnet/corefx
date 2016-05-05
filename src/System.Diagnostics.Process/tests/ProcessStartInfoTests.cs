@@ -15,7 +15,7 @@ using System.Text;
 
 namespace System.Diagnostics.Tests
 {
-    public class ProcessStartInfoTests : ProcessTestBase
+    public partial class ProcessStartInfoTests : ProcessTestBase
     {
         [Fact]
         public void TestEnvironmentProperty()
@@ -313,6 +313,39 @@ namespace System.Diagnostics.Tests
             }
         }
 
+
+        [Fact, PlatformSpecific(PlatformID.AnyUnix)]
+        public void TestUserCredentialsPropertiesOnUnix()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.Domain);
+            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.UserName);
+            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.PasswordInClearText);
+            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.LoadUserProfile);
+        }
+
+        [Fact]
+        public void TestWorkingDirectoryProperty()
+        {
+            // check defaults
+            Assert.Equal(string.Empty, _process.StartInfo.WorkingDirectory);
+
+            Process p = CreateProcessLong();
+            p.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                p.Start();
+                Assert.Equal(Directory.GetCurrentDirectory(), p.StartInfo.WorkingDirectory);
+            }
+            finally
+            {
+                if (!p.HasExited)
+                    p.Kill();
+
+                Assert.True(p.WaitForExit(WaitInMS));
+            }
+        }
+
         [Fact, PlatformSpecific(PlatformID.Windows), OuterLoop] // Requires admin privileges
         public void TestUserCredentialsPropertiesOnWindows()
         {
@@ -363,38 +396,6 @@ namespace System.Diagnostics.Tests
                     p.Kill();
 
                 Interop.NetUserDel(null, username);
-                Assert.True(p.WaitForExit(WaitInMS));
-            }
-        }
-
-        [Fact, PlatformSpecific(PlatformID.AnyUnix)]
-        public void TestUserCredentialsPropertiesOnUnix()
-        {
-            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.Domain);
-            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.UserName);
-            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.PasswordInClearText);
-            Assert.Throws<PlatformNotSupportedException>(() => _process.StartInfo.LoadUserProfile);
-        }
-
-        [Fact]
-        public void TestWorkingDirectoryProperty()
-        {
-            // check defaults
-            Assert.Equal(string.Empty, _process.StartInfo.WorkingDirectory);
-
-            Process p = CreateProcessLong();
-            p.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-
-            try
-            {
-                p.Start();
-                Assert.Equal(Directory.GetCurrentDirectory(), p.StartInfo.WorkingDirectory);
-            }
-            finally
-            {
-                if (!p.HasExited)
-                    p.Kill();
-
                 Assert.True(p.WaitForExit(WaitInMS));
             }
         }

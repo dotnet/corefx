@@ -6,14 +6,10 @@
       <SupportedFramework>net45;netcore45;wp8;wpa81</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\ref\System.Net.NetworkInformation.csproj">
-      <SupportedFramework>net46;netcore50;netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>net46;netcore50;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Net.NetworkInformation.csproj">
-      <AdditionalProperties>TargetGroup=net46</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="win\System.Net.NetworkInformation.pkgproj" />
-    <ProjectReference Include="linux\System.Net.NetworkInformation.pkgproj" />
-    <ProjectReference Include="osx\System.Net.NetworkInformation.pkgproj" />
+    <ProjectReference Include="..\src\System.Net.NetworkInformation.builds" />
+
   </ItemGroup>
   <ItemGroup>
     <InboxOnTargetFramework Include="MonoAndroid10" />
@@ -22,6 +18,7 @@
     <InboxOnTargetFramework Include="win8" />
     <InboxOnTargetFramework Include="wp80" />
     <InboxOnTargetFramework Include="wpa81" />
+    <InboxOnTargetFramework Include="portable-net45+win8+wp8+wpa81" />
     <InboxOnTargetFramework Include="xamarinios10" />
     <InboxOnTargetFramework Include="xamarinmac20" />
     <InboxOnTargetFramework Include="xamarintvos10" />

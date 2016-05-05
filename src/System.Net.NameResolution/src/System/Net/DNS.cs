@@ -43,7 +43,7 @@ namespace System.Net
             //
             // IPv6 Changes: IPv6 requires the use of getaddrinfo() rather
             //               than the traditional IPv4 gethostbyaddr() / gethostbyname().
-            //               getaddrinfo() is also protocol independant in that it will also
+            //               getaddrinfo() is also protocol independent in that it will also
             //               resolve IPv4 names / addresses. As a result, it is the preferred
             //               resolution mechanism on platforms that support it (Windows 5.1+).
             //               If getaddrinfo() is unsupported, IPv6 resolution does not work.
@@ -65,7 +65,7 @@ namespace System.Net
                 SocketError errorCode = NameResolutionPal.TryGetAddrInfo(hostName, out ipHostEntry, out nativeErrorCode);
                 if (errorCode != SocketError.Success)
                 {
-                    throw new InternalSocketException(errorCode, nativeErrorCode);
+                    throw SocketExceptionFactory.CreateSocketException(errorCode, nativeErrorCode);
                 }
             }
             else
@@ -112,8 +112,11 @@ namespace System.Net
 
                     if (NetEventSource.Log.IsEnabled())
                     {
-                        NetEventSource.Exception(NetEventSource.ComponentType.Socket, "DNS",
-                        "InternalGetHostByAddress", new InternalSocketException(errorCode, nativeErrorCode));
+                        NetEventSource.Exception(
+                            NetEventSource.ComponentType.Socket, 
+                            "DNS",
+                            "InternalGetHostByAddress", 
+                            SocketExceptionFactory.CreateSocketException(errorCode, nativeErrorCode));
                     }
 
                     // One of two things happened:
@@ -125,7 +128,7 @@ namespace System.Net
                     // Just return the resolved host name and no IPs.
                     return hostEntry;
                 }
-                throw new InternalSocketException(errorCode, nativeErrorCode);
+                throw SocketExceptionFactory.CreateSocketException(errorCode, nativeErrorCode);
             }
 
             //
@@ -225,7 +228,7 @@ namespace System.Net
         }
 
         // Helpers for async GetHostByName, ResolveToAddresses, and Resolve - they're almost identical
-        // If hostName is an IPString and justReturnParsedIP==true then no reverse lookup will be attempted, but the orriginal address is returned.
+        // If hostName is an IPString and justReturnParsedIP==true then no reverse lookup will be attempted, but the original address is returned.
         private static IAsyncResult HostResolutionBeginHelper(string hostName, bool justReturnParsedIp, AsyncCallback requestCallback, object state)
         {
             if (hostName == null)

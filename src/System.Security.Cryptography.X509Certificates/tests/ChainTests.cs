@@ -251,18 +251,60 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        public static void SafeX509ChainHandle_InvalidHandle_IsInvalid()
+        [OuterLoop( /* May require using the network, to download CRLs and intermediates */)]
+        public static void VerifyWithRevocation()
         {
-            Assert.True(SafeX509ChainHandle.InvalidHandle.IsInvalid);
-        }
+            using (var cert = new X509Certificate2(Path.Combine("TestData", "MS.cer")))
+            using (var onlineChain = new X509Chain())
+            using (var offlineChain = new X509Chain())
+            {
+                onlineChain.ChainPolicy.VerificationFlags =
+                    X509VerificationFlags.AllowUnknownCertificateAuthority;
 
-        [Fact]
-        public static void SafeX509ChainHandle_InvalidHandle_StaticObject()
-        {
-            SafeX509ChainHandle firstCall = SafeX509ChainHandle.InvalidHandle;
-            SafeX509ChainHandle secondCall = SafeX509ChainHandle.InvalidHandle;
+                onlineChain.ChainPolicy.VerificationTime = cert.NotBefore.AddHours(2);
+                onlineChain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                onlineChain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
 
-            Assert.Same(firstCall, secondCall);
+                bool valid = onlineChain.Build(cert);
+                Assert.True(valid, "Online Chain Built Validly");
+
+                // Since the network was enabled, we should get the whole chain.
+                Assert.Equal(3, onlineChain.ChainElements.Count);
+
+                Assert.Equal(0, onlineChain.ChainElements[0].ChainElementStatus.Length);
+                Assert.Equal(0, onlineChain.ChainElements[1].ChainElementStatus.Length);
+
+                // The root CA is not expected to be installed on everyone's machines,
+                // so allow for it to report UntrustedRoot, but nothing else..
+                X509ChainStatus[] rootElementStatus = onlineChain.ChainElements[2].ChainElementStatus;
+                
+                if (rootElementStatus.Length != 0)
+                {
+                    Assert.Equal(1, rootElementStatus.Length);
+                    Assert.Equal(X509ChainStatusFlags.UntrustedRoot, rootElementStatus[0].Status);
+                }
+
+                // Now that everything is cached, try again in Offline mode.
+                offlineChain.ChainPolicy.VerificationFlags = onlineChain.ChainPolicy.VerificationFlags;
+                offlineChain.ChainPolicy.VerificationTime = onlineChain.ChainPolicy.VerificationTime;
+                offlineChain.ChainPolicy.RevocationMode = X509RevocationMode.Offline;
+                offlineChain.ChainPolicy.RevocationFlag = onlineChain.ChainPolicy.RevocationFlag;
+
+                valid = offlineChain.Build(cert);
+                Assert.True(valid, "Offline Chain Built Validly");
+
+                // Everything should look just like the online chain:
+                Assert.Equal(onlineChain.ChainElements.Count, offlineChain.ChainElements.Count);
+
+                for (int i = 0; i < offlineChain.ChainElements.Count; i++)
+                {
+                    X509ChainElement onlineElement = onlineChain.ChainElements[i];
+                    X509ChainElement offlineElement = offlineChain.ChainElements[i];
+
+                    Assert.Equal(onlineElement.ChainElementStatus, offlineElement.ChainElementStatus);
+                    Assert.Equal(onlineElement.Certificate, offlineElement.Certificate);
+                }
+            }
         }
     }
 }

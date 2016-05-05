@@ -6,32 +6,20 @@ using Xunit;
 
 namespace System.Text.Tests
 {
-    // GetMaxCharCount(System.Int32)
     public class UTF8EncodingGetMaxCharCount
     {
-        #region Positive Test Cases
-        // PosTest1: Verify method GetMaxCharCount
-        [Fact]
-        public void PosTest1()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(int.MaxValue - 1)]
+        public void GetMaxCharCount(int byteCount)
         {
-            UTF8Encoding utf8 = new UTF8Encoding();
-            int byteCount = 8;
-            int maxCharCount = utf8.GetMaxCharCount(byteCount);
+            int expected = byteCount + 1;
+            Assert.Equal(expected, new UTF8Encoding(true, true).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UTF8Encoding(true, false).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UTF8Encoding(false, true).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UTF8Encoding(false, false).GetMaxCharCount(byteCount));
         }
-        #endregion
-
-        #region Negative Test Cases
-        // NegTest1: ArgumentOutOfRangeException is not thrown when byteCount is less than zero
-        [Fact]
-        public void NegTest1()
-        {
-            UTF8Encoding utf8 = new UTF8Encoding();
-            int byteCount = -1;
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                int maxCharCount = utf8.GetMaxCharCount(byteCount);
-            });
-        }
-        #endregion
     }
 }

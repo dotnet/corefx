@@ -5,8 +5,11 @@
     <ProjectReference Include="..\ref\4.0.0\System.Text.RegularExpressions.depproj">
       <SupportedFramework>net45;netcore45;wp8;wpa81</SupportedFramework>
     </ProjectReference>
+    <ProjectReference Include="..\ref\4.0.10\System.Text.RegularExpressions.depproj">
+      <SupportedFramework>net46;netcore50</SupportedFramework>
+    </ProjectReference>
     <ProjectReference Include="..\ref\System.Text.RegularExpressions.csproj">
-      <SupportedFramework>net46;netcore50;netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>net462;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Text.RegularExpressions.builds" />
     <InboxOnTargetFramework Include="MonoAndroid10" />
@@ -15,6 +18,7 @@
     <InboxOnTargetFramework Include="win8" />
     <InboxOnTargetFramework Include="wp80" />
     <InboxOnTargetFramework Include="wpa81" />
+    <InboxOnTargetFramework Include="portable-net45+win8+wp8+wpa81" />
     <InboxOnTargetFramework Include="xamarinios10" />
     <InboxOnTargetFramework Include="xamarinmac20" />
     <InboxOnTargetFramework Include="xamarintvos10" />

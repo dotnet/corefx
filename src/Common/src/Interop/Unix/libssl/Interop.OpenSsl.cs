@@ -59,10 +59,12 @@ internal static partial class Interop
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
-                Ssl.SetProtocolOptions(innerContext, protocols);
+                // Configure allowed protocols. It's ok to use DangerousGetHandle here without AddRef/Release as we just
+                // create the handle, it's rooted by the using, no one else has a reference to it, etc.
+                Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
 
                 // The logic in SafeSslHandle.Disconnect is simple because we are doing a quiet
-                // shutdown (we aren't negotating for session close to enable later session
+                // shutdown (we aren't negotiating for session close to enable later session
                 // restoration).
                 //
                 // If you find yourself wanting to remove this line to enable bidirectional
@@ -70,7 +72,10 @@ internal static partial class Interop
                 // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
                 Ssl.SslCtxSetQuietShutdown(innerContext);
 
-                Ssl.SetEncryptionPolicy(innerContext, policy);
+                if (!Ssl.SetEncryptionPolicy(innerContext, policy))
+                {
+                    throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
+                }
 
                 if (certHandle != null && certKeyHandle != null)
                 {
@@ -149,19 +154,20 @@ internal static partial class Interop
             return stateOk;
         }
 
-        internal static int Encrypt(SafeSslHandle context, byte[] buffer, int offset, int count, out Ssl.SslErrorCode errorCode)
+        internal static int Encrypt(SafeSslHandle context, byte[] input, int offset, int count, ref byte[] output, out Ssl.SslErrorCode errorCode)
         {
-            Debug.Assert(buffer != null);
+            Debug.Assert(input != null);
             Debug.Assert(offset >= 0);
             Debug.Assert(count >= 0);
-            Debug.Assert(buffer.Length >= offset + count);
+            Debug.Assert(offset <= input.Length);
+            Debug.Assert(input.Length - offset >= count);
 
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
             int retVal;
             unsafe
             {
-                fixed (byte* fixedBuffer = buffer)
+                fixed (byte* fixedBuffer = input)
                 {
                     retVal = Ssl.SslWrite(context, fixedBuffer + offset, count);
                 }
@@ -188,10 +194,12 @@ internal static partial class Interop
             {
                 int capacityNeeded = Crypto.BioCtrlPending(context.OutputBio);
 
-                Debug.Assert(buffer.Length >= capacityNeeded, "Input buffer of size " + buffer.Length +
-                                                              " bytes is insufficient since encryption needs " + capacityNeeded + " bytes.");
+                if (output == null || output.Length < capacityNeeded)
+                {
+                    output = new byte[capacityNeeded];
+                }
 
-                retVal = BioRead(context.OutputBio, buffer, capacityNeeded);
+                retVal = BioRead(context.OutputBio, output, capacityNeeded);
             }
 
             return retVal;

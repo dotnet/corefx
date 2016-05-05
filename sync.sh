@@ -7,6 +7,13 @@ usage()
     echo "  -s         Fetch source history from all configured remotes"
     echo "             (git fetch --all -p -v)"
     echo "  -p         Restore all NuGet packages for the repository"
+    echo "  -ab        Downloads the latests product packages from Azure."
+    echo "             The following properties are required:'"
+    echo "               /p:CloudDropAccountName='Account name'"
+    echo "               /p:CloudDropAccessToken='Access token'"
+    echo "             To download a specific group of product packages, specify:"
+    echo "               /p:BuildNumberMajor"
+    echo "               /p:BuildNumberMinor"
     echo
     echo "If no option is specified, then \"sync.sh -p -s\" is implied."
     exit 1
@@ -15,10 +22,12 @@ usage()
 working_tree_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 sync_log=$working_tree_root/sync.log
 
-# Parse arguments
+options="/nologo /v:minimal /clp:Summary /flp:v=detailed;Append;LogFile=$sync_log"
+unprocessedBuildArgs=
 
 echo "Running sync.sh $*" > $sync_log
 
+# Parse arguments
 if [ $# == 0 ]; then
     sync_packages=true
     sync_src=true
@@ -37,11 +46,11 @@ do
         -s)
         sync_src=true
         ;;
-        *)
-        echo "Unrecognized argument '$opt'"
-        echo "Use 'sync -h' for help."
-        exit 1
+        -ab)
+        azure_blobs=true
         ;;
+        *)
+        unprocessedBuildArgs="$unprocessedBuildArgs $1"
     esac
     shift
 done
@@ -51,7 +60,7 @@ $working_tree_root/init-tools.sh
 
 if [ "$sync_src" == true ]; then
     echo "Fetching git database from remote repos..."
-    git fetch --all -p -v &>> $sync_log
+    git fetch --all -p -v >> $sync_log 2>&1
     if [ $? -ne 0 ]; then
         echo -e "\ngit fetch failed. Aborting sync." >> $sync_log
         echo "ERROR: An error occurred while fetching remote source code; see $sync_log for more details."
@@ -59,10 +68,23 @@ if [ "$sync_src" == true ]; then
     fi
 fi
 
+if [ "$azure_blobs" == true ]; then
+    echo "Connecting and downloading packages from Azure BLOB ..."
+    echo -e "\n$working_tree_root/Tools/corerun $working_tree_root/Tools/MSBuild.exe $working_tree_root/src/syncAzure.proj $options $unprocessedBuildArgs" >> $sync_log
+    $working_tree_root/Tools/corerun $working_tree_root/Tools/MSBuild.exe $working_tree_root/src/syncAzure.proj $options $unprocessedBuildArgs
+    if [ $? -ne 0 ]
+    then
+        echo -e "\nDownload from Azure failed. Aborting sync." >> $sync_log
+        echo "ERROR: An error occurred while downloading packages from Azure BLOB; see $sync_log for more details. There may have been networking problems, so please try again in a few minutes."
+        exit 1
+    fi
+fi
+
 if [ "$sync_packages" == true ]; then
+    options="$options /t:BatchRestorePackages /p:RestoreDuringBuild=true"
     echo "Restoring all packages..."
-    echo -e "\n$working_tree_root/Tools/corerun $working_tree_root/Tools/MSBuild.exe $working_tree_root/build.proj /t:BatchRestorePackages /nologo /v:minimal /p:RestoreDuringBuild=true /flp:v=detailed;Append;LogFile=$sync_log" >> $sync_log
-    $working_tree_root/Tools/corerun $working_tree_root/Tools/MSBuild.exe $working_tree_root/build.proj /t:BatchRestorePackages /nologo /v:minimal /p:RestoreDuringBuild=true "/flp:v=detailed;Append;LogFile=$sync_log"
+    echo -e "\n$working_tree_root/Tools/corerun $working_tree_root/Tools/MSBuild.exe $working_tree_root/build.proj $options $unprocessedBuildArgs" >> $sync_log
+    $working_tree_root/Tools/corerun $working_tree_root/Tools/MSBuild.exe $working_tree_root/build.proj $options $unprocessedBuildArgs
     if [ $? -ne 0 ]
     then
         echo -e "\nPackage restored failed. Aborting sync." >> $sync_log

@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
-  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{F3E72F35-0351-4D67-9388-725BCAD807BA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Data.SqlClient.Tests</RootNamespace>
     <AssemblyName>System.Data.SqlClient.Tests</AssemblyName>
+    <KeepAllProjectReferences>true</KeepAllProjectReferences>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
@@ -20,10 +18,14 @@
   <ItemGroup>
     <Compile Include="ExceptionTest.cs" />
     <Compile Include="SqlBulkCopyColumnMappingCollectionTest.cs" />
+    <Compile Include="SqlConnectionTest.RetrieveStatistics.cs" />
+    <Compile Include="SqlErrorCollectionTest.cs" />
+    <Compile Include="SqlStringTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Data.SqlClient.csproj"> 
-      <Name>System.Data.SqlClient</Name> 
+      <Name>System.Data.SqlClient</Name>
+      <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference> 
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

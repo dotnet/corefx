@@ -2,74 +2,77 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics.Tracing;
 
 namespace System.Buffers
 {
-    [EventSource(
-        Guid = "20b30044-b729-457e-8dda-8b41b5dd02e6", 
-        Name = "System.Buffers.BufferPoolEventSource",
-        LocalizationResources = "FxResources.System.Buffers.SR")]
+    [EventSource(Name = "System.Buffers.ArrayPoolEventSource")]
     internal sealed class ArrayPoolEventSource : EventSource
     {
         internal readonly static ArrayPoolEventSource Log = new ArrayPoolEventSource();
 
-        internal enum BufferAllocationReason : int
+        /// <summary>The reason for a BufferAllocated event.</summary>
+        internal enum BufferAllocatedReason : int
         {
+            /// <summary>The pool is allocating a buffer to be pooled in a bucket.</summary>
             Pooled,
+            /// <summary>The requested buffer size was too large to be pooled.</summary>
             OverMaximumSize,
+            /// <summary>The pool has already allocated for pooling as many buffers of a particular size as it's allowed.</summary>
             PoolExhausted
         }
 
-        [Event(1, Level = EventLevel.Informational)]
-        internal void BufferRented(int bufferId, int bufferSize, int poolId, int bucketId) { WriteEventHelper(1, bufferId, bufferSize, poolId, bucketId); }
+        /// <summary>
+        /// Event for when a buffer is rented.  This is invoked once for every successful call to Rent,
+        /// regardless of whether a buffer is allocated or a buffer is taken from the pool.  In a
+        /// perfect situation where all rented buffers are returned, we expect to see the number
+        /// of BufferRented events exactly match the number of BuferReturned events, with the number
+        /// of BufferAllocated events being less than or equal to those numbers (ideally significantly
+        /// less than).
+        /// </summary>
+        [Event(1, Level = EventLevel.Verbose)]
+        internal unsafe void BufferRented(int bufferId, int bufferSize, int poolId, int bucketId)
+        {
+            EventData* payload = stackalloc EventData[4];
+            payload[0].Size = sizeof(int);
+            payload[0].DataPointer = ((IntPtr)(&bufferId));
+            payload[1].Size = sizeof(int);
+            payload[1].DataPointer = ((IntPtr)(&bufferSize));
+            payload[2].Size = sizeof(int);
+            payload[2].DataPointer = ((IntPtr)(&poolId));
+            payload[3].Size = sizeof(int);
+            payload[3].DataPointer = ((IntPtr)(&bucketId));
+            WriteEventCore(1, 4, payload);
+        }
 
+        /// <summary>
+        /// Event for when a buffer is allocated by the pool.  In an ideal situation, the number
+        /// of BufferAllocated events is significantly smaller than the number of BufferRented and
+        /// BufferReturned events.
+        /// </summary>
         [Event(2, Level = EventLevel.Informational)]
-        internal void BufferAllocated(int bufferId, int bufferSize, int poolId, int bucketId, BufferAllocationReason reason)
+        internal unsafe void BufferAllocated(int bufferId, int bufferSize, int poolId, int bucketId, BufferAllocatedReason reason)
         {
-            unsafe
-            {
-                 EventData* payload = stackalloc EventData[5];
-                 payload[0].Size = sizeof(int);
-                 payload[0].DataPointer = ((IntPtr) (&bufferId));
-                 payload[1].Size = sizeof(int);
-                 payload[1].DataPointer = ((IntPtr) (&bufferSize));
-                 payload[2].Size = sizeof(int);
-                 payload[2].DataPointer = ((IntPtr) (&poolId));
-                 payload[3].Size = sizeof(int);
-                 payload[3].DataPointer = ((IntPtr) (&bucketId));
-                 payload[4].Size = sizeof(BufferAllocationReason);
-                 payload[4].DataPointer = ((IntPtr) (&reason));
-                 WriteEventCore(2, 5, payload);
-             }
+            EventData* payload = stackalloc EventData[5];
+            payload[0].Size = sizeof(int);
+            payload[0].DataPointer = ((IntPtr)(&bufferId));
+            payload[1].Size = sizeof(int);
+            payload[1].DataPointer = ((IntPtr)(&bufferSize));
+            payload[2].Size = sizeof(int);
+            payload[2].DataPointer = ((IntPtr)(&poolId));
+            payload[3].Size = sizeof(int);
+            payload[3].DataPointer = ((IntPtr)(&bucketId));
+            payload[4].Size = sizeof(BufferAllocatedReason);
+            payload[4].DataPointer = ((IntPtr)(&reason));
+            WriteEventCore(2, 5, payload);
         }
 
-        [Event(3, Level = EventLevel.Informational)]
-        internal void BufferReturned(int bufferId, int poolId) { WriteEvent(3, bufferId, poolId); }
-
-        [Event(4, Level = EventLevel.Warning)]
-        internal void BucketExhausted(int bucketId, int bucketSize, int buffersInBucket, int poolId) { WriteEventHelper(4, bucketId, bucketSize, buffersInBucket, poolId); }
-        
-        [NonEvent]
-        private unsafe void WriteEventHelper(int eventId, int arg0, int arg1, int arg2, int arg3)
-        {
-            if (IsEnabled())
-            {
-                unsafe
-                {
-                    EventData* payload = stackalloc EventData[4];
-                    payload[0].Size = sizeof(int);
-                    payload[0].DataPointer = ((IntPtr) (&arg0));
-                    payload[1].Size = sizeof(int);
-                    payload[1].DataPointer = ((IntPtr) (&arg1));
-                    payload[2].Size = sizeof(int);
-                    payload[2].DataPointer = ((IntPtr) (&arg2));
-                    payload[3].Size = sizeof(int);
-                    payload[3].DataPointer = ((IntPtr) (&arg3));
-                    WriteEventCore(eventId, 4, payload);
-                }
-            }
-        }
+        /// <summary>
+        /// Event raised when a buffer is returned to the pool.  This event is raised regardless of whether
+        /// the returned buffer is stored or dropped.  In an ideal situation, the number of BufferReturned
+        /// events exactly matches the number of BufferRented events.
+        /// </summary>
+        [Event(3, Level = EventLevel.Verbose)]
+        internal void BufferReturned(int bufferId, int bufferSize, int poolId) => WriteEvent(3, bufferId, bufferSize, poolId);
     }
 }

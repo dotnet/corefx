@@ -2,26 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Globalization;
 using Xunit;
 
-namespace System.Globalization.CalendarsTests
+namespace System.Globalization.Tests
 {
-    //System.Globalization.KoreanCalendar.TwoDigitYearMax
     public class KoreanCalendarTwoDigitYearMax
     {
-        #region Test Logic
-        // PosTest1:get the property
         [Fact]
-        public void PosTest1()
+        public void TwoDigitYearMax_Get()
         {
-            System.Globalization.Calendar kC = new KoreanCalendar();
-            int expectedValue = 4362;
-            int actualValue;
-            actualValue = kC.TwoDigitYearMax;
-            Assert.Equal(expectedValue, actualValue);
+            Assert.Equal(4362, new KoreanCalendar().TwoDigitYearMax);
         }
-        #endregion
+
+        [Theory]
+        [InlineData(99)]
+        [InlineData(2016)]
+        public void TwoDigitYearMax_Set(int newTwoDigitYearMax)
+        {
+            Calendar calendar = new KoreanCalendar();
+            calendar.TwoDigitYearMax = newTwoDigitYearMax;
+            Assert.Equal(newTwoDigitYearMax, calendar.TwoDigitYearMax);
+        }
     }
 }

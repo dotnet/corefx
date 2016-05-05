@@ -5,22 +5,20 @@
     <ProjectReference Include="..\ref\4.0.0\System.Linq.Expressions.depproj">
       <SupportedFramework>net45;netcore45;wp80;wpa81</SupportedFramework>
     </ProjectReference>
+    <ProjectReference Include="..\ref\4.0.10\System.Linq.Expressions.depproj">
+      <SupportedFramework>net46;netcore50</SupportedFramework>
+    </ProjectReference>
     <ProjectReference Include="..\ref\System.Linq.Expressions.csproj">
-      <SupportedFramework>net46;netcore50;netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>net462;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
-    <!-- not yet needed
-    <ProjectReference Include="..\src\Facade\System.Linq.Expressions.csproj">
-      <TargetGroup>net46</TargetGroup>
-    </ProjectReference>
-    -->
-    <ProjectReference Include="any\System.Linq.Expressions.pkgproj" />
-    <ProjectReference Include="aot\System.Linq.Expressions.pkgproj" />
+    <ProjectReference Include="..\src\System.Linq.Expressions.builds" />
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
     <InboxOnTargetFramework Include="net45" />
     <InboxOnTargetFramework Include="win8" />
     <InboxOnTargetFramework Include="wp80" />
     <InboxOnTargetFramework Include="wpa81" />
+    <InboxOnTargetFramework Include="portable-net45+win8+wp8+wpa81" />
     <InboxOnTargetFramework Include="xamarinios10" />
     <InboxOnTargetFramework Include="xamarinmac20" />
     <InboxOnTargetFramework Include="xamarintvos10" />

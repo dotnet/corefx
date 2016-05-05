@@ -507,7 +507,7 @@ namespace System.Net.Security
 
                 if (!_negoState.CanGetSecureStream)
                 {
-                    return InnerStreamAPM.BeginRead(buffer, offset, count, asyncCallback, asyncState);
+                    return InnerStream.BeginRead(buffer, offset, count, asyncCallback, asyncState);
                 }
 
                 BufferAsyncResult bufferResult = new BufferAsyncResult(this, buffer, offset, count, asyncState, asyncCallback);
@@ -529,7 +529,7 @@ namespace System.Net.Security
 
                 if (!_negoState.CanGetSecureStream)
                 {
-                    return InnerStreamAPM.EndRead(asyncResult);
+                    return InnerStream.EndRead(asyncResult);
                 }
 
 
@@ -579,7 +579,7 @@ namespace System.Net.Security
 
                 if (!_negoState.CanGetSecureStream)
                 {
-                    return InnerStreamAPM.BeginWrite(buffer, offset, count, asyncCallback, asyncState);
+                    return InnerStream.BeginWrite(buffer, offset, count, asyncCallback, asyncState);
                 }
 
                 BufferAsyncResult bufferResult = new BufferAsyncResult(this, buffer, offset, count, true, asyncState, asyncCallback);
@@ -602,7 +602,7 @@ namespace System.Net.Security
 
                 if (!_negoState.CanGetSecureStream)
                 {
-                    InnerStreamAPM.EndWrite(asyncResult);
+                    InnerStream.EndWrite(asyncResult);
                     return;
                 }
 
@@ -649,7 +649,7 @@ namespace System.Net.Security
         //     buffer            - Buffer to read into.
         //     offset            - Offset into the buffer where we're to read.
         //     size              - Number of bytes to read.
-        //     cancellationtoken - Token used to request cancellation of the operation
+        //     cancellationToken - Token used to request cancellation of the operation
         // 
         // Returns:
         // 
@@ -680,7 +680,7 @@ namespace System.Net.Security
         //     buffer  - Buffer to write into.
         //     offset  - Offset into the buffer where we're to write.
         //     size    - Number of bytes to write.
-        //     cancellationtoken - Token used to request cancellation of the operation
+        //     cancellationToken - Token used to request cancellation of the operation
         // 
         // Returns:
         // 

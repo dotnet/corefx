@@ -111,7 +111,7 @@ namespace System.IO
         {
             if (stream == null || encoding == null)
             {
-                throw new ArgumentNullException((stream == null ? "stream" : "encoding"));
+                throw new ArgumentNullException(stream == null ? nameof(stream) : nameof(encoding));
             }
             if (!stream.CanWrite)
             {
@@ -425,7 +425,7 @@ namespace System.IO
         public override Task WriteAsync(char value)
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Write() which a subclass might have overriden.  
+            // since it does not call through to Write() which a subclass might have overridden.  
             // To be safe we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Write) when we are not sure.
             if (GetType() != typeof(StreamWriter))
@@ -492,7 +492,7 @@ namespace System.IO
         public override Task WriteAsync(string value)
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Write() which a subclass might have overriden.  
+            // since it does not call through to Write() which a subclass might have overridden.  
             // To be safe we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Write) when we are not sure.
             if (GetType() != typeof(StreamWriter))
@@ -516,7 +516,7 @@ namespace System.IO
             }
             else
             {
-                return MakeCompletedTask();
+                return Task.CompletedTask;
             }
         }
 
@@ -602,7 +602,7 @@ namespace System.IO
             }
 
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Write() which a subclass might have overriden.  
+            // since it does not call through to Write() which a subclass might have overridden.  
             // To be safe we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Write) when we are not sure.
             if (GetType() != typeof(StreamWriter))
@@ -688,7 +688,7 @@ namespace System.IO
         public override Task WriteLineAsync()
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Write() which a subclass might have overriden.  
+            // since it does not call through to Write() which a subclass might have overridden.  
             // To be safe we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Write) when we are not sure.
             if (GetType() != typeof(StreamWriter))
@@ -713,7 +713,7 @@ namespace System.IO
         public override Task WriteLineAsync(char value)
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Write() which a subclass might have overriden.  
+            // since it does not call through to Write() which a subclass might have overridden.  
             // To be safe we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Write) when we are not sure.
             if (GetType() != typeof(StreamWriter))
@@ -738,7 +738,7 @@ namespace System.IO
         public override Task WriteLineAsync(string value)
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Write() which a subclass might have overriden.  
+            // since it does not call through to Write() which a subclass might have overridden.  
             // To be safe we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Write) when we are not sure.
             if (GetType() != typeof(StreamWriter))
@@ -780,7 +780,7 @@ namespace System.IO
             }
 
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Write() which a subclass might have overriden.  
+            // since it does not call through to Write() which a subclass might have overridden.  
             // To be safe we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Write) when we are not sure.
             if (GetType() != typeof(StreamWriter))
@@ -805,7 +805,7 @@ namespace System.IO
         public override Task FlushAsync()
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
-            // since it does not call through to Flush() which a subclass might have overriden.  To be safe 
+            // since it does not call through to Flush() which a subclass might have overridden.  To be safe 
             // we will only use this implementation in cases where we know it is safe to do so,
             // and delegate to our base class (which will call into Flush) when we are not sure.
             if (GetType() != typeof(StreamWriter))
@@ -840,23 +840,13 @@ namespace System.IO
             set { _haveWrittenPreamble = value; }
         }
 
-
-#pragma warning disable 1998 // async method with no await
-        private async Task MakeCompletedTask()
-        {
-            // do nothing.  We're taking advantage of the async infrastructure's optimizations, one of which is to
-            // return a cached already-completed Task when possible.
-        }
-#pragma warning restore 1998
-
-
         private Task FlushAsyncInternal(bool flushStream, bool flushEncoder,
                                         char[] sCharBuffer, int sCharPos)
         {
             // Perf boost for Flush on non-dirty writers.
             if (sCharPos == 0 && !flushStream && !flushEncoder)
             {
-                return MakeCompletedTask();
+                return Task.CompletedTask;
             }
 
             Task flushTask = FlushAsyncInternal(this, flushStream, flushEncoder, sCharBuffer, sCharPos, _haveWrittenPreamble,

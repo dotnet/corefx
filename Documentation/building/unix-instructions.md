@@ -1,7 +1,7 @@
 Building CoreFX on FreeBSD, Linux and OS X
 ==========================================
 
-Building CoreFX is pretty straightforward. Clone the repo and run the build script.
+Building CoreFX is pretty straightforward. Clone the repo and run the build script.  For specific steps to build on Ubuntu, [navigate to the end of this document](#steps-to-build-on-ubuntu).
 
 ```bash
 git clone https://github.com/dotnet/corefx.git
@@ -10,7 +10,7 @@ cd corefx
 ```
 
 ### `build.sh` Usage
- `./build.sh [managed] [native] [BuildArch] [BuildType] [clean] [verbose] [clangx.y] [platform]`
+ `./build.sh [managed] [native] [BuildArch] [BuildType] [clean] [verbose] [clangx.y] [platform] [cross] [skiptests] [cmakeargs]`
 
 **Example:**
 
@@ -19,26 +19,30 @@ cd corefx
 **Options:**
 
 ```bash
-    managed            # optional argument to build the managed code
-    native             # optional argument to build the native code
+managed            # optional argument to build the managed code
+native             # optional argument to build the native code
 
-    # The following arguments affect native builds only:
+# The following arguments affect native builds only:
 
-    BuildArch          # build architecture (x64, x86, arm, arm64)
-    BuildType          # build configuration type (Debug, Release)
-    clean              # optional argument to force a clean build
-    verbose            # optional argument to enable verbose build output
-    clangx.y           # optional argument to build using clang version x.y
+BuildArch          # build architecture (x64, x86, arm, arm64)
+BuildType          # build configuration type (Debug, Release)
+clean              # optional argument to force a clean build
+verbose            # optional argument to enable verbose build output
+clangx.y           # optional argument to build using clang version x.y
+platform           # OS to compile for (FreeBSD, Linux, NetBSD, OSX, Windows)
+cross              # optional argument to signify cross compilation, uses ROOTFS_DIR environment variable if set
+skiptests          # skip the tests in the './bin/*/*Tests/' subdirectory
+cmakeargs          # user-settable additional arguments passed to CMake
 ```
 
 ### Prerequisites
 
-* bash
-* curl (devel)
-* icu
-* clang
-* llvm
-* lldb
+* git
+* curl-dev (libcurl4-openssl-dev)
+* icu (libicu52)
+* cmake
+* clang (clang-3.5)
+* libunwind (libunwind8)
 
 > Note: These instructions have been validated on:
 * Ubuntu 15.04, 14.04, and 12.04
@@ -55,4 +59,12 @@ If you see errors along the lines of `SendFailure (Error writing headers)` you m
 mozroots --import --sync
 ```
 
-`System.Diagnostics.Debug.Tests` does not build on Unix. https://github.com/dotnet/corefx/issues/1609
+## Steps to Build on Ubuntu
+
+*Note: verified on Ubuntu 14.04 LTS*
+
+1. Install the prerequisites
+ * `sudo apt-get install git libcurl4-openssl-dev libicu52 cmake clang-3.5 libunwind8`
+2. Clone the corefx repo `git clone https://github.com/dotnet/corefx.git`
+3. Navigate to the `corefx` directory 
+4. Run the build script `./build.sh`

@@ -6,63 +6,24 @@ using Xunit;
 
 namespace System.Text.Tests
 {
-    //System.Text.UnicodeEncoding.GetMaxCharCount(int)
     public class UnicodeEncodingGetMaxCharCount
     {
-        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
-
-        #region Positive Tests
-        // PosTest1:Invoke the method and set byteCount as 0
-        [Fact]
-        public void PosTest1()
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(1, 2)]
+        [InlineData(10, 6)]
+        [InlineData(int.MaxValue, 1073741825)]
+        public void GetMaxCharCount(int byteCount, int expected)
         {
-            int expectedValue = 1;
-            int actualValue;
-            UnicodeEncoding uE = new UnicodeEncoding();
-            actualValue = uE.GetMaxCharCount(0);
+            Assert.Equal(expected, new UnicodeEncoding(false, true, false).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UnicodeEncoding(false, false, false).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UnicodeEncoding(true, true, false).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UnicodeEncoding(true, false, false).GetMaxCharCount(byteCount));
 
-            Assert.Equal(expectedValue, actualValue);
+            Assert.Equal(expected, new UnicodeEncoding(false, true, true).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UnicodeEncoding(false, false, true).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UnicodeEncoding(true, true, true).GetMaxCharCount(byteCount));
+            Assert.Equal(expected, new UnicodeEncoding(true, false, true).GetMaxCharCount(byteCount));
         }
-
-        // PosTest2:Invoke the method and set byteCount as 1
-        [Fact]
-        public void PosTest2()
-        {
-            int expectedValue = 2;
-            int actualValue;
-            UnicodeEncoding uE = new UnicodeEncoding();
-
-            actualValue = uE.GetMaxCharCount(1);
-            Assert.Equal(expectedValue, actualValue);
-        }
-
-        // PosTest3:Invoke the method and set byteCount as random integer
-        [Fact]
-        public void PosTest3()
-        {
-            int byteCount = _generator.GetInt32(-55);
-            int expectedValue = (byteCount + 1) / 2 + 1;
-            int actualValue;
-            UnicodeEncoding uE = new UnicodeEncoding();
-
-            actualValue = uE.GetMaxCharCount(byteCount);
-            Assert.Equal(expectedValue, actualValue);
-        }
-
-        #endregion
-
-        #region Negative Tests
-        [Fact]
-        public void NegTest1()
-        {
-            int actualValue;
-            UnicodeEncoding uE = new UnicodeEncoding();
-
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                actualValue = uE.GetMaxCharCount(-1);
-            });
-        }
-        #endregion
     }
 }

@@ -3,13 +3,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Diagnostics.TraceSource.csproj">
-      <SupportedFramework>net46;netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>net46;netcore50;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Diagnostics.TraceSource.csproj">
-      <TargetGroup>net46</TargetGroup>
-    </ProjectReference>
-    <ProjectReference Include="win\System.Diagnostics.TraceSource.pkgproj" />
-    <ProjectReference Include="unix\System.Diagnostics.TraceSource.pkgproj" />
+    <ProjectReference Include="..\src\System.Diagnostics.TraceSource.builds" />
   </ItemGroup>
   <ItemGroup>
     <InboxOnTargetFramework Include="MonoAndroid10" />

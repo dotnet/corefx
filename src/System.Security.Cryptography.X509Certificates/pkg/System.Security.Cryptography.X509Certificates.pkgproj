@@ -2,14 +2,13 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
+    <ProjectReference Include="..\ref\4.0\System.Security.Cryptography.X509Certificates.csproj">
+      <SupportedFramework>net46</SupportedFramework>
+    </ProjectReference>
     <ProjectReference Include="..\ref\System.Security.Cryptography.X509Certificates.csproj">
-      <SupportedFramework>net461;netcore50;netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>net461;netcore50;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Security.Cryptography.X509Certificates.csproj">
-      <AdditionalProperties>TargetGroup=net461</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="win\System.Security.Cryptography.X509Certificates.pkgproj" />
-    <ProjectReference Include="unix\System.Security.Cryptography.X509Certificates.pkgproj" />
+    <ProjectReference Include="..\src\System.Security.Cryptography.X509Certificates.builds" />
   </ItemGroup>
   <ItemGroup>
     <InboxOnTargetFramework Include="MonoAndroid10" />
@@ -18,6 +17,8 @@
     <InboxOnTargetFramework Include="xamarinmac20" />
     <InboxOnTargetFramework Include="xamarintvos10" />
     <InboxOnTargetFramework Include="xamarinwatchos10" />
+  </ItemGroup>
+  <ItemGroup>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

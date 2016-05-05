@@ -22,6 +22,20 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
+        private class EnumerableStaticAdd : IEnumerable<string>
+        {
+            public IEnumerator<string> GetEnumerator()
+            {
+                yield break;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()  => GetEnumerator();
+
+            public static void Add(string value)
+            {
+            }
+        }
+
         [Fact]
         public void NullNewMethod()
         {
@@ -58,21 +72,28 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentNullException>("initializers", () => Expression.ListInit(validNew, null, default(IEnumerable<Expression>)));
         }
 
-        [Fact]
-        public void ZeroInitializers()
+        private static IEnumerable<object[]> ZeroInitializerInits()
         {
             var validNew = Expression.New(typeof(List<int>));
-            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(validNew, new Expression[0]));
-            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(validNew, Enumerable.Empty<Expression>()));
-            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(validNew, new ElementInit[0]));
-            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(validNew, Enumerable.Empty<ElementInit>()));
+            yield return new object[] {Expression.ListInit(validNew, new Expression[0])};
+            yield return new object[] {Expression.ListInit(validNew, Enumerable.Empty<Expression>())};
+            yield return new object[] {Expression.ListInit(validNew, new ElementInit[0])};
+            yield return new object[] {Expression.ListInit(validNew, Enumerable.Empty<ElementInit>())};
 
             var validMethod = typeof(List<int>).GetMethod("Add");
-            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(validNew, validMethod, new Expression[0]));
-            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(validNew, validMethod, Enumerable.Empty<Expression>()));
+            yield return new object[] {Expression.ListInit(validNew, validMethod)};
+            yield return new object[] {Expression.ListInit(validNew, validMethod, Enumerable.Empty<Expression>())};
 
-            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(validNew, null, new Expression[0]));
-            Assert.Throws<ArgumentException>(null, () => Expression.ListInit(validNew, null, Enumerable.Empty<Expression>()));
+            yield return new object[] {Expression.ListInit(validNew, null, new Expression[0])};
+            yield return new object[] {Expression.ListInit(validNew, null, Enumerable.Empty<Expression>())};
+        }
+
+        [Theory, PerCompilationType(nameof(ZeroInitializerInits))]
+        public void ZeroInitializers(Expression init, bool useInterpreter)
+        {
+            var exp = Expression.Lambda<Func<List<int>>>(init);
+            var func = exp.Compile(useInterpreter);
+            Assert.Empty(func());
         }
 
         [Fact]
@@ -91,6 +112,17 @@ namespace System.Linq.Expressions.Tests
             // () => new NonEnumerableAddable { 1, 2, 4, 16, 42 } isn't allowed because list initialization
             // is allowed only with enumerable types.
             Assert.Throws<ArgumentException>(null, () => Expression.ListInit(Expression.New(typeof(NonEnumerableAddable)), Expression.Constant(1)));
+        }
+
+        [Fact]
+        public void StaticAddMethodOnType()
+        {
+            var newExp = Expression.New(typeof(EnumerableStaticAdd));
+            var adder = typeof(EnumerableStaticAdd).GetMethod(nameof(EnumerableStaticAdd.Add));
+            Assert.Throws<ArgumentException>(() => Expression.ListInit(newExp, Expression.Constant("")));
+            Assert.Throws<ArgumentException>(() => Expression.ListInit(newExp, adder, Expression.Constant("")));
+            Assert.Throws<ArgumentException>(() => Expression.ElementInit(adder, Expression.Constant("")));
+            Assert.Throws<ArgumentException>(() => Expression.ElementInit(adder, Enumerable.Repeat(Expression.Constant(""), 1)));
         }
 
         [Fact]
@@ -113,61 +145,33 @@ namespace System.Linq.Expressions.Tests
             Assert.NotSame(listInit, listInit.ReduceAndCheck());
         }
 
-        [Fact]
-        public void InitializeVoidAddCompiler()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void InitializeVoidAdd(bool useInterpreter)
         {
             Expression<Func<List<int>>> listInit = () => new List<int> { 1, 2, 4, 16, 42 };
-            Func<List<int>> func = listInit.Compile(false);
+            Func<List<int>> func = listInit.Compile(useInterpreter);
             Assert.Equal(new[] { 1, 2, 4, 16, 42 }, func());
         }
 
-        [Fact]
-        public void InitializeVoidAddInterpreter()
-        {
-            Expression<Func<List<int>>> listInit = () => new List<int> { 1, 2, 4, 16, 42 };
-            Func<List<int>> func = listInit.Compile(true);
-            Assert.Equal(new[] { 1, 2, 4, 16, 42 }, func());
-        }
-
-        [Fact]
-        public void InitializeNonVoidAddCompiler()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void InitializeNonVoidAdd(bool useInterpreter)
         {
             Expression<Func<HashSet<int>>> hashInit = () => new HashSet<int> { 1, 2, 4, 16, 42 };
-            Func<HashSet<int>> func = hashInit.Compile(false);
+            Func<HashSet<int>> func = hashInit.Compile(useInterpreter);
             Assert.Equal(new[] { 1, 2, 4, 16, 42 }, func().OrderBy(i => i));
         }
 
-        [Fact]
-        public void InitializeNonVoidAddInterpreter()
-        {
-            Expression<Func<HashSet<int>>> hashInit = () => new HashSet<int> { 1, 2, 4, 16, 42 };
-            Func<HashSet<int>> func = hashInit.Compile(true);
-            Assert.Equal(new[] { 1, 2, 4, 16, 42 }, func().OrderBy(i => i));
-        }
-
-        [Fact]
-        public void InitializeTwoParameterAddCompiler()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void InitializeTwoParameterAdd(bool useInterpreter)
         {
             Expression<Func<Dictionary<string, int>>> dictInit = () => new Dictionary<string, int>
             {
                 { "a", 1 }, {"b", 2 }, {"c", 3 }
             };
-            Func<Dictionary<string, int>> func = dictInit.Compile(false);
-            var expected = new Dictionary<string, int>
-            {
-                { "a", 1 }, {"b", 2 }, {"c", 3 }
-            };
-            Assert.Equal(expected.OrderBy(kvp => kvp.Key), func().OrderBy(kvp => kvp.Key));
-        }
-
-        [Fact]
-        public void InitializeTwoParameterAddInterpreter()
-        {
-            Expression<Func<Dictionary<string, int>>> dictInit = () => new Dictionary<string, int>
-            {
-                { "a", 1 }, {"b", 2 }, {"c", 3 }
-            };
-            Func<Dictionary<string, int>> func = dictInit.Compile(true);
+            Func<Dictionary<string, int>> func = dictInit.Compile(useInterpreter);
             var expected = new Dictionary<string, int>
             {
                 { "a", 1 }, {"b", 2 }, {"c", 3 }

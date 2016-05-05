@@ -1,4 +1,4 @@
-@echo off
+@if "%_echo%" neq "on" echo off
 setlocal
 
 :SetupArgs
@@ -7,34 +7,34 @@ set __sourceDir=%~dp0
 set __binDir=%~dp0..\..\..\bin
 set __CMakeBinDir=""
 set __IntermediatesDir=""
-set __BuildArch=AnyCPU
+set __BuildArch=x64
 set __VCBuildArch=x86_amd64
-set CMAKE_BUILD_TYPE=Release
+set CMAKE_BUILD_TYPE=Debug
+set "__LinkArgs= "
+set "__LinkLibraries= "
 
 :Arg_Loop
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
-:: For consistency with building the managed components, args are taken in the msbuild style i.e. /p:
+:: For consistency with building the managed components, some args are taken in the msbuild style i.e. /p:
 if [%1] == [] goto :ToolsVersion
 if /i [%1] == [/p:ConfigurationGroup]    (
-    if /i [%2] == [Release] (set CMAKE_BUILD_TYPE=Release&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [Debug]   (set CMAKE_BUILD_TYPE=Debug&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [Release]     ( set CMAKE_BUILD_TYPE=Release&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [Debug]       ( set CMAKE_BUILD_TYPE=Debug&&shift&&shift&goto Arg_Loop)
     echo Error: Invalid configuration args "%1 and %2"
     exit /b 1
 )
-if /i [%1] == [/p:Platform]    (
-    if /i [%2] == [AnyCPU]  (set __BuildArch=AnyCPU&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [x86]     (set __BuildArch=x86&&set __VCBuildArch=x86&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [arm]     (set __BuildArch=arm&&set __VCBuildArch=x86_arm&&shift&&shift&goto Arg_Loop)
-    if /i [%2] == [x64]     (set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [/p:Platform]     (
+    if /i [%2] == [AnyCPU]      ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [x86]         ( set __BuildArch=x86&&set __VCBuildArch=x86&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [arm]         ( set __BuildArch=arm&&set __VCBuildArch=x86_arm&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [x64]         ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [amd64]       ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
     echo Error: Invalid platform args "%1 and %2"
     exit /b 1
 )
-if /i [%1] == [-intermediateDir]    (
-    set __IntermediatesDir=%2
-)
-if /i [%1] == [-binDir]    (
-    set __CMakeBinDir=%2
-)
+if /i [%1] == [-LinkArgument]   ( set "__LinkArgs=%__LinkArgs% %2"&&shift&&shift&goto Arg_Loop)
+if /i [%1] == [-LinkLibraries]  ( set "__LinkLibraries=%__LinkLibraries% %2"&&shift&&shift&goto Arg_Loop)
+
 shift
 goto :Arg_Loop
 
@@ -90,14 +90,8 @@ if %__CMakeBinDir% == "" (
 if %__IntermediatesDir% == "" (
     set "__IntermediatesDir=%__binDir%\obj\Windows_NT.%__BuildArch%.%CMAKE_BUILD_TYPE%\Native"
 )
-    set "__CMakeBinDir=%__CMakeBinDir:\=/%"
-    set "__IntermediatesDir=%__IntermediatesDir:\=/%"
-
-:: We wanted to allow AnyCPU for folder creation purposes, but it doesn't make sense for a native build. Default to something else for the actual building.
-if "%__BuildArch%" == "AnyCPU" (
-    set __BuildArch=x64
-)
-echo %__CMakeBinDir%
+set "__CMakeBinDir=%__CMakeBinDir:\=/%"
+set "__IntermediatesDir=%__IntermediatesDir:\=/%"
 
 :: Check that the intermediate directory exists so we can place our cmake build tree there
 if exist "%__IntermediatesDir%" rd /s /q "%__IntermediatesDir%"

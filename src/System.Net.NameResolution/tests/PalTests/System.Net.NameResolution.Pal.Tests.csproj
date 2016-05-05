@@ -10,14 +10,11 @@
     <ProjectGuid>{F6D1C093-081D-46DE-B5A8-516533375FDD}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
-    <UnsupportedPlatforms>FreeBSD</UnsupportedPlatforms>
   </PropertyGroup>
   
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   
@@ -146,8 +143,11 @@
     <Compile Include="$(CommonPath)\System\Net\InteropIPAddressExtensions.Unix.cs">
       <Link>Common\System\Net\InteropIPAddressExtensions.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Internals\SocketException.Unix.cs">
-      <Link>ProductionCode\Common\System\Net\Internals\SocketException.Unix.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketExceptionFactory.cs">
+      <Link>ProductionCode\Common\System\Net\Internals\SocketExceptionFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketExceptionFactory.Unix.cs">
+      <Link>ProductionCode\Common\System\Net\Internals\SocketExceptionFactory.Unix.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\NameResolutionPal.Unix.cs">
       <Link>ProductionCode\System\Net\NameResolutionPal.Unix.cs</Link>

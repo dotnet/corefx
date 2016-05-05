@@ -9,6 +9,17 @@ namespace System.Net.Test.Common
         public const string Host = "corefx-net.cloudapp.net";
         public const string Http2Host = "http2.akamai.com";
 
+        public const string SSLv2RemoteServer = "https://www.ssllabs.com:10200/";
+        public const string SSLv3RemoteServer = "https://www.ssllabs.com:10300/";
+        public const string TLSv10RemoteServer = "https://www.ssllabs.com:10301/";
+        public const string TLSv11RemoteServer = "https://www.ssllabs.com:10302/";
+        public const string TLSv12RemoteServer = "https://www.ssllabs.com:10303/";
+
+        public const string ExpiredCertRemoteServer = "https://expired.badssl.com/";
+        public const string WrongHostNameCertRemoteServer = "https://wrong.host.badssl.com/";
+        public const string SelfSignedCertRemoteServer = "https://self-signed.badssl.com/";
+        public const string RevokedCertRemoteServer = "https://revoked.grc.com/";
+
         private const string HttpScheme = "http";
         private const string HttpsScheme = "https";
 
@@ -80,42 +91,45 @@ namespace System.Net.Test.Common
                     statusDescription));
         }
 
-        public static Uri RedirectUriForDestinationUri(bool secure, Uri destinationUri, int hops)
+        public static Uri RedirectUriForDestinationUri(bool secure, int statusCode, Uri destinationUri, int hops)
         {
             string uriString;
             string destination = Uri.EscapeDataString(destinationUri.AbsoluteUri);
-            
+
             if (hops > 1)
             {
-                uriString = string.Format("{0}://{1}/{2}?uri={3}&hops={4}",
+                uriString = string.Format("{0}://{1}/{2}?statuscode={3}&uri={4}&hops={5}",
                     secure ? HttpsScheme : HttpScheme,
                     Host,
                     RedirectHandler,
+                    statusCode,
                     destination,
                     hops);
             }
             else
             {
-                uriString = string.Format("{0}://{1}/{2}?uri={3}",
+                uriString = string.Format("{0}://{1}/{2}?statuscode={3}&uri={4}",
                     secure ? HttpsScheme : HttpScheme,
                     Host,
                     RedirectHandler,
+                    statusCode,
                     destination);
             }
             
             return new Uri(uriString);
         }
 
-        public static Uri RedirectUriForCreds(bool secure, string userName, string password)
+        public static Uri RedirectUriForCreds(bool secure, int statusCode, string userName, string password)
         {
-                Uri destinationUri = BasicAuthUriForCreds(secure, userName, password);
-                string destination = Uri.EscapeDataString(destinationUri.AbsoluteUri);
-                
-                return new Uri(string.Format("{0}://{1}/{2}?uri={3}",
-                    secure ? HttpsScheme : HttpScheme,
-                    Host,
-                    RedirectHandler,
-                    destination));
+            Uri destinationUri = BasicAuthUriForCreds(secure, userName, password);
+            string destination = Uri.EscapeDataString(destinationUri.AbsoluteUri);
+            
+            return new Uri(string.Format("{0}://{1}/{2}?statuscode={3}&uri={4}",
+                secure ? HttpsScheme : HttpScheme,
+                Host,
+                RedirectHandler,
+                statusCode,
+                destination));
         }
     }
 }

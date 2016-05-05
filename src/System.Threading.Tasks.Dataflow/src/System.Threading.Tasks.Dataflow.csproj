@@ -9,6 +9,7 @@
     <DocumentationFile>$(OutputPath)System.Threading.Tasks.Dataflow.XML</DocumentationFile>
     <DefineConstants>$(DefineConstants);CONCURRENT_COLLECTIONS;FEATURE_TRACING</DefineConstants>
     <PackageTargetFramework>netstandard1.1</PackageTargetFramework>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.1</NuGetTargetMoniker>
   </PropertyGroup>
   <ItemGroup>
     <PackageDestination Include="lib/netstandard1.1">
@@ -47,7 +48,7 @@
     <Compile Include="Internal\DataflowEtwProvider.cs" />
     <Compile Include="Internal\EnumerableDebugView.cs" />
     <Compile Include="Internal\IDebuggerDisplay.cs" />
-    <Compile Include="Internal\ImmutableList.cs" />
+    <Compile Include="Internal\ImmutableArray.cs" />
     <Compile Include="Internal\Padding.cs" />
     <Compile Include="Internal\ProducerConsumerQueues.cs" />
     <Compile Include="Internal\QueuedMap.cs" />

@@ -133,11 +133,15 @@ namespace System.Net
                 GlobalLog.Print("CredentialCache::Remove() Removing key:[" + key.ToString() + "]");
             }
 
-            if (_cache[key] is SystemNetworkCredential)
+            NetworkCredential value;
+            if (_cache.TryGetValue(key, out value))
             {
-                --_numbDefaultCredInCache;
+                if (value is SystemNetworkCredential)
+                {
+                    --_numbDefaultCredInCache;
+                }
+                _cache.Remove(key);
             }
-            _cache.Remove(key);
         }
 
 
@@ -164,11 +168,15 @@ namespace System.Net
                 GlobalLog.Print("CredentialCache::Remove() Removing key:[" + key.ToString() + "]");
             }
 
-            if (_cacheForHosts[key] is SystemNetworkCredential)
+            NetworkCredential value;
+            if (_cacheForHosts.TryGetValue(key, out value))
             {
-                --_numbDefaultCredInCache;
+                if (value is SystemNetworkCredential)
+                {
+                    --_numbDefaultCredInCache;
+                }
+                _cacheForHosts.Remove(key);
             }
-            _cacheForHosts.Remove(key);
         }
 
         /// <devdoc>
@@ -196,12 +204,11 @@ namespace System.Net
 
             int longestMatchPrefix = -1;
             NetworkCredential mostSpecificMatch = null;
-            IDictionaryEnumerator credEnum = _cache.GetEnumerator();
 
             // Enumerate through every credential in the cache
-            while (credEnum.MoveNext())
+            foreach (KeyValuePair<CredentialKey, NetworkCredential> pair in _cache)
             {
-                CredentialKey key = (CredentialKey)credEnum.Key;
+                CredentialKey key = pair.Key;
 
                 // Determine if this credential is applicable to the current Uri/AuthType
                 if (key.Match(uriPrefix, authenticationType))
@@ -213,7 +220,7 @@ namespace System.Net
                     {
                         // Yes: update the information about currently preferred match
                         longestMatchPrefix = prefixLen;
-                        mostSpecificMatch = (NetworkCredential)credEnum.Value;
+                        mostSpecificMatch = pair.Value;
                     }
                 }
             }
@@ -252,17 +259,15 @@ namespace System.Net
 
             NetworkCredential match = null;
 
-            IDictionaryEnumerator credEnum = _cacheForHosts.GetEnumerator();
-
             // Enumerate through every credential in the cache
-            while (credEnum.MoveNext())
+            foreach (KeyValuePair<CredentialHostKey, NetworkCredential> pair in _cacheForHosts)
             {
-                CredentialHostKey key = (CredentialHostKey)credEnum.Key;
+                CredentialHostKey key = pair.Key;
 
                 // Determine if this credential is applicable to the current Uri/AuthType
                 if (key.Match(host, port, authenticationType))
                 {
-                    match = (NetworkCredential)credEnum.Value;
+                    match = pair.Value;
                 }
             }
 

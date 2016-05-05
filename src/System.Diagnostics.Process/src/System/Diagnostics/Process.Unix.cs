@@ -15,6 +15,9 @@ namespace System.Diagnostics
 {
     public partial class Process : IDisposable
     {
+        private static readonly UTF8Encoding s_utf8NoBom =
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
         /// special mode by enabling the native property SeDebugPrivilege on the current thread.
@@ -58,6 +61,14 @@ namespace System.Diagnostics
                 _waitStateHolder.Dispose();
                 _waitStateHolder = null;
             }
+        }
+
+        /// <summary>Additional configuration when a process ID is set.</summary>
+        partial void ConfigureAfterProcessIdSet()
+        {
+            // Make sure that we configure the wait state holder for this process object, which we can only do once we have a process ID.
+            Debug.Assert(_haveProcessId, $"{nameof(ConfigureAfterProcessIdSet)} should only be called once a process ID is set");
+            GetWaitState(); // lazily initializes the wait state
         }
 
         /// <summary>
@@ -240,8 +251,8 @@ namespace System.Diagnostics
 
             // Store the child's information into this Process object.
             Debug.Assert(childPid >= 0);
-            SetProcessHandle(new SafeProcessHandle(childPid));
             SetProcessId(childPid);
+            SetProcessHandle(new SafeProcessHandle(childPid));
 
             // Configure the parent's ends of the redirection streams.
             // We use UTF8 encoding without BOM by-default(instead of Console encoding as on Windows)
@@ -251,19 +262,19 @@ namespace System.Diagnostics
             {
                 Debug.Assert(stdinFd >= 0);
                 _standardInput = new StreamWriter(OpenStream(stdinFd, FileAccess.Write),
-                    new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), StreamBufferSize) { AutoFlush = true };
+                    s_utf8NoBom, StreamBufferSize) { AutoFlush = true };
             }
             if (startInfo.RedirectStandardOutput)
             {
                 Debug.Assert(stdoutFd >= 0);
                 _standardOutput = new StreamReader(OpenStream(stdoutFd, FileAccess.Read),
-                    startInfo.StandardOutputEncoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), true, StreamBufferSize);
+                    startInfo.StandardOutputEncoding ?? s_utf8NoBom, true, StreamBufferSize);
             }
             if (startInfo.RedirectStandardError)
             {
                 Debug.Assert(stderrFd >= 0);
                 _standardError = new StreamReader(OpenStream(stderrFd, FileAccess.Read),
-                    startInfo.StandardErrorEncoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), true, StreamBufferSize);
+                    startInfo.StandardErrorEncoding ?? s_utf8NoBom, true, StreamBufferSize);
             }
 
             return true;
@@ -395,8 +406,9 @@ namespace System.Diagnostics
         /// <returns>The converted time.</returns>
         internal static DateTime BootTimeToDateTime(TimeSpan timespanAfterBoot)
         {
-            // Use the uptime and the current time to determine the absolute boot time
-            DateTime bootTime = DateTime.UtcNow - TimeSpan.FromMilliseconds(Environment.TickCount);
+            // Use the uptime and the current time to determine the absolute boot time. This implementation is relying on the 
+            // implementation detail that Stopwatch.GetTimestamp() uses a value based on time since boot.
+            DateTime bootTime = DateTime.UtcNow - TimeSpan.FromSeconds(Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency);
 
             // And use that to determine the absolute time for timespan.
             DateTime dt = bootTime + timespanAfterBoot;

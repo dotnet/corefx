@@ -43,10 +43,38 @@ namespace System.Collections.Tests
 
         /// <summary>
         /// Used for the ICollection_NonGeneric_CopyTo_ArrayOfEnumType test where we try to call CopyTo
-        /// on an Array of Enum values. Some implementations special-case for this and throw an argumentexception,
+        /// on an Array of Enum values. Some implementations special-case for this and throw an ArgumentException,
         /// while others just throw an InvalidCastExcepton.
         /// </summary>
         protected virtual bool ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowsArgumentException { get { return false; } }
+
+        /// <summary>
+        /// Used for the ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType test where we try to call CopyTo
+        /// on an Array of different reference values. Some implementations special-case for this and throw an ArgumentException,
+        /// while others just throw an InvalidCastExcepton.
+        /// </summary>
+        protected virtual bool ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType_ThrowsArgumentException { get { return true; } }
+
+        /// <summary>
+        /// Used for the ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType test where we try to call CopyTo
+        /// on an Array of different value values. Some implementations special-case for this and throw an ArgumentException,
+        /// while others just throw an InvalidCastExcepton.
+        /// </summary>
+        protected virtual bool ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType_ThrowsArgumentException { get { return true; } }
+
+        /// <summary>
+        /// Used for the ICollection_NonGeneric_CopyTo_NonZeroLowerBound test where we try to call CopyTo
+        /// on an Array of a non-zero lower bound. Some implementations don't throw an ArgumentException
+        /// when the count is zero, others do.
+        /// </summary>
+        protected virtual bool ICollection_NonGeneric_CopyTo_NonZeroLowerBound_ZeroCountThrowsArgumentException { get { return true; } }
+
+        /// <summary>
+        /// Used for the ICollection_NonGeneric_CopyTo_NonZeroLowerBound test where we try to call CopyTo
+        /// on an Array of a non-zero lower bound. Some implementations don't throw an ArgumentException
+        /// when the count is one, others do.
+        /// </summary>
+        protected virtual bool ICollection_NonGeneric_CopyTo_NonZeroLowerBound_SingleCountThrowsArgumentException { get { return true; } }
 
         #endregion
 
@@ -64,7 +92,7 @@ namespace System.Collections.Tests
         #region Count
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_Count_Validity(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -76,7 +104,7 @@ namespace System.Collections.Tests
         #region IsSynchronized
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_IsSynchronized(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -88,7 +116,7 @@ namespace System.Collections.Tests
         #region SyncRoot
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_SyncRoot_NonNull(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -96,7 +124,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_SyncRootConsistent(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -106,7 +134,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_SyncRootUnique(int count)
         {
             ICollection collection1 = NonGenericICollectionFactory(count);
@@ -119,7 +147,7 @@ namespace System.Collections.Tests
         #region CopyTo
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_NullArray_ThrowsArgumentNullException(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -127,7 +155,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_TwoDimensionArray_ThrowsArgumentException(int count)
         {
             if (count > 0)
@@ -140,42 +168,61 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_NonZeroLowerBound(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
             Array arr = Array.CreateInstance(typeof(object), new int[1] { 2 }, new int[1] { 2 });
             Assert.Equal(1, arr.Rank);
             Assert.Equal(2, arr.GetLowerBound(0));
-            Assert.ThrowsAny<ArgumentException>(() => collection.CopyTo(arr, 0));
+
+            if (ICollection_NonGeneric_CopyTo_NonZeroLowerBound_SingleCountThrowsArgumentException && (ICollection_NonGeneric_CopyTo_NonZeroLowerBound_ZeroCountThrowsArgumentException || count > 0))
+            {
+                Assert.ThrowsAny<ArgumentException>(() => collection.CopyTo(arr, 0));
+            }
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public virtual void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType(int count)
         {
             if (count > 0)
             {
                 ICollection collection = NonGenericICollectionFactory(count);
                 float[] array = new float[count * 3 / 2];
-                Assert.Throws<ArgumentException>(() => collection.CopyTo(array, 0));
+
+                if (ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType_ThrowsArgumentException)
+                {
+                    Assert.Throws<ArgumentException>(() => collection.CopyTo(array, 0));
+                }
+                else
+                {
+                    Assert.Throws<InvalidCastException>(() => collection.CopyTo(array, 0));
+                }
             }
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType(int count)
         {
             if (count > 0)
             {
                 ICollection collection = NonGenericICollectionFactory(count);
                 StringBuilder[] array = new StringBuilder[count * 3 / 2];
-                Assert.Throws<ArgumentException>(() => collection.CopyTo(array, 0));
+                if (ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType_ThrowsArgumentException)
+                {
+                    Assert.Throws<ArgumentException>(() => collection.CopyTo(array, 0));
+                }
+                else
+                {
+                    Assert.Throws<InvalidCastException>(() => collection.CopyTo(array, 0));
+                }
             }
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public virtual void ICollection_NonGeneric_CopyTo_ArrayOfEnumType(int count)
         {
             Array enumArr = Enum.GetValues(typeof(EnumerableType));
@@ -190,7 +237,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_NegativeIndex_ThrowsArgumentOutOfRangeException(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -200,7 +247,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_IndexEqualToArrayCount_ThrowsArgumentException(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -212,7 +259,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_IndexLargerThanArrayCount_ThrowsAnyArgumentException(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -221,7 +268,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_NotEnoughSpaceInOffsettedArray_ThrowsArgumentException(int count)
         {
             if (count > 0) // Want the T array to have at least 1 element
@@ -233,7 +280,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_ExactlyEnoughSpaceInArray(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);
@@ -245,7 +292,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData("ValidCollectionSizes")]
+        [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_NonGeneric_CopyTo_ArrayIsLargerThanCollection(int count)
         {
             ICollection collection = NonGenericICollectionFactory(count);

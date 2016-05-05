@@ -18,7 +18,7 @@ namespace System.Globalization.Tests
             yield return new object[] { new DateTimeFormatInfo(), englishDayNames };
 
             // ActiveIssue(2103)
-            if (!PlatformDetection.IsUbuntu1510)
+            if (!PlatformDetection.IsUbuntu1510 && !PlatformDetection.IsUbuntu1604)
             {
                 yield return new object[] { new CultureInfo("fr-FR").DateTimeFormat, DateTimeFormatInfoData.FrFRDayNames() };
             }
@@ -45,9 +45,12 @@ namespace System.Globalization.Tests
             }
         }
 
-        public void GetDayName_Invalid()
+        [Theory]
+        [InlineData(DayOfWeek.Sunday - 1)]
+        [InlineData(DayOfWeek.Saturday + 1)]
+        public void GetDayName_Invalid_ThrowsArgumentOutOfRangeException(DayOfWeek dayofweek)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new DateTimeFormatInfo().GetDayName((DayOfWeek)(-1))); // DayOfWeek is invalid
+            Assert.Throws<ArgumentOutOfRangeException>("dayofweek", () => new DateTimeFormatInfo().GetDayName(dayofweek));
         }
     }
 }

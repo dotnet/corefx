@@ -9,7 +9,7 @@ namespace System.Net.Sockets
 {
     public partial class SocketAsyncEventArgs : EventArgs, IDisposable
     {
-        private int _acceptedFileDescriptor;
+        private IntPtr _acceptedFileDescriptor;
         private int _socketAddressSize;
         private SocketFlags _receivedFlags;
 
@@ -47,13 +47,11 @@ namespace System.Net.Sockets
 
         private void InnerStartOperationAccept(bool userSuppliedBuffer)
         {
-            _acceptedFileDescriptor = -1;
+            _acceptedFileDescriptor = (IntPtr)(-1);
         }
 
-        private void AcceptCompletionCallback(int acceptedFileDescriptor, byte[] socketAddress, int socketAddressSize, SocketError socketError)
+        private void AcceptCompletionCallback(IntPtr acceptedFileDescriptor, byte[] socketAddress, int socketAddressSize, SocketError socketError)
         {
-            // TODO: receive bytes on socket if requested
-
             _acceptedFileDescriptor = acceptedFileDescriptor;
             Debug.Assert(socketAddress == null || socketAddress == _acceptBuffer, $"Unexpected socketAddress: {socketAddress}");
             _acceptAddressBufferCount = socketAddressSize;
@@ -63,11 +61,16 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationAccept(Socket socket, SafeCloseSocket handle, SafeCloseSocket acceptHandle, out int bytesTransferred)
         {
+            if (_buffer != null)
+            {
+                throw new PlatformNotSupportedException(SR.net_sockets_accept_receive_notsupported);
+            }
+
             Debug.Assert(acceptHandle == null, $"Unexpected acceptHandle: {acceptHandle}");
 
             bytesTransferred = 0;
 
-            return handle.AsyncContext.AcceptAsync(_buffer ?? _acceptBuffer, _acceptAddressBufferCount / 2, AcceptCompletionCallback);
+            return handle.AsyncContext.AcceptAsync(_acceptBuffer, _acceptAddressBufferCount / 2, AcceptCompletionCallback);
         }
 
         private void InnerStartOperationConnect()
@@ -231,7 +234,14 @@ namespace System.Net.Sockets
 
         internal void LogBuffer(int size)
         {
-            // TODO: implement?
+            if (_buffer != null)
+            {
+                SocketsEventSource.Dump(_buffer, _offset, size);
+            }
+            else if (_acceptBuffer != null)
+            {
+                SocketsEventSource.Dump(_acceptBuffer, 0, size);
+            }
         }
 
         internal void LogSendPacketsBuffers(int size)
@@ -271,7 +281,6 @@ namespace System.Net.Sockets
 
         private void CompletionCallback(int bytesTransferred, SocketError socketError)
         {
-            // TODO: plumb SocketFlags through TransferOperation
             if (socketError == SocketError.Success)
             {
                 FinishOperationSuccess(socketError, bytesTransferred, _receivedFlags);

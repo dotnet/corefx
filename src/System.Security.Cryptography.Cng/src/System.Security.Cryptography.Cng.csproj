@@ -5,18 +5,21 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>System.Security.Cryptography.Cng</AssemblyName>
     <ProjectGuid>{4C1BD451-6A99-45E7-9339-79C77C42EE9E}</ProjectGuid>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)'=='net46'">4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
-    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net46'">None</ResourcesSourceOutputDirectory>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.3</PackageTargetFramework>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'net461'">true</IsPartialFacadeAssembly>
+    <ResourcesSourceOutputDirectory Condition="'$(IsPartialFacadeAssembly)' == 'true'">None</ResourcesSourceOutputDirectory>
+    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.4</PackageTargetFramework>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.4</NuGetTargetMoniker>
+    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Security\Cryptography\AesCng.cs" />
     <Compile Include="System\Security\Cryptography\CngAlgorithm.cs" />
     <Compile Include="System\Security\Cryptography\CngAlgorithmGroup.cs" />
@@ -52,7 +55,7 @@
     <Compile Include="System\Security\Cryptography\RSACng.Key.cs" />
     <Compile Include="System\Security\Cryptography\TripleDESCng.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\NCryptSafeHandles.cs" />
-    <Compile Include="Internal\Cryptography\BasicSymmetricCipherCng.cs" />
+    <Compile Include="Internal\Cryptography\BasicSymmetricCipherNCrypt.cs" />
     <Compile Include="Internal\Cryptography\CngAlgorithmCore.cs" />
     <Compile Include="Internal\Cryptography\Helpers.cs" />
     <Compile Include="Internal\Cryptography\ICngSymmetricAlgorithm.cs" />
@@ -62,6 +65,12 @@
     <Compile Include="Internal\Cryptography\CngSymmetricAlgorithmCore.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\BCrypt\AesBCryptModes.cs">
+      <Link>Interop\Windows\BCrypt\AesBCryptModes.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\BCrypt\Cng.cs">
+      <Link>Interop\Windows\BCrypt\Cng.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\BCrypt\Interop.NTSTATUS.cs">
       <Link>Interop\Windows\BCrypt\Interop.NTSTATUS.cs</Link>
@@ -107,6 +116,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\BCrypt\Interop.BCryptKeyDataBlob.cs">
       <Link>Internal\Windows\BCrypt\Interop.BCryptKeyDataBlob.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\BCrypt\TripleDesBCryptModes.cs">
+      <Link>Interop\Windows\BCrypt\TripleDesBCryptModes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\NCrypt\Interop.AsymmetricPaddingMode.cs">
       <Link>Internal\Windows\NCrypt\Interop.AsymmetricPaddingMode.cs</Link>
@@ -180,6 +192,9 @@
     <Compile Include="$(CommonPath)\Internal\Cryptography\BasicSymmetricCipher.cs">
       <Link>Internal\Cryptography\BasicSymmetricCipher.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Internal\Cryptography\BasicSymmetricCipherBCrypt.cs">
+      <Link>Internal\Cryptography\BasicSymmetricCipherBCrypt.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Internal\Cryptography\UniversalCryptoTransform.cs">
       <Link>Internal\Cryptography\UniversalCryptoTransform.cs</Link>
     </Compile>
@@ -202,7 +217,7 @@
       <Link>Common\System\Security\Cryptography\RSACng.SignVerify.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System.Core" />
   </ItemGroup>

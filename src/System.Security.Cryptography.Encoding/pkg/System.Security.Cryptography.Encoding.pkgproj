@@ -3,13 +3,10 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Security.Cryptography.Encoding.csproj">
-      <SupportedFramework>net46;netcore50;netstandardapp1.5</SupportedFramework>
+      <SupportedFramework>net46;netcore50;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Security.Cryptography.Encoding.csproj">
-      <AdditionalProperties>TargetGroup=net46</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="win\System.Security.Cryptography.Encoding.pkgproj" />
-    <ProjectReference Include="unix\System.Security.Cryptography.Encoding.pkgproj" />
+    <ProjectReference Include="..\src\System.Security.Cryptography.Encoding.builds" />
+
   </ItemGroup>
   <ItemGroup>
     <InboxOnTargetFramework Include="MonoAndroid10" />

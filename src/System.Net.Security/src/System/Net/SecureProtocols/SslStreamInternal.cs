@@ -294,7 +294,7 @@ namespace System.Net.Security
         }
 
         //
-        // Validates user parameteres for all Read/Write methods.
+        // Validates user parameters for all Read/Write methods.
         //
         private void ValidateParameters(byte[] buffer, int offset, int count)
         {
@@ -403,11 +403,11 @@ namespace System.Net.Security
 
                     int chunkBytes = Math.Min(count, _sslState.MaxDataSize);
                     int encryptedBytes;
-                    SecurityStatusPal errorCode = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
-                    if (errorCode != SecurityStatusPal.OK)
+                    SecurityStatusPal status = _sslState.EncryptData(buffer, offset, chunkBytes, ref outBuffer, out encryptedBytes);
+                    if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
                         // Re-handshake status is not supported.
-                        ProtocolToken message = new ProtocolToken(null, errorCode);
+                        ProtocolToken message = new ProtocolToken(null, status);
                         throw new IOException(SR.net_io_encrypt, message.GetException());
                     }
 
@@ -421,13 +421,13 @@ namespace System.Net.Security
                     {
                         // Prepare for the next request.
                         asyncRequest.SetNextRequest(buffer, offset + chunkBytes, count - chunkBytes, s_resumeAsyncWriteCallback);
-                        IAsyncResult ar = _sslState.InnerStreamAPM.BeginWrite(outBuffer, 0, encryptedBytes, s_writeCallback, asyncRequest);
+                        IAsyncResult ar = _sslState.InnerStream.BeginWrite(outBuffer, 0, encryptedBytes, s_writeCallback, asyncRequest);
                         if (!ar.CompletedSynchronously)
                         {
                             return;
                         }
 
-                        _sslState.InnerStreamAPM.EndWrite(ar);
+                        _sslState.InnerStream.EndWrite(ar);
 
                     }
                     else
@@ -460,7 +460,7 @@ namespace System.Net.Security
         }
 
         //
-        // Combined sync/async read method. For sync requet asyncRequest==null.
+        // Combined sync/async read method. For sync request asyncRequest==null.
         //
         private int ProcessRead(byte[] buffer, int offset, int count, AsyncProtocolRequest asyncRequest)
         {
@@ -657,9 +657,9 @@ namespace System.Net.Security
             // Decrypt into internal buffer, change "readBytes" to count now _Decrypted Bytes_.
             int data_offset = 0;
 
-            SecurityStatusPal errorCode = _sslState.DecryptData(InternalBuffer, ref data_offset, ref readBytes);
+            SecurityStatusPal status = _sslState.DecryptData(InternalBuffer, ref data_offset, ref readBytes);
 
-            if (errorCode != SecurityStatusPal.OK)
+            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
                 byte[] extraBuffer = null;
                 if (readBytes != 0)
@@ -670,7 +670,7 @@ namespace System.Net.Security
 
                 // Reset internal buffer count.
                 SkipBytes(InternalBufferCount);
-                return ProcessReadErrorCode(errorCode, buffer, offset, count, asyncRequest, extraBuffer);
+                return ProcessReadErrorCode(status, buffer, offset, count, asyncRequest, extraBuffer);
             }
 
 
@@ -707,9 +707,9 @@ namespace System.Net.Security
         //
         // Only processing SEC_I_RENEGOTIATE.
         //
-        private int ProcessReadErrorCode(SecurityStatusPal errorCode, byte[] buffer, int offset, int count, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
+        private int ProcessReadErrorCode(SecurityStatusPal status, byte[] buffer, int offset, int count, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
         {
-            ProtocolToken message = new ProtocolToken(null, errorCode);
+            ProtocolToken message = new ProtocolToken(null, status);
 
             if (GlobalLog.IsEnabled)
             {
@@ -761,7 +761,7 @@ namespace System.Net.Security
 
             try
             {
-                sslStream._sslState.InnerStreamAPM.EndWrite(transportResult);
+                sslStream._sslState.InnerStream.EndWrite(transportResult);
                 sslStream._sslState.FinishWrite();
 
                 if (asyncRequest.Count == 0)

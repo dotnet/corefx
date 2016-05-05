@@ -28,7 +28,7 @@ namespace System.IO
         // the specified extension. If path is null, the function
         // returns null. If path does not contain a file extension,
         // the new file extension is appended to the path. If extension
-        // is null, any exsiting extension is removed from path.
+        // is null, any existing extension is removed from path.
         public static string ChangeExtension(string path, string extension)
         {
             if (path != null)
@@ -170,14 +170,6 @@ namespace System.IO
             return new string(rndCharArray, 0, 12);
         }
 
-        // Returns a unique temporary file name, and creates a 0-byte file by that
-        // name on disk.
-        [System.Security.SecuritySafeCritical]
-        public static string GetTempFileName()
-        {
-            return InternalGetTempFileName(checkHost: true);
-        }
-
         // Tests if a path includes a file extension. The result is
         // true if the characters that follow the last directory
         // separator ('\\' or '/') or volume separator (':') in the path include 
@@ -238,7 +230,7 @@ namespace System.IO
             int finalSize = 0;
             int firstComponent = 0;
 
-            // We have two passes, the first calcuates how large a buffer to allocate and does some precondition
+            // We have two passes, the first calculates how large a buffer to allocate and does some precondition
             // checks on the paths passed in.  The second actually does the combination.
 
             for (int i = 0; i < paths.Length; i++)

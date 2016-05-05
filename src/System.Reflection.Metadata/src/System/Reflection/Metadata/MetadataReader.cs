@@ -61,9 +61,15 @@ namespace System.Reflection.Metadata
         /// Use <see cref="PEReaderExtensions.GetMetadataReader(PortableExecutable.PEReader, MetadataReaderOptions, MetadataStringDecoder)"/> to obtain 
         /// metadata from a PE image.
         /// </remarks>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="length"/> is not positive.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="metadata"/> is null.</exception>
+        /// <exception cref="ArgumentException">The encoding of <paramref name="utf8Decoder"/> is not <see cref="UTF8Encoding"/>.</exception>
+        /// <exception cref="PlatformNotSupportedException">The current platform is big-endian.</exception>
         public unsafe MetadataReader(byte* metadata, int length, MetadataReaderOptions options, MetadataStringDecoder utf8Decoder)
         {
-            if (length <= 0)
+            // Do not throw here when length is 0. We'll throw BadImageFormatException later on, so that the caller doesn't need to 
+            // worry about the image (stream) being empty and can handle all image errors by catching BadImageFormatException.
+            if (length < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(length));
             }
@@ -85,7 +91,7 @@ namespace System.Reflection.Metadata
 
             if (!BitConverter.IsLittleEndian)
             {
-                throw new PlatformNotSupportedException(SR.LitteEndianArchitectureRequired);
+                Throw.LitteEndianArchitectureRequired();
             }
 
             this.Block = new MemoryBlock(metadata, length);
@@ -170,7 +176,7 @@ namespace System.Reflection.Metadata
 
         /// <summary>
         /// Looks like this function reads beginning of the header described in
-        /// Ecma-335 24.2.1 Metadata root
+        /// ECMA-335 24.2.1 Metadata root
         /// </summary>
         private void ReadMetadataHeader(ref BlobReader memReader, out string versionString)
         {
@@ -228,7 +234,7 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
-        /// Reads stream headers described in Ecma-335 24.2.2 Stream header
+        /// Reads stream headers described in ECMA-335 24.2.2 Stream header
         /// </summary>
         private StreamHeader[] ReadStreamHeaders(ref BlobReader memReader)
         {
@@ -743,7 +749,8 @@ namespace System.Reflection.Metadata
             // debug tables:
             // Type-system metadata tables may be stored in a separate (external) metadata file.
             // We need to use the row counts of the external tables when referencing them.
-            var combinedRowCounts = (externalRowCountsOpt != null) ? CombineRowCounts(rowCounts, externalRowCountsOpt, TableIndex.Document) : rowCounts;
+            // Debug tables are local to the current metadata image and type system metadata tables are external and precede all debug tables.
+            var combinedRowCounts = (externalRowCountsOpt != null) ? CombineRowCounts(rowCounts, externalRowCountsOpt, firstLocalTableIndex: TableIndex.Document) : rowCounts;
 
             int methodRefSizeCombined = GetReferenceSize(combinedRowCounts, TableIndex.MethodDef);
             int hasCustomDebugInformationRefSizeCombined = ComputeCodedTokenSize(HasCustomDebugInformationTag.LargeRowSize, combinedRowCounts, HasCustomDebugInformationTag.TablesReferenced);
@@ -778,19 +785,19 @@ namespace System.Reflection.Metadata
             }
         }
 
-        private static int[] CombineRowCounts(int[] local, int[] external, TableIndex firstExternalTableIndex)
+        private static int[] CombineRowCounts(int[] local, int[] external, TableIndex firstLocalTableIndex)
         {
             Debug.Assert(local.Length == external.Length);
 
             var rowCounts = new int[local.Length];
-            for (int i = 0; i < (int)firstExternalTableIndex; i++)
-            {
-                rowCounts[i] = local[i];
-            }
-
-            for (int i = (int)firstExternalTableIndex; i < rowCounts.Length; i++)
+            for (int i = 0; i < (int)firstLocalTableIndex; i++)
             {
                 rowCounts[i] = external[i];
+            }
+
+            for (int i = (int)firstLocalTableIndex; i < rowCounts.Length; i++)
+            {
+                rowCounts[i] = local[i];
             }
 
             return rowCounts;

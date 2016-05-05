@@ -355,11 +355,7 @@ namespace System.Linq.Expressions
 
         internal static Expression Create(ExpressionType nodeType, Expression left, Expression right, Type type, MethodInfo method, LambdaExpression conversion)
         {
-            if (nodeType == ExpressionType.Assign)
-            {
-                Debug.Assert(method == null && TypeUtils.AreEquivalent(type, left.Type));
-                return new AssignBinaryExpression(left, right);
-            }
+            Debug.Assert(nodeType != ExpressionType.Assign);
             if (conversion != null)
             {
                 Debug.Assert(method == null && TypeUtils.AreEquivalent(type, right.Type) && nodeType == ExpressionType.Coalesce);
@@ -409,7 +405,7 @@ namespace System.Linq.Expressions
         }
 
         //
-        // For a userdefined type T which has op_False defined and L, R are
+        // For a user-defined type T which has op_False defined and L, R are
         // nullable, (L AndAlso R) is computed as:
         //
         // L.HasValue
@@ -420,7 +416,7 @@ namespace System.Linq.Expressions
         //             : null
         //     : null
         //
-        // For a userdefined type T which has op_True defined and L, R are
+        // For a user-defined type T which has op_True defined and L, R are
         // nullable, (L OrElse R)  is computed as:
         //
         // L.HasValue

@@ -3,34 +3,36 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-
 using Xunit;
 
-public class Utility
+namespace System.IO.Tests
 {
-    public static void ValidateExceptionProperties(Exception e,
-        int dataCount = 0,
-        string helpLink = null,
-        int hResult = HResults.COR_E_EXCEPTION,
-        Exception innerException = null,
-        string message = null,
-        string source = null,
-        string stackTrace = null,
-        bool validateMessage = true)
+    public static class ExceptionUtility
     {
-        Assert.Equal(dataCount, e.Data.Count);
-        Assert.Equal(helpLink, e.HelpLink);
-        Assert.Equal(hResult, e.HResult);
-        Assert.Equal(innerException, e.InnerException);
-        if (validateMessage)
+        public static void ValidateExceptionProperties(Exception e,
+            int dataCount = 0,
+            string helpLink = null,
+            int hResult = HResults.COR_E_EXCEPTION,
+            Exception innerException = null,
+            string message = null,
+            string source = null,
+            string stackTrace = null,
+            bool validateMessage = true)
         {
-            Assert.Equal(message, e.Message);
+            Assert.Equal(dataCount, e.Data.Count);
+            Assert.Equal(helpLink, e.HelpLink);
+            Assert.Equal(hResult, e.HResult);
+            Assert.Equal(innerException, e.InnerException);
+            if (validateMessage)
+            {
+                Assert.Equal(message, e.Message);
+            }
+            else
+            {
+                Assert.NotNull(e.Message);
+            }
+            Assert.Equal(source, e.Source);
+            Assert.Equal(stackTrace, e.StackTrace);
         }
-        else
-        {
-            Assert.NotNull(e.Message);
-        }
-        Assert.Equal(source, e.Source);
-        Assert.Equal(stackTrace, e.StackTrace);
     }
 }

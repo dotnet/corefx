@@ -47,25 +47,53 @@ namespace System.IO
             // as a Creation and Deletion instead of a Rename and thus differ from Windows.
             if (Interop.Sys.Link(sourceFullPath, destFullPath) < 0)
             {
+                // If link fails, we can fall back to doing a full copy, but we'll only do so for
+                // cases where we expect link could fail but such a copy could succeed.  We don't
+                // want to do so for all errors, because the copy could incur a lot of cost
+                // even if we know it'll eventually fail, e.g. EROFS means that the source file
+                // system is read-only and couldn't support the link being added, but if it's
+                // read-only, then the move should fail any way due to an inability to delete
+                // the source file.
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
-                if (errorInfo.Error == Interop.Error.EXDEV) // rename fails across devices / mount points
+                if (errorInfo.Error == Interop.Error.EXDEV ||      // rename fails across devices / mount points
+                    errorInfo.Error == Interop.Error.EPERM ||      // permissions might not allow creating hard links even if a copy would work
+                    errorInfo.Error == Interop.Error.EOPNOTSUPP || // links aren't supported by the source file system
+                    errorInfo.Error == Interop.Error.EMLINK)       // too many hard links to the source file
                 {
                     CopyFile(sourceFullPath, destFullPath, overwrite: false);
                 }
-                else if (errorInfo.Error == Interop.Error.ENOENT && !Directory.Exists(Path.GetDirectoryName(destFullPath))) // The parent directory of destFile can't be found
-                {
-                    // Windows distinguishes between whether the directory or the file isn't found,
-                    // and throws a different exception in these cases.  We attempt to approximate that
-                    // here; there is a race condition here, where something could change between
-                    // when the error occurs and our checks, but it's the best we can do, and the
-                    // worst case in such a race condition (which could occur if the file system is
-                    // being manipulated concurrently with these checks) is that we throw a
-                    // FileNotFoundException instead of DirectoryNotFoundexception.
-                    throw Interop.GetExceptionForIoErrno(errorInfo, destFullPath, isDirectory: true);
-                }
                 else
                 {
-                    throw Interop.GetExceptionForIoErrno(errorInfo);
+                    // The operation failed.  Within reason, try to determine which path caused the problem 
+                    // so we can throw a detailed exception.
+                    string path = null;
+                    bool isDirectory = false;
+                    if (errorInfo.Error == Interop.Error.ENOENT)
+                    {
+                        if (!Directory.Exists(Path.GetDirectoryName(destFullPath)))
+                        {
+                            // The parent directory of destFile can't be found.
+                            // Windows distinguishes between whether the directory or the file isn't found,
+                            // and throws a different exception in these cases.  We attempt to approximate that
+                            // here; there is a race condition here, where something could change between
+                            // when the error occurs and our checks, but it's the best we can do, and the
+                            // worst case in such a race condition (which could occur if the file system is
+                            // being manipulated concurrently with these checks) is that we throw a
+                            // FileNotFoundException instead of DirectoryNotFoundexception.
+                            path = destFullPath;
+                            isDirectory = true;
+                        }
+                        else
+                        {
+                            path = sourceFullPath;
+                        }
+                    }
+                    else if (errorInfo.Error == Interop.Error.EEXIST)
+                    {
+                        path = destFullPath;
+                    }
+
+                    throw Interop.GetExceptionForIoErrno(errorInfo, path, isDirectory);
                 }
             }
             DeleteFile(sourceFullPath);
@@ -208,30 +236,38 @@ namespace System.IO
 
         public override void RemoveDirectory(string fullPath, bool recursive)
         {
-            if (!DirectoryExists(fullPath))
+            var di = new DirectoryInfo(fullPath);
+            if (!di.Exists)
             {
                 throw Interop.GetExceptionForIoErrno(Interop.Error.ENOENT.Info(), fullPath, isDirectory: true);
             }
-            RemoveDirectoryInternal(fullPath, recursive, throwOnTopLevelDirectoryNotFound: true);
+            RemoveDirectoryInternal(di, recursive, throwOnTopLevelDirectoryNotFound: true);
         }
 
-        private void RemoveDirectoryInternal(string fullPath, bool recursive, bool throwOnTopLevelDirectoryNotFound)
+        private void RemoveDirectoryInternal(DirectoryInfo directory, bool recursive, bool throwOnTopLevelDirectoryNotFound)
         {
             Exception firstException = null;
+
+            if ((directory.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                DeleteFile(directory.FullName);
+                return;
+            }
 
             if (recursive)
             {
                 try
                 {
-                    foreach (string item in EnumeratePaths(fullPath, "*", SearchOption.TopDirectoryOnly, SearchTarget.Both))
+                    foreach (string item in EnumeratePaths(directory.FullName, "*", SearchOption.TopDirectoryOnly, SearchTarget.Both))
                     {
                         if (!ShouldIgnoreDirectory(Path.GetFileName(item)))
                         {
                             try
                             {
-                                if (DirectoryExists(item))
+                                var childDirectory = new DirectoryInfo(item);
+                                if (childDirectory.Exists)
                                 {
-                                    RemoveDirectoryInternal(item, recursive, throwOnTopLevelDirectoryNotFound: false);
+                                    RemoveDirectoryInternal(childDirectory, recursive, throwOnTopLevelDirectoryNotFound: false);
                                 }
                                 else
                                 {
@@ -262,7 +298,7 @@ namespace System.IO
                 }
             }
 
-            if (Interop.Sys.RmDir(fullPath) < 0)
+            if (Interop.Sys.RmDir(directory.FullName) < 0)
             {
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
                 switch (errorInfo.Error)
@@ -271,7 +307,7 @@ namespace System.IO
                     case Interop.Error.EPERM:
                     case Interop.Error.EROFS:
                     case Interop.Error.EISDIR:
-                        throw new IOException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, fullPath)); // match Win32 exception
+                        throw new IOException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, directory.FullName)); // match Win32 exception
                     case Interop.Error.ENOENT:
                         if (!throwOnTopLevelDirectoryNotFound)
                         {
@@ -279,7 +315,7 @@ namespace System.IO
                         }
                         goto default;
                     default:
-                        throw Interop.GetExceptionForIoErrno(errorInfo, fullPath, isDirectory: true);
+                        throw Interop.GetExceptionForIoErrno(errorInfo, directory.FullName, isDirectory: true);
                 }
             }
         }
@@ -303,16 +339,27 @@ namespace System.IO
 
         private static bool FileExists(string fullPath, int fileType, out Interop.ErrorInfo errorInfo)
         {
+            Debug.Assert(fileType == Interop.Sys.FileTypes.S_IFREG || fileType == Interop.Sys.FileTypes.S_IFDIR);
+
             Interop.Sys.FileStatus fileinfo;
             errorInfo = default(Interop.ErrorInfo);
 
-            int result = Interop.Sys.Stat(fullPath, out fileinfo);
-            if (result < 0)
+            // First use stat, as we want to follow symlinks.  If that fails, it could be because the symlink
+            // is broken, we don't have permissions, etc., in which case fall back to using LStat to evaluate
+            // based on the symlink itself.
+            if (Interop.Sys.Stat(fullPath, out fileinfo) < 0 &&
+                Interop.Sys.LStat(fullPath, out fileinfo) < 0)
             {
                 errorInfo = Interop.Sys.GetLastErrorInfo();
                 return false;
             }
-            return (fileinfo.Mode & Interop.Sys.FileTypes.S_IFMT) == fileType;
+
+            // Something exists at this path.  If the caller is asking for a directory, return true if it's
+            // a directory and false for everything else.  If the caller is asking for a file, return false for
+            // a directory and true for everything else.
+            return
+                (fileType == Interop.Sys.FileTypes.S_IFDIR) ==
+                ((fileinfo.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR);
         }
 
         public override IEnumerable<string> EnumeratePaths(string path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
@@ -449,7 +496,7 @@ namespace System.IO
                             else if (dirent.InodeType == Interop.Sys.NodeType.DT_LNK || dirent.InodeType == Interop.Sys.NodeType.DT_UNKNOWN)
                             {
                                 // It's a symlink or unknown: stat to it to see if we can resolve it to a directory.
-                                // If we can't (e.g.symlink to a file, broken symlink, etc.), we'll just treat it as a file.
+                                // If we can't (e.g. symlink to a file, broken symlink, etc.), we'll just treat it as a file.
                                 Interop.ErrorInfo errnoIgnored;
                                 isDir = DirectoryExists(Path.Combine(dirPath.FullPath, dirent.InodeName), out errnoIgnored);
                             }
@@ -545,7 +592,7 @@ namespace System.IO
 
         public override void SetCurrentDirectory(string fullPath)
         {
-            Interop.CheckIo(Interop.Sys.ChDir(fullPath), fullPath);
+            Interop.CheckIo(Interop.Sys.ChDir(fullPath), fullPath, isDirectory:true);
         }
 
         public override FileAttributes GetAttributes(string fullPath)

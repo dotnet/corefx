@@ -21,7 +21,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 using Xunit;
 
 namespace System.Threading.Tasks.Tests
@@ -50,7 +50,7 @@ namespace System.Threading.Tasks.Tests
         }
         private static void OneMoveNext(int length, bool isOrderable)
         {
-            Logger.LogInformation("Length: {0} IsOrderable: {1}", length, isOrderable);
+            Debug.WriteLine("Length: {0} IsOrderable: {1}", length, isOrderable);
             List<int> ds = new List<int>();
             for (int i = 0; i < length; i++)
                 ds.Add(i);
@@ -293,7 +293,7 @@ namespace System.Threading.Tasks.Tests
         //the enumerators should be disposed
         private ConcurrentBag<UserActionEnumerator<T>> _allEnumerators = new ConcurrentBag<UserActionEnumerator<T>>();
 
-        //called in the begining of enumerator Move Next 
+        //called in the beginning of enumerator Move Next 
         private Action<int> _moveNextAction = null;
 
         public UserActionEnumerable(List<T> enumerable, Action<int> moveNextAction)

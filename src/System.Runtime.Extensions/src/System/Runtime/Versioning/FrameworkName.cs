@@ -62,19 +62,22 @@ namespace System.Runtime.Versioning
             {
                 if (_fullName == null)
                 {
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append(Identifier);
-                    sb.Append(c_componentSeparator);
-                    sb.Append(c_versionKey).Append(c_keyValueSeparator);
-                    sb.Append(c_versionValuePrefix);
-                    sb.Append(Version);
-                    if (!String.IsNullOrEmpty(Profile))
+                    if (string.IsNullOrEmpty(Profile))
                     {
-                        sb.Append(c_componentSeparator);
-                        sb.Append(c_profileKey).Append(c_keyValueSeparator);
-                        sb.Append(Profile);
+                        _fullName =
+                            Identifier +
+                            c_componentSeparator + c_versionKey + c_keyValueSeparator + c_versionValuePrefix +
+                            Version.ToString();
                     }
-                    _fullName = sb.ToString();
+                    else
+                    {
+                        _fullName =
+                            Identifier +
+                            c_componentSeparator + c_versionKey + c_keyValueSeparator + c_versionValuePrefix +
+                            Version.ToString() +
+                            c_componentSeparator + c_profileKey + c_keyValueSeparator +
+                            Profile;
+                    }
                 }
                 Debug.Assert(_fullName != null);
                 return _fullName;
@@ -132,7 +135,7 @@ namespace System.Runtime.Versioning
             identifier = identifier.Trim();
             if (identifier.Length == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_emptystringcall, "identifier"), nameof(identifier));
+                throw new ArgumentException(SR.Format(SR.net_emptystringcall, nameof(identifier)), nameof(identifier));
             }
             if (version == null)
             {
@@ -173,12 +176,12 @@ namespace System.Runtime.Versioning
             }
             if (frameworkName.Length == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_emptystringcall, "frameworkName"), nameof(frameworkName));
+                throw new ArgumentException(SR.Format(SR.net_emptystringcall, nameof(frameworkName)), nameof(frameworkName));
             }
 
             string[] components = frameworkName.Split(c_componentSeparator);
 
-            // Identifer and Version are required, Profile is optional.
+            // Identifier and Version are required, Profile is optional.
             if (components.Length < 2 || components.Length > 3)
             {
                 throw new ArgumentException(SR.Argument_FrameworkNameTooShort, nameof(frameworkName));
@@ -203,16 +206,17 @@ namespace System.Runtime.Versioning
             for (int i = 1; i < components.Length; i++)
             {
                 // Get the key/value pair separated by '='
-                string[] keyValuePair = components[i].Split(c_keyValueSeparator);
+                string component = components[i];
+                int separatorIndex = component.IndexOf(c_keyValueSeparator);
 
-                if (keyValuePair.Length != 2)
+                if (separatorIndex == -1 || separatorIndex != component.LastIndexOf(c_keyValueSeparator))
                 {
                     throw new ArgumentException(SR.Argument_FrameworkNameInvalid, nameof(frameworkName));
                 }
 
                 // Get the key and value, trimming any whitespace
-                string key = keyValuePair[0].Trim();
-                string value = keyValuePair[1].Trim();
+                string key = component.Substring(0, separatorIndex).Trim();
+                string value = component.Substring(separatorIndex + 1).Trim();
 
                 //
                 // 2) Parse the required "Version" key value

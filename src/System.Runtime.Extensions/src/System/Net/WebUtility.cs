@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace System.Net
@@ -170,9 +171,10 @@ namespace System.Net
                     int index = value.IndexOfAny(s_htmlEntityEndingChars, i + 1);
                     if (index > 0 && value[index] == ';')
                     {
-                        string entity = value.Substring(i + 1, index - i - 1);
+                        int entityOffset = i + 1;
+                        int entityLength = index - entityOffset;
 
-                        if (entity.Length > 1 && entity[0] == '#')
+                        if (entityLength > 1 && value[entityOffset] == '#')
                         {
                             // The # syntax can be in decimal or hex, e.g.
                             //      &#229;  --> decimal
@@ -181,13 +183,13 @@ namespace System.Net
 
                             bool parsedSuccessfully;
                             uint parsedValue;
-                            if (entity[1] == 'x' || entity[1] == 'X')
+                            if (value[entityOffset + 1] == 'x' || value[entityOffset + 1] == 'X')
                             {
-                                parsedSuccessfully = UInt32.TryParse(entity.Substring(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out parsedValue);
+                                parsedSuccessfully = uint.TryParse(value.Substring(entityOffset + 2, entityLength - 2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out parsedValue);
                             }
                             else
                             {
-                                parsedSuccessfully = UInt32.TryParse(entity.Substring(1), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedValue);
+                                parsedSuccessfully = uint.TryParse(value.Substring(entityOffset + 1, entityLength - 1), NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedValue);
                             }
 
                             if (parsedSuccessfully)
@@ -218,6 +220,7 @@ namespace System.Net
                         }
                         else
                         {
+                            string entity = value.Substring(entityOffset, entityLength);
                             i = index; // already looked at everything until semicolon
 
                             char entityChar = HtmlEntities.Lookup(entity);
@@ -281,53 +284,25 @@ namespace System.Net
         #endregion
 
         #region UrlEncode implementation
-
-        // *** Source: alm/tfs_core/Framework/Common/UriUtility/HttpUtility.cs
-        // This specific code was copied from above ASP.NET codebase.
-
-        private static byte[] UrlEncode(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
+        
+        private static void GetEncodedBytes(byte[] originalBytes, int offset, int count, byte[] expandedBytes)
         {
-            byte[] encoded = UrlEncode(bytes, offset, count);
-
-            return (alwaysCreateNewReturnValue && (encoded != null) && (encoded == bytes))
-                ? (byte[])encoded.Clone()
-                : encoded;
-        }
-
-        private static byte[] UrlEncode(byte[] bytes, int offset, int count)
-        {
-            if (!ValidateUrlEncodingParameters(bytes, offset, count))
-            {
-                return null;
-            }
-
-            int cSpaces = 0;
-            int cUnsafe = 0;
-
-            // count them first
-            for (int i = 0; i < count; i++)
-            {
-                char ch = (char)bytes[offset + i];
-
-                if (ch == ' ')
-                    cSpaces++;
-                else if (!IsUrlSafeChar(ch))
-                    cUnsafe++;
-            }
-
-            // nothing to expand?
-            if (cSpaces == 0 && cUnsafe == 0)
-                return bytes;
-
-            // expand not 'safe' characters into %XX, spaces to +s
-            byte[] expandedBytes = new byte[count + cUnsafe * 2];
             int pos = 0;
-
-            for (int i = 0; i < count; i++)
+            int end = offset + count;
+            Debug.Assert(offset < end && end <= originalBytes.Length);
+            for (int i = offset; i < end; i++)
             {
-                byte b = bytes[offset + i];
-                char ch = (char)b;
+#if DEBUG
+                // Make sure we never overwrite any bytes if originalBytes and
+                // expandedBytes refer to the same array
+                if (originalBytes == expandedBytes)
+                {
+                    Debug.Assert(i >= pos);
+                }
+#endif
 
+                byte b = originalBytes[i];
+                char ch = (char)b;
                 if (IsUrlSafeChar(ch))
                 {
                     expandedBytes[pos++] = b;
@@ -343,43 +318,114 @@ namespace System.Net
                     expandedBytes[pos++] = (byte)IntToHex(b & 0x0f);
                 }
             }
-
-            return expandedBytes;
         }
 
-        #endregion
+#endregion
 
-        #region UrlEncode public methods
+#region UrlEncode public methods
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
         public static string UrlEncode(string value)
         {
-            if (value == null)
-                return null;
+            if (string.IsNullOrEmpty(value))
+                return value;
 
-            byte[] bytes = Encoding.UTF8.GetBytes(value);
-            byte[] encodedBytes = UrlEncode(bytes, 0, bytes.Length, false /* alwaysCreateNewReturnValue */);
-            return Encoding.UTF8.GetString(encodedBytes, 0, encodedBytes.Length);
+            int cSafe = 0;
+            int cSpaces = 0;
+            for (int i = 0; i < value.Length; i++)
+            {
+                char ch = value[i];
+                if (IsUrlSafeChar(ch))
+                {
+                    cSafe++;
+                }
+                else if (ch == ' ')
+                {
+                    cSpaces++;
+                }
+            }
+
+            if (cSafe + cSpaces == value.Length)
+            {
+                if (cSpaces != 0)
+                {
+                    // Only spaces to encode
+                    return value.Replace(' ', '+');
+                }
+
+                // Nothing to expand
+                return value;
+            }
+
+            int unsafeByteCount = Encoding.UTF8.GetByteCount(value) - cSafe - cSpaces;
+            int byteIndex = unsafeByteCount * 2;
+
+            // Instead of allocating one array of length Encoding.UTF8.GetByteCount(value) to store
+            // the UTF8 encoded bytes and then a second array of length 
+            // cSafe + cSpaces + 3 * (Encoding.UTF8.GetByteCount(value) - cSafe - cSpaces) 
+            // to store the URL encoded UTF8 bytes, we allocate a single array of length
+            // cSafe + cSpaces + 3 * Encoding.UTF8.GetByteCount(value), 
+            // saving Encoding.UTF8.GetByteCount(value) - 3 * (cSafe +cSpaces) bytes allocated.
+            // We encode the UTF8 to the end of this array, and then URL encode to the
+            // beginning of the array.
+            byte[] newBytes = new byte[cSafe + cSpaces + unsafeByteCount + byteIndex];
+            Encoding.UTF8.GetBytes(value, 0, value.Length, newBytes, byteIndex);
+            
+            GetEncodedBytes(newBytes, byteIndex, newBytes.Length - byteIndex, newBytes);
+            return Encoding.UTF8.GetString(newBytes);
         }
 
         public static byte[] UrlEncodeToBytes(byte[] value, int offset, int count)
         {
-            return UrlEncode(value, offset, count, true /* alwaysCreateNewReturnValue */);
+            if (!ValidateUrlEncodingParameters(value, offset, count))
+            {
+                return null;
+            }
+
+            int cSpaces = 0;
+            int cUnsafe = 0;
+
+            // count them first
+            for (int i = 0; i < count; i++)
+            {
+                char ch = (char)value[offset + i];
+
+                if (ch == ' ')
+                    cSpaces++;
+                else if (!IsUrlSafeChar(ch))
+                    cUnsafe++;
+            }
+
+            // nothing to expand?
+            if (cSpaces == 0 && cUnsafe == 0)
+            {
+                if (offset == 0 && value.Length == count)
+                {
+                    return (byte[])value.Clone();
+                }
+                else
+                {
+                    var subarray = new byte[count];
+                    Buffer.BlockCopy(value, offset, subarray, 0, count);
+                    return subarray;
+                }
+            }
+
+            // expand not 'safe' characters into %XX, spaces to +s
+            byte[] expandedBytes = new byte[count + cUnsafe * 2];
+            GetEncodedBytes(value, offset, count, expandedBytes);
+            return expandedBytes;
         }
 
-        #endregion
+#endregion
 
-        #region UrlDecode implementation
-
-        // *** Source: alm/tfs_core/Framework/Common/UriUtility/HttpUtility.cs
-        // This specific code was copied from above ASP.NET codebase.
-        // Changes done - Removed the logic to handle %Uxxxx as it is not standards compliant.
+#region UrlDecode implementation
 
         private static string UrlDecodeInternal(string value, Encoding encoding)
         {
-            if (value == null)
+            if (string.IsNullOrEmpty(value))
             {
-                return null;
+                return value;
             }
 
             int count = value.Length;
@@ -388,13 +434,15 @@ namespace System.Net
             // go through the string's chars collapsing %XX and
             // appending each char as char, with exception of %XX constructs
             // that are appended as bytes
-
+            bool needsDecodingUnsafe = false;
+            bool needsDecodingSpaces = false;
             for (int pos = 0; pos < count; pos++)
             {
                 char ch = value[pos];
 
                 if (ch == '+')
                 {
+                    needsDecodingSpaces = true;
                     ch = ' ';
                 }
                 else if (ch == '%' && pos < count - 2)
@@ -409,6 +457,7 @@ namespace System.Net
 
                         // don't add as char
                         helper.AddByte(b);
+                        needsDecodingUnsafe = true;
                         continue;
                     }
                 }
@@ -417,6 +466,18 @@ namespace System.Net
                     helper.AddByte((byte)ch); // 7 bit have to go as bytes because of Unicode
                 else
                     helper.AddChar(ch);
+            }
+            
+            if (!needsDecodingUnsafe)
+            {
+                if (needsDecodingSpaces)
+                {
+                    // Only spaces to decode
+                    return value.Replace('+', ' ');
+                }
+
+                // Nothing to decode
+                return value;
             }
 
             return helper.GetString();
@@ -464,9 +525,9 @@ namespace System.Net
             return decodedBytes;
         }
 
-        #endregion
+#endregion
 
-        #region UrlDecode public methods
+#region UrlDecode public methods
 
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
@@ -480,9 +541,9 @@ namespace System.Net
             return UrlDecodeInternal(encodedValue, offset, count);
         }
 
-        #endregion
+#endregion
 
-        #region Helper methods
+#region Helper methods
 
         // similar to Char.ConvertFromUtf32, but doesn't check arguments or generate strings
         // input is assumed to be an SMP character
@@ -544,9 +605,11 @@ namespace System.Net
                 return (char)(n - 10 + (int)'A');
         }
 
-        // Set of safe chars, from RFC 1738.4 minus '+'
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUrlSafeChar(char ch)
         {
+            // Set of safe chars, from RFC 1738.4 minus '+'
+            /*
             if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9')
                 return true;
 
@@ -563,6 +626,23 @@ namespace System.Net
             }
 
             return false;
+            */
+            // Optimized version of the above:
+
+            int code = (int)ch;
+
+            const int safeSpecialCharMask = 0x03FF0000 | // 0..9
+                1 << ((int)'!' - 0x20) | // 0x21
+                1 << ((int)'(' - 0x20) | // 0x28
+                1 << ((int)')' - 0x20) | // 0x29
+                1 << ((int)'*' - 0x20) | // 0x2A
+                1 << ((int)'-' - 0x20) | // 0x2D
+                1 << ((int)'.' - 0x20); // 0x2E
+
+            return ((uint)(code - 'a') <= (uint)('z' - 'a')) ||
+                   ((uint)(code - 'A') <= (uint)('Z' - 'A')) ||
+                   ((uint)(code - 0x20) <= (uint)('9' - 0x20) && ((1 << (code - 0x20)) & safeSpecialCharMask) != 0) ||
+                   (code == (int)'_');
         }
 
         private static bool ValidateUrlEncodingParameters(byte[] bytes, int offset, int count)
@@ -599,15 +679,10 @@ namespace System.Net
             return false;
         }
 
-        #endregion
+#endregion
 
-        #region UrlDecoder nested class
-
-        // *** Source: alm/tfs_core/Framework/Common/UriUtility/HttpUtility.cs
-        // This specific code was copied from above ASP.NET codebase.
-
-        // Internal class to facilitate URL decoding -- keeps char buffer and byte buffer, allows appending of either chars or bytes
-        private class UrlDecoder
+        // Internal struct to facilitate URL decoding -- keeps char buffer and byte buffer, allows appending of either chars or bytes
+        private struct UrlDecoder
         {
             private int _bufferSize;
 
@@ -624,11 +699,12 @@ namespace System.Net
 
             private void FlushBytes()
             {
-                if (_numBytes > 0)
-                {
-                    _numChars += _encoding.GetChars(_byteBuffer, 0, _numBytes, _charBuffer, _numChars);
-                    _numBytes = 0;
-                }
+                Debug.Assert(_numBytes > 0);
+                if (_charBuffer == null)
+                    _charBuffer = new char[_bufferSize];
+
+                _numChars += _encoding.GetChars(_byteBuffer, 0, _numBytes, _charBuffer, _numChars);
+                _numBytes = 0;
             }
 
             internal UrlDecoder(int bufferSize, Encoding encoding)
@@ -636,14 +712,20 @@ namespace System.Net
                 _bufferSize = bufferSize;
                 _encoding = encoding;
 
-                _charBuffer = new char[bufferSize];
-                // byte buffer created on demand
+                _charBuffer = null; // char buffer created on demand
+
+                _numChars = 0;
+                _numBytes = 0;
+                _byteBuffer = null; // byte buffer created on demand
             }
 
             internal void AddChar(char ch)
             {
                 if (_numBytes > 0)
                     FlushBytes();
+
+                if (_charBuffer == null)
+                    _charBuffer = new char[_bufferSize];
 
                 _charBuffer[_numChars++] = ch;
             }
@@ -661,16 +743,10 @@ namespace System.Net
                 if (_numBytes > 0)
                     FlushBytes();
 
-                if (_numChars > 0)
-                    return new String(_charBuffer, 0, _numChars);
-                else
-                    return String.Empty;
+                Debug.Assert(_numChars > 0);
+                return new string(_charBuffer, 0, _numChars);
             }
         }
-
-        #endregion
-
-        #region HtmlEntities nested class
 
         // helper class for lookup of HTML encoding entities
         private static class HtmlEntities
@@ -678,7 +754,7 @@ namespace System.Net
 #if DEBUG
             static HtmlEntities()
             {
-                // Make sure the inital capacity for s_lookupTable is correct
+                // Make sure the initial capacity for s_lookupTable is correct
                 Debug.Assert(s_lookupTable.Count == Count, $"There should be {Count} HTML entities, but {nameof(s_lookupTable)} has {s_lookupTable.Count} of them.");
             }
 #endif
@@ -954,6 +1030,5 @@ namespace System.Net
                 return theChar;
             }
         }
-#endregion
     }
 }

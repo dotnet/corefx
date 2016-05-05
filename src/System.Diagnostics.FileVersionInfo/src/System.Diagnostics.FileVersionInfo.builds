@@ -3,15 +3,17 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="System.Diagnostics.FileVersionInfo.csproj">
-      <OSGroup>Linux</OSGroup>
-    </Project>
-    <Project Include="System.Diagnostics.FileVersionInfo.csproj">
-      <OSGroup>OSX</OSGroup>
+      <OSGroup>Unix</OSGroup>
     </Project>
     <Project Include="System.Diagnostics.FileVersionInfo.csproj">
       <OSGroup>Windows_NT</OSGroup>
     </Project>
     <Project Include="System.Diagnostics.FileVersionInfo.csproj">
+      <OSGroup>Windows_NT</OSGroup>
+      <TargetGroup>netcore50</TargetGroup>
+    </Project>
+    <Project Include="System.Diagnostics.FileVersionInfo.csproj">
+      <OSGroup>Windows_NT</OSGroup>
       <TargetGroup>net46</TargetGroup>
     </Project>
   </ItemGroup>

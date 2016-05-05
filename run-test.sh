@@ -27,7 +27,7 @@ usage()
     echo "                                      default: <repo_root>/bin/Product/<OS>.x64.<ConfigurationGroup>"
     echo "    --corefx-tests <location>         Location of the root binaries location containing"
     echo "                                      the tests to run"
-    echo "                                      default: <repo_root>/bin/tests/<OS>.AnyCPU.<ConfigurationGroup>"
+    echo "                                      default: <repo_root>/bin/tests"
     echo "    --corefx-native-bins <location>   Location of the FreeBSD, Linux, NetBSD or OSX native corefx binaries"
     echo "                                      default: <repo_root>/bin/<OS>.x64.<ConfigurationGroup>"
     echo
@@ -41,6 +41,8 @@ usage()
     echo "    --restrict-proj <regex>           Run test projects that match regex"
     echo "                                      default: .* (all projects)"
     echo "    --useServerGC                     Enable Server GC for this test run"
+    echo "    --IgnoreForCI                     Passes the IgnoreForCI category trait to the xunit runner to let the tests know they're in CI"
+    echo "    --outerloop                       Includes the OuterLoop tests that are by default excluded."
     echo
     echo "Runtime Code Coverage options:"
     echo "    --coreclr-coverage                Optional argument to get coreclr code coverage reports"
@@ -83,19 +85,18 @@ esac
 # Misc defaults
 TestSelection=".*"
 TestsFailed=0
-OverlayDir="$ProjectRoot/bin/tests/$OS.AnyCPU.$ConfigurationGroup/TestOverlay/"
 
 create_test_overlay()
 {
   local mscorlibLocation="$MscorlibBins/mscorlib.dll"
 
   # Make the overlay
-    
+
   rm -rf $OverlayDir
   mkdir -p $OverlayDir
-  
+
   local LowerConfigurationGroup="$(echo $ConfigurationGroup | awk '{print tolower($0)}')"
- 
+
   # Copy the CoreCLR native binaries
   if [ ! -d $CoreClrBins ]
   then
@@ -103,16 +104,16 @@ create_test_overlay()
 	exit 1
   fi
   cp -r $CoreClrBins/* $OverlayDir
-  
+
   # Then the mscorlib from the upstream build.
-  # TODO When the mscorlib flavors get properly changed then 
+  # TODO When the mscorlib flavors get properly changed then
   if [ ! -f $mscorlibLocation ]
   then
 	echo "error: Mscorlib not found at $mscorlibLocation"
 	exit 1
   fi
   cp -r $mscorlibLocation $OverlayDir
-  
+
   # Then the native CoreFX binaries
   if [ ! -d $CoreFxNativeBins ]
   then
@@ -130,42 +131,39 @@ copy_test_overlay()
 }
 
 
-# $1 is the name of the test project
-runtest()
+# $1 is the name of the platform folder (e.g Unix.AnyCPU.Debug)
+run_all_tests()
 {
-  testProject=$1
+  for testFolder in "$CoreFxTests/$1/"*
+  do
+     run_test $testFolder &
+     pids="$pids $!"
+     numberOfProcesses=$(($numberOfProcesses+1))
+     if [ "$numberOfProcesses" -ge $maxProcesses ]; then
+       wait_on_pids "$pids"
+       numberOfProcesses=0
+       pids=""
+     fi
+  done
 
-  # Check here to see whether we should run this project
+  # Wait on the last processes
+  wait_on_pids "$pids"
+  pids=""
+}
 
-  if grep "UnsupportedPlatforms.*$OS.*" $1 > /dev/null
-  then
-    echo "Test project file $1 indicates this test is not supported on $OS, skipping"
-    exit 0
-  fi
-  
+# $1 is the path to the test folder
+run_test()
+{
+  testProject=`basename $1`
+
   # Check for project restrictions
-  
+
   if [[ ! $testProject =~ $TestSelection ]]; then
     echo "Skipping $testProject"
     exit 0
   fi
 
-  # Grab the directory name that would correspond to this test
-
-  lowerOS="$(echo $OS | awk '{print tolower($0)}')"
-  fileName="${file##*/}"
-  fileNameWithoutExtension="${fileName%.*}"
-  testDllName="$fileNameWithoutExtension.dll"
-  xunitOSCategory="non$lowerOS"
-  xunitOSCategory+="tests"
-
-  dirName="$CoreFxTests/$fileNameWithoutExtension/dnxcore50"
-
-  if [ ! -d "$dirName" ] || [ ! -f "$dirName/$testDllName" ]
-  then
-    echo "error: Did not find corresponding test dll for $testProject at $dirName/$testDllName"
-    exit 1
-  fi
+  dirName="$1/dnxcore50"
 
   copy_test_overlay $dirName
 
@@ -179,14 +177,17 @@ runtest()
   fi
 
   chmod +x ./corerun
-  
+
   # Invoke xunit
+  lowerOS="$(echo $OS | awk '{print tolower($0)}')"
+  xunitOSCategory="non$lowerOS"
+  xunitOSCategory+="tests"
 
   echo
   echo "Running tests in $dirName"
-  echo "./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing $OuterLoop -notrait category=$xunitOSCategory" -notrait Benchmark=true
+  echo "./corerun xunit.console.netcore.exe $testProject.dll -xml testResults.xml -notrait category=failing $OuterLoop $IgnoreForCI -notrait category=$xunitOSCategory -notrait Benchmark=true"
   echo
-  ./corerun xunit.console.netcore.exe $testDllName -xml testResults.xml -notrait category=failing $OuterLoop -notrait category=$xunitOSCategory -notrait Benchmark=true
+  ./corerun xunit.console.netcore.exe "$testProject.dll" -xml testResults.xml -notrait category=failing $OuterLoop $IgnoreForCI -notrait category=$xunitOSCategory -notrait Benchmark=true
   exitCode=$?
 
   if [ $exitCode -ne 0 ]
@@ -253,6 +254,7 @@ coreclr_code_coverage()
 
 ((serverGC = 0))
 OuterLoop="-notrait category=outerloop"
+IgnoreForCI=""
 
 while [[ $# > 0 ]]
 do
@@ -295,13 +297,18 @@ do
         ((serverGC = 1))
         ;;
         --outerloop)
-        OuterLoop="-trait category=outerloop"
+        OuterLoop=""
+        ;;
+        --IgnoreForCI)
+        IgnoreForCI="-notrait category=IgnoreForCI"
         ;;
         *)
         ;;
     esac
     shift
 done
+
+OverlayDir="$ProjectRoot/bin/tests/TestOverlay/"
 
 # Compute paths to the binaries if they haven't already been computed
 
@@ -317,7 +324,7 @@ fi
 
 if [ "$CoreFxTests" == "" ]
 then
-    CoreFxTests="$ProjectRoot/bin/tests/$OS.AnyCPU.$ConfigurationGroup"
+    CoreFxTests="$ProjectRoot/bin/tests"
 fi
 
 if [ "$CoreFxNativeBins" == "" ]
@@ -344,6 +351,20 @@ then
     CoreClrObjs="$ProjectRoot/bin/obj/$OS.x64.$ConfigurationGroup"
 fi
 
+# The CI system shares PR build job definitions between RC2 and master.  In RC2, we expected
+# that CoreFxTests was the path to the root folder containing the tests for a specific platform
+# (since all tests were rooted under a path like tests/Linux.AnyCPU.$ConfigurationGroup). In
+# master, we instead want CoreFxTests to point at the root of the tests folder, since tests
+# are now split across tests/AnyOS.AnyCPU.$ConfigruationGroup,
+# tests/Unix.AnyCPU.$ConfigruationGroup and tests/$OS.AnyCPU.$ConfigurationGroup.
+#
+# Until we can split the CI definitions up, we need them to pass a platform specific folder (so
+# the jobs work on RC2), so here we detect that case and use the parent folder instead.
+if [[ `basename $CoreFxTests` =~ ^(Linux|OSX|FreeBSD|NetBSD) ]]
+then
+    CoreFxTests=`dirname $CoreFxTests`
+fi
+
 export CORECLR_SERVER_GC="$serverGC"
 export PAL_OUTPUTDEBUGSTRING="1"
 
@@ -366,22 +387,9 @@ else
   maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
 fi
 
-TestProjects=($(find . -regex ".*/src/.*/tests/.*\.Tests\.csproj"))
-for file in ${TestProjects[@]}
-do
-  runtest $file &
-  pids="$pids $!"
-  numberOfProcesses=$(($numberOfProcesses+1))
-  if [ "$numberOfProcesses" -ge $maxProcesses ]; then
-    wait_on_pids "$pids"
-    numberOfProcesses=0
-    pids=""
-  fi
-done
-
-# Wait on the last processes
-wait_on_pids "$pids"
-
+run_all_tests "AnyOS.AnyCPU.$ConfigurationGroup"
+run_all_tests "Unix.AnyCPU.$ConfigurationGroup"
+run_all_tests "$OS.AnyCPU.$ConfigurationGroup"
 
 if [ "$CoreClrCoverage" == "ON" ]
 then

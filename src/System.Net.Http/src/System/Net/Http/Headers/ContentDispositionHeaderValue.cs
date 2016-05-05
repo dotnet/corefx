@@ -35,7 +35,7 @@ namespace System.Net.Http.Headers
             get { return _dispositionType; }
             set
             {
-                CheckDispositionTypeFormat(value, "value");
+                CheckDispositionTypeFormat(value, nameof(value));
                 _dispositionType = value;
             }
         }
@@ -157,7 +157,7 @@ namespace System.Net.Http.Headers
 
         public ContentDispositionHeaderValue(string dispositionType)
         {
-            CheckDispositionTypeFormat(dispositionType, "dispositionType");
+            CheckDispositionTypeFormat(dispositionType, nameof(dispositionType));
             _dispositionType = dispositionType;
         }
 
@@ -231,7 +231,7 @@ namespace System.Net.Http.Headers
                 return 0;
             }
 
-            // Caller must remove leading whitespaces. If not, we'll return 0.
+            // Caller must remove leading whitespace. If not, we'll return 0.
             string dispositionType = null;
             int dispositionTypeLength = GetDispositionTypeExpressionLength(input, startIndex, out dispositionType);
 
@@ -293,7 +293,7 @@ namespace System.Net.Http.Headers
                 throw new ArgumentException(SR.net_http_argument_empty_string, parameterName);
             }
 
-            // When adding values using strongly typed objects, no leading/trailing LWS (whitespaces) are allowed.
+            // When adding values using strongly typed objects, no leading/trailing LWS (whitespace) are allowed.
             string tempDispositionType;
             int dispositionTypeLength = GetDispositionTypeExpressionLength(dispositionType, 0, out tempDispositionType);
             if ((dispositionTypeLength == 0) || (tempDispositionType.Length != dispositionType.Length))
@@ -357,7 +357,7 @@ namespace System.Net.Http.Headers
             }
         }
 
-        // Gets a parameter of the given name and attempts to decode it if nessisary.
+        // Gets a parameter of the given name and attempts to decode it if necessary.
         // Returns null if the parameter is not present or the raw value if the encoding is incorrect.
         private string GetName(string parameter)
         {
@@ -501,6 +501,7 @@ namespace System.Net.Http.Headers
             {
                 return false;
             }
+            
             string[] parts = processedInput.Split('?');
             // "=, encodingName, encodingType, encodedData, ="
             if (parts.Length != 5 || parts[0] != "\"=" || parts[4] != "=\"" || parts[2].ToLowerInvariant() != "b")
@@ -564,18 +565,27 @@ namespace System.Net.Http.Headers
         private bool TryDecode5987(string input, out string output)
         {
             output = null;
-            string[] parts = input.Split('\'');
-            if (parts.Length != 3)
+            
+            int quoteIndex = input.IndexOf('\'');
+            if (quoteIndex == -1)
             {
                 return false;
             }
+            
+            int lastQuoteIndex = input.LastIndexOf('\'');
+            if (quoteIndex == lastQuoteIndex || input.IndexOf('\'', quoteIndex + 1) != lastQuoteIndex)
+            {
+                return false;
+            }
+            
+            string encodingString = input.Substring(0, quoteIndex);
+            string dataString = input.Substring(lastQuoteIndex + 1, input.Length - (lastQuoteIndex + 1));
 
             StringBuilder decoded = new StringBuilder();
             try
             {
-                Encoding encoding = Encoding.GetEncoding(parts[0]);
+                Encoding encoding = Encoding.GetEncoding(encodingString);
 
-                string dataString = parts[2];
                 byte[] unescapedBytes = new byte[dataString.Length];
                 int unescapedBytesCount = 0;
                 for (int index = 0; index < dataString.Length; index++)

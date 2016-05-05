@@ -15,13 +15,14 @@ namespace System.Net.Http
         //
         // Fast lookup table to convert WINHTTP_AUTH constants to strings.
         // WINHTTP_AUTH_SCHEME_BASIC = 0x00000001;
+        // WINHTTP_AUTH_SCHEME_NTLM = 0x00000002;
         // WINHTTP_AUTH_SCHEME_DIGEST = 0x00000008;
         // WINHTTP_AUTH_SCHEME_NEGOTIATE = 0x00000010;
         private static readonly string[] s_authSchemeStringMapping =
         {
             null,
             "Basic",
-            null,
+            "NTLM",
             null,
             null,
             null,
@@ -41,6 +42,7 @@ namespace System.Net.Http
         private static readonly uint[] s_authSchemePriorityOrder =
         {
             Interop.WinHttp.WINHTTP_AUTH_SCHEME_NEGOTIATE,
+            Interop.WinHttp.WINHTTP_AUTH_SCHEME_NTLM,
             Interop.WinHttp.WINHTTP_AUTH_SCHEME_DIGEST,
             Interop.WinHttp.WINHTTP_AUTH_SCHEME_BASIC
         };
@@ -122,6 +124,15 @@ namespace System.Net.Http
                     
                     state.LastStatusCode = statusCode;
 
+                    // If we don't have any proxy credentials to try, then we end up with 407.
+                    ICredentials proxyCreds = state.Proxy == null ?
+                        state.DefaultProxyCredentials :
+                        state.Proxy.Credentials;
+                     if (proxyCreds == null)
+                     {
+                         break;
+                     }
+
                     // Determine authorization scheme to use. We ignore the firstScheme
                     // parameter which is included in the supportedSchemes flags already.
                     // We pass the schemes to ChooseAuthScheme which will pick the scheme
@@ -162,10 +173,23 @@ namespace System.Net.Http
             // 407-401-407-401- loop.
             if (proxyAuthScheme != 0)
             {
+                ICredentials proxyCredentials;
+                Uri proxyUri;
+                if (state.Proxy != null)
+                {
+                    proxyCredentials = state.Proxy.Credentials;
+                    proxyUri = state.Proxy.GetProxy(state.RequestMessage.RequestUri);
+                }
+                else
+                {
+                    proxyCredentials = state.DefaultProxyCredentials;
+                    proxyUri = state.RequestMessage.RequestUri;
+                }
+
                 SetWinHttpCredential(
                     state.RequestHandle,
-                    state.Proxy == null ? state.DefaultProxyCredentials : state.Proxy.Credentials,
-                    state.RequestMessage.RequestUri,
+                    proxyCredentials,
+                    proxyUri,
                     proxyAuthScheme,
                     Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY);
             }

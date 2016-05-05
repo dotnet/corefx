@@ -404,7 +404,7 @@ namespace System.Diagnostics
             {
                 if (!Enum.IsDefined(typeof(ProcessPriorityClass), value))
                 {
-                    throw new ArgumentException(SR.Format(SR.InvalidEnumArgument, "value", (int)value, typeof(ProcessPriorityClass)));
+                    throw new ArgumentException(SR.Format(SR.InvalidEnumArgument, nameof(value), (int)value, typeof(ProcessPriorityClass)));
                 }
 
                 PriorityClassCore = value;
@@ -1058,7 +1058,11 @@ namespace System.Diagnostics
         {
             _processId = processId;
             _haveProcessId = true;
+            ConfigureAfterProcessIdSet();
         }
+
+        /// <summary>Additional optional configuration hook after a process ID is set.</summary>
+        partial void ConfigureAfterProcessIdSet();
 
         /// <devdoc>
         ///    <para>

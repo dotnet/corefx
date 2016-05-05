@@ -3,7 +3,7 @@ syntax: glob
 ### VisualStudio ###
 
 # Tool Runtime Dir
-[Tt]ools/
+/[Tt]ools/
 
 # User-specific files
 *.suo
@@ -23,6 +23,9 @@ bld/
 [Bb]in/
 [Oo]bj/
 msbuild.log
+
+# Cross building rootfs
+cross/rootfs/
 
 # Visual Studio 2015
 .vs/
@@ -80,6 +83,7 @@ ipch/
 *.opensdf
 *.sdf
 *.cachefile
+*.VC.db
 
 # Visual Studio profiler
 *.psess

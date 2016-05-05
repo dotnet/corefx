@@ -16,7 +16,7 @@ namespace System.Net.WebSockets
     internal class WinHttpWebSocket : WebSocket
     {
         #region Constants
-        // TODO: This code needs to be shared with WinHttpClientHandler
+        // TODO (#7893): This code needs to be shared with WinHttpClientHandler
         private const string HeaderNameCookie = "Cookie";
         private const string HeaderNameWebSocketProtocol = "Sec-WebSocket-Protocol";
         #endregion
@@ -137,10 +137,15 @@ namespace System.Net.WebSockets
                         WinHttpException.ThrowExceptionUsingLastError();
                     }
 
+                    const uint notificationFlags =
+                        Interop.WinHttp.WINHTTP_CALLBACK_FLAG_ALL_COMPLETIONS |
+                        Interop.WinHttp.WINHTTP_CALLBACK_FLAG_HANDLES |
+                        Interop.WinHttp.WINHTTP_CALLBACK_FLAG_SECURE_FAILURE;
+
                     if (Interop.WinHttp.WinHttpSetStatusCallback(
                         _operation.RequestHandle,
                         WinHttpWebSocketCallback.s_StaticCallbackDelegate,
-                        Interop.WinHttp.WINHTTP_CALLBACK_FLAG_ALL_NOTIFICATIONS,
+                        notificationFlags,
                         IntPtr.Zero) == (IntPtr)Interop.WinHttp.WINHTTP_INVALID_STATUS_CALLBACK)
                     {
                         WinHttpException.ThrowExceptionUsingLastError();

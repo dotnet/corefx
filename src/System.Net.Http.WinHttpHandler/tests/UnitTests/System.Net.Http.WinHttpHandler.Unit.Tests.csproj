@@ -12,7 +12,6 @@
     <AssemblyName>System.Net.Http.WinHttpHandler.Unit.Tests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
-    <UnsupportedPlatforms>FreeBSD;Linux;NetBSD;OSX</UnsupportedPlatforms>
   </PropertyGroup>
   
   <!-- Help VS understand available configurations -->
@@ -46,6 +45,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
       <Link>Common\System\StringExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Diagnostics\ExceptionExtensions.cs">
+      <Link>Common\System\Diagnostics\ExceptionExtensions.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs">
       <Link>Common\System\Net\HttpKnownHeaderNames.cs</Link>

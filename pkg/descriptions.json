@@ -101,6 +101,11 @@
         "CommonTypes": [ ]
     },
     {
+        "Name": "Microsoft.Private.PackageBaseline",
+        "Description": "Package used by CoreFx build infrastructure to represent the latest package versions in a release.",
+        "CommonTypes": [ ]
+    },
+    {
         "Name": "Microsoft.TargetingPack.NETFramework.v4.6",
         "Description": "Contains the .NET Framework v4.6 targeting pack.",
         "CommonTypes": [ ]
@@ -468,6 +473,18 @@
             "System.Diagnostics.Tracing.EventAttribute",
             "System.Diagnostics.Tracing.EventSourceAttribute",
             "System.Diagnostics.Tracing.NonEventAttribute"
+        ]
+    },
+    {
+        "Name": "System.Drawing.Primitives",
+        "Description": "Provides basic drawing primitive structures, that exposes the corresponding System.Drawing.dll types in .NET Core.",
+        "CommonTypes": [
+            "System.Drawing.Point",
+            "System.Drawing.PointF",
+            "System.Drawing.Size",
+            "System.Drawing.SizeF",
+            "System.Drawing.Rectangle",
+            "System.Drawing.RectangleF"
         ]
     },
     {
@@ -1085,6 +1102,13 @@
         ]
     },
     {
+        "Name": "System.Runtime.CompilerServices.Unsafe",
+        "Description": "Provides the System.Runtime.CompilerServices.Unsafe class, which provides generic, low-level functionality for manipulating pointers.",
+        "CommonTypes": [
+            "System.Runtime.CompilerServices.Unsafe",
+        ]
+    },
+    {
         "Name": "System.Runtime.CompilerServices.VisualC",
         "Description": "Provides support for C++/CLI language features.",
         "CommonTypes": [
@@ -1320,6 +1344,13 @@
         ]
     },
     {
+        "Name": "System.Security.Cryptography.Pkcs",
+        "Description": "Provides support for PKCS and CMS algorithms.",
+        "CommonTypes": [
+            "System.Security.Cryptography.Pkcs.EnvelopedCms"
+        ]
+    },
+    {
         "Name": "System.Security.Cryptography.Primitives",
         "Description": "Provides common types for the cryptographic libraries.",
         "CommonTypes": [
@@ -1335,6 +1366,14 @@
             "System.Security.Cryptography.PaddingMode",
             "System.Security.Cryptography.CryptoStream",
             "System.Security.Cryptography.CryptoStreamMode"
+        ]
+    },
+    {
+        "Name": "System.Security.Cryptography.ProtectedData",
+        "Description": "Provides access to Windows Data Protection Api.",
+        "CommonTypes": [
+            "System.Security.Cryptography.DataProtectionScope",
+            "System.Security.Cryptography.ProtectedData",
         ]
     },
     {
@@ -1626,6 +1665,21 @@
         "CommonTypes": [
             "System.Threading.Timer",
             "System.Threading.TimerCallback"
+        ]
+    },
+    {
+        "Name": "System.ValueTuple",
+        "Description": "Provides the System.ValueTuple structs, which implement the underlying types for C# 7 tuples.",
+        "CommonTypes": [
+            "System.ValueTuple",
+            "System.ValueTuple<T1>",
+            "System.ValueTuple<T1, T2>",
+            "System.ValueTuple<T1, T2, T3>",
+            "System.ValueTuple<T1, T2, T3, T4>",
+            "System.ValueTuple<T1, T2, T3, T4, T5>",
+            "System.ValueTuple<T1, T2, T3, T4, T5, T6>",
+            "System.ValueTuple<T1, T2, T3, T4, T5, T6, T7>",
+            "System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>"
         ]
     },
     {
