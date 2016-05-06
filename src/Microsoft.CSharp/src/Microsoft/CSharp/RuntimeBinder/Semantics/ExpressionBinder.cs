@@ -874,7 +874,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     Name getOrCreateMethodName = GetSymbolLoader().GetNameManager().GetPredefName(PredefinedName.PN_GETORCREATEEVENTREGISTRATIONTOKENTABLE);
                     GetSymbolLoader().RuntimeBinderSymbolTable.PopulateSymbolTableWithName(getOrCreateMethodName.Text, null, fieldType.AssociatedSystemType);
-                    MethodSymbol getOrCreateMethod = GetSymbolLoader().LookupAggMember(getOrCreateMethodName, fieldType.getAggregate(), symbmask_t.MASK_MethodSymbol).AsMethodSymbol();
+                    MethodSymbol getOrCreateMethod = GetSymbolLoader().LookupAggMember(getOrCreateMethodName, fieldType.getAggregate(), SymbolMask.MethodSymbol).AsMethodSymbol();
 
                     MethPropWithInst getOrCreatempwi = new MethPropWithInst(getOrCreateMethod, fieldType.AsAggregateType());
                     EXPRMEMGRP getOrCreateGrp = GetExprFactory().CreateMemGroup(null, getOrCreatempwi);
@@ -892,7 +892,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     PropertySymbol invocationList = GetSymbolLoader().LookupAggMember(
                                                         invocationListName,
                                                         fieldTypeSymbol,
-                                                        symbmask_t.MASK_PropertySymbol).AsPropertySymbol();
+                                                        SymbolMask.PropertySymbol).AsPropertySymbol();
 
                     MethPropWithInst mpwi = new MethPropWithInst(invocationList, fieldType.AsAggregateType());
                     EXPRMEMGRP memGroup = GetExprFactory().CreateMemGroup(getOrCreateCall, mpwi);
@@ -1092,8 +1092,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // Find the next operator.
                 methCur = (methCur == null) ?
-                          GetSymbolLoader().LookupAggMember(pName, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol).AsMethodSymbol() :
-                          GetSymbolLoader().LookupNextSym(methCur, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol).AsMethodSymbol();
+                          GetSymbolLoader().LookupAggMember(pName, atsCur.getAggregate(), SymbolMask.MethodSymbol).AsMethodSymbol() :
+                          GetSymbolLoader().LookupNextSym(methCur, atsCur.getAggregate(), SymbolMask.MethodSymbol).AsMethodSymbol();
 
                 if (methCur == null)
                 {
@@ -1891,7 +1891,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return;
             }
 
-            symbmask_t mask = pswt.Sym.mask();
+            SymbolMask mask = pswt.Sym.mask();
 
             AggregateType atsObj = typeObj.AsAggregateType();
 

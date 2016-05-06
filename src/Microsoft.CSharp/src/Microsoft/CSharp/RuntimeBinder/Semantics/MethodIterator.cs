@@ -21,7 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private CType _pQualifyingType;
             private Name _pName;
             private int _nArity;
-            private symbmask_t _mask;
+            private SymbolMask _mask;
             private EXPRFLAG _flags;
             // Internal state.
             private int _nCurrentTypeCount;
@@ -39,7 +39,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Namespace's extension methodlist
             private bool _bEndIterationAtCurrentExtensionList;
 
-            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType @object, CType qualifyingType, Declaration context, bool allowBogusAndInaccessible, bool allowExtensionMethods, int arity, EXPRFLAG flags, symbmask_t mask)
+            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType @object, CType qualifyingType, Declaration context, bool allowBogusAndInaccessible, bool allowExtensionMethods, int arity, EXPRFLAG flags, SymbolMask mask)
             {
                 Debug.Assert(name != null);
                 Debug.Assert(symLoader != null);
@@ -144,10 +144,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // Make sure that whether we're seeing a ctor is consistent with the flag.
                 // The only properties we handle are indexers.
-                if (_mask == symbmask_t.MASK_MethodSymbol && (
+                if (_mask == SymbolMask.MethodSymbol && (
                         0 == (_flags & EXPRFLAG.EXF_CTOR) != !_pCurrentSym.AsMethodSymbol().IsConstructor() ||
                         0 == (_flags & EXPRFLAG.EXF_OPERATOR) != !_pCurrentSym.AsMethodSymbol().isOperator) ||
-                    _mask == symbmask_t.MASK_PropertySymbol && !_pCurrentSym.AsPropertySymbol().isIndexer())
+                    _mask == SymbolMask.PropertySymbol && !_pCurrentSym.AsPropertySymbol().isIndexer())
                 {
                     // Get the next symbol.
                     return false;
@@ -156,7 +156,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // If our arity is non-0, we must match arity with this symbol.
                 if (_nArity > 0)
                 {
-                    if (_mask == symbmask_t.MASK_MethodSymbol && _pCurrentSym.AsMethodSymbol().typeVars.size != _nArity)
+                    if (_mask == SymbolMask.MethodSymbol && _pCurrentSym.AsMethodSymbol().typeVars.size != _nArity)
                     {
                         return false;
                     }

@@ -961,15 +961,15 @@ namespace Microsoft.CSharp.RuntimeBinder
             // out all overrides.
             //
             // Find that set of types now.
-            symbmask_t mask = symbmask_t.MASK_MethodSymbol;
+            SymbolMask mask = SymbolMask.MethodSymbol;
             switch (kind)
             {
                 case SymbolKind.PropertySymbol:
                 case SymbolKind.IndexerSymbol:
-                    mask = symbmask_t.MASK_PropertySymbol;
+                    mask = SymbolMask.PropertySymbol;
                     break;
                 case SymbolKind.MethodSymbol:
-                    mask = symbmask_t.MASK_MethodSymbol;
+                    mask = SymbolMask.MethodSymbol;
                     break;
                 default:
                     Debug.Assert(false, "Unhandled kind");

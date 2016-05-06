@@ -21,7 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _dictionary = new Dictionary<Key, Symbol>();
         }
 
-        public Symbol LookupSym(Name name, ParentSymbol parent, symbmask_t kindmask)
+        public Symbol LookupSym(Name name, ParentSymbol parent, SymbolMask kindmask)
         {
             Key k = new Key(name, parent);
             Symbol sym;
@@ -67,7 +67,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private static Symbol FindCorrectKind(Symbol sym, symbmask_t kindmask)
+        private static Symbol FindCorrectKind(Symbol sym, SymbolMask kindmask)
         {
             do
             {

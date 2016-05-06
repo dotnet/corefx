@@ -6,27 +6,28 @@ using System;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
+    // TODO: This looks like it could derive from int rather than long.
     [Flags]
-    internal enum symbmask_t : long
+    internal enum SymbolMask : long
     {
-        MASK_NamespaceSymbol = 1 << (int)SymbolKind.NamespaceSymbol,
-        MASK_NamespaceDeclaration = 1 << (int)SymbolKind.NamespaceDeclaration,
-        MASK_AssemblyQualifiedNamespaceSymbol = 1 << (int)SymbolKind.AssemblyQualifiedNamespaceSymbol,
-        MASK_AggregateSymbol = 1 << (int)SymbolKind.AggregateSymbol,
-        MASK_AggregateDeclaration = 1 << (int)SymbolKind.AggregateDeclaration,
-        MASK_TypeParameterSymbol = 1 << (int)SymbolKind.TypeParameterSymbol,
-        MASK_FieldSymbol = 1 << (int)SymbolKind.FieldSymbol,
-        MASK_LocalVariableSymbol = 1 << (int)SymbolKind.LocalVariableSymbol,
-        MASK_MethodSymbol = 1 << (int)SymbolKind.MethodSymbol,
-        MASK_PropertySymbol = 1 << (int)SymbolKind.PropertySymbol,
-        MASK_EventSymbol = 1 << (int)SymbolKind.EventSymbol,
-        MASK_TransparentIdentifierMemberSymbol = 1 << (int)SymbolKind.TransparentIdentifierMemberSymbol,
-        MASK_Scope = 1 << (int)SymbolKind.Scope,
-        MASK_CachedNameSymbol = 1 << (int)SymbolKind.CachedNameSymbol,
-        MASK_LabelSymbol = 1 << (int)SymbolKind.LabelSymbol,
-        MASK_GlobalAttributeDeclaration = 1 << (int)SymbolKind.GlobalAttributeDeclaration,
-        MASK_LambdaScope = 1 << (int)SymbolKind.LambdaScope,
-        MASK_ALL = ~0,
-        LOOKUPMASK = (MASK_AssemblyQualifiedNamespaceSymbol | MASK_FieldSymbol | MASK_LocalVariableSymbol | MASK_MethodSymbol | MASK_PropertySymbol)
+        NamespaceSymbol = 1 << (int)SymbolKind.NamespaceSymbol,
+        NamespaceDeclaration = 1 << (int)SymbolKind.NamespaceDeclaration,
+        AssemblyQualifiedNamespaceSymbol = 1 << (int)SymbolKind.AssemblyQualifiedNamespaceSymbol,
+        AggregateSymbol = 1 << (int)SymbolKind.AggregateSymbol,
+        AggregateDeclaration = 1 << (int)SymbolKind.AggregateDeclaration,
+        TypeParameterSymbol = 1 << (int)SymbolKind.TypeParameterSymbol,
+        FieldSymbol = 1 << (int)SymbolKind.FieldSymbol,
+        LocalVariableSymbol = 1 << (int)SymbolKind.LocalVariableSymbol,
+        MethodSymbol = 1 << (int)SymbolKind.MethodSymbol,
+        PropertySymbol = 1 << (int)SymbolKind.PropertySymbol,
+        EventSymbol = 1 << (int)SymbolKind.EventSymbol,
+        TransparentIdentifierMemberSymbol = 1 << (int)SymbolKind.TransparentIdentifierMemberSymbol,
+        Scope = 1 << (int)SymbolKind.Scope,
+        CachedNameSymbol = 1 << (int)SymbolKind.CachedNameSymbol,
+        LabelSymbol = 1 << (int)SymbolKind.LabelSymbol,
+        GlobalAttributeDeclaration = 1 << (int)SymbolKind.GlobalAttributeDeclaration,
+        LambdaScope = 1 << (int)SymbolKind.LambdaScope,
+        ALL = ~0,
+        LOOKUPMASK = (AssemblyQualifiedNamespaceSymbol | FieldSymbol | LocalVariableSymbol | MethodSymbol | PropertySymbol)
     }
 }

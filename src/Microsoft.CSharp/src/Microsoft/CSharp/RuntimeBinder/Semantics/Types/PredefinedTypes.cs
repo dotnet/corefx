@@ -127,7 +127,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // first search for an outer type which is also predefined
                 // this must be first because we always create a namespace for
                 // outer names, even for nested types
-                AggregateSymbol aggNext = _pBSymmgr.LookupGlobalSymCore(name, bagCur, symbmask_t.MASK_AggregateSymbol).AsAggregateSymbol();
+                AggregateSymbol aggNext = _pBSymmgr.LookupGlobalSymCore(name, bagCur, SymbolMask.AggregateSymbol).AsAggregateSymbol();
                 if (aggNext != null && aggNext.InAlias(aid) && aggNext.IsPredefined())
                 {
                     bagCur = aggNext;
@@ -135,7 +135,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 else
                 {
                     // ... if no outer type, then search for namespaces
-                    NamespaceSymbol nsNext = _pBSymmgr.LookupGlobalSymCore(name, bagCur, symbmask_t.MASK_NamespaceSymbol).AsNamespaceSymbol();
+                    NamespaceSymbol nsNext = _pBSymmgr.LookupGlobalSymCore(name, bagCur, SymbolMask.NamespaceSymbol).AsNamespaceSymbol();
                     bool bIsInAlias = true;
                     if (nsNext == null)
                     {
@@ -192,9 +192,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             paggAmbig = null;
             paggBad = null;
 
-            for (AggregateSymbol aggCur = _pBSymmgr.LookupGlobalSymCore(name, bag, symbmask_t.MASK_AggregateSymbol).AsAggregateSymbol();
+            for (AggregateSymbol aggCur = _pBSymmgr.LookupGlobalSymCore(name, bag, SymbolMask.AggregateSymbol).AsAggregateSymbol();
                  aggCur != null;
-                 aggCur = BSYMMGR.LookupNextSym(aggCur, bag, symbmask_t.MASK_AggregateSymbol).AsAggregateSymbol())
+                 aggCur = BSYMMGR.LookupNextSym(aggCur, bag, SymbolMask.AggregateSymbol).AsAggregateSymbol())
             {
                 if (!aggCur.InAlias(aid) || aggCur.GetTypeVarsAll().size != arity)
                 {

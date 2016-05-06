@@ -121,9 +121,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _kind = kind;
         }
 
-        public symbmask_t mask()
+        public SymbolMask mask()
         {
-            return (symbmask_t)(1 << (int)_kind);
+            return (SymbolMask)(1 << (int)_kind);
         }
 
         public bool checkBogus()
