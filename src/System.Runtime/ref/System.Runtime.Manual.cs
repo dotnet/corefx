@@ -16,29 +16,88 @@ using System.Security;
 
 namespace System
 {
+    /// <summary>
+    /// Represents a single-precision floating-point number.
+    /// </summary>
     public partial struct Single
     {
+        /// <summary>
+        /// Represents the smallest possible value of <see cref="Single" />. This field is constant.
+        /// </summary>
         public const float MinValue = (float)-3.40282346638528859e+38;
+        /// <summary>
+        /// Represents the smallest positive <see cref="Single" /> value that is greater than
+        /// zero. This field is constant.
+        /// </summary>
         public const float Epsilon = (float)1.4e-45;
+        /// <summary>
+        /// Represents the largest possible value of <see cref="Single" />. This field is constant.
+        /// </summary>
         public const float MaxValue = (float)3.40282346638528859e+38;
+        /// <summary>
+        /// Represents positive infinity. This field is constant.
+        /// </summary>
         public const float PositiveInfinity = (float)1.0 / (float)0.0;
+        /// <summary>
+        /// Represents negative infinity. This field is constant.
+        /// </summary>
         public const float NegativeInfinity = (float)-1.0 / (float)0.0;
+        /// <summary>
+        /// Represents not a number (NaN). This field is constant.
+        /// </summary>
         public const float NaN = (float)0.0 / (float)0.0;
     }
+    /// <summary>
+    /// Represents a double-precision floating-point number.
+    /// </summary>
     public partial struct Double
     {
+        /// <summary>
+        /// Represents the smallest possible value of a <see cref="Double" />. This field is
+        /// constant.
+        /// </summary>
         public const double MinValue = -1.7976931348623157E+308;
+        /// <summary>
+        /// Represents the largest possible value of a <see cref="Double" />. This field is constant.
+        /// </summary>
         public const double MaxValue = 1.7976931348623157E+308;
+        /// <summary>
+        /// Represents the smallest positive <see cref="Double" /> value that is greater than
+        /// zero. This field is constant.
+        /// </summary>
 
         // Note Epsilon should be a double whose hex representation is 0x1
         // on little endian machines.
         public const double Epsilon = 4.9406564584124654E-324;
+        /// <summary>
+        /// Represents negative infinity. This field is constant.
+        /// </summary>
         public const double NegativeInfinity = (double)-1.0 / (double)(0.0);
+        /// <summary>
+        /// Represents positive infinity. This field is constant.
+        /// </summary>
         public const double PositiveInfinity = (double)1.0 / (double)(0.0);
+        /// <summary>
+        /// Represents a value that is not a number (NaN). This field is constant.
+        /// </summary>
         public const double NaN = (double)0.0 / (double)0.0;
     }
+    /// <summary>
+    /// Represents type declarations: class types, interface types, array types, value types, enumeration
+    /// types, type parameters, generic type definitions, and open or closed constructed generic types.To
+    /// browse the .NET Framework source code for this type, see the Reference Source.
+    /// </summary>
     public partial class Type
     {
+        /// <summary>
+        /// Gets the type that declares the current nested type or generic type parameter.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Type" /> object representing the enclosing type, if the current type
+        /// is a nested type; or the generic type definition, if the current type is a type parameter
+        /// of a generic type; or the type that declares the generic method, if the current type is a
+        /// type parameter of a generic method; otherwise, null.
+        /// </returns>
         // Members promoted from MemberInfo
         public abstract Type DeclaringType { get; }
         public abstract string Name { get; }
