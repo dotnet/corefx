@@ -36,8 +36,6 @@ namespace System.Globalization
 #endif
     sealed partial class IdnMapping
     {
-        private const int StackallocThreshold = 512;
-
         private bool _allowUnassigned;
         private bool _useStd3AsciiRules;
 

@@ -13,35 +13,36 @@ namespace System.Globalization
 
             // Each unicode character is represented by 2 ASCII chars
             // and a "xn--" prefix of length 4
-            int estimatedLength = count * 2 + 4;
+            const int StackallocThreshold = 512;
+            int estimatedLength = (int)Math.Min(count * 2L + 4, StackallocThreshold);
             int actualLength;
             if (estimatedLength < StackallocThreshold)
             {
-                char* outputSmall = stackalloc char[estimatedLength];
-                actualLength = Interop.GlobalizationNative.ToAscii(flags, unicode, count, outputSmall, estimatedLength);
-                if (actualLength == 0)
+                char* outputStack = stackalloc char[estimatedLength];
+                actualLength = Interop.GlobalizationNative.ToAscii(flags, unicode, count, outputStack, estimatedLength);
+                if (actualLength > 0 && actualLength <= estimatedLength)
                 {
-                    throw new ArgumentException(SR.Argument_IdnIllegalName, nameof(unicode));
-                }
-                else if (actualLength <= estimatedLength)
-                {
-                    return new string(outputSmall, 0, actualLength);
+                    return new string(outputStack, 0, actualLength);
                 }
             }
             else
             {
                 actualLength = Interop.GlobalizationNative.ToAscii(flags, unicode, count, null, 0);
             }
-
-            char[] outputLarge = new char[actualLength];
-            fixed (char* pOutputLarge = outputLarge)
+            if (actualLength == 0)
             {
-                actualLength = Interop.GlobalizationNative.ToAscii(flags, unicode, count, pOutputLarge, actualLength);
-                if (actualLength == 0 || actualLength > outputLarge.Length)
+                throw new ArgumentException(SR.Argument_IdnIllegalName, nameof(unicode));
+            }
+
+            char[] outputHeap = new char[actualLength];
+            fixed (char* pOutputHeap = outputHeap)
+            {
+                actualLength = Interop.GlobalizationNative.ToAscii(flags, unicode, count, pOutputHeap, actualLength);
+                if (actualLength == 0 || actualLength > outputHeap.Length)
                 {
                     throw new ArgumentException(SR.Argument_IdnIllegalName, nameof(unicode));
                 }
-                return new string(pOutputLarge, 0, actualLength);
+                return new string(pOutputHeap, 0, actualLength);
             }
         }
 
