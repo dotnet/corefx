@@ -52,6 +52,34 @@ namespace System.IO
             return new DirectoryInfo(fullPath, null);
         }
 
+        // Create a new directory if it is currently not existing.
+        // 
+        // Returns true if the directory already exists
+        [System.Security.SecuritySafeCritical]
+        public static bool CreateDirectoryIfNotExists(String path)
+        {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+            if (path.Length == 0)
+                throw new ArgumentException(SR.Argument_PathEmpty, nameof(path));
+
+            bool alreadyExists = false;
+
+            string directoryPath = Path.GetDirectoryName(path);
+
+            if (Directory.Exists(directoryPath))
+            {
+                alreadyExists = true;
+            }
+            else
+            {
+                Directory.CreateDirectory(directoryPath);
+                alreadyExists = false;
+            }
+
+            return alreadyExists;
+        }
+
         // Input to this method should already be fullpath. This method will ensure that we append 
         // the trailing slash only when appropriate.
         internal static String EnsureTrailingDirectorySeparator(string fullPath)
@@ -116,7 +144,7 @@ namespace System.IO
         {
             return File.GetCreationTimeUtc(path);
         }
- 
+
         public static void SetLastWriteTime(String path, DateTime lastWriteTime)
         {
             String fullPath = Path.GetFullPath(path);
