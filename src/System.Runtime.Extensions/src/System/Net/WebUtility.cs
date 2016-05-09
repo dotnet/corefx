@@ -330,25 +330,25 @@ namespace System.Net
             if (string.IsNullOrEmpty(value))
                 return value;
 
-            int unexpandedCount = 0;
-            bool foundSpaces = false;
+            int safeCount = 0;
+            int spaceCount = 0;
             for (int i = 0; i < value.Length; i++)
             {
                 char ch = value[i];
                 if (IsUrlSafeChar(ch))
                 {
-                    unexpandedCount++;
+                    safeCount++;
                 }
                 else if (ch == ' ')
                 {
-                    unexpandedCount++;
-                    foundSpaces = true;
+                    spaceCount++;
                 }
             }
 
+            int unexpandedCount = safeCount + spaceCount;
             if (unexpandedCount == value.Length)
             {
-                if (foundSpaces)
+                if (spaceCount != 0)
                 {
                     // Only spaces to encode
                     return value.Replace(' ', '+');
