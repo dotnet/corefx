@@ -14,7 +14,7 @@ namespace System.Globalization
             const int StackallocThreshold = 512;
             // Each unicode character is represented by 2 ASCII chars
             // and the whole string is prefixed by "xn--" (length 4)
-            int estimatedLength = (int)Math.Min(count * 2L + 4, StackallocThreshold);
+            int estimatedLength = (int)Math.Min(count * 3L + 4, StackallocThreshold);
             int actualLength;
             if (estimatedLength < StackallocThreshold)
             {
