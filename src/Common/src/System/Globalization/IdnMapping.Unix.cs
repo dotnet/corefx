@@ -11,9 +11,9 @@ namespace System.Globalization
             uint flags = Flags;
             CheckInvalidIdnCharacters(unicode, count, flags, nameof(unicode));
 
-            // Each unicode character is represented by 2 ASCII chars
-            // and a "xn--" prefix of length 4
             const int StackallocThreshold = 512;
+            // Each unicode character is represented by 2 ASCII chars
+            // and the whole string is prefixed by "xn--" (length 4)
             int estimatedLength = (int)Math.Min(count * 2L + 4, StackallocThreshold);
             int actualLength;
             if (estimatedLength < StackallocThreshold)
