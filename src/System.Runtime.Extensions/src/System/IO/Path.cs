@@ -85,12 +85,18 @@ namespace System.IO
 
         public static char[] GetInvalidPathChars()
         {
-            return (char[])PathInternal.InvalidPathChars.Clone();
+            var src = PathInternal.InvalidPathChars;
+            var dest = new char[src.Length];
+            Buffer.BlockCopy(src, 0, dest, 0, src.Length * sizeof(char));
+            return dest;
         }
 
         public static char[] GetInvalidFileNameChars()
         {
-            return (char[])InvalidFileNameChars.Clone();
+            var src = InvalidFileNameChars;
+            var dest = new char[src.Length];
+            Buffer.BlockCopy(src, 0, dest, 0, src.Length * sizeof(char));
+            return dest;
         }
 
         // Returns the extension of the given path. The returned value includes the
