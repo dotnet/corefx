@@ -12,7 +12,7 @@ namespace System.Globalization
             CheckInvalidIdnCharacters(unicode, count, flags, nameof(unicode));
 
             const int StackallocThreshold = 512;
-            // Each unicode character is represented by 2 ASCII chars
+            // Each unicode character is represented by up to 3 ASCII chars
             // and the whole string is prefixed by "xn--" (length 4)
             int estimatedLength = (int)Math.Min(count * 3L + 4, StackallocThreshold);
             int actualLength;
