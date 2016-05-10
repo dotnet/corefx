@@ -15,6 +15,8 @@ namespace System.IO
         public static readonly char PathSeparator = ':';
 
         private const string DirectorySeparatorCharAsString = "/";
+        
+        public static char[] GetInvalidFileNameChars() => new char[] { '\0', '/' };
 
         private static readonly int MaxPath = Interop.Sys.MaxPath;
         private static readonly int MaxLongPath = MaxPath;
@@ -60,8 +62,6 @@ namespace System.IO
 
             return result;
         }
-        
-        public static char[] GetInvalidFileNameChars() => new char[] { '\0', '/' };
 
         /// <summary>
         /// Try to remove relative segments from the given path (without combining with a root).
