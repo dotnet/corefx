@@ -12,9 +12,10 @@ namespace System.IO
     {
         // There is only one invalid path character in Unix
         private const char InvalidPathChar = '\0';
-        internal static readonly char[] InvalidPathChars = GetInvalidPathChars();
-
+        
         internal static readonly int MaxComponentLength = Interop.Sys.MaxName;
+        
+        internal static char[] GetInvalidPathChars() => new char[] { InvalidPathChar };
 
         /// <summary>Returns a value indicating if the given path contains invalid characters.</summary>
         internal static bool HasIllegalCharacters(string path)
@@ -22,8 +23,6 @@ namespace System.IO
             Debug.Assert(path != null);
             return path.IndexOf(InvalidPathChar) >= 0;
         }
-        
-        internal static char[] GetInvalidPathChars() => new char[] { InvalidPathChar };
 
         internal static int GetRootLength(string path)
         {

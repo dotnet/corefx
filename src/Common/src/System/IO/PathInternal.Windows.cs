@@ -51,8 +51,6 @@ namespace System.IO
         internal const int DevicePrefixLength = 4;
         internal static readonly int MaxComponentLength = 255;
 
-        internal static readonly char[] InvalidPathChars = GetInvalidPathChars();
-        
         internal static char[] GetInvalidPathChars() => new char[]
         {
             '\"', '<', '>', '|', '\0',
