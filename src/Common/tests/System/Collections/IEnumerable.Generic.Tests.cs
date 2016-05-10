@@ -70,12 +70,6 @@ namespace System.Collections.Tests
         protected virtual bool IEnumerable_Generic_Enumerator_Current_EnumerationNotStarted_ThrowsInvalidOperationException => true;
 
         /// <summary>
-        /// Some collections (e.g. ConcurrentDictionary) use yield return iterators to enumerate,
-        /// so calling reset anytime throws a NotSupportedException.
-        /// </summary>
-        protected virtual bool IEnumerable_Generic_Enumerator_Reset_Implemented => false;
-
-        /// <summary>
         /// Specifies whether this IEnumerable follows some sort of ordering pattern.
         /// </summary>
         protected virtual EnumerableOrder Order { get { return EnumerableOrder.Sequential; } }
@@ -103,7 +97,7 @@ namespace System.Collections.Tests
             for (var i = 0; i < iters; i++)
             {
                 testCode(enumerator, items, i);
-                if (!ResetImplemented || !IEnumerable_Generic_Enumerator_Reset_Implemented)
+                if (!ResetImplemented)
                 {
                     enumerator = enumerable.GetEnumerator();
                 }

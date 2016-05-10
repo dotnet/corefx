@@ -203,7 +203,7 @@ namespace System.Collections.Tests
 
         /// <summary>
         /// Used in IDictionary_Generic_Values_ModifyingTheDictionaryUpdatesTheCollection and 
-        /// IDictionary_Generic_KKeyss_ModifyingTheDictionaryUpdatesTheCollection/
+        /// IDictionary_Generic_Keys_ModifyingTheDictionaryUpdatesTheCollection/
         /// Some collections (e..g ConcurrentDictionary) use iterators in the Keys and Values properties,
         /// and do not respond to updates in the base collection.
         /// </summary>

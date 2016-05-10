@@ -68,7 +68,7 @@
     <Compile Include="BlockingCollectionTests.cs" />
     <Compile Include="ConcurrentBagTests.cs" />
     <Compile Include="ConcurrentDicionary\ConcurrentDictionary.Generic.Tests.cs" />
-    <Compile Include="ConcurrentDictionaryTests.cs" />
+    <Compile Include="ConcurrentDicionary\ConcurrentDictionaryTests.cs" />
     <Compile Include="ConcurrentQueueTests.cs" />
     <Compile Include="ConcurrentStackTests.cs" />
     <Compile Include="EtwTests.cs" />
