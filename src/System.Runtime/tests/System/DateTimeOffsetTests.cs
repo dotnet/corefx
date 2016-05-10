@@ -535,7 +535,7 @@ namespace System.Tests
         [Fact]
         public static void UtcNow()
         {
-            Assert.NotSame(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+            Assert.NotNull(DateTimeOffset.UtcNow);
         }
 
         [Fact]

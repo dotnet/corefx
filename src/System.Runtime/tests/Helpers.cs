@@ -9,17 +9,23 @@ namespace System.Tests
 {
     public static class Helpers
     {
+        private static Type s_nonRuntimeType;
+
         public static Type NonRuntimeType()
         {
-            AssemblyName assemblyName = new AssemblyName("AssemblyName");
-            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-            ModuleBuilder mboduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
+            if (s_nonRuntimeType == null)
+            {
+                AssemblyName assemblyName = new AssemblyName("AssemblyName");
+                AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+                ModuleBuilder mboduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
 
-            TypeBuilder typeBuilder = mboduleBuilder.DefineType("TestType", TypeAttributes.Public);
+                TypeBuilder typeBuilder = mboduleBuilder.DefineType("TestType", TypeAttributes.Public);
 
-            GenericTypeParameterBuilder[] typeParams = typeBuilder.DefineGenericParameters("T");
+                GenericTypeParameterBuilder[] typeParams = typeBuilder.DefineGenericParameters("T");
+                s_nonRuntimeType = typeParams[0].UnderlyingSystemType;
+            }
 
-            return typeParams[0].UnderlyingSystemType;
+            return s_nonRuntimeType;
         }
     }
 }

@@ -140,6 +140,11 @@ namespace System.Tests
             yield return new object[] { stringArray, 3, 4, "bb", null, 3 };
             yield return new object[] { stringArray, 4, 3, "bb", null, -5 };
             yield return new object[] { stringArray, 4, 0, "bb", null, -5 };
+
+            yield return new object[] { stringArray, 0, 7, "bb", new StringComparer(), 3 };
+            yield return new object[] { stringArray, 0, 7, "ee", new StringComparer(), 6 };
+            yield return new object[] { stringArray, 0, 7, null, new StringComparer(), 0 };
+            yield return new object[] { stringArray, 0, 7, "no-such-object", new StringComparer(), -8 };
         }
 
         public static IEnumerable<object[]> BinarySearch_Generic_TestData()
@@ -154,6 +159,10 @@ namespace System.Tests
             yield return new object[] { intArray, 0, 8, 99, null, ~intArray.Length };
 
             yield return new object[] { intArray, 1, 5, 16, null, -7 };
+
+            yield return new object[] { intArray, 0, 8, 8, new IntegerComparer(), 4 };
+            yield return new object[] { intArray, 0, 8, 6, new IntegerComparer(), 3 };
+            yield return new object[] { intArray, 0, 8, 0, new IntegerComparer(), -1 };
         }
 
         [Theory]
