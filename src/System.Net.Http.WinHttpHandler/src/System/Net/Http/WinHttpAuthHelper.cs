@@ -272,6 +272,21 @@ namespace System.Net.Http
             }
         }
 
+        public void ChangeDefaultCredentialsPolicy(SafeWinHttpHandle requestHandle, bool allowDefaultCredentials)
+        {
+            uint optionData = allowDefaultCredentials ?
+                Interop.WinHttp.WINHTTP_AUTOLOGON_SECURITY_LEVEL_LOW :
+                Interop.WinHttp.WINHTTP_AUTOLOGON_SECURITY_LEVEL_HIGH;
+
+            if (!Interop.WinHttp.WinHttpSetOption(
+                requestHandle,
+                Interop.WinHttp.WINHTTP_OPTION_AUTOLOGON_POLICY,
+                ref optionData))
+            {
+                WinHttpException.ThrowExceptionUsingLastError();
+            }
+        }
+
         private void SetWinHttpCredential(
             SafeWinHttpHandle requestHandle,
             ICredentials credentials,
@@ -286,9 +301,15 @@ namespace System.Net.Http
 
             NetworkCredential networkCredential = credentials.GetCredential(uri, s_authSchemeStringMapping[authScheme]);
 
-            // Skip if no credentials or this is the default credential.
-            if (networkCredential == null || networkCredential == CredentialCache.DefaultNetworkCredentials)
+            if (networkCredential == null)
             {
+                return;
+            }
+
+            if (networkCredential == CredentialCache.DefaultNetworkCredentials)
+            {
+                // Allow WinHTTP to transmit the default credentials.
+                ChangeDefaultCredentialsPolicy(requestHandle, allowDefaultCredentials:true);
                 return;
             }
 
