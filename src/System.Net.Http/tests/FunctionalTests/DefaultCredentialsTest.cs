@@ -11,6 +11,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
+    // TODO: #2383 - Consolidate the use of the environment variable settings to Common/tests.
     public class DefaultCredentialsTest
     {
         private static string HttpInternalTestServer => Environment.GetEnvironmentVariable("HTTP_INTERNAL_TESTSERVER");

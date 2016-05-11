@@ -1161,12 +1161,18 @@ namespace System.Net.Http
 
         private void SetRequestHandleCredentialsOptions(WinHttpRequestState state)
         {
-            // By default, WinHTTP uses WINHTTP_AUTOLOGON_SECURITY_LEVEL_MEDIUM. This would send logged on credentials
-            // to a proxy or server if it is considered to be on the Intranet. WinHttpHandler uses a different model.
-            // It will explicitly allow logged on credentials (default credentials) to be sent at a later stage in the
-            // request processing (after getting a 401/407 response). It will only send them if the resulting credential
-            // is set as CredentialCache.DefaultNetworkCredential.
-            _authHelper.ChangeDefaultCredentialsPolicy(state.RequestHandle, allowDefaultCredentials:false);
+            // By default, WinHTTP sets the default credentials policy such that it automatically sends default credentials
+            // (current user's logged on Windows credentials) to a proxy when needed (407 response). It only sends
+            // default credentials to a server (401 response) if the server is considered to be on the Intranet.
+            // WinHttpHandler uses a more granual opt-in model for using default credentials that can be different between
+            // proxy and server credentials. It will explicitly allow default credentials to be sent at a later stage in
+            // the request processing (after getting a 401/407 response) when the proxy or server credential is set as
+            // CredentialCache.DefaultNetworkCredential. For now, we set the policy to prevent any default credentials
+            // from being automatically sent until we get a 401/407 response.
+            _authHelper.ChangeDefaultCredentialsPolicy(
+                state.RequestHandle,
+                Interop.WinHttp.WINHTTP_AUTH_TARGET_SERVER,
+                allowDefaultCredentials:false);
         }
 
         private void SetRequestHandleBufferingOptions(SafeWinHttpHandle requestHandle)
