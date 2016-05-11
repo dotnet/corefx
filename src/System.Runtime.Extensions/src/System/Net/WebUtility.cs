@@ -285,21 +285,35 @@ namespace System.Net
 
         #region UrlEncode implementation
         
-        private static void GetEncodedBytes(byte[] originalBytes, int offset, int count, byte[] expandedBytes)
+        private unsafe static void GetEncodedBytes(byte[] originalBytes, int offset, int count, byte[] expandedBytes)
         {
-            int pos = 0;
-            int end = offset + count;
-            Debug.Assert(offset < end && end <= originalBytes.Length);
-            for (int i = offset; i < end; i++)
+            Debug.Assert(originalBytes != null);
+            Debug.Assert(expandedBytes != null);
+            Debug.Assert(originalBytes.Length > 0);
+            Debug.Assert(offset + count <= originalBytes.Length);
+            Debug.Assert(expandedBytes.Length >= originalBytes.Length);
+            
+            fixed (byte* pOriginalBytes = originalBytes)
+            fixed (byte* pExpandedBytes = expandedBytes)
             {
-#if DEBUG
+                bool sameBuffer = originalBytes == expandedBytes;
+                GetEncodedBytes(pOriginalBytes + offset, count, pExpandedBytes, expandedBytes.Length, sameBuffer);
+            }
+        }
+        
+        private unsafe static void GetEncodedBytes(byte* originalBytes, int originalCount, byte* expandedBytes, int expandedCount, bool sameBuffer)
+        {
+            Debug.Assert(originalBytes != null);
+            Debug.Assert(expandedBytes != null);
+            Debug.Assert(originalCount > 0);
+            Debug.Assert(expandedCount >= originalCount); // Protect against buffer overflows
+            
+            int pos = 0;
+            for (int i = 0; i < originalCount; i++)
+            {
                 // Make sure we never overwrite any bytes if originalBytes and
-                // expandedBytes refer to the same array
-                if (originalBytes == expandedBytes)
-                {
-                    Debug.Assert(i >= pos);
-                }
-#endif
+                // expandedBytes refer to the same buffer
+                Debug.Assert(!sameBuffer || (originalBytes + i >= expandedBytes + pos));
 
                 byte b = originalBytes[i];
                 char ch = (char)b;
@@ -325,7 +339,7 @@ namespace System.Net
 #region UrlEncode public methods
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
-        public static string UrlEncode(string value)
+        public unsafe static string UrlEncode(string value)
         {
             if (string.IsNullOrEmpty(value))
                 return value;
@@ -361,6 +375,8 @@ namespace System.Net
             int byteCount = Encoding.UTF8.GetByteCount(value);
             int unsafeByteCount = byteCount - unexpandedCount;
             int byteIndex = unsafeByteCount * 2;
+            
+            Debug.Assert(unsafeByteCount > 0);
 
             // Instead of allocating one array of length `byteCount` to store
             // the UTF-8 encoded bytes, and then a second array of length 
@@ -369,11 +385,26 @@ namespace System.Net
             // the latter and encode the data in place, saving the first allocation.
             // We store the UTF-8 bytes to the end of this array, and then URL encode to the
             // beginning of the array.
-            byte[] newBytes = new byte[byteCount + byteIndex];
-            Encoding.UTF8.GetBytes(value, 0, value.Length, newBytes, byteIndex);
+            const int StackAllocThreshold = 1024; // Arbitrary limit for how big the stackalloc can be
             
-            GetEncodedBytes(newBytes, byteIndex, byteCount, newBytes);
-            return Encoding.UTF8.GetString(newBytes);
+            int newByteCount = byteCount + byteIndex;
+            if (newByteCount <= StackAllocThreshold)
+            {
+                byte* pNewBytes = stackalloc byte[newByteCount];
+                fixed (char* pValue = value)
+                {
+                    Encoding.UTF8.GetBytes(pValue, value.Length, pNewBytes + byteIndex, byteCount);
+                }
+                GetEncodedBytes(pNewBytes + byteIndex, byteCount, pNewBytes, newByteCount, sameBuffer: true);
+                return Encoding.UTF8.GetString(pNewBytes, newByteCount);
+            }
+            else
+            {
+                byte[] newBytes = new byte[newByteCount];
+                Encoding.UTF8.GetBytes(value, 0, value.Length, newBytes, byteIndex);
+                GetEncodedBytes(newBytes, byteIndex, byteCount, newBytes);
+                return Encoding.UTF8.GetString(newBytes);
+            }
         }
 
         public static byte[] UrlEncodeToBytes(byte[] value, int offset, int count)
