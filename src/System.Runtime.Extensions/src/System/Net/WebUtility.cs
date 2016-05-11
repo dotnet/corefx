@@ -339,7 +339,7 @@ namespace System.Net
 #region UrlEncode public methods
 
         [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Already shipped public API; code moved here as part of API consolidation")]
-        public unsafe static string UrlEncode(string value)
+        public static string UrlEncode(string value)
         {
             if (string.IsNullOrEmpty(value))
                 return value;
@@ -390,13 +390,16 @@ namespace System.Net
             int newByteCount = byteCount + byteIndex;
             if (newByteCount <= StackAllocThreshold)
             {
-                byte* pNewBytes = stackalloc byte[newByteCount];
-                fixed (char* pValue = value)
+                unsafe
                 {
-                    Encoding.UTF8.GetBytes(pValue, value.Length, pNewBytes + byteIndex, byteCount);
+                    byte* pNewBytes = stackalloc byte[newByteCount];
+                    fixed (char* pValue = value)
+                    {
+                        Encoding.UTF8.GetBytes(pValue, value.Length, pNewBytes + byteIndex, byteCount);
+                    }
+                    GetEncodedBytes(pNewBytes + byteIndex, byteCount, pNewBytes, newByteCount, sameBuffer: true);
+                    return Encoding.UTF8.GetString(pNewBytes, newByteCount);
                 }
-                GetEncodedBytes(pNewBytes + byteIndex, byteCount, pNewBytes, newByteCount, sameBuffer: true);
-                return Encoding.UTF8.GetString(pNewBytes, newByteCount);
             }
             else
             {
