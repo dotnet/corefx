@@ -232,7 +232,6 @@ namespace System.IO
 
             // We have two passes, the first calculates how large a buffer to allocate and does some precondition
             // checks on the paths passed in.  The second actually does the combination.
-
             for (int i = 0; i < paths.Length; i++)
             {
                 if (paths[i] == null)
@@ -247,7 +246,7 @@ namespace System.IO
 
                 PathInternal.CheckInvalidPathChars(paths[i]);
 
-                if (IsPathRooted(paths[i]))
+                if (IsVolumeRooted(paths[i]))
                 {
                     firstComponent = i;
                     finalSize = paths[i].Length;
@@ -277,8 +276,9 @@ namespace System.IO
                 }
                 else
                 {
-                    char ch = finalPath[finalPath.Length - 1];
-                    if (!IsDirectoryOrVolumeSeparator(ch))
+                    char ch1 = finalPath[finalPath.Length - 1];
+                    char ch2 = paths[i][0];
+                    if (!IsDirectoryOrVolumeSeparator(ch1) && !IsDirectoryOrVolumeSeparator(ch2))
                     {
                         finalPath.Append(DirectorySeparatorChar);
                     }
@@ -298,11 +298,12 @@ namespace System.IO
             if (path1.Length == 0)
                 return path2;
 
-            if (IsPathRooted(path2))
+            if (IsVolumeRooted(path2))
                 return path2;
 
-            char ch = path1[path1.Length - 1];
-            return IsDirectoryOrVolumeSeparator(ch) ?
+            char ch1 = path1[path1.Length - 1];
+            char ch2 = path2[0];
+            return IsDirectoryOrVolumeSeparator(ch1) || IsDirectoryOrVolumeSeparator(ch2) ?
                 path1 + path2 :
                 path1 + DirectorySeparatorCharAsString + path2;
         }
@@ -316,13 +317,13 @@ namespace System.IO
             if (path3.Length == 0)
                 return CombineNoChecks(path1, path2);
 
-            if (IsPathRooted(path3))
+            if (IsVolumeRooted(path3))
                 return path3;
-            if (IsPathRooted(path2))
+            if (IsVolumeRooted(path2))
                 return CombineNoChecks(path2, path3);
 
-            bool hasSep1 = IsDirectoryOrVolumeSeparator(path1[path1.Length - 1]);
-            bool hasSep2 = IsDirectoryOrVolumeSeparator(path2[path2.Length - 1]);
+            bool hasSep1 = IsDirectoryOrVolumeSeparator(path1[path1.Length - 1]) || IsDirectoryOrVolumeSeparator(path2[0]);
+            bool hasSep2 = IsDirectoryOrVolumeSeparator(path2[path2.Length - 1]) || IsDirectoryOrVolumeSeparator(path3[0]);
 
             if (hasSep1 && hasSep2)
             {

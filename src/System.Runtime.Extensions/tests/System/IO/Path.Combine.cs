@@ -82,7 +82,8 @@ namespace System.IO.Tests
         public static void Combine(string[] paths)
         {
             string expected = string.Empty;
-            if (paths.Length > 0) expected = paths[0];
+            if (paths.Length > 0)
+                expected = paths[0];
             for (int i = 1; i < paths.Length; i++)
             {
                 expected = Path.Combine(expected, paths[i]);
@@ -114,6 +115,86 @@ namespace System.IO.Tests
         public static void PathIsNull()
         {
             VerifyException<ArgumentNullException>(null);
+        }
+
+        [Theory]
+        [InlineData("/foo//bar.txt", "/foo/", "/bar.txt")]
+        [InlineData("/foo/bar.txt", "/foo", "/bar.txt")]
+        [InlineData("/foo/bar/txt.txt", "/foo", "/bar/txt.txt")]
+        public static void Combine2Rooted(string fullDirectory, string path1, string path2)
+        {
+            string result = Path.Combine(path1, path2);
+            Assert.Equal(fullDirectory, result);
+        }
+
+        [Theory]
+        [InlineData("c:\\dog", "c:\\cat", "c:\\dog")]
+        [InlineData("c:\\dog", "c:\\cat\\dog/horse\\mouse", "c:\\dog")]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void Combine2Rooted_Windows(string fullDirectory, string path1, string path2)
+        {
+            string result = Path.Combine(path1, path2);
+            Assert.Equal(fullDirectory, result);
+        }
+
+        [Theory]
+        [InlineData("/dog/cat/mouse", "/dog/", "cat", "/mouse")]
+        [InlineData("/dog//cat/mouse", "/dog/", "/cat", "/mouse")]
+        [InlineData("/dog/cat//mouse", "/dog/", "cat/", "/mouse")]
+        [InlineData("/dog/cat///mouse", "/dog/", "cat//", "/mouse")]
+        public static void Combine3Rooted(string fullDirectory, string path1, string path2, string path3)
+        {
+            string result = Path.Combine(path1, path2, path3);
+            Assert.Equal(fullDirectory, result);
+        }
+
+        [Theory]
+        [InlineData("c:\\dog\\cat", "c:\\cat", "c:\\dog", "\\cat")]
+        [InlineData("c:\\dog/cat", "c:\\cat", "c:\\dog", "/cat")]
+        [InlineData("c:\\cat", "c:\\cat\\dog/horse\\mouse", "c:\\dog", "c:\\cat")]
+        [InlineData("c:\\dog", "c:\\cat\\", "\\horse\\", "c:\\dog")]
+        [InlineData("c:\\dog", "\\local\\", "\\horse\\", "c:\\dog")]
+        [InlineData("c:\\horse/dog", "\\local\\", "c:\\horse", "/dog")]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void Combine3Rooted_Windows(string fullDirectory, string path1, string path2, string path3)
+        {
+            string result = Path.Combine(path1, path2, path3);
+            Assert.Equal(fullDirectory, result);
+        }
+
+        public static IEnumerable<object[]> VariableRootedData()
+        {
+            yield return new object[] { "/dog/cat/mouse/horse", new string[] { "/dog/", "cat", "/mouse/", "horse" } };
+            yield return new object[] { "/dog//cat/mouse", new string[] { "/dog/", "/cat", "/mouse" } };
+            yield return new object[] { "/dog/cat/", new string[] { "/dog/", "cat/" } };
+        }
+
+        public static IEnumerable<object[]> VariableRootedData_Windows()
+        {
+            yield return new object[] { "c:\\dog\\cat", new string[] { "c:\\cat", "c:\\dog", "\\cat" } };
+            yield return new object[] { "c:\\cat", new string[] { "c:\\cat\\dog/horse\\mouse", "c:\\dog", "c:\\cat" } };
+            yield return new object[] { "c:\\dog", new string[] { "c:\\cat\\", "\\horse\\", "c:\\dog" } };
+            yield return new object[] { "c:\\dog", new string[] { "\\local\\", "\\horse\\", "c:\\dog" } };
+            yield return new object[] { "c:\\horse/dog", new string[] { "\\local\\", "c:\\horse", "/dog" } };
+            yield return new object[] { "c:\\dog", new string[] { "c:\\cat", "c:\\dog" } };
+            yield return new object[] { "c:\\dog", new string[] { "c:\\cat\\dog/horse\\mouse", "c:\\dog" } };
+        }
+
+        [Theory]
+        [MemberData(nameof(VariableRootedData))]
+        public static void CombineVariableRooted(string fullDirectory, params string[] paths)
+        {
+            string result = Path.Combine(paths);
+            Assert.Equal(fullDirectory, result);
+        }
+
+        [Theory]
+        [MemberData(nameof(VariableRootedData_Windows))]
+        [PlatformSpecific(PlatformID.Windows)]
+        public static void CombineVariableRooted_Windows(string fullDirectory, params string[] paths)
+        {
+            string result = Path.Combine(paths);
+            Assert.Equal(fullDirectory, result);
         }
 
         [Fact]
