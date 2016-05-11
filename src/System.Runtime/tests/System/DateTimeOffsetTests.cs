@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading;
 using Xunit;
 
 namespace System.Tests
@@ -535,7 +536,10 @@ namespace System.Tests
         [Fact]
         public static void UtcNow()
         {
-            Assert.NotNull(DateTimeOffset.UtcNow);
+            DateTimeOffset start = DateTimeOffset.UtcNow;
+            Assert.True(
+                SpinWait.SpinUntil(() => DateTimeOffset.UtcNow > start, TimeSpan.FromSeconds(2)),
+                "Expected UtcNow to changes");
         }
 
         [Fact]
