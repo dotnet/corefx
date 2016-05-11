@@ -447,10 +447,14 @@ if (HAVE_GSSFW_HEADERS)
         "GSS/GSS.h"
         HAVE_GSS_SPNEGO_MECHANISM)
 else ()
+    # Look up for MIT-KRB5 specific header, not available in Heimdal
+    find_path(LIBGSS_INCLUDE_DIR gssapi/gssapi_ext.h)
+    set(CMAKE_REQUIRED_INCLUDES ${LIBGSS_INCLUDE_DIR})
     check_symbol_exists(
         GSS_SPNEGO_MECHANISM
         "gssapi/gssapi.h"
         HAVE_GSS_SPNEGO_MECHANISM)
+    unset(CMAKE_REQUIRED_INCLUDES)
 endif ()
 
 if (HAVE_GSSFW_HEADERS)
