@@ -617,9 +617,10 @@ namespace System.Net
 
         private static int HexToInt(char h)
         {
-            return IsIntBetween(h, '0', '9') ? h - '0' :
-                IsIntBetween(h, 'a', 'f') ? h - 'a' + 10 :
-                IsIntBetween(h, 'A', 'F') ? h - 'A' + 10 :
+            return IsIntBetween(h, '0', '9') ?
+                h - '0' :
+                IsIntBetween(h | '\u0020', 'a', 'f') ?
+                h - 'A' - (h & '\u0020') + 10 :
                 -1;
         }
 
@@ -667,8 +668,7 @@ namespace System.Net
                 1 << ((int)'-' - 0x20) | // 0x2D
                 1 << ((int)'.' - 0x20); // 0x2E
 
-            return IsIntBetween(code, 'a', 'z') ||
-                   IsIntBetween(code, 'A', 'Z') ||
+            return IsIntBetween(code | '\u0020', 'a', 'z') ||
                    (IsIntBetween(code, 0x20, '9') && ((1 << (code - 0x20)) & SafeSpecialCharMask) != 0) ||
                    (code == (int)'_');
         }
