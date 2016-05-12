@@ -620,7 +620,7 @@ namespace System.Net
             return IsIntBetween(h, '0', '9') ?
                 h - '0' :
                 IsIntBetween(h | '\u0020', 'a', 'f') ?
-                (h & ~'\u0020') - 'A' + 10 :
+                (h | '\u0020') - 'a' + 10 :
                 -1;
         }
 
