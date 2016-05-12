@@ -617,10 +617,10 @@ namespace System.Net
 
         private static int HexToInt(char h)
         {
-            return (h >= '0' && h <= '9') ? h - '0' :
-            (h >= 'a' && h <= 'f') ? h - 'a' + 10 :
-            (h >= 'A' && h <= 'F') ? h - 'A' + 10 :
-            -1;
+            return IsIntBetween(h, '0', '9') ? h - '0' :
+                IsIntBetween(h, 'a', 'f') ? h - 'a' + 10 :
+                IsIntBetween(h, 'A', 'F') ? h - 'A' + 10 :
+                -1;
         }
 
         private static char IntToHex(int n)
@@ -659,7 +659,7 @@ namespace System.Net
 
             int code = (int)ch;
 
-            const int safeSpecialCharMask = 0x03FF0000 | // 0..9
+            const int SafeSpecialCharMask = 0x03FF0000 | // 0..9
                 1 << ((int)'!' - 0x20) | // 0x21
                 1 << ((int)'(' - 0x20) | // 0x28
                 1 << ((int)')' - 0x20) | // 0x29
@@ -667,9 +667,9 @@ namespace System.Net
                 1 << ((int)'-' - 0x20) | // 0x2D
                 1 << ((int)'.' - 0x20); // 0x2E
 
-            return ((uint)(code - 'a') <= (uint)('z' - 'a')) ||
-                   ((uint)(code - 'A') <= (uint)('Z' - 'A')) ||
-                   ((uint)(code - 0x20) <= (uint)('9' - 0x20) && ((1 << (code - 0x20)) & safeSpecialCharMask) != 0) ||
+            return IsIntBetween(code, 'a', 'z') ||
+                   IsIntBetween(code, 'A', 'Z') ||
+                   (IsIntBetween(code, 0x20, '9') && ((1 << (code - 0x20)) & SafeSpecialCharMask) != 0) ||
                    (code == (int)'_');
         }
 
@@ -705,6 +705,16 @@ namespace System.Net
                 }
             }
             return false;
+        }
+        
+        // Returns whether a given int is between two others (inclusive).
+        // It takes advantage of unsigned integer wrapping to avoid
+        // unnecessarily creating a branch.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsIntBetween(int value, int lowerBound, int upperBound)
+        {
+            Debug.Assert(upperBound >= lowerBound);
+            return (uint)(value - lowerBound) <= (uint)(upperBound - lowerBound);
         }
 
 #endregion
