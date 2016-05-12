@@ -96,7 +96,7 @@ namespace System.Net
                         int valueToEncode = -1; // set to >= 0 if needs to be encoded
 
 #if ENTITY_ENCODE_HIGH_ASCII_CHARS
-                        if (ch >= 160 && ch < 256)
+                        if (IsIntBetween(ch, 160, 255))
                         {
                             // The seemingly arbitrary 160 comes from RFC
                             valueToEncode = ch;
@@ -266,7 +266,7 @@ namespace System.Net
                         }
                     }
 #if ENTITY_ENCODE_HIGH_ASCII_CHARS
-                    else if (ch >= 160 && ch < 256)
+                    else if (IsIntBetween(ch, 160, 255))
                     {
                         return s.Length - cch;
                     }
