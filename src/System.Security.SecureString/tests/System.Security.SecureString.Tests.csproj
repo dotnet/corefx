@@ -23,6 +23,7 @@
     <ProjectReference Include="..\src\System.Security.SecureString.csproj">
       <Project>{A958BBDD-3238-4E58-AB7F-390AB6D88233}</Project>
       <Name>System.Security.SecureString</Name>
+      <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
