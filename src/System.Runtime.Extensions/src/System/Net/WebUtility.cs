@@ -710,7 +710,6 @@ namespace System.Net
         // Returns whether a given int is between two others (inclusive).
         // It takes advantage of unsigned integer wrapping to avoid
         // unnecessarily creating a branch.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsIntBetween(int value, int lowerBound, int upperBound)
         {
             Debug.Assert(upperBound >= lowerBound);
