@@ -120,7 +120,7 @@ namespace Windows.Foundation
             set
             {
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(Width), SR.ArgumentOutOfRange_NeedNonNegNum);
 
                 _width = (float)value;
             }
@@ -132,7 +132,7 @@ namespace Windows.Foundation
             set
             {
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(Height), SR.ArgumentOutOfRange_NeedNonNegNum);
 
                 _height = (float)value;
             }
