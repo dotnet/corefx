@@ -17,7 +17,7 @@ In addition, to cross compile CoreFX, binutils, gcc and g++ for the target are r
 
 and for arm64 you need:
 
-    lgs@ubuntu ~/git/corefx/ $ sudo apt-get install binutils-aarch64-linux-gnu gcc-arm-linux-gnu g++-arm-linux-gnu
+    lgs@ubuntu ~/git/corefx/ $ sudo apt-get install binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
 
 Generating the rootfs
