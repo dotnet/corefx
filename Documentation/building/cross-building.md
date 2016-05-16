@@ -35,7 +35,7 @@ For example, to generate an arm rootfs:
 
 and if you wanted to generate the rootfs elsewhere:
 
-    lgs@ubuntu ~/git/corefx/ $ sudo ROOTFS_DIR=/home/lgs/corefx-cross/arm ./build-rootfs.sh arm
+    lgs@ubuntu ~/git/corefx/ $ sudo ROOTFS_DIR=/home/lgs/corefx-cross/arm ./cross/build-rootfs.sh arm
 
 
 Cross compiling for native CoreFX
