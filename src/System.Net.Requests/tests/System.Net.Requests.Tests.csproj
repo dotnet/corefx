@@ -24,11 +24,17 @@
     <Compile Include="RequestStreamTest.cs" />
     <Compile Include="WebRequestTest.cs" />
 
+    <Compile Include="$(CommonTestPath)\System\Net\CertificateConfiguration.cs">
+      <Link>Common\System\Net\CertificateConfiguration.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\HttpTestServers.cs">
       <Link>Common\System\Net\HttpTestServers.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\TestSettings.cs">
       <Link>Common\System\Net\TestSettings.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
+      <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
     </Compile>
   </ItemGroup>
 
