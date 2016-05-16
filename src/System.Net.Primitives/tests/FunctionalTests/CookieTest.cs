@@ -349,23 +349,20 @@ namespace System.Net.Primitives.Functional.Tests
         
         [Theory]
         [MemberData(nameof(HashCodesTestData))]
-        public static void HashCodes_ShouldWorkLikeTuple(string name, string value, string path, string domain, int version)
+        public static void HashCode_Get_EqualToExpected(string name, string value, string path, string domain, int version, int expected)
         {
             var cookie = new Cookie(name, value, path, domain)
             {
                 Version = version
             };
             
-            Tuple<string, string, string, string, int> tuple = Tuple.Create(name, value, path, domain, version);
-            
-            // Cookie should use the same algorithm as Tuple/ValueTuple for hashing.
-            Assert.Equal(tuple.GetHashCode(), cookie.GetHashCode());
+            Assert.Equal(expected, cookie.GetHashCode());
         }
         
         public static IEnumerable<object[]> HashCodesTestData()
         {
-            yield return new object[] { "FoobarName", "QuuxValue", "Path", "SomeDomain", 123123 };
-            yield return new object[] { "109238123", "--++++--", "=|", "))))", 10119 };
+            yield return new object[] { "FoobarName", "QuuxValue", "Path", "SomeDomain", 123123, 0 };
+            yield return new object[] { "109238123", "--++++--", "=|", "))))", 10119, 0 };
         }
     }
 }
