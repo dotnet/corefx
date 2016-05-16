@@ -9,10 +9,6 @@
     <!-- Temp change to make OS X build behave as a Linux build -->
     <OsEnvironment Condition="'$(OsEnvironment)'=='' AND '$(OS)'=='OSX'">Unix</OsEnvironment>
     <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
-
-    <!-- On Windows the Path Separator needs to be a backslash and in Linux a forwardslash -->
-    <PathSeparator Condition="'$(OsEnvironment)' == 'Windows_NT'">\</PathSeparator>
-    <PathSeparator Condition="'$(PathSeparator)' == ''">/</PathSeparator>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -37,7 +33,7 @@
   <!-- Common repo directories -->
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
-    <SourceDir>$(ProjectDir)src$(PathSeparator)</SourceDir>
+    <SourceDir>$(ProjectDir)src\</SourceDir>
 
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
@@ -492,8 +488,8 @@
 
   <!-- Set up some common paths -->
   <PropertyGroup>
-    <CommonPath>$(SourceDir)Common$(PathSeparator)src</CommonPath>
-    <CommonTestPath>$(SourceDir)Common$(PathSeparator)tests</CommonTestPath>
+    <CommonPath>$(SourceDir)Common\src</CommonPath>
+    <CommonTestPath>$(SourceDir)Common\tests</CommonTestPath>
   </PropertyGroup>
 
   <!-- Set up the default output and intermediate paths -->
