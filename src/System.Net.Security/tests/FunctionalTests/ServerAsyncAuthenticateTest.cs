@@ -169,8 +169,9 @@ namespace System.Net.Security.Tests
                     _logVerbose.WriteLine("ServerAsyncAuthenticateTest.serverAuthentication complete.");
 
                     _log.WriteLine(
-                        "Server({0}) authenticated with encryption cipher: {1} {2}-bit strength",
-                        serverEndPoint,
+                        "Server({0}) authenticated client({1}) with encryption cipher: {2} {3}-bit strength",
+                        serverConnection.Client.LocalEndPoint,
+                        serverConnection.Client.RemoteEndPoint,
                         sslServerStream.CipherAlgorithm,
                         sslServerStream.CipherStrength);
 
