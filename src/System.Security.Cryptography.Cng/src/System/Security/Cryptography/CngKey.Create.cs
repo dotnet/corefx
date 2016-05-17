@@ -41,21 +41,18 @@ namespace System.Security.Cryptography
             SafeNCryptKeyHandle keyHandle;
             ErrorCode errorCode = Interop.NCrypt.NCryptCreatePersistedKey(providerHandle, out keyHandle, algorithm.Algorithm, keyName, 0, creationParameters.KeyCreationOptions);
             if (errorCode != ErrorCode.ERROR_SUCCESS)
+            {
+                // For ecc, the exception may be caught and re-thrown as PlatformNotSupportedException
                 throw errorCode.ToCryptographicException();
+            }
 
             InitializeKeyProperties(keyHandle, creationParameters);
 
             errorCode = Interop.NCrypt.NCryptFinalizeKey(keyHandle, 0);
             if (errorCode != ErrorCode.ERROR_SUCCESS)
             {
-                Exception e = errorCode.ToCryptographicException();
-                if (CngKey.IsECNamedCurve(algorithm.Algorithm) && 
-                    (errorCode == ErrorCode.NTE_INVALID_PARAMETER || errorCode == ErrorCode.NTE_NOT_SUPPORTED))
-                {
-                    // Curve is not supported
-                    throw new PlatformNotSupportedException(SR.Cryptography_CurveNotSupported, e);
-                }
-                throw e;
+                // For ecc, the exception may be caught and re-thrown as PlatformNotSupportedException
+                throw errorCode.ToCryptographicException();
             }
 
             CngKey key = new CngKey(providerHandle, keyHandle);
