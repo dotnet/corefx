@@ -23,8 +23,28 @@ namespace System.Security.Cryptography.EcDsa.Tests
 
         public bool IsCurveValid(Oid oid)
         {
-            return NativeOidValueExists(oid.Value) ||
-                NativeOidFriendlyNameExists(oid.FriendlyName);
+            if (!string.IsNullOrEmpty(oid.Value))
+            {
+                // Value is passed before FriendlyName
+                return IsValueOrFriendlyNameValid(oid.Value);
+            }
+            return IsValueOrFriendlyNameValid(oid.FriendlyName);
+        }
+
+        private static bool IsValueOrFriendlyNameValid(string friendlyNameOrValue)
+        {
+            if (string.IsNullOrEmpty(friendlyNameOrValue))
+            {
+                return false;
+            }
+
+            IntPtr key = Interop.Crypto.EcKeyCreateByOid(friendlyNameOrValue);
+            if (key != IntPtr.Zero)
+            {
+                Interop.Crypto.EcKeyDestroy(key);
+                return true;
+            }
+            return false;
         }
 
         public bool ExplicitCurvesSupported
@@ -33,25 +53,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
             {
                 return true;
             }
-        }
-
-        private static bool NativeOidValueExists(string oidValue)
-        {
-            if (string.IsNullOrEmpty(oidValue))
-                return false;
-
-            IntPtr friendlyNamePtr = IntPtr.Zero;
-            int result = Interop.Crypto.LookupFriendlyNameByOid(oidValue, ref friendlyNamePtr);
-            return (result == 1);
-        }
-
-        private static bool NativeOidFriendlyNameExists(string oidFriendlyName)
-        {
-            if (string.IsNullOrEmpty(oidFriendlyName))
-                return false;
-
-            IntPtr sharedObject = Interop.Crypto.GetObjectDefinitionByName(oidFriendlyName);
-            return (sharedObject != IntPtr.Zero);
         }
     }
 

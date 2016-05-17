@@ -62,7 +62,7 @@ namespace System.Security.Cryptography.EcDsa.OpenSsl.Tests
         [ConditionalFact(nameof(ECDsa224Available))]
         public void CtorHandle224()
         {
-            IntPtr ecKey = Interop.Crypto.EcKeyCreateByCurveOid(ECDSA_P224_OID_VALUE);
+            IntPtr ecKey = Interop.Crypto.EcKeyCreateByOid(ECDSA_P224_OID_VALUE);
             Assert.NotEqual(IntPtr.Zero, ecKey);
             int success = Interop.Crypto.EcKeyGenerateKey(ecKey);
             Assert.NotEqual(0, success);
@@ -80,7 +80,7 @@ namespace System.Security.Cryptography.EcDsa.OpenSsl.Tests
         [Fact]
         public void CtorHandle384()
         {
-            IntPtr ecKey = Interop.Crypto.EcKeyCreateByCurveOid(ECDSA_P384_OID_VALUE);
+            IntPtr ecKey = Interop.Crypto.EcKeyCreateByOid(ECDSA_P384_OID_VALUE);
             Assert.NotEqual(IntPtr.Zero, ecKey);
             int success = Interop.Crypto.EcKeyGenerateKey(ecKey);
             Assert.NotEqual(0, success);
@@ -98,7 +98,7 @@ namespace System.Security.Cryptography.EcDsa.OpenSsl.Tests
         [Fact]
         public void CtorHandle521()
         {
-            IntPtr ecKey = Interop.Crypto.EcKeyCreateByCurveOid(ECDSA_P521_OID_VALUE);
+            IntPtr ecKey = Interop.Crypto.EcKeyCreateByOid(ECDSA_P521_OID_VALUE);
             Assert.NotEqual(IntPtr.Zero, ecKey);
             int success = Interop.Crypto.EcKeyGenerateKey(ecKey);
             Assert.NotEqual(0, success);
@@ -116,7 +116,7 @@ namespace System.Security.Cryptography.EcDsa.OpenSsl.Tests
         [Fact]
         public void CtorHandleDuplicate()
         {
-            IntPtr ecKey = Interop.Crypto.EcKeyCreateByCurveOid(ECDSA_P521_OID_VALUE);
+            IntPtr ecKey = Interop.Crypto.EcKeyCreateByOid(ECDSA_P521_OID_VALUE);
             Assert.NotEqual(IntPtr.Zero, ecKey);
             int success = Interop.Crypto.EcKeyGenerateKey(ecKey);
             Assert.NotEqual(0, success);
@@ -287,18 +287,12 @@ internal static partial class Interop
     internal static class Crypto
     {
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EcKeyCreateByOid")]
-        internal static extern IntPtr EcKeyCreateByCurveOid(string oid);
+        internal static extern IntPtr EcKeyCreateByOid(string oid);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EcKeyGenerateKey")]
         internal static extern int EcKeyGenerateKey(IntPtr ecKey);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EcKeyDestroy")]
         internal static extern void EcKeyDestroy(IntPtr r);
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_LookupFriendlyNameByOid")]
-        internal static extern int LookupFriendlyNameByOid(string oidValue, ref IntPtr friendlyNamePtr);
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetObjectDefinitionByName", CharSet = CharSet.Ansi)]
-        internal static extern IntPtr GetObjectDefinitionByName(string friendlyName);
     }
 }
