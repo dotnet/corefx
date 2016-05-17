@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.Runtime.Serialization
 {
     [System.AttributeUsageAttribute((System.AttributeTargets)(12), Inherited = false, AllowMultiple = false)]
@@ -64,6 +63,10 @@ namespace System.Runtime.Serialization
     public sealed partial class IgnoreDataMemberAttribute : System.Attribute
     {
         public IgnoreDataMemberAttribute() { }
+    }
+    public static partial class FormatterServices
+    {
+        public static Object GetUninitializedObject(Type type) { return default(Object); }
     }
     public partial class InvalidDataContractException : System.Exception
     {

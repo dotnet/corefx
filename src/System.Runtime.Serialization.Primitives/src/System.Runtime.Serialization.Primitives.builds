@@ -10,7 +10,7 @@
     By default, all assemblies that are built for netcore50 or netcore50aot have the reflection block enabled. -->
     <Project Include="System.Runtime.Serialization.Primitives.csproj">
       <OSGroup>Windows_NT</OSGroup>
-      <TargetGroup>netcore50aot</TargetGroup>
+      <TargetGroup>netcore50</TargetGroup>
     </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
