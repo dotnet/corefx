@@ -38,7 +38,7 @@ internal static partial class Interop
             throw Interop.Crypto.CreateOpenSslCryptographicException();
         }
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EcKeyGetCurveName")]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EcKeyGetCurveName2")]
         private static extern int CryptoNative_EcKeyGetCurveName(SafeEcKeyHandle ecKey, out int nid);
 
         internal static string EcKeyGetCurveName(SafeEcKeyHandle key)
