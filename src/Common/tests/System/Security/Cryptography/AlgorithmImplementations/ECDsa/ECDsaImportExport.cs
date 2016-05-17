@@ -100,13 +100,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
             }
         }
 
-        [Theory, MemberData(nameof(TestInvalidCurves))]
-        public static void TestExplicitCurvesNegative(CurveDef curveDef)
-        {
-            // An exception may be thrown during Create() if the Oid is bad, or later during native calls
-            Assert.Throws<PlatformNotSupportedException>(() => ECDsaFactory.Create(curveDef.Curve).ExportExplicitParameters(false));
-        }
-
         [Fact]
         public static void TestNamedCurveNegative()
         {
