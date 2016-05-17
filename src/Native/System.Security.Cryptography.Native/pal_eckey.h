@@ -54,7 +54,12 @@ extern "C" int32_t CryptoNative_EcKeyGetSize(const EC_KEY* key, int32_t* keySize
 
 /*
 Gets the NID of the curve name as an oid value for the specified EC_KEY.
+*/
+extern "C" int32_t CryptoNative_EcKeyGetCurveName(const EC_KEY* key);
+
+/*
+Gets the NID of the curve name as an oid value for the specified EC_KEY.
 
 Returns 1 upon success, otherwise 0.
 */
-extern "C" int32_t CryptoNative_EcKeyGetCurveName(const EC_KEY* key, int32_t* nidName);
+extern "C" int32_t CryptoNative_EcKeyGetCurveName2(const EC_KEY* key, int32_t* nidName);
