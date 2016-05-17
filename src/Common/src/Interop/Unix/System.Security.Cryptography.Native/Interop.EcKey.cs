@@ -68,7 +68,7 @@ internal static partial class Interop
             int rc = CryptoNative_EcKeyGetCurveName(key, out nidCurveName);
             if (rc == 1)
             {
-                Debug.Assert(nidCurveName != Interop.Crypto.NID_undef); // Key is invalid or doesn't have a curve
+                // Key is invalid or doesn't have a curve
                 return (nidCurveName != Interop.Crypto.NID_undef);
             }
             throw Interop.Crypto.CreateOpenSslCryptographicException();
