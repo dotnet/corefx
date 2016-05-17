@@ -11,8 +11,7 @@
       $(TraversalBuildDependsOn)
     </TraversalBuildDependsOn>
   </PropertyGroup>
-
-  <Import Project="$(ToolsDir)versioning.targets" Condition="Exists('$(ToolsDir)versioning.targets')" />
+  
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="*\tests\**\*.builds">
