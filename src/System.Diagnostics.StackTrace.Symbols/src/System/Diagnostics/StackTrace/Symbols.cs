@@ -16,14 +16,14 @@ namespace System.Diagnostics.StackTrace
         /// Returns the source file and line number information for the method.
         /// </summary>
         /// <param name="assemblyPath">file path of the assembly or null</param>
-        /// <param name="inMemorySymbols">in memory PDB address or zero</param>
-        /// <param name="inMemorySymbolsSize">in memory PDB size</param>
+        /// <param name="inMemoryAddress">in memory PE (assemblyPath != null) or PDB (assemblyPath == null) address or zero</param>
+        /// <param name="inMemorySize">in memory PE or PDB size</param>
         /// <param name="methodToken">method token</param>
         /// <param name="ilOffset">il offset of the stack frame</param>
         /// <param name="sourceFile">source file return</param>
         /// <param name="sourceLine">line number return</param>
         /// <param name="sourceColumn">column return</param>
-        public static void GetSourceLineInfo(string assemblyPath, IntPtr inMemorySymbols, int inMemorySymbolsSize, 
+        public static void GetSourceLineInfo(string assemblyPath, IntPtr inMemoryAddress, int inMemorySize, 
             int methodToken, int ilOffset, out string sourceFile, out int sourceLine, out int sourceColumn)
         {
             sourceFile = null;
@@ -31,70 +31,36 @@ namespace System.Diagnostics.StackTrace
             sourceColumn = 0;
 
             MetadataReader reader;
-            using (GetReader(assemblyPath, inMemorySymbols, inMemorySymbolsSize, out reader)) {
-                if (reader != null) {
+            using (GetReader(assemblyPath, inMemoryAddress, inMemorySize, out reader))
+            {
+                if (reader != null)
+                {
                     Handle handle = MetadataTokens.Handle(methodToken);
 
-                    if (handle.Kind == HandleKind.MethodDefinition) {
+                    if (handle.Kind == HandleKind.MethodDefinition)
+                    {
                         MethodDebugInformationHandle methodDebugHandle = ((MethodDefinitionHandle)handle).ToDebugInformationHandle();
                         MethodDebugInformation methodInfo = reader.GetMethodDebugInformation(methodDebugHandle);
 
-                        if (!methodInfo.SequencePointsBlob.IsNil) {
-                            try {
-                                SequencePointCollection sequencePoints = methodInfo.GetSequencePoints();
+                        if (!methodInfo.SequencePointsBlob.IsNil)
+                        {
+                            SequencePointCollection sequencePoints = methodInfo.GetSequencePoints();
 
-                                int sequencePointCount = 0;
-                                foreach (SequencePoint sequence in sequencePoints) {
-                                    sequencePointCount++;
-                                }
+                            SequencePoint? bestPointSoFar = null;
+                            foreach (SequencePoint point in sequencePoints)
+                            {
+                                if (point.Offset > ilOffset)
+                                    break;
 
-                                if (sequencePointCount > 0) {
-                                    int[] offsets = new int[sequencePointCount];
-                                    int[] lines = new int[sequencePointCount];
-                                    int[] columns = new int[sequencePointCount];
-                                    DocumentHandle[] documents = new DocumentHandle[sequencePointCount];
-
-                                    int i = 0;
-                                    foreach (SequencePoint sequence in sequencePoints) {
-                                        offsets[i] = sequence.Offset;
-                                        lines[i] = sequence.StartLine;
-                                        columns[i] = sequence.StartColumn;
-                                        documents[i] = sequence.Document;
-                                        i++;
-                                    }
-
-                                    // Search for the correct IL offset
-                                    int j;
-                                    for (j = 0; j < sequencePointCount; j++) {
-
-                                        // look for the entry matching the one we're looking for
-                                        if (offsets[j] >= ilOffset) {
-
-                                            // if this offset is > what we're looking for, ajdust the index
-                                            if (offsets[j] > ilOffset && j > 0) {
-                                                j--;
-                                            }
-                                            break;
-                                        }
-                                    }
-
-                                    // If we didn't find a match, default to the last sequence point
-                                    if (j == sequencePointCount) {
-                                        j--;
-                                    }
-
-                                    while (lines[j] == SequencePoint.HiddenLine && j > 0) {
-                                        j--;
-                                    }
-
-                                    if (lines[j] != SequencePoint.HiddenLine) {
-                                        sourceLine = lines[j];
-                                        sourceColumn = columns[j];
-                                    }
-                                    sourceFile = reader.GetString(reader.GetDocument(documents[j]).Name);
-                                }
+                                if (point.StartLine != SequencePoint.HiddenLine)
+                                    bestPointSoFar = point;
                             }
-                            catch {
+
+                            if (bestPointSoFar.HasValue)
+                            {
+                                sourceLine = bestPointSoFar.Value.StartLine;
+                                sourceColumn = bestPointSoFar.Value.StartColumn;
+                                sourceFile = reader.GetString(reader.GetDocument(bestPointSoFar.Value.Document).Name);
                             }
                         }
                     }
@@ -106,23 +72,26 @@ namespace System.Diagnostics.StackTrace
         /// Returns the portable PDB reader for the assembly path
         /// </summary>
         /// <param name="assemblyPath">file path of the assembly or null</param>
-        /// <param name="inMemorySymbols">in memory PDB address or zero</param>
-        /// <param name="inMemorySymbolsSize">in memory PDB size</param>
+        /// <param name="inMemoryAddress">in memory PE (assemblyPath != null) or PDB (assemblyPath == null) address or zero</param>
+        /// <param name="inMemorySize">in memory PE or PDB size</param>
         /// <param name="reader">returns the reader</param>
         /// <returns>provider</returns>
-        static IDisposable GetReader(string assemblyPath, IntPtr inMemorySymbols, int inMemorySymbolsSize, out MetadataReader reader)
+        static IDisposable GetReader(string assemblyPath, IntPtr inMemoryAddress, int inMemorySize, out MetadataReader reader)
         {
             reader = null;
             MetadataReaderProvider provider = null;
 
-            if (assemblyPath != null) {
-                try {
-                    uint stamp;
-                    int age;
-                    Guid guid;
+            if (assemblyPath != null)
+            {
+                uint stamp;
+                int age;
+                Guid guid;
 
-                    string pdbName = GetPdbPathFromPeStream(assemblyPath, out age, out guid, out stamp);
-                    if (pdbName != null) {
+                string pdbName = GetPdbPathFromPeStream(assemblyPath, inMemoryAddress, inMemorySize, out age, out guid, out stamp);
+                if (pdbName != null)
+                {
+                    try
+                    {
                         Stream pdbStream = File.OpenRead(pdbName);
 
                         // Need to always return provider so that it will be disposed
@@ -130,19 +99,24 @@ namespace System.Diagnostics.StackTrace
                         MetadataReader rdr = provider.GetMetadataReader();
 
                         // Validate that the PDB matches the assembly version
-                        if (age == 1) {
-                            if (IdEquals(rdr.DebugMetadataHeader.Id, guid, stamp)) {
+                        if (age == 1)
+                        {
+                            if (IdEquals(rdr.DebugMetadataHeader.Id, guid, stamp))
+                            {
                                 reader = rdr;
                             }
                         }
                     }
-                }
-                catch {
+                    catch
+                    {
+                    }
                 }
             }
-            else if (inMemorySymbols != IntPtr.Zero && inMemorySymbolsSize > 0) {
-                unsafe {
-                    provider = MetadataReaderProvider.FromPortablePdbImage((byte*)inMemorySymbols.ToPointer(), inMemorySymbolsSize);
+            else if (inMemoryAddress != IntPtr.Zero && inMemorySize > 0)
+            {
+                unsafe
+                {
+                    provider = MetadataReaderProvider.FromPortablePdbImage((byte*)inMemoryAddress.ToPointer(), inMemorySize);
                     reader = provider.GetMetadataReader();
                 }
             }
@@ -153,32 +127,40 @@ namespace System.Diagnostics.StackTrace
         /// <summary>
         /// Read the pdb file name and assembly version information from the PE file.
         /// </summary>
-        /// <param name="assemblyPath">PE file</param>
+        /// <param name="assemblyPath">PE file path</param>
+        /// <param name="inMemoryAddress">in memory PE address</param>
+        /// <param name="inMemorySize">in memory PE size</param>
         /// <param name="age">age</param>
         /// <param name="guid">assembly guid</param>
         /// <param name="stamp">time stamp</param>
         /// <returns>pdb name or null</returns>
-        static string GetPdbPathFromPeStream(string assemblyPath, out int age, out Guid guid, out uint stamp)
+        static unsafe string GetPdbPathFromPeStream(string assemblyPath, IntPtr inMemoryAddress, int inMemorySize, out int age, out Guid guid, out uint stamp)
         {
-            try {
-                Stream peStream = File.OpenRead(assemblyPath);
+            try
+            {
+                if (inMemoryAddress != IntPtr.Zero && inMemorySize > 0)
+                {
+                    using (var peReader = new PEReader((byte*)inMemoryAddress.ToPointer(), inMemorySize))
+                    {
+                        foreach (var entry in peReader.ReadDebugDirectory())
+                        {
+                            if (entry.Type == DebugDirectoryEntryType.CodeView)
+                            {
+                                CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
 
-                using (var peReader = new PEReader(peStream)) {
-                    foreach (var entry in peReader.ReadDebugDirectory()) {
-                        if (entry.Type == DebugDirectoryEntryType.CodeView) {
-                            CodeViewDebugDirectoryData codeViewData = peReader.ReadCodeViewDebugDirectoryData(entry);
+                                stamp = entry.Stamp;
+                                age = codeViewData.Age;
+                                guid = codeViewData.Guid;
 
-                            stamp = entry.Stamp;
-                            age = codeViewData.Age;
-                            guid = codeViewData.Guid;
-
-                            string peDirectory = Path.GetDirectoryName(assemblyPath);
-                            return Path.Combine(peDirectory, Path.GetFileName(codeViewData.Path));
+                                string peDirectory = Path.GetDirectoryName(assemblyPath);
+                                return Path.Combine(peDirectory, Path.GetFileName(codeViewData.Path));
+                            }
                         }
                     }
                 }
             }
-            catch {
+            catch
+            {
             }
 
             stamp = 0;
