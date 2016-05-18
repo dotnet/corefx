@@ -88,7 +88,7 @@
       <TestTargetFramework Remove="@(TestTargetFramework)" />
       <TestTargetFramework Include=".NETCoreApp,Version=v1.0">
         <!-- Folder should be netcoreapp10, but dnxcore50 hardcoded in runtest.sh -->
-        <Folder>netcoreapp10</Folder>
+        <Folder>dnxcore50</Folder>
       </TestTargetFramework>
     </ItemGroup>
   </Target>

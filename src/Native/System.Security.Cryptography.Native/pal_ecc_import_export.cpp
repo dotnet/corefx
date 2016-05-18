@@ -13,25 +13,15 @@ ECCurveType MethodToCurveType(EC_METHOD* method)
     if (method == EC_GFp_mont_method())
         return ECCurveType::PrimeMontgomery;
 
-#if HAVE_OPENSSL_EC2M
-    if (method == EC_GF2m_simple_method())
+    int fieldType = EC_METHOD_get_field_type(method);
+
+    if (fieldType == NID_X9_62_characteristic_two_field)
         return ECCurveType::Characteristic2;
-#endif
 
-    if (method == EC_GFp_simple_method()
-        || method == EC_GFp_nist_method()
-#if HAVE_OPENSSL_EC_NISTP_64_GCC_128
-        || method == EC_GFp_nistp224_method()
-        || method == EC_GFp_nistp256_method()
-        || method == EC_GFp_nistp521_method()
-#endif
-        )
-    {
+    if (fieldType == NID_X9_62_prime_field)
         return ECCurveType::PrimeShortWeierstrass;
-    }
 
-    // As a workaround for platform differences, fall back to PrimeShortWeierstrass
-    return ECCurveType::PrimeShortWeierstrass; // return ECCurveType::Unspecified;
+    return ECCurveType::Unspecified;
 }
 
 const EC_METHOD* CurveTypeToMethod(ECCurveType curveType)

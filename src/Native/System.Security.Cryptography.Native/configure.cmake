@@ -13,10 +13,6 @@ check_function_exists(
     EC_GF2m_simple_method
     HAVE_OPENSSL_EC2M)
 
-check_function_exists(
-    EC_GFp_nistp256_method
-    HAVE_OPENSSL_EC_NISTP_64_GCC_128)
-
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/pal_crypto_config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/pal_crypto_config.h)
