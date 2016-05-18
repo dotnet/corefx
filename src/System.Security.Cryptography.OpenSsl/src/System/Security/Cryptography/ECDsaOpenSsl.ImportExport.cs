@@ -118,7 +118,6 @@ namespace System.Security.Cryptography
         {
             CheckInvalidKey(key);
 
-            ECCurve.ECCurveType curveType = Interop.Crypto.EcKeyGetCurveType(key);
             ECParameters parameters = Interop.Crypto.GetECCurveParameters(key, includePrivateParameters);
 
             bool hasPrivateKey = (parameters.D != null);

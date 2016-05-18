@@ -4,6 +4,7 @@
 
 #include <openssl/ec.h>
 #include <openssl/objects.h>
+#include "pal_crypto_config.h"
 #include "pal_ecc_import_export.h"
 #include "pal_utilities.h"
 
@@ -12,14 +13,14 @@ ECCurveType MethodToCurveType(EC_METHOD* method)
     if (method == EC_GFp_mont_method())
         return ECCurveType::PrimeMontgomery;
 
-#ifndef OPENSSL_NO_EC2M
+#if HAVE_OPENSSL_EC2M
     if (method == EC_GF2m_simple_method())
         return ECCurveType::Characteristic2;
 #endif
 
     if (method == EC_GFp_simple_method() ||
         method == EC_GFp_nist_method()
-#ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
+#if HAVE_OPENSSL_EC_NISTP_64_GCC_128
         || method == EC_GFp_nistp224_method() ||
         method == EC_GFp_nistp256_method() ||
         method == EC_GFp_nistp521_method()
@@ -27,7 +28,6 @@ ECCurveType MethodToCurveType(EC_METHOD* method)
         )
         return ECCurveType::PrimeShortWeierstrass;
 
-    assert(false); // Unknown method
     return ECCurveType::Unspecified;
 }
 
@@ -39,7 +39,7 @@ const EC_METHOD* CurveTypeToMethod(ECCurveType curveType)
     if (curveType == ECCurveType::PrimeMontgomery)
         return EC_GFp_mont_method();
 
-#ifndef OPENSSL_NO_EC2M
+#if HAVE_OPENSSL_EC2M
     if (curveType == ECCurveType::Characteristic2)
         return EC_GF2m_simple_method();
 #endif
@@ -99,7 +99,7 @@ extern "C" int32_t CryptoNative_GetECKeyParameters(
     if (!xBn || !yBn)
         goto error;
 
-#ifndef OPENSSL_NO_EC2M
+#if HAVE_OPENSSL_EC2M
     if (curveType == ECCurveType::Characteristic2)
     {
         if (!EC_POINT_get_affine_coordinates_GF2m(group, Q, xBn, yBn, nullptr)) 
@@ -227,7 +227,7 @@ extern "C" int32_t CryptoNative_GetECCurveParameters(
         goto error;
 
     // Extract p, a, b
-#ifndef OPENSSL_NO_EC2M
+#if HAVE_OPENSSL_EC2M
     if (*curveType == ECCurveType::Characteristic2)
     {
         // pBn represents the binary polynomial
@@ -244,7 +244,7 @@ extern "C" int32_t CryptoNative_GetECCurveParameters(
 
     // Extract gx and gy
     G = const_cast<EC_POINT*>(EC_GROUP_get0_generator(group));
-#ifndef OPENSSL_NO_EC2M
+#if HAVE_OPENSSL_EC2M
     if (*curveType == ECCurveType::Characteristic2)
     {
         if (!EC_POINT_get_affine_coordinates_GF2m(group, G, xBn, yBn, NULL)) 
@@ -437,7 +437,7 @@ extern "C" EC_KEY* CryptoNative_EcKeyCreateByExplicitParameters(
     aBn = BN_bin2bn(a, aLength, nullptr);
     bBn = BN_bin2bn(b, bLength, nullptr);
 
-#ifndef OPENSSL_NO_EC2M
+#if HAVE_OPENSSL_EC2M
     if (curveType == ECCurveType::Characteristic2)
     {
         if (!EC_GROUP_set_curve_GF2m(group, pBn, aBn, bBn, nullptr)) 
@@ -455,7 +455,7 @@ extern "C" EC_KEY* CryptoNative_EcKeyCreateByExplicitParameters(
     gxBn = BN_bin2bn(gx, gxLength, nullptr);
     gyBn = BN_bin2bn(gy, gyLength, nullptr);
 
-#ifndef OPENSSL_NO_EC2M
+#if HAVE_OPENSSL_EC2M
     if (curveType == ECCurveType::Characteristic2)
     {
         EC_POINT_set_affine_coordinates_GF2m(group, G, gxBn, gyBn, nullptr);
