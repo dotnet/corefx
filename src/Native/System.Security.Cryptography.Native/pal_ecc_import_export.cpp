@@ -18,17 +18,20 @@ ECCurveType MethodToCurveType(EC_METHOD* method)
         return ECCurveType::Characteristic2;
 #endif
 
-    if (method == EC_GFp_simple_method() ||
-        method == EC_GFp_nist_method()
+    if (method == EC_GFp_simple_method()
+        || method == EC_GFp_nist_method()
 #if HAVE_OPENSSL_EC_NISTP_64_GCC_128
-        || method == EC_GFp_nistp224_method() ||
-        method == EC_GFp_nistp256_method() ||
-        method == EC_GFp_nistp521_method()
+        || method == EC_GFp_nistp224_method()
+        || method == EC_GFp_nistp256_method()
+        || method == EC_GFp_nistp521_method()
 #endif
         )
+    {
         return ECCurveType::PrimeShortWeierstrass;
+    }
 
-    return ECCurveType::Unspecified;
+    // As a workaround for platform differences, fall back to PrimeShortWeierstrass
+    return ECCurveType::PrimeShortWeierstrass; // return ECCurveType::Unspecified;
 }
 
 const EC_METHOD* CurveTypeToMethod(ECCurveType curveType)

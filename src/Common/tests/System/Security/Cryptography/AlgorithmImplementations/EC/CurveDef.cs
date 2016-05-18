@@ -27,10 +27,12 @@ namespace System.Security.Cryptography.EcDsa.Tests
             if (CurveType == actual)
                 return true;
 
-            // Montgomery curves can be expressed as Weierstrass, and some curves can be either depending on the 
-            // platform so use whichever the platform says it is for the given curve
-            if (CurveType == ECCurve.ECCurveType.PrimeMontgomery && actual == ECCurve.ECCurveType.PrimeShortWeierstrass)
+            // Montgomery and Weierstrass are interchangable depending on the platform 
+            if (CurveType == ECCurve.ECCurveType.PrimeMontgomery && actual == ECCurve.ECCurveType.PrimeShortWeierstrass ||
+                CurveType == ECCurve.ECCurveType.PrimeShortWeierstrass && actual == ECCurve.ECCurveType.PrimeMontgomery)
+            {
                 return true;
+            }
 
             return false;
         }
