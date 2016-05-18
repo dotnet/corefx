@@ -127,15 +127,27 @@ namespace System.IO
                 Interop.mincore.SetErrorMode(oldMode);
             }
 
-            // Disallow access to all non-file devices from the Win32FileStream
-            // constructors that take a String.  Everyone else can call 
-            // CreateFile themselves then use the constructor that takes an 
-            // IntPtr.  Disallows "con:", "com1:", "lpt1:", etc.
-            int fileType = Interop.mincore.GetFileType(_handle);
-            if (fileType != Interop.mincore.FileTypes.FILE_TYPE_DISK)
+            int handleType = Interop.mincore.GetFileType(_handle);
+
+            if (handleType != Interop.mincore.FileTypes.FILE_TYPE_DISK)
             {
-                _handle.Dispose();
-                throw new NotSupportedException(SR.NotSupported_FileStreamOnNonFiles);
+                if (!PathInternal.IsExtended(path))
+                {
+                    // Disallow access to all non-file devices from the Win32FileStream constructors that take a String
+                    // if not opened with \\?\. This prevents accidental use of legacy device paths such as (COM1, LPT1,
+                    // CON, etc). Windows normalization will turn CON into \\.\CON, it won't turn it into \\?\CON, which
+                    // is equivalent (other than it skips normalization and length checks). If we get \\?\CON, we know
+                    // the user requested it on purpose.
+                    _handle.Dispose();
+                    throw new NotSupportedException(SR.NotSupported_FileStreamOnNonFiles);
+                }
+
+                if (seekToEnd)
+                {
+                    // Can only seek disk files.
+                    _handle.Dispose();
+                    throw Error.GetSeekNotSupported();
+                }
             }
 
             // This is necessary for async IO using IO Completion ports via our 
@@ -169,8 +181,8 @@ namespace System.IO
 
             _canRead = (access & FileAccess.Read) != 0;
             _canWrite = (access & FileAccess.Write) != 0;
-            _canSeek = true;
-            _isPipe = false;
+            _canSeek = handleType == Interop.mincore.FileTypes.FILE_TYPE_DISK;
+            _isPipe = handleType == Interop.mincore.FileTypes.FILE_TYPE_PIPE;
             _pos = 0;
             _bufferSize = bufferSize;
             _readPos = 0;
