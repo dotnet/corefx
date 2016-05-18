@@ -15,7 +15,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="BrowsableAttributeTests.cs" />
+    <!--<Compile Include="BrowsableAttributeTests.cs" />
     <Compile Include="CategoryAttributeTests.cs" />
     <Compile Include="ComponentModelPrimitivesBasicTests.cs" />
     <Compile Include="DescriptionAttributeTests.cs" />
@@ -30,7 +30,7 @@
     <Compile Include="NotifyParentPropertyAttributeTests.cs" />
     <Compile Include="ParenthesizePropertyNameAttributeTests.cs" />
     <Compile Include="ReadOnlyAttributeTests.cs" />
-    <Compile Include="RefreshPropertiesAttributeTests.cs" />
+    <Compile Include="RefreshPropertiesAttributeTests.cs" />-->
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.ComponentModel.Primitives.csproj">

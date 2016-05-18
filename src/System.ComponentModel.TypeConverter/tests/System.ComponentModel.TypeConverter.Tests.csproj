@@ -19,7 +19,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ArrayConverterTests.cs" />
+    <!--<Compile Include="ArrayConverterTests.cs" />
     <Compile Include="AttributeCollectionTests.cs" />
     <Compile Include="AttributeProviderAttributeTests.cs" />
     <Compile Include="BooleanConverterTests.cs" />
@@ -64,12 +64,12 @@
     <Compile Include="UInt16ConverterTests.cs" />
     <Compile Include="UInt32ConverterTests.cs" />
     <Compile Include="UInt64ConverterTests.cs" />
-    <Compile Include="UriTypeConverterTests.cs" />
+    <Compile Include="UriTypeConverterTests.cs" />-->
     <!-- Performance Tests -->
-    <Compile Include="Performance\Perf.TypeDescriptorTests.cs" />
+    <!--<Compile Include="Performance\Perf.TypeDescriptorTests.cs" />
     <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
       <Link>Common\System\PerfUtils.cs</Link>
-    </Compile>
+    </Compile>-->
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.ComponentModel.TypeConverter.csproj">

@@ -22,7 +22,7 @@
       "imports": [
         "dotnet5.6"
       ]
-    },    
+    },
     "netstandard1.0": {
       "dependencies": {
         "System.Collections": "4.0.0",
