@@ -346,23 +346,5 @@ namespace System.Net.Primitives.Functional.Tests
             c.Port = "";
             Assert.Equal("name=value; $Path=path; $Domain=domain; $Port", c.ToString());
         }
-        
-        [Theory]
-        [MemberData(nameof(HashCodesTestData))]
-        public static void HashCode_Get_EqualToExpected(string name, string value, string path, string domain, int version, int expected)
-        {
-            var cookie = new Cookie(name, value, path, domain)
-            {
-                Version = version
-            };
-            
-            Assert.Equal(expected, cookie.GetHashCode());
-        }
-        
-        public static IEnumerable<object[]> HashCodesTestData()
-        {
-            yield return new object[] { "FoobarName", "QuuxValue", "Path", "SomeDomain", 123123, 0 };
-            yield return new object[] { "109238123", "--++++--", "=|", "))))", 10119, 0 };
-        }
     }
 }
