@@ -2,12 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+extern alias SRSP;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using Xunit;
+
+using FormatterServices = SRSP::System.Runtime.Serialization.FormatterServices;
 
 namespace System.Tests
 {

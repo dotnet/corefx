@@ -30,6 +30,8 @@
       <!-- Don't copy the reference assembly to output -->
       <Private>false</Private>
       <UndefineProperties>OSGroup</UndefineProperties>
+      <!-- Temporary to work around problem that matching S.Runtime.dll is not yet published to NuGet -->
+      <Aliases>SRSP</Aliases>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Runtime.Serialization.Primitives.csproj">
       <Name>System.Runtime.Serialization.Primitives</Name>
