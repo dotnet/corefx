@@ -1789,7 +1789,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("ReflectionBasedDCS")]
     public static void DCS_ConcurrentDictionary()
     {
         var value = new ConcurrentDictionary<string, int>();
@@ -1844,7 +1843,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("ReflectionBasedDCS")]
     public static void DCS_CollectionDataContractWithCustomKeyName()
     {
         CollectionDataContractWithCustomKeyName value = new CollectionDataContractWithCustomKeyName();
@@ -1858,7 +1856,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("ReflectionBasedDCS")]
     public static void DCS_CollectionDataContractWithCustomKeyNameDuplicate()
     {
         CollectionDataContractWithCustomKeyNameDuplicate value = new CollectionDataContractWithCustomKeyNameDuplicate();
