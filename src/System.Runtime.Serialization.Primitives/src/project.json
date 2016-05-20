@@ -2,9 +2,7 @@
   "frameworks": {
     "netstandard1.3": {
       "dependencies": {
-        "System.Runtime": "4.0.20",
-        "System.Resources.ResourceManager": "4.0.0",
-        "System.Threading.Tasks": "4.0.10"
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-24117-00"
       },
       "imports": [
         "dotnet5.4"
