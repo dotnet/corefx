@@ -2972,6 +2972,7 @@ namespace System.Runtime.CompilerServices
         public static object GetObjectValue(object obj) { return default(object); }
         public static void InitializeArray(System.Array array, System.RuntimeFieldHandle fldHandle) { }
         public static void RunClassConstructor(System.RuntimeTypeHandle type) { }
+        public static object GetUninitializedObject(Type type) { return default(object); }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited = false, AllowMultiple = false)]
     public partial class StateMachineAttribute : System.Attribute
@@ -3052,13 +3053,6 @@ namespace System.Runtime.InteropServices
         public int Size;
         public StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind layoutKind) { }
         public System.Runtime.InteropServices.LayoutKind Value { get { return default(System.Runtime.InteropServices.LayoutKind); } }
-    }
-}
-namespace System.Runtime.Serialization
-{
-    public static partial class FormatterServices
-    {
-        public static Object GetUninitializedObject(Type type) { return default(Object); }
     }
 }
 namespace System.Runtime.Versioning

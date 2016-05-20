@@ -3,6 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using Xunit;
 
@@ -97,6 +100,75 @@ namespace System.Runtime.CompilerServices.Tests
             Assert.Equal(HasCctorReceiver.S, "Hello");
             return;
         }
+               
+        [Fact]
+        public static void NoArgument_Throws_ArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("type", () => RuntimeHelpers.GetUninitializedObject(null));
+        }
+
+        [Theory]
+        [InlineData(typeof(string))]
+        [InlineData(typeof(int*))]
+        public static void StringsAndPointers_Throw_ArgumentException(Type type)
+        {
+            Assert.Throws<ArgumentException>(null /* really should be 'type' */, () => RuntimeHelpers.GetUninitializedObject(type));
+        }
+
+        [Fact]
+        public static void InstantiatedArrays_Throw_ArgumentException()
+        {
+            Assert.Throws<ArgumentException>(null /* really should be 'type' */, () => RuntimeHelpers.GetUninitializedObject((new int[] { }).GetType()));
+        }
+
+        [Theory]
+        [InlineData(typeof(Array))]
+        [InlineData(typeof(ICollection))]
+        [InlineData(typeof(Stream))]
+        public static void InterfacesAndAbstractClasses_Throw_MemberAccessException(Type type)
+        {
+            Assert.Throws<MemberAccessException>(() => RuntimeHelpers.GetUninitializedObject(type));
+        }
+
+        [Theory]
+        [InlineData(typeof(object))]
+        [InlineData(typeof(MyClass))]
+        public static void PlainObjects_Success(Type type)
+        {
+            Assert.Equal(type, RuntimeHelpers.GetUninitializedObject(type).GetType());
+        }
+
+        [Fact]
+        public static void Generic_Success()
+        {
+            var type = typeof(List<int>);
+            Assert.Equal(0, ((List<int>)RuntimeHelpers.GetUninitializedObject(type)).Count);
+            Assert.Equal(type, RuntimeHelpers.GetUninitializedObject(type).GetType());
+        }
+
+        [Theory]
+        [InlineData(typeof(int), 0)]
+        [InlineData(typeof(short), 0)]
+        public static void PrimitiveTypes_Success(Type type, object value)
+        {
+            Assert.Equal(value.ToString(), RuntimeHelpers.GetUninitializedObject(type).ToString());
+            Assert.Equal(type, RuntimeHelpers.GetUninitializedObject(type).GetType());
+        }
+
+        [Fact]
+        public static void Nullable_BecomesNonNullable_Success()
+        {
+            Assert.Equal(typeof(int), RuntimeHelpers.GetUninitializedObject(typeof(int?)).GetType());
+        }
+
+        [Fact]
+        public static void Result_Is_Mutable()
+        {
+            // Sanity check the object is actually useable
+            MyClass mc = ((MyClass)RuntimeHelpers.GetUninitializedObject(typeof(MyClass)));
+            mc.MyMember = "foo";
+            Assert.Equal("foo", mc.MyMember);
+        }
 
         internal class HasCctor
         {
@@ -109,6 +181,11 @@ namespace System.Runtime.CompilerServices.Tests
         internal class HasCctorReceiver
         {
             public static string S;
+        }
+
+        private class MyClass
+        {
+            public string MyMember { get; set; }
         }
     }
 }
