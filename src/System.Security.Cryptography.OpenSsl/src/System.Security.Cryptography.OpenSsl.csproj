@@ -8,7 +8,7 @@
     <ProjectGuid>{78452F3E-BA91-47E7-BB0F-02E8A5C116C4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Security.Cryptography.OpenSsl</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <AssemblyVersion>4.1.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
     <PackageTargetFramework>netstandard1.6</PackageTargetFramework>
@@ -18,6 +18,7 @@
     <GeneratePlatformNotSupportedAssembly>true</GeneratePlatformNotSupportedAssembly>
     <PackageTargetFramework>netstandard1.4</PackageTargetFramework>
     <NuGetTargetMoniker>.NETStandard,Version=v1.4</NuGetTargetMoniker>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <!-- Clear PackageTargetRuntime on Windows to package the PlatformNotSupported assembly 
          without a RID so that it applies in desktop packages.config projects as well -->
     <PackageTargetRuntime></PackageTargetRuntime>
