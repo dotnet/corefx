@@ -179,7 +179,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression variable = Expression.Variable(typeof(string));
             MethodInfo method = typeof(object).GetTypeInfo().GetDeclaredMethod("ReferenceEquals");
-            Assert.Throws<ArgumentException>(() => Expression.PostIncrementAssign(variable, method));
+            Assert.Throws<ArgumentException>(null, () => Expression.PostIncrementAssign(variable, method));
         }
 
         [Fact]
@@ -187,7 +187,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression variable = Expression.Variable(typeof(int));
             MethodInfo method = typeof(IncDecAssignTests).GetTypeInfo().GetDeclaredMethod("GetString");
-            Assert.Throws<ArgumentException>(() => Expression.PostIncrementAssign(variable, method));
+            Assert.Throws<ArgumentException>(null, () => Expression.PostIncrementAssign(variable, method));
         }
 
         [Theory]
@@ -277,6 +277,7 @@ namespace System.Linq.Expressions.Tests
         {
             UnaryExpression op = Expression.PostIncrementAssign(Expression.Variable(typeof(int)));
             Assert.Same(op, op.Update(op.Operand));
+            Assert.Same(op, NoOpVisitor.Instance.Visit(op));
         }
 
         [Fact]

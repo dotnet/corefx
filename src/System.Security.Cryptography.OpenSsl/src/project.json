@@ -14,6 +14,11 @@
     "System.Text.Encoding": "4.0.10"
   },
   "frameworks": {
+    "netstandard1.6": {
+      "imports": [
+        "dotnet5.5"
+      ]
+    },
     "netstandard1.4": {
       "imports": [
         "dotnet5.5"
