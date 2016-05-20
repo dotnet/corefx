@@ -13,7 +13,6 @@
     <CLSCompliant>false</CLSCompliant>
     <PackageTargetFramework>netstandard1.6</PackageTargetFramework>
     <NuGetTargetMoniker>.NETStandard,Version=v1.6</NuGetTargetMoniker>
-    <GeneratePlatformNotSupportedAssembly Condition="'$(OSGroup)' == 'AnyOS'">true</GeneratePlatformNotSupportedAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsWindows)' == 'true'">
     <GeneratePlatformNotSupportedAssembly>true</GeneratePlatformNotSupportedAssembly>
