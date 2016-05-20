@@ -6,6 +6,8 @@ setlocal EnableDelayedExpansion
 ::       means that that rebuilding cannot successfully delete the task
 ::       assembly.
 
+:: test
+
 :ReadArguments
 :: Read in the args to determine whether to run the native build, managed build, or both (default)
 set "__args= %*"
