@@ -42,7 +42,7 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Theory]
-        [ActiveIssue(8362, ~PlatformID.OSX)]
+        [ActiveIssue(8362, PlatformID.OSX)]
         [InlineData("000235.000073.0000031.00000033", "157.59.25.27")] // Octal
         [InlineData("0235.073.031.033", "157.59.25.27")] // Octal
         [InlineData("157.59.25.033", "157.59.25.27")] // Partial octal
@@ -89,7 +89,7 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Theory]
-        [ActiveIssue(8362, ~PlatformID.OSX)]
+        [ActiveIssue(8362, PlatformID.OSX)]
         [InlineData("0.0.0.089")] // Octal (leading zero) but with 8 or 9
         public void ParseIPv4_Failure_Octal_NonOSX(string address)
         {
