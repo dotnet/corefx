@@ -448,6 +448,7 @@ def static addCopyCoreClrAndRunTestSteps(def job, def coreclrBranch, String os, 
                 --mscorlib-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.${coreClrConfigurationGroup}/ \\
                 ${useServerGC ? '--serverGc' : ''} ${isOuterLoop ? '--outerloop' : ''}
             ${isOuterLoop ? 'sudo find . -name \"testResults.xml\" -exec chmod 777 {} \\;' : ''}
+            ${isOuterLoop ? 'sudo rm -rf /tmp/.dotnet' : ''}
             """)
         }
 
