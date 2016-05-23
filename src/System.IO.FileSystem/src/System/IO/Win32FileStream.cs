@@ -276,19 +276,13 @@ namespace System.IO
             }
             else if (!_isAsync)
             {
-                if (handleType != Interop.mincore.FileTypes.FILE_TYPE_PIPE)
-                    VerifyHandleIsSync();
+                VerifyHandleIsSync(handleType);
             }
 
             if (_canSeek)
                 SeekCore(0, SeekOrigin.Current);
             else
                 _pos = 0;
-        }
-
-        private static bool GetDefaultIsAsync(SafeFileHandle handle)
-        {
-            return handle.IsAsync.HasValue ? handle.IsAsync.Value : DefaultIsAsync;
         }
 
         private static bool GetSuppressBindHandle(SafeFileHandle handle)
@@ -310,39 +304,7 @@ namespace System.IO
             return secAttrs;
         }
 
-        // Verifies that this handle supports synchronous IO operations (unless you
-        // didn't open it for either reading or writing).
-        [System.Security.SecuritySafeCritical]  // auto-generated
-        private unsafe void VerifyHandleIsSync()
-        {
-            Debug.Assert(!_isAsync);
 
-            // Do NOT use this method on pipes.  Reading or writing to a pipe may
-            // cause an app to block incorrectly, introducing a deadlock (depending
-            // on whether a write will wake up an already-blocked thread or this
-            // Win32FileStream's thread).
-            Debug.Assert(Interop.mincore.GetFileType(_handle) != Interop.mincore.FileTypes.FILE_TYPE_PIPE);
-
-            byte* bytes = stackalloc byte[1];
-            int numBytesReadWritten;
-            int r = -1;
-
-            // If the handle is a pipe, ReadFile will block until there
-            // has been a write on the other end.  We'll just have to deal with it,
-            // For the read end of a pipe, you can mess up and 
-            // accidentally read synchronously from an async pipe.
-            if (_canRead)
-                r = Interop.mincore.ReadFile(_handle, bytes, 0, out numBytesReadWritten, IntPtr.Zero);
-            else if (_canWrite)
-                r = Interop.mincore.WriteFile(_handle, bytes, 0, out numBytesReadWritten, IntPtr.Zero);
-
-            if (r == 0)
-            {
-                int errorCode = GetLastWin32ErrorAndDisposeHandleIfInvalid(throwIfInvalidHandle: true);
-                if (errorCode == ERROR_INVALID_PARAMETER)
-                    throw new ArgumentException(SR.Arg_HandleNotSync, "handle");
-            }
-        }
 
         private bool HasActiveBufferOperation
         {
@@ -1285,7 +1247,7 @@ namespace System.IO
             }
 
             return completionSource.Task;
-        }       
+        }
 
         // Reads a byte from the file stream.  Returns the byte cast to an int
         // or -1 if reading from the end of the stream.
@@ -1664,7 +1626,7 @@ namespace System.IO
         }
 
         [System.Security.SecurityCritical]
-        private int GetLastWin32ErrorAndDisposeHandleIfInvalid(bool throwIfInvalidHandle = false)
+        private int GetLastWin32ErrorAndDisposeHandleIfInvalid()
         {
             int errorCode = Marshal.GetLastWin32Error();
 
@@ -1688,9 +1650,6 @@ namespace System.IO
             if (errorCode == Interop.mincore.Errors.ERROR_INVALID_HANDLE)
             {
                 _handle.Dispose();
-
-                if (throwIfInvalidHandle)
-                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
             }
 
             return errorCode;
