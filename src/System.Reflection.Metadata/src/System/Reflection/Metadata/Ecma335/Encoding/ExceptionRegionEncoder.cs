@@ -4,7 +4,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public struct ExceptionRegionEncoder
+    internal struct ExceptionRegionEncoder
     {
         private readonly int _exceptionRegionCount;
         private readonly bool _isSmallFormat;

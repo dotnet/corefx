@@ -5,7 +5,7 @@
 namespace System.Reflection.Metadata
 {
     [Flags]
-    public enum MetadataStreamOptions
+    internal enum MetadataStreamOptions
     {
         /// <summary>
         /// By default the stream is disposed when <see cref="MetadataReaderProvider"/> is disposed and sections of the PE image are read lazily.

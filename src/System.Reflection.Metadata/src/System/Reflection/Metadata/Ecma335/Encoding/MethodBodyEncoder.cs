@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public struct MethodBodyEncoder
+    internal struct MethodBodyEncoder
     {
         public BlobBuilder Builder { get; }
 

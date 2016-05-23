@@ -51,7 +51,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        public ImmutableArray<TType> DecodeSignature<TType>(ISignatureTypeProvider<TType> provider)
+        internal ImmutableArray<TType> DecodeSignature<TType>(ISignatureTypeProvider<TType> provider)
         {
             var decoder = new Ecma335.SignatureDecoder<TType>(provider, _reader);
             var blobReader = _reader.GetBlobReader(Signature);

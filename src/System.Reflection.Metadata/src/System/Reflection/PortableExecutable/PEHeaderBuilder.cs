@@ -4,7 +4,7 @@
 
 namespace System.Reflection.PortableExecutable
 {
-    public sealed class PEHeaderBuilder
+    internal sealed class PEHeaderBuilder
     {
         // COFF:
         public Machine Machine { get; }

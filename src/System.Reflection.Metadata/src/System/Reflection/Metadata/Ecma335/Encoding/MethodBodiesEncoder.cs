@@ -4,7 +4,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public struct MethodBodiesEncoder
+    internal struct MethodBodiesEncoder
     {
         public BlobBuilder Builder { get; }
 

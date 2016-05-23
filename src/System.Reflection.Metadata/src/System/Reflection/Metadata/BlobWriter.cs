@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Metadata
 {
     // TODO: argument checking
-    public unsafe struct BlobWriter
+    internal unsafe struct BlobWriter
     {
         // writable slice:
         private readonly byte[] _buffer;

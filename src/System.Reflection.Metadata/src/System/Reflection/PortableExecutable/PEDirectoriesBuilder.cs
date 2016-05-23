@@ -4,7 +4,7 @@
 
 namespace System.Reflection.PortableExecutable
 {
-    public sealed class PEDirectoriesBuilder
+    internal sealed class PEDirectoriesBuilder
     {
         public int AddressOfEntryPoint { get; set; }
 

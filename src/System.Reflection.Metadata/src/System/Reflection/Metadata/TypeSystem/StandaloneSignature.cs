@@ -37,14 +37,14 @@ namespace System.Reflection.Metadata
             get { return _reader.StandAloneSigTable.GetSignature(_rowId); }
         }
 
-        public MethodSignature<TType> DecodeMethodSignature<TType>(ISignatureTypeProvider<TType> provider)
+        internal MethodSignature<TType> DecodeMethodSignature<TType>(ISignatureTypeProvider<TType> provider)
         {
             var decoder = new SignatureDecoder<TType>(provider, _reader);
             var blobReader = _reader.GetBlobReader(Signature);
             return decoder.DecodeMethodSignature(ref blobReader);
         }
 
-        public ImmutableArray<TType> DecodeLocalSignature<TType>(ISignatureTypeProvider<TType> provider)
+        internal ImmutableArray<TType> DecodeLocalSignature<TType>(ISignatureTypeProvider<TType> provider)
         {
             var decoder = new SignatureDecoder<TType>(provider, _reader);
             var blobReader = _reader.GetBlobReader(Signature);

@@ -4,7 +4,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public struct InstructionEncoder
+    internal struct InstructionEncoder
     {
         public BlobBuilder Builder { get; }
         private readonly BranchBuilder _branchBuilderOpt;

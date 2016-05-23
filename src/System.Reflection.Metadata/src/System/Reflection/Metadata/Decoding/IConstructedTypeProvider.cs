@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace System.Reflection.Metadata
 {
-    public interface IConstructedTypeProvider<TType> : ISZArrayTypeProvider<TType>
+    internal interface IConstructedTypeProvider<TType> : ISZArrayTypeProvider<TType>
     {
         /// <summary>
         /// Gets the type symbol for a generic instantiation of the given generic type with the given type arguments.

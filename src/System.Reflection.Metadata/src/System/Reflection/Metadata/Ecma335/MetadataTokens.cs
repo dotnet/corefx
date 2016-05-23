@@ -156,7 +156,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
         /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
         /// </returns>
-        public static int GetHeapOffset(BlobHandle handle) => handle.IsVirtual ? -1 : handle.GetHeapOffset();
+        internal static int GetHeapOffset(BlobHandle handle) => handle.IsVirtual ? -1 : handle.GetHeapOffset();
 
         /// <summary>
         /// Returns the offset of metadata heap data that corresponds 
@@ -166,7 +166,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
         /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
         /// </returns>
-        public static int GetHeapOffset(GuidHandle handle) => handle.Index;
+        internal static int GetHeapOffset(GuidHandle handle) => handle.Index;
 
         /// <summary>
         /// Returns the offset of metadata heap data that corresponds 
@@ -176,7 +176,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
         /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
         /// </returns>
-        public static int GetHeapOffset(UserStringHandle handle) => handle.GetHeapOffset();
+        internal static int GetHeapOffset(UserStringHandle handle) => handle.GetHeapOffset();
 
         /// <summary>
         /// Returns the offset of metadata heap data that corresponds 
@@ -186,7 +186,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
         /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
         /// </returns>
-        public static int GetHeapOffset(StringHandle handle) => handle.IsVirtual ? -1 : handle.GetHeapOffset();
+        internal static int GetHeapOffset(StringHandle handle) => handle.IsVirtual ? -1 : handle.GetHeapOffset();
 
         /// <summary>
         /// Returns the metadata token of the specified <paramref name="handle"/>.

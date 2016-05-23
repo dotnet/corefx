@@ -11,7 +11,7 @@ using System.Text;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public sealed partial class MetadataBuilder
+    internal sealed partial class MetadataBuilder
     {
         private sealed class HeapBlobBuilder : BlobBuilder
         {

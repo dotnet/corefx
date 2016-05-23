@@ -10,7 +10,7 @@ using System.Reflection.PortableExecutable;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public sealed class StandaloneDebugMetadataSerializer : MetadataSerializer
+    internal sealed class StandaloneDebugMetadataSerializer : MetadataSerializer
     {
         private const string DebugMetadataVersionString = "PDB v1.0";
         public ushort FormatVersion => 0x0100;
@@ -64,7 +64,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    public sealed class TypeSystemMetadataSerializer : MetadataSerializer
+    internal sealed class TypeSystemMetadataSerializer : MetadataSerializer
     {
         private static readonly ImmutableArray<int> EmptyRowCounts = ImmutableArray.CreateRange(Enumerable.Repeat(0, MetadataTokens.TableCount));
 
@@ -88,7 +88,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    public abstract class MetadataSerializer
+    internal abstract class MetadataSerializer
     {
         protected readonly MetadataBuilder _builder;
         private readonly MetadataSizes _sizes;
