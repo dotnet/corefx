@@ -369,7 +369,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// <summary>
         /// Given a type handle and a raw type kind found in a signature blob determines whether the target type is a value type or a reference type.
         /// </summary>
-        public static SignatureTypeKind ResolveSignatureTypeKind(this MetadataReader reader, EntityHandle typeHandle, byte rawTypeKind)
+        internal static SignatureTypeKind ResolveSignatureTypeKind(this MetadataReader reader, EntityHandle typeHandle, byte rawTypeKind)
         {
             if (reader == null)
             {

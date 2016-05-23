@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Metadata
 {
     [DebuggerDisplay("{GetDebuggerDisplay(),nq}")]
-    public unsafe partial class BlobBuilder
+    internal unsafe partial class BlobBuilder
     {
         // The implementation is akin to StringBuilder. 
         // The differences:

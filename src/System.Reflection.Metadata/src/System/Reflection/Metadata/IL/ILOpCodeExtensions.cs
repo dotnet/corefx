@@ -4,7 +4,7 @@
 
 namespace System.Reflection.Metadata
 {
-    public static partial class ILOpCodeExtensions
+    internal static partial class ILOpCodeExtensions
     {
         /// <summary>
         /// Returns true of the specified op-code is a branch to a label.

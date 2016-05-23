@@ -8,7 +8,7 @@ using System.Reflection.Internal;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public sealed class MetadataSizes
+    internal sealed class MetadataSizes
     {
         private const int StreamAlignment = 4;
 

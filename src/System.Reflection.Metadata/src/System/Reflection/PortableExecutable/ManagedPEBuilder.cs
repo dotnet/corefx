@@ -10,7 +10,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.PortableExecutable
 {
-    public class ManagedPEBuilder : PEBuilder
+    internal class ManagedPEBuilder : PEBuilder
     {
         public const int ManagedResourcesDataAlignment = ManagedTextSection.ManagedResourcesDataAlignment;
         public const int MappedFieldDataAlignment = ManagedTextSection.MappedFieldDataAlignment;

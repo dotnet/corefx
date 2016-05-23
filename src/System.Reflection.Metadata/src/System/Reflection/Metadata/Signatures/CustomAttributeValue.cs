@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace System.Reflection.Metadata
 {
-    public struct CustomAttributeValue<TType>
+    internal struct CustomAttributeValue<TType>
     {
         public ImmutableArray<CustomAttributeTypedArgument<TType>> FixedArguments { get; }
         public ImmutableArray<CustomAttributeNamedArgument<TType>> NamedArguments { get; }

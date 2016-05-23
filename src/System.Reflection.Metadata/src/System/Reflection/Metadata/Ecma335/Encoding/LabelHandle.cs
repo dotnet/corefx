@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public struct LabelHandle : IEquatable<LabelHandle>
+    internal struct LabelHandle : IEquatable<LabelHandle>
     {
         // 1-based
         internal readonly int Id;

@@ -9,7 +9,7 @@ namespace System.Reflection.PortableExecutable
     /// <summary>
     /// Base class for PE resource section builder. Implement to provide serialization logic for native resources.
     /// </summary>
-    public abstract class ResourceSectionBuilder
+    internal abstract class ResourceSectionBuilder
     {
         protected ResourceSectionBuilder()
         {

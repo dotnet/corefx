@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public sealed class BranchBuilder
+    internal sealed class BranchBuilder
     {
         // internal for testing:
         internal struct BranchInfo

@@ -11,7 +11,7 @@ namespace System.Reflection.Metadata.Ecma335
     /// Decodes signature blobs.
     /// See Metadata Specification section II.23.2: Blobs and signatures.
     /// </summary>
-    public struct SignatureDecoder<TType>
+    internal struct SignatureDecoder<TType>
     {
         private readonly ISignatureTypeProvider<TType> _provider;
         private readonly MetadataReader _metadataReaderOpt;

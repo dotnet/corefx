@@ -8,7 +8,7 @@ using System.Reflection.Internal;
 
 namespace System.Reflection.Metadata
 {
-    public struct BlobContentId
+    internal struct BlobContentId
     {
         public Guid Guid { get; }
         public uint Stamp { get; }

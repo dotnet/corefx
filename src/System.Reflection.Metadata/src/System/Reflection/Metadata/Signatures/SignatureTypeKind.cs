@@ -6,7 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public enum SignatureTypeKind : byte
+    internal enum SignatureTypeKind : byte
     {
         /// <summary>
         /// It is not known in the current context if the type reference or definition is a class or value type.

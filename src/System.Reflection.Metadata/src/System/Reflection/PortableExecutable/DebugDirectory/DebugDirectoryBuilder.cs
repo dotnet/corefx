@@ -7,7 +7,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.PortableExecutable
 {
-    public sealed class DebugDirectoryBuilder
+    internal sealed class DebugDirectoryBuilder
     {
         private struct Entry
         {

@@ -7,7 +7,7 @@ namespace System.Reflection.Metadata
     /// <summary>
     /// Represents a primitive type found in metadata signatures.
     /// </summary>
-    public enum PrimitiveTypeCode : byte
+    internal enum PrimitiveTypeCode : byte
     {
         Boolean = SignatureTypeCode.Boolean,
         Byte = SignatureTypeCode.Byte,

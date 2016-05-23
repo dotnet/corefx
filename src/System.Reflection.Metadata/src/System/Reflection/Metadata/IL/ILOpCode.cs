@@ -4,7 +4,7 @@
 
 namespace System.Reflection.Metadata
 {
-    public enum ILOpCode : ushort
+    internal enum ILOpCode : ushort
     {
         Nop = 0x00,
         Break = 0x01,

@@ -4,7 +4,7 @@
 
 namespace System.Reflection.Metadata
 {
-    public interface ITypeProvider<TType>
+    internal interface ITypeProvider<TType>
     {
         /// <summary>
         /// Gets the type symbol for a type definition.

@@ -10,7 +10,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.PortableExecutable
 {
-    public abstract class PEBuilder
+    internal abstract class PEBuilder
     {
         public PEHeaderBuilder Header { get; }
         public Func<IEnumerable<Blob>, BlobContentId> IdProvider { get; }

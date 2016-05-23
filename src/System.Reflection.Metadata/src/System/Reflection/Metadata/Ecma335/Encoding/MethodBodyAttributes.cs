@@ -5,7 +5,7 @@
 namespace System.Reflection.Metadata.Ecma335
 {
     [Flags]
-    public enum MethodBodyAttributes
+    internal enum MethodBodyAttributes
     {
         None = 0,
         InitLocals = 1,

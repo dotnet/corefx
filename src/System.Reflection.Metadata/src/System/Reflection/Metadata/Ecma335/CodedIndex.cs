@@ -4,7 +4,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    public static class CodedIndex
+    internal static class CodedIndex
     {
         private static int ToCodedIndex(this int rowId, HasCustomAttribute tag) => (rowId << (int)HasCustomAttribute.__bits) | (int)tag;
         private static int ToCodedIndex(this int rowId, HasConstant tag) => (rowId << (int)HasConstant.__bits) | (int)tag;
