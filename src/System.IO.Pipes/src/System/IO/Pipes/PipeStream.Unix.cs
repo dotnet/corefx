@@ -377,34 +377,35 @@ namespace System.IO.Pipes
 
                 // Create /tmp/.dotnet/ if it doesn't exist.
                 string partialPath = Path.Combine(tempPath, PersistedFiles.TopLevelHiddenDirectory);
-                CreateDirectory(partialPath);
+                CreateWorldWriteableDirectory(partialPath);
 
                 // Create /tmp/.dotnet/corefx/ if it doesn't exist
                 partialPath = Path.Combine(partialPath, PersistedFiles.SecondLevelDirectory);
-                CreateDirectory(partialPath);
+                CreateWorldWriteableDirectory(partialPath);
 
                 // Create /tmp/.dotnet/corefx/pipe/ if it doesn't exist
-                CreateDirectory(fullPath);
+                CreateWorldWriteableDirectory(fullPath);
             }
 
             return fullPath;
         }
 
-        private static void CreateDirectory(string directoryPath)
+        private static void CreateWorldWriteableDirectory(string directoryPath)
         {
             int result = Interop.Sys.MkDir(directoryPath, (int)Interop.Sys.Permissions.Mask);
 
-            // If successful created, we're done.
-            if (result >= 0)
-                return;
+            if (result < 0)
+            {
+                // If the directory already exists, consider it a success, otherwise throw.
+                Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
+                if (errorInfo.Error != Interop.Error.EEXIST)
+                {
+                    throw Interop.GetExceptionForIoErrno(errorInfo, directoryPath, isDirectory: true);
+                }
+            }
 
-            // If the directory already exists, consider it a success.
-            Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
-            if (errorInfo.Error == Interop.Error.EEXIST)
-                return;
-
-            // Otherwise, fail.
-            throw Interop.GetExceptionForIoErrno(errorInfo, directoryPath, isDirectory: true);
+            // We consider any IO error during ChMod'ing to be a problem.
+            Interop.CheckIo(Interop.Sys.ChMod(directoryPath, (int)Interop.Sys.Permissions.Mask), path: directoryPath, isDirectory: true);
         }
 
         /// <summary>Creates an anonymous pipe.</summary>
