@@ -139,8 +139,7 @@ Existing PCL projects in VS2013 and VS2015 (excluding UWP targets), can only tar
 | ASP.NET 5.0 on .NET Framework | aspnet50 | net46 |
 | ASP.NET 5.0 on .NET Core | aspnetcore50 | netcoreapp1.0 |
 | DNX on .NET Framework 4.5.1 - 4.6 | dnx451 - dnx46 | net451 - net46 |
-| DNX on .NET Core 5.0 (Executable) | dnxcore50  | netstandardapp1.5 &rarr; netcoreapp1.0 |
-| DNX on .NET Core 5.0 (Portable Library) | dnxcore50  | dotnet &rarr; dotnet5.4 &rarr; netstandard1.3 |
+| DNX on .NET Core 5.0 | dnxcore50 | netstandardapp1.5 &rarr; netcoreapp1.0 |
 | .NET Standard Application 1.5 | netstandardapp1.5 | netcoreapp1.0 |
 | .NET Platform 5.1 - 5.6 | dotnet5.1 - dotnet5.6  | netstandard1.0 - netstandard 1.5 |
 | .NET Platform 5.0 | dotnet | dotnet5.4 &rarr; netstandard1.3 |
