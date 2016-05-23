@@ -35,7 +35,7 @@ def osShortName = ['Windows 10': 'win10',
                    'Windows_NT' : 'windows_nt',
                    'Ubuntu14.04' : 'ubuntu14.04',
                    'OSX' : 'osx',
-                   'Windows Nano' : 'winnano',
+                   'Windows Nano 2016' : 'winnano',
                    'Ubuntu15.10' : 'ubuntu15.10',
                    'CentOS7.1' : 'centos7.1',
                    'OpenSUSE13.2' : 'opensuse13.2',
@@ -116,7 +116,7 @@ def osShortName = ['Windows 10': 'win10',
 // Define outerloop windows Nano testing.  Run locally on each machine.
 // **************************
 [true, false].each { isPR ->
-    ['Windows Nano'].each { os ->
+    ['Windows Nano 2016'].each { os ->
         ['Debug', 'Release'].each { configurationGroup ->
 
             def newJobName = "outerloop_${osShortName[os]}_${configurationGroup.toLowerCase()}"
@@ -448,6 +448,7 @@ def static addCopyCoreClrAndRunTestSteps(def job, def coreclrBranch, String os, 
                 --mscorlib-bins \${WORKSPACE}/bin/Product/${osGroup}.x64.${coreClrConfigurationGroup}/ \\
                 ${useServerGC ? '--serverGc' : ''} ${isOuterLoop ? '--outerloop' : ''}
             ${isOuterLoop ? 'sudo find . -name \"testResults.xml\" -exec chmod 777 {} \\;' : ''}
+            ${isOuterLoop ? 'sudo rm -rf /tmp/.dotnet' : ''}
             """)
         }
 
