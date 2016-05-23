@@ -5,6 +5,10 @@
     "Microsoft.NETCore.Console": "1.0.0-rc4-24123-00",
     "System.IO.Compression": "4.1.0-rc4-24123-00",
     "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-rc4-24123-00",
+    "System.Runtime.InteropServices.PInvoke": {
+       "version": "4.0.0-rc3-24117-00",
+       "exclude": "compile"
+    },
     "coveralls.io": "1.4",
     "OpenCover": "4.6.519",
     "ReportGenerator": "2.4.3",
