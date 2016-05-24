@@ -22,6 +22,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class KeyTransRecipientInfoTests
     {
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransVersion_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -29,6 +30,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransVersion_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -36,6 +38,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransType_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -43,6 +46,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransType_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -50,6 +54,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdType_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -58,6 +63,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdType_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -66,6 +72,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -78,6 +85,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -90,6 +98,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdType_Ski_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -98,6 +107,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdType_Ski_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -106,6 +116,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_Ski_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -117,6 +128,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_Ski_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -128,6 +140,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransKeyEncryptionAlgorithm_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -137,6 +150,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransKeyEncryptionAlgorithm_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -146,6 +160,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransEncryptedKey_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -154,6 +169,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransEncryptedKey_FixedValue()
         {
             byte[] expectedEncryptedKey =

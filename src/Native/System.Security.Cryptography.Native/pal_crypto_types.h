@@ -9,3 +9,4 @@
 
 typedef STACK_OF(X509) X509Stack;
 typedef STACK_OF(X509_NAME) X509NameStack;
+typedef STACK_OF(CMS_RecipientInfo) CmsRecipientStack;

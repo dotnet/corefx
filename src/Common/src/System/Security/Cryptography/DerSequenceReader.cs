@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 
 namespace System.Security.Cryptography
 {
@@ -14,7 +17,10 @@ namespace System.Security.Cryptography
     /// </summary>
     internal class DerSequenceReader
     {
+        internal const byte ConstructedFlag = 0x20;
         internal const byte ContextSpecificTagFlag = 0x80;
+
+        internal static DateTimeFormatInfo s_validityDateTimeFormatInfo;
 
         private readonly byte[] _data;
         private readonly int _end;
@@ -40,6 +46,15 @@ namespace System.Security.Cryptography
         }
 
         internal DerSequenceReader(byte[] data, int offset, int length)
+            : this(DerTag.Sequence, data, offset, length)
+        {
+        }
+
+        /// <summary>
+        /// This constructor allows the DerSequenceReader to be extended to read sets. For
+        /// safe check on the tag and length in the encoding use ReadSet. 
+        /// </summary>
+        internal DerSequenceReader(DerTag tagToEat, byte[] data, int offset, int length)
         {
             _data = data;
             _end = offset + length;
@@ -47,10 +62,10 @@ namespace System.Security.Cryptography
             Debug.Assert(data != null, "Data is null");
             Debug.Assert(offset >= 0, "Offset is negative");
             Debug.Assert(length > 2, "Length is too short");
-            Debug.Assert(data.Length >= offset + length, "Array is too short");
+            Debug.Assert(length <= data.Length - offset, "Array is too short");
 
             _position = offset;
-            EatTag(DerTag.Sequence);
+            EatTag(tagToEat);
             ContentLength = EatLength();
         }
 
@@ -66,6 +81,8 @@ namespace System.Security.Cryptography
 
         internal byte PeekTag()
         {
+            if (_data.Length <= _position)
+                throw new InvalidOperationException(SR.Cryptography_Der_Invalid_Encoding);
             return _data[_position];
         }
 
@@ -74,6 +91,23 @@ namespace System.Security.Cryptography
             EatTag((DerTag)PeekTag());
             int contentLength = EatLength();
             _position += contentLength;
+        }
+
+        /// <summary>
+        /// Returns the next value encoded (this includes tag and length)
+        /// </summary>
+        internal byte[] ReadNextEncodedValue()
+        {
+            int lengthLength;
+            int contentLength = ScanContentLength(_data, _position + 1, out lengthLength);
+            // Length of tag, encoded length, and the content
+            int totalLength = 1 + lengthLength + contentLength;
+
+            byte[] encodedValue = new byte[totalLength];
+            Buffer.BlockCopy(_data, _position, encodedValue, 0, totalLength);
+
+            _position += totalLength;
+            return encodedValue;
         }
 
         internal int ReadInteger()
@@ -105,6 +139,10 @@ namespace System.Security.Cryptography
         {
             EatTag(DerTag.ObjectIdentifier);
             int contentLength = EatLength();
+
+            // For desktop compat, empty Oids are supported
+            if (contentLength == 0)
+                return string.Empty;
 
             // Each byte could cause 3 decimal characters to be written, plus a period. Over-allocate
             // and avoid re-alloc.
@@ -161,18 +199,50 @@ namespace System.Security.Cryptography
             return new Oid(ReadOidAsString());
         }
 
-        internal DerSequenceReader ReadSequence()
+        /// <summary>
+        /// Use for explicitly defined sequences. This returns a reader that eats both tags. 
+        /// </summary>
+        /// <returns>DerSequenceReader ready to read the inner contents of a explicit sequence</returns>
+        internal DerSequenceReader ReadExplicitContextSequence()
+        {
+            byte tag = PeekTag();
+            if ((tag & ContextSpecificTagFlag) == 0)
+            {
+                throw new InvalidOperationException(SR.Format(
+                    SR.InvalidOperation_Unexpected_Tag,
+                    ContextSpecificTagFlag.ToString("X2"),
+                    tag.ToString("X2"),
+                    _position));
+            }
+
+            EatTag((DerTag)tag);
+            EatLength();
+
+            return ReadSequence();
+        }
+
+        private DerSequenceReader ReadCollectionWithTag(DerTag expected)
         {
             // DerSequenceReader wants to read its own tag, so don't EatTag here.
-            CheckTag(DerTag.Sequence, _data, _position);
+            CheckTag(expected, _data, _position);
 
             int lengthLength;
             int contentLength = ScanContentLength(_data, _position + 1, out lengthLength);
             int totalLength = 1 + lengthLength + contentLength;
 
-            DerSequenceReader reader = new DerSequenceReader(_data, _position, totalLength);
+            DerSequenceReader reader = new DerSequenceReader(expected, _data, _position, totalLength);
             _position += totalLength;
             return reader;
+        }
+
+        internal DerSequenceReader ReadSequence()
+        {
+            return ReadCollectionWithTag(DerTag.Sequence);
+        }
+
+        internal DerSequenceReader ReadSet()
+        {
+            return ReadCollectionWithTag(DerTag.Set);
         }
 
         internal string ReadIA5String()
@@ -186,6 +256,42 @@ namespace System.Security.Cryptography
             _position += contentLength;
 
             return ia5String;
+        }
+
+        internal DateTime ReadUtcTime()
+        {
+            EatTag(DerTag.UTCTime);
+            int contentLength = EatLength();
+
+            string decodedTime = System.Text.Encoding.ASCII.GetString(_data, _position, contentLength);
+            _position += contentLength;
+
+            Debug.Assert(decodedTime.Length == 13, "The date doesn't follow the X.690 format, incorrect length");
+            Debug.Assert(decodedTime[12] == 'Z', "The date doesn't follow the X.690 format, doesn't end with 'Z'");
+
+            DateTime utcTime;
+
+            DateTimeFormatInfo fi = LazyInitializer.EnsureInitialized(
+                ref s_validityDateTimeFormatInfo,
+                () =>
+                {
+                    var clone = (DateTimeFormatInfo)CultureInfo.InvariantCulture.DateTimeFormat.Clone();
+                    clone.Calendar.TwoDigitYearMax = 2049;
+
+                    return clone;
+                });
+
+            if (!DateTime.TryParseExact(
+                    decodedTime,
+                    "yyMMddHHmmss'Z'",
+                    fi,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out utcTime))
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            return utcTime;
         }
 
         private byte[] ReadContentAsBytes()
@@ -207,6 +313,8 @@ namespace System.Security.Cryptography
 
         private static void CheckTag(DerTag expected, byte[] data, int position)
         {
+            if (data.Length <= position)
+                throw new InvalidOperationException(SR.Cryptography_Der_Invalid_Encoding);
             byte actual = data[position];
 
             // Context-specific datatypes cannot be tag-verified
@@ -216,14 +324,15 @@ namespace System.Security.Cryptography
             }
 
             byte relevant = (byte)(actual & 0x1F);
-            byte expectedByte = (byte)expected;
+            byte expectedByte = (byte)((byte)expected & 0x1F);
 
             if (expectedByte != relevant)
             {
-                throw new InvalidOperationException(
-                    "Expected tag '0x" + expectedByte.ToString("X2") +
-                        "', got '0x" + actual.ToString("X2") +
-                        "' at position " + position);
+                throw new InvalidOperationException(SR.Format(
+                    SR.InvalidOperation_Unexpected_Tag,
+                    expectedByte.ToString("X2"),
+                    actual.ToString("X2"),
+                    position));
             }
         }
 
@@ -238,6 +347,8 @@ namespace System.Security.Cryptography
 
         private static int ScanContentLength(byte[] data, int offset, out int bytesConsumed)
         {
+            if (data.Length <= offset)
+                throw new InvalidOperationException(SR.Cryptography_Der_Invalid_Encoding);
             byte lengthOrLengthLength = data[offset];
 
             if (lengthOrLengthLength < 0x80)
