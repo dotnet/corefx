@@ -157,7 +157,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(ECExplicitCurvesSupported))]
         public void TestRegenKeyNistP256()
         {
             ECParameters param, param2;
