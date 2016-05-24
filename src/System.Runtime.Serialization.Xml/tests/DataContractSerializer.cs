@@ -1852,7 +1852,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("ReflectionBasedDCS")]
     public static void DCS_TypeWithCollectionWithoutDefaultConstructor()
     {
         TypeWithCollectionWithoutDefaultConstructor value = new TypeWithCollectionWithoutDefaultConstructor();
@@ -1980,7 +1979,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("ReflectionBasedDCS")]
     public static void DCS_EnumerableInterfaceGetOnlyCollection()
     {
         // Expect exception in deserialization process
