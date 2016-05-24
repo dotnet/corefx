@@ -44,6 +44,7 @@
     <Compile Include="ServerAsyncAuthenticateTest.cs" />
     <Compile Include="ServerNoEncryptionTest.cs" />
     <Compile Include="ServerRequireEncryptionTest.cs" />
+    <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
     <Compile Include="SslStreamStreamToStreamTest.cs" />
     <Compile Include="SslStreamNetworkStreamTest.cs" />
     <Compile Include="StreamAPMExtensions.cs" />
@@ -62,6 +63,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.cs">
       <Link>Common\System\Net\Capability.Security.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\SchSendAuxRecordTestServer.cs">
+      <Link>Common\System\Net\SchSendAuxRecordTestServer.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\SslProtocolSupport.cs">
       <Link>Common\System\Net\SslProtocolSupport.cs</Link>
