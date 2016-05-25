@@ -7,6 +7,7 @@ using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static Internal.NativeCrypto.BCryptNative;
+
 using BCRYPT_ECCFULLKEY_BLOB = Interop.BCrypt.BCRYPT_ECCFULLKEY_BLOB;
 using BCRYPT_ECCKEY_BLOB = Interop.BCrypt.BCRYPT_ECCKEY_BLOB;
 using BCRYPT_ECC_PARAMETER_HEADER = Interop.BCrypt.BCRYPT_ECC_PARAMETER_HEADER;
