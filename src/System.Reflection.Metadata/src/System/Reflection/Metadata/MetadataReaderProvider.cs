@@ -20,7 +20,7 @@ namespace System.Reflection.Metadata
     /// - Edit and Continue metadata delta (<see cref="FromMetadataImage(byte*, int)"/>)
     /// - Portable PDB metadata (<see cref="FromPortablePdbImage(byte*, int)"/>)
     /// </remarks>
-    internal sealed class MetadataReaderProvider : IDisposable
+    public sealed class MetadataReaderProvider : IDisposable
     {
         // Either we have a provider and create metadata block lazily or
         // we have no provider and metadata block is created in the ctor.
