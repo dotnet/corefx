@@ -105,7 +105,7 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Theory]
-        [PlatformSpecific(~PlatformID.OSX)] // There does't appear to be an OSX API that will fail for these
+        [PlatformSpecific(~PlatformID.OSX)] // There doesn't appear to be an OSX API that will fail for these
         [InlineData("0x.1.1.1")] // Empty leading hex segment
         public void ParseIPv4_InvalidHex_Failure_NonOSX(string address)
         {
@@ -262,6 +262,17 @@ namespace System.Net.Primitives.Functional.Tests
         [InlineData("::5EFE:192.168.0.1", "::5efe:192.168.0.1")] // ISATAP
         [InlineData("1::5EFE:192.168.0.1", "1::5efe:192.168.0.1")] // ISATAP
         public void ParseIPv6_v4_Success_NonUnix(string address, string expected)
+        {
+            Assert.Equal(expected, IPAddress.Parse(address).ToString());
+        }
+
+        [Theory]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        // Linux/OSX don't do the IPv6->IPv4 formatting for these addresses
+        [InlineData("::FFFF:0:192.168.0.1", "::ffff:0:c0a8:1")] // SIIT
+        [InlineData("::5EFE:192.168.0.1", "::5efe:c0a8:1")] // ISATAP
+        [InlineData("1::5EFE:192.168.0.1", "1::5efe:c0a8:1")] // ISATAP
+        public void ParseIPv6_v4_Success_Unix(string address, string expected)
         {
             Assert.Equal(expected, IPAddress.Parse(address).ToString());
         }
