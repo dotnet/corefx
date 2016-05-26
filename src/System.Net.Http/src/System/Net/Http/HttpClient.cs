@@ -347,18 +347,17 @@ namespace System.Net.Http
             HttpResponseMessage response = null;
             try
             {
-                try
-                {
-                    // Wait for the send request to complete, getting back the response.
-                    response = await sendTask.ConfigureAwait(false);
-                }
-                finally
-                {
-                    // When a request completes, dispose the request content so the user doesn't have to. This also
-                    // ensures that a HttpContent object is only sent once using HttpClient (similar to HttpRequestMessages
-                    // that can also be sent only once).
-                    request.Content?.Dispose();
-                }
+                // Wait for the send request to complete, getting back the response.
+                response = await sendTask.ConfigureAwait(false);
+
+                // The implementation of HttpClient in the full framework currently disposes
+                // of the request.Content here.  That, however, causes problems for handlers
+                // that may continue to use the request content after the SendAsync task has
+                // already completed, such as a handler that allows the task to be completed
+                // once all response headers have been received even if all request content
+                // hasn't finished sending.  This implementation pushes that disposal responsibility
+                // to the handler, such that the handler can dispose of the content if/when
+                // it's known to be safe.
 
                 if (response == null)
                 {

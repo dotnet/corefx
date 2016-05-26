@@ -556,7 +556,21 @@ namespace System.Net.Http.Functional.Tests
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                return _func(request, cancellationToken);
+                try
+                {
+                    return DisposeWhenCompleted(_func(request, cancellationToken), request);
+                }
+                catch
+                {
+                    request.Content?.Dispose();
+                    throw;
+                }
+            }
+
+            private static async Task<T> DisposeWhenCompleted<T>(Task<T> t, HttpRequestMessage request)
+            {
+                try { return await t; }
+                finally { request.Content?.Dispose(); }
             }
         }
 

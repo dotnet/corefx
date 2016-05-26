@@ -180,13 +180,6 @@ namespace System.Net.Http
 
             public void Cleanup() // not called Dispose because the request may still be in use after it's cleaned up
             {
-                _responseMessage.ResponseStream.SignalComplete(); // No more callbacks so no more data
-                // Don't dispose of the ResponseMessage.ResponseStream as it may still be in use
-                // by code reading data stored in the stream.
-
-                // Dispose of the input content stream if there was one.  Nothing should be using it any more.
-                _requestContentStream?.Dispose();
-
                 // Dispose of the underlying easy handle.  We're no longer processing it.
                 _easyHandle?.Dispose();
 
@@ -197,7 +190,20 @@ namespace System.Net.Http
                 // doing any processing that assumes it's valid.
                 _requestHeaders?.Dispose();
 
+                // Dispose of our native callback information
                 _callbackHandle?.Dispose();
+
+                // Dispose of the input content and content stream if they existed.  Nothing should be using them any more.
+                _requestContentStream?.Dispose();
+                _requestMessage.Content?.Dispose();
+
+                // Finally, complete the response stream, highlighting that there's no more data to be consumed.
+                // We do this after disposing of the request content and message so that they're deterministically
+                // disposed in the success case prior to the last read on the response stream completing.
+                _responseMessage.ResponseStream.SignalComplete();
+
+                // Don't dispose of the ResponseMessage or ResponseMessage.ResponseStream, as they may still be in use
+                // by code consuming those objects.  The responsibility to dispose those is with the caller.
             }
 
             private void SetUrl()
