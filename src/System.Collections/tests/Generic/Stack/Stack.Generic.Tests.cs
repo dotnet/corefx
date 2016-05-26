@@ -54,7 +54,16 @@ namespace System.Collections.Tests
 
         #endregion
         
-        // Constructor (TODO)
+        // Constructor
+        
+        [Fact]
+        public void Stack_Generic_Constructor_InitialValues()
+        {
+            var stack = new Stack<T>();
+            Assert.Equal(0, stack.Count);
+            Assert.Equal(0, stack.ToArray().Length);
+            Assert.NotNull(((ICollection)stack).SyncRoot);
+        }
         
         // IEnumerable constructor
 
