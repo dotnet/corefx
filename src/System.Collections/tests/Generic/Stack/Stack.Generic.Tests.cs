@@ -53,12 +53,10 @@ namespace System.Collections.Tests
         protected override bool Enumerator_Current_UndefinedOperation_Throws { get { return true; } }
 
         #endregion
-
-        #region Constructor
-
-        #endregion
-
-        #region Constructor_IEnumerable
+        
+        // Constructor (TODO)
+        
+        // IEnumerable constructor
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
@@ -74,10 +72,8 @@ namespace System.Collections.Tests
         {
             Assert.Throws<ArgumentNullException>("collection", () => new Stack<T>(null));
         }
-
-        #endregion
-
-        #region Constructor_Capacity
+        
+        // Capacity-based constructor
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -93,10 +89,8 @@ namespace System.Collections.Tests
             Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new Stack<T>(-1));
             Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new Stack<T>(int.MinValue));
         }
-
-        #endregion
-
-        #region Pop
+        
+        // Pop
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -114,21 +108,17 @@ namespace System.Collections.Tests
             Assert.Throws<InvalidOperationException>(() => new Stack<T>().Pop());
         }
 
-        #endregion
-
-        #region ToArray
+        // ToArray
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
         public void Stack_Generic_ToArray(int count)
         {
             Stack<T> stack = GenericStackFactory(count);
-            Assert.True(stack.ToArray().SequenceEqual(stack.ToArray<T>()));
+            Assert.Equal(stack.ToArray(), stack.ToArray());
         }
 
-        #endregion
-
-        #region Peek
+        // Peek
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -149,9 +139,7 @@ namespace System.Collections.Tests
             Assert.Throws<InvalidOperationException>(() => new Stack<T>().Peek());
         }
 
-        #endregion
-
-        #region TrimExcess
+        // TrimExcess
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -165,12 +153,12 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void Stack_Generic_TrimExcess_Repeatedly(int count)
         {
-            Stack<T> stack = GenericStackFactory(count);;
+            Stack<T> stack = GenericStackFactory(count);
             List<T> expected = stack.ToList();
             stack.TrimExcess();
             stack.TrimExcess();
             stack.TrimExcess();
-            Assert.True(stack.SequenceEqual(expected));
+            Assert.Equal(expected, stack);
         }
 
         [Theory]
@@ -179,7 +167,7 @@ namespace System.Collections.Tests
         {
             if (count > 0)
             {
-                Stack<T> stack = GenericStackFactory(count);;
+                Stack<T> stack = GenericStackFactory(count);
                 List<T> expected = stack.ToList();
                 T elementToRemove = stack.ElementAt(0);
 
@@ -188,7 +176,7 @@ namespace System.Collections.Tests
                 expected.RemoveAt(0);
                 stack.TrimExcess();
 
-                Assert.True(stack.SequenceEqual(expected));
+                Assert.Equal(expected, stack);
             }
         }
 
@@ -198,7 +186,7 @@ namespace System.Collections.Tests
         {
             if (count > 0)
             {
-                Stack<T> stack = GenericStackFactory(count);;
+                Stack<T> stack = GenericStackFactory(count);
                 stack.TrimExcess();
                 stack.Clear();
                 stack.TrimExcess();
@@ -216,7 +204,7 @@ namespace System.Collections.Tests
         {
             if (count > 0)
             {
-                Stack<T> stack = GenericStackFactory(count);;
+                Stack<T> stack = GenericStackFactory(count);
                 stack.TrimExcess();
                 stack.Clear();
                 stack.TrimExcess();
@@ -227,7 +215,28 @@ namespace System.Collections.Tests
                 Assert.Equal(count, stack.Count);
             }
         }
-
-        #endregion
+        
+        // Contains
+        
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void Stack_Generic_Contains_BasicFunctionality(int count)
+        {
+            Stack<T> stack = GenericStackFactory(count);
+            List<T> list = stack.ToList();
+            
+            // Stack should contain all items that result from enumeration
+            Assert.All(list, item => Assert.True(stack.Contains(item)));
+            
+            stack.Clear();
+            
+            // Stack should not contain any items after being cleared
+            Assert.All(list, item => Assert.False(stack.Contains(item)));
+            
+            foreach (T item in list) stack.Push(item);
+            
+            // Stack should contain whatever items are pushed to it
+            Assert.All(list, item => Assert.True(stack.Contains(item)));
+        }
     }
 }
