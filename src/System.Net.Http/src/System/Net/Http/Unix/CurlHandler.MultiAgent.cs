@@ -653,7 +653,14 @@ namespace System.Net.Http
                 try
                 {
                     easy.InitializeCurl();
-                    easy._requestContentStream?.Run();
+                    if (easy._requestContentStream != null && 
+                        easy._requestMessage.Method != HttpMethod.Head &&
+                        easy._requestMessage.Method != HttpMethod.Trace)
+                    {
+                        // If there's content and we haven't set NOBODY on the request,
+                        // kick off the transfer from the HttpContent to the request stream.
+                        easy._requestContentStream.StartCopy();
+                    }
 
                     easy._associatedMultiAgent = this;
                     easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_PRIVATE, gcHandlePtr);
@@ -930,6 +937,7 @@ namespace System.Net.Http
                             response.Content.Headers.Clear();
                             response._headerBytesReceived = (uint)size;
 
+                            easy._ensureResponseMessagePublishedInvoked = false;
                             easy._isRedirect = easy._handler.AutomaticRedirection &&
                                 (response.StatusCode == HttpStatusCode.Moved ||           // 301
                                  response.StatusCode == HttpStatusCode.Redirect ||        // 302
@@ -1206,9 +1214,6 @@ namespace System.Net.Http
                         {
                             // Dump any state associated with the old stream's position
                             easy._sendTransferState?.SetTaskOffsetCount(null, 0, 0);
-
-                            // Restart the transfer
-                            easy._requestContentStream.Run();
 
                             CurlHandler.EventSourceTrace("Seek successful", easy: easy);
                             return Interop.Http.CurlSeekResult.CURL_SEEKFUNC_OK;

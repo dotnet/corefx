@@ -44,6 +44,7 @@ namespace System.Net.Http
             internal MultiAgent _associatedMultiAgent;
             internal SendTransferState _sendTransferState;
             internal bool _isRedirect = false;
+            internal bool _ensureResponseMessagePublishedInvoked = false;
             internal Uri _targetUri;
             internal StrongToWeakReference<EasyRequest> _selfStrongToWeakReference;
 
@@ -99,29 +100,56 @@ namespace System.Net.Http
 
             public void EnsureResponseMessagePublished()
             {
-                // If the response message hasn't been published yet, do any final processing of it before it is.
-                if (!Task.IsCompleted)
-                {
-                    EventSourceTrace("Publishing response message");
+                // This method is called once all response headers have been received, and it may be called
+                // multiple times after that point.  Once all request data has been sent and the response
+                // headers have been received, we need to complete the Task (which was returned from SendAsync).
+                // However, while not common, it's possible for a server to send all of the response headers
+                // before all of the request data has been sent.  To deal with this, we track whether this
+                // function has been called, separately from whether the Task is completed.  The first time
+                // it's called, we either publish the response message if all request data has been sent,
+                // or we schedule the response message to be published when the request data is finished being sent.
+                EventSourceTrace("Already invoked: {0}", _ensureResponseMessagePublishedInvoked);
 
-                    // On Windows, if the response was automatically decompressed, Content-Encoding and Content-Length
-                    // headers are removed from the response. Do the same thing here.
-                    DecompressionMethods dm = _handler.AutomaticDecompression;
-                    if (dm != DecompressionMethods.None)
+                // Ensure we only publish once.
+                if (_ensureResponseMessagePublishedInvoked) return;
+                _ensureResponseMessagePublishedInvoked = true;
+
+                // If request data is still being copied, schedule the publishing of the response for when it completes.
+                // Otherwise, just publish it now.
+                Task copyTask = _requestContentStream?.CopyTask;
+                if (copyTask != null && !copyTask.IsCompleted)
+                {
+                    EventSourceTrace("CopyTask: {0}", copyTask.Status);
+                    copyTask.ContinueWith((_, s) => ((EasyRequest)s).PublishResponseMessage(), this,
+                        CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+                }
+                else
+                {
+                    PublishResponseMessage();
+                }
+            }
+
+            private void PublishResponseMessage()
+            {
+                EventSourceTrace("Status: {0}", Task.Status);
+
+                // On Windows, if the response was automatically decompressed, Content-Encoding and Content-Length
+                // headers are removed from the response. Do the same thing here.
+                DecompressionMethods dm = _handler.AutomaticDecompression;
+                if (dm != DecompressionMethods.None)
+                {
+                    HttpContentHeaders contentHeaders = _responseMessage.Content.Headers;
+                    IEnumerable<string> encodings;
+                    if (contentHeaders.TryGetValues(HttpKnownHeaderNames.ContentEncoding, out encodings))
                     {
-                        HttpContentHeaders contentHeaders = _responseMessage.Content.Headers;
-                        IEnumerable<string> encodings;
-                        if (contentHeaders.TryGetValues(HttpKnownHeaderNames.ContentEncoding, out encodings))
+                        foreach (string encoding in encodings)
                         {
-                            foreach (string encoding in encodings)
+                            if (((dm & DecompressionMethods.GZip) != 0 && string.Equals(encoding, EncodingNameGzip, StringComparison.OrdinalIgnoreCase)) ||
+                                ((dm & DecompressionMethods.Deflate) != 0 && string.Equals(encoding, EncodingNameDeflate, StringComparison.OrdinalIgnoreCase)))
                             {
-                                if (((dm & DecompressionMethods.GZip) != 0 && string.Equals(encoding, EncodingNameGzip, StringComparison.OrdinalIgnoreCase)) ||
-                                    ((dm & DecompressionMethods.Deflate) != 0 && string.Equals(encoding, EncodingNameDeflate, StringComparison.OrdinalIgnoreCase)))
-                                {
-                                    contentHeaders.Remove(HttpKnownHeaderNames.ContentEncoding);
-                                    contentHeaders.Remove(HttpKnownHeaderNames.ContentLength);
-                                    break;
-                                }
+                                contentHeaders.Remove(HttpKnownHeaderNames.ContentEncoding);
+                                contentHeaders.Remove(HttpKnownHeaderNames.ContentLength);
+                                break;
                             }
                         }
                     }
@@ -129,18 +157,14 @@ namespace System.Net.Http
 
                 // Now ensure it's published.
                 bool completedTask = TrySetResult(_responseMessage);
-                Debug.Assert(completedTask || Task.Status == TaskStatus.RanToCompletion,
-                    "If the task was already completed, it should have been completed successfully; " +
-                    "we shouldn't be completing as successful after already completing as failed.");
+                Debug.Assert(completedTask || Task.IsFaulted || Task.IsCanceled,
+                    "Expected either to successfully complete the task or have it already be faulted/canceled");
 
-                // If we successfully transitioned it to be completed, we also handed off lifetime ownership
-                // of the response to the owner of the task.  Transition our reference on the EasyRequest
-                // to be weak instead of strong, so that we don't forcibly keep it alive.
-                if (completedTask)
-                {
-                    Debug.Assert(_selfStrongToWeakReference != null, "Expected non-null wrapper");
-                    _selfStrongToWeakReference.MakeWeak();
-                }
+                // We handed off lifetime ownership of the response to the owner of the task.
+                // Transition our reference on the EasyRequest to be weak instead of strong, so 
+                // that we don't forcibly keep it alive.
+                Debug.Assert(_selfStrongToWeakReference != null, "Expected non-null wrapper");
+                _selfStrongToWeakReference.MakeWeak();
             }
 
             public void FailRequestAndCleanup(Exception error)
@@ -559,6 +583,14 @@ namespace System.Net.Http
                 {
                     ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoTransferEncoding));
                 }
+
+                // And disable the "Expect: 100-continue" header that libcurl sends by default for some
+                // requests. This is done both to match the WinHttpHandler behavior as well as to enable 
+                // us to match the behavior of completing the SendAsync task when response headers have
+                // been received and once all request data has been sent (without this, we can't tell the
+                // difference between whether no request data has been sent because libcurl simply hasn't yet
+                // but will or because it's never going to).
+                ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoExpect));
 
                 if (!slist.IsInvalid)
                 {
