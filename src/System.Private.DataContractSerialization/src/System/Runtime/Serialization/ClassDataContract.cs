@@ -373,10 +373,15 @@ namespace System.Runtime.Serialization
 #if !NET_NATIVE
             return new ClassDataContract(type, ns, memberNames);
 #else
-            ClassDataContract cdc = (ClassDataContract)DataContract.GetDataContractFromGeneratedAssembly(type);
-            ClassDataContract cloned = cdc.Clone();
-            cloned.UpdateNamespaceAndMembers(type, ns, memberNames);
-            return cloned;
+            if (DataContractSerializer.Option == SerializationOption.ReflectionOnly) {
+                return new ClassDataContract(type, ns, memberNames);
+            }
+            else {
+                ClassDataContract cdc = (ClassDataContract)DataContract.GetDataContractFromGeneratedAssembly(type);
+                ClassDataContract cloned = cdc.Clone();
+                cloned.UpdateNamespaceAndMembers(type, ns, memberNames);
+                return cloned;
+            }
 #endif
         }
 
