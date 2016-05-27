@@ -674,7 +674,6 @@ namespace System.Runtime.Serialization
                             if (type == null)
                                 type = Type.GetTypeFromHandle(typeHandle);
                             type = UnwrapNullableType(type);
-                            type = GetDataContractAdapterType(type);
 
 #if NET_NATIVE
                             dataContract = DataContract.GetDataContractFromGeneratedAssembly(type);
@@ -685,6 +684,7 @@ namespace System.Runtime.Serialization
                             }
 #endif
 
+                            type = GetDataContractAdapterType(type);
                             dataContract = GetBuiltInDataContract(type);
                             if (dataContract == null)
                             {
