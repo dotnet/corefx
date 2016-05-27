@@ -17,7 +17,7 @@ namespace System.Collections.Tests
     /// </summary>
     public abstract class IGenericSharedAPI_Tests<T> : IEnumerable_Generic_Tests<T>
     {
-        #region IGenericSharedAPI<T> Helper methods
+        // IGenericSharedAPI<T> Helper methods
 
         protected virtual bool DuplicateValuesAllowed { get { return true; } }
         protected virtual bool DefaultValueWhenNotAllowed_Throws { get { return true; } }
@@ -48,9 +48,7 @@ namespace System.Collections.Tests
         protected abstract void CopyTo(IEnumerable<T> enumerable, T[] array, int index);
         protected abstract bool Remove(IEnumerable<T> enumerable);
 
-        #endregion
-
-        #region IEnumerable<T> helper methods
+        // IEnumerable<T> helper methods
 
         protected override IEnumerable<T> GenericIEnumerableFactory(int count)
         {
@@ -89,9 +87,8 @@ namespace System.Collections.Tests
                 };
             }
         }
-        #endregion
 
-        #region Count
+        // Count
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -101,9 +98,7 @@ namespace System.Collections.Tests
             Assert.Equal(count, Count(collection));
         }
 
-        #endregion
-
-        #region Add
+        // Add
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -234,9 +229,7 @@ namespace System.Collections.Tests
             }
         }
 
-        #endregion
-
-        #region Clear
+        // Clear
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -255,9 +248,7 @@ namespace System.Collections.Tests
             }
         }
 
-        #endregion
-
-        #region Contains
+        // Contains
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -339,9 +330,7 @@ namespace System.Collections.Tests
             }
         }
 
-        #endregion
-
-        #region CopyTo
+        // CopyTo
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -413,7 +402,5 @@ namespace System.Collections.Tests
             CopyTo(collection, array, 0);
             Assert.True(Enumerable.SequenceEqual(collection, array.Take(count)));
         }
-
-        #endregion
     }
 }
