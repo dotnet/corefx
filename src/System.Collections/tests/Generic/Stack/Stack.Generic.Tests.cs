@@ -224,28 +224,5 @@ namespace System.Collections.Tests
                 Assert.Equal(count, stack.Count);
             }
         }
-        
-        // Contains
-        
-        [Theory]
-        [MemberData(nameof(ValidCollectionSizes))]
-        public void Stack_Generic_Contains_BasicFunctionality(int count)
-        {
-            Stack<T> stack = GenericStackFactory(count);
-            List<T> list = stack.ToList();
-            
-            // Stack should contain all items that result from enumeration
-            Assert.All(list, item => Assert.True(stack.Contains(item)));
-            
-            stack.Clear();
-            
-            // Stack should not contain any items after being cleared
-            Assert.All(list, item => Assert.False(stack.Contains(item)));
-            
-            foreach (T item in list) stack.Push(item);
-            
-            // Stack should contain whatever items are pushed to it
-            Assert.All(list, item => Assert.True(stack.Contains(item)));
-        }
     }
 }
