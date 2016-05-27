@@ -16,13 +16,13 @@ namespace System.Threading.Tasks.Channels.Tests
             Assert.True(default(ValueTask<int>).IsCompletedSuccessfully);
             Assert.False(default(ValueTask<int>).IsFaulted);
             Assert.False(default(ValueTask<int>).IsCanceled);
-            Assert.Equal(0, default(ValueTask<int>).Result);
+            Assert.Equal(0, default(ValueTask<int>).GetAwaiter().GetResult());
 
             Assert.True(default(ValueTask<string>).IsCompleted);
             Assert.True(default(ValueTask<string>).IsCompletedSuccessfully);
             Assert.False(default(ValueTask<string>).IsFaulted);
             Assert.False(default(ValueTask<string>).IsCanceled);
-            Assert.Equal(null, default(ValueTask<string>).Result);
+            Assert.Equal(null, default(ValueTask<string>).GetAwaiter().GetResult());
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace System.Threading.Tasks.Channels.Tests
             Assert.True(t.IsCompletedSuccessfully);
             Assert.False(t.IsFaulted);
             Assert.False(t.IsCanceled);
-            Assert.Equal(42, t.Result);
+            Assert.Equal(42, t.GetAwaiter().GetResult());
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace System.Threading.Tasks.Channels.Tests
             Assert.True(t.IsCompletedSuccessfully);
             Assert.False(t.IsFaulted);
             Assert.False(t.IsCanceled);
-            Assert.Equal(42, t.Result);
+            Assert.Equal(42, t.GetAwaiter().GetResult());
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace System.Threading.Tasks.Channels.Tests
 
             tcs.SetResult(42);
 
-            Assert.Equal(42, t.Result);
+            Assert.Equal(42, t.GetAwaiter().GetResult());
             Assert.True(t.IsCompleted);
             Assert.True(t.IsCompletedSuccessfully);
             Assert.False(t.IsFaulted);
@@ -79,7 +79,7 @@ namespace System.Threading.Tasks.Channels.Tests
         {
             ValueTask<int> t = 42;
 
-            Assert.Equal(42, t.Result);
+            Assert.Equal(42, t.GetAwaiter().GetResult());
 
             Assert.True(t.IsCompleted);
             Assert.True(t.IsCompletedSuccessfully);
@@ -92,7 +92,7 @@ namespace System.Threading.Tasks.Channels.Tests
         {
             ValueTask<int> t = Task.FromResult(42);
 
-            Assert.Equal(42, t.Result);
+            Assert.Equal(42, t.GetAwaiter().GetResult());
 
             Assert.True(t.IsCompleted);
             Assert.True(t.IsCompletedSuccessfully);
@@ -105,7 +105,7 @@ namespace System.Threading.Tasks.Channels.Tests
         {
             ValueTask<int> t = Task.FromException<int>(new FormatException());
 
-            Assert.Throws<FormatException>(() => t.Result);
+            Assert.Throws<FormatException>(() => t.GetAwaiter().GetResult());
 
             Assert.True(t.IsCompleted);
             Assert.False(t.IsCompletedSuccessfully);
@@ -118,7 +118,7 @@ namespace System.Threading.Tasks.Channels.Tests
         {
             ValueTask<int> t = Task.FromCanceled<int>(new CancellationToken(true));
 
-            Assert.Throws<TaskCanceledException>(() => t.Result);
+            Assert.Throws<TaskCanceledException>(() => t.GetAwaiter().GetResult());
 
             Assert.True(t.IsCompleted);
             Assert.False(t.IsCompletedSuccessfully);
@@ -264,7 +264,7 @@ namespace System.Threading.Tasks.Channels.Tests
         public void GetHashCode_ContainsResult()
         {
             ValueTask<int> t = 42;
-            Assert.Equal(t.Result.GetHashCode(), t.GetHashCode());
+            Assert.Equal(t.GetAwaiter().GetResult().GetHashCode(), t.GetHashCode());
         }
 
         [Fact]

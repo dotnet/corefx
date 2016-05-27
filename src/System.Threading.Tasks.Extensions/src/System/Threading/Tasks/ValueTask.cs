@@ -153,9 +153,6 @@ namespace System.Threading.Tasks
         /// <summary>Gets whether the <see cref="ValueTask{TResult}"/> represents a canceled operation.</summary>
         public bool IsCanceled { get { return _task != null && _task.IsCanceled; } }
 
-        /// <summary>Gets the result.</summary>
-        public TResult Result { get { return _task == null ? _result : _task.GetAwaiter().GetResult(); } }
-
         /// <summary>Gets an awaiter for this value.</summary>
         public ValueTaskAwaiter<TResult> GetAwaiter()
         {
