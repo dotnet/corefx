@@ -80,6 +80,7 @@ namespace System.Runtime.Serialization
 
         internal static DataContract GetDataContractFromGeneratedAssembly(Type type)
         {
+#if NET_NATIVE
             if (DataContractSerializer.Option == SerializationOption.ReflectionOnly)
             {
                 return null;
@@ -101,6 +102,9 @@ namespace System.Runtime.Serialization
                 }
             }
             return dataContract;
+#else
+            return null;
+#endif
         }
 
 #if !NET_NATIVE
@@ -675,14 +679,12 @@ namespace System.Runtime.Serialization
                                 type = Type.GetTypeFromHandle(typeHandle);
                             type = UnwrapNullableType(type);
 
-#if NET_NATIVE
                             dataContract = DataContract.GetDataContractFromGeneratedAssembly(type);
                             if (dataContract != null)
                             {
                                 AssignDataContractToId(dataContract, id);
                                 return dataContract;
                             }
-#endif
 
                             type = GetDataContractAdapterType(type);
                             dataContract = GetBuiltInDataContract(type);
