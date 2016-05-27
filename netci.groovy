@@ -611,7 +611,7 @@ def supportedFullCyclePlatforms = ['Windows_NT', 'Ubuntu14.04', 'OSX']
                     else {
                         // Use Server GC for Ubuntu/OSX Debug PR build & test
                         def useServerGC = (configurationGroup == 'Release' && isPR) ? 'useServerGC' : ''
-                        shell("HOME=\$WORKSPACE/tempHome ./build.sh ${useServerGC} ${configurationGroup.toLowerCase()} /p:ConfigurationGroup=${configurationGroup} /p:TestWithLocalLibraries=true /p:WithoutCategories=IgnoreForCI")
+                        shell("HOME=\$WORKSPACE/tempHome ./build.sh ${useServerGC} ${configurationGroup.toLowerCase()} /p:ConfigurationGroup=${configurationGroup} /p:WithoutCategories=IgnoreForCI")
                         // Tar up the appropriate bits.  On OSX the tarring is a different syntax for exclusion.
                         if (os == 'OSX') {
                             shell("tar -czf bin/build.tar.gz --exclude *.Tests bin/*.${configurationGroup} bin/ref bin/packages")
