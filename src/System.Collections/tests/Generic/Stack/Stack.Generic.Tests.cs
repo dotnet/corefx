@@ -53,8 +53,8 @@ namespace System.Collections.Tests
         protected override bool Enumerator_Current_UndefinedOperation_Throws { get { return true; } }
 
         #endregion
-        
-        // Constructor
+
+        #region Constructor
         
         [Fact]
         public void Stack_Generic_Constructor_InitialValues()
@@ -64,8 +64,10 @@ namespace System.Collections.Tests
             Assert.Equal(0, stack.ToArray().Length);
             Assert.NotNull(((ICollection)stack).SyncRoot);
         }
-        
-        // IEnumerable constructor
+
+        #endregion
+
+        #region Constructor_IEnumerable
 
         [Theory]
         [MemberData(nameof(EnumerableTestData))]
@@ -81,8 +83,10 @@ namespace System.Collections.Tests
         {
             Assert.Throws<ArgumentNullException>("collection", () => new Stack<T>(null));
         }
-        
-        // Capacity-based constructor
+
+        #endregion
+
+        #region Constructor_Capacity
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -98,8 +102,10 @@ namespace System.Collections.Tests
             Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new Stack<T>(-1));
             Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new Stack<T>(int.MinValue));
         }
-        
-        // Pop
+
+        #endregion
+
+        #region Pop
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -117,7 +123,9 @@ namespace System.Collections.Tests
             Assert.Throws<InvalidOperationException>(() => new Stack<T>().Pop());
         }
 
-        // ToArray
+        #endregion
+
+        #region ToArray
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -127,7 +135,9 @@ namespace System.Collections.Tests
             Assert.Equal(stack.ToArray(), stack.ToArray());
         }
 
-        // Peek
+        #endregion
+
+        #region Peek
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -148,7 +158,9 @@ namespace System.Collections.Tests
             Assert.Throws<InvalidOperationException>(() => new Stack<T>().Peek());
         }
 
-        // TrimExcess
+        #endregion
+
+        #region TrimExcess
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -224,5 +236,7 @@ namespace System.Collections.Tests
                 Assert.Equal(count, stack.Count);
             }
         }
+
+        #endregion
     }
 }
