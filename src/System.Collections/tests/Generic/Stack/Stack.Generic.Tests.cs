@@ -132,7 +132,7 @@ namespace System.Collections.Tests
         public void Stack_Generic_ToArray(int count)
         {
             Stack<T> stack = GenericStackFactory(count);
-            Assert.Equal(stack.ToArray(), stack.ToArray());
+            Assert.Equal(Enumerable.ToArray(stack), stack.ToArray());
         }
 
         #endregion
