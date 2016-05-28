@@ -529,6 +529,13 @@
     <SymbolPackageOutputPath Condition="'$(SymbolPackageOutputPath)'==''">$(PackageOutputPath)symbols/</SymbolPackageOutputPath>
   </PropertyGroup>
 
+  <!-- we don't yet have runtime packages for these RIDs so exclude them for now as it breaks the test build -->
+  <ItemGroup Condition="'$(_BuildAgainstPackages)' == 'true'">
+    <ExcludedRuntimes Include="fedora.23-x64" />
+    <ExcludedRuntimes Include="opensuse.13.2-x64" />
+    <ExcludedRuntimes Include="ubuntu.16.04-x64" />
+  </ItemGroup>
+
   <PropertyGroup>
     <!-- Don't run tests if we're building another platform's binaries on Windows -->
     <SkipTests Condition="'$(SkipTests)'=='' and ('$(OsEnvironment)'=='Windows_NT' and '$(TargetsWindows)'!='true' and '$(OSGroup)'!='AnyOS')">true</SkipTests>
