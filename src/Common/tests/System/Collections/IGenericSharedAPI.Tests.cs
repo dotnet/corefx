@@ -445,7 +445,7 @@ namespace System.Collections.Tests
             IEnumerable<T> collection = GenericIEnumerableFactory(count);
             T[] array = new T[count];
             CopyTo(collection, array, 0);
-            Assert.True(Enumerable.SequenceEqual(collection, array));
+            Assert.Equal(collection, array);
         }
 
         [Theory]
@@ -455,7 +455,7 @@ namespace System.Collections.Tests
             IEnumerable<T> collection = GenericIEnumerableFactory(count);
             T[] array = new T[count * 3 / 2];
             CopyTo(collection, array, 0);
-            Assert.True(Enumerable.SequenceEqual(collection, array.Take(count)));
+            Assert.Equal(collection, array.Take(count));
         }
 
         #endregion
