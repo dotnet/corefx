@@ -43,8 +43,6 @@ namespace System.Net.Http
 
             internal MultiAgent _associatedMultiAgent;
             internal SendTransferState _sendTransferState;
-            internal bool _isRedirect = false;
-            internal Uri _targetUri;
             internal StrongToWeakReference<EasyRequest> _selfStrongToWeakReference;
 
             private SafeCallbackHandle _callbackHandle;
@@ -62,7 +60,6 @@ namespace System.Net.Http
                 }
 
                 _responseMessage = new CurlResponseMessage(this);
-                _targetUri = requestMessage.RequestUri;
             }
 
             /// <summary>
@@ -496,6 +493,9 @@ namespace System.Net.Http
             {
                 if (credentialSchemePair.Key == null)
                 {
+                    EventSourceTrace("Credentials cleared.");
+                    SetCurlOption(CURLoption.CURLOPT_USERNAME, IntPtr.Zero);
+                    SetCurlOption(CURLoption.CURLOPT_PASSWORD, IntPtr.Zero);
                     return;
                 }
 
@@ -722,10 +722,22 @@ namespace System.Net.Http
                 }
             }
 
-            internal void  SetRedirectUri(Uri redirectUri)
+            internal void StoreLastEffectiveUri()
             {
-                _targetUri = _requestMessage.RequestUri;
-                _requestMessage.RequestUri = redirectUri;
+                IntPtr urlCharPtr; // do not free; will point to libcurl private memory
+                CURLcode urlResult = Interop.Http.EasyGetInfoPointer(_easyHandle, Interop.Http.CURLINFO.CURLINFO_EFFECTIVE_URL, out urlCharPtr);
+                if (urlResult == CURLcode.CURLE_OK && urlCharPtr != IntPtr.Zero)
+                {
+                    string url = Marshal.PtrToStringAnsi(urlCharPtr);
+                    Uri finalUri;
+                    if (Uri.TryCreate(url, UriKind.Absolute, out finalUri))
+                    {
+                        _requestMessage.RequestUri = finalUri;
+                        return;
+                    }
+                }
+
+                Debug.Fail("Expected to be able to get the last effective Uri from libcurl");
             }
 
             private void EventSourceTrace<TArg0>(string formatMessage, TArg0 arg0, [CallerMemberName] string memberName = null)

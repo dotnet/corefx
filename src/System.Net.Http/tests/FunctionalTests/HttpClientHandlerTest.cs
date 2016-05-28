@@ -338,6 +338,7 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
                     Assert.Equal(statusCode, (int)response.StatusCode);
+                    Assert.Equal(uri, response.RequestMessage.RequestUri);
                 }
             }
         }
@@ -358,6 +359,7 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.Equal(HttpTestServers.RemoteEchoServer, response.RequestMessage.RequestUri);
                 }
             }
         }
@@ -378,6 +380,7 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.Equal(HttpTestServers.SecureRemoteEchoServer, response.RequestMessage.RequestUri);
                 }
             }
         }
@@ -398,6 +401,7 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
                     Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+                    Assert.Equal(uri, response.RequestMessage.RequestUri);
                 }
             }
         }
@@ -418,25 +422,60 @@ namespace System.Net.Http.Functional.Tests
                 _output.WriteLine("Uri: {0}", uri);
                 using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
+                    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
                     Assert.Equal(targetUri, response.RequestMessage.RequestUri);
                 }
             }
         }
 
+        [ActiveIssue(8945, PlatformID.Windows)]
         [Theory]
-        [InlineData(6)]
-        public async Task GetAsync_MaxAutomaticRedirectionsNServerHopsNPlus1_Throw(int hops)
+        [InlineData(3, 2)]
+        [InlineData(3, 3)]
+        [InlineData(3, 4)]
+        public async Task GetAsync_MaxAutomaticRedirectionsNServerHops_ThrowsIfTooMany(int maxHops, int hops)
         {
-            var handler = new HttpClientHandler();
-            handler.MaxAutomaticRedirections = hops;
-            using (var client = new HttpClient(handler))
+            using (var client = new HttpClient(new HttpClientHandler() { MaxAutomaticRedirections = maxHops }))
             {
-                await Assert.ThrowsAsync<HttpRequestException>(() => 
-                    client.GetAsync(HttpTestServers.RedirectUriForDestinationUri(
-                        secure:false,
-                        statusCode:302,
-                        destinationUri:HttpTestServers.RemoteEchoServer,
-                        hops:(hops + 1))));
+                Task<HttpResponseMessage> t = client.GetAsync(HttpTestServers.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: 302,
+                    destinationUri: HttpTestServers.RemoteEchoServer,
+                    hops: hops));
+
+                if (hops <= maxHops)
+                {
+                    using (HttpResponseMessage response = await t)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Equal(HttpTestServers.RemoteEchoServer, response.RequestMessage.RequestUri);
+                    }
+                }
+                else
+                {
+                    await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task GetAsync_AllowAutoRedirectTrue_RedirectWithRelativeLocation()
+        {
+            using (var client = new HttpClient(new HttpClientHandler() { AllowAutoRedirect = true }))
+            {
+                Uri uri = HttpTestServers.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: 302,
+                    destinationUri: HttpTestServers.RemoteEchoServer,
+                    hops: 1,
+                    relative: true);
+                _output.WriteLine("Uri: {0}", uri);
+
+                using (HttpResponseMessage response = await client.GetAsync(uri))
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.Equal(HttpTestServers.RemoteEchoServer, response.RequestMessage.RequestUri);
+                }
             }
         }
 
@@ -480,6 +519,7 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage response = await client.GetAsync(redirectUri))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.Equal(uri, response.RequestMessage.RequestUri);
                 }
             }
         }
