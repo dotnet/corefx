@@ -17,7 +17,7 @@ namespace System.Collections.Tests
     /// </summary>
     public abstract class IGenericSharedAPI_Tests<T> : IEnumerable_Generic_Tests<T>
     {
-        // IGenericSharedAPI<T> Helper methods
+        #region IGenericSharedAPI<T> Helper methods
 
         protected virtual bool DuplicateValuesAllowed { get { return true; } }
         protected virtual bool DefaultValueWhenNotAllowed_Throws { get { return true; } }
@@ -48,7 +48,9 @@ namespace System.Collections.Tests
         protected abstract void CopyTo(IEnumerable<T> enumerable, T[] array, int index);
         protected abstract bool Remove(IEnumerable<T> enumerable);
 
-        // IEnumerable<T> helper methods
+        #endregion
+
+        #region IEnumerable<T> helper methods
 
         protected override IEnumerable<T> GenericIEnumerableFactory(int count)
         {
@@ -87,8 +89,9 @@ namespace System.Collections.Tests
                 };
             }
         }
+        #endregion
 
-        // Count
+        #region Count
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -98,7 +101,9 @@ namespace System.Collections.Tests
             Assert.Equal(count, Count(collection));
         }
 
-        // Add
+        #endregion
+
+        #region Add
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -229,7 +234,9 @@ namespace System.Collections.Tests
             }
         }
 
-        // Clear
+        #endregion
+
+        #region Clear
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -247,8 +254,32 @@ namespace System.Collections.Tests
                 Assert.Equal(0, Count(collection));
             }
         }
+        
+        #endregion
 
-        // Contains
+        #region Contains
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void IGenericSharedAPI_Contains_BasicFunctionality(int count)
+        {
+            IEnumerable<T> collection = GenericIEnumerableFactory(count);
+            T[] array = collection.ToArray();
+            
+            // Collection should contain all items that result from enumeration
+            Assert.All(array, item => Assert.True(Contains(collection, item)));
+            
+            Clear(collection);
+            
+            // Collection should not contain any items after being cleared
+            Assert.All(array, item => Assert.False(Contains(collection, item)));
+            
+            foreach (T item in array)
+                Add(collection, item);
+            
+            // Collection should contain whatever items are added back to it
+            Assert.All(array, item => Assert.True(Contains(collection, item)));
+        }
         
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -352,7 +383,9 @@ namespace System.Collections.Tests
             }
         }
 
-        // CopyTo
+        #endregion
+
+        #region CopyTo
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
@@ -424,5 +457,7 @@ namespace System.Collections.Tests
             CopyTo(collection, array, 0);
             Assert.True(Enumerable.SequenceEqual(collection, array.Take(count)));
         }
+
+        #endregion
     }
 }
