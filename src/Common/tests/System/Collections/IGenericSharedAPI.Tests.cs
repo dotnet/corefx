@@ -280,28 +280,6 @@ namespace System.Collections.Tests
             // Collection should contain whatever items are added back to it
             Assert.All(array, item => Assert.True(Contains(collection, item)));
         }
-        
-        [Theory]
-        [MemberData(nameof(ValidCollectionSizes))]
-        public void IGenericSharedAPI_Contains_BasicFunctionality(int count)
-        {
-            IEnumerable<T> collection = GenericIEnumerableFactory(count);
-            T[] array = collection.ToArray();
-            
-            // Collection should contain all items that result from enumeration
-            Assert.All(array, item => Assert.True(Contains(collection, item)));
-            
-            Clear(collection);
-            
-            // Collection should not contain any items after being cleared
-            Assert.All(array, item => Assert.False(Contains(collection, item)));
-            
-            foreach (T item in array)
-                Add(collection, item);
-            
-            // Collection should contain whatever items are added back to it
-            Assert.All(array, item => Assert.True(Contains(collection, item)));
-        }
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
