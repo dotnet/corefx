@@ -14,9 +14,7 @@ Learn about .NET Core
 Get .NET Core
 =============
 
-- [Get .NET Core SDK on Windows](https://www.microsoft.com/net/core#windows)
-- [Get .NET Core SDK on OS X](https://www.microsoft.com/net/core#macosx)
-- [Get .NET Core SDK on Linux](https://www.microsoft.com/net/core)
+- [Get .NET Core SDK](https://www.microsoft.com/net/core)
 
 Project Docs
 ============
