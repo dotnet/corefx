@@ -36,7 +36,11 @@ namespace System.Net.Http
             /// <summary>Cached task that contains the Int32 value 0.</int></summary>
             private static readonly Task<int> s_zeroTask = Task.FromResult(0);
 
-            /// <summary>Object used to synchronize all activity on the stream.</summary>
+            /// <summary>
+            /// Object used to synchronize readers and writers on the stream.  There should only ever be one of
+            /// each, but that reader and writer could access the stream concurrently.  The lock protects state
+            /// used by both, in particular the buffer/offset/count.
+            /// </summary>
             private readonly object _syncObj = new object();
             /// <summary>The associated EasyRequest.</summary>
             private readonly EasyRequest _easy;
@@ -80,6 +84,18 @@ namespace System.Net.Http
             /// <summary>Gets whether the stream is seekable. It's not.</summary>
             public override bool CanSeek { get { return false; } }
 
+            /// <summary>Starts copying from the HttpContent to this request stream.</summary>
+            internal void StartCopy()
+            {
+                Debug.Assert(_copyTask == null, "Expected null copy task");
+                EventSourceTrace("Starting CopyToAsync from request HttpContent to request stream");
+
+                // Start the copy and store the task to represent it, then fix up this instance when done.
+                _copyTask = _easy._requestMessage.Content.CopyToAsync(this, _transportContext);
+                _copyTask.ContinueWith((t, s) => ((HttpContentAsyncStream)s).EndCopyToAsync(t), this,
+                    CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            }
+
             /// <summary>
             /// Reads asynchronously from the data written to the stream.  Since this stream is exposed out
             /// as an argument to HttpContent.CopyToAsync, and since we don't want that code attempting to read
@@ -89,6 +105,9 @@ namespace System.Net.Http
             /// </summary>
             internal Task<int> ReadAsyncInternal(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
+                Debug.Assert(buffer != null, "Expected non-null buffer");
+                Debug.Assert(offset >= 0, $"Expected non-negative offset, got {offset}");
+                Debug.Assert(count >= 0, $"Expected non-negative counnt, got {count}");
                 EventSourceTrace("Buffer={0}, Offset={1}, Count={2}", buffer.Length, offset, count);
 
                 // If no data was requested, give back 0 bytes.
@@ -102,6 +121,15 @@ namespace System.Net.Http
                 {
                     EventSourceTrace("CancellationToken canceled");
                     return Task.FromCanceled<int>(cancellationToken);
+                }
+
+                // Ensure we've kicked off copying, now that data is actually being requested.
+                // This is done when the request is first created, but if libcurl then asks for a rewind,
+                // we don't reinitiate until it actually asks for data again, since it may not if
+                // it has any of the data cached.
+                if (_copyTask == null)
+                {
+                    StartCopy();
                 }
 
                 lock (_syncObj)
@@ -156,6 +184,7 @@ namespace System.Net.Http
                     {
                         // The writer still has more data to provide to a future read.
                         // Update based on this read.
+                        Debug.Assert(bytesToCopy < _count, "Expected bytesToCopy to be less than _count");
                         _offset += bytesToCopy;
                         _count -= bytesToCopy;
                     }
@@ -419,6 +448,9 @@ namespace System.Net.Http
                 }, this);
             }
 
+            /// <summary>Gets the Task object that represents an in-flight copy.</summary>
+            internal Task CopyTask => _copyTask;
+
             /// <summary>
             /// Try to rewind the stream to the beginning.  If successful, the next call to ReadAsync
             /// will initiate a new CopyToAsync operation.  Reset is only successful when there's
@@ -427,32 +459,15 @@ namespace System.Net.Http
             /// <returns></returns>
             internal bool TryReset()
             {
-                lock (_syncObj)
+                if (_copyTask == null || _copyTask.IsCompleted)
                 {
-                    if (_copyTask == null || _copyTask.IsCompleted)
-                    {
-                        EventSourceTrace("TryReset successful");
-                        _copyTask = null;
-                        return true;
-                    }
+                    EventSourceTrace("TryReset successful");
+                    _copyTask = null;
+                    return true;
                 }
 
                 EventSourceTrace("TryReset failed due to in-progress copy.");
                 return false;
-            }
-
-            /// <summary>Initiate a new copy from the HttpContent to this stream. This is not thread-safe.</summary>
-            internal void Run()
-            {
-                Debug.Assert(!Monitor.IsEntered(_syncObj), "Should not be invoked while holding the lock");
-                Debug.Assert(_copyTask == null, "Should only be invoked after construction or a reset");
-
-                // Start the copy and store the task to represent it.
-                _copyTask = _easy._requestMessage.Content.CopyToAsync(this, _transportContext);
-
-                // Fix up the instance when it's done
-                _copyTask.ContinueWith((t, s) => ((HttpContentAsyncStream)s).EndCopyToAsync(t), this,
-                    CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             }
 
             /// <summary>  passes the channel binding token to the transport context </summary>
@@ -464,6 +479,8 @@ namespace System.Net.Http
             /// <summary>Completes a CopyToAsync initiated in Run.</summary>
             private void EndCopyToAsync(Task completedCopy)
             {
+                Debug.Assert(completedCopy != null, "Expected non-null completed task");
+                Debug.Assert(completedCopy.IsCompleted, "Expected task to be completed");
                 Debug.Assert(!Monitor.IsEntered(_syncObj), "Should not be invoked while holding the lock");
                 lock (_syncObj)
                 {
