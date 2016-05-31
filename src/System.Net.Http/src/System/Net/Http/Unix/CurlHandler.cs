@@ -734,36 +734,6 @@ namespace System.Net.Http
                 error is HttpRequestException && error.InnerException != null ? error.InnerException : error);
         }
 
-        private static void HandleRedirectLocationHeader(EasyRequest state, string locationValue)
-        {
-            Uri forwardUri;
-            if (Uri.TryCreate(state._requestMessage.RequestUri, locationValue.Trim(), out forwardUri))
-            {
-                // Just as with WinHttpHandler, for security reasons, we drop the server credential if it is 
-                // anything other than a CredentialCache. We allow credentials in a CredentialCache since they 
-                // are specifically tied to URIs.
-                state.SetCredentialsOptions(GetCredentials(forwardUri, state._handler.Credentials as CredentialCache, s_orderedAuthTypes));
-
-                // Reset proxy - it is possible that the proxy has different credentials for the new URI
-                state.SetProxyOptions(forwardUri);
-
-                if (state._handler._useCookie)
-                {
-                    // Reset cookies for the new Uri
-                    state.SetCurlOption(CURLoption.CURLOPT_COOKIE, IntPtr.Zero);
-                    state.SetCookieOption(forwardUri);
-                }
-
-                // Set the headers again. This is a workaround for libcurl's limitation in handling headers with empty values
-                state.SetRequestHeaders();
-            }
-            else
-            {
-                // In case of a bad location, clear out any creds that may have been set, just in case.
-                state.SetCredentialsOptions(default(KeyValuePair<NetworkCredential, CURLAUTH>));
-            }
-        }
-
         private static void SetChunkedModeForSend(HttpRequestMessage request)
         {
             bool chunkedMode = request.Headers.TransferEncodingChunked.GetValueOrDefault();

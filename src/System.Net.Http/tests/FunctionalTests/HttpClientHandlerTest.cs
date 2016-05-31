@@ -479,6 +479,85 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Theory]
+        [InlineData(200)]
+        [InlineData(201)]
+        [InlineData(400)]
+        public async Task GetAsync_AllowAutoRedirectTrue_NonRedirectStatusCode_LocationHeader_NoRedirect(int statusCode)
+        {
+            using (var handler = new HttpClientHandler() { AllowAutoRedirect = true })
+            using (var client = new HttpClient(handler))
+            {
+                await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
+                {
+                    await LoopbackServer.CreateServerAsync(async (redirectServer, redirectUrl) =>
+                    {
+                        Task<HttpResponseMessage> getResponse = client.GetAsync(origUrl);
+
+                        Task redirectTask = LoopbackServer.ReadRequestAndSendResponseAsync(redirectServer);
+
+                        await LoopbackServer.ReadRequestAndSendResponseAsync(origServer,
+                                $"HTTP/1.1 {statusCode} OK\r\n" +
+                                $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                                $"Location: {redirectUrl}\r\n" +
+                                "\r\n");
+
+                        using (HttpResponseMessage response = await getResponse)
+                        {
+                            Assert.Equal(statusCode, (int)response.StatusCode);
+                            Assert.Equal(origUrl, response.RequestMessage.RequestUri);
+                            Assert.False(redirectTask.IsCompleted, "Should not have redirected to Location");
+                        }
+                    });
+                });
+            }
+        }
+
+        [Theory]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [InlineData("#origFragment", "", "#origFragment", false)]
+        [InlineData("#origFragment", "", "#origFragment", true)]
+        [InlineData("", "#redirFragment", "#redirFragment", false)]
+        [InlineData("", "#redirFragment", "#redirFragment", true)]
+        [InlineData("#origFragment", "#redirFragment", "#redirFragment", false)]
+        [InlineData("#origFragment", "#redirFragment", "#redirFragment", true)]
+        public async Task GetAsync_AllowAutoRedirectTrue_RetainsOriginalFragmentIfAppropriate(
+            string origFragment, string redirFragment, string expectedFragment, bool useRelativeRedirect)
+        {
+            using (var handler = new HttpClientHandler() { AllowAutoRedirect = true })
+            using (var client = new HttpClient(handler))
+            {
+                await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
+                {
+                    origUrl = new Uri(origUrl.ToString() + origFragment);
+                    Uri redirectUrl = useRelativeRedirect ?
+                        new Uri(origUrl.PathAndQuery + redirFragment, UriKind.Relative) :
+                        new Uri(origUrl.ToString() + redirFragment);
+                    Uri expectedUrl = new Uri(origUrl.ToString() + expectedFragment);
+
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(origUrl);
+                    Task firstRequest = LoopbackServer.ReadRequestAndSendResponseAsync(origServer,
+                            $"HTTP/1.1 302 OK\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            $"Location: {redirectUrl}\r\n" +
+                            "\r\n");
+                    Assert.Equal(firstRequest, await Task.WhenAny(firstRequest, getResponse));
+
+                    Task secondRequest = LoopbackServer.ReadRequestAndSendResponseAsync(origServer,
+                            $"HTTP/1.1 200 OK\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+                    await TestHelper.WhenAllCompletedOrAnyFailed(secondRequest, getResponse);
+
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(200, (int)response.StatusCode);
+                        Assert.Equal(expectedUrl, response.RequestMessage.RequestUri);
+                    }
+                });
+            }
+        }
+
         [Fact]
         public async Task GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
         {

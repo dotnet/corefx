@@ -947,9 +947,18 @@ namespace System.Net.Http
                                 {
                                     response.Content.Headers.TryAddWithoutValidation(headerName, headerValue);
                                 }
-                                else if (string.Equals(headerName, HttpKnownHeaderNames.Location, StringComparison.OrdinalIgnoreCase))
+                                else if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400 &&
+                                    easy._handler.AutomaticRedirection &&
+                                    string.Equals(headerName, HttpKnownHeaderNames.Location, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    HandleRedirectLocationHeader(easy, headerValue);
+                                    // A "Location" header field can mean different things for different status codes.  For 3xx status codes,
+                                    // it implies a redirect.  As such, if we got a 3xx status code and we support automatically redirecting,
+                                    // reconfigure the easy handle under the assumption that libcurl will redirect.  If it does redirect, we'll
+                                    // be prepared; if it doesn't (e.g. it doesn't treat some particular 3xx as a redirect, if we've reached
+                                    // our redirect limit, etc.), this will have been unnecessary work in reconfiguring the easy handle, but 
+                                    // nothing incorrect, as we'll tear down the handle once the request finishes, anyway, and all of the configuration
+                                    // we're doing is about initiating a new request.
+                                    easy.SetPossibleRedirectForLocationHeader(headerValue);
                                 }
                                 else if (string.Equals(headerName, HttpKnownHeaderNames.SetCookie, StringComparison.OrdinalIgnoreCase))
                                 {
