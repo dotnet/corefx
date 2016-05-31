@@ -2,7 +2,7 @@
 
 usage()
 {
-    echo "Usage: $0 [managed] [native] [BuildArch] [BuildType] [clean] [verbose] [clangx.y] [platform] [cross] [skiptests] [cmakeargs]"
+    echo "Usage: $0 [managed] [native] [BuildArch] [BuildType] [clean] [verbose] [clangx.y] [platform] [cross] [skiptests] [staticcurl]  [cmakeargs]"
     echo "managed - optional argument to build the managed code"
     echo "native - optional argument to build the native code"
     echo "The following arguments affect native builds only:"
@@ -15,6 +15,7 @@ usage()
     echo "cross - optional argument to signify cross compilation,"
     echo "      - will use ROOTFS_DIR environment variable if set."
     echo "skiptests - skip the tests in the './bin/*/*Tests/' subdirectory."
+    echo "staticcurl - Optional argument to enable to statically link curl to any native library."
     echo "generateversion - if building native only, pass this in to get a version on the build output."
     echo "cmakeargs - user-settable additional arguments passed to CMake."
     exit 1
@@ -122,7 +123,7 @@ build_native()
 
     # Regenerate the CMake solution
     echo "Invoking cmake with arguments: \"$__nativeroot\" $__CMakeArgs $__CMakeExtraArgs"
-    "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__CMakeArgs "$__CMakeExtraArgs"
+    "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__CMakeArgs $__CMakeStaticCurl "$__CMakeExtraArgs"
 
     # Check that the makefiles were created.
 
@@ -236,6 +237,7 @@ esac
 __BuildOS=$__HostOS
 __BuildType=Debug
 __CMakeArgs=DEBUG
+__CMakeStaticCurl=0
 __CMakeExtraArgs=""
 
 BUILDERRORLEVEL=0
@@ -295,6 +297,9 @@ while :; do
         verbose)
             __VerboseBuild=1
             ;;
+	staticcurl)
+	    __CMakeStaticCurl=1
+	    ;;
         generateversion)
             __generateversionsource=true
             ;;
