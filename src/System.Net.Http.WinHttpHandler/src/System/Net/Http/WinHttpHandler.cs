@@ -552,7 +552,15 @@ namespace System.Net.Http
 
             s_diagnosticListener.LogHttpResponse(tcs.Task, loggingRequestId);
 
-            return tcs.Task;
+            return request.Content == null ?
+                tcs.Task :
+                DisposeContentWhenCompleted(request.Content, tcs.Task);
+        }
+
+        private static async Task<HttpResponseMessage> DisposeContentWhenCompleted(HttpContent content, Task<HttpResponseMessage> task)
+        {
+            try { return await task.ConfigureAwait(false); }
+            finally { content.Dispose(); }
         }
 
         private static bool IsChunkedModeForSend(HttpRequestMessage requestMessage)

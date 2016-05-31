@@ -543,28 +543,38 @@ namespace System.Net.Http
         protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            CheckDisposed();
-            SetOperationStarted();
-
-            HttpResponseMessage response;
             try
             {
-                await ConfigureRequest(request).ConfigureAwait(false);
-            
-                response = await this.handlerToFilter.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                // Convert back to the expected exception type
-                throw new HttpRequestException(SR.net_http_client_execution_error, ex);
-            }
+                CheckDisposed();
+                SetOperationStarted();
 
-            ProcessResponse(response);
-            return response;
+                HttpResponseMessage response;
+                try
+                {
+                    await ConfigureRequest(request).ConfigureAwait(false);
+
+                    response = await this.handlerToFilter.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    // Convert back to the expected exception type
+                    throw new HttpRequestException(SR.net_http_client_execution_error, ex);
+                }
+
+                ProcessResponse(response);
+                return response;
+            }
+            finally
+            {
+                // When a request completes, dispose the request content so the user doesn't have to. This also
+                // helps ensure that a HttpContent object is only sent once using HttpClient (similar to HttpRequestMessages
+                // that can also be sent only once).
+                request.Content?.Dispose();
+            }
         }
 
         #endregion Request Execution

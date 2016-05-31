@@ -4,9 +4,11 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Net.Sockets;
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
 using System.Security.Authentication.ExtendedProtection;
 using System.Text;
 using System.Threading;
@@ -14,7 +16,6 @@ using System.Threading.Tasks;
 
 using Xunit;
 using Xunit.Abstractions;
-using System.Net.Sockets;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -61,7 +62,9 @@ namespace System.Net.Http.Functional.Tests
         public readonly static IEnumerable<object[]> HttpMethods =
             GetMethods("GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "CUSTOM1");
         public readonly static IEnumerable<object[]> HttpMethodsThatAllowContent =
-            GetMethods("GET", "POST", "PUT", "DELETE", "CUSTOM1");
+            GetMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "CUSTOM1");
+        public readonly static IEnumerable<object[]> HttpMethodsThatDontAllowContent =
+            GetMethods("HEAD", "TRACE");
 
         private static IEnumerable<object[]> GetMethods(params string[] methods)
         {
@@ -997,6 +1000,110 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        public static IEnumerable<object[]> PostAsync_ServerSendsResponseBeforeAllRequestReceived_TaskCompletionDelayed_MemberData()
+        {
+            foreach (bool knownRequestContentLength in new[] { true, false })
+                foreach (long requestContentLength in new[] { 2, 200, 80000 })
+                    yield return new object[] { knownRequestContentLength, requestContentLength };
+        }
+
+        [Theory]
+        [MemberData(nameof(PostAsync_ServerSendsResponseBeforeAllRequestReceived_TaskCompletionDelayed_MemberData))]
+        public async Task PostAsync_ServerSendsResponseBeforeAllRequestReceived_TaskCompletionDelayed(
+            bool knownRequestContentLength, long requestContentLength)
+        {
+            using (var client = new HttpClient())
+            {
+                await LoopbackServer.CreateServerAsync(async (server, url) =>
+                {
+                    var triggerRemainingRequestContent = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                    bool contentDisposed = false;
+                    var requestContent = new DelegateContent
+                    {
+                        SerializeToStreamAsyncDelegate = async (contentStream, contentTransport) =>
+                        {
+                            byte[] data = Enumerable.Range(0, (int)requestContentLength).Select(i => (byte)i).ToArray();
+                            await Task.Delay(1);
+                            await contentStream.WriteAsync(data, 0, data.Length / 2);
+                            await Task.Delay(1);
+                            await triggerRemainingRequestContent.Task;
+                            await Task.Delay(1);
+                            await contentStream.WriteAsync(data, data.Length / 2, data.Length - (data.Length / 2));
+                            await Task.Delay(1);
+                            Assert.False(contentDisposed);
+                        },
+                        TryComputeLengthDelegate = () => knownRequestContentLength ? Tuple.Create(true, requestContentLength) : Tuple.Create(false, 0L),
+                        DisposeDelegate = disposing => contentDisposed = true
+                    };
+                    var requestMessage = new HttpRequestMessage(HttpMethod.Post, url) { Content = requestContent };
+                    Task<HttpResponseMessage> post = client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        // Read headers from client
+                        while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) ;
+
+                        // Send back all headers and some but not all of the response
+                        await writer.WriteAsync($"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 10\r\n\r\n");
+                        await writer.WriteAsync("abcd"); // less than contentLength
+
+                        // On Unix, the operation will now complete, as all of the headers have been sent,
+                        // even though all of the request data hasn't.  On Windows, the completion
+                        // won't happen until all of the request data is also sent.
+                        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            await post;
+                        }
+
+                        // Now let the rest of the request data be transferred
+                        Assert.False(contentDisposed);
+                        triggerRemainingRequestContent.SetResult(true);
+
+                        // On Windows, the operation should now complete.
+                        using (HttpResponseMessage response = await post)
+                        {
+                            await writer.WriteAsync("efghij"); // remaining content
+                            s.Shutdown(SocketShutdown.Send);
+
+                            string result = await response.Content.ReadAsStringAsync();
+                            Assert.Equal("abcdefghij", result);
+                            Assert.True(contentDisposed);
+                        }
+                    });
+                });
+            }
+        }
+
+        private sealed class DelegateContent : HttpContent
+        {
+            internal Func<Stream, TransportContext, Task> SerializeToStreamAsyncDelegate;
+            internal Func<Tuple<bool, long>> TryComputeLengthDelegate;
+            internal Action<bool> DisposeDelegate;
+
+            protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                return SerializeToStreamAsyncDelegate != null ?
+                    SerializeToStreamAsyncDelegate(stream, context) :
+                    Task.CompletedTask;
+            }
+
+            protected override bool TryComputeLength(out long length)
+            {
+                if (TryComputeLengthDelegate != null)
+                {
+                    var result = TryComputeLengthDelegate();
+                    length = result.Item2;
+                    return result.Item1;
+                }
+
+                length = 0;
+                return false;
+            }
+
+            protected override void Dispose(bool disposing) =>
+                DisposeDelegate?.Invoke(disposing);
+        }
+
         [Theory]
         [InlineData(HttpStatusCode.MethodNotAllowed, "Custom description")]
         [InlineData(HttpStatusCode.MethodNotAllowed, "")]
@@ -1079,6 +1186,34 @@ namespace System.Net.Http.Functional.Tests
                         response.Content.Headers.ContentMD5,
                         false,
                         ExpectedContent);                    
+                }
+            }        
+        }
+
+        [Theory, MemberData(nameof(HttpMethodsThatDontAllowContent))]
+        public async Task SendAsync_SendRequestUsingNoBodyMethodToEchoServerWithContent_NoBodySent(
+            string method,
+            bool secureServer)
+        {
+            using (var client = new HttpClient())
+            {
+                var request = new HttpRequestMessage(
+                    new HttpMethod(method), 
+                    secureServer ? HttpTestServers.SecureRemoteEchoServer : HttpTestServers.RemoteEchoServer);
+                request.Content = new StringContent(ExpectedContent);
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && method == "TRACE")
+                    {
+                        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                    }
+                    else
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        TestHelper.VerifyRequestMethod(response, method);
+                        string responseContent = await response.Content.ReadAsStringAsync();
+                        Assert.False(responseContent.Contains(ExpectedContent));
+                    }
                 }
             }        
         }

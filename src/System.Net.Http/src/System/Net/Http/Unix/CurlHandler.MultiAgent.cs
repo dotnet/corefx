@@ -653,7 +653,6 @@ namespace System.Net.Http
                 try
                 {
                     easy.InitializeCurl();
-                    easy._requestContentStream?.Run();
 
                     easy._associatedMultiAgent = this;
                     easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_PRIVATE, gcHandlePtr);
@@ -1206,9 +1205,6 @@ namespace System.Net.Http
                         {
                             // Dump any state associated with the old stream's position
                             easy._sendTransferState?.SetTaskOffsetCount(null, 0, 0);
-
-                            // Restart the transfer
-                            easy._requestContentStream.Run();
 
                             CurlHandler.EventSourceTrace("Seek successful", easy: easy);
                             return Interop.Http.CurlSeekResult.CURL_SEEKFUNC_OK;
