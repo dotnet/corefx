@@ -1237,6 +1237,10 @@ namespace System.Runtime.Serialization
                     return true;
                 }
             }
+            if (ClassDataContract.IsKnownSerializableType(type))
+            {
+                return true;
+            }
             return DataContract.GetBuiltInDataContract(type) != null ||
                    ClassDataContract.IsNonAttributedTypeValidForSerialization(type);
         }

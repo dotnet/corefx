@@ -456,7 +456,11 @@ namespace System.Runtime.Serialization
             { "System.Tuple`8", Array.Empty<string>() },
             { "System.Collections.Queue", new [] {"_syncRoot" } },
             { "System.Collections.Stack", new [] {"_syncRoot" } },
-            { "System.Globalization.CultureInfo", Array.Empty<string>() },
+            { "System.Globalization.CultureInfo", new [] { "m_cultureData", "m_isInherited", "m_nonSortName", "m_parent", "m_sortName" } },
+            { "System.Globalization.CompareInfo", new[] { "m_dataHandle", "m_handleOrigin", "m_sortName" } },
+            { "System.Globalization.TextInfo", new[] { "m_cultureData", "m_IsAsciiCasingSameAsInvariant", "m_cultureData", "m_dataHandle", "m_handleOrigin", "m_textInfoName" } },
+            { "System.Globalization.CultureData", Array.Empty<string>() },
+            { "System.Globalization.CalendarData", Array.Empty<string>() },
             { "System.Version", Array.Empty<string>() },
         };
 
