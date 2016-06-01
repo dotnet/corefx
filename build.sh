@@ -123,7 +123,7 @@ build_native()
 
     # Regenerate the CMake solution
     echo "Invoking cmake with arguments: \"$__nativeroot\" $__CMakeArgs $__CMakeExtraArgs"
-    "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__CMakeArgs $__CMakeStaticCurl "$__CMakeExtraArgs"
+    "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__CMakeArgs  "$__CMakeExtraArgs"
 
     # Check that the makefiles were created.
 
@@ -237,7 +237,6 @@ esac
 __BuildOS=$__HostOS
 __BuildType=Debug
 __CMakeArgs=DEBUG
-__CMakeStaticCurl=0
 __CMakeExtraArgs=""
 
 BUILDERRORLEVEL=0
@@ -298,7 +297,8 @@ while :; do
             __VerboseBuild=1
             ;;
 	staticcurl)
-	    __CMakeStaticCurl=1
+            staticCurl=" -DCMAKE_STATIC_CURL=1"
+            __CMakeExtraArgs="$__CMakeExtraArgs$staticCurl"
 	    ;;
         generateversion)
             __generateversionsource=true
@@ -347,7 +347,7 @@ while :; do
             ;;
         cmakeargs)
             if [ -n "$2" ]; then
-                __CMakeExtraArgs="$2"
+                __CMakeExtraArgs="$__CMakeExtraArgs $2"
                 shift
             else
                 echo "ERROR: 'cmakeargs' requires a non-empty option argument"

@@ -3,14 +3,13 @@
 # This file invokes cmake and generates the build system for Clang.
 #
 
-if [ $# -lt 4 -o $# -gt 7 ]
+if [ $# -lt 4 -o $# -gt 6 ]
 then
   echo "Usage..."
-  echo "gen-buildsys-clang.sh <path to top level CMakeLists.txt> <ClangMajorVersion> <ClangMinorVersion> <Architecture> [build flavor] [Static_Curl] [cmakeargs]"
+  echo "gen-buildsys-clang.sh <path to top level CMakeLists.txt> <ClangMajorVersion> <ClangMinorVersion> <Architecture> [build flavor] [cmakeargs]"
   echo "Specify the path to the top level CMake file - <corefx>/src/Native"
   echo "Specify the clang version to use, split into major and minor version"
   echo "Specify the target architecture." 
-  echo "Optionally Specify that the curl lib will be statically linked. Defaults to False."
   echo "Optionally specify the build configuration (flavor.) Defaults to DEBUG." 
   echo "Optionally pass additional arguments to CMake call."
   exit 1
@@ -48,7 +47,6 @@ else
   buildtype="$5"
 fi
 
-
 cmake_extra_defines="-DCMAKE_BUILD_TYPE=$buildtype"
 
 if [[ -n "$LLDB_LIB_DIR" ]]; then
@@ -69,19 +67,11 @@ if [ "$build_arch" == "arm-softfp" ]; then
     cmake_extra_defines="$cmake_extra_defines -DARM_SOFTFP=1"
 fi
 
-if [ -z "$6" ]
-then
-  echo "Defaulting Static_Curl to False."
-  cmake_extra_defines="$cmake_extra_defines -DCMAKE_STATIC_CURL=0"
-else
-  cmake_extra_defines="$cmake_extra_defines -DCMAKE_STATIC_CURL=$6"
-fi
-
 __UnprocessedCMakeArgs=""
-if [ -z "$7" ]; then
+if [ -z "$6" ]; then
     echo "No CMake extra Args specified"
 else
-    __UnprocessedCMakeArgs="$7"
+    __UnprocessedCMakeArgs="$6"
 fi
 
 cmake $cmake_extra_defines \
