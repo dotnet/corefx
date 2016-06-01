@@ -296,10 +296,9 @@ while :; do
         verbose)
             __VerboseBuild=1
             ;;
-	staticcurl)
-            staticCurl=" -DCMAKE_STATIC_CURL=1"
-            __CMakeExtraArgs="$__CMakeExtraArgs$staticCurl"
-	    ;;
+        staticcurl)
+            __CMakeExtraArgs="$__CMakeExtraArgs$staticCurl -DCMAKE_STATIC_CURL=1"
+            ;;
         generateversion)
             __generateversionsource=true
             ;;
