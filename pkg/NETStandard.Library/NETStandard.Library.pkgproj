@@ -10,6 +10,11 @@
   <Import Project="NETStandard.Library.packages.targets" />
 
   <ItemGroup>
+    <!-- Tempoarily hardcode the version of System.IO.Compression -->
+    <Dependency Include="System.IO.Compression">
+      <Version>4.1.0-$(ExternalExpectedPrerelease)</Version>
+    </Dependency>
+
     <ProjectReference Include="..\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.pkgproj">
       <TargetFramework>netstandard1.0</TargetFramework>
     </ProjectReference>
