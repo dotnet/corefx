@@ -12,7 +12,6 @@
     <Package Include="System.Globalization" />
     <Package Include="System.Globalization.Calendars" />
     <Package Include="System.IO" />
-    <Package Include="System.IO.Compression" />
     <Package Include="System.IO.Compression.ZipFile" />
     <Package Include="System.IO.FileSystem" />
     <Package Include="System.IO.FileSystem.Primitives" />

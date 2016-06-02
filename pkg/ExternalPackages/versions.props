@@ -3,10 +3,10 @@
   <Import Condition="Exists('..\dir.props')" Project="..\dir.props" />
   <ItemGroup>
     <ExternalPackage Include="System.IO.Compression">
-      <Version>4.1.0-rc3-24117-00</Version>
+      <Version>4.1.0-$(ExternalExpectedPrerelease)</Version>
     </ExternalPackage>
     <ExternalPackage Include="System.Data.SqlClient">
-      <Version>4.1.0-rc3-24117-00</Version>
+      <Version>4.1.0-$(ExternalExpectedPrerelease)</Version>
     </ExternalPackage>
   </ItemGroup>
 </Project>
