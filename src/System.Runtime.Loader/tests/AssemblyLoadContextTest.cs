@@ -80,7 +80,6 @@ namespace System.Runtime.Loader.Tests
                 () => loadContext.LoadFromAssemblyName(asmName));
         }
 
-        [ActiveIssue(8643)]
         [Fact]
         public static void LoadFromAssemblyName_ValidTrustedPlatformAssembly()
         {
