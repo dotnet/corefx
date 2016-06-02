@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    public class BitArray_GetSetTests
+    public static class BitArray_GetSetTests
     {
         private static BitArray s_allTrue = new BitArray(320, true);
         private static BitArray s_allFalse = new BitArray(320, false);
@@ -175,7 +175,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(CopyTo_IntArray_TestData))]
-        public void CopyTo(BitArray bitArray, Array array, int index, Array expected, Type arrayType)
+        public static void CopyTo(BitArray bitArray, Array array, int index, Array expected, Type arrayType)
         {
             object defaultValue = Activator.CreateInstance(arrayType);
             ICollection collection = bitArray;
@@ -195,7 +195,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void CopyTo_Invalid()
+        public static void CopyTo_Invalid()
         {
             ICollection bitArray = new BitArray(10);
             // Invalid array
@@ -210,7 +210,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void SyncRoot()
+        public static void SyncRoot()
         {
             ICollection bitArray = new BitArray(10);
             Assert.Same(bitArray.SyncRoot, bitArray.SyncRoot);

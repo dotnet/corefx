@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    public class BitArray_CtorTests
+    public static class BitArray_CtorTests
     {
         [Theory]
         [InlineData(0)]
@@ -98,7 +98,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(Ctor_IntArray_TestData))]
-        public void Ctor_IntArray(int[] array, bool[] expected)
+        public static void Ctor_IntArray(int[] array, bool[] expected)
         {
             BitArray bitArray = new BitArray(array);
             Assert.Equal(expected.Length, bitArray.Length);

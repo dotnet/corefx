@@ -7,8 +7,8 @@ using Xunit;
 namespace System.Collections.Tests
 {
     public enum Operator { Xor, Or, And };
-    
-    public class BitArray_OperatorsTests
+
+    public static class BitArray_OperatorsTests
     {
         [Fact]
         public static void And_EmptyArray()
