@@ -23,7 +23,7 @@
     "System.Text.RegularExpressions": "4.1.0-rc4-24201-04",
     "System.Threading.Tasks": "4.0.11-rc4-24201-04",
     "xunit": "2.1.0",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00312-04",
+    "xunit.netcore.extensions": "1.0.0-prerelease-00431-01",
     "System.Security.Principal": "4.0.0",
     "System.Security.Principal.Windows": "4.0.0-rc4-24201-04",
     "System.Security.AccessControl": "4.0.0-rc4-24201-04",

@@ -6,7 +6,7 @@
     "System.Runtime.InteropServices": "4.1.0-rc4-24201-04",
     "System.Text.RegularExpressions": "4.1.0-rc4-24201-04",
     "xunit": "2.1.0",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00312-04",
+    "xunit.netcore.extensions": "1.0.0-prerelease-00431-01",
     "test-runtime": {
       "target": "project",
       "exclude": "compile"

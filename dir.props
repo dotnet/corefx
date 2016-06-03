@@ -119,7 +119,7 @@
     </ValidationPattern>
     <ValidationPattern Include="xUnitExtensionsVersions">
       <IdentityRegex>^(?i)xunit\.netcore\.extensions$</IdentityRegex>
-      <ExpectedVersion>1.0.0-prerelease-00312-04</ExpectedVersion>
+      <ExpectedVersion>1.0.0-prerelease-00431-01</ExpectedVersion>
     </ValidationPattern>
   </ItemGroup>
 
