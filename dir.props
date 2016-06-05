@@ -81,9 +81,9 @@
   <PropertyGroup>
     <ValidatePackageVersions>true</ValidatePackageVersions>
     <ProhibitFloatingDependencies>true</ProhibitFloatingDependencies>
-    <CoreFxExpectedPrerelease>rc3-24203-02</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>rc3-24203-02</CoreClrExpectedPrerelease>
-    <ExternalExpectedPrerelease>rc3-24203-02</ExternalExpectedPrerelease>
+    <CoreFxExpectedPrerelease>rc3-24204-03</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>rc3-24205-04</CoreClrExpectedPrerelease>
+    <ExternalExpectedPrerelease>rc3-24204-00</ExternalExpectedPrerelease>
     <CoreFxVersionsIdentityRegex>^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore\.Targets)|(Microsoft\.NETCore\.Platforms)|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))(?&lt;!TestData)(?&lt;!System\.Data\.SqlClient)(?&lt;!System\.IO\.Compression)$</CoreFxVersionsIdentityRegex>
   </PropertyGroup>
   
@@ -129,6 +129,7 @@
     <DnuSourceList Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(PackagesDrops)" />
     <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
     <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core-test/api/v3/index.json" />
     <DnuSourceList Include="https:%2F%2Fwww.nuget.org/api/v2/" />
   </ItemGroup>
 
