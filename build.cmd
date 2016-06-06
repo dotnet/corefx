@@ -1,6 +1,9 @@
 @if "%_echo%" neq "on" echo off
 setlocal EnableDelayedExpansion
 
+set cleanBuild=
+set _skipTests=false
+set _configurationgroup=Debug
 :: Note: We've disabled node reuse because it causes file locking issues.
 ::       The issue is that we extend the build with our own targets which
 ::       means that that rebuilding cannot successfully delete the task
@@ -15,6 +18,13 @@ set unprocessedBuildArgs=
 :Loop
 if [%1]==[] goto Tools
 
+if /i "%1" == "/?"    goto Usage
+if /i "%1" == "-?"    goto Usage
+if /i "%1" == "/h"    goto Usage
+if /i "%1" == "-h"    goto Usage
+if /i "%1" == "/help" goto Usage
+if /i "%1" == "-help" goto Usage
+
 if /I [%1]==[native] (
     set __buildSpec=native
     set processedArgs=!processedArgs! %1
@@ -23,6 +33,30 @@ if /I [%1]==[native] (
 
 if /I [%1] == [managed] (
     set __buildSpec=managed
+    set processedArgs=!processedArgs! %1
+    goto Next
+)
+
+if /I [%1] == [clean] (
+    set cleanBuild=1
+    set processedArgs=!processedArgs! %1
+    goto Next
+)
+
+if /I [%1] == [skiptests] (
+    set _skipTests=true
+    set processedArgs=!processedArgs! %1
+    goto Next
+)
+
+if /I [%1] == [debug] (
+    set _configurationgroup=Debug
+    set processedArgs=!processedArgs! %1
+    goto Next
+)
+
+if /I [%1] == [release] (
+    set _configurationgroup=Release
     set processedArgs=!processedArgs! %1
     goto Next
 )
@@ -51,6 +85,11 @@ if not defined VisualStudioVersion (
 )
 
 :Build
+:: Clean output folders in case clean parameter was passed in.
+if [%cleanBuild%]==[1] (
+    if exist %~dp0bin rmdir /s /q %~dp0bin
+)
+
 :: Restore the Tools directory
 call %~dp0init-tools.cmd
 
@@ -103,7 +142,7 @@ call :build %__args%
 goto :AfterBuild
 
 :build
-%_buildprefix% msbuild "%_buildproj%" /nologo /maxcpucount /v:minimal /clp:Summary /nodeReuse:false /flp:v=normal;LogFile="%_buildlog%";Append /flp2:warningsonly;logfile=%~dp0msbuild.wrn /flp3:errorsonly;logfile=%~dp0msbuild.err "/l:BinClashLogger,%_binclashLoggerDll%;LogFile=%_binclashlog%" !unprocessedBuildArgs! %_buildpostfix%
+%_buildprefix% msbuild "%_buildproj%" /nologo /maxcpucount /v:minimal /clp:Summary /nodeReuse:false /flp:v=normal;LogFile="%_buildlog%";Append /flp2:warningsonly;logfile=%~dp0msbuild.wrn /flp3:errorsonly;logfile=%~dp0msbuild.err "/l:BinClashLogger,%_binclashLoggerDll%;LogFile=%_binclashlog%" /p:SkipTests=%_skipTests% /p:ConfigurationGroup=%_configurationgroup% !unprocessedBuildArgs! %_buildpostfix%
 set BUILDERRORLEVEL=%ERRORLEVEL%
 goto :eof
 
@@ -115,3 +154,12 @@ findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%_buildlog%"
 echo [%time%] Build Exit Code = %BUILDERRORLEVEL%
 
 exit /b %BUILDERRORLEVEL%
+
+:Usage
+echo Usage: build.cmd [managed] [native] [BuildType] [clean] [skiptests]
+echo managed - optional argument to build the managed code
+echo native - optional argument to build the native code
+echo BuildType can be: debug, release
+echo clean - optional argument to force a clean build.
+echo skiptests - skip the tests in the './bin/*/*Tests/' subdirectory.
+exit /b 1
