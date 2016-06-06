@@ -4,12 +4,12 @@
   
   <PropertyGroup>
     <Version>4.0.1</Version>
-    <PackageTargetRuntime>win10-$(PackagePlatform)</PackageTargetRuntime>
+    <PackageTargetRuntime>win10-$(PackagePlatform)-aot</PackageTargetRuntime>
   </PropertyGroup>
 
   <ItemGroup>
     <NativeFile Include="$(WinNativePath)..\..\NetCoreForCoreCLR\native\clrcompression.dll">
-      <TargetPath>runtimes/win10-$(PackagePlatform)/lib/netcore50</TargetPath>
+      <TargetPath>runtimes/win10-$(PackagePlatform)-aot/lib/netcore50</TargetPath>
     </NativeFile>
   </ItemGroup>
 
