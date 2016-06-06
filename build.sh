@@ -2,7 +2,7 @@
 
 usage()
 {
-    echo "Usage: $0 [managed] [native] [BuildArch] [BuildType] [clean] [verbose] [clangx.y] [platform] [cross] [skiptests] [staticcurl]  [cmakeargs]"
+    echo "Usage: $0 [managed] [native] [BuildArch] [BuildType] [clean] [verbose] [clangx.y] [platform] [cross] [skiptests] [staticLibLink]  [cmakeargs]"
     echo "managed - optional argument to build the managed code"
     echo "native - optional argument to build the native code"
     echo "The following arguments affect native builds only:"
@@ -15,7 +15,7 @@ usage()
     echo "cross - optional argument to signify cross compilation,"
     echo "      - will use ROOTFS_DIR environment variable if set."
     echo "skiptests - skip the tests in the './bin/*/*Tests/' subdirectory."
-    echo "staticcurl - Optional argument to enable to statically link curl to any native library."
+    echo "staticLibLink - Optional argument to  statically link any native library."
     echo "generateversion - if building native only, pass this in to get a version on the build output."
     echo "cmakeargs - user-settable additional arguments passed to CMake."
     exit 1
@@ -296,7 +296,7 @@ while :; do
         verbose)
             __VerboseBuild=1
             ;;
-        staticcurl)
+        staticliblink)
             __CMakeExtraArgs="$__CMakeExtraArgs$staticCurl -DCMAKE_STATIC_CURL=1"
             ;;
         generateversion)
