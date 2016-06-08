@@ -81,9 +81,9 @@
   <PropertyGroup>
     <ValidatePackageVersions>true</ValidatePackageVersions>
     <ProhibitFloatingDependencies>true</ProhibitFloatingDependencies>
-    <CoreFxExpectedPrerelease>rc3-24207-03</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>rc3-24206-00</CoreClrExpectedPrerelease>
-    <ExternalExpectedPrerelease>rc3-24206-00</ExternalExpectedPrerelease>
+    <CoreFxExpectedPrerelease>rc3-24208-01</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>rc3-24207-03</CoreClrExpectedPrerelease>
+    <ExternalExpectedPrerelease>rc3-24207-01</ExternalExpectedPrerelease>
     <CoreFxVersionsIdentityRegex>^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore\.Targets)|(Microsoft\.NETCore\.Platforms)|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))(?&lt;!TestData)$</CoreFxVersionsIdentityRegex>
   </PropertyGroup>
 
@@ -99,7 +99,7 @@
       <ExpectedPrerelease>$(CoreClrExpectedPrerelease)</ExpectedPrerelease>
     </ValidationPattern>
     <ValidationPattern Include="CoreLibTargetingPackVersions">
-      <IdentityRegex>^(?i)Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative)$</IdentityRegex>
+      <IdentityRegex>^(?i)Microsoft\.TargetingPack\.Private\.NETNative$</IdentityRegex>
       <ExpectedPrerelease>$(ExternalExpectedPrerelease)</ExpectedPrerelease>
     </ValidationPattern>
     <ValidationPattern Include="TargetingPackVersions">
