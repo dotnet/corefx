@@ -12,12 +12,12 @@
     },
     "netcore50": {
       "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1-rc3-24207-03",
-        "Microsoft.TargetingPack.Private.NETNative": "1.0.0-rc3-24206-00",
+        "Microsoft.NETCore.Platforms": "1.0.1-rc3-24208-01",
+        "Microsoft.TargetingPack.Private.NETNative": "1.0.0-rc3-24207-01",
         "System.Collections": "4.0.0",
         "System.Diagnostics.Contracts": "4.0.0",
         "System.Linq": "4.0.0",
-        "System.Reflection": "4.1.0-rc3-24207-03",
+        "System.Reflection": "4.1.0-rc3-24208-01",
         "System.Runtime.Extensions": "4.0.10"
       }
     }

@@ -3,9 +3,9 @@
     "netstandard1.3": {
       "dependencies": {
         "Microsoft.TargetingPack.Private.CoreCLR": "1.0.0-rc3-24206-00",
-        "System.IO.FileSystem": "4.0.1-rc3-24207-03",
-        "System.Reflection.Metadata": "1.3.0-rc3-24207-03",
-        "System.Collections.Immutable": "1.2.0-rc3-24207-03"
+        "System.IO.FileSystem": "4.0.1-rc3-24208-01",
+        "System.Reflection.Metadata": "1.3.0-rc3-24208-01",
+        "System.Collections.Immutable": "1.2.0-rc3-24208-01"
       },
       "imports": [
         "dotnet5.4"
@@ -13,7 +13,7 @@
     },
     "netcore50": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.NETNative": "1.0.0-rc3-24206-00"
+        "Microsoft.TargetingPack.Private.NETNative": "1.0.0-rc3-24207-01"
       }
     },
     "net46": {
