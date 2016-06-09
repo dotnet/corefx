@@ -9,8 +9,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-  <RuntimeDependency Include="runtime.win10-amd64-aot.runtime.native.System.IO.Compression">
-      <TargetRuntime>win10-amd64-aot</TargetRuntime>
+    <RuntimeDependency Include="runtime.win7-x64.runtime.native.System.IO.Compression">
+      <TargetRuntime>win7-x64</TargetRuntime>
+      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+    </RuntimeDependency>
+    <RuntimeDependency Include="runtime.win7-x86.runtime.native.System.IO.Compression">
+      <TargetRuntime>win7-x86</TargetRuntime>
+      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+    </RuntimeDependency>
+    <RuntimeDependency Include="runtime.win8-arm.runtime.native.System.IO.Compression">
+      <TargetRuntime>win8-arm</TargetRuntime>
+      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+    </RuntimeDependency>
+    <RuntimeDependency Include="runtime.win10-x64-aot.runtime.native.System.IO.Compression">
+      <TargetRuntime>win10-x64-aot</TargetRuntime>
       <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
     </RuntimeDependency>
     <RuntimeDependency Include="runtime.win10-arm-aot.runtime.native.System.IO.Compression">
@@ -45,15 +57,6 @@
     </ProjectReference>
     <ProjectReference Include="ubuntu\16.04\runtime.native.System.IO.Compression.pkgproj">
       <Platform>amd64</Platform>
-    </ProjectReference>
-    <ProjectReference Include="win\runtime.native.System.IO.Compression.pkgproj">
-      <Platform>x86</Platform>
-    </ProjectReference>
-    <ProjectReference Include="win\runtime.native.System.IO.Compression.pkgproj">
-      <Platform>amd64</Platform>
-    </ProjectReference>
-    <ProjectReference Include="win\runtime.native.System.IO.Compression.pkgproj">
-      <Platform>arm</Platform>
     </ProjectReference>
   </ItemGroup>
 
