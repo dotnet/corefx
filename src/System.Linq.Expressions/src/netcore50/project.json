@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.0.1-rc3-24209-01",
+    "Microsoft.NETCore.Platforms": "1.0.1-rc3-24209-08",
     "Microsoft.TargetingPack.Private.NETNative": "1.0.0-rc3-24208-00",
     "System.Collections": "4.0.10",
     "System.Diagnostics.Contracts": "4.0.0",
