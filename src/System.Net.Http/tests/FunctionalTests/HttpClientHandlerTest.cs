@@ -1134,6 +1134,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [PlatformSpecific(PlatformID.Windows)] // CopyToAsync(Stream, TransportContext) isn't used on unix
         [Fact]
         public async Task PostAsync_Post_ChannelBindingHasExpectedValue()
         {
