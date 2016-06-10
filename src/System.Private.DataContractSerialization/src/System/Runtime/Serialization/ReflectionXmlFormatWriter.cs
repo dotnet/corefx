@@ -12,8 +12,6 @@ namespace System.Runtime.Serialization
 {
     internal sealed class ReflectionXmlFormatWriter
     {
-        private int _childElementIndex = 0;
-
         private XmlWriterDelegator _arg0XmlWriter;
         private object _arg1Object;
         private XmlObjectSerializerWriteContext _arg2Context;
@@ -22,8 +20,32 @@ namespace System.Runtime.Serialization
 
         internal void ReflectionWriteClass(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, ClassDataContract classContract)
         {
+            InvokeOnSerializing(obj, context, classContract);
             ReflectionInitArgs(xmlWriter, obj, context, classContract);
-            ReflectionWriteMembers(xmlWriter, _arg1Object, _arg2Context, _arg3ClassDataContract, _arg3ClassDataContract);
+            ReflectionWriteMembers(xmlWriter, _arg1Object, _arg2Context, _arg3ClassDataContract, _arg3ClassDataContract, 0 /*childElementIndex*/);
+            InvokeOnSerialized(obj, context, classContract);
+        }
+
+        private void InvokeOnSerializing(object obj, XmlObjectSerializerWriteContext context, ClassDataContract classContract)
+        {
+            if (classContract.BaseContract != null)
+                InvokeOnSerializing(obj, context, classContract.BaseContract);
+            if (classContract.OnSerializing != null)
+            {
+                var contextArg = context.GetStreamingContext() ;
+                classContract.OnSerializing.Invoke(obj, new object[] { contextArg });
+            }
+        }
+
+        private void InvokeOnSerialized(object obj, XmlObjectSerializerWriteContext context, ClassDataContract classContract)
+        {
+            if (classContract.BaseContract != null)
+                InvokeOnSerialized(obj, context, classContract.BaseContract);
+            if (classContract.OnSerialized != null)
+            {
+                var contextArg = context.GetStreamingContext() ;
+                classContract.OnSerialized.Invoke(obj, new object[] { contextArg });
+            }
         }
 
         private void ReflectionInitArgs(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, ClassDataContract classContract)
@@ -43,10 +65,12 @@ namespace System.Runtime.Serialization
             _arg3ClassDataContract = classContract;
         }
 
-        internal int ReflectionWriteMembers(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, ClassDataContract classContract, ClassDataContract derivedMostClassContract)
+        internal int ReflectionWriteMembers(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, ClassDataContract classContract, ClassDataContract derivedMostClassContract, int childElementIndex)
         {
             int memberCount = (classContract.BaseContract == null) ? 0 :
-                ReflectionWriteMembers(xmlWriter, obj, context, classContract.BaseContract, derivedMostClassContract);
+                ReflectionWriteMembers(xmlWriter, obj, context, classContract.BaseContract, derivedMostClassContract, childElementIndex);
+
+            childElementIndex += memberCount;
 
             Type classType = classContract.UnadaptedClassType;
             XmlDictionaryString[] memberNames = classContract.MemberNames;
@@ -63,12 +87,12 @@ namespace System.Runtime.Serialization
                 bool writeXsiType = CheckIfMemberHasConflict(member, classContract, derivedMostClassContract);
                 MemberInfo memberInfo = member.MemberInfo;
                 object memberValue = ReflectionGetMemberValue(obj, memberInfo);
-                if (writeXsiType || !ReflectionTryWritePrimitive(xmlWriter, context, memberType, memberValue, member.MemberInfo, null /*arrayItemIndex*/, ns, memberNames[i] /*nameLocal*/, i + _childElementIndex))
+                if (writeXsiType || !ReflectionTryWritePrimitive(xmlWriter, context, memberType, memberValue, member.MemberInfo, null /*arrayItemIndex*/, ns, memberNames[i + childElementIndex] /*nameLocal*/, i + childElementIndex))
                 {
                     ReflectionWriteStartElement(memberType, ns, ns.Value, member.Name, 0);
-                    if (classContract.ChildElementNamespaces[i + _childElementIndex] != null)
+                    if (classContract.ChildElementNamespaces[i + childElementIndex] != null)
                     {
-                        var nsChildElement = classContract.ChildElementNamespaces[i + _childElementIndex];
+                        var nsChildElement = classContract.ChildElementNamespaces[i + childElementIndex];
                         _arg0XmlWriter.WriteNamespaceDecl(nsChildElement);
                     }
                     ReflectionWriteValue(memberType, memberValue, writeXsiType);
@@ -76,7 +100,7 @@ namespace System.Runtime.Serialization
                 }
             }
 
-            return 0;
+            return memberCount;
         }
 
         private object ReflectionGetMemberValue(object obj, MemberInfo memberInfo)
@@ -165,8 +189,6 @@ namespace System.Runtime.Serialization
                 }
 
                 IEnumerator enumerator = ((IEnumerable)obj).GetEnumerator();
-                Type itemType = collectionDataContract.ItemType;
-
                 bool isDictionary = false, isGenericDictionary = false;
                 Type enumeratorType = null;
                 Type[] keyValueTypes = null;
@@ -188,21 +210,28 @@ namespace System.Runtime.Serialization
                     IEnumerator nonGenericDictEnumerator = (IEnumerator)new CollectionDataContract.DictionaryEnumerator(((IDictionary)obj).GetEnumerator());
                     enumerator = nonGenericDictEnumerator;
                 }
+                else
+                {
+                    enumeratorType = collectionDataContract.GetEnumeratorMethod.ReturnType;
+                }
+
+                MethodInfo getCurrentMethod = enumeratorType.GetMethod(Globals.GetCurrentMethodName, BindingFlags.Instance | BindingFlags.Public, Array.Empty<Type>());
+                Type elementType = getCurrentMethod.ReturnType;
 
                 while (enumerator.MoveNext())
                 {
                     object current = enumerator.Current;
                     _arg2Context.IncrementItemCount(1);
-                    if (!ReflectionTryWritePrimitive(_arg0XmlWriter, _arg2Context, itemType, current, null, null, ns, itemName, 0))
+                    if (!ReflectionTryWritePrimitive(_arg0XmlWriter, _arg2Context, elementType, current, null, null, ns, itemName, 0))
                     {
-                        ReflectionWriteStartElement(itemType, ns, ns.Value, itemName.Value, 0);
+                        ReflectionWriteStartElement(elementType, ns, ns.Value, itemName.Value, 0);
                         if (isGenericDictionary || isDictionary)
                         {
                             _arg3CollectionDataContract.ItemContract.WriteXmlValue(_arg0XmlWriter, current, _arg2Context);
                         }
                         else
                         {
-                            ReflectionWriteValue(itemType, current, false);
+                            ReflectionWriteValue(elementType, current, false);
                         }
                         ReflectionWriteEndElement();
                     }
@@ -244,54 +273,60 @@ namespace System.Runtime.Serialization
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    ReflectionInternalSerialize(value, value.GetType().TypeHandle.Equals(memberType.TypeHandle), writeXsiType, memberType);
                 }
             }
             else
             {
                 if (isNullableOfT)
                 {
-                    throw new NotImplementedException();
-                }
-                else
-                {
                     if (memberValue == null)
                     {
-                        _arg2Context.WriteNull(_arg0XmlWriter, memberType, DataContract.IsTypeSerializable(memberType));
+                        Type[] genericArgumentTypes = memberType.GetGenericArguments();
+                        if (genericArgumentTypes.Length != 1)
+                        {
+                            throw new InvalidOperationException(string.Format("Cannot serialize type: {0}", memberType.Name));
+                        }
+
+                        memberType = genericArgumentTypes[0];
                     }
                     else
                     {
-                        PrimitiveDataContract primitiveContract = PrimitiveDataContract.GetPrimitiveDataContract(memberType);
-                        if (primitiveContract != null && primitiveContract.UnderlyingType != Globals.TypeOfObject && !writeXsiType)
+                        MethodInfo getValueOrDefault = memberType.GetMethod("GetValueOrDefault", Array.Empty<Type>());
+                        memberValue = getValueOrDefault.Invoke(memberValue, Array.Empty<object>());
+                        memberType = memberValue.GetType();
+                    }
+                }
+
+                if (memberValue == null)
+                {
+                    _arg2Context.WriteNull(_arg0XmlWriter, memberType, DataContract.IsTypeSerializable(memberType));
+                }
+                else
+                {
+                    PrimitiveDataContract primitiveContract = PrimitiveDataContract.GetPrimitiveDataContract(memberType);
+                    if (primitiveContract != null && primitiveContract.UnderlyingType != Globals.TypeOfObject && !writeXsiType)
+                    {
+                        primitiveContract.WriteXmlValue(_arg0XmlWriter, memberValue, _arg2Context);
+                    }
+                    else
+                    {
+                        if (memberType == Globals.TypeOfObject ||//boxed Nullable<T>
+                            memberType == Globals.TypeOfValueType ||
+                            ((IList)Globals.TypeOfNullable.GetInterfaces()).Contains(memberType))
                         {
-                            if (isNullableOfT)
+                            if (value == null)
                             {
-                                primitiveContract.WriteXmlValue(_arg0XmlWriter, memberValue, _arg2Context);
-                            }
-                            else
-                            {
-                                primitiveContract.WriteXmlValue(_arg0XmlWriter, memberValue, _arg2Context);
-                            }
-                        }
-                        else
-                        {
-                            if (memberType == Globals.TypeOfObject ||//boxed Nullable<T>
-                                memberType == Globals.TypeOfValueType ||
-                                ((IList)Globals.TypeOfNullable.GetInterfaces()).Contains(memberType))
-                            {
-                                if (value == null)
-                                {
-                                    _arg2Context.WriteNull(_arg0XmlWriter, memberType, DataContract.IsTypeSerializable(memberType));
-                                }
-                                else
-                                {
-                                    ReflectionInternalSerialize(value, value.GetType().TypeHandle.Equals(memberType.TypeHandle), writeXsiType, memberType);
-                                }
+                                _arg2Context.WriteNull(_arg0XmlWriter, memberType, DataContract.IsTypeSerializable(memberType));
                             }
                             else
                             {
                                 ReflectionInternalSerialize(value, value.GetType().TypeHandle.Equals(memberType.TypeHandle), writeXsiType, memberType);
                             }
+                        }
+                        else
+                        {
+                            ReflectionInternalSerialize(value, value.GetType().TypeHandle.Equals(memberType.TypeHandle), writeXsiType, memberType);
                         }
                     }
                 }

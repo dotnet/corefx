@@ -794,6 +794,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsTimeSpan()
                 : HandleReadValue(reader.ReadElementContentAsTimeSpan(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator writer, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            writer.WriteTimeSpan((TimeSpan)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -859,6 +864,11 @@ namespace System.Runtime.Serialization
                 return HandleReadValue(reader.ReadElementContentAsUri(), context);
             }
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator writer, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            writer.WriteUri((Uri)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -894,6 +904,11 @@ namespace System.Runtime.Serialization
             {
                 return HandleReadValue(reader.ReadElementContentAsQName(), context);
             }
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator writer, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            context.WriteQName(writer, (XmlQualifiedName)obj, name, ns);
         }
 
         internal override void WriteRootElement(XmlWriterDelegator writer, XmlDictionaryString name, XmlDictionaryString ns)
