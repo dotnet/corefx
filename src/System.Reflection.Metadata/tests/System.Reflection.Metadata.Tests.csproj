@@ -35,6 +35,7 @@
     <Compile Include="Metadata\BlobContentIdTests.cs" />
     <Compile Include="Metadata\BlobTests.cs" />
     <Compile Include="Metadata\BlobUtilitiesTests.cs" />
+    <Compile Include="Metadata\Ecma335\CodedIndexTests.cs" />
     <Compile Include="Metadata\LargeTablesAndHeapsTests.cs" />
     <Compile Include="Metadata\TypeSystem\ClassLayoutRow.cs" />
     <Compile Include="Metadata\Decoding\CustomAttributeDecoderTests.cs" />
@@ -64,7 +65,7 @@
     <Compile Include="PortableExecutable\DebugDirectoryTests.cs" />
     <Compile Include="PortableExecutable\PEBinaryReaderTests.cs" />
     <Compile Include="PortableExecutable\PEBuilderTests.cs" />
-    <Compile Include="PortableExecutable\PEHeaderTests.cs" />
+    <Compile Include="PortableExecutable\PEHeadersTests.cs" />
     <Compile Include="PortableExecutable\PEReaderTests.cs" />
     <Compile Include="PortableExecutable\SectionHeaderTests.cs" />
     <Compile Include="Utilities\StreamExtensionsTests.cs" />
@@ -75,7 +76,7 @@
     <Compile Include="TestUtilities\AssertEx.cs" />
     <Compile Include="TestUtilities\DiffUtil.cs" />
     <Compile Include="TestUtilities\TestMetadataResolver.cs" />
-    <Compile Include="TestUtilities\TestStreamBase.cs" />
+    <Compile Include="PortableExecutable\TestStreamBase.cs" />
     <Compile Include="TestUtilities\CustomAccessMemoryStream.cs" />
     <Compile Include="Utilities\StringUtilsTests.cs" />
     <Compile Include="Utilities\BlobReaderTests.cs" />
