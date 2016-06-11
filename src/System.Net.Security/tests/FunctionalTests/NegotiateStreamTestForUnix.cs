@@ -32,6 +32,11 @@ namespace System.Net.Security.Tests
 
         public KDCSetup()
         {
+            if (!NegotiateStreamTest.IsSupportedTestOS)
+            {
+                return;
+            }
+
             _isKrbPreInstalled = File.Exists(Krb5ConfigFile) &&
                 File.ReadAllText(Krb5ConfigFile).Contains(TestConfiguration.Realm);
             if (!_isKrbPreInstalled)
@@ -56,7 +61,7 @@ namespace System.Net.Security.Tests
 
         public void Dispose()
         {
-            if (!_isKrbPreInstalled)
+            if (NegotiateStreamTest.IsSupportedTestOS && !_isKrbPreInstalled)
             {
                 RunSetupScript(ScriptUninstallArgs);
             }
@@ -124,6 +129,9 @@ namespace System.Net.Security.Tests
         private readonly string _testTarget = "TestTarget";
         private readonly static string _ntlmPassword = TestConfiguration.NtlmPassword;
 
+        // Limit the places where this test runs to match the environments we have pre-configured to support the script.
+        internal static bool IsSupportedTestOS { get; } = PlatformDetection.IsUbuntu1404 || PlatformDetection.IsUbuntu1604;
+
         private void AssertClientPropertiesForTarget(NegotiateStream client, string target)
         {
             Assert.True(client.IsAuthenticated, "client.IsAuthenticated");
@@ -148,7 +156,7 @@ namespace System.Net.Security.Tests
             _isNtlmAvailable = _fixture.CheckAndInitializeNtlm(_isKrbAvailable);
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_KerberosAuthentication_Success()
         {
@@ -181,7 +189,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_AuthToHttpTarget_Success()
         {
@@ -214,7 +222,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_KerberosAuthWithoutRealm_Success()
         {
@@ -246,7 +254,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_KerberosAuthDefaultCredentials_Success()
         {
@@ -281,7 +289,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_EchoServer_ClientWriteRead_Successive_Sync_Success()
         {
@@ -325,7 +333,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_EchoServer_ClientWriteRead_Successive_Async_Success()
         {
@@ -382,7 +390,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_KerberosAuthDefaultCredentialsNoSeed_Failure()
         {
@@ -405,7 +413,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_KerberosAuthInvalidUser_Failure()
         {
@@ -432,7 +440,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_KerberosAuthInvalidPassword_Failure()
         {
@@ -460,7 +468,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_KerberosAuthInvalidTarget_Failure()
         {
@@ -515,7 +523,7 @@ namespace System.Net.Security.Tests
         }
 
 
-        [Theory, OuterLoop]
+        [ConditionalTheory(nameof(IsSupportedTestOS)), OuterLoop]
         [MemberData(nameof(ValidNtlmCredentials))]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_NtlmAuthentication_ValidCredentials_Success(NetworkCredential credential)
@@ -561,7 +569,7 @@ namespace System.Net.Security.Tests
         }
 
      
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [ActiveIssue(7825)]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_NtlmAuthentication_Fallback_Success()
@@ -607,7 +615,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_NtlmAuthentication_KerberosCreds_Success()
         {
@@ -652,7 +660,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [ActiveIssue(7825)]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_EchoServer_NTLM_ClientWriteRead_Successive_Sync_Success()
@@ -701,7 +709,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact, OuterLoop]
+        [ConditionalFact(nameof(IsSupportedTestOS)), OuterLoop]
         [ActiveIssue(7825)]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_EchoServer_NTLM_ClientWriteRead_Successive_Async_Success()
@@ -755,7 +763,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Theory, OuterLoop]
+        [ConditionalTheory(nameof(IsSupportedTestOS)), OuterLoop]
         [MemberData(nameof(InvalidNtlmCredentials))]
         [PlatformSpecific(PlatformID.Linux)]
         public void NegotiateStream_StreamToStream_NtlmAuthentication_NtlmUser_InvalidCredentials_Fail(NetworkCredential credential)
