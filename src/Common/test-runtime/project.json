@@ -2,7 +2,7 @@
   "dependencies": {
     "Microsoft.NETCore.Platforms": "1.0.1-rc3-24210-10",
     "Microsoft.NETCore.TestHost": "1.0.0-rc3-24203-00",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2-rc3-24210-01",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2-rc3-24210-10",
     "NETStandard.Library": "1.6.0-rc3-24210-10",
     "System.Diagnostics.Contracts": "4.0.1-rc3-24210-10",
     "System.IO.Compression": "4.1.0-rc3-24210-10",
