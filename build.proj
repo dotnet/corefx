@@ -73,7 +73,15 @@
 
   <UsingTask TaskName="GatherDirectoriesToRestore" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll" />
 
-  <Target Name="BatchRestorePackages">
+  <!-- by default in the release branch we will re-download packages every time -->
+  <PropertyGroup Condition="'$(SkipCleanPackages)' != 'true'">
+    <BatchRestorePackagesDepensOn>
+      CleanPackages;
+      CleanPackagesCache;
+      $(BatchRestorePackagesDepensOn);
+    </BatchRestorePackagesDepensOn>
+  </PropertyGroup>
+  <Target Name="BatchRestorePackages" DependsOnTargets="$(BatchRestorePackagesDepensOn)">
     <MakeDir Directories="$(PackagesDir)" Condition="!Exists('$(PackagesDir)')" /> 
 
     <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Restoring all packages..." />
