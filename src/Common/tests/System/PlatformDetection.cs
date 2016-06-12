@@ -21,6 +21,7 @@ namespace System
 
         public static int WindowsVersion { get; } = GetWindowsVersion();
 
+        public static bool IsDebian8 { get; } = IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1404 { get; } = IsDistroAndVersion("ubuntu", "14.04");
         public static bool IsUbuntu1510 { get; } = IsDistroAndVersion("ubuntu", "15.10");
         public static bool IsUbuntu1604 { get; } = IsDistroAndVersion("ubuntu", "16.04");
