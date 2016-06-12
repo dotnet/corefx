@@ -11,27 +11,27 @@
   <ItemGroup>
     <RuntimeDependency Include="runtime.win7-x64.runtime.native.System.IO.Compression">
       <TargetRuntime>win7-x64</TargetRuntime>
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </RuntimeDependency>
     <RuntimeDependency Include="runtime.win7-x86.runtime.native.System.IO.Compression">
       <TargetRuntime>win7-x86</TargetRuntime>
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </RuntimeDependency>
     <RuntimeDependency Include="runtime.win8-arm.runtime.native.System.IO.Compression">
       <TargetRuntime>win8-arm</TargetRuntime>
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </RuntimeDependency>
     <RuntimeDependency Include="runtime.win10-x64-aot.runtime.native.System.IO.Compression">
       <TargetRuntime>win10-x64-aot</TargetRuntime>
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </RuntimeDependency>
     <RuntimeDependency Include="runtime.win10-arm-aot.runtime.native.System.IO.Compression">
       <TargetRuntime>win10-arm-aot</TargetRuntime>
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </RuntimeDependency>
     <RuntimeDependency Include="runtime.win10-x86-aot.runtime.native.System.IO.Compression">
       <TargetRuntime>win10-x86-aot</TargetRuntime>
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </RuntimeDependency>
     <!-- make this package installable and noop in a packages.config-based project -->
     <File Include="$(PlaceHolderFile)">
