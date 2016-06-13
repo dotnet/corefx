@@ -3,28 +3,28 @@
   <Import Condition="Exists('..\dir.props')" Project="..\dir.props" />
   <ItemGroup>
     <ExternalPackage Include="runtime.win7-x64.runtime.native.System.Data.SqlClient.sni">
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </ExternalPackage>
     <ExternalPackage Include="runtime.win7-x86.runtime.native.System.Data.SqlClient.sni">
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </ExternalPackage>
     <ExternalPackage Include="runtime.win7-x64.runtime.native.System.IO.Compression">
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </ExternalPackage>
     <ExternalPackage Include="runtime.win7-x86.runtime.native.System.IO.Compression">
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </ExternalPackage>
     <ExternalPackage Include="runtime.win8-arm.runtime.native.System.IO.Compression">
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </ExternalPackage>
     <ExternalPackage Include="runtime.win10-x64-aot.runtime.native.System.IO.Compression">
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </ExternalPackage>
     <ExternalPackage Include="runtime.win10-arm-aot.runtime.native.System.IO.Compression">
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </ExternalPackage>
     <ExternalPackage Include="runtime.win10-x86-aot.runtime.native.System.IO.Compression">
-      <Version>4.0.1-$(ExternalExpectedPrerelease)</Version>
+      <Version>4.0.1</Version>
     </ExternalPackage>
   </ItemGroup>
 </Project>
