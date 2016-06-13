@@ -9,6 +9,8 @@ add_compile_options(-Wno-deprecated-declarations)
 # These are happening inside of OpenSSL-defined macros out of our control
 add_compile_options(-Wno-cast-align)
 
+add_definitions(-DPIC=1)
+
 if(CMAKE_STATIC_LIB_LINK)
    message("Build OpenSSL Static Link")
    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -16,10 +18,6 @@ if(CMAKE_STATIC_LIB_LINK)
 endif(CMAKE_STATIC_LIB_LINK)
 
 find_package(OpenSSL REQUIRED)
-
-if(NOT OPENSSL_FOUND)
-   message(FATAL_ERROR "!!! Cannot find openssl. System.Security.Criptography.Native cannot build without it. Try installing opennssl (or the appropriate package for your platform) !!!")
-endif(NOT OPENSSL_FOUND)
 
 set(NATIVECRYPTO_SOURCES
     openssl.c
