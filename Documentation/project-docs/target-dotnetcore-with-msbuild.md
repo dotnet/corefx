@@ -16,6 +16,7 @@ Prerequisites
 =============
 - [Visual Studio 2015 Update 2 or higher](https://www.visualstudio.com/downloads/download-visual-studio-vs)
 - [.NET Core tools for Visual Studio](https://www.visualstudio.com/downloads/download-visual-studio-vs)
+- NuGet?
 
 Coretemplate
 ============
@@ -33,16 +34,73 @@ To use the CoreConsole host, you need to reference the `Microsoft.NETCore.Consol
 to `MyApp.dll` and rename `CoreConsole.exe` to `MyApp.exe`.  Coretemplate does this in a [common targets file](https://github.com/mellinoe/corebuild/blob/master/coreconsole.targets).
 - Visual Studio may ask you to enable developer mode for Windows 10 when you open the project
 
+Creating a library targeting .NET Core
+======================================
 
+- File > New > Project
 
-Starting from a portable library
-- New library, target .NET 4.6 and .NET Core 1.0
-- Update project.json
+![New Project](https://dotnetdocs.blob.core.windows.net/getting-started/new-project.png)
 
-For an EXE
-- Remove ProjecttypeGuids
-- Set BaseNuGetRuntimeIdentifier to win10
-- After targets import, set AutoUnifyAssemblyReferences property to true
-- Change OutputType to Exe
-- Change configuration to target x64 instead of AnyCPU
-- Add debugging support
+- Select ".NET Framework 4.6" and "ASP.NET Core 1.0"
+
+![Portable targets dialog](pcl-targets-dialog-net46-aspnetcore10.png)
+
+- In the "Library" tab of the project properties, click on the "Target .NET Platform Standard" link, and click "Yes" in the dialog that is shown
+
+- Open the `project.json` file and change the version number of the `NETStandard.Library` package to `1.5.0-rc2-24027` (this is the .NET Core RC2 release).
+
+Creating a .NET Core Console application
+========================================
+
+- Start by following the steps in the previous section to create a library targeting .NET Core
+
+- Open the project's XML for editing (in Visual Studio, right click on the project -> Unload Project, right click again -> Edit MyProj.csproj)
+  - Remove the `ProjectTypeGuids` property
+  - Add the following property: `<BaseNuGetRuntimeIdentifier>win10</BaseNuGetRuntimeIdentifier>`
+  - Add the following at the end of the file (after the import of `Microsoft.Portable.CSharp.Targets`:
+
+```xml
+  <PropertyGroup>
+    <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(TargetDir)CoreRun.exe</StartProgram>
+    <StartArguments>$(TargetPath)</StartArguments>
+    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
+  </PropertyGroup>
+```
+
+  - Close the .csproj file, and reload the project in Visual Studio
+- In the project properties:
+  - Change the Output type to "Console Application" in the Application tab
+  - In the "Build" tab, select "All Configurations" and change the "Platform Target" to "x64"
+- Add a 'Main' method, for example:
+
+```C#
+public static void Main(string[] args)
+{
+    Console.WriteLine("Hello, .NET Core!");
+}
+```
+
+- Add runtimes and dependencies on the runtime and host to `project.json`
+  - Add a `runtimes` section with the following runtimes: `win10-x64`, `ubuntu.14.04-x64`, and `osx.10.10-x64`
+  - Add a dependency on `Microsoft.NETCore.Runtime` version `1.0.2-rc2-24027` and `Microsoft.NETCore.TestHost` version `1.0.0-rc2-24027`
+  - When you're done, the `project.json` should look like this:
+
+```json
+{
+  "dependencies": {
+    "NETStandard.Library": "1.5.0-rc2-24027",
+    "Microsoft.NETCore.TestHost": "1.0.0-rc2-24027",
+    "Microsoft.NETCore.Runtime": "1.0.2-rc2-24027"
+  },
+  "runtimes": {
+    "win10-x64": { },
+    "ubuntu.14.04-x64": { },
+    "osx.10.10-x64": { }
+  },
+  "frameworks": {
+    "netstandard1.5": { }
+  }
+}
+```
