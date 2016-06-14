@@ -24,23 +24,23 @@ Creating a library targeting .NET Core
 
 - File > New > Project
 
-![New Project](https://dotnetdocs.blob.core.windows.net/getting-started/new-project.png)
+  ![New Project](https://dotnetdocs.blob.core.windows.net/getting-started/new-project.png)
 
 - Select ".NET Framework 4.6" and "ASP.NET Core 1.0"
 
-![Portable targets dialog](pcl-targets-dialog-net46-aspnetcore10.png)
+  ![Portable targets dialog](pcl-targets-dialog-net46-aspnetcore10.png)
 
 - In the "Library" tab of the project properties, click on the "Target .NET Platform Standard" link, and click "Yes" in the dialog that is shown
 - In the `project.json` file:
-  - Change the version number of the `NETStandard.Library` package to `1.5.0-rc2-24027` (this is the .NET Core RC2 version of the package).
-  - Add the below `imports` definition inside the `netstandard1.5` framework definition.  This will allow your project to reference .NET Core compatible
-  NuGet packages that haven't been updated to target .NET Standard
+    - Change the version number of the `NETStandard.Library` package to `1.5.0-rc2-24027` (this is the .NET Core RC2 version of the package).
+    - Add the below `imports` definition inside the `netstandard1.5` framework definition.  This will allow your project to reference .NET Core compatible
+      NuGet packages that haven't been updated to target .NET Standard
 
-```json
-"netstandard1.5": {
-    "imports": [ "dnxcore50", "portable-net452" ]
-}
-```
+        ```json
+        "netstandard1.5": {
+            "imports": [ "dnxcore50", "portable-net452" ]
+        }
+        ```
 
 - You may see an error in the Visual Studio error list saying "Platform target 'AnyCPU' is not supported by one or more of the project's targets."  If so,
 you can suppress the error by editing the `.csproj` file and removing the line with the `ProjectTypeGuids` property  
@@ -63,56 +63,57 @@ Creating a .NET Core console application from Visual Studio
 ===========================================================
 
 - Start by following the steps in the previous section to create a library targeting .NET Core
-
 - Open the project's XML for editing (in Visual Studio, right click on the project -> Unload Project, right click again -> Edit MyProj.csproj)
-  - Remove the `ProjectTypeGuids` property
-  - Add the following property: `<BaseNuGetRuntimeIdentifier>win10</BaseNuGetRuntimeIdentifier>`
-  - Add the following at the end of the file (after the import of `Microsoft.Portable.CSharp.Targets`:
+    - Remove the `ProjectTypeGuids` property
+    - Add the following property: `<BaseNuGetRuntimeIdentifier>win10</BaseNuGetRuntimeIdentifier>`
+    - Add the following at the end of the file (after the import of `Microsoft.Portable.CSharp.Targets`:
 
-```xml
-  <PropertyGroup>
-    <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
-    <StartAction>Program</StartAction>
-    <StartProgram>$(TargetDir)CoreRun.exe</StartProgram>
-    <StartArguments>$(TargetPath)</StartArguments>
-    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
-  </PropertyGroup>
-```
+        ```xml
+        <PropertyGroup>
+            <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
+            <StartAction>Program</StartAction>
+            <StartProgram>$(TargetDir)CoreRun.exe</StartProgram>
+            <StartArguments>$(TargetPath)</StartArguments>
+            <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
+        </PropertyGroup>
+        ```
 
-  - Close the .csproj file, and reload the project in Visual Studio
+    - Close the .csproj file, and reload the project in Visual Studio
 - In the project properties:
-  - Change the Output type to "Console Application" in the Application tab
-  - In the "Build" tab, select "All Configurations" and change the "Platform Target" to "x64"
+    - Change the Output type to "Console Application" in the Application tab
+    - In the "Build" tab, select "All Configurations" and change the "Platform Target" to "x64"
+- Add runtimes and dependencies on the runtime and host to `project.json`
+    - Add a `runtimes` section with the following runtimes: `win10-x64`, `ubuntu.14.04-x64`, and `osx.10.10-x64`
+    - Add a dependency on `Microsoft.NETCore.Runtime` version `1.0.2-rc2-24027` and `Microsoft.NETCore.TestHost` version `1.0.0-rc2-24027`
+    - When you're done, the `project.json` should look like this:
+
+        ```json
+        {
+            "dependencies": {
+                "NETStandard.Library": "1.5.0-rc2-24027",
+                "Microsoft.NETCore.TestHost": "1.0.0-rc2-24027",
+                "Microsoft.NETCore.Runtime": "1.0.2-rc2-24027"
+            },
+            "runtimes": {
+                "win10-x64": { },
+                "ubuntu.14.04-x64": { },
+                "osx.10.10-x64": { }
+            },
+            "frameworks": {
+                "netstandard1.5": {
+                    "imports": [ "dnxcore50", "portable-net452" ]
+                }
+            }
+        }
+        ```
+
 - Add a 'Main' method, for example:
 
-```C#
-public static void Main(string[] args)
-{
-    Console.WriteLine("Hello, .NET Core!");
-}
-```
-
-- Add runtimes and dependencies on the runtime and host to `project.json`
-  - Add a `runtimes` section with the following runtimes: `win10-x64`, `ubuntu.14.04-x64`, and `osx.10.10-x64`
-  - Add a dependency on `Microsoft.NETCore.Runtime` version `1.0.2-rc2-24027` and `Microsoft.NETCore.TestHost` version `1.0.0-rc2-24027`
-  - When you're done, the `project.json` should look like this:
-
-```json
-{
-  "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-24027",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-24027",
-    "Microsoft.NETCore.Runtime": "1.0.2-rc2-24027"
-  },
-  "runtimes": {
-    "win10-x64": { },
-    "ubuntu.14.04-x64": { },
-    "osx.10.10-x64": { }
-  },
-  "frameworks": {
-    "netstandard1.5": {
-      "imports": [ "dnxcore50", "portable-net452" ]
+    ```C#
+    public static void Main(string[] args)
+    {
+        Console.WriteLine("Hello, .NET Core!");
     }
-  }
-}
-```
+    ```
+
+- You should be able to run your program with F5 in Visual Studio, or from the command line in the output folder with `CoreRun MyApp.exe` 
