@@ -18,22 +18,6 @@ Prerequisites
 - [.NET Core tools for Visual Studio](https://www.visualstudio.com/downloads/download-visual-studio-vs)
 - NuGet?
 
-Coretemplate
-============
-A good option to use to create an MSBuild based .NET Core project is to start with [coretemplate](https://github.com/mellinoe/coretemplate). This is a basic project which brings
-in some MSBuild targets for .NET Core.
-
-Starting from scratch
-=====================
-It is also possible to start by creating a project in Visual Studio and modify it to target .NET Core.  The instructions below show the minimal steps to get this working.
-In contrast to coretemplate, a project created this way:
-
-- Won't include configurations for targeting Linux and Mac OS
-- Will use the CoreRun instead of the CoreConsole host.  This means that you will need to run the app via `CoreRun MyApp.exe` instead of just `MyApp.exe`.
-To use the CoreConsole host, you need to reference the `Microsoft.NETCore.ConsoleHost` package instead of `Microsoft.NETCore.TestHost`, and after building rename `MyApp.exe`
-to `MyApp.dll` and rename `CoreConsole.exe` to `MyApp.exe`.  Coretemplate does this in a [common targets file](https://github.com/mellinoe/corebuild/blob/master/coreconsole.targets).
-- Visual Studio may ask you to enable developer mode for Windows 10 when you open the project
-
 Creating a library targeting .NET Core
 ======================================
 
@@ -47,10 +31,24 @@ Creating a library targeting .NET Core
 
 - In the "Library" tab of the project properties, click on the "Target .NET Platform Standard" link, and click "Yes" in the dialog that is shown
 
-- Open the `project.json` file and change the version number of the `NETStandard.Library` package to `1.5.0-rc2-24027` (this is the .NET Core RC2 release).
+- Open the `project.json` file and change the version number of the `NETStandard.Library` package to `1.5.0-rc2-24027` (this is the .NET Core RC2 version of the package).
 
-Creating a .NET Core Console application
+Creating a .NET Core console application
 ========================================
+Building a console application for .NET Core requires some customization of the MSBuild build process.  A good option to start with is
+[coretemplate](https://github.com/mellinoe/coretemplate).  This is a basic project which brings in MSBuild targets for .NET Core.  
+
+It is also possible to start by creating a project in Visual Studio and modify it to target .NET Core.  The instructions below show the minimal steps to get this working.
+In contrast to coretemplate, a project created this way:
+
+- Won't include configurations for targeting Linux and Mac OS
+- Will use the CoreRun instead of the CoreConsole host.  This means that you will need to run the app via `CoreRun MyApp.exe` instead of just `MyApp.exe`.
+To use the CoreConsole host, you need to reference the `Microsoft.NETCore.ConsoleHost` package instead of `Microsoft.NETCore.TestHost`, and after building rename `MyApp.exe`
+to `MyApp.dll` and rename `CoreConsole.exe` to `MyApp.exe`.  Coretemplate does this in a [common targets file](https://github.com/mellinoe/corebuild/blob/master/coreconsole.targets).
+- Visual Studio may ask you to enable developer mode for Windows 10 when you open the project
+
+Creating a .NET Core console application from Visual Studio
+===========================================================
 
 - Start by following the steps in the previous section to create a library targeting .NET Core
 
