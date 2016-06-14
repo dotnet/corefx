@@ -14,9 +14,10 @@ MSBuild's extensibility in your build for scenarios that are not well supported 
 
 Prerequisites
 =============
+
 - [Visual Studio 2015 Update 2 or higher](https://www.visualstudio.com/downloads/download-visual-studio-vs)
 - [.NET Core tools for Visual Studio](https://www.visualstudio.com/downloads/download-visual-studio-vs)
-- NuGet?
+- NuGet Visual Studio extension [v3.5.0-beta](https://dist.nuget.org/visualstudio-2015-vsix/v3.5.0-beta/NuGet.Tools.vsix) or later
 
 Creating a library targeting .NET Core
 ======================================
@@ -30,8 +31,19 @@ Creating a library targeting .NET Core
 ![Portable targets dialog](pcl-targets-dialog-net46-aspnetcore10.png)
 
 - In the "Library" tab of the project properties, click on the "Target .NET Platform Standard" link, and click "Yes" in the dialog that is shown
+- In the `project.json` file:
+  - Change the version number of the `NETStandard.Library` package to `1.5.0-rc2-24027` (this is the .NET Core RC2 version of the package).
+  - Add the below `imports` definition inside the `netstandard1.5` framework definition.  This will allow your project to reference .NET Core compatible
+  NuGet packages that haven't been updated to target .NET Standard
 
-- Open the `project.json` file and change the version number of the `NETStandard.Library` package to `1.5.0-rc2-24027` (this is the .NET Core RC2 version of the package).
+```json
+"netstandard1.5": {
+    "imports": [ "dnxcore50", "portable-net452" ]
+}
+```
+
+- You may see an error in the Visual Studio error list saying "Platform target 'AnyCPU' is not supported by one or more of the project's targets."  If so,
+you can suppress the error by editing the `.csproj` file and removing the line with the `ProjectTypeGuids` property  
 
 Creating a .NET Core console application
 ========================================
@@ -98,7 +110,9 @@ public static void Main(string[] args)
     "osx.10.10-x64": { }
   },
   "frameworks": {
-    "netstandard1.5": { }
+    "netstandard1.5": {
+      "imports": [ "dnxcore50", "portable-net452" ]
+    }
   }
 }
 ```
