@@ -120,6 +120,9 @@
   <data name="Cryptography_Der_Invalid_Encoding" xml:space="preserve">
     <value>ASN1 corrupted data.</value>
   </data>
+  <data name="Cryptography_Der_Invalid_Length" xml:space="preserve">
+    <value>ASN1 unexpected end of data.</value>
+  </data>
   <data name="Cryptography_Oid_InvalidValue" xml:space="preserve">
     <value>The OID value is invalid.</value>
   </data>

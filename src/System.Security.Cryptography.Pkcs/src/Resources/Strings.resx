@@ -162,6 +162,9 @@
   <data name="Cryptography_Der_Invalid_Encoding" xml:space="preserve">
     <value>ASN1 corrupted data.</value>
   </data>
+  <data name="Cryptography_Der_Invalid_Length" xml:space="preserve">
+    <value>ASN1 unexpected end of data.</value>
+  </data>
   <data name="Cryptography_Invalid_IA5String" xml:space="preserve">
     <value>The string contains a character not in the 7 bit ASCII character set.</value>
   </data>
