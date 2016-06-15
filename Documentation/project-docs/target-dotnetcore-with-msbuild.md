@@ -72,7 +72,7 @@ Creating a .NET Core console application from Visual Studio
         },
         "frameworks": {
             "netcoreapp1.0": {
-            "imports": [ "dnxcore50", "portable-net452" ]
+                "imports": [ "dnxcore50", "portable-net452" ]
             }
         }
     }
