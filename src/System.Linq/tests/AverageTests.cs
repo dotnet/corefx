@@ -313,7 +313,7 @@ namespace System.Linq.Tests
 
         [Theory]
         [MemberData(nameof(Double_TestData))]
-        public void Double(double[] source, double expected)
+        public void Average_Double(double[] source, double expected)
         {
             Assert.Equal(expected, source.Average());
             Assert.Equal(expected, source.Average(x => x));
