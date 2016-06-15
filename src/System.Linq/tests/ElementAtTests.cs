@@ -29,7 +29,7 @@ namespace System.Linq.Tests
             Assert.Equal(q.ElementAt(4), q.ElementAt(4));
         }
 
-        public static IEnumerable<object[]> ElementAt_TestData()
+        public static IEnumerable<object[]> TestData()
         {
             yield return new object[] { NumberRangeGuaranteedNotCollectionType(9, 1), 0, 9 };
             yield return new object[] { NumberRangeGuaranteedNotCollectionType(9, 10), 9, 18 };
@@ -40,14 +40,14 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(ElementAt_TestData))]
+        [MemberData(nameof(TestData))]
         public void ElementAt(IEnumerable<int> source, int index, int expected)
         {
             Assert.Equal(expected, source.ElementAt(index));
         }
 
         [Fact]
-        public void ElementAt_InvalidIndex_ThrowsArgumentOutOfRangeException()
+        public void InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             Assert.Throws<ArgumentOutOfRangeException>("index", () => new int?[] { 9, 8 }.ElementAt(-1));
             Assert.Throws<ArgumentOutOfRangeException>("index", () => new int[] { 1, 2, 3, 4 }.ElementAt(4));
@@ -60,7 +60,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void ElementAt_NullableArray_ValidIndex_ReturnsCorrectObject()
+        public void NullableArray_ValidIndex_ReturnsCorrectObject()
         {
             int?[] source = { 9, 8, null, -5, 10 };
             
@@ -69,7 +69,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void ElementAt_NullSource_ThrowsArgumentNullException()
+        public void NullSource_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).ElementAt(2));
         }

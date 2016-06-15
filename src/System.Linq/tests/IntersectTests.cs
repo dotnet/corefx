@@ -31,7 +31,7 @@ namespace System.Linq.Tests
             Assert.Equal(first.Intersect(second), first.Intersect(second));
         }
 
-        public static IEnumerable<object[]> Intersect_Int_TestData()
+        public static IEnumerable<object[]> Int_TestData()
         {
             yield return new object[] { new int[0], new int[0], new int[0] };
             yield return new object[] { new int[] { -5, 3, -2, 6, 9 }, new int[] { 0, 5, 2, 10, 20 }, new int[0] };
@@ -40,14 +40,14 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Intersect_Int_TestData))]
-        public void Intersect_Int(IEnumerable<int> first, IEnumerable<int> second, int[] expected)
+        [MemberData(nameof(Int_TestData))]
+        public void Int(IEnumerable<int> first, IEnumerable<int> second, int[] expected)
         {
             Assert.Equal(expected, first.Intersect(second));
             Assert.Equal(expected, first.Intersect(second, null));
         }
 
-        public static IEnumerable<object[]> Intersect_String_TestData()
+        public static IEnumerable<object[]> String_TestData()
         {
             IEqualityComparer<string> defaultComparer = EqualityComparer<string>.Default;
             yield return new object[] { new string[1], new string[0], defaultComparer, new string[0] };
@@ -59,8 +59,8 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Intersect_String_TestData))]
-        public void Intersect_String(IEnumerable<string> first, IEnumerable<string> second, IEqualityComparer<string> comparer, string[] expected)
+        [MemberData(nameof(String_TestData))]
+        public void String(IEnumerable<string> first, IEnumerable<string> second, IEqualityComparer<string> comparer, string[] expected)
         {
             if (comparer == null)
             {
@@ -69,7 +69,7 @@ namespace System.Linq.Tests
             Assert.Equal(expected, first.Intersect(second, comparer));
         }
 
-        public static IEnumerable<object[]> Intersect_NullableInt_TestData()
+        public static IEnumerable<object[]> NullableInt_TestData()
         {
             yield return new object[] { new int?[0], new int?[] { -5, 0, null, 1, 2, 9, 2 }, new int?[0] };
             yield return new object[] { new int?[] { -5, 0, 1, 2, null, 9, 2 }, new int?[0], new int?[0] };
@@ -77,15 +77,15 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Intersect_NullableInt_TestData))]
-        public void Intersect_NullableInt(IEnumerable<int?> first, IEnumerable<int?> second, int?[] expected)
+        [MemberData(nameof(NullableInt_TestData))]
+        public void NullableInt(IEnumerable<int?> first, IEnumerable<int?> second, int?[] expected)
         {
             Assert.Equal(expected, first.Intersect(second));
             Assert.Equal(expected, first.Intersect(second, null));
         }
 
         [Fact]
-        public void Intersect_FirstNull_ThrowsArgumentNullException()
+        public void FirstNull_ThrowsArgumentNullException()
         {
             string[] first = null;
             string[] second = { "ekiM", "bBo" };
@@ -95,7 +95,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Intersect_SecondNull_ThrowsArgumentNullException()
+        public void SecondNull_ThrowsArgumentNullException()
         {
             string[] first = { "Tim", "Bob", "Mike", "Robert" };
             string[] second = null;

@@ -29,7 +29,7 @@ namespace System.Linq.Tests
 
         }
 
-        public static IEnumerable<object[]> DefaultIfEmpty_TestData()
+        public static IEnumerable<object[]> TestData()
         {
             yield return new object[] { new int[0], 0, new int[] { 0 } };
             yield return new object[] { new int[] { 3 }, 0, new int[] { 3 } };
@@ -42,7 +42,7 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(DefaultIfEmpty_TestData))]
+        [MemberData(nameof(TestData))]
         public static void DefaultIfEmpty(IEnumerable<int> source, int defaultValue, int[] expected)
         {
             IEnumerable<int> result;
@@ -64,14 +64,14 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void DefaultIfEmpty_NullableArray_Empty_WithoutDefaultValue()
+        public void NullableArray_Empty_WithoutDefaultValue()
         {
             int?[] source = new int?[0];
             Assert.Equal(new int?[] { null }, source.DefaultIfEmpty());
         }
 
         [Fact]
-        public void DefaultIfEmpty_NullableArray_Empty_WithDefaultValue()
+        public void NullableArray_Empty_WithDefaultValue()
         {
             int?[] source = new int?[0];
             int? defaultValue = 9;
@@ -79,7 +79,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void DefaultIfEmpty_NullSource_ThrowsArgumentNullException()
+        public void NullSource_ThrowsArgumentNullException()
         {
             IEnumerable<int> source = null;
 

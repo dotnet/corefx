@@ -57,21 +57,21 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void LongCount_NullableArray_IncludesNullValues()
+        public void NullableArray_IncludesNullValues()
         {
             int?[] data = { -10, 4, 9, null, 11 };
             Assert.Equal(5, data.LongCount());
         }
 
         [Fact]
-        public void LongCount_NullSource_ThrowsArgumentNullException()
+        public void NullSource_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LongCount());
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LongCount(i => i != 0));
         }
 
         [Fact]
-        public void LongCount_NullPredicate_ThrowsArgumentNullException()
+        public void NullPredicate_ThrowsArgumentNullException()
         {
             Func<int, bool> predicate = null;
             Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).LongCount(predicate));

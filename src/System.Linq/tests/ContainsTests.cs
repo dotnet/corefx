@@ -29,7 +29,7 @@ namespace System.Linq.Tests
             Assert.Equal(q.Contains("X"), q.Contains("X"));
         }
 
-        public static IEnumerable<object> Contains_Int_TestData()
+        public static IEnumerable<object> Int_TestData()
         {
             yield return new object[] { new int[0], 6, false };
             yield return new object[] { new int[] { 8, 10, 3, 0, -8 }, 6, false };
@@ -45,14 +45,14 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Contains_Int_TestData))]
-        public void Contains_Int(IEnumerable<int> source, int value, bool expected)
+        [MemberData(nameof(Int_TestData))]
+        public void Int(IEnumerable<int> source, int value, bool expected)
         {
             Assert.Equal(expected, source.Contains(value));
             Assert.Equal(expected, source.Contains(value, null));
         }
 
-        public static IEnumerable<object> Contains_String_TestData()
+        public static IEnumerable<object> String_TestData()
         {
             yield return new object[] { new string[] { null }, StringComparer.Ordinal, null, true };
             yield return new object[] { new string[] { "Bob", "Robert", "Tim" }, null, "trboeR", false };
@@ -62,8 +62,8 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Contains_String_TestData))]
-        public void Contains_String(IEnumerable<string> source, IEqualityComparer<string> comparer, string value, bool expected)
+        [MemberData(nameof(String_TestData))]
+        public void String(IEnumerable<string> source, IEqualityComparer<string> comparer, string value, bool expected)
         {
             if (comparer == null)
             {
@@ -72,7 +72,7 @@ namespace System.Linq.Tests
             Assert.Equal(expected, source.Contains(value, comparer));
         }
 
-        public static IEnumerable<object> Contains_NullableInt_TestData()
+        public static IEnumerable<object> NullableInt_TestData()
         {
             yield return new object[] { new int?[] { 8, 0, 10, 3, 0, -8, 0 }, null, false };
             yield return new object[] { new int?[] { 8, 0, 10, null, 3, 0, -8, 0 }, null, true };
@@ -82,15 +82,15 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Contains_NullableInt_TestData))]
-        public void Contains_NullableInt(IEnumerable<int?> source, int? value, bool expected)
+        [MemberData(nameof(NullableInt_TestData))]
+        public void NullableInt(IEnumerable<int?> source, int? value, bool expected)
         {
             Assert.Equal(expected, source.Contains(value));
             Assert.Equal(expected, source.Contains(value, null));
         }
 
         [Fact]
-        public void Contains_NullSource_ThrowsArgumentNullException()
+        public void NullSource_ThrowsArgumentNullException()
         {
             IEnumerable<int> source = null;
             

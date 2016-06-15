@@ -29,7 +29,7 @@ namespace System.Linq.Tests
             Assert.Equal(q.Count(), q.Count());
         }
 
-        public static IEnumerable<object[]> Count_Int_TestData()
+        public static IEnumerable<object[]> Int_TestData()
         {
             yield return new object[] { new int[0], null, 0 };
 
@@ -46,8 +46,8 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Count_Int_TestData))]
-        public void Count_Int(IEnumerable<int> source, Func<int, bool> predicate, int expected)
+        [MemberData(nameof(Int_TestData))]
+        public void Int(IEnumerable<int> source, Func<int, bool> predicate, int expected)
         {
             if (predicate == null)
             {
@@ -60,7 +60,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Count_NullableIntArray_IncludesNullObjects()
+        public void NullableIntArray_IncludesNullObjects()
         {
             int?[] data = { -10, 4, 9, null, 11 };
             Assert.Equal(5, data.Count());
@@ -97,14 +97,14 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Count_NullSource_ThrowsArgumentNullException()
+        public void NullSource_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Count());
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Count(i => i != 0));
         }
 
         [Fact]
-        public void Count_NullPredicate_ThrowsArgumentNullException()
+        public void NullPredicate_ThrowsArgumentNullException()
         {
             Func<int, bool> predicate = null;
             Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).Count(predicate));

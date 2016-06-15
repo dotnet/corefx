@@ -34,7 +34,7 @@ namespace System.Linq.Tests
             Assert.Equal(q1.Except(q2), q1.Except(q2));
         }
 
-        public static IEnumerable<object[]> Except_Int_TestData()
+        public static IEnumerable<object[]> Int_TestData()
         {
             yield return new object[] { new int[0], new int[0], null, new int[0] };
             yield return new object[] { new int[0], new int[] { -6, -8, -6, 2, 0, 0, 5, 6 }, null, new int[0] };
@@ -43,8 +43,8 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Except_Int_TestData))]
-        public void Except_Int(IEnumerable<int> first, IEnumerable<int> second, IEqualityComparer<int> comparer, IEnumerable<int> expected)
+        [MemberData(nameof(Int_TestData))]
+        public void Int(IEnumerable<int> first, IEnumerable<int> second, IEqualityComparer<int> comparer, IEnumerable<int> expected)
         {
             if (comparer == null)
             {
@@ -53,7 +53,7 @@ namespace System.Linq.Tests
             Assert.Equal(expected, first.Except(second, comparer));
         }
 
-        public static IEnumerable<object[]> Except_String_TestData()
+        public static IEnumerable<object[]> String_TestData()
         {
             IEqualityComparer <string> defaultComparer = EqualityComparer<string>.Default;
             yield return new object[] { new string[1], new string[0], defaultComparer, new string[1] };
@@ -65,8 +65,8 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Except_String_TestData))]
-        public void Except_String(IEnumerable<string> first, IEnumerable<string> second, IEqualityComparer<string> comparer, IEnumerable<string> expected)
+        [MemberData(nameof(String_TestData))]
+        public void String(IEnumerable<string> first, IEnumerable<string> second, IEqualityComparer<string> comparer, IEnumerable<string> expected)
         {
             if (comparer == null)
             {
@@ -75,7 +75,7 @@ namespace System.Linq.Tests
             Assert.Equal(expected, first.Except(second, comparer));
         }
 
-        public static IEnumerable<object[]> Except_NullableInt_TestData()
+        public static IEnumerable<object[]> NullableInt_TestData()
         {
             yield return new object[] { new int?[] { -6, -8, -6, 2, 0, 0, 5, 6, null, null }, new int?[0], new int?[] { -6, -8, 2, 0, 5, 6, null } };
 
@@ -84,14 +84,14 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Except_NullableInt_TestData))]
-        public void Except_NullableInt(IEnumerable<int?> first, IEnumerable<int?> second, IEnumerable<int?> expected)
+        [MemberData(nameof(NullableInt_TestData))]
+        public void NullableInt(IEnumerable<int?> first, IEnumerable<int?> second, IEnumerable<int?> expected)
         {
                 Assert.Equal(expected, first.Except(second));
         }
 
         [Fact]
-        public void Except_FirstNull_ThrowsArgumentNullException()
+        public void FirstNull_ThrowsArgumentNullException()
         {
             string[] first = null;
             string[] second = { "bBo", "shriC" };
@@ -101,7 +101,7 @@ namespace System.Linq.Tests
         }
         
         [Fact]
-        public void Except_SecondNull_ThrowsArgumentNullException()
+        public void SecondNull_ThrowsArgumentNullException()
         {
             string[] first = { "Bob", "Tim", "Robert", "Chris" };
             string[] second = null;

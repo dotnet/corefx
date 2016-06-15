@@ -30,7 +30,7 @@ namespace System.Linq.Tests
             Assert.Equal(q.Any(predicate), q.Any(predicate));
         }
         
-        public static IEnumerable<object[]> Any_TestData()
+        public static IEnumerable<object[]> TestData()
         {
             yield return new object[] { new int[0], null, false };
             yield return new object[] { new int[] { 3 }, null, true };
@@ -52,7 +52,7 @@ namespace System.Linq.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Any_TestData))]
+        [MemberData(nameof(TestData))]
         public void Any(IEnumerable<int> source, Func<int, bool> predicate, bool expected)
         {
             if (predicate == null)
@@ -66,21 +66,21 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Any_NullObjectsInArray_Included()
+        public void NullObjectsInArray_Included()
         {
             int?[] source = { null, null, null, null };
             Assert.True(source.Any());
         }
 
         [Fact]
-        public void Any_NullSource_ThrowsArgumentNullException()
+        public void NullSource_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Any());
             Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Any(i => i != 0));
         }
 
         [Fact]
-        public void Any_NullPredicate_ThrowsArgumentNullException()
+        public void NullPredicate_ThrowsArgumentNullException()
         {
             Func<int, bool> predicate = null;
             Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).Any(predicate));
