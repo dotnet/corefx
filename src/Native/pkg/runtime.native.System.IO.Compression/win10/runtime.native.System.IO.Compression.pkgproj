@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <NativeFile Include="$(WinNativePath)..\..\NetCoreForCoreCLR\native\clrcompression.dll">
-      <TargetPath>runtimes/win10-$(PackagePlatform)-aot/lib/netcore50</TargetPath>
+    <NativeFile Include="$(WinNativePath)\clrcompression.dll">
+      <TargetPath>runtimes/win10-$(PackagePlatform)-aot/native</TargetPath>
     </NativeFile>
   </ItemGroup>
 
