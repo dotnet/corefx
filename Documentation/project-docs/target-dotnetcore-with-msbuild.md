@@ -44,11 +44,13 @@ Creating a library targeting .NET Core
 
 Creating a .NET Core console application
 ========================================
-Building a console application for .NET Core requires some customization of the MSBuild build process.  A good option to start with is
-[coretemplate](https://github.com/mellinoe/coretemplate).  This is a basic project which brings in MSBuild targets for .NET Core.  
+Building a console application for .NET Core requires some customization of the MSBuild build process.  A sample project for a .NET Core console application
+is [CoreApp](https://github.com/dotnet/corefxlab/tree/master/samples/NetCoreSample/CoreApp) in the [corefxlab](https://github.com/dotnet/corefxlab) repo.
+Another good option is to start with [coretemplate](https://github.com/mellinoe/coretemplate), which uses separate MSBuild targets files to target .NET Core
+instead of putting the the changes directly in the project file.  
 
 It is also possible to start by creating a project in Visual Studio and modify it to target .NET Core.  The instructions below show the minimal steps to get this working.
-In contrast to coretemplate, a project created this way:
+In contrast to CoreApp or coretemplate, a project created this way:
 
 - Won't include configurations for targeting Linux and Mac OS
 - Will use the CoreRun instead of the CoreConsole host.  This means that you will need to run the app via `CoreRun MyApp.exe` instead of just `MyApp.exe`.
