@@ -15,7 +15,7 @@ MSBuild's extensibility in your build for scenarios that are not well supported 
 Prerequisites
 =============
 
-- [Visual Studio 2015 Update 2 or higher](https://www.visualstudio.com/downloads/download-visual-studio-vs)
+- [Visual Studio 2015 Update 3 RC](https://www.visualstudio.com/downloads/visual-studio-prerelease-downloads#sec1) or higher
 - [.NET Core tools for Visual Studio](https://www.visualstudio.com/downloads/download-visual-studio-vs)
 - NuGet Visual Studio extension [v3.5.0-beta](https://dist.nuget.org/visualstudio-2015-vsix/v3.5.0-beta/NuGet.Tools.vsix) or later
 
@@ -41,9 +41,6 @@ Creating a library targeting .NET Core
             "imports": [ "dnxcore50", "portable-net452" ]
         }
         ```
-
-- You may see an error in the Visual Studio error list saying "Platform target 'AnyCPU' is not supported by one or more of the project's targets."  If so,
-you can suppress the error by editing the `.csproj` file and removing the line with the `ProjectTypeGuids` property  
 
 Creating a .NET Core console application
 ========================================
