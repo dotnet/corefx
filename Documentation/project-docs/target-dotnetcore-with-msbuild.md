@@ -22,7 +22,7 @@ Prerequisites
 Creating a library targeting .NET Core
 ======================================
 
-- File > New > Project
+- File > New > Project > Class Library (Portable)
 
   ![New Project](https://dotnetdocs.blob.core.windows.net/getting-started/new-project.png)
 
@@ -50,72 +50,69 @@ Another good option is to start with [coretemplate](https://github.com/mellinoe/
 instead of putting the the changes directly in the project file.  
 
 It is also possible to start by creating a project in Visual Studio and modify it to target .NET Core.  The instructions below show the minimal steps to get this working.
-In contrast to CoreApp or coretemplate, a project created this way:
-
-- Won't include configurations for targeting Linux and Mac OS
-- Will use the CoreRun instead of the CoreConsole host.  This means that you will need to run the app via `CoreRun MyApp.exe` instead of just `MyApp.exe`.
-To use the CoreConsole host, you need to reference the `Microsoft.NETCore.ConsoleHost` package instead of `Microsoft.NETCore.TestHost`, and after building rename `MyApp.exe`
-to `MyApp.dll` and rename `CoreConsole.exe` to `MyApp.exe`.  Coretemplate does this in a [common targets file](https://github.com/mellinoe/corebuild/blob/master/coreconsole.targets).
-- Visual Studio may ask you to enable developer mode for Windows 10 when you open the project
+In contrast to CoreApp or coretemplate, a project created this way won't include configurations for targeting Linux and Mac OS.
 
 Creating a .NET Core console application from Visual Studio
 ===========================================================
 
-- Start by following the steps in the previous section to create a library targeting .NET Core
+- File > New > Project > Console Application
+- In "Build" tab of the project properties, select "All Configurations" and change the "Platform Target" to "x64"
+- Delete the `app.config` file from the project
+- Add the following project.json file to the project:
+
+    ```json
+    {
+        "dependencies": {
+            "Microsoft.NETCore.App": "1.0.0-rc2-3002702"
+        },
+        "runtimes": {
+            "win7-x64": { },
+            "ubuntu.14.04-x64": { },
+            "osx.10.10-x64": { }
+        },
+        "frameworks": {
+            "netcoreapp1.0": {
+            "imports": [ "dnxcore50", "portable-net452" ]
+            }
+        }
+    }
+    ```
+
 - Open the project's XML for editing (in Visual Studio, right click on the project -> Unload Project, right click again -> Edit MyProj.csproj)
-    - Remove the `ProjectTypeGuids` property
-    - Add the following property: `<BaseNuGetRuntimeIdentifier>win10</BaseNuGetRuntimeIdentifier>`
+    - Remove all the default `Reference` items (to `System`, `System.Core`, etc.)
+    - Add the following properties to the first `PropertyGroup` in the project:
+
+        ```xml
+        <TargetFrameworkIdentifier>.NETCoreApp</TargetFrameworkIdentifier>
+        <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+        <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
+        <NoStdLib>true</NoStdLib>
+        <NoWarn>$(NoWarn);1701</NoWarn>
+        ```
+
     - Add the following at the end of the file (after the import of `Microsoft.Portable.CSharp.Targets`:
 
         ```xml
         <PropertyGroup>
+            <!-- We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two
+                    properties to any folder that exists to skip the GetReferenceAssemblyPaths task (not target) and
+                    to prevent it from outputting a warning (MSB3644).
+                -->
+            <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
+            <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
+
             <!-- MSBuild thinks all EXEs need binding redirects, not so for CoreCLR! -->
             <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
+            <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
 
             <!-- Set up debug options to run with host, and to use the CoreCLR debug engine -->
             <StartAction>Program</StartAction>
-            <StartProgram>$(TargetDir)CoreRun.exe</StartProgram>
+            <StartProgram>$(TargetDir)dotnet.exe</StartProgram>
             <StartArguments>$(TargetPath)</StartArguments>
             <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
         </PropertyGroup>
         ```
 
     - Close the .csproj file, and reload the project in Visual Studio
-- In the project properties:
-    - Change the Output type to "Console Application" in the Application tab
-    - In the "Build" tab, select "All Configurations" and change the "Platform Target" to "x64"
-- Add runtimes and dependencies on the runtime and host to `project.json`
-    - Add a `runtimes` section with the following runtimes: `win10-x64`, `ubuntu.14.04-x64`, and `osx.10.10-x64`
-    - Add a dependency on `Microsoft.NETCore.Runtime` version `1.0.2-rc2-24027` and `Microsoft.NETCore.TestHost` version `1.0.0-rc2-24027`
-    - When you're done, the `project.json` should look like this:
 
-        ```json
-        {
-            "dependencies": {
-                "NETStandard.Library": "1.5.0-rc2-24027",
-                "Microsoft.NETCore.TestHost": "1.0.0-rc2-24027",
-                "Microsoft.NETCore.Runtime": "1.0.2-rc2-24027"
-            },
-            "runtimes": {
-                "win10-x64": { },
-                "ubuntu.14.04-x64": { },
-                "osx.10.10-x64": { }
-            },
-            "frameworks": {
-                "netstandard1.5": {
-                    "imports": [ "dnxcore50", "portable-net452" ]
-                }
-            }
-        }
-        ```
-
-- Add a 'Main' method, for example:
-
-    ```C#
-    public static void Main(string[] args)
-    {
-        Console.WriteLine("Hello, .NET Core!");
-    }
-    ```
-
-- You should be able to run your program with F5 in Visual Studio, or from the command line in the output folder with `CoreRun MyApp.exe` 
+- You should be able to run your program with F5 in Visual Studio, or from the command line in the output folder with `dotnet MyApp.exe` 
