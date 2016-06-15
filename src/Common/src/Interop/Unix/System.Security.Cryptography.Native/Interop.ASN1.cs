@@ -127,4 +127,12 @@ namespace Microsoft.Win32.SafeHandles
         {
         }
     }
+
+    internal class SafeSharedAsn1OctetStringHandle: SafeInteriorHandle
+    {
+        private SafeSharedAsn1OctetStringHandle() :
+            base(IntPtr.Zero, ownsHandle: true)
+        {
+        }
+    }
 }

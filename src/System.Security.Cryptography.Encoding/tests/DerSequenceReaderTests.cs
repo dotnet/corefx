@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Numerics;
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.Encoding.Tests
@@ -77,6 +78,20 @@ namespace System.Security.Cryptography.Encoding.Tests
 
             // And... done.
             Assert.False(reader.HasData);
+        }
+        
+        [Theory]
+        [InlineData("170d3135303430313030303030305a", 2015, 4, 1, 0, 0, 0)] // Tests encoding for midnight
+        [InlineData("170d3439313233313131353935395a", 2049, 12, 31, 11, 59, 59)]
+        [InlineData("170d3531303632383030303330305a", 1951, 06, 28, 0, 3, 0)]
+        public static void ReadUtcTime(string hexString, int year, int month, int day, int hour, int minute, int second)
+        {
+            byte[] payload = hexString.HexToByteArray();
+            DateTime representedTime = new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+            DerSequenceReader reader = DerSequenceReader.CreateForPayload(payload);
+            DateTime decodedTime = reader.ReadUtcTime();
+            Assert.Equal(representedTime, decodedTime);
+            Assert.Equal(DateTimeKind.Utc, decodedTime.Kind);
         }
     }
 }

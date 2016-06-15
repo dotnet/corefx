@@ -103,6 +103,21 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CheckX509Hostname")]
         internal static extern int CheckX509Hostname(SafeX509Handle x509, string hostname, int cchHostname);
 
+        internal static byte[] GetAsn1StringBytes(SafeSharedAsn1OctetStringHandle content)
+        {
+            bool gotRef = false;
+            try
+            {
+                content.DangerousAddRef(ref gotRef);
+                return GetAsn1StringBytes(content.DangerousGetHandle());
+            }
+            finally
+            {
+                if(gotRef)
+                    content.DangerousRelease();
+            }
+        }
+
         internal static byte[] GetAsn1StringBytes(IntPtr asn1)
         {
             return GetDynamicBuffer((ptr, buf, i) => GetAsn1StringBytes(ptr, buf, i), asn1);

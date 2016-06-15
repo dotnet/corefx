@@ -2,14 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Globalization;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.Xml;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
@@ -22,6 +14,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class DecryptTests
     {
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_IssuerAndSerial()
         {
@@ -31,6 +24,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_Ski()
         {
@@ -40,6 +34,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_Capi()
         {
@@ -49,6 +44,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_256()
         {
@@ -58,6 +54,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_384()
         {
@@ -67,6 +64,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_512()
         {
@@ -76,6 +74,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_SignedWithinEnveloped()
         {
@@ -103,6 +102,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_EnvelopedWithinEnveloped()
         {
@@ -120,6 +120,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void DecryptMultipleRecipients()
         {

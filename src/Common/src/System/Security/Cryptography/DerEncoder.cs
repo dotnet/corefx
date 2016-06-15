@@ -353,6 +353,42 @@ namespace System.Security.Cryptography
         }
 
         /// <summary>
+        /// Encodes an octet string using distinguished encoding rules
+        /// </summary>
+        /// <param name="data">Octet string as a byte array</param>
+        /// <returns>DER representation of the octet string</returns>
+        internal static byte[] EncodeOctetString(byte[] data)
+        {
+            return DerEncoder.ConcatenateArrays(SegmentedEncodeOctetString(data));
+        }
+
+        /// <summary>
+        /// Encodes an DateTime object using distinguished encoding rules
+        /// </summary>
+        /// <param name="data">DateTime object to be encoded in UTC format</param>
+        /// <returns>DER representation of the UTC time</returns>
+        internal static byte[] EncodeUtcTime(DateTime utcTime)
+        {
+            return DerEncoder.ConcatenateArrays(SegmentedEncodeUtcTime(utcTime));
+        }
+
+        internal static byte[][] SegmentedEncodeUtcTime(DateTime utcTime)
+        {
+            DateTime newUtcTime = utcTime.Kind == DateTimeKind.Local ?
+                utcTime.ToUniversalTime() :
+                utcTime;
+            
+            string timeToEncode = newUtcTime.ToString("yyMMddHHmmss'Z'");
+            byte[] byteReprOfString = System.Text.Encoding.ASCII.GetBytes(timeToEncode);
+
+            return new byte[][] {
+                new byte[] { (byte)DerSequenceReader.DerTag.UTCTime },
+                EncodeLength(byteReprOfString.Length),
+                byteReprOfString,
+            };
+        }
+
+        /// <summary>
         /// Encode the segments { tag, length, value } of an octet string (byte array).
         /// </summary>
         /// <param name="data">The data to encode</param>
@@ -364,7 +400,7 @@ namespace System.Security.Cryptography
             // Because this is not currently public API the data array is not being cloned.
             return new byte[][]
             {
-                new byte[] { (byte)DerSequenceReader.DerTag.OctetString }, 
+                new byte[] { (byte)DerSequenceReader.DerTag.OctetString },
                 EncodeLength(data.Length),
                 data,
             };
@@ -841,7 +877,7 @@ namespace System.Security.Cryptography
             return false;
         }
 
-        private static byte[] ConcatenateArrays(byte[][][] segments)
+        private static byte[] ConcatenateArrays(params byte[][][] segments)
         {
             int length = 0;
 
