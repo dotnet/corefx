@@ -156,7 +156,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
 
             if (encodedCms.HasData && encodedCms.PeekTag() == contextImplicit1)
             {
-                DerSequenceReader encodedAttributesReader = encodedCms.ReadSequence();
+                DerSequenceReader encodedAttributesReader = encodedCms.ReadSet();
                 while (encodedAttributesReader.HasData)
                 {
                     DerSequenceReader attributeReader = encodedAttributesReader.ReadSequence();
