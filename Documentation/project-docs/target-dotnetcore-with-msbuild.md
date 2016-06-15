@@ -67,7 +67,10 @@ Creating a .NET Core console application from Visual Studio
 
         ```xml
         <PropertyGroup>
+            <!-- MSBuild thinks all EXEs need binding redirects, not so for CoreCLR! -->
             <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
+
+            <!-- Set up debug options to run with host, and to use the CoreCLR debug engine -->
             <StartAction>Program</StartAction>
             <StartProgram>$(TargetDir)CoreRun.exe</StartProgram>
             <StartArguments>$(TargetPath)</StartArguments>
