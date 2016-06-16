@@ -127,6 +127,8 @@ namespace System.Collections.Tests
                 yield return new object[] { alternating, allTrue, inverse };
                 yield return new object[] { allFalse, alternating, alternating };
                 yield return new object[] { alternating, allFalse, alternating };
+                yield return new object[] { alternating, inverse, allTrue };
+                yield return new object[] { inverse, alternating, allTrue };
             }
         }
 
