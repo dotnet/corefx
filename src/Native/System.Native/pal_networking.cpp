@@ -277,19 +277,17 @@ extern "C" int32_t SystemNative_IPv4StringToAddress(const uint8_t* address, uint
     assert(bufferLength == NUM_BYTES_IN_IPV4_ADDRESS);
     assert(port != nullptr);
 
-    // Call our helper to do the getaddrinfo call for us; once we have the info, copy what we need
-    addrinfo* info;
-    int32_t result = IpStringToAddressHelper(address, nullptr, false, info);
+    in_addr inaddr;
+    int32_t result = inet_aton(reinterpret_cast<const char*>(address), &inaddr);
     if (result == 0)
     {
-        sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(info->ai_addr);
-        ConvertInAddrToByteArray(buffer, bufferLength, addr->sin_addr);
-        *port = addr->sin_port;
-
-        freeaddrinfo(info);
+        return PAL_EAI_NONAME;
     }
 
-    return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
+    ConvertInAddrToByteArray(buffer, bufferLength, inaddr);
+    *port = 0; // callers expect this to always be zero
+
+    return PAL_EAI_SUCCESS;
 }
 
 static void AppendScopeIfNecessary(uint8_t* string, int32_t stringLength, uint32_t scope)
