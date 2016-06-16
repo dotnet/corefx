@@ -41,7 +41,7 @@ namespace System.Collections.Tests
         public static IEnumerable<object[]> And_Operator_Data()
         {
             yield return new object[] { new bool[0], new bool[0], new bool[0] };
-            foreach (int size in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
             {
                 bool[] allTrue = Enumerable.Repeat(true, size).ToArray();
                 bool[] allFalse = Enumerable.Repeat(false, size).ToArray();
@@ -77,7 +77,7 @@ namespace System.Collections.Tests
         public static IEnumerable<object[]> Or_Operator_Data()
         {
             yield return new object[] { new bool[0], new bool[0], new bool[0] };
-            foreach (int size in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
             {
                 bool[] allTrue = Enumerable.Repeat(true, size).ToArray();
                 bool[] allFalse = Enumerable.Repeat(false, size).ToArray();
@@ -113,7 +113,7 @@ namespace System.Collections.Tests
         public static IEnumerable<object[]> Xor_Operator_Data()
         {
             yield return new object[] { new bool[0], new bool[0], new bool[0] };
-            foreach (int size in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
             {
                 bool[] allTrue = Enumerable.Repeat(true, size).ToArray();
                 bool[] allFalse = Enumerable.Repeat(false, size).ToArray();
