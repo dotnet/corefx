@@ -10,8 +10,8 @@ namespace System.Collections.Tests
 {
     public static class BitArray_CtorTests
     {
-        public const int BitsPerByte = 8;
-        public const int BitsPerInt32 = 32;
+        private const int BitsPerByte = 8;
+        private const int BitsPerInt32 = 32;
 
         [Theory]
         [InlineData(0)]
