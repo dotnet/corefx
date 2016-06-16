@@ -13,13 +13,24 @@ namespace System.Collections.Tests
         private const int BitsPerByte = 8;
         private const int BitsPerInt32 = 32;
 
-        [Theory]
-        [InlineData(new bool[] { true })]
-        [InlineData(new bool[] { false })]
-        [InlineData(new bool[] { true, false, true, true, false, true })]
-        public static void Get_Set(bool[] newValues)
+        public static IEnumerable<object[]> Get_Set_Data()
         {
-            BitArray bitArray = new BitArray(newValues.Length, false);
+            foreach (int size in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2 })
+            {
+                foreach (bool def in new[] { true, false })
+                {
+                    yield return new object[] { def, Enumerable.Repeat(true, size).ToArray() };
+                    yield return new object[] { def, Enumerable.Repeat(false, size).ToArray() };
+                    yield return new object[] { def, Enumerable.Range(0, size).Select(i => i % 2 == 1).ToArray() };
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Get_Set_Data))]
+        public static void Get_Set(bool def, bool[] newValues)
+        {
+            BitArray bitArray = new BitArray(newValues.Length, def);
             for (int i = 0; i < newValues.Length; i++)
             {
                 bitArray.Set(i, newValues[i]);
@@ -57,8 +68,8 @@ namespace System.Collections.Tests
         [InlineData(1, false)]
         [InlineData(BitsPerByte, true)]
         [InlineData(BitsPerByte, false)]
-        [InlineData(+1, true)]
-        [InlineData(+1, false)]
+        [InlineData(BitsPerByte + 1, true)]
+        [InlineData(BitsPerByte + 1, false)]
         [InlineData(BitsPerInt32, true)]
         [InlineData(BitsPerInt32, false)]
         [InlineData(BitsPerInt32 + 1, true)]
@@ -83,7 +94,7 @@ namespace System.Collections.Tests
 
         public static IEnumerable<object[]> GetEnumerator_Data()
         {
-            foreach (int size in new[] { 0, 1, BitsPerByte, +1, BitsPerInt32, BitsPerInt32 + 1 })
+            foreach (int size in new[] { 0, 1, BitsPerByte, BitsPerByte + 1, BitsPerInt32, BitsPerInt32 + 1 })
             {
                 foreach (bool lead in new[] { true, false })
                 {
@@ -116,7 +127,7 @@ namespace System.Collections.Tests
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(BitsPerByte)]
-        [InlineData(+1)]
+        [InlineData(BitsPerByte + 1)]
         [InlineData(BitsPerInt32)]
         [InlineData(BitsPerInt32 + 1)]
         public static void GetEnumerator_Invalid(int size)
@@ -148,7 +159,7 @@ namespace System.Collections.Tests
 
         public static IEnumerable<object[]> Length_Set_Data()
         {
-            int[] sizes = { 1, BitsPerByte, +1, BitsPerInt32, BitsPerInt32 + 1 };
+            int[] sizes = { 1, BitsPerByte, BitsPerByte + 1, BitsPerInt32, BitsPerInt32 + 1 };
             foreach (int original in sizes.Concat(new[] { 16384 }))
             {
                 foreach (int n in sizes)
@@ -290,6 +301,7 @@ namespace System.Collections.Tests
         {
             ICollection bitArray = new BitArray(10);
             Assert.Same(bitArray.SyncRoot, bitArray.SyncRoot);
+            Assert.NotSame(bitArray.SyncRoot, ((ICollection)new BitArray(10)).SyncRoot);
         }
     }
 }
