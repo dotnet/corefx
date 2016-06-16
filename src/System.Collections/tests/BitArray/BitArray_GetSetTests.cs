@@ -206,8 +206,12 @@ namespace System.Collections.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => bitArray.Length = -1);
         }
 
-        public static IEnumerable<object[]> CopyTo_IntArray_TestData()
+        public static IEnumerable<object[]> CopyTo_Array_TestData()
         {
+            yield return new object[] { new BitArray(0), 0, 0, new bool[0], default(bool) };
+            yield return new object[] { new BitArray(0), 0, 0, new byte[0], default(byte) };
+            yield return new object[] { new BitArray(0), 0, 0, new int[0], default(int) };
+
             foreach (int bitArraySize in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2 })
             {
                 BitArray allTrue = new BitArray(Enumerable.Repeat(true, bitArraySize).ToArray());
@@ -244,7 +248,7 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [MemberData(nameof(CopyTo_IntArray_TestData))]
+        [MemberData(nameof(CopyTo_Array_TestData))]
         public static void CopyTo<T>(BitArray bitArray, int length, int index, T[] expected, T def)
         {
             T[] array = (T[])Array.CreateInstance(typeof(T), length);
