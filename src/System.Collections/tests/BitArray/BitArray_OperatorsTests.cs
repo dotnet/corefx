@@ -162,7 +162,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void BitArray_XorTest_Negative()
+        public static void Xor_Invalid()
         {
             BitArray bitArray1 = new BitArray(11, false);
             BitArray bitArray2 = new BitArray(6, false);
