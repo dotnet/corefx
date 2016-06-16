@@ -10,9 +10,16 @@ namespace System.Collections.Tests
 {
     public static class BitArray_CtorTests
     {
+        public const int BitsPerByte = 8;
+        public const int BitsPerInt32 = 32;
+
         [Theory]
         [InlineData(0)]
-        [InlineData(40)]
+        [InlineData(1)]
+        [InlineData(BitsPerByte)]
+        [InlineData(BitsPerByte * 2)]
+        [InlineData(BitsPerInt32)]
+        [InlineData(BitsPerInt32 * 2)]
         [InlineData(200)]
         [InlineData(65551)]
         public static void Ctor_Int(int length)
@@ -32,8 +39,16 @@ namespace System.Collections.Tests
         [Theory]
         [InlineData(0, true)]
         [InlineData(0, false)]
-        [InlineData(40, true)]
-        [InlineData(40, false)]
+        [InlineData(1, true)]
+        [InlineData(1, false)]
+        [InlineData(BitsPerByte, true)]
+        [InlineData(BitsPerByte, false)]
+        [InlineData(BitsPerByte * 2, true)]
+        [InlineData(BitsPerByte * 2, false)]
+        [InlineData(BitsPerInt32, true)]
+        [InlineData(BitsPerInt32, false)]
+        [InlineData(BitsPerInt32 * 2, true)]
+        [InlineData(BitsPerInt32 * 2, false)]
         [InlineData(200, true)]
         [InlineData(200, false)]
         [InlineData(65551, true)]
@@ -62,15 +77,12 @@ namespace System.Collections.Tests
         public static IEnumerable<object[]> Ctor_BoolArray_TestData()
         {
             yield return new object[] { new bool[0] };
-            yield return new object[] { new bool[] { false } };
-            yield return new object[] { new bool[] { true } };
-            yield return new object[] { new bool[] { false, false, true, false, false, false, true, false, false, true } };
-            yield return new object[] { Enumerable.Repeat(true, 32).ToArray() };
-            yield return new object[] { Enumerable.Repeat(false, 32).ToArray() };
-            yield return new object[] { Enumerable.Range(0, 32).Select(x => x % 2 == 0).ToArray() };
-            yield return new object[] { Enumerable.Repeat(true, 64).ToArray() };
-            yield return new object[] { Enumerable.Repeat(false, 64).ToArray() };
-            yield return new object[] { Enumerable.Range(0, 64).Select(x => x % 2 == 0).ToArray() };
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2 })
+            {
+                yield return new object[] { Enumerable.Repeat(true, size).ToArray() };
+                yield return new object[] { Enumerable.Repeat(false, size).ToArray() };
+                yield return new object[] { Enumerable.Range(0, size).Select(x => x % 2 == 0).ToArray() };
+            }
         }
 
         [Theory]
@@ -91,7 +103,11 @@ namespace System.Collections.Tests
 
         public static IEnumerable<object[]> Ctor_BitArray_TestData()
         {
-            foreach (int size in new[] { 0, 1, 8, 32, 64 })
+            yield return new object[] { "bool[](empty)", new BitArray(new bool[0]) };
+            yield return new object[] { "byte[](empty)", new BitArray(new byte[0]) };
+            yield return new object[] { "int[](empty)", new BitArray(new int[0]) };
+
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2 })
             {
                 yield return new object[] { "length", new BitArray(size) };
                 yield return new object[] { "length|default(true)", new BitArray(size, true) };
@@ -99,12 +115,18 @@ namespace System.Collections.Tests
                 yield return new object[] { "bool[](all)", new BitArray(Enumerable.Repeat(true, size).ToArray()) };
                 yield return new object[] { "bool[](none)", new BitArray(Enumerable.Repeat(false, size).ToArray()) };
                 yield return new object[] { "bool[](alternating)", new BitArray(Enumerable.Range(0, size).Select(x => x % 2 == 0).ToArray()) };
-                yield return new object[] { "byte[](all)", new BitArray(Enumerable.Repeat((byte)255, size / 8).ToArray()) };
-                yield return new object[] { "byte[](none)", new BitArray(Enumerable.Repeat((byte)0, size / 8).ToArray()) };
-                yield return new object[] { "byte[](alternating)", new BitArray(Enumerable.Repeat((byte)0xaa, size / 8).ToArray()) };
-                yield return new object[] { "int[](all)", new BitArray(Enumerable.Repeat(unchecked((int)0xffffffff), size / 32).ToArray()) };
-                yield return new object[] { "int[](none)", new BitArray(Enumerable.Repeat(0, size / 32).ToArray()) };
-                yield return new object[] { "int[](alternating)", new BitArray(Enumerable.Repeat(unchecked((int)0xaaaaaaaa), size / 32).ToArray()) };
+                if (size >= BitsPerByte)
+                {
+                    yield return new object[] { "byte[](all)", new BitArray(Enumerable.Repeat((byte)0xff, size / BitsPerByte).ToArray()) };
+                    yield return new object[] { "byte[](none)", new BitArray(Enumerable.Repeat((byte)0x00, size / BitsPerByte).ToArray()) };
+                    yield return new object[] { "byte[](alternating)", new BitArray(Enumerable.Repeat((byte)0xaa, size / BitsPerByte).ToArray()) };
+                }
+                if (size >= BitsPerInt32)
+                {
+                    yield return new object[] { "int[](all)", new BitArray(Enumerable.Repeat(unchecked((int)0xffffffff), size / BitsPerInt32).ToArray()) };
+                    yield return new object[] { "int[](none)", new BitArray(Enumerable.Repeat(0x00000000, size / BitsPerInt32).ToArray()) };
+                    yield return new object[] { "int[](alternating)", new BitArray(Enumerable.Repeat(unchecked((int)0xaaaaaaaa), size / BitsPerInt32).ToArray()) };
+                }
             }
         }
 
@@ -127,9 +149,12 @@ namespace System.Collections.Tests
         public static IEnumerable<object[]> Ctor_IntArray_TestData()
         {
             yield return new object[] { new int[0], new bool[0] };
-            yield return new object[] { Enumerable.Repeat(unchecked((int)0xffffffff), 10).ToArray(), Enumerable.Repeat(true, 320).ToArray() };
-            yield return new object[] { Enumerable.Repeat(0, 10).ToArray(), Enumerable.Repeat(false, 320).ToArray() };
-            yield return new object[] { Enumerable.Repeat(unchecked((int)0xaaaaaaaa), 10).ToArray(), Enumerable.Range(0, 320).Select(i => i % 2 == 1).ToArray() };
+            foreach (int size in new[] { 1, 10 })
+            {
+                yield return new object[] { Enumerable.Repeat(unchecked((int)0xffffffff), size).ToArray(), Enumerable.Repeat(true, size * BitsPerInt32).ToArray() };
+                yield return new object[] { Enumerable.Repeat(0x00000000, size).ToArray(), Enumerable.Repeat(false, size * BitsPerInt32).ToArray() };
+                yield return new object[] { Enumerable.Repeat(unchecked((int)0xaaaaaaaa), size).ToArray(), Enumerable.Range(0, size * BitsPerInt32).Select(i => i % 2 == 1).ToArray() };
+            }
         }
 
         [Theory]
@@ -169,14 +194,12 @@ namespace System.Collections.Tests
         public static IEnumerable<object[]> Ctor_ByteArray_TestData()
         {
             yield return new object[] { new byte[0], new bool[0] };
-            yield return new object[] { new byte[] { 255, 255 }, Enumerable.Repeat(true, 16).ToArray() };
-            yield return new object[] { new byte[] { 0, 0 }, Enumerable.Repeat(false, 16).ToArray() };
-            yield return new object[] { new byte[] { 255, 255, 255, 255 }, Enumerable.Repeat(true, 32).ToArray() };
-            yield return new object[] { new byte[] { 0, 0, 0, 0 }, Enumerable.Repeat(false, 32).ToArray() };
-            yield return new object[] { Enumerable.Repeat((byte)0xaa, 4).ToArray(), Enumerable.Range(0, 32).Select(i => i % 2 == 1).ToArray() };
-            yield return new object[] { new byte[] { 255, 255, 255, 255, 255, 255, 255, 255 }, Enumerable.Repeat(true, 64).ToArray() };
-            yield return new object[] { new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 }, Enumerable.Repeat(false, 64).ToArray() };
-            yield return new object[] { Enumerable.Repeat((byte)0xaa, 8).ToArray(), Enumerable.Range(0, 64).Select(i => i % 2 == 1).ToArray() };
+            foreach (int size in new[] { 1, 2, BitsPerInt32 / BitsPerByte, 2 * BitsPerInt32 / BitsPerByte })
+            {
+                yield return new object[] { Enumerable.Repeat((byte)0xff, size).ToArray(), Enumerable.Repeat(true, size * BitsPerByte).ToArray() };
+                yield return new object[] { Enumerable.Repeat((byte)0x00, size).ToArray(), Enumerable.Repeat(false, size * BitsPerByte).ToArray() };
+                yield return new object[] { Enumerable.Repeat((byte)0xaa, size).ToArray(), Enumerable.Range(0, size * BitsPerByte).Select(i => i % 2 == 1).ToArray() };
+            }
         }
 
         [Theory]
