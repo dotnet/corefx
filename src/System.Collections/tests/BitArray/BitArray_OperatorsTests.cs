@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace System.Collections.Tests
@@ -10,46 +12,43 @@ namespace System.Collections.Tests
 
     public static class BitArray_OperatorsTests
     {
-        [Fact]
-        public static void And_EmptyArray()
+        private const int BitsPerByte = BitArray_CtorTests.BitsPerByte;
+        private const int BitsPerInt32 = BitArray_CtorTests.BitsPerInt32;
+
+        public static IEnumerable<object[]> Not_Operator_Data()
         {
-            BitArray bitArray1 = new BitArray(0);
-            BitArray bitArray2 = new BitArray(0);
-            
-            Assert.Equal(0, bitArray1.And(bitArray2).Length);
-        }
-        
-        [Theory]
-        [InlineData(0)]
-        [InlineData(6)]
-        [InlineData(0x1000F)]
-        public static void Not(int length)
-        {
-            BitArray bitArray = new BitArray(length, false);
-            if (length > 0)
+            foreach (int size in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2 })
             {
-                bitArray[0] = true;
-                bitArray[1] = true;
-                bitArray[length - 2] = true;
-                bitArray[length - 1] = true;
+                yield return new object[] { Enumerable.Repeat(true, size).ToArray() };
+                yield return new object[] { Enumerable.Repeat(false, size).ToArray() };
+                yield return new object[] { Enumerable.Range(0, size).Select(i => i % 2 == 1).ToArray() };
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(Not_Operator_Data))]
+        public static void Not(bool[] data)
+        {
+            BitArray bitArray = new BitArray(data);
 
             BitArray bitArrayNot = bitArray.Not();
             Assert.Equal(bitArray.Length, bitArrayNot.Length);
             Assert.Same(bitArray, bitArrayNot);
             for (int i = 0; i < bitArray.Length; i++)
             {
-                if (i <= 1 || i >= length - 2)
-                {
-                    Assert.False(bitArrayNot[i]);
-                }
-                else
-                {
-                    Assert.True(bitArrayNot[i]);
-                }
+                Assert.Equal(!data[i], bitArrayNot[i]);
             }
         }
-        
+
+        [Fact]
+        public static void And_EmptyArray()
+        {
+            BitArray bitArray1 = new BitArray(0);
+            BitArray bitArray2 = new BitArray(0);
+
+            Assert.Equal(0, bitArray1.And(bitArray2).Length);
+        }
+
         [Theory]
         [InlineData(Operator.And)]
         [InlineData(Operator.Or)]
