@@ -254,18 +254,35 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void CopyTo_Invalid()
+        public static void CopyTo_Type_Invalid()
         {
             ICollection bitArray = new BitArray(10);
-            // Invalid array
             Assert.Throws<ArgumentNullException>("array", () => bitArray.CopyTo(null, 0));
             Assert.Throws<ArgumentException>(null, () => bitArray.CopyTo(new long[10], 0));
             Assert.Throws<ArgumentException>(null, () => bitArray.CopyTo(new int[10, 10], 0));
+        }
 
-            // Invalid index
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray.CopyTo(new byte[10], -1));
-            Assert.Throws<ArgumentException>(null, () => bitArray.CopyTo(new byte[1], 2));
-            Assert.Throws<ArgumentException>(null, () => bitArray.CopyTo(new bool[10], 2));
+        [Theory]
+        [InlineData(default(bool), 1, 0, 0)]
+        [InlineData(default(bool), 1, 1, 1)]
+        [InlineData(default(bool), BitsPerByte, BitsPerByte - 1, 0)]
+        [InlineData(default(bool), BitsPerByte, BitsPerByte, 1)]
+        [InlineData(default(bool), BitsPerInt32, BitsPerInt32 - 1, 0)]
+        [InlineData(default(bool), BitsPerInt32, BitsPerInt32, 1)]
+        [InlineData(default(byte), BitsPerByte, 0, 0)]
+        [InlineData(default(byte), BitsPerByte, 1, 1)]
+        [InlineData(default(byte), BitsPerByte * 4, 4 - 1, 0)]
+        [InlineData(default(byte), BitsPerByte * 4, 4, 1)]
+        [InlineData(default(int), BitsPerInt32, 0, 0)]
+        [InlineData(default(int), BitsPerInt32, 1, 1)]
+        [InlineData(default(int), BitsPerInt32 * 4, 4 - 1, 0)]
+        [InlineData(default(int), BitsPerInt32 * 4, 4, 1)]
+        public static void CopyTo_Size_Invalid<T>(T def, int bits, int arraySize, int index)
+        {
+            ICollection bitArray = new BitArray(bits);
+            T[] array = (T[])Array.CreateInstance(typeof(T), arraySize);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => bitArray.CopyTo(array, -1));
+            Assert.Throws<ArgumentException>(def is int ? string.Empty : null, () => bitArray.CopyTo(array, index));
         }
 
         [Fact]
