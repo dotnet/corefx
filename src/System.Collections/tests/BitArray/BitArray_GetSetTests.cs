@@ -10,8 +10,8 @@ namespace System.Collections.Tests
 {
     public static class BitArray_GetSetTests
     {
-        private const int BitsPerByte = 8;
-        private const int BitsPerInt32 = 32;
+        private const int BitsPerByte = BitArray_CtorTests.BitsPerByte;
+        private const int BitsPerInt32 = BitArray_CtorTests.BitsPerInt32;
 
         public static IEnumerable<object[]> Get_Set_Data()
         {
