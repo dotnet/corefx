@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 
@@ -21,6 +22,24 @@ namespace System.Reflection
         internal static void LitteEndianArchitectureRequired()
         {
             throw new PlatformNotSupportedException(SR.LitteEndianArchitectureRequired);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void InvalidArgument_OffsetForVirtualHeapHandle()
+        {
+            throw new ArgumentException(SR.CantGetOffsetForVirtualHeapHandle, "handle");
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static Exception InvalidArgument_UnexpectedHandleKind(HandleKind kind)
+        {
+            throw new ArgumentException(SR.Format(SR.UnexpectedHandleKind, kind));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static Exception InvalidArgument_Handle(string parameterName)
+        {
+            throw new ArgumentException(SR.Format(SR.InvalidHandle), parameterName);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -69,6 +88,12 @@ namespace System.Reflection
         internal static void ArgumentNull(string parameterName)
         {
             throw new ArgumentNullException(parameterName);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ArgumentEmptyString(string parameterName)
+        {
+            throw new ArgumentException(SR.ExpectedNonEmptyString, parameterName);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -189,6 +214,12 @@ namespace System.Reflection
         internal static void SequencePointValueOutOfRange()
         {
             throw new BadImageFormatException(SR.SequencePointValueOutOfRange);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void HeapSizeLimitExceeded(HeapIndex heap)
+        {
+            throw new ImageFormatLimitationException(SR.Format(SR.HeapSizeLimitExceeded, heap));
         }
     }
 }

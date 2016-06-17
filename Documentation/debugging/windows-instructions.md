@@ -18,15 +18,7 @@ Note: You can select the Standalone Debugging Tools for Windows or download only
 
 1. Build the entire repository. This ensures that all packages are downloaded and that you have up-to-date symbols.
 
-2. Find the path where the debugging engine (SOS) is located.
-
-Assuming that your repo is at `C:\corefx` this should be located at:
-
-```
-C:\corefx\packages\runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\<version>\tools\sos.dll   
-```
-
-3. Install WinDBG as post-mortem debugger
+2. Install WinDBG as post-mortem debugger
 As Administrator:
 
 ```
@@ -41,15 +33,15 @@ To run a single test from command line:
 
 * Locate the test binary folder based on the CSPROJ name. 
 
-For example: `src\System.Net.Sockets\tests\Functional\System.Net.Sockets.Tests.csproj` will build and output binaries at  `bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\dnxcore50`.
+For example: `src\System.Net.Sockets\tests\Functional\System.Net.Sockets.Tests.csproj` will build and output binaries at  `bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\netcoreapp1.0`.
  
 * Execute the test
 
 Assuming that your repo is at `C:\corefx`:
 
 ```
-cd C:\corefx\bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\dnxcore50
-C:\corefx\bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\dnxcore50\CoreRun.exe xunit.console.netcore.exe System.Net.Sockets.Tests.dll -xml testResults.xml -notrait category=nonwindowstests -notrait category=OuterLoop -notrait category=failing
+cd C:\corefx\bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\netcoreapp1.0
+C:\corefx\bin\tests\Windows_NT.AnyCPU.Debug\System.Net.Sockets.Tests\netcoreapp1.0\CoreRun.exe xunit.console.netcore.exe System.Net.Sockets.Tests.dll -xml testResults.xml -notrait category=nonwindowstests -notrait category=OuterLoop -notrait category=failing
 ```
 
 * If the test crashes or encounteres a `Debugger.Launch()` method call, WinDBG will automatically start and attach to the `CoreRun.exe` process 
@@ -138,8 +130,11 @@ Logs are going to be placed in %SYSTEMDRIVE%\sockets.etl.
 
 1. Install [PerfView](http://www.microsoft.com/en-us/download/details.aspx?id=28567)
 2. Run PerfView as Administrator
-3. Disable all other collection parameters
-4. Add Additional Providers (see below - Important: keep the "*" wildcard before the names.)
+3. Press Alt+C to collect events 
+4. Disable all other collection parameters
+5. Add Additional Providers (see below - Important: keep the "*" wildcard before the names.)
+
+![PerfView example](perfview_example.gif)
 
 ### Built-in EventSource tracing
 

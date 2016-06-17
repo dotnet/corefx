@@ -237,6 +237,12 @@ namespace System.Net.Http
             get { return _clientCertificateOption; }
             set
             {
+                if (value != ClientCertificateOption.Manual &&
+                    value != ClientCertificateOption.Automatic)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
                 CheckDisposedOrStarted();
                 _clientCertificateOption = value;
             }
@@ -455,7 +461,6 @@ namespace System.Net.Http
                 return Task.FromCanceled<HttpResponseMessage>(cancellationToken);
             }
 
-            EventSourceTrace("{0}", request);
             Guid loggingRequestId = s_diagnosticListener.LogHttpRequest(request);
 
             // Create the easy request.  This associates the easy request with this handler and configures
@@ -463,6 +468,7 @@ namespace System.Net.Http
             var easy = new EasyRequest(this, request, cancellationToken);
             try
             {
+                EventSourceTrace("{0}", request, easy: easy, agent: _agent);
                 _agent.Queue(new MultiAgent.IncomingRequest { Easy = easy, Type = MultiAgent.IncomingRequestType.New });
             }
             catch (Exception exc)
@@ -555,14 +561,15 @@ namespace System.Net.Http
 
             try
             {
-                _cookieContainer.SetCookies(state._targetUri, cookieHeader);
+                _cookieContainer.SetCookies(state._requestMessage.RequestUri, cookieHeader);
                 state.SetCookieOption(state._requestMessage.RequestUri);
             }
             catch (CookieException e)
             {
                 EventSourceTrace(
                     "Malformed cookie parsing failed: {0}, server: {1}, cookie: {2}", 
-                    e.Message, state._requestMessage.RequestUri, cookieHeader);
+                    e.Message, state._requestMessage.RequestUri, cookieHeader,
+                    easy: state);
             }
         }
 
@@ -629,6 +636,9 @@ namespace System.Net.Http
 
                     case CURLcode.CURLE_OUT_OF_MEMORY:
                         throw new OutOfMemoryException(msg);
+
+                    case CURLcode.CURLE_SEND_FAIL_REWIND:
+                        throw new InvalidOperationException(msg);
 
                     default:
                         throw new CurlException((int)error, msg);
@@ -731,50 +741,6 @@ namespace System.Net.Http
             return new IOException(
                 isRead ? SR.net_http_io_read : SR.net_http_io_write,
                 error is HttpRequestException && error.InnerException != null ? error.InnerException : error);
-        }
-
-        private static void HandleRedirectLocationHeader(EasyRequest state, string locationValue)
-        {
-            Debug.Assert(state._isRedirect);
-            Debug.Assert(state._handler.AutomaticRedirection);
-
-            string location = locationValue.Trim();
-            //only for absolute redirects
-            Uri forwardUri;
-            if (Uri.TryCreate(location, UriKind.RelativeOrAbsolute, out forwardUri) && forwardUri.IsAbsoluteUri)
-            {
-                // Just as with WinHttpHandler, for security reasons, we drop the server credential if it is 
-                // anything other than a CredentialCache. We allow credentials in a CredentialCache since they 
-                // are specifically tied to URIs.
-                var creds = state._handler.Credentials as CredentialCache;
-                KeyValuePair<NetworkCredential, CURLAUTH> ncAndScheme = GetCredentials(forwardUri, creds, s_orderedAuthTypes);
-                if (ncAndScheme.Key != null)
-                {
-                    state.SetCredentialsOptions(ncAndScheme);
-                }
-                else
-                {
-                    state.SetCurlOption(CURLoption.CURLOPT_USERNAME, IntPtr.Zero);
-                    state.SetCurlOption(CURLoption.CURLOPT_PASSWORD, IntPtr.Zero);
-                }
-
-                // reset proxy - it is possible that the proxy has different credentials for the new URI
-                state.SetProxyOptions(forwardUri);
-
-                if (state._handler._useCookie)
-                {
-                    // reset cookies.
-                    state.SetCurlOption(CURLoption.CURLOPT_COOKIE, IntPtr.Zero);
-
-                    // set cookies again
-                    state.SetCookieOption(forwardUri);
-                }
-
-                state.SetRedirectUri(forwardUri);
-            }
-
-            // set the headers again. This is a workaround for libcurl's limitation in handling headers with empty values
-            state.SetRequestHeaders();
         }
 
         private static void SetChunkedModeForSend(HttpRequestMessage request)

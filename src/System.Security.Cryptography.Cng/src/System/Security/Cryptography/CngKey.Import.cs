@@ -5,6 +5,8 @@
 using Microsoft.Win32.SafeHandles;
 
 using Internal.Cryptography;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 using ErrorCode = Interop.NCrypt.ErrorCode;
 
@@ -24,7 +26,17 @@ namespace System.Security.Cryptography
             return Import(keyBlob, format, provider: CngProvider.MicrosoftSoftwareKeyStorageProvider);
         }
 
+        internal static CngKey Import(byte[] keyBlob, string curveName, CngKeyBlobFormat format)
+        {
+            return Import(keyBlob, curveName, format, provider: CngProvider.MicrosoftSoftwareKeyStorageProvider);
+        }
+
         public static CngKey Import(byte[] keyBlob, CngKeyBlobFormat format, CngProvider provider)
+        {
+            return Import(keyBlob, null, format, provider);
+        }
+
+        internal static CngKey Import(byte[] keyBlob, string curveName, CngKeyBlobFormat format, CngProvider provider)
         {
             if (keyBlob == null)
                 throw new ArgumentNullException(nameof(keyBlob));
@@ -34,10 +46,23 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(provider));
 
             SafeNCryptProviderHandle providerHandle = provider.OpenStorageProvider();
-            SafeNCryptKeyHandle keyHandle;
-            ErrorCode errorCode = Interop.NCrypt.NCryptImportKey(providerHandle, IntPtr.Zero, format.Format, IntPtr.Zero, out keyHandle, keyBlob, keyBlob.Length, 0);
-            if (errorCode != ErrorCode.ERROR_SUCCESS)
-                throw errorCode.ToCryptographicException();
+            SafeNCryptKeyHandle keyHandle = null;
+            ErrorCode errorCode;
+            
+            if (curveName == null)
+            {
+                errorCode = Interop.NCrypt.NCryptImportKey(providerHandle, IntPtr.Zero, format.Format, IntPtr.Zero, out keyHandle, keyBlob, keyBlob.Length, 0);
+                if (errorCode != ErrorCode.ERROR_SUCCESS)
+                {
+                    throw errorCode.ToCryptographicException();
+                }
+            }
+            else
+            {
+#if !NETNATIVE
+                keyHandle = ECCng.ImportKeyBlob(format.Format, keyBlob, curveName, providerHandle);
+#endif //!NETNATIVE
+            }
 
             CngKey key = new CngKey(providerHandle, keyHandle);
 
@@ -48,4 +73,3 @@ namespace System.Security.Cryptography
         }
     }
 }
-

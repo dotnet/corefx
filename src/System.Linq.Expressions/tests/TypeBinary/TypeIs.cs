@@ -28,7 +28,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression exp = Expression.Constant(0);
             Type byRef = typeof(int).MakeByRefType();
-            Assert.Throws<ArgumentException>(() => Expression.TypeIs(exp, byRef));
+            Assert.Throws<ArgumentException>("type", () => Expression.TypeIs(exp, byRef));
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.TypeIs(Expression.Constant(0), typeof(int));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(() => exp.ReduceAndCheck());
+            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Theory]
@@ -116,6 +116,7 @@ namespace System.Linq.Expressions.Tests
             Expression expression = Expression.Constant(0);
             TypeBinaryExpression typeExp = Expression.TypeIs(expression, typeof(int));
             Assert.Same(typeExp, typeExp.Update(expression));
+            Assert.Same(typeExp, NoOpVisitor.Instance.Visit(typeExp));
         }
 
         [Fact]

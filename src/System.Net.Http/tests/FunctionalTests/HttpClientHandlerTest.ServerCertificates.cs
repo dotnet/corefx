@@ -199,26 +199,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(BackendDoesNotSupportCustomCertificateHandling))]
-        public async Task SSLBackendNotSupported_AutomaticClientCerts_ThrowsPlatformNotSupportedException()
-        {
-            using (var client = new HttpClient(new HttpClientHandler() { ClientCertificateOptions = ClientCertificateOption.Automatic }))
-            {
-                await Assert.ThrowsAsync<PlatformNotSupportedException>(() => client.GetAsync(HttpTestServers.SecureRemoteEchoServer));
-            }
-        }
-
-        [ConditionalFact(nameof(BackendDoesNotSupportCustomCertificateHandling))]
-        public async Task SSLBackendNotSupported_ManualClientCerts_ThrowsPlatformNotSupportedException()
-        {
-            var handler = new HttpClientHandler();
-            handler.ClientCertificates.Add(new X509Certificate2());
-            using (var client = new HttpClient(handler))
-            {
-                await Assert.ThrowsAsync<PlatformNotSupportedException>(() => client.GetAsync(HttpTestServers.SecureRemoteEchoServer));
-            }
-        }
-
+        [PlatformSpecific(PlatformID.Windows)] // CopyToAsync(Stream, TransportContext) isn't used on unix
         [Fact]
         public async Task PostAsync_Post_ChannelBinding_ConfiguredCorrectly()
         {
