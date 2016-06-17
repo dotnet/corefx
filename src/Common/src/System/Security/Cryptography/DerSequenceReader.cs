@@ -194,6 +194,32 @@ namespace System.Security.Cryptography
             return builder.ToString();
         }
 
+        internal byte[] ReadBitString()
+        {
+            // Bitstrings are primitives with tag and length, followed by a number
+            // of unused bits in the last byte, followed by the payload that can be read 
+            // as a byte array. The unused bits in the last byte of the array should then be cleared.
+            EatTag(DerTag.BitString);
+            int length = EatLength();
+            
+            byte numUnusedBits = _data[_position];
+            _position += 1;
+
+            if (length == 1)
+                return Array.Empty<byte>();
+            
+            byte[] octets = new byte[length-1];
+            Buffer.BlockCopy(_data, _position, octets, 0, octets.Length);
+
+            // DER forces the padding to be all zeros, but to future-proof and to allow for extensibility
+            // to a BER reader in the future we clear the unused bits in the last byte. 
+            byte mask = (byte)~((1 << numUnusedBits) - 1);
+            octets[octets.Length - 1] &= mask;
+
+            _position += length;
+            return octets;
+        }
+
         internal Oid ReadOid()
         {
             return new Oid(ReadOidAsString());
@@ -260,16 +286,30 @@ namespace System.Security.Cryptography
 
         internal DateTime ReadUtcTime()
         {
-            EatTag(DerTag.UTCTime);
+            return ReadTime(DerTag.UTCTime, "yyMMddHHmmss'Z'");
+        }
+
+        internal DateTime ReadGeneralizedTime()
+        {
+            // Currently only supports reading times with no fractional seconds or time differentials
+            // as RFC 2630 doesn't allow these. In case this is done, the format string has to be parsed
+            // to follow rules on X.680 and X.690.
+            return ReadTime(DerTag.GeneralizedTime, "yyyyMMddHHmmss'Z'");
+        }
+
+        private DateTime ReadTime(DerTag timeTag, string formatString)
+        {
+            EatTag(timeTag);
             int contentLength = EatLength();
 
             string decodedTime = System.Text.Encoding.ASCII.GetString(_data, _position, contentLength);
             _position += contentLength;
+            
+            Debug.Assert(
+                decodedTime[decodedTime.Length-1] == 'Z', 
+                $"The date doesn't follow the X.690 format, ending with {decodedTime[decodedTime.Length - 1]}");
 
-            Debug.Assert(decodedTime.Length == 13, "The date doesn't follow the X.690 format, incorrect length");
-            Debug.Assert(decodedTime[12] == 'Z', "The date doesn't follow the X.690 format, doesn't end with 'Z'");
-
-            DateTime utcTime;
+            DateTime time;
 
             DateTimeFormatInfo fi = LazyInitializer.EnsureInitialized(
                 ref s_validityDateTimeFormatInfo,
@@ -283,15 +323,15 @@ namespace System.Security.Cryptography
 
             if (!DateTime.TryParseExact(
                     decodedTime,
-                    "yyMMddHHmmss'Z'",
+                    formatString,
                     fi,
                     DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                    out utcTime))
+                    out time))
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            return utcTime;
+            return time;
         }
 
         private byte[] ReadContentAsBytes()
@@ -396,6 +436,7 @@ namespace System.Security.Cryptography
             T61String = 0x14,
             IA5String = 0x16,
             UTCTime = 0x17,
+            GeneralizedTime = 0x18,
         }
     }
 }

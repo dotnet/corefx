@@ -11,19 +11,28 @@ namespace Internal.Cryptography.Pal.OpenSsl
 {
     internal sealed class KeyTransRecipientInfoPalOpenSsl : KeyTransRecipientInfoPal
     {
-        private readonly SafeSharedCmsRecipientInfoHandle _recipientHandle;
+        private readonly int _version;
+        private readonly AlgorithmIdentifier _keyEncryptionAlgorithm;
+        private readonly SubjectIdentifier _recipientIdentifier;
+        private readonly byte[] _encryptedKey;
 
-        internal KeyTransRecipientInfoPalOpenSsl(SafeSharedCmsRecipientInfoHandle recipient)
+        internal KeyTransRecipientInfoPalOpenSsl(
+            int version,
+            SubjectIdentifier recipientIdentifier,
+            AlgorithmIdentifier keyEncryptionAlgorithm,
+            byte[] encrypted)
         {
-            _recipientHandle = recipient;
-            // TODO(3334): Design decision, how to deal with opaqued fields for CMS_RecipientInfo
+            _version = version;
+            _keyEncryptionAlgorithm = keyEncryptionAlgorithm;
+            _recipientIdentifier = recipientIdentifier;
+            _encryptedKey = encrypted;
         }
 
         public override byte[] EncryptedKey
         {
             get
             {
-                throw new NotImplementedException();
+                return _encryptedKey;
             }
         }
 
@@ -31,7 +40,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
         {
             get
             {
-                throw new NotImplementedException();
+                return _keyEncryptionAlgorithm;
             }
         }
 
@@ -39,7 +48,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
         {
             get
             {
-                throw new NotImplementedException();
+                return _recipientIdentifier;
             }
         }
 
@@ -47,7 +56,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
         {
             get
             {
-                throw new NotImplementedException();
+                return _version;
             }
         }
     }

@@ -173,7 +173,7 @@ namespace Internal.Cryptography
             return serialBytes.ToUpperHexString();
         }
 
-        private static string ToUpperHexString(this byte[] ba)
+        public static string ToUpperHexString(this byte[] ba)
         {
             StringBuilder sb = new StringBuilder(ba.Length * 2);
             foreach (byte b in ba)

@@ -159,6 +159,9 @@
   <data name="Cryptography_Cms_UnknownKeySpec" xml:space="preserve">
     <value>Unable to determine the type of key handle from this keyspec {0}.</value>
   </data>
+  <data name="Cryptography_Err_Not_Impl" xml:space="preserve">
+    <value>Not implemented</value>
+  </data>
   <data name="Cryptography_Der_Invalid_Encoding" xml:space="preserve">
     <value>ASN1 corrupted data.</value>
   </data>

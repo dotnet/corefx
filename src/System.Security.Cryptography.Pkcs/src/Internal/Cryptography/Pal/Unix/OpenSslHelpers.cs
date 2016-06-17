@@ -72,7 +72,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
             return origCertCollection;
         }
 
-        public static AlgorithmIdentifier ReadEncryptionAlgorithm(this DerSequenceReader encodedCms)
+        public static AlgorithmIdentifier ReadAlgoIdFromEncryptedContentInfo(this DerSequenceReader encodedCms)
         {
             DerSequenceReader encryptedContentInfo = encodedCms.ReadSequence();
             // EncryptedContentInfo ::= SEQUENCE {
@@ -86,7 +86,13 @@ namespace Internal.Cryptography.Pal.OpenSsl
                 "Expected to skip an OID while reading EncryptedContentInfo");
             encryptedContentInfo.SkipValue();
 
-            // The encoding for a ContentEncryptionAlgorithmIdentifier is just the OID and the parameters, and we just need the OID 
+            return encryptedContentInfo.ReadAlgoIdentifier();
+        }
+
+        public static AlgorithmIdentifier ReadAlgoIdentifier(this DerSequenceReader encryptedContentInfo)
+        {
+            // The encoding for a ContentEncryptionAlgorithmIdentifier is just a sequence of the OID and the parameters, 
+            // but we just need the OID 
             DerSequenceReader contentEncryptionAlgorithmIdentifier = encryptedContentInfo.ReadSequence();
             string algoOid = contentEncryptionAlgorithmIdentifier.ReadOidAsString();
             int keyLength = 0;
@@ -115,35 +121,6 @@ namespace Internal.Cryptography.Pal.OpenSsl
             }
 
             return new AlgorithmIdentifier(new Oid(algoOid), keyLength);
-        }
-
-        public static RecipientInfoCollection GetRecipients(this SafeCmsHandle cmsHandle)
-        {
-            using (SafeSharedCmsRecipientInfoStackHandle recipientInfoStackHandle = Interop.Crypto.CmsGetRecipients(cmsHandle))
-            {
-                Interop.Crypto.CheckValidOpenSslHandle(recipientInfoStackHandle);
-                int recipientCount = Interop.Crypto.CmsGetRecipientStackFieldCount(recipientInfoStackHandle);
-                List<RecipientInfo> recipientInfoStack = new List<RecipientInfo>(recipientCount);
-
-                for (int index = 0; index < recipientCount; index++)
-                {
-                    RecipientInfo recipient = recipientInfoStackHandle.GetRecipientAtIndex(index);
-                    recipientInfoStack.Add(recipient);
-                }
-
-                return new RecipientInfoCollection(recipientInfoStack);
-            }
-        }
-
-        private static RecipientInfo GetRecipientAtIndex(this SafeSharedCmsRecipientInfoStackHandle recipientStack, int index)
-        {
-            // Get the recipient at a specific index.
-            SafeSharedCmsRecipientInfoHandle recipient = Interop.Crypto.CmsGetRecipientStackField(recipientStack, index);
-            Interop.Crypto.CheckValidOpenSslHandle(recipient);
-
-            // Get the type and delegate to the appropriate constructor
-            // TODO(3334): Shim get type method, create the enum and decide on the constructor
-            return new KeyTransRecipientInfo(new KeyTransRecipientInfoPalOpenSsl(recipient));
         }
 
         public static CryptographicAttributeObjectCollection ReadUnprotectedAttributes(this DerSequenceReader encodedCms)
