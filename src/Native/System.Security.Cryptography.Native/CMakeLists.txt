@@ -14,7 +14,7 @@ add_definitions(-DPIC=1)
 if(CMAKE_STATIC_LIB_LINK)
    message("Build OpenSSL Static Link")
    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lcrypto -lz -ldl  -static-libgcc -static-libstdc++ -static")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lz -ldl  -static-libgcc -static-libstdc++ -static")
 endif(CMAKE_STATIC_LIB_LINK)
 
 find_package(OpenSSL REQUIRED)

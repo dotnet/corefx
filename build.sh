@@ -15,7 +15,7 @@ usage()
     echo "cross - optional argument to signify cross compilation,"
     echo "      - will use ROOTFS_DIR environment variable if set."
     echo "skiptests - skip the tests in the './bin/*/*Tests/' subdirectory."
-    echo "staticLibLink - Optional argument to  statically link any native library."
+    echo "staticLibLink - Optional argument to statically link any native library."
     echo "generateversion - if building native only, pass this in to get a version on the build output."
     echo "cmakeargs - user-settable additional arguments passed to CMake."
     exit 1
@@ -124,7 +124,7 @@ build_native()
 
     # Regenerate the CMake solution
     echo "Invoking cmake with arguments: \"$__nativeroot\" $__CMakeArgs $__CMakeExtraArgs"
-    "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__CMakeArgs  "$__CMakeExtraArgs"
+    "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__CMakeArgs "$__CMakeExtraArgs"
 
     # Check that the makefiles were created.
 
