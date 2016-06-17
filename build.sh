@@ -168,7 +168,7 @@ __buildnative=false
 __TestNugetRuntimeId=win7-x64
 
 # Use uname to determine what the CPU is.
-CPUName=$(uname -p)
+CPUName=$(uname -m)
 # Some Linux platforms report unknown for platform, but the arch for machine.
 if [ $CPUName == "unknown" ]; then
     CPUName=$(uname -m)
