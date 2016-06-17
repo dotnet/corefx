@@ -8,6 +8,7 @@ set __binDir=%~dp0..\..\..\bin
 set __CMakeBinDir=""
 set __IntermediatesDir=""
 set __BuildArch=x64
+set __appContainer=""
 set __VCBuildArch=x86_amd64
 set CMAKE_BUILD_TYPE=Debug
 set "__LinkArgs= "
@@ -30,6 +31,11 @@ if /i [%1] == [/p:Platform]     (
     if /i [%2] == [x64]         ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
     if /i [%2] == [amd64]       ( set __BuildArch=x64&&set __VCBuildArch=x86_amd64&&shift&&shift&goto Arg_Loop)
     echo Error: Invalid platform args "%1 and %2"
+    exit /b 1
+)
+if /i [%1] == [/p:TargetGroup]   (
+    if /i [%2] == [netcore50]    ( set "__LinkArgs=%__LinkArgs% /APPCONTAINER"&&set "__appContainer=true"&&shift&&shift&goto Arg_Loop)
+    if /i [%2] == [netcore50aot] ( set "__LinkArgs=%__LinkArgs% /APPCONTAINER"&&set "__appContainer=true"&&shift&&shift&goto Arg_Loop)
     exit /b 1
 )
 if /i [%1] == [-LinkArgument]   ( set "__LinkArgs=%__LinkArgs% %2"&&shift&&shift&goto Arg_Loop)
