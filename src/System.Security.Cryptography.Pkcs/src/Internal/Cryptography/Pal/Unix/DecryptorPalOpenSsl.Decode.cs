@@ -103,8 +103,8 @@ namespace Internal.Cryptography.Pal.OpenSsl
 
             // Skip recipientInfos as these are retrieved with OpenSSL
             const byte constructedSequence = (byte)DerSequenceReader.DerTag.Set | DerSequenceReader.ConstructedFlag;
-            Debug.Assert(encodedCms.PeekTag() == constructedSequence);
-            encodedCms.SkipValue();
+            Debug.Assert(innerSequenceReader.PeekTag() == constructedSequence);
+            innerSequenceReader.SkipValue();
 
             contentEncryptionAlgorithm = innerSequenceReader.ReadEncryptionAlgorithm();
             unprotectedAttributes = innerSequenceReader.ReadUnprotectedAttributes();

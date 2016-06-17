@@ -61,7 +61,7 @@ namespace System.Security.Cryptography
 
             Debug.Assert(data != null, "Data is null");
             Debug.Assert(offset >= 0, "Offset is negative");
-            Debug.Assert(length > 2, "Length is too short");
+            Debug.Assert(length >= 2, "Length is too short");
             Debug.Assert(length <= data.Length - offset, "Array is too short");
 
             _position = offset;
@@ -354,6 +354,10 @@ namespace System.Security.Cryptography
             if (lengthOrLengthLength < 0x80)
             {
                 bytesConsumed = 1;
+
+                if (lengthOrLengthLength > data.Length - offset - 1)
+                    throw new InvalidOperationException(SR.Cryptography_Der_Invalid_Length);
+                
                 return lengthOrLengthLength;
             }
 
@@ -370,6 +374,9 @@ namespace System.Security.Cryptography
                 accum <<= 8;
                 accum += data[i];
             }
+
+            if (accum > data.Length - end)
+                throw new InvalidOperationException(SR.Cryptography_Der_Invalid_Length);
 
             return accum;
         }
