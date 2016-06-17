@@ -156,6 +156,12 @@
   <data name="Chain_NoPolicyMatch" xml:space="preserve">
     <value>The certificate has invalid policy.</value>
   </data>
+  <data name="Cryptography_Der_Invalid_Encoding" xml:space="preserve">
+    <value>ASN1 corrupted data.</value>
+  </data>
+  <data name="Cryptography_Der_Invalid_Length" xml:space="preserve">
+    <value>ASN1 unexpected end of data.</value>
+  </data>
   <data name="Cryptography_InvalidContextHandle" xml:space="preserve">
     <value>The chain context handle is invalid.</value>
   </data>
@@ -215,6 +221,9 @@
   </data>
   <data name="InvalidOperation_EnumNotStarted" xml:space="preserve">
     <value>Enumeration has not started.  Call MoveNext.</value>
+  </data>
+  <data name="InvalidOperation_Unexpected_Tag" xml:space="preserve">
+    <value>Expected tag '0x{0}', got '0x{1}' at position {2}.</value>
   </data>
   <data name="InvalidPublicKeyInX509" xml:space="preserve">
     <value>Cannot obtain public key from X509Certificate. Public Key ASN.1 is in an unexpected format.</value>

@@ -14,7 +14,8 @@
         "System.Runtime.Numerics": "4.0.0",
         "System.Security.Cryptography.Primitives": "4.0.0",
         "System.Security.Cryptography.Encoding": "4.0.0",
-        "System.Text.Encoding.Extensions": "4.0.0"
+        "System.Text.Encoding.Extensions": "4.0.0",
+        "System.Threading": "4.0.10"
       },
       "imports": [
         "dotnet5.5"

@@ -356,5 +356,47 @@ namespace System.Security.Cryptography.Encoding.Tests
             // And, full roundtrip
             Assert.Equal(input.Substring(offset, length), Text.Encoding.UTF8.GetString(encodedString[2]));
         }
+
+        [Theory]
+        [InlineData("170d3135303430313030303030305a", 2015, 4, 1, 0, 0, 0)] // Tests encoding for midnight
+        [InlineData("170d3439313233313131353935395a", 2049, 12, 31, 11, 59, 59)]
+        [InlineData("170d3531303632383030303330305a", 1951, 06, 28, 0, 3, 0)]
+        public static void CheckUtcTimeEncoding_Local(string hexExpected, int year, int month, int day, int hour, int minute, int second)
+        {
+            DateTime timeToEncode = new DateTime(year, month, day, hour, minute, second);
+            byte[] encodedTime = DerEncoder.EncodeUtcTime(timeToEncode);
+            byte[] expected = hexExpected.HexToByteArray();
+            Assert.Equal(expected, encodedTime);
+        }
+
+        [Fact]
+        public static void CheckUtcTimeEncoding_Unspecified()
+        {
+            // Tests that handles unspecified time as if it was Utc (for desktop compat)
+            byte[] encodedTime = DerEncoder.EncodeUtcTime(new DateTime(2015, 4, 1));
+            byte[] expected = ("170d3135303430313030303030305a").HexToByteArray();
+            Assert.Equal(expected, encodedTime);
+        }
+
+        [Fact]
+        public static void CheckUtcTimeEncoding_Local()
+        {
+            DateTime local = new DateTime(2015, 4, 1, 0, 0, 0, DateTimeKind.Local);
+            DateTime utc = local.ToUniversalTime();
+            byte[] encodedLocal = DerEncoder.EncodeUtcTime(local);
+            byte[] encodedUtc = DerEncoder.EncodeUtcTime(utc);
+                    
+            Assert.Equal(encodedUtc, encodedLocal);
+        }
+
+        [Fact]
+        public static void CheckUtcTimeEncoding_Local_Static()
+        {
+            byte[] encodedExpected = ("170d3135303430313030303030305a").HexToByteArray();
+            DateTime local = new DateTime(2015, 4, 1, 0, 0, 0, DateTimeKind.Utc).ToLocalTime();
+            byte[] encodedLocal = DerEncoder.EncodeUtcTime(local);
+
+            Assert.Equal(encodedExpected, encodedLocal);
+        }
     }
 }

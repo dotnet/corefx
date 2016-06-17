@@ -11,7 +11,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
     <ResourcesSourceOutputDirectory Condition="'$(IsPartialFacadeAssembly)' == 'true'">None</ResourcesSourceOutputDirectory>
-    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
     <UsePackageTargetRuntimeDefaults Condition="'$(IsPartialFacadeAssembly)' != 'true'">true</UsePackageTargetRuntimeDefaults>
     <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
     <NuGetTargetMoniker Condition="'$(TargetGroup)'==''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
@@ -24,13 +23,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
-  <PropertyGroup>
-    <ProjectJson>project.json</ProjectJson>
-    <ProjectLockJson>project.lock.json</ProjectLockJson>
+  <PropertyGroup Condition="'$(TargetsWindows)' == 'true'">
+    <ProjectJson>win/project.json</ProjectJson>
+    <ProjectLockJson>win/project.lock.json</ProjectLockJson>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'netcore50'">
     <ProjectJson>netcore50/project.json</ProjectJson>
     <ProjectLockJson>netcore50/project.lock.json</ProjectLockJson>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetsUnix)' == 'true'">
+    <ProjectJson>unix/project.json</ProjectJson>
+    <ProjectLockJson>unix/project.lock.json</ProjectLockJson>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.6</PackageTargetFramework>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)'==''">.NETStandard,Version=v1.6</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- API types (platform independent) -->
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(GeneratePlatformNotSupportedAssembly)' != 'true'">
@@ -179,7 +184,76 @@
   </ItemGroup>
   <!-- Internal types (platform: Unix) -->
   <ItemGroup Condition="'$(TargetsUnix)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(GeneratePlatformNotSupportedAssembly)' != 'true'">
-    <Compile Include="Internal\Cryptography\Pal\Unix\PkcsPal.Unix.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\DecryptorPalOpenSsl.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\DecryptorPalOpenSsl.Decode.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\OpenSslHelpers.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\KeyAgreeRecipientInfoPalOpenSsl.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\KeyTransRecipientInfoPalOpenSsl.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\PkcsPal.OpenSsl.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\PkcsPalOpenSsl.cs" />
+  </ItemGroup>
+  <!-- Common types (platform: Unix) -->
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(GeneratePlatformNotSupportedAssembly)' != 'true'">
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerEncoder.cs">
+      <Link>Common\System\Security\Cryptography\DerEncoder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\DerSequenceReader.cs">
+      <Link>Common\System\Security\Cryptography\DerSequenceReader.cs</Link>
+    </Compile>
+  </ItemGroup>
+   <!-- Interop types (platform: Unix) -->
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(GeneratePlatformNotSupportedAssembly)' != 'true'">
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ASN1.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ASN1.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.BIO.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.BIO.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Cms.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Cms.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509Ext.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509Ext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509Stack.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509Stack.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509StoreCtx.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509StoreCtx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\Asn1SafeHandles.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\Asn1SafeHandles.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeBioHandle.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeBioHandle.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeCmsHandle.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeCmsHandle.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeCmsRecipientInfoHandles.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeCmsRecipientInfoHandles.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeInteriorHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeInteriorHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\X509ExtensionSafeHandles.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\X509ExtensionSafeHandles.Unix.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <TargetingPackReference Include="mscorlib" />

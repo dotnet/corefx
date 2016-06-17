@@ -126,11 +126,17 @@
   <data name="Argument_InvalidOffLen" xml:space="preserve">
     <value>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
   </data>
+  <data name="Argument_InvalidOidValue" xml:space="preserve">
+    <value>The OID value was invalid.</value>
+  </data>
   <data name="ArgumentOutOfRange_Index" xml:space="preserve">
     <value>Index was out of range.  Must be non-negative and less than the size of the collection.</value>
   </data>
   <data name="Cryptography_Cms_Envelope_Empty_Content" xml:space="preserve">
     <value>Cannot create CMS enveloped for empty content.</value>
+  </data>
+  <data name="Cryptography_Cms_Invalid_Message_Type" xml:space="preserve">
+    <value>Invalid cryptographic message type.</value>
   </data>
   <data name="Cryptography_Cms_Invalid_Originator_Identifier_Choice" xml:space="preserve">
     <value>Invalid originator identifier choice {0} found in decoded CMS.</value>
@@ -147,8 +153,20 @@
   <data name="Cryptography_Cms_NoRecipients" xml:space="preserve">
     <value>The recipients collection is empty. You must specify at least one recipient. This platform does not implement the certificate picker UI.</value>
   </data>
+  <data name="Cryptography_Cms_Recipient_Not_Found" xml:space="preserve">
+    <value>The enveloped-data message does not contain the specified recipient.</value>
+  </data>
   <data name="Cryptography_Cms_UnknownKeySpec" xml:space="preserve">
     <value>Unable to determine the type of key handle from this keyspec {0}.</value>
+  </data>
+  <data name="Cryptography_Der_Invalid_Encoding" xml:space="preserve">
+    <value>ASN1 corrupted data.</value>
+  </data>
+  <data name="Cryptography_Der_Invalid_Length" xml:space="preserve">
+    <value>ASN1 unexpected end of data.</value>
+  </data>
+  <data name="Cryptography_Invalid_IA5String" xml:space="preserve">
+    <value>The string contains a character not in the 7 bit ASCII character set.</value>
   </data>
   <data name="Cryptography_Pkcs9_AttributeMismatch" xml:space="preserve">
     <value>The parameter should be a PKCS 9 attribute.</value>
@@ -158,6 +176,9 @@
   </data>
   <data name="InvalidOperation_DuplicateItemNotAllowed" xml:space="preserve">
     <value>Duplicate items are not allowed in the collection.</value>
+  </data>
+  <data name="InvalidOperation_Unexpected_Tag" xml:space="preserve">
+    <value>Expected tag '0x{0}', got '0x{1}' at position {2}.</value>
   </data>
   <data name="InvalidOperation_WrongOidInAsnCollection" xml:space="preserve">
     <value>AsnEncodedData element in the collection has wrong Oid value: expected = '{0}', actual = '{1}'.</value>

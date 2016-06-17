@@ -8,31 +8,40 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Security.Cryptograph
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Unix_Release|Any CPU = Unix_Release|Any CPU
+		Unix_Debug|Any CPU = Unix_Debug|Any CPU
 		Windows_Debug|Any CPU = Windows_Debug|Any CPU
-		Windows_Release|Any CPU = Windows_Release|Any CPU
 		Windows_netcore50_Debug|Any CPU = Windows_netcore50_Debug|Any CPU
 		Windows_netcore50_Release|Any CPU = Windows_netcore50_Release|Any CPU
+		Windows_Release|Any CPU = Windows_Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
+		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
+		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
+		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
 		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
 		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
 		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_netcore50_Debug|Any CPU.ActiveCfg = Windows_netcore50_Debug|Any CPU
 		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_netcore50_Debug|Any CPU.Build.0 = Windows_netcore50_Debug|Any CPU
 		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_netcore50_Release|Any CPU.ActiveCfg = Windows_netcore50_Release|Any CPU
 		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_netcore50_Release|Any CPU.Build.0 = Windows_netcore50_Release|Any CPU
+		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{03D84CBD-896D-4B2F-9A22-07034F51E73D}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
+		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Unix_Release|Any CPU.ActiveCfg = Unix_Release|Any CPU
+		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Unix_Release|Any CPU.Build.0 = Unix_Release|Any CPU
+		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Unix_Debug|Any CPU.ActiveCfg = Unix_Debug|Any CPU
+		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Unix_Debug|Any CPU.Build.0 = Unix_Debug|Any CPU
 		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_Debug|Any CPU.ActiveCfg = Windows_Debug|Any CPU
 		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_Debug|Any CPU.Build.0 = Windows_Debug|Any CPU
-		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
-		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
 		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_netcore50_Debug|Any CPU.ActiveCfg = Windows_netcore50_Debug|Any CPU
 		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_netcore50_Debug|Any CPU.Build.0 = Windows_netcore50_Debug|Any CPU
 		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_netcore50_Release|Any CPU.ActiveCfg = Windows_netcore50_Release|Any CPU
 		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_netcore50_Release|Any CPU.Build.0 = Windows_netcore50_Release|Any CPU
+		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_Release|Any CPU.ActiveCfg = Windows_Release|Any CPU
+		{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}.Windows_Release|Any CPU.Build.0 = Windows_Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
-

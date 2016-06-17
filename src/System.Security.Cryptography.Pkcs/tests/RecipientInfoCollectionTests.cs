@@ -22,6 +22,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
     public static class RecipientInfoCollectionTests
     {
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestCount()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -29,6 +30,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestGetEnumerator()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -36,6 +38,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestExplicitGetEnumerator()
         {
             IEnumerable col = CreateTestCollection();
@@ -43,6 +46,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestIndex()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -51,6 +55,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestIndexExceptions()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -60,6 +65,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestCopyTo()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -70,6 +76,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestExplicitCopyTo()
         {
             ICollection col = CreateTestCollection();
@@ -79,6 +86,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestCopyToOffset()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -92,6 +100,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestExplicitCopyToOffset()
         {
             ICollection col = CreateTestCollection();
@@ -105,6 +114,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestCopyToExceptions()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -127,6 +137,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestExplicitCopyToExceptions()
         {
             ICollection col = CreateTestCollection();

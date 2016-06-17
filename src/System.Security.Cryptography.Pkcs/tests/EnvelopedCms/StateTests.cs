@@ -99,6 +99,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostCtor_Decrypt()
         {
             EnvelopedCms ecms = new EnvelopedCms();
@@ -122,6 +123,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         //
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostEncrypt_Version()
         {
             ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -137,6 +139,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostEncrypt_RecipientInfos()
         {
             ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -151,6 +154,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostEncrypt_Decrypt()
         {
             ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -163,6 +167,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostEncrypt_ContentInfo()
         {
             ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -228,6 +233,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         //
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostDecrypt_Encode()
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };
@@ -261,6 +267,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostDecrypt_RecipientInfos()
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };
@@ -300,6 +307,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostDecrypt_Decrypt()
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };

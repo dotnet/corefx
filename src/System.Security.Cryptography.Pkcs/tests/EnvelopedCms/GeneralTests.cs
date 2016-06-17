@@ -2,14 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
 using System.Linq;
-using System.Globalization;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.Xml;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
@@ -22,6 +15,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class GeneralTests
     {
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeVersion0_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -59,6 +53,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeRecipients3_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -75,6 +70,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeRecipients3_FixedValue()
         {
             byte[] encodedMessage =
@@ -156,6 +152,28 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             Oid contentType = ContentInfo.GetContentType(encodedMessage);
             Assert.Equal(Oids.Pkcs7Signed, contentType.Value);
+        }
+
+        [Fact]
+        public static void TestContent()
+        {
+            // Tests that the content is what it is expected to be, even if it's still encyrpted. This prevents from ambiguous definitions of content.
+
+            // The encoded message was built in ASN.1 editor and tested in framework. It contains an enveloped message version 0 with one recipient of
+            // key transport type. The symmetric algorythm is 3DES and the contained type is data. 
+            byte[] encodedMessage =
+                 ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
+                + "414b65795472616e7366657231021031d935fb63e8cfab48a0bf7b397b67c0300d06092a864886f70d010101050004818013"
+                + "dc0eb2984a445d04a1f6246b8fe41f1d24507548d449d454d5bb5e0638d75ed101bf78c0155a5d208eb746755fbccbc86923"
+                + "8443760a9ae94770d6373e0197be23a6a891f0c522ca96b3e8008bf23547474b7e24e7f32e8134df3862d84f4dea2470548e"
+                + "c774dd74f149a56cdd966e141122900d00ad9d10ea1848541294a1302b06092a864886f70d010701301406082a864886f70d"
+                + "030704089c8119f6cf6b174c8008bcea3a10d0737eb9").HexToByteArray();
+
+            EnvelopedCms cms = new EnvelopedCms();
+
+            cms.Decode(encodedMessage);
+
+            Assert.Equal(cms.ContentInfo.Content, new byte[] { 188, 234, 58, 16, 208, 115, 126, 185 });
         }
 
         private static X509Certificate2[] s_certs =

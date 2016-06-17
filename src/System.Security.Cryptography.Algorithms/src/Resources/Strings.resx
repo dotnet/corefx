@@ -141,6 +141,12 @@
   <data name="Cryptography_CSP_NoPrivateKey" xml:space="preserve">
     <value>Object contains only the public half of a key pair. A private key must also be provided.</value>
   </data>
+  <data name="Cryptography_Der_Invalid_Encoding" xml:space="preserve">
+    <value>ASN1 corrupted data.</value>
+  </data>
+  <data name="Cryptography_Der_Invalid_Length" xml:space="preserve">
+    <value>ASN1 unexpected end of data.</value>
+  </data>
   <data name="Cryptography_HashAlgorithmNameNullOrEmpty" xml:space="preserve">
     <value>The hash algorithm name cannot be null or empty.</value>
   </data>
@@ -233,6 +239,9 @@
   </data>
   <data name="Cryptography_UnsupportedPaddingMode" xml:space="preserve">
     <value>The specified PaddingMode is not supported.</value>
+  </data>
+  <data name="InvalidOperation_Unexpected_Tag" xml:space="preserve">
+    <value>Expected tag '0x{0}', got '0x{1}' at position {2}.</value>
   </data>
   <data name="NotSupported_SubclassOverride" xml:space="preserve">
     <value>Method not supported. Derived class must override.</value>
