@@ -12,6 +12,14 @@ using System.Threading.Tasks;
 
 namespace System.Runtime.Loader.Tests
 {
+    public class SecondaryLoadContext : AssemblyLoadContext
+    {
+        protected override Assembly Load(AssemblyName assemblyName)
+        {
+            return null;
+        }
+    }
+
     public class DefaultLoadContextTests
     {
         private static string s_loadFromPath = null;
@@ -58,24 +66,59 @@ namespace System.Runtime.Loader.Tests
         {
             Init();
 
-           // This will attempt to load an assembly, by path, in the Default Load context via the Resolving event
-           var assemblyName = "System.Runtime.Loader.Noop.Assembly";
+            // This will attempt to load an assembly, by path, in the Default Load context via the Resolving event
+            var assemblyNameStr = "System.Runtime.Loader.Noop.Assembly";
+            var assemblyName = new AssemblyName(assemblyNameStr);
 
+            // By default, the assembly should not be found in DefaultContext at all
+            Assert.Throws(typeof(FileNotFoundException), () => Assembly.Load(assemblyName));
+
+            // Create a secondary load context and wireup its resolving event
+            SecondaryLoadContext slc = new SecondaryLoadContext();
+            slc.Resolving += ResolveAssembly;
+            
+            // Attempt to load the assembly in secondary load context
+            var slcLoadedAssembly = slc.LoadFromAssemblyName(assemblyName);
+            
+            // We should have successfully loaded the assembly in default context.
+            Assert.NotNull(slcLoadedAssembly);
+
+            // And make sure the simple name matches
+            Assert.Equal(assemblyNameStr, slcLoadedAssembly.GetName().Name);
+
+            // Now, wireup the Resolving event of default context to locate the assembly
             AssemblyLoadContext.Default.Resolving += ResolveAssembly;
-            var assemblyExpected = AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName(assemblyName));
+            
+            // This will invoke the resolution via VM requiring to bind using the TPA binder
+            var assemblyExpectedFromLoad = Assembly.Load(assemblyName);
+
+            // We should have successfully loaded the assembly in default context.
+            Assert.NotNull(assemblyExpectedFromLoad);
+
+            // And make sure the simple name matches
+            Assert.Equal(assemblyNameStr, assemblyExpectedFromLoad.GetName().Name);
+
+            // The assembly loaded in DefaultContext should have a different reference from the one in secondary load context
+            Assert.NotEqual(slcLoadedAssembly, assemblyExpectedFromLoad);
+
+            // This will resolve the assembly via event invocation.
+            var assemblyExpected = AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
             
             // We should have successfully loaded the assembly in default context.
             Assert.NotNull(assemblyExpected);
 
+            // What we got via Assembly.Load and LoadFromAssemblyName should be the same
+            Assert.Equal(assemblyExpected, assemblyExpectedFromLoad);
+
             // And make sure the simple name matches
-            Assert.Equal(assemblyExpected.GetName().Name, assemblyName);
+            Assert.Equal(assemblyExpected.GetName().Name, assemblyNameStr);
 
             // Unwire the Resolving event.
             AssemblyLoadContext.Default.Resolving -= ResolveAssembly;
 
             // Unwire the Resolving event and attempt to load the assembly again. This time
             // it should be found in the Default Load Context.
-            var assemblyLoaded = Assembly.Load(new AssemblyName(assemblyName));
+            var assemblyLoaded = Assembly.Load(new AssemblyName(assemblyNameStr));
 
             // We should have successfully found the assembly in default context.
             Assert.NotNull(assemblyLoaded);
