@@ -298,7 +298,7 @@ while :; do
             __VerboseBuild=1
             ;;
         staticliblink)
-            __CMakeExtraArgs="$__CMakeExtraArgs$staticCurl -DCMAKE_STATIC_LIB_LINK=1"
+            __CMakeExtraArgs="$__CMakeExtraArgs -DCMAKE_STATIC_LIB_LINK=1"
             ;;
         generateversion)
             __generateversionsource=true
