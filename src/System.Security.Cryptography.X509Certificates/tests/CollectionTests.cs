@@ -860,6 +860,36 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        public static void X509ChainElementCollection_CopyTo_NonZeroLowerBound_ThrowsIndexOutOfRangeException()
+        {
+            using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
+            using (var microsoftDotComIssuer = new X509Certificate2(TestData.MicrosoftDotComIssuerBytes))
+            using (var microsoftDotComRoot = new X509Certificate2(TestData.MicrosoftDotComRootBytes))
+            using (X509Chain chain = new X509Chain())
+            {
+                chain.ChainPolicy.ExtraStore.Add(microsoftDotComRoot);
+                chain.ChainPolicy.ExtraStore.Add(microsoftDotComIssuer);
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+
+                chain.Build(microsoftDotCom);
+                ICollection collection = chain.ChainElements;
+                Array array = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
+                Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(array, 0));
+            }
+        }
+
+        [Fact]
+        public static void X509ExtensionCollection_CopyTo_NonZeroLowerBound_ThrowsIndexOutOfRangeException()
+        {
+            using (X509Certificate2 cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            {
+                ICollection collection = cert.Extensions;
+                Array array = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
+                Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(array, 0));
+            }
+        }
+
         [Fact]
         public static void X509CertificateCollectionIndexOf()
         {

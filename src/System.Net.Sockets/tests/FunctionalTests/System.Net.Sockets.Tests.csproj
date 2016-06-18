@@ -38,6 +38,7 @@
     <Compile Include="SocketOptionNameTest.cs" />
     <Compile Include="UdpClientTest.cs" />
     <Compile Include="UnixDomainSocketTest.cs" />
+    
     <!-- Common Sockets files -->
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\Configuration.cs">
       <Link>SocketCommon\Configuration.cs</Link>
@@ -61,6 +62,9 @@
       <Link>SocketCommon\SocketImplementationType.cs</Link>
     </Compile>
     <!-- Common test files -->
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\TestLogging.cs">
       <Link>Common\System\Net\TestLogging.cs</Link>
     </Compile>

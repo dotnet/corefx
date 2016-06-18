@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Xunit;
 
@@ -69,21 +67,15 @@ namespace System.Collections.Tests
             }
         }
 
-        protected virtual bool ExpectedFixedSize { get { return false; } }
+        protected virtual bool ExpectedFixedSize => false;
 
         #endregion
 
         #region ICollection Helper Methods
 
-        protected override ICollection NonGenericICollectionFactory()
-        {
-            return NonGenericIListFactory();
-        }
+        protected override ICollection NonGenericICollectionFactory() => NonGenericIListFactory();
 
-        protected override ICollection NonGenericICollectionFactory(int count)
-        {
-            return NonGenericIListFactory(count);
-        }
+        protected override ICollection NonGenericICollectionFactory(int count) => NonGenericIListFactory(count);
 
         /// <summary>
         /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
@@ -94,31 +86,44 @@ namespace System.Collections.Tests
             {
                 yield return (IEnumerable enumerable) => {
                     IList casted = ((IList)enumerable);
-                    casted.Add(CreateT(2344));
-                    return true;
-                };
-                yield return (IEnumerable enumerable) => {
-                    IList casted = ((IList)enumerable);
-                    casted.Insert(0, CreateT(12));
-                    return true;
-                };
-                yield return (IEnumerable enumerable) => {
-                    IList casted = ((IList)enumerable);
-                    casted[0] = CreateT(12);
-                    return true;
-                };
-
-                yield return (IEnumerable enumerable) => {
-                    IList casted = ((IList)enumerable);
-                    if (casted.Count > 0)
+                    if (!casted.IsFixedSize && !casted.IsReadOnly)
                     {
-                        casted.Remove(casted[0]);
+                        casted.Add(CreateT(2344));
+                        return true;
                     }
                     return false;
                 };
                 yield return (IEnumerable enumerable) => {
                     IList casted = ((IList)enumerable);
-                    if (casted.Count > 0)
+                    if (!casted.IsFixedSize && !casted.IsReadOnly)
+                    {
+                        casted.Insert(0, CreateT(12));
+                        return true;
+                    }
+                    return false;
+                };
+                yield return (IEnumerable enumerable) => {
+                    IList casted = ((IList)enumerable);
+                    if (casted.Count > 0 && !casted.IsReadOnly)
+                    {
+                        casted[0] = CreateT(12);
+                        return true;
+                    }
+                    return false;
+                };
+
+                yield return (IEnumerable enumerable) => {
+                    IList casted = ((IList)enumerable);
+                    if (casted.Count > 0 && !casted.IsFixedSize && !casted.IsReadOnly)
+                    {
+                        casted.Remove(casted[0]);
+                        return true;
+                    }
+                    return false;
+                };
+                yield return (IEnumerable enumerable) => {
+                    IList casted = ((IList)enumerable);
+                    if (casted.Count > 0 && !casted.IsFixedSize && !casted.IsReadOnly)
                     {
                         casted.RemoveAt(0);
                         return true;
@@ -127,7 +132,7 @@ namespace System.Collections.Tests
                 };
                 yield return (IEnumerable enumerable) => {
                     IList casted = ((IList)enumerable);
-                    if (casted.Count > 0)
+                    if (casted.Count > 0 && !casted.IsFixedSize && !casted.IsReadOnly)
                     {
                         casted.Clear();
                         return true;
@@ -137,13 +142,15 @@ namespace System.Collections.Tests
             }
         }
 
+        protected override void AddToCollection(ICollection collection, int numberOfItemsToAdd) => AddToCollection((IList)collection, numberOfItemsToAdd);
+
         #endregion
 
         #region IsFixedSize
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_IsFixedSize_Validity(int count)
+        public void IList_NonGeneric_IsFixedSize_Validity(int count)
         {
             IList collection = NonGenericIListFactory(count);
             Assert.Equal(ExpectedFixedSize, collection.IsFixedSize);
@@ -155,7 +162,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_IsReadOnly_Validity(int count)
+        public void IList_NonGeneric_IsReadOnly_Validity(int count)
         {
             IList collection = NonGenericIListFactory(count);
             Assert.Equal(IsReadOnly, collection.IsReadOnly);
@@ -325,9 +332,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_Null(int count)
+        public void IList_NonGeneric_Add_Null(int count)
         {
-            if (NullAllowed && !IsReadOnly)
+            if (NullAllowed && !IsReadOnly && !ExpectedFixedSize)
             {
                 IList collection = NonGenericIListFactory(count);
                 collection.Add(null);
@@ -337,9 +344,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_InvalidValueToMiddleOfCollection(int count)
+        public void IList_NonGeneric_Add_InvalidValueToMiddleOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -354,9 +361,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_InvalidValueToBeginningOfCollection(int count)
+        public void IList_NonGeneric_Add_InvalidValueToBeginningOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -371,9 +378,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_InvalidValueToEndOfCollection(int count)
+        public void IList_NonGeneric_Add_InvalidValueToEndOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -386,9 +393,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_DuplicateValue(int count)
+        public void IList_NonGeneric_Add_DuplicateValue(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 if (DuplicateValuesAllowed)
                 {
@@ -403,9 +410,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_AfterCallingClear(int count)
+        public void IList_NonGeneric_Add_AfterCallingClear(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList collection = NonGenericIListFactory(count);
                 collection.Clear();
@@ -416,9 +423,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_AfterRemovingAnyValue(int count)
+        public void IList_NonGeneric_Add_AfterRemovingAnyValue(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 int seed = 840;
                 IList collection = NonGenericIListFactory(count);
@@ -440,9 +447,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_AfterRemovingAllItems(int count)
+        public void IList_NonGeneric_Add_AfterRemovingAllItems(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList collection = NonGenericIListFactory(count);
                 object[] arr = new object[count];
@@ -456,9 +463,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_ToReadOnlyCollection(int count)
+        public void IList_NonGeneric_Add_ToReadOnlyCollection(int count)
         {
-            if (IsReadOnly)
+            if (IsReadOnly || ExpectedFixedSize)
             {
                 IList collection = NonGenericIListFactory(count);
                 Assert.Throws<NotSupportedException>(() => collection.Add(CreateT(0)));
@@ -468,9 +475,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Add_AfterRemoving(int count)
+        public void IList_NonGeneric_Add_AfterRemoving(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 int seed = 840;
                 IList collection = NonGenericIListFactory(count);
@@ -489,10 +496,10 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Clear(int count)
+        public void IList_NonGeneric_Clear(int count)
         {
             IList collection = NonGenericIListFactory(count);
-            if (IsReadOnly)
+            if (IsReadOnly || ExpectedFixedSize)
             {
                 Assert.Throws<NotSupportedException>(() => collection.Clear());
                 Assert.Equal(count, collection.Count);
@@ -510,7 +517,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Contains_ValidValueOnCollectionNotContainingThatValue(int count)
+        public void IList_NonGeneric_Contains_ValidValueOnCollectionNotContainingThatValue(int count)
         {
             IList collection = NonGenericIListFactory(count);
             int seed = 4315;
@@ -522,7 +529,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_ICollection_NonGeneric_Contains_ValidValueOnCollectionContainingThatValue(int count)
+        public void IList_NonGeneric_IList_NonGeneric_Contains_ValidValueOnCollectionContainingThatValue(int count)
         {
             IList collection = NonGenericIListFactory(count);
             foreach (object item in collection)
@@ -531,7 +538,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Contains_NullOnCollectionNotContainingNull(int count)
+        public void IList_NonGeneric_Contains_NullOnCollectionNotContainingNull(int count)
         {
             IList collection = NonGenericIListFactory(count);
             if (NullAllowed)
@@ -540,10 +547,10 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Contains_NullOnCollectionContainingNull(int count)
+        public void IList_NonGeneric_Contains_NullOnCollectionContainingNull(int count)
         {
             IList collection = NonGenericIListFactory(count);
-            if (NullAllowed && !IsReadOnly)
+            if (NullAllowed && !IsReadOnly && !ExpectedFixedSize)
             {
                 collection.Add(null);
                 Assert.True(collection.Contains(null));
@@ -552,9 +559,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Contains_ValidValueThatExistsTwiceInTheCollection(int count)
+        public void IList_NonGeneric_Contains_ValidValueThatExistsTwiceInTheCollection(int count)
         {
-            if (DuplicateValuesAllowed && !IsReadOnly)
+            if (DuplicateValuesAllowed && !IsReadOnly && !ExpectedFixedSize)
             {
                 IList collection = NonGenericIListFactory(count);
                 object item = CreateT(12);
@@ -566,7 +573,7 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Contains_InvalidValue_ThrowsArgumentException(int count)
+        public void IList_NonGeneric_Contains_InvalidValue_ThrowsArgumentException(int count)
         {
             IList collection = NonGenericIListFactory(count);
             Assert.All(InvalidValues, invalidValue =>
@@ -588,7 +595,7 @@ namespace System.Collections.Tests
                 object value = null;
                 if (list.Contains(value))
                 {
-                    if (IsReadOnly)
+                    if (IsReadOnly || ExpectedFixedSize)
                         return;
                     list.Remove(value);
                 }
@@ -606,7 +613,7 @@ namespace System.Collections.Tests
                 object value = null;
                 if (!list.Contains(value))
                 {
-                    if (IsReadOnly)
+                    if (IsReadOnly || ExpectedFixedSize)
                         return;
                     list[0] = value;
                 }
@@ -618,7 +625,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_IndexOf_ValueInCollectionMultipleTimes(int count)
         {
-            if (count > 0 && !IsReadOnly && DuplicateValuesAllowed)
+            if (count > 0 && !IsReadOnly && !ExpectedFixedSize && DuplicateValuesAllowed)
             {
                 // IndexOf should always return the lowest index for which a matching element is found
                 IList list = NonGenericIListFactory(count);
@@ -645,7 +652,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_IndexOf_InvalidValue(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 Assert.All(InvalidValues, value =>
                 {
@@ -659,7 +666,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_IndexOf_ReturnsFirstMatchingValue(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
 
@@ -685,7 +692,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_NegativeIndex_ThrowsArgumentOutOfRangeException(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 object validAdd = CreateT(0);
@@ -700,7 +707,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_IndexGreaterThanListCount_Appends(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 object validAdd = CreateT(12350);
@@ -714,7 +721,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_ToReadOnlyList(int count)
         {
-            if (IsReadOnly)
+            if (IsReadOnly || ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 Assert.Throws<NotSupportedException>(() => list.Insert(count / 2, CreateT(321432)));
@@ -726,7 +733,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_FirstItemToNonNull(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 object value = CreateT(123452);
@@ -740,7 +747,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_FirstItemToNull(int count)
         {
-            if (!IsReadOnly && NullAllowed)
+            if (!IsReadOnly && !ExpectedFixedSize && NullAllowed)
             {
                 IList list = NonGenericIListFactory(count);
                 object value = null;
@@ -754,7 +761,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_LastItemToNonNull(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 object value = CreateT(123452);
@@ -769,7 +776,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_LastItemToNull(int count)
         {
-            if (!IsReadOnly && NullAllowed)
+            if (!IsReadOnly && !ExpectedFixedSize && NullAllowed)
             {
                 IList list = NonGenericIListFactory(count);
                 object value = null;
@@ -784,7 +791,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_DuplicateValues(int count)
         {
-            if (!IsReadOnly && DuplicateValuesAllowed)
+            if (!IsReadOnly && !ExpectedFixedSize && DuplicateValuesAllowed)
             {
                 IList list = NonGenericIListFactory(count);
                 object value = CreateT(123452);
@@ -800,7 +807,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Insert_InvalidValue(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 Assert.All(InvalidValues, value =>
                 {
@@ -816,9 +823,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Remove_OnReadOnlyCollection_ThrowsNotSupportedException(int count)
+        public void IListNonGeneric_Remove_OnReadOnlyCollection_ThrowsNotSupportedException(int count)
         {
-            if (IsReadOnly)
+            if (IsReadOnly || ExpectedFixedSize)
             {
                 IList collection = NonGenericIListFactory(count);
                 Assert.Throws<NotSupportedException>(() => collection.Remove(CreateT(34543)));
@@ -827,9 +834,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Remove_NullNotContainedInCollection(int count)
+        public void IList_NonGeneric_Remove_NullNotContainedInCollection(int count)
         {
-            if (!IsReadOnly && NullAllowed && !Enumerable.Contains(InvalidValues, null))
+            if (!IsReadOnly && !ExpectedFixedSize && NullAllowed && !Enumerable.Contains(InvalidValues, null))
             {
                 int seed = count * 21;
                 IList collection = NonGenericIListFactory(count);
@@ -846,9 +853,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Remove_NonNullNotContainedInCollection(int count)
+        public void IList_NonGeneric_Remove_NonNullNotContainedInCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 int seed = count * 251;
                 IList collection = NonGenericIListFactory(count);
@@ -862,9 +869,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Remove_NullContainedInCollection(int count)
+        public void IList_NonGeneric_Remove_NullContainedInCollection(int count)
         {
-            if (!IsReadOnly && NullAllowed && !Enumerable.Contains(InvalidValues, null))
+            if (!IsReadOnly && !ExpectedFixedSize && NullAllowed && !Enumerable.Contains(InvalidValues, null))
             {
                 int seed = count * 21;
                 IList collection = NonGenericIListFactory(count);
@@ -881,9 +888,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Remove_NonNullContainedInCollection(int count)
+        public void IList_NonGeneric_Remove_NonNullContainedInCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 int seed = count * 251;
                 IList collection = NonGenericIListFactory(count);
@@ -900,9 +907,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Remove_ValueThatExistsTwiceInCollection(int count)
+        public void IList_NonGeneric_Remove_ValueThatExistsTwiceInCollection(int count)
         {
-            if (!IsReadOnly && DuplicateValuesAllowed)
+            if (!IsReadOnly && !ExpectedFixedSize && DuplicateValuesAllowed)
             {
                 int seed = count * 90;
                 IList collection = NonGenericIListFactory(count);
@@ -918,9 +925,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Remove_EveryValue(int count)
+        public void IList_NonGeneric_Remove_EveryValue(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList collection = NonGenericIListFactory(count);
                 object[] arr = new object[count];
@@ -935,14 +942,17 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_NonGeneric_Remove_InvalidValue_ThrowsArgumentException(int count)
+        public void IList_NonGeneric_Remove_InvalidValue_ThrowsArgumentException(int count)
         {
-            IList collection = NonGenericIListFactory(count);
-            Assert.All(InvalidValues, value =>
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
-                Assert.ThrowsAny<ArgumentException>(() => collection.Remove(value));
-            });
-            Assert.Equal(count, collection.Count);
+                IList collection = NonGenericIListFactory(count);
+                Assert.All(InvalidValues, value =>
+                {
+                    Assert.ThrowsAny<ArgumentException>(() => collection.Remove(value));
+                });
+                Assert.Equal(count, collection.Count);
+            }
         }
 
         #endregion
@@ -953,7 +963,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_RemoveAt_NegativeIndex_ThrowsArgumentOutOfRangeException(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 object validAdd = CreateT(0);
@@ -967,7 +977,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_RemoveAt_IndexGreaterThanListCount_ThrowsArgumentOutOfRangeException(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 object validAdd = CreateT(0);
@@ -981,7 +991,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_RemoveAt_OnReadOnlyList(int count)
         {
-            if (IsReadOnly)
+            if (IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 Assert.Throws<NotSupportedException>(() => list.RemoveAt(count / 2));
@@ -993,7 +1003,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_RemoveAt_AllValidIndices(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 Assert.Equal(count, list.Count);
@@ -1009,7 +1019,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_RemoveAt_ZeroMultipleTimes(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 IList list = NonGenericIListFactory(count);
                 Assert.All(Enumerable.Range(0, count), index =>

@@ -53,6 +53,7 @@ namespace System.Net.Http
 
             // Create response stream and wrap it in a StreamContent object.
             var responseStream = new WinHttpResponseStream(requestHandle, state);
+            state.RequestHandle = null; // ownership successfully transfered to WinHttpResponseStram.
             Stream decompressedStream = responseStream;
 
             if (doManualDecompressionCheck)
@@ -82,7 +83,15 @@ namespace System.Net.Http
                 }
             }
 
+#if HTTP_DLL
+            var content = new StreamContent(decompressedStream, state.CancellationToken);
+#else
+            // TODO: Issue https://github.com/dotnet/corefx/issues/9071
+            // We'd like to be able to pass state.CancellationToken into the StreamContent so that its
+            // SerializeToStreamAsync method can use it, but that ctor isn't public, nor is there a
+            // SerializeToStreamAsync override that takes a CancellationToken.
             var content = new StreamContent(decompressedStream);
+#endif
 
             response.Content = content;
             response.RequestMessage = request;

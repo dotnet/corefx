@@ -9,12 +9,14 @@
       <SupportedFramework>net46;netcore50</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\ref\System.Text.RegularExpressions.csproj">
-      <SupportedFramework>net462;netcoreapp1.0</SupportedFramework>
+      <SupportedFramework>net463;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Text.RegularExpressions.builds" />
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
-    <InboxOnTargetFramework Include="net45" />
+    <InboxOnTargetFramework Include="net45">
+      <FrameworkReference>System</FrameworkReference>
+    </InboxOnTargetFramework>
     <InboxOnTargetFramework Include="win8" />
     <InboxOnTargetFramework Include="wp80" />
     <InboxOnTargetFramework Include="wpa81" />

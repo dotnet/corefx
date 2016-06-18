@@ -11,7 +11,8 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <!-- rev'ed to 1.4.1 so that we can drop pre-release down to beta -->
+    <AssemblyVersion>1.4.1.0</AssemblyVersion>
     <DefineConstants>$(DefineConstants)</DefineConstants>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.0</NuGetTargetMoniker>
   </PropertyGroup>
@@ -37,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Reflection\Internal\Utilities\ExceptionUtilities.cs" />
+    <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\FunctionPointerAttributes.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\MethodBodiesEncoder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\MethodBodyAttributes.cs" />
     <Compile Include="System\Reflection\Metadata\EntityHandle.cs" />
@@ -72,14 +74,16 @@
     <Compile Include="System\Reflection\Metadata\Internal\MetadataWriterUtilities.cs" />
     <Compile Include="System\Reflection\Metadata\MetadataStreamOptions.cs" />
     <Compile Include="System\Reflection\Metadata\MetadataReaderProvider.cs" />
-    <Compile Include="System\Reflection\Metadata\ContentId.cs" />
+    <Compile Include="System\Reflection\Metadata\BlobContentId.cs" />
     <Compile Include="System\Reflection\Metadata\Signatures\PrimitiveSerializationTypeCode.cs" />
     <Compile Include="System\Reflection\Metadata\TypeSystem\Handles.TypeSystem.cs" />
     <Compile Include="System\Reflection\PortableExecutable\ManagedPEBuilder.cs" />
     <Compile Include="System\Reflection\PortableExecutable\ManagedTextSection.cs" />
     <Compile Include="System\Reflection\PortableExecutable\PEBuilder.cs" />
+    <Compile Include="System\Reflection\PortableExecutable\DebugDirectory\DebugDirectoryBuilder.cs" />
     <Compile Include="System\Reflection\PortableExecutable\PEDirectoriesBuilder.cs" />
     <Compile Include="System\Reflection\PortableExecutable\PEHeaderBuilder.cs" />
+    <Compile Include="System\Reflection\PortableExecutable\ResourceSectionBuilder.cs" />
     <Compile Include="System\Reflection\PortableExecutable\SectionLocation.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\BlobUtilities.cs" />
   </ItemGroup>

@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}</ProjectGuid>
     <AssemblyName>System.Linq</AssemblyName>
-    <AssemblyVersion>4.1.0.0</AssemblyVersion>
+    <AssemblyVersion>4.1.1.0</AssemblyVersion>
     <RootNamespace>System.Linq</RootNamespace>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net462'">true</IsPartialFacadeAssembly>
-    <!-- The following line needs to be removed once we have a targeting pack for 4.6.2 -->
-    <TargetingPackNugetPackageId Condition="'$(TargetGroup)' == 'net462'">Microsoft.TargetingPack.NETFramework.v4.6.1</TargetingPackNugetPackageId>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.5</PackageTargetFramework>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.5</NuGetTargetMoniker>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
+    <!-- The following line needs to be removed once we have a targeting pack for 4.6.3 -->
+    <TargetingPackNugetPackageId Condition="'$(TargetGroup)' == 'net463'">Microsoft.TargetingPack.NETFramework.v4.6.1</TargetingPackNugetPackageId>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.6</PackageTargetFramework>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.6</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -26,6 +26,7 @@
     </Compile>
     <Compile Include="System\Linq\Aggregate.cs" />
     <Compile Include="System\Linq\AnyAll.cs" />
+    <Compile Include="System\Linq\AppendPrepend.cs" />
     <Compile Include="System\Linq\Average.cs" />
     <Compile Include="System\Linq\Buffer.cs" />
     <Compile Include="System\Linq\Cast.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="System\Linq\Where.cs" />
     <Compile Include="System\Linq\Zip.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net462'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System.Core" />
   </ItemGroup>

@@ -94,11 +94,26 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Theory]
-        [InlineData(0)] // Any
-        [InlineData(1)] // Loopback
-        [PlatformSpecific(~PlatformID.OSX)] // Receive times out on loopback interface
-        public void MulticastInterface_Set_ValidIndex_Succeeds(int interfaceIndex)
+        [Fact]
+        public void MulticastInterface_Set_AnyInterface_Succeeds()
+        {
+            // On all platforms, index 0 means "any interface"
+            MulticastInterface_Set_Helper(0);
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // see comment below
+        public void MulticastInterface_Set_Loopback_Succeeds()
+        {
+            // On Windows, we can apparently assume interface 1 is "loopback."  On other platforms, this is not a
+            // valid assumption.  We could maybe use NetworkInterface.LoopbackInterfaceIndex to get the index, but
+            // this would introduce a dependency on System.Net.NetworkInformation, which depends on System.Net.Sockets,
+            // which is what we're testing here....  So for now, we'll just assume "loopback == 1" and run this on
+            // Windows only.
+            MulticastInterface_Set_Helper(1);
+        }
+
+        private void MulticastInterface_Set_Helper(int interfaceIndex)
         {
             IPAddress multicastAddress = IPAddress.Parse("239.1.2.3");
             string message = "hello";
@@ -111,7 +126,11 @@ namespace System.Net.Sockets.Tests
                 receiveSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(multicastAddress, interfaceIndex));
 
                 sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex));
-                sendSocket.SendTo(Encoding.UTF8.GetBytes(message), new IPEndPoint(multicastAddress, port));
+
+                for (int i = 0; i < Configuration.UDPRedundancy; i++)
+                {
+                    sendSocket.SendTo(Encoding.UTF8.GetBytes(message), new IPEndPoint(multicastAddress, port));
+                }
 
                 var receiveBuffer = new byte[1024];
                 int bytesReceived = receiveSocket.Receive(receiveBuffer);

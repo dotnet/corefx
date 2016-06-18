@@ -21,6 +21,7 @@ set(NATIVECRYPTO_SOURCES
     pal_bio.cpp
     pal_cms.cpp
     pal_ecdsa.cpp
+    pal_ecc_import_export.cpp
     pal_eckey.cpp
     pal_err.cpp
     pal_evp.cpp
@@ -71,4 +72,4 @@ endif()
 
 include(configure.cmake)
 
-install (TARGETS System.Security.Cryptography.Native DESTINATION .)
+install_library_and_symbols (System.Security.Cryptography.Native)

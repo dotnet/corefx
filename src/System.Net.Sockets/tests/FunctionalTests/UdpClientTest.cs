@@ -4,7 +4,7 @@
 
 using System.Net.Test.Common;
 using System.Threading;
-
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Net.Sockets.Tests
@@ -42,7 +42,6 @@ namespace System.Net.Sockets.Tests
             });
         }
 
-        [ActiveIssue(4071)]
         [Fact]
         public void BeginSend_AsyncOperationCompletes_Success()
         {
@@ -53,6 +52,56 @@ namespace System.Net.Sockets.Tests
             udpClient.BeginSend(sendBytes, sendBytes.Length, remoteServer, new AsyncCallback(AsyncCompleted), udpClient);
 
             Assert.True(_waitHandle.WaitOne(Configuration.PassingTestTimeout), "Timed out while waiting for connection");
+        }
+
+        [Fact]
+        public void Client_Idempotent()
+        {
+            using (var c = new UdpClient())
+            {
+                Socket client = c.Client;
+                Assert.NotNull(client);
+                Assert.Same(client, c.Client);
+            }
+        }
+        
+        [Fact]
+        [ActiveIssue(9189, PlatformID.AnyUnix)]
+        public async Task ConnectAsync_StringHost_Success()
+        {
+            using (var c = new UdpClient())
+            {
+                await c.Client.ConnectAsync("114.114.114.114", 53);
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(9304)]
+        public async Task ConnectAsync_IPAddressHost_Success()
+        {
+            using (var c = new UdpClient())
+            {
+                await c.Client.ConnectAsync(IPAddress.Parse("114.114.114.114"), 53);
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(9189, PlatformID.AnyUnix)]
+        public void Connect_StringHost_Success()
+        {
+            using (var c = new UdpClient())
+            {
+                c.Client.Connect("114.114.114.114", 53);
+            }
+        }
+
+        [Fact]
+        public void Connect_IPAddressHost_Success()
+        {
+            using (var c = new UdpClient())
+            {
+                c.Client.Connect(IPAddress.Parse("114.114.114.114"), 53);
+            }
         }
 
         private void AsyncCompleted(IAsyncResult ar)

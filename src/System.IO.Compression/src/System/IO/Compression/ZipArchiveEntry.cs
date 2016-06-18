@@ -24,7 +24,7 @@ namespace System.IO.Compression
         private readonly Boolean _originallyInArchive;
         private readonly Int32 _diskNumberStart;
         private readonly ZipVersionMadeByPlatform _versionMadeByPlatform;
-        private readonly byte _versionMadeBySpecification;
+        private ZipVersionNeededValues _versionMadeBySpecification;
         private ZipVersionNeededValues _versionToExtract;
         private BitFlagValues _generalPurposeBitFlag;
         private CompressionMethodValues _storedCompressionMethod;
@@ -67,7 +67,7 @@ namespace System.IO.Compression
 
             _diskNumberStart = cd.DiskNumberStart;
             _versionMadeByPlatform = (ZipVersionMadeByPlatform)cd.VersionMadeByCompatibility;
-            _versionMadeBySpecification = cd.VersionMadeBySpecification;
+            _versionMadeBySpecification = (ZipVersionNeededValues)cd.VersionMadeBySpecification;
             _versionToExtract = (ZipVersionNeededValues)cd.VersionNeededToExtract;
             _generalPurposeBitFlag = (BitFlagValues)cd.GeneralPurposeBitFlag;
             CompressionMethod = (CompressionMethodValues)cd.CompressionMethod;
@@ -114,7 +114,7 @@ namespace System.IO.Compression
 
             _diskNumberStart = 0;
             _versionMadeByPlatform = CurrentZipPlatform;
-            _versionMadeBySpecification = 0;
+            _versionMadeBySpecification = ZipVersionNeededValues.Default;
             _versionToExtract = ZipVersionNeededValues.Default; //this must happen before following two assignment
             _generalPurposeBitFlag = 0;
             CompressionMethod = CompressionMethodValues.Deflate;
@@ -429,21 +429,6 @@ namespace System.IO.Compression
             }
         }
 
-        private Encoding DefaultSystemEncoding
-        {
-            // On the desktop, this was Encoding.GetEncoding(0), which gives you the encoding object
-            // that corresponds too the default system codepage.
-            // However, in ProjectN, not only Encoding.GetEncoding(Int32) is not exposed, but there is also
-            // no guarantee that a notion of a default system code page exists on the OS.
-            // In fact, we can really only rely on UTF8 and UTF16 being present on all platforms.
-            // We fall back to UTF8 as this is what is used by ZIP when as the "unicode encoding".
-            get
-            {
-                return Encoding.UTF8;
-                // return Encoding.GetEncoding(0);
-            }
-        }
-
         private String DecodeEntryName(Byte[] entryNameBytes)
         {
             Debug.Assert(entryNameBytes != null);
@@ -452,8 +437,8 @@ namespace System.IO.Compression
             if ((_generalPurposeBitFlag & BitFlagValues.UnicodeFileName) == 0)
             {
                 readEntryNameEncoding = (_archive == null)
-                                            ? DefaultSystemEncoding
-                                            : _archive.EntryNameEncoding ?? DefaultSystemEncoding;
+                                            ? Encoding.UTF8
+                                            : _archive.EntryNameEncoding ?? Encoding.UTF8;
             }
             else
             {
@@ -473,7 +458,7 @@ namespace System.IO.Compression
             else
                 writeEntryNameEncoding = ZipHelper.RequiresUnicode(entryName)
                                             ? Encoding.UTF8
-                                            : DefaultSystemEncoding;
+                                            : Encoding.ASCII;
 
             isUTF8 = writeEntryNameEncoding.Equals(Encoding.UTF8);
             return writeEntryNameEncoding.GetBytes(entryName);
@@ -568,7 +553,7 @@ namespace System.IO.Compression
             }
 
             writer.Write(ZipCentralDirectoryFileHeader.SignatureConstant);      // Central directory file header signature  (4 bytes)
-            writer.Write(_versionMadeBySpecification);                          // Version made by Specification (version)  (1 byte)
+            writer.Write((byte)_versionMadeBySpecification);                    // Version made by Specification (version)  (1 byte)
             writer.Write((byte)CurrentZipPlatform);                             // Version made by Compatibility (type)     (1 byte)
             writer.Write((UInt16)_versionToExtract);                            // Minimum version needed to extract        (2 bytes)
             writer.Write((UInt16)_generalPurposeBitFlag);                       // General Purpose bit flag                 (2 bytes)
@@ -662,10 +647,10 @@ namespace System.IO.Compression
 
             Boolean leaveCompressorStreamOpenOnClose = leaveBackingStreamOpen && !isIntermediateStream;
             var checkSumStream = new CheckSumAndSizeWriteStream(
-                compressorStream, 
-                backingStream, 
-                leaveCompressorStreamOpenOnClose, 
-                this, 
+                compressorStream,
+                backingStream,
+                leaveCompressorStreamOpenOnClose,
+                this,
                 onClose,
                 (Int64 initialPosition, Int64 currentPosition, UInt32 checkSum, Stream backing, ZipArchiveEntry thisRef, EventHandler closeHandler) =>
                 {
@@ -743,14 +728,14 @@ namespace System.IO.Compression
             _currentlyOpenForWrite = true;
             //always put it at the beginning for them
             UncompressedData.Seek(0, SeekOrigin.Begin);
-            return new WrappedStream(UncompressedData, this, thisRef => 
-                                     {
-                                         //once they close, we know uncompressed length, but still not compressed length
-                                         //so we don't fill in any size information
-                                         //those fields get figured out when we call GetCompressor as we write it to
-                                         //the actual archive
-                                         thisRef._currentlyOpenForWrite = false;
-                                     });
+            return new WrappedStream(UncompressedData, this, thisRef =>
+            {
+                //once they close, we know uncompressed length, but still not compressed length
+                //so we don't fill in any size information
+                //those fields get figured out when we call GetCompressor as we write it to
+                //the actual archive
+                thisRef._currentlyOpenForWrite = false;
+            });
         }
 
         private Boolean IsOpenable(Boolean needToUncompress, Boolean needToLoadIntoMemory, out String message)
@@ -1083,6 +1068,10 @@ namespace System.IO.Compression
             if (_versionToExtract < value)
             {
                 _versionToExtract = value;
+            }
+            if (_versionMadeBySpecification < value)
+            {
+                _versionMadeBySpecification = value;
             }
         }
 
