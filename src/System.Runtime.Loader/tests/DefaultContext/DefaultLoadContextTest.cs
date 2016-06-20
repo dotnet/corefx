@@ -24,17 +24,36 @@ namespace System.Runtime.Loader.Tests
     {
         private static string s_loadFromPath = null;
 
+        // Since the first non-Null returning callback should stop Resolving event processing,
+        // this counter is used to assert the same.
+        private static int s_NumNonNullResolutions = 0;
+
         private static Assembly ResolveAssembly(AssemblyLoadContext sender, AssemblyName assembly)
         {
             string assemblyFilename = assembly.Name + ".dll";
-            
+            s_NumNonNullResolutions++;
+
             return sender.LoadFromAssemblyPath(Path.Combine(s_loadFromPath, assemblyFilename));
+        }
+
+        private static Assembly ResolveAssemblyAgain(AssemblyLoadContext sender, AssemblyName assembly)
+        {
+            string assemblyFilename = assembly.Name + ".dll";
+            s_NumNonNullResolutions++;
+
+            return sender.LoadFromAssemblyPath(Path.Combine(s_loadFromPath, assemblyFilename));
+        }
+
+        private static Assembly ResolveNullAssembly(AssemblyLoadContext sender, AssemblyName assembly)
+        {
+            return null;
         }
 
         private static void Init()
         {
             // Delete the assembly from the temp location if it exists.
             var assemblyFilename = "System.Runtime.Loader.Noop.Assembly.dll";
+            s_NumNonNullResolutions = 0;
 
             // Form the dynamic path that would not collide if another instance of this test is running.
             s_loadFromPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -86,14 +105,25 @@ namespace System.Runtime.Loader.Tests
             // And make sure the simple name matches
             Assert.Equal(assemblyNameStr, slcLoadedAssembly.GetName().Name);
 
-            // Now, wireup the Resolving event of default context to locate the assembly
+            // We should have only invoked non-Null returning handler once
+            Assert.Equal(1, s_NumNonNullResolutions);
+
+            // Reset the non-Null resolution counter
+            s_NumNonNullResolutions = 0;
+
+            // Now, wireup the Resolving event of default context to locate the assembly via multiple handlers
+            AssemblyLoadContext.Default.Resolving += ResolveNullAssembly;
             AssemblyLoadContext.Default.Resolving += ResolveAssembly;
+            AssemblyLoadContext.Default.Resolving += ResolveAssemblyAgain;
             
             // This will invoke the resolution via VM requiring to bind using the TPA binder
             var assemblyExpectedFromLoad = Assembly.Load(assemblyName);
 
             // We should have successfully loaded the assembly in default context.
             Assert.NotNull(assemblyExpectedFromLoad);
+
+            // We should have only invoked non-Null returning handler once
+            Assert.Equal(1, s_NumNonNullResolutions);
 
             // And make sure the simple name matches
             Assert.Equal(assemblyNameStr, assemblyExpectedFromLoad.GetName().Name);
