@@ -41,11 +41,7 @@ namespace System.Collections
             m_length = length;
 
             uint fillValue = defaultValue ? 0xffffffffU : 0x00000000U;
-
-            for (int i = 0; i < m_array.Length; i++)
-            {
-                m_array[i] = fillValue;
-            }
+            Array.Fill(m_array, fillValue);
 
             _version = 0;
         }
@@ -76,33 +72,17 @@ namespace System.Collections
             m_array = new uint[GetArrayLength(bytes.Length, BytesPerUInt32)];
             m_length = bytes.Length * BitsPerByte;
 
-            int i = 0;
-            int j = 0;
-            while (bytes.Length - j >= BytesPerUInt32)
+            Buffer.BlockCopy(bytes, 0, m_array, 0, bytes.Length);
+            if (!BitConverter.IsLittleEndian)
             {
-                m_array[i++] = (bytes[j] & 0xffU) |
-                              ((bytes[j + 1] & 0xffU) << 1 * BitsPerByte) |
-                              ((bytes[j + 2] & 0xffU) << 2 * BitsPerByte) |
-                              ((bytes[j + 3] & 0xffU) << 3 * BitsPerByte);
-                j += BytesPerUInt32;
-            }
-
-            Debug.Assert(bytes.Length - j >= 0, "BitArray byteLength problem");
-            Debug.Assert(bytes.Length - j < BytesPerUInt32, "BitArray byteLength problem #2");
-
-            switch (bytes.Length - j)
-            {
-                case 3:
-                    m_array[i] = ((bytes[j + 2] & 0xffU) << (3 - 1) * BitsPerByte);
-                    goto case 2;
-                // fall through
-                case 2:
-                    m_array[i] |= ((bytes[j + 1] & 0xffU) << (2 - 1) * BitsPerByte);
-                    goto case 1;
-                // fall through
-                case 1:
-                    m_array[i] |= ((bytes[j] & 0xffU) << (1 - 1) * BitsPerByte);
-                    break;
+                for (int i = 0; i < m_array.Length; i++)
+                {
+                    // Swap byte order
+                    m_array[i] = ((m_array[i] & 0x000000ffU) << 3 * BitsPerByte)
+                        | ((m_array[i] & 0x0000ff00U) << BitsPerByte)
+                        | ((m_array[i] & 0x00ff0000U) >> BitsPerByte)
+                        | ((m_array[i] & 0xff000000U) >> 3 * BitsPerByte);
+                }
             }
 
             _version = 0;
@@ -150,10 +130,7 @@ namespace System.Collections
             }
 
             m_array = new uint[values.Length];
-            for (int i = 0; i < m_array.Length; i++)
-            {
-                m_array[i] = unchecked((uint)values[i]);
-            }
+            Buffer.BlockCopy(values, 0, m_array, 0, m_array.Length * BytesPerUInt32);
             m_length = values.Length * BitsPerUInt32;
 
             _version = 0;
@@ -175,7 +152,7 @@ namespace System.Collections
             int arrayLength = GetArrayLength(bits.m_length, BitsPerUInt32);
 
             m_array = new uint[arrayLength];
-            Array.Copy(bits.m_array, 0, m_array, 0, arrayLength);
+            Array.Copy(bits.m_array, m_array, arrayLength);
             m_length = bits.m_length;
 
             _version = bits._version;
@@ -520,9 +497,17 @@ namespace System.Collections
                     arrayLength -= 1;
                 }
 
-                for (int i = 0; i < arrayLength; i++)
+                if (index < int.MaxValue / BytesPerUInt32)
                 {
-                    intArray[i + index] = unchecked((int)m_array[i]);
+                    Buffer.BlockCopy(m_array, 0, array, index * BytesPerUInt32, arrayLength * BytesPerUInt32);
+                }
+                else
+                {
+                    int[] ia = (int[])array;
+                    for (int i = 0; i < arrayLength; i++)
+                    {
+                        ia[i + index] = unchecked((int)m_array[i]);
+                    }
                 }
 
                 if (extraBits > 0)
@@ -548,8 +533,15 @@ namespace System.Collections
                 byte[] b = (byte[])array;
 
                 // copy all the perfectly-aligned bytes
-                for (int i = 0; i < arrayLength; i++)
-                    b[index + i] = (byte)((m_array[i / BytesPerUInt32] >> ((i % BytesPerUInt32) * BitsPerByte)) & 0xffU); // Shift to bring the required byte to LSB, then mask
+                if (BitConverter.IsLittleEndian)
+                {
+                    Buffer.BlockCopy(m_array, 0, b, index, arrayLength);
+                }
+                else
+                {
+                    for (int i = 0; i < arrayLength; i++)
+                        b[index + i] = (byte)((m_array[i / BytesPerUInt32] >> ((i % BytesPerUInt32) * BitsPerByte)) & 0xffU); // Shift to bring the required byte to LSB, then mask
+                }
 
                 if (extraBits > 0)
                 {
