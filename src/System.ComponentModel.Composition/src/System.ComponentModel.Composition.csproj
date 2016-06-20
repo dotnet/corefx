@@ -6,8 +6,6 @@
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <NuGetTargetMoniker>.NETStandard,Version=v1.5</NuGetTargetMoniker>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <ContractProject>..\ref\System.ComponentModel.Composition.depproj</ContractProject>
-    <UseEcmaKey>true</UseEcmaKey>
     <GenFacadesArgs>$(GenFacadesArgs) -ignoreMissingTypes</GenFacadesArgs>
     <BaselineAllAPICompatError>true</BaselineAllAPICompatError>
     <ProjectGuid>{B0535517-3B72-4343-A773-3F3D68592919}</ProjectGuid>
@@ -19,4 +17,5 @@
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$(CommonPath)/../Compat.targets" />
 </Project>

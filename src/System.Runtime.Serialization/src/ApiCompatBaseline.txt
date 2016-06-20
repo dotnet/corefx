@@ -1,5 +1,3 @@
-DEFAULT_APPNAME Error: 0 : Unable to resolve assembly 'Assembly(Name=mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)' referenced by the contract assembly 'Assembly(Name=System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)'.
-DEFAULT_APPNAME Error: 0 : Unable to resolve assembly 'Assembly(Name=System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a)' referenced by the contract assembly 'Assembly(Name=System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089)'.
 Compat issues with assembly System.Runtime.Serialization:
 TypesMustExist : Type 'System.Runtime.Serialization.CollectionDataContractAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.ContractNamespaceAttribute' does not exist in the implementation but it does exist in the contract.
@@ -16,24 +14,12 @@ TypesMustExist : Type 'System.Runtime.Serialization.ExtensionDataObject' does no
 TypesMustExist : Type 'System.Runtime.Serialization.IDataContractSurrogate' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.IExtensibleDataObject' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.IgnoreDataMemberAttribute' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.ImportOptions' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.InvalidDataContractException' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.KnownTypeAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.NetDataContractSerializer' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.XmlObjectSerializer' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.XmlSerializableServices' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.XPathQueryGenerator' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.XsdDataContractExporter' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.XsdDataContractImporter' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.DataContractSerializerSection' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.DeclaredTypeElement' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.DeclaredTypeElementCollection' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.NetDataContractSerializerSection' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.ParameterElement' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.ParameterElementCollection' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.SerializationSectionGroup' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.TypeElement' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.Serialization.Configuration.TypeElementCollection' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.Json.DataContractJsonSerializer' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.Json.DataContractJsonSerializerSettings' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Serialization.Json.IXmlJsonReaderInitializer' does not exist in the implementation but it does exist in the contract.
@@ -58,4 +44,4 @@ TypesMustExist : Type 'System.Xml.XmlDictionaryReaderQuotas' does not exist in t
 TypesMustExist : Type 'System.Xml.XmlDictionaryReaderQuotaTypes' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Xml.XmlDictionaryString' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Xml.XmlDictionaryWriter' does not exist in the implementation but it does exist in the contract.
-Total Issues: 57
+Total Issues: 45
