@@ -1220,7 +1220,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(deserializedValue.GetPrivatePropertyValue(), value.GetPrivatePropertyValue());
     }
 
-    #region private type has to be in with in the class
+#region private type has to be in with in the class
     [DataContract]
     private class PrivateType
     {
@@ -1246,7 +1246,7 @@ public static partial class DataContractSerializerTests
             return PrivateProperty;
         }
     }
-    #endregion
+#endregion
 
     [Fact]
     public static void DCS_RootNameAndNamespaceThroughConstructorAsString()
@@ -2035,6 +2035,42 @@ public static partial class DataContractSerializerTests
         {
             Assert.StrictEqual(expected.Elements[i].InnerText, actual.Elements[i].InnerText);
         }
+    }
+
+    [Fact]
+    public static void DCS_CultureInfo()
+    {
+        CultureInfo value = new CultureInfo("zh-cn");
+#if DESKTOP_COMPATIBLE
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"<CultureInfo xmlns=""http://schemas.datacontract.org/2004/07/System.Globalization"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><calendar i:nil=""true""/><compareInfo i:nil=""true""/><cultureID>2052</cultureID><dateTimeInfo i:nil=""true""/><m_dataItem>0</m_dataItem><m_isReadOnly>false</m_isReadOnly><m_name>zh-CN</m_name><m_useUserOverride>true</m_useUserOverride><numInfo i:nil=""true""/><textInfo i:nil=""true""/></CultureInfo>");
+#else
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"<CultureInfo xmlns=""http://schemas.datacontract.org/2004/07/System.Globalization"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><calendar i:nil=""true""/><compareInfo i:nil=""true""/><dateTimeInfo i:nil=""true""/><m_isReadOnly>false</m_isReadOnly><m_name>zh-CN</m_name><m_useUserOverride>false</m_useUserOverride><numInfo i:nil=""true""/><textInfo i:nil=""true""/></CultureInfo>");
+#endif
+
+        Assert.NotNull(deserialized);
+#if DESKTOP_COMPATIBLE
+        Assert.Equal(value, deserialized);
+#endif
+    }
+
+    [Fact]
+    public static void DCS_CultureInfoLazyInitialized()
+    {
+        CultureInfo value = new CultureInfo("zh-cn");
+        // Use these properties to force lazy initialization
+        Assert.NotNull(value.Name);
+        Assert.NotNull(value.CompareInfo);
+        Assert.NotNull(value.TextInfo);
+#if DESKTOP_COMPATIBLE
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"<CultureInfo xmlns=""http://schemas.datacontract.org/2004/07/System.Globalization"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><calendar i:nil=""true""/><compareInfo><culture>2052</culture><m_SortVersion i:nil=""true""/><m_name>zh-CN</m_name><win32LCID>0</win32LCID></compareInfo><cultureID>2052</cultureID><dateTimeInfo i:nil=""true""/><m_dataItem>0</m_dataItem><m_isReadOnly>false</m_isReadOnly><m_name>zh-CN</m_name><m_useUserOverride>true</m_useUserOverride><numInfo i:nil=""true""/><textInfo><customCultureName>zh-CN</customCultureName><m_cultureName>zh-CN</m_cultureName><m_isReadOnly>false</m_isReadOnly><m_listSeparator i:nil=""true""/><m_nDataItem>0</m_nDataItem><m_useUserOverride>false</m_useUserOverride><m_win32LangID>2052</m_win32LangID></textInfo></CultureInfo>");
+#else
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"<CultureInfo xmlns=""http://schemas.datacontract.org/2004/07/System.Globalization"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><calendar i:nil=""true""/><compareInfo><m_name>zh-CN</m_name></compareInfo><dateTimeInfo i:nil=""true""/><m_isReadOnly>false</m_isReadOnly><m_name>zh-CN</m_name><m_useUserOverride>false</m_useUserOverride><numInfo i:nil=""true""/><textInfo><customCultureName i:nil=""true""/><m_cultureName>zh-CN</m_cultureName><m_isReadOnly>false</m_isReadOnly><m_listSeparator i:nil=""true""/></textInfo></CultureInfo>");
+#endif
+
+        Assert.NotNull(deserialized);
+#if DESKTOP_COMPATIBLE
+        Assert.Equal(value, deserialized);
+#endif
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)

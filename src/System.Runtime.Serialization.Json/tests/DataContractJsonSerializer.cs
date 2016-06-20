@@ -1825,6 +1825,43 @@ public static partial class DataContractJsonSerializerTests
         });
     }
 
+    [Fact]
+    public static void DCJS_CultureInfo()
+    {
+        CultureInfo value = new CultureInfo("zh-cn");
+#if DESKTOP_COMPATIBLE
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"{""calendar"":null,""compareInfo"":null,""cultureID"":2052,""dateTimeInfo"":null,""m_dataItem"":0,""m_isReadOnly"":false,""m_name"":""zh-CN"",""m_useUserOverride"":true,""numInfo"":null,""textInfo"":null}");
+#else
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"{""calendar"":null,""compareInfo"":null,""dateTimeInfo"":null,""m_isReadOnly"":false,""m_name"":""zh-CN"",""m_useUserOverride"":false,""numInfo"":null,""textInfo"":null}");
+#endif
+
+        Assert.NotNull(deserialized);
+#if DESKTOP_COMPATIBLE
+        Assert.Equal(value, deserialized);
+#endif
+    }
+
+    [Fact]
+    public static void DCJS_CultureInfoLazyInitialized()
+    {
+        CultureInfo value = new CultureInfo("zh-cn");
+        // Use these properties to force lazy initialization
+        Assert.NotNull(value.Name);
+        Assert.NotNull(value.CompareInfo);
+        Assert.NotNull(value.TextInfo);
+
+#if DESKTOP_COMPATIBLE
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"{""calendar"":null,""compareInfo"":{""culture"":2052,""m_SortVersion"":null,""m_name"":""zh-CN"",""win32LCID"":0},""cultureID"":2052,""dateTimeInfo"":null,""m_dataItem"":0,""m_isReadOnly"":false,""m_name"":""zh-CN"",""m_useUserOverride"":true,""numInfo"":null,""textInfo"":{""customCultureName"":""zh-CN"",""m_cultureName"":""zh-CN"",""m_isReadOnly"":false,""m_listSeparator"":null,""m_nDataItem"":0,""m_useUserOverride"":false,""m_win32LangID"":2052}}");
+#else
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"{""calendar"":null,""compareInfo"":{""m_name"":""zh-CN""},""dateTimeInfo"":null,""m_isReadOnly"":false,""m_name"":""zh-CN"",""m_useUserOverride"":false,""numInfo"":null,""textInfo"":{""customCultureName"":null,""m_cultureName"":""zh-CN"",""m_isReadOnly"":false,""m_listSeparator"":null}}");
+#endif
+
+        Assert.NotNull(deserialized);
+#if DESKTOP_COMPATIBLE
+        Assert.Equal(value, deserialized);
+#endif
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractJsonSerializer dcjs;
