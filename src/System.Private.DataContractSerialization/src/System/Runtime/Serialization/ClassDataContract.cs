@@ -771,10 +771,8 @@ namespace System.Runtime.Serialization
             private List<DataMember> _members;
             private MethodInfo _onSerializing, _onSerialized;
             private MethodInfo _onDeserializing, _onDeserialized;
-#if !NET_NATIVE
             private DataContractDictionary _knownDataContracts;
             private bool _isKnownTypeAttributeChecked;
-#endif
             private bool _isMethodChecked;
             /// <SecurityNote>
             /// in serialization/deserialization we base the decision whether to Demand SerializationFormatter permission on this value and hasDataContract
@@ -1320,12 +1318,17 @@ namespace System.Runtime.Serialization
                 }
             }
 
-#if !NET_NATIVE
+
             internal override DataContractDictionary KnownDataContracts
             {
                 [SecurityCritical]
                 get
                 {
+                    if (_knownDataContracts != null)
+                    {
+                        return _knownDataContracts;
+                    }
+
                     if (!_isKnownTypeAttributeChecked && UnderlyingType != null)
                     {
                         lock (this)
@@ -1344,7 +1347,7 @@ namespace System.Runtime.Serialization
                 set
                 { _knownDataContracts = value; }
             }
-#endif
+
 
             internal bool HasDataContract
             {

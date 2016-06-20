@@ -192,6 +192,7 @@ namespace System.Runtime.Serialization
                 bool isDictionary = false, isGenericDictionary = false;
                 Type enumeratorType = null;
                 Type[] keyValueTypes = null;
+                Type elementType = null;
                 if (collectionDataContract.Kind == CollectionKind.GenericDictionary)
                 {
                     isGenericDictionary = true;
@@ -210,13 +211,27 @@ namespace System.Runtime.Serialization
                     IEnumerator nonGenericDictEnumerator = (IEnumerator)new CollectionDataContract.DictionaryEnumerator(((IDictionary)obj).GetEnumerator());
                     enumerator = nonGenericDictEnumerator;
                 }
+                else if (collectionDataContract.Kind == CollectionKind.GenericCollection)
+                {
+                    elementType = collectionDataContract.ItemType;
+                }
                 else
                 {
                     enumeratorType = collectionDataContract.GetEnumeratorMethod.ReturnType;
                 }
 
-                MethodInfo getCurrentMethod = enumeratorType.GetMethod(Globals.GetCurrentMethodName, BindingFlags.Instance | BindingFlags.Public, Array.Empty<Type>());
-                Type elementType = getCurrentMethod.ReturnType;
+                if (elementType == null)
+                {
+                    // For GenericCollection we get elementType from the collection's ItemType. For other kinds of
+                    // collection , we use enumeratorType.ReturnType.
+                    if (enumeratorType == null)
+                    {
+                        throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.TypeNotSerializableViaReflection, collectionDataContract.UnderlyingType)));
+                    }
+
+                    MethodInfo getCurrentMethod = enumeratorType.GetMethod(Globals.GetCurrentMethodName, BindingFlags.Instance | BindingFlags.Public, Array.Empty<Type>());
+                    elementType = getCurrentMethod.ReturnType;
+                }
 
                 while (enumerator.MoveNext())
                 {
@@ -292,8 +307,8 @@ namespace System.Runtime.Serialization
                     }
                     else
                     {
-                        MethodInfo getValueOrDefault = memberType.GetMethod("GetValueOrDefault", Array.Empty<Type>());
-                        memberValue = getValueOrDefault.Invoke(memberValue, Array.Empty<object>());
+                        MethodInfo getValue = memberType.GetMethod("get_Value", Array.Empty<Type>());
+                        memberValue = getValue.Invoke(memberValue, Array.Empty<object>());
                         memberType = memberValue.GetType();
                     }
                 }
