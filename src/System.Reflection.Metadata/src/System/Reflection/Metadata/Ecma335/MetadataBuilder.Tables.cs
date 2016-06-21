@@ -1205,9 +1205,11 @@ namespace System.Reflection.Metadata.Ecma335
 
         #endregion
 
-        public ImmutableArray<int> GetRowCounts()
+        // internal for testing
+        internal ImmutableArray<int> GetRowCounts()
         {
-            var rowCounts = new int[MetadataTokens.TableCount];
+            var rowCounts = ImmutableArray.CreateBuilder<int>(MetadataTokens.TableCount);
+            rowCounts.Count = MetadataTokens.TableCount;
 
             rowCounts[(int)TableIndex.Assembly] = _assemblyRow.HasValue ? 1 : 0;
             rowCounts[(int)TableIndex.AssemblyRef] = _assemblyRefTable.Count;
@@ -1255,7 +1257,7 @@ namespace System.Reflection.Metadata.Ecma335
             rowCounts[(int)TableIndex.ImportScope] = _importScopeTable.Count;
             rowCounts[(int)TableIndex.CustomDebugInformation] = _customDebugInformationTable.Count;
 
-            return ImmutableArray.CreateRange(rowCounts);
+            return rowCounts.MoveToImmutable();
         }
 
         #region Serialization
@@ -1263,232 +1265,233 @@ namespace System.Reflection.Metadata.Ecma335
         internal void SerializeMetadataTables(
             BlobBuilder writer,
             MetadataSizes metadataSizes,
+            ImmutableArray<int> stringMap,
             int methodBodyStreamRva,
             int mappedFieldDataStreamRva)
         {
             int startPosition = writer.Count;
 
-            this.SerializeTablesHeader(writer, metadataSizes);
+            SerializeTablesHeader(writer, metadataSizes);
 
             if (metadataSizes.IsPresent(TableIndex.Module))
             {
-                SerializeModuleTable(writer, metadataSizes);
+                SerializeModuleTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.TypeRef))
             {
-                this.SerializeTypeRefTable(writer, metadataSizes);
+                SerializeTypeRefTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.TypeDef))
             {
-                this.SerializeTypeDefTable(writer, metadataSizes);
+                SerializeTypeDefTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.Field))
             {
-                this.SerializeFieldTable(writer, metadataSizes);
+                SerializeFieldTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.MethodDef))
             {
-                this.SerializeMethodDefTable(writer, metadataSizes, methodBodyStreamRva);
+                SerializeMethodDefTable(writer, stringMap, metadataSizes, methodBodyStreamRva);
             }
 
             if (metadataSizes.IsPresent(TableIndex.Param))
             {
-                this.SerializeParamTable(writer, metadataSizes);
+                SerializeParamTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.InterfaceImpl))
             {
-                this.SerializeInterfaceImplTable(writer, metadataSizes);
+                SerializeInterfaceImplTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.MemberRef))
             {
-                this.SerializeMemberRefTable(writer, metadataSizes);
+                SerializeMemberRefTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.Constant))
             {
-                this.SerializeConstantTable(writer, metadataSizes);
+                SerializeConstantTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.CustomAttribute))
             {
-                this.SerializeCustomAttributeTable(writer, metadataSizes);
+                SerializeCustomAttributeTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.FieldMarshal))
             {
-                this.SerializeFieldMarshalTable(writer, metadataSizes);
+                SerializeFieldMarshalTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.DeclSecurity))
             {
-                this.SerializeDeclSecurityTable(writer, metadataSizes);
+                SerializeDeclSecurityTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.ClassLayout))
             {
-                this.SerializeClassLayoutTable(writer, metadataSizes);
+                SerializeClassLayoutTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.FieldLayout))
             {
-                this.SerializeFieldLayoutTable(writer, metadataSizes);
+                SerializeFieldLayoutTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.StandAloneSig))
             {
-                this.SerializeStandAloneSigTable(writer, metadataSizes);
+                SerializeStandAloneSigTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.EventMap))
             {
-                this.SerializeEventMapTable(writer, metadataSizes);
+                SerializeEventMapTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.Event))
             {
-                this.SerializeEventTable(writer, metadataSizes);
+                SerializeEventTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.PropertyMap))
             {
-                this.SerializePropertyMapTable(writer, metadataSizes);
+                SerializePropertyMapTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.Property))
             {
-                this.SerializePropertyTable(writer, metadataSizes);
+                SerializePropertyTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.MethodSemantics))
             {
-                this.SerializeMethodSemanticsTable(writer, metadataSizes);
+                SerializeMethodSemanticsTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.MethodImpl))
             {
-                this.SerializeMethodImplTable(writer, metadataSizes);
+                SerializeMethodImplTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.ModuleRef))
             {
-                this.SerializeModuleRefTable(writer, metadataSizes);
+                SerializeModuleRefTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.TypeSpec))
             {
-                this.SerializeTypeSpecTable(writer, metadataSizes);
+                SerializeTypeSpecTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.ImplMap))
             {
-                this.SerializeImplMapTable(writer, metadataSizes);
+                SerializeImplMapTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.FieldRva))
             {
-                this.SerializeFieldRvaTable(writer, metadataSizes, mappedFieldDataStreamRva);
+                SerializeFieldRvaTable(writer, metadataSizes, mappedFieldDataStreamRva);
             }
 
             if (metadataSizes.IsPresent(TableIndex.EncLog))
             {
-                this.SerializeEncLogTable(writer);
+                SerializeEncLogTable(writer);
             }
 
             if (metadataSizes.IsPresent(TableIndex.EncMap))
             {
-                this.SerializeEncMapTable(writer);
+                SerializeEncMapTable(writer);
             }
 
             if (metadataSizes.IsPresent(TableIndex.Assembly))
             {
-                this.SerializeAssemblyTable(writer, metadataSizes);
+                SerializeAssemblyTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.AssemblyRef))
             {
-                this.SerializeAssemblyRefTable(writer, metadataSizes);
+                SerializeAssemblyRefTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.File))
             {
-                this.SerializeFileTable(writer, metadataSizes);
+                SerializeFileTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.ExportedType))
             {
-                this.SerializeExportedTypeTable(writer, metadataSizes);
+                SerializeExportedTypeTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.ManifestResource))
             {
-                this.SerializeManifestResourceTable(writer, metadataSizes);
+                SerializeManifestResourceTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.NestedClass))
             {
-                this.SerializeNestedClassTable(writer, metadataSizes);
+                SerializeNestedClassTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.GenericParam))
             {
-                this.SerializeGenericParamTable(writer, metadataSizes);
+                SerializeGenericParamTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.MethodSpec))
             {
-                this.SerializeMethodSpecTable(writer, metadataSizes);
+                SerializeMethodSpecTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.GenericParamConstraint))
             {
-                this.SerializeGenericParamConstraintTable(writer, metadataSizes);
+                SerializeGenericParamConstraintTable(writer, metadataSizes);
             }
 
             // debug tables
             if (metadataSizes.IsPresent(TableIndex.Document))
             {
-                this.SerializeDocumentTable(writer, metadataSizes);
+                SerializeDocumentTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.MethodDebugInformation))
             {
-                this.SerializeMethodDebugInformationTable(writer, metadataSizes);
+                SerializeMethodDebugInformationTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.LocalScope))
             {
-                this.SerializeLocalScopeTable(writer, metadataSizes);
+                SerializeLocalScopeTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.LocalVariable))
             {
-                this.SerializeLocalVariableTable(writer, metadataSizes);
+                SerializeLocalVariableTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.LocalConstant))
             {
-                this.SerializeLocalConstantTable(writer, metadataSizes);
+                SerializeLocalConstantTable(writer, stringMap, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.ImportScope))
             {
-                this.SerializeImportScopeTable(writer, metadataSizes);
+                SerializeImportScopeTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.StateMachineMethod))
             {
-                this.SerializeStateMachineMethodTable(writer, metadataSizes);
+                SerializeStateMachineMethodTable(writer, metadataSizes);
             }
 
             if (metadataSizes.IsPresent(TableIndex.CustomDebugInformation))
             {
-                this.SerializeCustomDebugInformationTable(writer, metadataSizes);
+                SerializeCustomDebugInformationTable(writer, metadataSizes);
             }
 
             writer.WriteByte(0);
@@ -1518,9 +1521,9 @@ namespace System.Reflection.Metadata.Ecma335
                 heapSizes |= HeapSizeFlag.BlobHeapLarge;
             }
 
-            if (metadataSizes.IsMinimalDelta)
+            if (metadataSizes.IsEncDelta)
             {
-                heapSizes |= (HeapSizeFlag.EnCDeltas | HeapSizeFlag.DeletedMarks);
+                heapSizes |= (HeapSizeFlag.EncDeltas | HeapSizeFlag.DeletedMarks);
             }
 
             ulong sortedDebugTables = metadataSizes.PresentTablesMask & MetadataSizes.SortedDebugTables;
@@ -1542,12 +1545,12 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         // internal for testing
-        internal void SerializeModuleTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        internal void SerializeModuleTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             if (_moduleRow.HasValue)
             {
                 writer.WriteUInt16(_moduleRow.Value.Generation);
-                writer.WriteReference(SerializeHandle(_moduleRow.Value.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, _moduleRow.Value.Name), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(_moduleRow.Value.ModuleVersionId), metadataSizes.GuidReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(_moduleRow.Value.EncId), metadataSizes.GuidReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(_moduleRow.Value.EncBaseId), metadataSizes.GuidReferenceIsSmall);
@@ -1571,40 +1574,40 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializeTypeRefTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeTypeRefTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (TypeRefRow typeRef in _typeRefTable)
             {
                 writer.WriteReference(typeRef.ResolutionScope, metadataSizes.ResolutionScopeCodedIndexIsSmall);
-                writer.WriteReference(SerializeHandle(typeRef.Name), metadataSizes.StringReferenceIsSmall);
-                writer.WriteReference(SerializeHandle(typeRef.Namespace), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, typeRef.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, typeRef.Namespace), metadataSizes.StringReferenceIsSmall);
             }
         }
 
-        private void SerializeTypeDefTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeTypeDefTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (TypeDefRow typeDef in _typeDefTable)
             {
                 writer.WriteUInt32(typeDef.Flags);
-                writer.WriteReference(SerializeHandle(typeDef.Name), metadataSizes.StringReferenceIsSmall);
-                writer.WriteReference(SerializeHandle(typeDef.Namespace), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, typeDef.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, typeDef.Namespace), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(typeDef.Extends, metadataSizes.TypeDefOrRefCodedIndexIsSmall);
                 writer.WriteReference(typeDef.FieldList, metadataSizes.FieldDefReferenceIsSmall);
                 writer.WriteReference(typeDef.MethodList, metadataSizes.MethodDefReferenceIsSmall);
             }
         }
 
-        private void SerializeFieldTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeFieldTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (FieldDefRow fieldDef in _fieldTable)
             {
                 writer.WriteUInt16(fieldDef.Flags);
-                writer.WriteReference(SerializeHandle(fieldDef.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, fieldDef.Name), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(fieldDef.Signature), metadataSizes.BlobReferenceIsSmall);
             }
         }
 
-        private void SerializeMethodDefTable(BlobBuilder writer, MetadataSizes metadataSizes, int methodBodyStreamRva)
+        private void SerializeMethodDefTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes, int methodBodyStreamRva)
         {
             foreach (MethodRow method in _methodDefTable)
             {
@@ -1619,19 +1622,19 @@ namespace System.Reflection.Metadata.Ecma335
 
                 writer.WriteUInt16(method.ImplFlags);
                 writer.WriteUInt16(method.Flags);
-                writer.WriteReference(SerializeHandle(method.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, method.Name), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(method.Signature), metadataSizes.BlobReferenceIsSmall);
                 writer.WriteReference(method.ParamList, metadataSizes.ParameterReferenceIsSmall);
             }
         }
 
-        private void SerializeParamTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeParamTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (ParamRow param in _paramTable)
             {
                 writer.WriteUInt16(param.Flags);
                 writer.WriteUInt16(param.Sequence);
-                writer.WriteReference(SerializeHandle(param.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, param.Name), metadataSizes.StringReferenceIsSmall);
             }
         }
 
@@ -1646,12 +1649,12 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializeMemberRefTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeMemberRefTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (MemberRefRow memberRef in _memberRefTable)
             {
                 writer.WriteReference(memberRef.Class, metadataSizes.MemberRefParentCodedIndexIsSmall);
-                writer.WriteReference(SerializeHandle(memberRef.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, memberRef.Name), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(memberRef.Signature), metadataSizes.BlobReferenceIsSmall);
             }
         }
@@ -1758,12 +1761,12 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializeEventTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeEventTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (EventRow eventRow in _eventTable)
             {
                 writer.WriteUInt16(eventRow.EventFlags);
-                writer.WriteReference(SerializeHandle(eventRow.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, eventRow.Name), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(eventRow.EventType, metadataSizes.TypeDefOrRefCodedIndexIsSmall);
             }
         }
@@ -1777,12 +1780,12 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializePropertyTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializePropertyTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (PropertyRow property in _propertyTable)
             {
                 writer.WriteUInt16(property.PropFlags);
-                writer.WriteReference(SerializeHandle(property.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, property.Name), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(property.Type), metadataSizes.BlobReferenceIsSmall);
             }
         }
@@ -1817,11 +1820,11 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializeModuleRefTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeModuleRefTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (ModuleRefRow moduleRef in _moduleRefTable)
             {
-                writer.WriteReference(SerializeHandle(moduleRef.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, moduleRef.Name), metadataSizes.StringReferenceIsSmall);
             }
         }
 
@@ -1833,7 +1836,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializeImplMapTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeImplMapTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
 #if DEBUG
             for (int i = 1; i < _implMapTable.Count; i++)
@@ -1845,7 +1848,7 @@ namespace System.Reflection.Metadata.Ecma335
             {
                 writer.WriteUInt16(implMap.MappingFlags);
                 writer.WriteReference(implMap.MemberForwarded, metadataSizes.MemberForwardedCodedIndexIsSmall);
-                writer.WriteReference(SerializeHandle(implMap.ImportName), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, implMap.ImportName), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(implMap.ImportScope, metadataSizes.ModuleRefReferenceIsSmall);
             }
         }
@@ -1865,7 +1868,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializeAssemblyTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeAssemblyTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             if (_assemblyRow.HasValue)
             {
@@ -1877,12 +1880,12 @@ namespace System.Reflection.Metadata.Ecma335
                 writer.WriteUInt16((ushort)version.Revision);
                 writer.WriteUInt32(_assemblyRow.Value.Flags);
                 writer.WriteReference(SerializeHandle(_assemblyRow.Value.AssemblyKey), metadataSizes.BlobReferenceIsSmall);
-                writer.WriteReference(SerializeHandle(_assemblyRow.Value.AssemblyName), metadataSizes.StringReferenceIsSmall);
-                writer.WriteReference(SerializeHandle(_assemblyRow.Value.AssemblyCulture), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, _assemblyRow.Value.AssemblyName), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, _assemblyRow.Value.AssemblyCulture), metadataSizes.StringReferenceIsSmall);
             }
         }
 
-        private void SerializeAssemblyRefTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeAssemblyRefTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (AssemblyRefTableRow row in _assemblyRefTable)
             {
@@ -1892,41 +1895,41 @@ namespace System.Reflection.Metadata.Ecma335
                 writer.WriteUInt16((ushort)row.Version.Revision);
                 writer.WriteUInt32(row.Flags);
                 writer.WriteReference(SerializeHandle(row.PublicKeyToken), metadataSizes.BlobReferenceIsSmall);
-                writer.WriteReference(SerializeHandle(row.Name), metadataSizes.StringReferenceIsSmall);
-                writer.WriteReference(SerializeHandle(row.Culture), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, row.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, row.Culture), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(row.HashValue), metadataSizes.BlobReferenceIsSmall);
             }
         }
 
-        private void SerializeFileTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeFileTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (FileTableRow fileReference in _fileTable)
             {
                 writer.WriteUInt32(fileReference.Flags);
-                writer.WriteReference(SerializeHandle(fileReference.FileName), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, fileReference.FileName), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(fileReference.HashValue), metadataSizes.BlobReferenceIsSmall);
             }
         }
 
-        private void SerializeExportedTypeTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeExportedTypeTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (ExportedTypeRow exportedType in _exportedTypeTable)
             {
                 writer.WriteUInt32(exportedType.Flags);
                 writer.WriteInt32(exportedType.TypeDefId);
-                writer.WriteReference(SerializeHandle(exportedType.TypeName), metadataSizes.StringReferenceIsSmall);
-                writer.WriteReference(SerializeHandle(exportedType.TypeNamespace), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, exportedType.TypeName), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, exportedType.TypeNamespace), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(exportedType.Implementation, metadataSizes.ImplementationCodedIndexIsSmall);
             }
         }
 
-        private void SerializeManifestResourceTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeManifestResourceTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (ManifestResourceRow manifestResource in _manifestResourceTable)
             {
                 writer.WriteUInt32(manifestResource.Offset);
                 writer.WriteUInt32(manifestResource.Flags);
-                writer.WriteReference(SerializeHandle(manifestResource.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, manifestResource.Name), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(manifestResource.Implementation, metadataSizes.ImplementationCodedIndexIsSmall);
             }
         }
@@ -1946,7 +1949,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializeGenericParamTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeGenericParamTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
 #if DEBUG
             for (int i = 1; i < _genericParamTable.Count; i++)
@@ -1961,7 +1964,7 @@ namespace System.Reflection.Metadata.Ecma335
                 writer.WriteUInt16(genericParam.Number);
                 writer.WriteUInt16(genericParam.Flags);
                 writer.WriteReference(genericParam.Owner, metadataSizes.TypeOrMethodDefCodedIndexIsSmall);
-                writer.WriteReference(SerializeHandle(genericParam.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, genericParam.Name), metadataSizes.StringReferenceIsSmall);
             }
         }
 
@@ -2037,21 +2040,21 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        private void SerializeLocalVariableTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeLocalVariableTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (var row in _localVariableTable)
             {
                 writer.WriteUInt16(row.Attributes);
                 writer.WriteUInt16(row.Index);
-                writer.WriteReference(SerializeHandle(row.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, row.Name), metadataSizes.StringReferenceIsSmall);
             }
         }
 
-        private void SerializeLocalConstantTable(BlobBuilder writer, MetadataSizes metadataSizes)
+        private void SerializeLocalConstantTable(BlobBuilder writer, ImmutableArray<int> stringMap, MetadataSizes metadataSizes)
         {
             foreach (var row in _localConstantTable)
             {
-                writer.WriteReference(SerializeHandle(row.Name), metadataSizes.StringReferenceIsSmall);
+                writer.WriteReference(SerializeHandle(stringMap, row.Name), metadataSizes.StringReferenceIsSmall);
                 writer.WriteReference(SerializeHandle(row.Signature), metadataSizes.BlobReferenceIsSmall);
             }
         }
