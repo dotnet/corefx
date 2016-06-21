@@ -122,6 +122,11 @@ namespace System.Net.Sockets.Tests
             using (Socket receiveSocket = CreateBoundUdpSocket(out port),
                           sendSocket    = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
+                // Make sure the sending socket is bound to the same interface as the receive socket, to avoid
+                // routing issues in the test environment.
+                IPEndPoint receiveEndpoint = (IPEndPoint)receiveSocket.LocalEndPoint;
+                sendSocket.Bind(new IPEndPoint(receiveEndpoint.Address, 0));
+
                 receiveSocket.ReceiveTimeout = 1000;
                 receiveSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(multicastAddress, interfaceIndex));
 
