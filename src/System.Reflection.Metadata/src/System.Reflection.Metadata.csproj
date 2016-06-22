@@ -41,6 +41,8 @@
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\FunctionPointerAttributes.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\MethodBodiesEncoder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\MethodBodyAttributes.cs" />
+    <Compile Include="System\Reflection\Metadata\Ecma335\MetadataBuilder.cs" />
+    <Compile Include="System\Reflection\Metadata\Ecma335\MetadataRootBuilder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\MetadataStreamsBuilder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\SerializedMetadataHeaps.cs" />
     <Compile Include="System\Reflection\Metadata\EntityHandle.cs" />
@@ -64,7 +66,7 @@
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\LabelHandle.cs" />
     <Compile Include="System\Reflection\Metadata\IL\ILOpCode.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\CodedIndex.cs" />
-    <Compile Include="System\Reflection\Metadata\Ecma335\MetadataSerializer.cs" />
+    <Compile Include="System\Reflection\Metadata\Ecma335\PortablePdbBuilder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\MetadataBuilder.Tables.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\BlobEncoders.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\MethodBodyEncoder.cs" />

@@ -443,27 +443,6 @@ namespace System.Reflection.Metadata.Ecma335
             return UserStringHandle.FromOffset(offset);
         }
 
-        internal SerializedMetadata GetSerializedMetadata(ImmutableArray<int> externalRowCounts, bool isStandaloneDebugMetadata)
-        {
-            var stringBuilder = new HeapBlobBuilder(_stringHeapCapacity);
-            var stringMap = SerializeStringHeap(stringBuilder, _strings, _stringHeapStartOffset);
-
-            Debug.Assert(HeapIndex.UserString == 0);
-            Debug.Assert((int)HeapIndex.String == 1);
-            Debug.Assert((int)HeapIndex.Blob == 2);
-            Debug.Assert((int)HeapIndex.Guid == 3);
-
-            var heapSizes = ImmutableArray.Create(
-                _userStringBuilder.Count,
-                stringBuilder.Count,
-                _blobHeapSize,
-                _guidBuilder.Count);
-            
-            var sizes = new MetadataSizes(GetRowCounts(), externalRowCounts, heapSizes, isStandaloneDebugMetadata);
-
-            return new SerializedMetadata(sizes, stringBuilder, stringMap);
-        }
-
         /// <summary>
         /// Fills in stringIndexMap with data from stringIndex and write to stringWriter.
         /// Releases stringIndex as the stringTable is sealed after this point.
