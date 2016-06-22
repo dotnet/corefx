@@ -448,7 +448,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// Releases stringIndex as the stringTable is sealed after this point.
         /// </summary>
         private static ImmutableArray<int> SerializeStringHeap(
-            BlobBuilder stringBuilder,
+            BlobBuilder heapBuilder,
             Dictionary<string, StringHandle> strings,
             int stringHeapStartOffset)
         {
@@ -462,13 +462,13 @@ namespace System.Reflection.Metadata.Ecma335
             stringVirtualIndexToHeapOffsetMap.Count = totalCount;
 
             stringVirtualIndexToHeapOffsetMap[0] = 0;
-            stringBuilder.WriteByte(0);
+            heapBuilder.WriteByte(0);
 
             // Find strings that can be folded
             string prev = string.Empty;
             foreach (KeyValuePair<string, StringHandle> entry in sorted)
             {
-                int position = stringHeapStartOffset + stringBuilder.Count;
+                int position = stringHeapStartOffset + heapBuilder.Count;
                 
                 // It is important to use ordinal comparison otherwise we'll use the current culture!
                 if (prev.EndsWith(entry.Key, StringComparison.Ordinal) && !BlobUtilities.IsLowSurrogateChar(entry.Key[0]))
@@ -479,8 +479,8 @@ namespace System.Reflection.Metadata.Ecma335
                 else
                 {
                     stringVirtualIndexToHeapOffsetMap[entry.Value.GetWriterVirtualIndex()] = position;
-                    stringBuilder.WriteUTF8(entry.Key, allowUnpairedSurrogates: false);
-                    stringBuilder.WriteByte(0);
+                    heapBuilder.WriteUTF8(entry.Key, allowUnpairedSurrogates: false);
+                    heapBuilder.WriteByte(0);
                 }
 
                 prev = entry.Key;

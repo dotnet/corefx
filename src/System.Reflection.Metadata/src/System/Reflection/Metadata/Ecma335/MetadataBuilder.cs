@@ -11,8 +11,8 @@ namespace System.Reflection.Metadata.Ecma335
     {
         internal SerializedMetadata GetSerializedMetadata(ImmutableArray<int> externalRowCounts, bool isStandaloneDebugMetadata)
         {
-            var stringBuilder = new HeapBlobBuilder(_stringHeapCapacity);
-            var stringMap = SerializeStringHeap(stringBuilder, _strings, _stringHeapStartOffset);
+            var stringHeapBuilder = new HeapBlobBuilder(_stringHeapCapacity);
+            var stringMap = SerializeStringHeap(stringHeapBuilder, _strings, _stringHeapStartOffset);
 
             Debug.Assert(HeapIndex.UserString == 0);
             Debug.Assert((int)HeapIndex.String == 1);
@@ -21,13 +21,13 @@ namespace System.Reflection.Metadata.Ecma335
 
             var heapSizes = ImmutableArray.Create(
                 _userStringBuilder.Count,
-                stringBuilder.Count,
+                stringHeapBuilder.Count,
                 _blobHeapSize,
                 _guidBuilder.Count);
 
             var sizes = new MetadataSizes(GetRowCounts(), externalRowCounts, heapSizes, isStandaloneDebugMetadata);
 
-            return new SerializedMetadata(sizes, stringBuilder, stringMap);
+            return new SerializedMetadata(sizes, stringHeapBuilder, stringMap);
         }
 
         internal static void SerializeMetadataHeader(BlobBuilder builder, string metadataVersion, MetadataSizes sizes)
