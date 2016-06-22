@@ -25,6 +25,7 @@ namespace System.Runtime.Serialization
         ArrayOfSimpleType,
         ListOfSimpleType,
         DictionaryOfSimpleType,
+        SimpleStructWithProperties
     }
 
     public interface IPerfTestSerializer
@@ -72,6 +73,7 @@ namespace System.Runtime.Serialization
             yield return new PerfTestConfig(5, TestType.ByteArray, 1024 * 1024);
             yield return new PerfTestConfig(10000, TestType.String, 128);
             yield return new PerfTestConfig(10000, TestType.String, 1024);
+            yield return new PerfTestConfig(10000, TestType.SimpleStructWithProperties, 1);
             yield return new PerfTestConfig(1000, TestType.ListOfInt, 128);
             yield return new PerfTestConfig(100, TestType.ListOfInt, 1024);
             yield return new PerfTestConfig(1, TestType.ListOfInt, 1024 * 1024);
@@ -226,6 +228,9 @@ namespace System.Runtime.Serialization
                     break;
                 case TestType.DictionaryOfSimpleType:
                     obj = CreateDictionaryOfIntSimpleType(testSize);
+                    break;
+                case TestType.SimpleStructWithProperties:
+                    obj = new SimpleStructWithProperties() { Num = 1, Text = "Foo" };
                     break;
                 default:
                     throw new ArgumentException();
