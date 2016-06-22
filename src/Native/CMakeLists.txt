@@ -173,7 +173,7 @@ function(strip_symbols targetName outputFilename)
                     COMMAND ${STRIP} -u -r ${strip_source_file}
                     COMMENT Stripping symbols from ${strip_source_file} into file ${strip_destination_file}
                 )
-            else(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+            elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
                 set(strip_destination_file ${strip_source_file}.dbg)
 
                 add_custom_command(
