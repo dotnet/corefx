@@ -108,6 +108,8 @@ namespace System.Runtime.Loader.Tests
             // We should have only invoked non-Null returning handler once
             Assert.Equal(1, s_NumNonNullResolutions);
 
+            slc.Resolving -= ResolveAssembly;
+
             // Reset the non-Null resolution counter
             s_NumNonNullResolutions = 0;
 
@@ -144,7 +146,9 @@ namespace System.Runtime.Loader.Tests
             Assert.Equal(assemblyExpected.GetName().Name, assemblyNameStr);
 
             // Unwire the Resolving event.
+            AssemblyLoadContext.Default.Resolving -= ResolveAssemblyAgain;
             AssemblyLoadContext.Default.Resolving -= ResolveAssembly;
+            AssemblyLoadContext.Default.Resolving -= ResolveNullAssembly;
 
             // Unwire the Resolving event and attempt to load the assembly again. This time
             // it should be found in the Default Load Context.
