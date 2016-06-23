@@ -7,20 +7,16 @@
     <PackageTargetFramework>net46</PackageTargetFramework>
     <NuGetTargetMoniker>.NETFramework,Version=v4.6</NuGetTargetMoniker>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ReferenceAssemblyOutputPath Condition="'$(ReferenceAssemblyOutputPath)' == ''">$(BaseOutputPath)ref/</ReferenceAssemblyOutputPath>
+    <AssemblyName Condition="'$(AssemblyName)' == ''">$(MSBuildProjectName)</AssemblyName>
+    <OutputPath>$(ReferenceAssemblyOutputPath)$(AssemblyName)/$(AssemblyVersion)/Compat/</OutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)ref/$(AssemblyName)/$(AssemblyVersion)/Compat/</IntermediateOutputPath>
+    <ExcludeReferenceAssembliesImport>true</ExcludeReferenceAssembliesImport>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Net.Http.cs" />
-    <ProjectReference Include="..\..\..\mscorlib\ref\mscorlib.csproj">
-      <Project>{E9E2FEE9-3F81-4B59-A24C-0DBFC47C960C}</Project>
-      <Name>mscorlib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\System\ref\System.csproj">
-      <Project>{F4A835F0-5CFE-4DD3-87BD-0A104860FCF7}</Project>
-      <Name>System</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
+    <ProjectReference Include="..\..\..\mscorlib\ref\Compat\mscorlib.csproj" />
+    <ProjectReference Include="..\..\..\System\ref\Compat\System.csproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
   <Import Project="$(CommonPath)/../Compat.targets" />

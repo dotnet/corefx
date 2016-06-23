@@ -9,7 +9,7 @@
       <RefCompatFolder>$(CompatFolder)ref</RefCompatFolder>
     </PropertyGroup>
     <ItemGroup>
-      <ContractFile Include="$(TargetPath)" />
+      <ContractFile Include="$(OutputPath)$(TargetFileName)" />
     </ItemGroup>
 
     <Copy
@@ -23,7 +23,7 @@
       <FacadesCompatFolder>$(CompatFolder)facades</FacadesCompatFolder>
     </PropertyGroup>
     <ItemGroup>
-      <FacadeFile Include="$(TargetPath)" />
+      <FacadeFile Include="$(OutputPath)$(TargetFileName)" />
     </ItemGroup>
 
     <Copy

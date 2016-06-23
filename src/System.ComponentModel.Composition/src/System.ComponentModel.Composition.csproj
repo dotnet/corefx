@@ -9,6 +9,7 @@
     <GenFacadesArgs>$(GenFacadesArgs) -ignoreMissingTypes</GenFacadesArgs>
     <BaselineAllAPICompatError>true</BaselineAllAPICompatError>
     <ProjectGuid>{B0535517-3B72-4343-A773-3F3D68592919}</ProjectGuid>
+    <ContractProject>..\ref\Compat\System.ComponentModel.Composition.csproj</ContractProject>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />

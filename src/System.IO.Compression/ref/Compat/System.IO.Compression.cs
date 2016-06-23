@@ -1,3 +1,8 @@
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.IO.Compression.CompressionMode))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.IO.Compression.DeflateStream))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.IO.Compression.GZipStream))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.IO.Compression.CompressionLevel))]
+
 namespace System.IO.Compression
 {
     public partial class ZipArchive : System.IDisposable

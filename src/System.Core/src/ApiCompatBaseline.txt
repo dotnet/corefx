@@ -1,6 +1,10 @@
 Compat issues with assembly System.Core:
 TypesMustExist : Type 'Microsoft.Win32.SafeHandles.SafeMemoryMappedFileHandle' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'Microsoft.Win32.SafeHandles.SafeMemoryMappedViewHandle' does not exist in the implementation but it does exist in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Action' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3, T4>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
@@ -9,6 +13,11 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3, T4, T5, T6, T7
 CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Func<TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Func<T, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, T4, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
@@ -17,6 +26,26 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, T4, T5, T6, T7, 
 CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.InvalidTimeZoneException' does not implement interface 'System.Runtime.Serialization.ISerializable' in the implementation but it does in the contract.
+MembersMustExist : Member 'System.InvalidTimeZoneException..ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
+CannotRemoveBaseTypeOrInterface : Type 'System.TimeZoneInfo' does not implement interface 'System.Runtime.Serialization.IDeserializationCallback' in the implementation but it does in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.ClearCachedData()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.ConvertTimeBySystemTimeZoneId(System.DateTime, System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.ConvertTimeBySystemTimeZoneId(System.DateTime, System.String, System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.ConvertTimeBySystemTimeZoneId(System.DateTimeOffset, System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.ConvertTimeFromUtc(System.DateTime, System.TimeZoneInfo)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.ConvertTimeToUtc(System.DateTime)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.ConvertTimeToUtc(System.DateTime, System.TimeZoneInfo)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.CreateCustomTimeZone(System.String, System.TimeSpan, System.String, System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.CreateCustomTimeZone(System.String, System.TimeSpan, System.String, System.String, System.String, System.TimeZoneInfo.AdjustmentRule[])' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.CreateCustomTimeZone(System.String, System.TimeSpan, System.String, System.String, System.String, System.TimeZoneInfo.AdjustmentRule[], System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.FromSerializedString(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.GetAdjustmentRules()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.HasSameRules(System.TimeZoneInfo)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.TimeZoneInfo.ToSerializedString()' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.TimeZoneInfo.AdjustmentRule' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.TimeZoneInfo.TransitionTime' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.TimeZoneNotFoundException' does not exist in the implementation but it does exist in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Collections.Generic.HashSet<T>' does not implement interface 'System.Runtime.Serialization.IDeserializationCallback' in the implementation but it does in the contract.
 MembersMustExist : Member 'System.Collections.Generic.HashSet<T>..ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Collections.Generic.HashSet<T>.CreateSetComparer()' does not exist in the implementation but it does exist in the contract.
@@ -96,6 +125,7 @@ TypesMustExist : Type 'System.Runtime.CompilerServices.IRuntimeVariables' does n
 TypesMustExist : Type 'System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<T>' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.CompilerServices.RuleCache<T>' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.CompilerServices.RuntimeOps' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Security.Cryptography.Aes.Create(System.String)' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Security.Cryptography.AesCryptoServiceProvider' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Security.Cryptography.AesManaged' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Security.Cryptography.ECDiffieHellmanPublicKey' does not exist in the implementation but it does exist in the contract.
@@ -104,4 +134,4 @@ CannotMakeMemberAbstract : Member 'System.Security.Cryptography.ECDsa.HashData(S
 CannotMakeMemberAbstract : Member 'System.Security.Cryptography.ECDsa.HashData(System.IO.Stream, System.Security.Cryptography.HashAlgorithmName)' is abstract in the implementation but is not abstract in the contract.
 MembersMustExist : Member 'System.Security.Cryptography.ECDsa.KeyExchangeAlgorithm.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Security.Cryptography.ECDsa.SignatureAlgorithm.get()' does not exist in the implementation but it does exist in the contract.
-Total Issues: 105
+Total Issues: 135
