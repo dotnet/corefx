@@ -22,7 +22,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeVersion_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1();
@@ -38,7 +37,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeType_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1();
@@ -55,7 +53,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeRecipientIdType_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1();
@@ -77,7 +74,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeRecipientIdValue_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1();
@@ -99,7 +95,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeRecipientIdType_Ski_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -120,7 +115,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeRecipientIdValue_Ski_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -142,7 +136,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeKeyEncryptionAlgorithm_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1();
@@ -161,7 +154,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeEncryptedKey_FixedValue()
         {
             byte[] expectedEncryptedKey = "c39323a9f5113c1465bf27b558ffeda656d606e08f8dc37e67cb8cbf7fb04d71dbe20071eaaa20db".HexToByteArray();
@@ -189,7 +181,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeOriginatorIdentifierOrKey_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1();
@@ -219,7 +210,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeDate_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1();
@@ -239,7 +229,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeDate_FixedValue_Ski()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -260,7 +249,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeOtherKeyAttribute_FixedValue()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1();
@@ -269,7 +257,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeOtherKeyAttribute_FixedValue_Ski()
         {
             //
@@ -295,6 +282,66 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             AsnEncodedData asnData = attribute.Values[0];
             byte[] expectedAsnData = "0403424d58".HexToByteArray();
             Assert.Equal<byte>(expectedAsnData, asnData.RawData);
+        }
+
+        [Fact]
+        public static void TestMultipleKeyAgree_ShortNotation()
+        {
+            // KeyAgreement recipients are defined in RFC 2630 as
+            //
+            // KeyAgreeRecipientInfo::= SEQUENCE {
+            //      version CMSVersion,  --always set to 3
+            //      originator[0] EXPLICIT OriginatorIdentifierOrKey,
+            //      ukm[1] EXPLICIT UserKeyingMaterial OPTIONAL,
+            //      keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
+            //      recipientEncryptedKeys RecipientEncryptedKeys }
+            //
+            // RecipientEncryptedKeys::= SEQUENCE OF RecipientEncryptedKey
+            //
+            // RecipientEncryptedKey::= SEQUENCE {
+            //      rid KeyAgreeRecipientIdentifier,
+            //      encryptedKey EncryptedKey }
+            //
+            // When RecipientEncryptedKeys has more than one sequence in it, then different KeyAgreement recipients are created, where each
+            // recipient hold the information from one RecipientEncryptedKey. This message has one KeyAgreeRecipientInfo object that has two
+            // RecipientEncryptedKeys so it needs to have two recipients in the end.   
+
+            byte[] encodedMessage =
+                ("3082019206092A864886F70D010703A08201833082017F0201023182014BA1820147020103A08196A18193300906072A"
+                + "8648CE3E02010381850002818100AC89002E19D3A7DC35DAFBF083413483EF14691FC00A465B957496CA860BA4918182"
+                + "1CAFB50EB25330952BB11A71A44B44691CF9779999F1115497CD1CE238B452CA95622AF968E39F06E165D2EBE1991493"
+                + "70334D925AA47273751AC63A0EF80CDCF6331ED3324CD689BFFC90E61E9CC921C88EF5FB92B863053C4C1FABFE15301E"
+                + "060B2A864886F70D0109100305300F060B2A864886F70D010910030605003081883042A016041410DA1370316788112E"
+                + "B8594C864C2420AE7FBA420428DFBDC19AD44063478A0C125641BE274113441AD5891C78F925097F06A3DF57F3F1E6D1"
+                + "160F8D3C223042A016041411DA1370316788112EB8594C864C2420AE7FBA420428DFBDC19AD44063478A0C125641BE27"
+                + "4113441AD5891C78F925097F06A3DF57F3F1E6D1160F8D3C22302B06092A864886F70D010701301406082A864886F70D"
+                + "030704088AADC286F258F6D78008FC304F518A653F83").HexToByteArray();
+
+            EnvelopedCms ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            RecipientInfoCollection recipients = ecms.RecipientInfos;
+            Assert.Equal(2, recipients.Count);
+            RecipientInfo recipient0 = recipients[0];
+            RecipientInfo recipient1 = recipients[1];
+
+            Assert.IsType<KeyAgreeRecipientInfo>(recipient0);
+            Assert.IsType<KeyAgreeRecipientInfo>(recipient1);
+
+            KeyAgreeRecipientInfo recipient0Cast = recipient0 as KeyAgreeRecipientInfo;
+            KeyAgreeRecipientInfo recipient1Cast = recipient1 as KeyAgreeRecipientInfo;
+
+            Assert.Equal(3, recipient0.Version);
+            Assert.Equal(3, recipient1.Version);
+
+            Assert.Equal(SubjectIdentifierOrKeyType.PublicKeyInfo, recipient0Cast.OriginatorIdentifierOrKey.Type);
+            Assert.Equal(SubjectIdentifierOrKeyType.PublicKeyInfo, recipient1Cast.OriginatorIdentifierOrKey.Type);
+
+            Assert.Equal(SubjectIdentifierType.SubjectKeyIdentifier, recipient0Cast.RecipientIdentifier.Type);
+            Assert.Equal(SubjectIdentifierType.SubjectKeyIdentifier, recipient1Cast.RecipientIdentifier.Type);
+
+            Assert.Equal("10DA1370316788112EB8594C864C2420AE7FBA42", recipient0Cast.RecipientIdentifier.Value);
+            Assert.Equal("11DA1370316788112EB8594C864C2420AE7FBA42", recipient1Cast.RecipientIdentifier.Value);
         }
 
         private static KeyAgreeRecipientInfo EncodeKeyAgreel(SubjectIdentifierType type = SubjectIdentifierType.IssuerAndSerialNumber)

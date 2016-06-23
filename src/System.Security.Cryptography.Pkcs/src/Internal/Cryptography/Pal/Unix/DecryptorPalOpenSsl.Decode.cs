@@ -32,15 +32,14 @@ namespace Internal.Cryptography.Pal.OpenSsl
 
             originatorCerts = cmsHandle.GetOriginatorCerts();
             contentInfo = cmsHandle.GetEmbeddedContent();
-            RecipientInfoCollection recipientInfos = cmsHandle.GetRecipients();
-
+            RecipientInfoCollection recipientInfos;
             try
             {
                 // Some fields of the CMS are not exposed by the OpenSSL CMS API, we have to parse this values from
                 // the DER encoded message. In case there's an error decoding we need to throw an exception and release the
                 // message and certificates as at this point it makes no sense to assume metadata is correct nor that decrypt
                 // can be called after this.
-                ParseMissingValues(encodedMessage, out version, out contentEncryptionAlgorithm, out unprotectedAttributes);
+                ParseMissingValues(encodedMessage, out version, out recipientInfos, out contentEncryptionAlgorithm, out unprotectedAttributes);
             }
             catch (InvalidOperationException e)
             {
@@ -64,6 +63,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
         private static void ParseMissingValues(
             byte[] encodedMessage,
             out int version,
+            out RecipientInfoCollection recipientInfos,
             out AlgorithmIdentifier contentEncryptionAlgorithm,
             out CryptographicAttributeObjectCollection unprotectedAttributes)
         {
@@ -101,12 +101,8 @@ namespace Internal.Cryptography.Pal.OpenSsl
                 innerSequenceReader.SkipValue();
             }
 
-            // Skip recipientInfos as these are retrieved with OpenSSL
-            const byte constructedSequence = (byte)DerSequenceReader.DerTag.Set | DerSequenceReader.ConstructedFlag;
-            Debug.Assert(innerSequenceReader.PeekTag() == constructedSequence);
-            innerSequenceReader.SkipValue();
-
-            contentEncryptionAlgorithm = innerSequenceReader.ReadEncryptionAlgorithm();
+            recipientInfos = ReadRecipientInfos(innerSequenceReader);
+            contentEncryptionAlgorithm = innerSequenceReader.ReadAlgoIdFromEncryptedContentInfo();
             unprotectedAttributes = innerSequenceReader.ReadUnprotectedAttributes();
         }
     }

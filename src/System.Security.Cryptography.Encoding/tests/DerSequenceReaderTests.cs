@@ -94,6 +94,30 @@ namespace System.Security.Cryptography.Encoding.Tests
             Assert.Equal(DateTimeKind.Utc, decodedTime.Kind);
         }
 
+        [Theory]
+        [InlineData("180f31393932303732323133323130305a", 1992, 07, 22, 13, 21, 00)]
+        [InlineData("180f32303138303531383130333731365a", 2018, 05, 18, 10, 37, 16)]
+        public static void ReadGeneralizedTime(string hexString, int year, int month, int day, int hour, int minute, int second)
+        {
+            byte[] payload = hexString.HexToByteArray();
+            DateTime representedTime = new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+            DerSequenceReader reader = DerSequenceReader.CreateForPayload(payload);
+            DateTime decodedTime = reader.ReadGeneralizedTime();
+            Assert.Equal(representedTime, decodedTime);
+            Assert.Equal(DateTimeKind.Utc, decodedTime.Kind);
+        }
+
+        [Theory]
+        [InlineData("030504056e9230", "056e9230")] // With unusedbits
+        [InlineData("030500056e9237", "056e9237")] // Without unusedbits
+        public static void ReadBitString(string hexString, string expected)
+        {
+            byte[] payload = hexString.HexToByteArray();
+            byte[] expectedOctets = expected.HexToByteArray();
+            byte[] decoded = DerSequenceReader.CreateForPayload(payload).ReadBitString();
+            Assert.Equal(expectedOctets, decoded);
+        }
+
         [Fact]
         public static void FalseEncodedLength_MultiByteLength()
         {

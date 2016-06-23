@@ -30,7 +30,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransVersion_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -46,7 +45,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransType_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -63,7 +61,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdType_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -85,7 +82,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -107,7 +103,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdType_Ski_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -128,7 +123,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_Ski_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -150,7 +144,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransKeyEncryptionAlgorithm_FixedValue()
         {
             KeyTransRecipientInfo recipient = FixedValueKeyTrans1();
@@ -169,7 +162,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransEncryptedKey_FixedValue()
         {
             byte[] expectedEncryptedKey =
