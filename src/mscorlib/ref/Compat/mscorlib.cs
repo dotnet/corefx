@@ -261,6 +261,12 @@ namespace System
     }
     public static partial class AppContext
     {
+        public static string BaseDirectory { [System.Security.SecuritySafeCriticalAttribute]get { throw null; } }
+        public static string TargetFrameworkName { get { throw null; } }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static object GetData(string name) { throw null; }
+        public static void SetSwitch(string switchName, bool isEnabled) { }
+        public static bool TryGetSwitch(string switchName, out bool isEnabled) { isEnabled = default(bool); throw null; }
     }
     [System.Runtime.InteropServices.ClassInterfaceAttribute((System.Runtime.InteropServices.ClassInterfaceType)(0))]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -2601,6 +2607,8 @@ namespace System
         public virtual string StackTrace { get { return default(string); } }
         public System.Reflection.MethodBase TargetSite { get { return default(System.Reflection.MethodBase); } }
         protected event System.EventHandler<System.Runtime.Serialization.SafeSerializationEventArgs> SerializeObjectState { add { } remove { } }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal void AddExceptionDataForRestrictedErrorInfo(string restrictedError, string restrictedErrorReference, string restrictedCapabilitySid, object restrictedErrorObject, bool hasrestrictedLanguageErrorObject = false) { }
         public virtual System.Exception GetBaseException() { return default(System.Exception); }
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public new System.Type GetType() { return default(System.Type); }
@@ -2671,6 +2679,8 @@ namespace System
         public static void Collect(int generation) { }
         public static void Collect(int generation, System.GCCollectionMode mode) { }
         public static void Collect(int generation, System.GCCollectionMode mode, bool blocking) { }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static void Collect(int generation, System.GCCollectionMode mode, bool blocking, bool compacting) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)][System.Runtime.ConstrainedExecution.ReliabilityContractAttribute((System.Runtime.ConstrainedExecution.Consistency)(3), (System.Runtime.ConstrainedExecution.Cer)(2))]
         public static int CollectionCount(int generation) { return default(int); }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]public static int GetGeneration(object obj) { return default(int); }
@@ -6484,9 +6494,16 @@ namespace System.Diagnostics.Tracing
     public sealed partial class EventAttribute : System.Attribute
     {
         public EventAttribute(int eventId) { }
+        public System.Diagnostics.Tracing.EventActivityOptions ActivityOptions { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Diagnostics.Tracing.EventChannel Channel { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public int EventId { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(int); } }
         public System.Diagnostics.Tracing.EventKeywords Keywords { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.Diagnostics.Tracing.EventKeywords); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Diagnostics.Tracing.EventLevel Level { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.Diagnostics.Tracing.EventLevel); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string Message { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Diagnostics.Tracing.EventOpcode Opcode { get { throw null; } set { } }
+        public System.Diagnostics.Tracing.EventTags Tags { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Diagnostics.Tracing.EventTask Task { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public byte Version { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public enum EventChannel : byte
     {
@@ -6511,6 +6528,39 @@ namespace System.Diagnostics.Tracing
         public bool DisableEvent(int eventId) { return default(bool); }
         public bool EnableEvent(int eventId) { return default(bool); }
     }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(12), Inherited = false)]
+    public partial class EventDataAttribute : System.Attribute
+    {
+        public EventDataAttribute() { }
+        public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(128))]
+    public partial class EventFieldAttribute : System.Attribute
+    {
+        public EventFieldAttribute() { }
+        public System.Diagnostics.Tracing.EventFieldFormat Format { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Diagnostics.Tracing.EventFieldTags Tags { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
+    public enum EventFieldFormat
+    {
+        Boolean = 3,
+        Default = 0,
+        Hexadecimal = 4,
+        HResult = 15,
+        Json = 12,
+        String = 2,
+        Xml = 11,
+    }
+    [System.FlagsAttribute]
+    public enum EventFieldTags
+    {
+        None = 0,
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(128))]
+    public partial class EventIgnoreAttribute : System.Attribute
+    {
+        public EventIgnoreAttribute() { }
+    }
     [System.FlagsAttribute]
     public enum EventKeywords : long
     {
@@ -6533,6 +6583,27 @@ namespace System.Diagnostics.Tracing
         LogAlways = 0,
         Verbose = 5,
         Warning = 3,
+    }
+    public partial class EventListener : System.IDisposable
+    {
+        public EventListener() { }
+        public void DisableEvents(System.Diagnostics.Tracing.EventSource eventSource) { }
+        public virtual void Dispose() { }
+        public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level) { }
+        public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords matchAnyKeyword) { }
+        public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords matchAnyKeyword, System.Collections.Generic.IDictionary<string, string> arguments) { }
+        public static int EventSourceIndex(System.Diagnostics.Tracing.EventSource eventSource) { throw null; }
+        protected internal virtual void OnEventSourceCreated(System.Diagnostics.Tracing.EventSource eventSource) { }
+        protected internal virtual void OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs eventData) { }
+    }
+    [System.FlagsAttribute]
+    public enum EventManifestOptions
+    {
+        AllCultures = 2,
+        AllowEventSourceOverride = 8,
+        None = 0,
+        OnlyIfNeededForRegistration = 4,
+        Strict = 1,
     }
     public enum EventOpcode
     {
@@ -6562,14 +6633,27 @@ namespace System.Diagnostics.Tracing
         public System.Guid Guid { get { return default(System.Guid); } }
         public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(string); } }
         public System.Diagnostics.Tracing.EventSourceSettings Settings { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.Diagnostics.Tracing.EventSourceSettings); } }
+        public event System.EventHandler<System.Diagnostics.Tracing.EventCommandEventArgs> EventCommandExecuted { add { } remove { } }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        public static string GenerateManifest(System.Type eventSourceType, string assemblyPathToIncludeInManifest) { throw null; }
+        public static string GenerateManifest(System.Type eventSourceType, string assemblyPathToIncludeInManifest, System.Diagnostics.Tracing.EventManifestOptions flags) { throw null; }
+        public static System.Guid GetGuid(System.Type eventSourceType) { throw null; }
+        public static string GetName(System.Type eventSourceType) { throw null; }
+        public static System.Collections.Generic.IEnumerable<System.Diagnostics.Tracing.EventSource> GetSources() { throw null; }
         public string GetTrait(string key) { return default(string); }
         public bool IsEnabled() { return default(bool); }
         public bool IsEnabled(System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords keywords) { return default(bool); }
         public bool IsEnabled(System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords keywords, System.Diagnostics.Tracing.EventChannel channel) { return default(bool); }
         protected virtual void OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs command) { }
+        public static void SendCommand(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventCommand command, System.Collections.Generic.IDictionary<string, string> commandArguments) { }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static void SetCurrentThreadActivityId(System.Guid activityId) { }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static void SetCurrentThreadActivityId(System.Guid activityId, out System.Guid oldActivityThatWillContinue) { oldActivityThatWillContinue = default(System.Guid); }
         public void Write(string eventName) { }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public void Write(string eventName, System.Diagnostics.Tracing.EventSourceOptions options) { }
         public void Write<T>(string eventName, T data) { }
         public void Write<T>(string eventName, System.Diagnostics.Tracing.EventSourceOptions options, T data) { }
         public void Write<T>(string eventName, ref System.Diagnostics.Tracing.EventSourceOptions options, ref T data) { }
@@ -6592,6 +6676,20 @@ namespace System.Diagnostics.Tracing
         protected void WriteEvent(int eventId, string arg1, long arg2) { }
         protected void WriteEvent(int eventId, string arg1, string arg2) { }
         protected void WriteEvent(int eventId, string arg1, string arg2, string arg3) { }
+        [System.CLSCompliantAttribute(false)]
+        [System.Security.SecurityCriticalAttribute]
+        protected unsafe void WriteEventCore(int eventId, int eventDataCount, System.Diagnostics.Tracing.EventSource.EventData* data) { }
+        [System.Security.SecuritySafeCriticalAttribute]
+        protected void WriteEventWithRelatedActivityId(int eventId, System.Guid relatedActivityId, params object[] args) { }
+        [System.CLSCompliantAttribute(false)]
+        [System.Security.SecurityCriticalAttribute]
+        protected unsafe void WriteEventWithRelatedActivityIdCore(int eventId, System.Guid* relatedActivityId, int eventDataCount, System.Diagnostics.Tracing.EventSource.EventData* data) { }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        protected internal partial struct EventData
+        {
+            public System.IntPtr DataPointer { get { throw null; } set { } }
+            public int Size { get { throw null; } set { } }
+        }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4))]
     public sealed partial class EventSourceAttribute : System.Attribute
@@ -6600,6 +6698,12 @@ namespace System.Diagnostics.Tracing
         public string Guid { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(string); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string LocalizationResources { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(string); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(string); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
+    public partial class EventSourceException : System.Exception
+    {
+        public EventSourceException() { }
+        public EventSourceException(string message) { }
+        public EventSourceException(string message, System.Exception innerException) { }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct EventSourceOptions
@@ -6627,6 +6731,78 @@ namespace System.Diagnostics.Tracing
     {
         None = 0,
     }
+    public partial class EventWrittenEventArgs : System.EventArgs
+    {
+        internal EventWrittenEventArgs() { }
+        public System.Guid ActivityId { [System.Security.SecurityCriticalAttribute]get { throw null; } }
+        public System.Diagnostics.Tracing.EventChannel Channel { get { throw null; } }
+        public int EventId { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string EventName { get { throw null; } }
+        public System.Diagnostics.Tracing.EventSource EventSource { get { throw null; } }
+        public System.Diagnostics.Tracing.EventKeywords Keywords { get { throw null; } }
+        public System.Diagnostics.Tracing.EventLevel Level { get { throw null; } }
+        public string Message { get { throw null; } }
+        public System.Diagnostics.Tracing.EventOpcode Opcode { get { throw null; } }
+        public System.Collections.ObjectModel.ReadOnlyCollection<object> Payload { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Collections.ObjectModel.ReadOnlyCollection<string> PayloadNames { get { throw null; } }
+        public System.Guid RelatedActivityId { [System.Runtime.CompilerServices.CompilerGeneratedAttribute, System.Security.SecurityCriticalAttribute]get { throw null; } }
+        public System.Diagnostics.Tracing.EventTags Tags { get { throw null; } }
+        public System.Diagnostics.Tracing.EventTask Task { get { throw null; } }
+        public byte Version { get { throw null; } }
+    }
+    [System.Diagnostics.Tracing.EventSourceAttribute(Guid = "8E9F5090-2D75-4d03-8A81-E5AFBF85DAF1", Name = "System.Diagnostics.Eventing.FrameworkEventSource")]
+    [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+    internal sealed partial class FrameworkEventSource : System.Diagnostics.Tracing.EventSource
+    {
+        internal static readonly System.Diagnostics.Tracing.FrameworkEventSource Log;
+        private FrameworkEventSource() { }
+        internal static bool IsInitialized { get { throw null; } }
+        [System.Diagnostics.Tracing.EventAttribute(31, Level = (System.Diagnostics.Tracing.EventLevel)(5), Keywords = (System.Diagnostics.Tracing.EventKeywords)(18))]
+        internal void ThreadPoolDequeueWork(long workID) { }
+        [System.Diagnostics.Tracing.NonEventAttribute]
+        [System.Security.SecuritySafeCriticalAttribute]
+        internal void ThreadPoolDequeueWorkObject(object workID) { }
+        [System.Diagnostics.Tracing.EventAttribute(30, Level = (System.Diagnostics.Tracing.EventLevel)(5), Keywords = (System.Diagnostics.Tracing.EventKeywords)(18))]
+        internal void ThreadPoolEnqueueWork(long workID) { }
+        [System.Diagnostics.Tracing.NonEventAttribute]
+        [System.Security.SecuritySafeCriticalAttribute]
+        internal void ThreadPoolEnqueueWorkObject(object workID) { }
+        internal void ThreadTransferReceive(long id, int kind, string info) { }
+        [System.Diagnostics.Tracing.NonEventAttribute]
+        [System.Security.SecuritySafeCriticalAttribute]
+        internal void ThreadTransferReceiveObj(object id, int kind, string info) { }
+        internal void ThreadTransferSend(long id, int kind, string info, bool multiDequeues) { }
+        [System.Diagnostics.Tracing.NonEventAttribute]
+        [System.Security.SecuritySafeCriticalAttribute]
+        internal void ThreadTransferSendObj(object id, int kind, string info, bool multiDequeues) { }
+        [System.Diagnostics.Tracing.NonEventAttribute]
+        [System.Security.SecuritySafeCriticalAttribute]
+        private void WriteEvent(int eventId, long arg1, int arg2, string arg3) { }
+        [System.Diagnostics.Tracing.NonEventAttribute]
+        [System.Security.SecuritySafeCriticalAttribute]
+        private void WriteEvent(int eventId, long arg1, int arg2, string arg3, bool arg4) { }
+        public static partial class Keywords
+        {
+            public const System.Diagnostics.Tracing.EventKeywords DynamicTypeUsage = (System.Diagnostics.Tracing.EventKeywords)8;
+            public const System.Diagnostics.Tracing.EventKeywords Loader = (System.Diagnostics.Tracing.EventKeywords)1;
+            public const System.Diagnostics.Tracing.EventKeywords NetClient = (System.Diagnostics.Tracing.EventKeywords)4;
+            public const System.Diagnostics.Tracing.EventKeywords ThreadPool = (System.Diagnostics.Tracing.EventKeywords)2;
+            public const System.Diagnostics.Tracing.EventKeywords ThreadTransfer = (System.Diagnostics.Tracing.EventKeywords)16;
+        }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        public static partial class Opcodes
+        {
+            public const System.Diagnostics.Tracing.EventOpcode ReceiveHandled = (System.Diagnostics.Tracing.EventOpcode)11;
+        }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        public static partial class Tasks
+        {
+            public const System.Diagnostics.Tracing.EventTask GetRequestStream = (System.Diagnostics.Tracing.EventTask)2;
+            public const System.Diagnostics.Tracing.EventTask GetResponse = (System.Diagnostics.Tracing.EventTask)1;
+            public const System.Diagnostics.Tracing.EventTask ThreadTransfer = (System.Diagnostics.Tracing.EventTask)3;
+        }
+    }
+
     [System.AttributeUsageAttribute((System.AttributeTargets)(64))]
     public sealed partial class NonEventAttribute : System.Attribute
     {
@@ -6814,6 +6990,14 @@ namespace System.Globalization
         OrdinalIgnoreCase = 268435456,
         StringSort = 536870912,
     }
+    [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+    internal partial class CultureData
+    {
+        public CultureData() { }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal static System.Globalization.CultureData GetCultureData(string cultureName, bool useUserOverride) { throw null; }
+    }
+
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class CultureInfo : System.ICloneable, System.IFormatProvider
     {
@@ -7676,15 +7860,17 @@ namespace System.IO
         protected void Write7BitEncodedInt(int value) { }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-    public sealed partial class BufferedStream : System.IO.Stream
+    internal sealed partial class BufferedStream : System.IO.Stream
     {
         public BufferedStream(System.IO.Stream stream) { }
         public BufferedStream(System.IO.Stream stream, int bufferSize) { }
+        internal int BufferSize { [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]get { throw null; } }
         public override bool CanRead { get { return default(bool); } }
         public override bool CanSeek { get { return default(bool); } }
         public override bool CanWrite { get { return default(bool); } }
         public override long Length { get { return default(long); } }
         public override long Position { get { return default(long); } set { } }
+        internal System.IO.Stream UnderlyingStream { [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]get { throw null; } }
         public override System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
         public override System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
         protected override void Dispose(bool disposing) { }
@@ -10119,6 +10305,9 @@ namespace System.Reflection.Emit
         public void AddResourceFile(string name, string fileName) { }
         public void AddResourceFile(string name, string fileName, System.Reflection.ResourceAttributes attribute) { }
         public static System.Reflection.Emit.AssemblyBuilder DefineDynamicAssembly(System.Reflection.AssemblyName name, System.Reflection.Emit.AssemblyBuilderAccess access) { return default(System.Reflection.Emit.AssemblyBuilder); }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static System.Reflection.Emit.AssemblyBuilder DefineDynamicAssembly(System.Reflection.AssemblyName name, System.Reflection.Emit.AssemblyBuilderAccess access, System.Collections.Generic.IEnumerable<System.Reflection.Emit.CustomAttributeBuilder> assemblyAttributes) { throw null; }
         public System.Reflection.Emit.ModuleBuilder DefineDynamicModule(string name) { return default(System.Reflection.Emit.ModuleBuilder); }
         public System.Reflection.Emit.ModuleBuilder DefineDynamicModule(string name, bool emitSymbolInfo) { return default(System.Reflection.Emit.ModuleBuilder); }
         public System.Reflection.Emit.ModuleBuilder DefineDynamicModule(string name, string fileName) { return default(System.Reflection.Emit.ModuleBuilder); }
@@ -10312,6 +10501,7 @@ namespace System.Reflection.Emit
         public System.Reflection.Emit.FieldBuilder UnderlyingField { get { return default(System.Reflection.Emit.FieldBuilder); } }
         public override System.Type UnderlyingSystemType { get { return default(System.Type); } }
         public System.Type CreateType() { return default(System.Type); }
+        public System.Reflection.TypeInfo CreateTypeInfo() { throw null; }
         public System.Reflection.Emit.FieldBuilder DefineLiteral(string literalName, object literalValue) { return default(System.Reflection.Emit.FieldBuilder); }
         protected override System.Reflection.TypeAttributes GetAttributeFlagsImpl() { return default(System.Reflection.TypeAttributes); }
         protected override System.Reflection.ConstructorInfo GetConstructorImpl(System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.ConstructorInfo); }
@@ -11425,6 +11615,15 @@ namespace System.Reflection.Emit
         public static System.Reflection.Emit.UnmanagedMarshal DefineUnmanagedMarshal(System.Runtime.InteropServices.UnmanagedType unmanagedType) { return default(System.Reflection.Emit.UnmanagedMarshal); }
     }
 }
+namespace System.Reflection.Metadata
+{
+    public static partial class AssemblyExtensions
+    {
+        [System.CLSCompliantAttribute(false)]
+        [System.Security.SecurityCriticalAttribute]
+        public unsafe static bool TryGetRawMetadata(this System.Reflection.Assembly assembly, out byte* blob, out int length) { blob = default(byte*); length = default(int); throw null; }
+    }
+}
 namespace System.Resources
 {
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -11468,6 +11667,12 @@ namespace System.Resources
         public NeutralResourcesLanguageAttribute(string cultureName, System.Resources.UltimateResourceFallbackLocation location) { }
         public string CultureName { get { return default(string); } }
         public System.Resources.UltimateResourceFallbackLocation Location { get { return default(System.Resources.UltimateResourceFallbackLocation); } }
+    }
+    internal partial class PRIExceptionInfo
+    {
+        public string _PackageSimpleName;
+        public string _ResWFile;
+        public PRIExceptionInfo() { }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class ResourceManager
@@ -11572,6 +11777,17 @@ namespace System.Resources
         MainAssembly = 0,
         Satellite = 1,
     }
+    internal partial class WindowsRuntimeResourceManagerBase
+    {
+        public WindowsRuntimeResourceManagerBase() { }
+        public virtual System.Globalization.CultureInfo GlobalResourceContextBestFitCultureInfo { [System.Security.SecurityCriticalAttribute]get { throw null; } }
+        [System.Security.SecurityCriticalAttribute]
+        public virtual string GetString(string stringName, string startingCulture, string neutralResourcesCulture) { throw null; }
+        [System.Security.SecurityCriticalAttribute]
+        public virtual bool Initialize(string libpath, string reswFilename, out System.Resources.PRIExceptionInfo exceptionInfo) { exceptionInfo = default(System.Resources.PRIExceptionInfo); throw null; }
+        [System.Security.SecurityCriticalAttribute]
+        public virtual bool SetGlobalResourceContextDefaultCulture(System.Globalization.CultureInfo ci) { throw null; }
+    }
 }
 namespace System.Runtime
 {
@@ -11591,6 +11807,7 @@ namespace System.Runtime
         Batch = 0,
         Interactive = 1,
         LowLatency = 2,
+        NoGCRegion = 4,
         SustainedLowLatency = 3,
     }
     public static partial class GCSettings
@@ -11738,6 +11955,9 @@ namespace System.Runtime.CompilerServices
     {
         public ConditionalWeakTable() { }
         public void Add(TKey key, TValue value) { }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        [System.Security.SecuritySafeCriticalAttribute]
+        internal TKey FindEquivalentKeyUnsafe(TKey key, out TValue value) { value = default(TValue); throw null; }
         public TValue GetOrCreateValue(TKey key) { return default(TValue); }
         public TValue GetValue(TKey key, System.Runtime.CompilerServices.ConditionalWeakTable<TKey, TValue>.CreateValueCallback createValueCallback) { return default(TValue); }
         public bool Remove(TKey key) { return default(bool); }
@@ -11852,6 +12072,11 @@ namespace System.Runtime.CompilerServices
     {
         public static System.FormattableString Create(string format, params object[] arguments) { return default(System.FormattableString); }
     }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(2044), AllowMultiple = false, Inherited = false)]
+    internal sealed partial class FriendAccessAllowedAttribute : System.Attribute
+    {
+        public FriendAccessAllowedAttribute() { }
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(8))]
     public sealed partial class HasCopySemanticsAttribute : System.Attribute
     {
@@ -11861,6 +12086,11 @@ namespace System.Runtime.CompilerServices
     {
         void MoveNext();
         void SetStateMachine(System.Runtime.CompilerServices.IAsyncStateMachine stateMachine);
+    }
+    public partial interface ICastable
+    {
+        System.RuntimeTypeHandle GetImplType(System.RuntimeTypeHandle interfaceType);
+        bool IsInstanceOfInterface(System.RuntimeTypeHandle interfaceType, out System.Exception castError);
     }
     public partial interface ICriticalNotifyCompletion : System.Runtime.CompilerServices.INotifyCompletion
     {
@@ -11926,6 +12156,13 @@ namespace System.Runtime.CompilerServices
     public sealed partial class IteratorStateMachineAttribute : System.Runtime.CompilerServices.StateMachineAttribute
     {
         public IteratorStateMachineAttribute(System.Type stateMachineType) : base (default(System.Type)) { }
+    }
+    [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+    internal static partial class JitHelpers
+    {
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        [System.Security.SecurityCriticalAttribute]
+        internal static T UnsafeCast<T>(object o) where T : class { throw null; }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(2304), Inherited=false)]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -13066,6 +13303,13 @@ namespace System.Runtime.InteropServices
         public System.Type EventProvider { get { return default(System.Type); } }
         public System.Type SourceInterface { get { return default(System.Type); } }
     }
+    public static partial class ComEventsHelper
+    {
+        [System.Security.SecurityCriticalAttribute]
+        public static void Combine(object rcw, System.Guid iid, int dispid, System.Delegate d) { }
+        [System.Security.SecurityCriticalAttribute]
+        public static System.Delegate Remove(object rcw, System.Guid iid, int dispid, System.Delegate d) { throw null; }
+    }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class COMException : System.Runtime.InteropServices.ExternalException
     {
@@ -13162,6 +13406,18 @@ namespace System.Runtime.InteropServices
         public CurrencyWrapper(decimal obj) { }
         public CurrencyWrapper(object obj) { }
         public decimal WrappedObject { get { return default(decimal); } }
+    }
+    public enum CustomQueryInterfaceMode
+    {
+        Allow = 1,
+        Ignore = 0,
+    }
+    [System.Runtime.InteropServices.ComVisibleAttribute(false)]
+    public enum CustomQueryInterfaceResult
+    {
+        Failed = 2,
+        Handled = 0,
+        NotHandled = 1,
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(2), Inherited=false)]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -13402,6 +13658,12 @@ namespace System.Runtime.InteropServices
     {
         object GetUnderlyingObject();
     }
+    [System.Runtime.InteropServices.ComVisibleAttribute(false)]
+    public partial interface ICustomQueryInterface
+    {
+        [System.Security.SecurityCriticalAttribute]
+        System.Runtime.InteropServices.CustomQueryInterfaceResult GetInterface(ref System.Guid iid, out System.IntPtr ppv);
+    }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial interface ICustomFactory
     {
@@ -13604,6 +13866,9 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr AllocHGlobal(int cb) { return default(System.IntPtr); }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)][System.Runtime.ConstrainedExecution.ReliabilityContractAttribute((System.Runtime.ConstrainedExecution.Consistency)(3), (System.Runtime.ConstrainedExecution.Cer)(1))]
         public static System.IntPtr AllocHGlobal(System.IntPtr cb) { return default(System.IntPtr); }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        [System.Security.SecurityCriticalAttribute]
+        public static bool AreComObjectsAvailableForCleanup() { throw null; }
         public static object BindToMoniker(string monikerName) { return default(object); }
         public static void ChangeWrapperHandleStrength(object otp, bool fIsWeak) { }
         public static void Copy(byte[] source, int startIndex, System.IntPtr destination, int length) { }
@@ -13640,6 +13905,8 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr GetComInterfaceForObject(object o, System.Type T) { return default(System.IntPtr); }
         public static System.IntPtr GetComInterfaceForObject<T, TInterface>(T o) { return default(System.IntPtr); }
         public static System.IntPtr GetComInterfaceForObjectInContext(object o, System.Type t) { return default(System.IntPtr); }
+        [System.Security.SecurityCriticalAttribute]
+        public static System.IntPtr GetComInterfaceForObject(object o, System.Type T, System.Runtime.InteropServices.CustomQueryInterfaceMode mode) { throw null; }
         public static object GetComObjectData(object obj, object key) { return default(object); }
         public static int GetComSlotForMethodInfo(System.Reflection.MemberInfo m) { return default(int); }
         public static System.Delegate GetDelegateForFunctionPointer(System.IntPtr ptr, System.Type t) { return default(System.Delegate); }
@@ -13710,6 +13977,10 @@ namespace System.Runtime.InteropServices
         public static string PtrToStringBSTR(System.IntPtr ptr) { return default(string); }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]public static string PtrToStringUni(System.IntPtr ptr) { return default(string); }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]public static string PtrToStringUni(System.IntPtr ptr, int len) { return default(string); }
+        [System.Security.SecurityCriticalAttribute]
+        public static string PtrToStringUTF8(System.IntPtr ptr) { throw null; }
+        [System.Security.SecurityCriticalAttribute]
+        public static string PtrToStringUTF8(System.IntPtr ptr, int len) { throw null; }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)][System.Runtime.InteropServices.ComVisibleAttribute(true)]
         public static void PtrToStructure(System.IntPtr ptr, object structure) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)][System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -13766,6 +14037,8 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr StringToCoTaskMemAnsi(string s) { return default(System.IntPtr); }
         public static System.IntPtr StringToCoTaskMemAuto(string s) { return default(System.IntPtr); }
         public static System.IntPtr StringToCoTaskMemUni(string s) { return default(System.IntPtr); }
+        [System.Security.SecurityCriticalAttribute]
+        public static System.IntPtr StringToCoTaskMemUTF8(string s) { throw null; }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]public static System.IntPtr StringToHGlobalAnsi(string s) { return default(System.IntPtr); }
         public static System.IntPtr StringToHGlobalAuto(string s) { return default(System.IntPtr); }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]public static System.IntPtr StringToHGlobalUni(string s) { return default(System.IntPtr); }
@@ -13804,6 +14077,7 @@ namespace System.Runtime.InteropServices
         public static void ZeroFreeCoTaskMemUnicode(System.IntPtr s) { }
         public static void ZeroFreeGlobalAllocAnsi(System.IntPtr s) { }
         public static void ZeroFreeGlobalAllocUnicode(System.IntPtr s) { }
+        public static void ZeroFreeMemoryUTF8(System.IntPtr s) { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(10496), Inherited=false)]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -13831,6 +14105,13 @@ namespace System.Runtime.InteropServices
         protected MarshalDirectiveException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public MarshalDirectiveException(string message) { }
         public MarshalDirectiveException(string message, System.Exception inner) { }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(64))]
+    public sealed partial class NativeCallableAttribute : System.Attribute
+    {
+        public System.Runtime.InteropServices.CallingConvention CallingConvention;
+        public string EntryPoint;
+        public NativeCallableAttribute() { }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public delegate System.IntPtr ObjectCreationDelegate(System.IntPtr aggregator);
@@ -14522,6 +14803,7 @@ namespace System.Runtime.InteropServices
         LPStr = 20,
         LPStruct = 43,
         LPTStr = 22,
+        LPUTF8Str = 48,
         LPWStr = 21,
         R4 = 11,
         R8 = 12,
@@ -15232,11 +15514,13 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static bool operator ==(System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken left, System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken right) { return default(bool); }
         public static bool operator !=(System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken left, System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken right) { return default(bool); }
     }
-        public sealed partial class EventRegistrationTokenTable<T> where T : class
+    public sealed partial class EventRegistrationTokenTable<T> where T : class
     {
         public EventRegistrationTokenTable() { }
         public T InvocationList { get { return default(T); } set { } }
         public System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken AddEventHandler(T handler) { return default(System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken); }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal T ExtractHandler(System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken token) { throw null; }
         public static System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable<T> GetOrCreateEventRegistrationTokenTable(ref System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable<T> refEventTable) { return default(System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable<T>); }
         public void RemoveEventHandler(T handler) { }
         public void RemoveEventHandler(System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken token) { }
@@ -15255,6 +15539,13 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public byte MajorVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(byte); } }
         public byte MinorVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(byte); } }
         public byte RevisionVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(byte); } }
+    }
+    [System.Runtime.InteropServices.GuidAttribute("82BA7092-4C88-427D-A7BC-16DD93FEB67E")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    internal partial interface IRestrictedErrorInfo
+    {
+        void GetErrorDetails(out string description, out int error, out string restrictedDescription, out string capabilitySid);
+        void GetReference(out string reference);
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public partial class NamespaceResolveEventArgs : System.EventArgs
@@ -15275,7 +15566,12 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public ReturnValueNameAttribute(string name) { }
         public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(string); } }
     }
-        public static partial class WindowsRuntimeMarshal
+    [System.AttributeUsageAttribute((System.AttributeTargets)(5148), Inherited = false)]
+    internal sealed partial class WindowsRuntimeImportAttribute : System.Attribute
+    {
+        internal WindowsRuntimeImportAttribute() { }
+    }
+    public static partial class WindowsRuntimeMarshal
     {
         public static void AddEventHandler<T>(System.Func<T, System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> addMethod, System.Action<System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod, T handler) { }
         public static void FreeHString(System.IntPtr ptr) { }
@@ -15283,9 +15579,12 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static string PtrToStringHString(System.IntPtr ptr) { return default(string); }
         public static void RemoveAllEventHandlers(System.Action<System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod) { }
         public static void RemoveEventHandler<T>(System.Action<System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod, T handler) { }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        [System.Security.SecuritySafeCriticalAttribute]
+        internal static bool ReportUnhandledError(System.Exception e) { throw null; }
         public static System.IntPtr StringToHString(string s) { return default(System.IntPtr); }
     }
-        public static partial class WindowsRuntimeMetadata
+    public static partial class WindowsRuntimeMetadata
     {
         public static event System.EventHandler<System.Runtime.InteropServices.WindowsRuntime.DesignerNamespaceResolveEventArgs> DesignerNamespaceResolve { add { } remove { } }
         public static event System.EventHandler<System.Runtime.InteropServices.WindowsRuntime.NamespaceResolveEventArgs> ReflectionOnlyNamespaceResolve { add { } remove { } }
@@ -15296,6 +15595,30 @@ namespace System.Runtime.InteropServices.WindowsRuntime
     public sealed partial class WriteOnlyArrayAttribute : System.Attribute
     {
         public WriteOnlyArrayAttribute() { }
+    }
+}
+namespace System.Runtime.Loader
+{
+    [System.Security.SecuritySafeCriticalAttribute]
+    public abstract partial class AssemblyLoadContext
+    {
+        protected AssemblyLoadContext() { }
+        public static System.Runtime.Loader.AssemblyLoadContext Default { get { throw null; } }
+        public event System.Func<System.Runtime.Loader.AssemblyLoadContext, System.Reflection.AssemblyName, System.Reflection.Assembly> Resolving { add { } remove { } }
+        public event System.Action<System.Runtime.Loader.AssemblyLoadContext> Unloading { add { } remove { } }
+        public static System.Reflection.AssemblyName GetAssemblyName(string assemblyPath) { throw null; }
+        public static System.Runtime.Loader.AssemblyLoadContext GetLoadContext(System.Reflection.Assembly assembly) { throw null; }
+        public static void InitializeDefaultContext(System.Runtime.Loader.AssemblyLoadContext context) { }
+        protected abstract System.Reflection.Assembly Load(System.Reflection.AssemblyName assemblyName);
+        public System.Reflection.Assembly LoadFromAssemblyName(System.Reflection.AssemblyName assemblyName) { throw null; }
+        public System.Reflection.Assembly LoadFromAssemblyPath(string assemblyPath) { throw null; }
+        public System.Reflection.Assembly LoadFromNativeImagePath(string nativeImagePath, string assemblyPath) { throw null; }
+        public System.Reflection.Assembly LoadFromStream(System.IO.Stream assembly) { throw null; }
+        public System.Reflection.Assembly LoadFromStream(System.IO.Stream assembly, System.IO.Stream assemblySymbols) { throw null; }
+        protected virtual System.IntPtr LoadUnmanagedDll(string unmanagedDllName) { throw null; }
+        protected System.IntPtr LoadUnmanagedDllFromPath(string unmanagedDllPath) { throw null; }
+        public void SetProfileOptimizationRoot(string directoryPath) { }
+        public void StartProfileOptimization(string profile) { }
     }
 }
 namespace System.Runtime.Remoting
@@ -21362,6 +21685,27 @@ namespace System.Security.Principal
         public override bool IsInRole(string role) { return default(bool); }
     }
 }
+namespace System.StubHelpers
+{
+    [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+    internal static partial class EventArgsMarshaler
+    {
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        [System.Security.SecurityCriticalAttribute]
+        internal static System.IntPtr CreateNativeNCCEventArgsInstance(int action, object newItems, object oldItems, int newIndex, int oldIndex) { throw null; }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.PreserveSig)]
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        [System.Security.SecurityCriticalAttribute]
+        internal static System.IntPtr CreateNativePCEventArgsInstance(string name) { throw null; }
+    }
+    [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+    internal static partial class InterfaceMarshaler
+    {
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal static object ConvertToManagedWithoutUnboxing(System.IntPtr pNative) { throw null; }
+    }
+}
 namespace System.Text
 {
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -22076,6 +22420,8 @@ namespace System.Threading
         public override int GetHashCode() { return default(int); }
         public static bool operator ==(System.Threading.CancellationTokenRegistration left, System.Threading.CancellationTokenRegistration right) { return default(bool); }
         public static bool operator !=(System.Threading.CancellationTokenRegistration left, System.Threading.CancellationTokenRegistration right) { return default(bool); }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal bool TryDeregister() { throw null; }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     [System.Security.Permissions.HostProtectionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Synchronization=true, ExternalThreading=true)]
@@ -22165,6 +22511,7 @@ namespace System.Threading
         [System.Security.SecuritySafeCriticalAttribute]
         public System.Threading.ExecutionContext CreateCopy() { return default(System.Threading.ExecutionContext); }
         public void Dispose() { }
+        internal static System.Threading.ExecutionContext FastCapture() { throw null; }
         [System.Security.SecurityCriticalAttribute]
         public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public static bool IsFlowSuppressed() { return default(bool); }
@@ -22172,6 +22519,9 @@ namespace System.Threading
         public static void RestoreFlow() { }
         [System.Security.SecurityCriticalAttribute]
         public static void Run(System.Threading.ExecutionContext executionContext, System.Threading.ContextCallback callback, object state) { }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        [System.Security.SecurityCriticalAttribute]
+        internal static void Run(System.Threading.ExecutionContext executionContext, System.Threading.ContextCallback callback, object state, bool preserveSyncCtx) { }
         [System.Security.SecurityCriticalAttribute]
         public static System.Threading.AsyncFlowControl SuppressFlow() { return default(System.Threading.AsyncFlowControl); }
     }
@@ -22409,6 +22759,22 @@ namespace System.Threading
         [System.Runtime.InteropServices.ComVisibleAttribute(true)]
         public bool Unregister(System.Threading.WaitHandle waitObject) { return default(bool); }
     }
+    public sealed partial class Semaphore : System.Threading.WaitHandle
+    {
+        [System.Security.SecuritySafeCriticalAttribute]
+        public Semaphore(int initialCount, int maximumCount) { }
+        [System.Security.SecurityCriticalAttribute]
+        public Semaphore(int initialCount, int maximumCount, string name) { }
+        [System.Security.SecurityCriticalAttribute]
+        public Semaphore(int initialCount, int maximumCount, string name, out bool createdNew) { createdNew = default(bool); }
+        [System.Security.SecurityCriticalAttribute]
+        public static System.Threading.Semaphore OpenExisting(string name) { throw null; }
+        public int Release() { throw null; }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public int Release(int releaseCount) { throw null; }
+        [System.Security.SecurityCriticalAttribute]
+        public static bool TryOpenExisting(string name, out System.Threading.Semaphore result) { result = default(System.Threading.Semaphore); throw null; }
+    }
     [System.Runtime.CompilerServices.TypeForwardedFromAttribute("System, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089")]
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public partial class SemaphoreFullException : System.SystemException
@@ -22474,6 +22840,13 @@ namespace System.Threading
         public static void SpinUntil(System.Func<bool> condition) { }
         public static bool SpinUntil(System.Func<bool> condition, int millisecondsTimeout) { return default(bool); }
         public static bool SpinUntil(System.Func<bool> condition, System.TimeSpan timeout) { return default(bool); }
+    }
+    internal enum StackCrawlMark
+    {
+        LookForMe = 0,
+        LookForMyCaller = 1,
+        LookForMyCallersCaller = 2,
+        LookForThread = 3,
     }
     [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.InheritanceDemand, Flags=(System.Security.Permissions.SecurityPermissionFlag)(96))]
     public partial class SynchronizationContext
@@ -22908,9 +23281,77 @@ namespace System.Threading
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public delegate void WaitOrTimerCallback(object state, bool timedOut);
+    [System.Security.SecurityCriticalAttribute]
+    internal partial class WinRTSynchronizationContextFactoryBase
+    {
+        public WinRTSynchronizationContextFactoryBase() { }
+        [System.Security.SecurityCriticalAttribute]
+        public virtual System.Threading.SynchronizationContext Create(object coreDispatcher) { throw null; }
+    }
 }
 namespace System.Threading.Tasks
 {
+    [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+    internal enum AsyncCausalityStatus
+    {
+        Canceled = 2,
+        Completed = 1,
+        Error = 3,
+        Started = 0,
+    }
+    [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+    internal static partial class AsyncCausalityTracer
+    {
+        private static System.Threading.Tasks.AsyncCausalityTracer.Loggers f_LoggingOn;
+        private static readonly System.Guid s_PlatformId;
+        private static Windows.Foundation.Diagnostics.IAsyncCausalityTracerStatics s_TracerFactory;
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal static bool LoggingOn { [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]get { throw null; } }
+        internal static void EnableToETW(bool enabled) { }
+        private static ulong GetOperationId(uint taskId) { throw null; }
+        private static void LogAndDisable(System.Exception ex) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal static void TraceOperationCompletion(System.Threading.Tasks.CausalityTraceLevel traceLevel, int taskId, System.Threading.Tasks.AsyncCausalityStatus status) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal static void TraceOperationCreation(System.Threading.Tasks.CausalityTraceLevel traceLevel, int taskId, string operationName, ulong relatedContext) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        internal static void TraceOperationRelation(System.Threading.Tasks.CausalityTraceLevel traceLevel, int taskId, System.Threading.Tasks.CausalityRelation relation) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        internal static void TraceSynchronousWorkCompletion(System.Threading.Tasks.CausalityTraceLevel traceLevel, System.Threading.Tasks.CausalitySynchronousWork work) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        internal static void TraceSynchronousWorkStart(System.Threading.Tasks.CausalityTraceLevel traceLevel, int taskId, System.Threading.Tasks.CausalitySynchronousWork work) { }
+        [System.Security.SecuritySafeCriticalAttribute]
+        private static void TracingStatusChangedHandler(object sender, Windows.Foundation.Diagnostics.TracingStatusChangedEventArgs args) { }
+        [System.FlagsAttribute]
+        private enum Loggers : byte
+        {
+            CausalityTracer = (byte)1,
+            ETW = (byte)2,
+        }
+    }
+    internal enum CausalityRelation
+    {
+        AssignDelegate = 0,
+        Cancel = 3,
+        Choice = 2,
+        Error = 4,
+        Join = 1,
+    }
+    internal enum CausalitySynchronousWork
+    {
+        CompletionNotification = 0,
+        Execution = 2,
+        ProgressNotification = 1,
+    }
+    [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+    internal enum CausalityTraceLevel
+    {
+        Important = 1,
+        Required = 0,
+        Verbose = 2,
+    }
     [System.Diagnostics.DebuggerDisplayAttribute("Concurrent={ConcurrentTaskCountForDebugger}, Exclusive={ExclusiveTaskCountForDebugger}, Mode={ModeForDebugger}")]
     public partial class ConcurrentExclusiveSchedulerPair
     {
@@ -22988,6 +23429,8 @@ namespace System.Threading.Tasks
     [System.Diagnostics.DebuggerDisplayAttribute("Id = {Id}, Status = {Status}, Method = {DebuggerDisplayMethodDescription}")]
     public partial class Task : System.IAsyncResult, System.IDisposable
     {
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal static bool s_asyncDebuggingEnabled;
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]public Task(System.Action action) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]public Task(System.Action action, System.Threading.CancellationToken cancellationToken) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]public Task(System.Action action, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions) { }
@@ -23009,6 +23452,8 @@ namespace System.Threading.Tasks
         public System.Threading.Tasks.TaskStatus Status { get { return default(System.Threading.Tasks.TaskStatus); } }
         System.Threading.WaitHandle System.IAsyncResult.AsyncWaitHandle { get { return default(System.Threading.WaitHandle); } }
         bool System.IAsyncResult.CompletedSynchronously { get { return default(bool); } }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal static bool AddToActiveTasks(System.Threading.Tasks.Task task) { throw null; }
         public System.Runtime.CompilerServices.ConfiguredTaskAwaitable ConfigureAwait(bool continueOnCapturedContext) { return default(System.Runtime.CompilerServices.ConfiguredTaskAwaitable); }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task, object> continuationAction, object state) { return default(System.Threading.Tasks.Task); }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task, object> continuationAction, object state, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
@@ -23042,6 +23487,8 @@ namespace System.Threading.Tasks
         public static System.Threading.Tasks.Task<TResult> FromException<TResult>(System.Exception exception) { return default(System.Threading.Tasks.Task<TResult>); }
         public static System.Threading.Tasks.Task<TResult> FromResult<TResult>(TResult result) { return default(System.Threading.Tasks.Task<TResult>); }
         public System.Runtime.CompilerServices.TaskAwaiter GetAwaiter() { return default(System.Runtime.CompilerServices.TaskAwaiter); }
+        [System.Runtime.CompilerServices.FriendAccessAllowedAttribute]
+        internal static void RemoveFromActiveTasks(int taskId) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]public static System.Threading.Tasks.Task Run(System.Action action) { return default(System.Threading.Tasks.Task); }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]public static System.Threading.Tasks.Task Run(System.Action action, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public static System.Threading.Tasks.Task Run(System.Func<System.Threading.Tasks.Task> function) { return default(System.Threading.Tasks.Task); }
@@ -23350,5 +23797,65 @@ namespace System.Threading.Tasks
         public System.AggregateException Exception { get { return default(System.AggregateException); } }
         public bool Observed { get { return default(bool); } }
         public void SetObserved() { }
+    }
+}
+namespace Windows.Foundation.Diagnostics
+{
+    internal enum AsyncCausalityStatus
+    {
+        Canceled = 2,
+        Completed = 1,
+        Error = 3,
+        Started = 0,
+    }
+    internal enum CausalityRelation
+    {
+        AssignDelegate = 0,
+        Cancel = 3,
+        Choice = 2,
+        Error = 4,
+        Join = 1,
+    }
+    internal enum CausalitySource
+    {
+        Application = 0,
+        Library = 1,
+        System = 2,
+    }
+    internal enum CausalitySynchronousWork
+    {
+        CompletionNotification = 0,
+        Execution = 2,
+        ProgressNotification = 1,
+    }
+    internal enum CausalityTraceLevel
+    {
+        Important = 1,
+        Required = 0,
+        Verbose = 2,
+    }
+    [System.Runtime.InteropServices.GuidAttribute("50850B26-267E-451B-A890-AB6A370245EE")]
+    internal partial interface IAsyncCausalityTracerStatics
+    {
+        System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken add_TracingStatusChanged(System.EventHandler<Windows.Foundation.Diagnostics.TracingStatusChangedEventArgs> eventHandler);
+        void TraceOperationCompletion(Windows.Foundation.Diagnostics.CausalityTraceLevel traceLevel, Windows.Foundation.Diagnostics.CausalitySource source, System.Guid platformId, ulong operationId, Windows.Foundation.Diagnostics.AsyncCausalityStatus status);
+        void TraceOperationCreation(Windows.Foundation.Diagnostics.CausalityTraceLevel traceLevel, Windows.Foundation.Diagnostics.CausalitySource source, System.Guid platformId, ulong operationId, string operationName, ulong relatedContext);
+        void TraceOperationRelation(Windows.Foundation.Diagnostics.CausalityTraceLevel traceLevel, Windows.Foundation.Diagnostics.CausalitySource source, System.Guid platformId, ulong operationId, Windows.Foundation.Diagnostics.CausalityRelation relation);
+        void TraceSynchronousWorkCompletion(Windows.Foundation.Diagnostics.CausalityTraceLevel traceLevel, Windows.Foundation.Diagnostics.CausalitySource source, Windows.Foundation.Diagnostics.CausalitySynchronousWork work);
+        void TraceSynchronousWorkStart(Windows.Foundation.Diagnostics.CausalityTraceLevel traceLevel, Windows.Foundation.Diagnostics.CausalitySource source, System.Guid platformId, ulong operationId, Windows.Foundation.Diagnostics.CausalitySynchronousWork work);
+    }
+    [System.Runtime.InteropServices.GuidAttribute("410B7711-FF3B-477F-9C9A-D2EFDA302DC3")]
+    internal partial interface ITracingStatusChangedEventArgs
+    {
+        bool Enabled { get; }
+        Windows.Foundation.Diagnostics.CausalityTraceLevel TraceLevel { get; }
+    }
+    [System.Runtime.InteropServices.GuidAttribute("410B7711-FF3B-477F-9C9A-D2EFDA302DC3")]
+    internal sealed partial class TracingStatusChangedEventArgs : Windows.Foundation.Diagnostics.ITracingStatusChangedEventArgs
+    {
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        public TracingStatusChangedEventArgs() { }
+        public bool Enabled { [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]get { throw null; } }
+        public Windows.Foundation.Diagnostics.CausalityTraceLevel TraceLevel { [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]get { throw null; } }
     }
 }

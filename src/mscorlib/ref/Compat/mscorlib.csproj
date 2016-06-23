@@ -9,6 +9,7 @@
     <NuGetTargetMoniker>.NETFramework,Version=v4.6</NuGetTargetMoniker>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsCoreAssembly>true</IsCoreAssembly>
+    <NoWarn>169,649,$(NoWarn)</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="mscorlib.cs" />
