@@ -187,6 +187,7 @@
     <Compile Include="Internal\Cryptography\Pal\Unix\DecryptorPalOpenSsl.cs" />
     <Compile Include="Internal\Cryptography\Pal\Unix\DecryptorPalOpenSsl.Decode.cs" />
     <Compile Include="Internal\Cryptography\Pal\Unix\DecryptorPalOpenSsl.DecodeRecipients.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\DecryptorPalOpenSsl.Decrypt.cs" />
     <Compile Include="Internal\Cryptography\Pal\Unix\OpenSslHelpers.cs" />
     <Compile Include="Internal\Cryptography\Pal\Unix\KeyAgreeRecipientInfoPalOpenSsl.cs" />
     <Compile Include="Internal\Cryptography\Pal\Unix\KeyTransRecipientInfoPalOpenSsl.cs" />

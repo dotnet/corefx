@@ -23,7 +23,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     {
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void ImportEdgeCase()
         {
             //
@@ -144,7 +143,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void ZeroLengthContent_FixedValue()
         {
             byte[] encodedMessage =
@@ -327,7 +325,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void EnvelopedCmsDecryptNullary()
         {
             byte[] encodedMessage =
@@ -383,7 +380,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void EnvelopedCmsDecryptWithoutMatchingCert()
         {
             // You don't have the private key? No message for you.
@@ -412,7 +408,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void EnvelopedCmsDecryptWithoutMatchingCertSki()
         {
             // You don't have the private key? No message for you.

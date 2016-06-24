@@ -12,6 +12,11 @@ Shims the d2i_CMS_ContentInfo method
 extern "C" CMS_ContentInfo* CryptoNative_CmsDecode(const uint8_t* buf, int32_t len);
 
 /*
+Shims the CMS_decrypt method
+*/
+extern "C" int CryptoNative_CmsDecrypt(CMS_ContentInfo* cms, X509* cert, EVP_PKEY* pkey, BIO* out);
+
+/*
 Shim the CMS_ContentInfo_free method
 */
 extern "C" void CryptoNative_CmsDestroy(CMS_ContentInfo* cms);

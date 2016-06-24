@@ -80,7 +80,11 @@ namespace Test.Cryptography
             X509Certificate2Collection matches = FindMatches("MY", StoreLocation.CurrentUser);
             if (matches.Count == 0)
             {
-                matches = FindMatches("MY", StoreLocation.LocalMachine);
+                try
+                {
+                    matches = FindMatches("MY", StoreLocation.LocalMachine);
+                }
+                catch (PlatformNotSupportedException) { }
             }
 
             if (matches.Count != 0)
@@ -100,7 +104,7 @@ namespace Test.Cryptography
                 X509Certificate2Collection matches = new X509Certificate2Collection();
                 using (X509Store store = new X509Store(storeName, storeLocation))
                 {
-                    store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+                    store.Open(OpenFlags.ReadOnly);
                     
                     foreach (X509Certificate2 candidate in store.Certificates)
                     {

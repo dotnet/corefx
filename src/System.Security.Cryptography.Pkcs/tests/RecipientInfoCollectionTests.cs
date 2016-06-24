@@ -2,17 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
 using System.Linq;
-using System.Globalization;
 using System.Collections;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.Xml;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
 using Test.Cryptography;
@@ -22,7 +14,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
     public static class RecipientInfoCollectionTests
     {
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestCount()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -30,7 +21,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestGetEnumerator()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -38,7 +28,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestExplicitGetEnumerator()
         {
             IEnumerable col = CreateTestCollection();
@@ -46,7 +35,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestIndex()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -55,7 +43,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestIndexExceptions()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -65,7 +52,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestCopyTo()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -76,7 +62,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestExplicitCopyTo()
         {
             ICollection col = CreateTestCollection();
@@ -86,7 +71,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestCopyToOffset()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -100,7 +84,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestExplicitCopyToOffset()
         {
             ICollection col = CreateTestCollection();
@@ -114,7 +97,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestCopyToExceptions()
         {
             RecipientInfoCollection col = CreateTestCollection();
@@ -137,7 +119,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestExplicitCopyToExceptions()
         {
             ICollection col = CreateTestCollection();
@@ -155,7 +136,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Array array = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
             Assert.Throws<IndexOutOfRangeException>(() => col.CopyTo(array, 0));
         }
-
 
         private static void ValidateMembers(IEnumerable e)
         {
@@ -207,5 +187,3 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
     }
 }
-
-
