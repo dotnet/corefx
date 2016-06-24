@@ -200,6 +200,29 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         [Fact]
         [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void TestDecryptSimpleAes192_IssuerAndSerial()
+        {
+            // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
+            // and of type IssuerAndSerialNumber. The symmetric algorithm used is Aes192
+            byte[] encryptedMessage =
+                ("3082011F06092A864886F70D010703A08201103082010C0201003181C83081C5020100302E301A311830160"
+                + "603550403130F5253414B65795472616E7366657231021031D935FB63E8CFAB48A0BF7B397B67C0300D0609"
+                + "2A864886F70D010107300004818029B82454B4C301F277D7872A14695A41ED24FD37AC4C9942F9EE96774E0"
+                + "C6ACC18E756993A38AB215E5702CD34F244E52402DA432E8B79DF748405135E8A6D8CB78D88D9E4C142565C"
+                + "06F9FAFB32F5A9A4074E10FCCB0758A708CA758C12A17A4961969FCB3B2A6E6C9EB49F5E688D107E1B1DF3D"
+                + "531BC684B944FCE6BD4550C303C06092A864886F70D010701301D06096086480165030401160410FD7CBBF5"
+                + "6101854387E584C1B6EF3B08801034BD11C68228CB683E0A43AB5D27A8A4").HexToByteArray();
+
+            byte[] expectedContent = { 1, 2, 3, 4 };
+            ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
+            CertLoader certLoader = Certificates.RSAKeyTransfer1;
+
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
+        }
+
+        [Fact]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleAes256_IssuerAndSerial()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
