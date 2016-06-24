@@ -305,8 +305,28 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
-            
+
             Assert.Equal(2, ecms.UnprotectedAttributes.Count);
+            
+            CryptographicAttributeObjectCollection collection = ecms.UnprotectedAttributes;
+
+            int countOfAttr0 = collection[0].Values.Count;
+            int countOfAttr1 = collection[1].Values.Count;
+
+            Assert.True(countOfAttr0 == 0 || countOfAttr0 == 0);
+
+            CryptographicAttributeObject emptyAttributeObj = (countOfAttr0 == 0) ?
+                collection[0] :
+                collection[1];
+
+            CryptographicAttributeObject nonEmptyAttributeObj = (countOfAttr0 != 0) ?
+                collection[0] :
+                collection[1];
+            
+            Assert.Equal(2, nonEmptyAttributeObj.Values.Count);
+
+            Assert.Equal(Oids.DocumentName, emptyAttributeObj.Oid.Value);
+            Assert.Equal(Oids.DocumentDescription, nonEmptyAttributeObj.Oid.Value);
         }
 
         [Fact]
