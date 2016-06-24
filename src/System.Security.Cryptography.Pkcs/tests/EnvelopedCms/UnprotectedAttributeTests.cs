@@ -289,7 +289,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             // }
             //
             // The important part of this test is that there are 0 attributes of a type that is declared within the encoded message.
-            // On framework, this would return 2 as it would create a CryptographicAttributeObjectCollection with two CryptographicAttributeObjects, 
+            // This should return 2 as it should create a CryptographicAttributeObjectCollection with two CryptographicAttributeObjects, 
             // the first one holding a list of document description with the two values, the second one holding an empty list of
             // document name.
 
@@ -309,24 +309,18 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(2, ecms.UnprotectedAttributes.Count);
             
             CryptographicAttributeObjectCollection collection = ecms.UnprotectedAttributes;
+            string attrObj0Oid = collection[0].Oid.Value;
 
-            int countOfAttr0 = collection[0].Values.Count;
-            int countOfAttr1 = collection[1].Values.Count;
-
-            Assert.True(countOfAttr0 == 0 || countOfAttr0 == 0);
-
-            CryptographicAttributeObject emptyAttributeObj = (countOfAttr0 == 0) ?
+            CryptographicAttributeObject documentDescObj = (attrObj0Oid == Oids.DocumentDescription) ?
                 collection[0] :
                 collection[1];
 
-            CryptographicAttributeObject nonEmptyAttributeObj = (countOfAttr0 != 0) ?
+            CryptographicAttributeObject documentNameObj = (attrObj0Oid == Oids.DocumentName) ?
                 collection[0] :
                 collection[1];
-            
-            Assert.Equal(2, nonEmptyAttributeObj.Values.Count);
 
-            Assert.Equal(Oids.DocumentName, emptyAttributeObj.Oid.Value);
-            Assert.Equal(Oids.DocumentDescription, nonEmptyAttributeObj.Oid.Value);
+            Assert.Equal(0, documentNameObj.Values.Count);
+            Assert.Equal(2, documentDescObj.Values.Count);
         }
 
         [Fact]
