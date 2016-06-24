@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 
 namespace System.Reflection.Metadata.Ecma335
@@ -15,12 +16,11 @@ namespace System.Reflection.Metadata.Ecma335
     /// </remarks>
     public sealed class MetadataRootBuilder
     {
-        public static string MetadataVersionString => "v4.0.30319";
+        private const string DefaultMetadataVersionString = "v4.0.30319";
 
         // internal for testing
         internal static readonly ImmutableArray<int> EmptyRowCounts = ImmutableArray.CreateRange(Enumerable.Repeat(0, MetadataTokens.TableCount));
 
-        private readonly string _metadataVersion;
         private readonly MetadataBuilder _tablesAndHeaps;
         private readonly SerializedMetadata _serializedMetadata;
 
@@ -32,8 +32,10 @@ namespace System.Reflection.Metadata.Ecma335
         /// The entities and values will be enumerated when serializing the metadata root.
         /// </param>
         /// <param name="metadataVersion">
-        /// The version string written to the metadata header. The default value is <see cref="MetadataVersionString"/>.
+        /// The version string written to the metadata header. The default value is "v4.0.30319".
         /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="tablesAndHeaps"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="metadataVersion"/> is too long (the number of bytes when UTF8-encoded must be less than 255).</exception>
         public MetadataRootBuilder(MetadataBuilder tablesAndHeaps, string metadataVersion = null)
         {
             if (tablesAndHeaps == null)
@@ -41,12 +43,28 @@ namespace System.Reflection.Metadata.Ecma335
                 Throw.ArgumentNull(nameof(tablesAndHeaps));
             }
 
+            Debug.Assert(BlobUtilities.GetUTF8ByteCount(DefaultMetadataVersionString) == DefaultMetadataVersionString.Length);
+            int metadataVersionByteCount = metadataVersion != null ? BlobUtilities.GetUTF8ByteCount(metadataVersion) : DefaultMetadataVersionString.Length;
+
+            if (metadataVersionByteCount > MetadataSizes.MaxMetadataVersionByteCount)
+            {
+                Throw.InvalidArgument(SR.MetadataVersionTooLong, nameof(metadataVersion));
+            }
+
             _tablesAndHeaps = tablesAndHeaps;
-            _metadataVersion = metadataVersion ?? MetadataVersionString;
-            _serializedMetadata = tablesAndHeaps.GetSerializedMetadata(EmptyRowCounts, isStandaloneDebugMetadata: false);
+            MetadataVersion = metadataVersion ?? DefaultMetadataVersionString;
+            _serializedMetadata = tablesAndHeaps.GetSerializedMetadata(EmptyRowCounts, metadataVersionByteCount, isStandaloneDebugMetadata: false);
         }
 
-        internal MetadataSizes Sizes => _serializedMetadata.Sizes;
+        /// <summary>
+        /// Metadata version string.
+        /// </summary>
+        public string MetadataVersion { get; }
+
+        /// <summary>
+        /// Returns sizes of various metadata structures.
+        /// </summary>
+        public MetadataSizes Sizes => _serializedMetadata.Sizes;
 
         /// <summary>
         /// Serialized the metadata root content into the given <see cref="BlobBuilder"/>.
@@ -60,6 +78,8 @@ namespace System.Reflection.Metadata.Ecma335
         /// The relative virtual address of the start of the field init data stream.
         /// Used to calculate the final value of RVA fields of FieldRVA table.
         /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="builder"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="methodBodyStreamRva"/> or <paramref name="mappedFieldDataStreamRva"/> is negative.</exception>
         public void Serialize(BlobBuilder builder, int methodBodyStreamRva, int mappedFieldDataStreamRva)
         {
             if (builder == null)
@@ -78,7 +98,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
 
             // header:
-            MetadataBuilder.SerializeMetadataHeader(builder, _metadataVersion, _serializedMetadata.Sizes);
+            MetadataBuilder.SerializeMetadataHeader(builder, MetadataVersion, _serializedMetadata.Sizes);
 
             // #~ or #- stream:
             _tablesAndHeaps.SerializeMetadataTables(builder, _serializedMetadata.Sizes, _serializedMetadata.StringMap, methodBodyStreamRva, mappedFieldDataStreamRva);

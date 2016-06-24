@@ -216,6 +216,137 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
+        /// <summary>
+        /// Returns the current number of entires in the specified table.
+        /// </summary>
+        /// <param name="table">Table index.</param>
+        /// <returns>The number of entires in the table.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="table"/> is not a valid table index.</exception>
+        public int GetRowCount(TableIndex table)
+        {
+            switch (table)
+            {
+                case TableIndex.Assembly                : return _assemblyRow.HasValue ? 1 : 0;
+                case TableIndex.AssemblyRef             : return _assemblyRefTable.Count;
+                case TableIndex.ClassLayout             : return _classLayoutTable.Count;
+                case TableIndex.Constant                : return _constantTable.Count;
+                case TableIndex.CustomAttribute         : return _customAttributeTable.Count;
+                case TableIndex.DeclSecurity            : return _declSecurityTable.Count;
+                case TableIndex.EncLog                  : return _encLogTable.Count;
+                case TableIndex.EncMap                  : return _encMapTable.Count;
+                case TableIndex.EventMap                : return _eventMapTable.Count;
+                case TableIndex.Event                   : return _eventTable.Count;
+                case TableIndex.ExportedType            : return _exportedTypeTable.Count;
+                case TableIndex.FieldLayout             : return _fieldLayoutTable.Count;
+                case TableIndex.FieldMarshal            : return _fieldMarshalTable.Count;
+                case TableIndex.FieldRva                : return _fieldRvaTable.Count;
+                case TableIndex.Field                   : return _fieldTable.Count;
+                case TableIndex.File                    : return _fileTable.Count;
+                case TableIndex.GenericParamConstraint  : return _genericParamConstraintTable.Count;
+                case TableIndex.GenericParam            : return _genericParamTable.Count;
+                case TableIndex.ImplMap                 : return _implMapTable.Count;
+                case TableIndex.InterfaceImpl           : return _interfaceImplTable.Count;
+                case TableIndex.ManifestResource        : return _manifestResourceTable.Count;
+                case TableIndex.MemberRef               : return _memberRefTable.Count;
+                case TableIndex.MethodImpl              : return _methodImplTable.Count;
+                case TableIndex.MethodSemantics         : return _methodSemanticsTable.Count;
+                case TableIndex.MethodSpec              : return _methodSpecTable.Count;
+                case TableIndex.MethodDef               : return _methodDefTable.Count;
+                case TableIndex.ModuleRef               : return _moduleRefTable.Count;
+                case TableIndex.Module                  : return _moduleRow.HasValue ? 1 : 0;
+                case TableIndex.NestedClass             : return _nestedClassTable.Count;
+                case TableIndex.Param                   : return _paramTable.Count;
+                case TableIndex.PropertyMap             : return _propertyMapTable.Count;
+                case TableIndex.Property                : return _propertyTable.Count;
+                case TableIndex.StandAloneSig           : return _standAloneSigTable.Count;
+                case TableIndex.TypeDef                 : return _typeDefTable.Count;
+                case TableIndex.TypeRef                 : return _typeRefTable.Count;
+                case TableIndex.TypeSpec                : return _typeSpecTable.Count;
+                case TableIndex.Document                : return _documentTable.Count;
+                case TableIndex.MethodDebugInformation  : return _methodDebugInformationTable.Count;
+                case TableIndex.LocalScope              : return _localScopeTable.Count;
+                case TableIndex.LocalVariable           : return _localVariableTable.Count;
+                case TableIndex.LocalConstant           : return _localConstantTable.Count;
+                case TableIndex.StateMachineMethod      : return _stateMachineMethodTable.Count;
+                case TableIndex.ImportScope             : return _importScopeTable.Count;
+                case TableIndex.CustomDebugInformation  : return _customDebugInformationTable.Count;
+
+                case TableIndex.AssemblyOS:
+                case TableIndex.AssemblyProcessor:
+                case TableIndex.AssemblyRefOS:
+                case TableIndex.AssemblyRefProcessor:
+                case TableIndex.EventPtr:
+                case TableIndex.FieldPtr:
+                case TableIndex.MethodPtr:
+                case TableIndex.ParamPtr:
+                case TableIndex.PropertyPtr:
+                    return 0;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(table));
+            }
+        }
+
+        /// <summary>
+        /// Returns the current number of entires in each table.
+        /// </summary>
+        /// <returns>
+        /// An array of size <see cref="MetadataTokens.TableCount"/> with each item filled with the current row count of the corresponding table.
+        /// </returns>
+        public ImmutableArray<int> GetRowCounts()
+        {
+            var rowCounts = ImmutableArray.CreateBuilder<int>(MetadataTokens.TableCount);
+            rowCounts.Count = MetadataTokens.TableCount;
+
+            rowCounts[(int)TableIndex.Assembly] = _assemblyRow.HasValue ? 1 : 0;
+            rowCounts[(int)TableIndex.AssemblyRef] = _assemblyRefTable.Count;
+            rowCounts[(int)TableIndex.ClassLayout] = _classLayoutTable.Count;
+            rowCounts[(int)TableIndex.Constant] = _constantTable.Count;
+            rowCounts[(int)TableIndex.CustomAttribute] = _customAttributeTable.Count;
+            rowCounts[(int)TableIndex.DeclSecurity] = _declSecurityTable.Count;
+            rowCounts[(int)TableIndex.EncLog] = _encLogTable.Count;
+            rowCounts[(int)TableIndex.EncMap] = _encMapTable.Count;
+            rowCounts[(int)TableIndex.EventMap] = _eventMapTable.Count;
+            rowCounts[(int)TableIndex.Event] = _eventTable.Count;
+            rowCounts[(int)TableIndex.ExportedType] = _exportedTypeTable.Count;
+            rowCounts[(int)TableIndex.FieldLayout] = _fieldLayoutTable.Count;
+            rowCounts[(int)TableIndex.FieldMarshal] = _fieldMarshalTable.Count;
+            rowCounts[(int)TableIndex.FieldRva] = _fieldRvaTable.Count;
+            rowCounts[(int)TableIndex.Field] = _fieldTable.Count;
+            rowCounts[(int)TableIndex.File] = _fileTable.Count;
+            rowCounts[(int)TableIndex.GenericParamConstraint] = _genericParamConstraintTable.Count;
+            rowCounts[(int)TableIndex.GenericParam] = _genericParamTable.Count;
+            rowCounts[(int)TableIndex.ImplMap] = _implMapTable.Count;
+            rowCounts[(int)TableIndex.InterfaceImpl] = _interfaceImplTable.Count;
+            rowCounts[(int)TableIndex.ManifestResource] = _manifestResourceTable.Count;
+            rowCounts[(int)TableIndex.MemberRef] = _memberRefTable.Count;
+            rowCounts[(int)TableIndex.MethodImpl] = _methodImplTable.Count;
+            rowCounts[(int)TableIndex.MethodSemantics] = _methodSemanticsTable.Count;
+            rowCounts[(int)TableIndex.MethodSpec] = _methodSpecTable.Count;
+            rowCounts[(int)TableIndex.MethodDef] = _methodDefTable.Count;
+            rowCounts[(int)TableIndex.ModuleRef] = _moduleRefTable.Count;
+            rowCounts[(int)TableIndex.Module] = _moduleRow.HasValue ? 1 : 0;
+            rowCounts[(int)TableIndex.NestedClass] = _nestedClassTable.Count;
+            rowCounts[(int)TableIndex.Param] = _paramTable.Count;
+            rowCounts[(int)TableIndex.PropertyMap] = _propertyMapTable.Count;
+            rowCounts[(int)TableIndex.Property] = _propertyTable.Count;
+            rowCounts[(int)TableIndex.StandAloneSig] = _standAloneSigTable.Count;
+            rowCounts[(int)TableIndex.TypeDef] = _typeDefTable.Count;
+            rowCounts[(int)TableIndex.TypeRef] = _typeRefTable.Count;
+            rowCounts[(int)TableIndex.TypeSpec] = _typeSpecTable.Count;
+
+            rowCounts[(int)TableIndex.Document] = _documentTable.Count;
+            rowCounts[(int)TableIndex.MethodDebugInformation] = _methodDebugInformationTable.Count;
+            rowCounts[(int)TableIndex.LocalScope] = _localScopeTable.Count;
+            rowCounts[(int)TableIndex.LocalVariable] = _localVariableTable.Count;
+            rowCounts[(int)TableIndex.LocalConstant] = _localConstantTable.Count;
+            rowCounts[(int)TableIndex.StateMachineMethod] = _stateMachineMethodTable.Count;
+            rowCounts[(int)TableIndex.ImportScope] = _importScopeTable.Count;
+            rowCounts[(int)TableIndex.CustomDebugInformation] = _customDebugInformationTable.Count;
+
+            return rowCounts.MoveToImmutable();
+        }
+
         #region Building
 
         // Note on argument value checking:
@@ -1204,61 +1335,6 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         #endregion
-
-        // internal for testing
-        internal ImmutableArray<int> GetRowCounts()
-        {
-            var rowCounts = ImmutableArray.CreateBuilder<int>(MetadataTokens.TableCount);
-            rowCounts.Count = MetadataTokens.TableCount;
-
-            rowCounts[(int)TableIndex.Assembly] = _assemblyRow.HasValue ? 1 : 0;
-            rowCounts[(int)TableIndex.AssemblyRef] = _assemblyRefTable.Count;
-            rowCounts[(int)TableIndex.ClassLayout] = _classLayoutTable.Count;
-            rowCounts[(int)TableIndex.Constant] = _constantTable.Count;
-            rowCounts[(int)TableIndex.CustomAttribute] = _customAttributeTable.Count;
-            rowCounts[(int)TableIndex.DeclSecurity] = _declSecurityTable.Count;
-            rowCounts[(int)TableIndex.EncLog] = _encLogTable.Count;
-            rowCounts[(int)TableIndex.EncMap] = _encMapTable.Count;
-            rowCounts[(int)TableIndex.EventMap] = _eventMapTable.Count;
-            rowCounts[(int)TableIndex.Event] = _eventTable.Count;
-            rowCounts[(int)TableIndex.ExportedType] = _exportedTypeTable.Count;
-            rowCounts[(int)TableIndex.FieldLayout] = _fieldLayoutTable.Count;
-            rowCounts[(int)TableIndex.FieldMarshal] = _fieldMarshalTable.Count;
-            rowCounts[(int)TableIndex.FieldRva] = _fieldRvaTable.Count;
-            rowCounts[(int)TableIndex.Field] = _fieldTable.Count;
-            rowCounts[(int)TableIndex.File] = _fileTable.Count;
-            rowCounts[(int)TableIndex.GenericParamConstraint] = _genericParamConstraintTable.Count;
-            rowCounts[(int)TableIndex.GenericParam] = _genericParamTable.Count;
-            rowCounts[(int)TableIndex.ImplMap] = _implMapTable.Count;
-            rowCounts[(int)TableIndex.InterfaceImpl] = _interfaceImplTable.Count;
-            rowCounts[(int)TableIndex.ManifestResource] = _manifestResourceTable.Count;
-            rowCounts[(int)TableIndex.MemberRef] = _memberRefTable.Count;
-            rowCounts[(int)TableIndex.MethodImpl] = _methodImplTable.Count;
-            rowCounts[(int)TableIndex.MethodSemantics] = _methodSemanticsTable.Count;
-            rowCounts[(int)TableIndex.MethodSpec] = _methodSpecTable.Count;
-            rowCounts[(int)TableIndex.MethodDef] = _methodDefTable.Count;
-            rowCounts[(int)TableIndex.ModuleRef] = _moduleRefTable.Count;
-            rowCounts[(int)TableIndex.Module] = _moduleRow.HasValue ? 1 : 0;
-            rowCounts[(int)TableIndex.NestedClass] = _nestedClassTable.Count;
-            rowCounts[(int)TableIndex.Param] = _paramTable.Count;
-            rowCounts[(int)TableIndex.PropertyMap] = _propertyMapTable.Count;
-            rowCounts[(int)TableIndex.Property] = _propertyTable.Count;
-            rowCounts[(int)TableIndex.StandAloneSig] = _standAloneSigTable.Count;
-            rowCounts[(int)TableIndex.TypeDef] = _typeDefTable.Count;
-            rowCounts[(int)TableIndex.TypeRef] = _typeRefTable.Count;
-            rowCounts[(int)TableIndex.TypeSpec] = _typeSpecTable.Count;
-
-            rowCounts[(int)TableIndex.Document] = _documentTable.Count;
-            rowCounts[(int)TableIndex.MethodDebugInformation] = _methodDebugInformationTable.Count;
-            rowCounts[(int)TableIndex.LocalScope] = _localScopeTable.Count;
-            rowCounts[(int)TableIndex.LocalVariable] = _localVariableTable.Count;
-            rowCounts[(int)TableIndex.LocalConstant] = _localConstantTable.Count;
-            rowCounts[(int)TableIndex.StateMachineMethod] = _stateMachineMethodTable.Count;
-            rowCounts[(int)TableIndex.ImportScope] = _importScopeTable.Count;
-            rowCounts[(int)TableIndex.CustomDebugInformation] = _customDebugInformationTable.Count;
-
-            return rowCounts.MoveToImmutable();
-        }
 
         #region Serialization
 

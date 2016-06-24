@@ -15,6 +15,11 @@ namespace System.Reflection.Metadata.Ecma335
     {
         private const int StreamAlignment = 4;
 
+        // Call the length of the string (including the terminator) m (we require m <= 255);
+        internal const int MaxMetadataVersionByteCount = 0xff - 1;
+
+        internal readonly int MetadataVersionPaddedLength;
+
         internal const ulong SortedDebugTables =
             1UL << (int)TableIndex.LocalScope |
             1UL << (int)TableIndex.StateMachineMethod |
@@ -101,6 +106,7 @@ namespace System.Reflection.Metadata.Ecma335
             ImmutableArray<int> rowCounts,
             ImmutableArray<int> externalRowCounts,
             ImmutableArray<int> heapSizes,
+            int metadataVersionByteCount,
             bool isStandaloneDebugMetadata)
         {
             Debug.Assert(rowCounts.Length == MetadataTokens.TableCount);
@@ -110,6 +116,9 @@ namespace System.Reflection.Metadata.Ecma335
             RowCounts = rowCounts;
             ExternalRowCounts = externalRowCounts;
             HeapSizes = heapSizes;
+
+            // +1 for NUL terminator
+            MetadataVersionPaddedLength = BitArithmetic.Align(metadataVersionByteCount + 1, 4);
 
             PresentTablesMask = ComputeNonEmptyTableMask(rowCounts);
             ExternalTablesMask = ComputeNonEmptyTableMask(externalRowCounts);
@@ -359,9 +368,6 @@ namespace System.Reflection.Metadata.Ecma335
                     (IsEncDelta ? EncDeltaMarkerStreamHeaderSize : 0);
             }
         }
-
-        // version must be 12 chars long, this observation is not supported by the standard
-        internal const int MetadataVersionPaddedLength = 12;
 
         internal static int GetMetadataStreamHeaderSize(string streamName)
         {

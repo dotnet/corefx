@@ -4,12 +4,13 @@
 
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Reflection.Internal;
 
 namespace System.Reflection.Metadata.Ecma335
 {
     public sealed partial class MetadataBuilder
     {
-        internal SerializedMetadata GetSerializedMetadata(ImmutableArray<int> externalRowCounts, bool isStandaloneDebugMetadata)
+        internal SerializedMetadata GetSerializedMetadata(ImmutableArray<int> externalRowCounts, int metadataVersionByteCount, bool isStandaloneDebugMetadata)
         {
             var stringHeapBuilder = new HeapBlobBuilder(_stringHeapCapacity);
             var stringMap = SerializeStringHeap(stringHeapBuilder, _strings, _stringHeapStartOffset);
@@ -25,7 +26,7 @@ namespace System.Reflection.Metadata.Ecma335
                 _blobHeapSize,
                 _guidBuilder.Count);
 
-            var sizes = new MetadataSizes(GetRowCounts(), externalRowCounts, heapSizes, isStandaloneDebugMetadata);
+            var sizes = new MetadataSizes(GetRowCounts(), externalRowCounts, heapSizes, metadataVersionByteCount, isStandaloneDebugMetadata);
 
             return new SerializedMetadata(sizes, stringHeapBuilder, stringMap);
         }
@@ -46,16 +47,18 @@ namespace System.Reflection.Metadata.Ecma335
             // reserved
             builder.WriteUInt32(0);
 
-            // metadata version length
-            builder.WriteUInt32(MetadataSizes.MetadataVersionPaddedLength);
+            // Spec (section 24.2.1 Metadata Root):
+            // Length ... Number of bytes allocated to hold version string (including null terminator), call this x.
+            //            Call the length of the string (including the terminator) m (we require m <= 255);
+            //            the length x is m rounded up to a multiple of four.
+            builder.WriteInt32(sizes.MetadataVersionPaddedLength);
 
-            int n = Math.Min(MetadataSizes.MetadataVersionPaddedLength, metadataVersion.Length);
-            for (int i = 0; i < n; i++)
-            {
-                builder.WriteByte((byte)metadataVersion[i]);
-            }
+            int metadataVersionStart = builder.Count;
+            builder.WriteUTF8(metadataVersion);
+            builder.WriteByte(0);
+            int metadataVersionEnd = builder.Count;
 
-            for (int i = n; i < MetadataSizes.MetadataVersionPaddedLength; i++)
+            for (int i = 0; i < sizes.MetadataVersionPaddedLength - (metadataVersionEnd - metadataVersionStart); i++)
             {
                 builder.WriteByte(0);
             }

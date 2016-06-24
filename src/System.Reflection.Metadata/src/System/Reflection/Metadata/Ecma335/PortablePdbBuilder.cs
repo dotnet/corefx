@@ -14,8 +14,8 @@ namespace System.Reflection.Metadata.Ecma335
     /// </summary>
     public sealed class PortablePdbBuilder
     {
-        public static string MetadataVersionString => "PDB v1.0";
-        public static ushort FormatVersion => 0x0100;
+        public string MetadataVersion => "PDB v1.0";
+        public ushort FormatVersion => 0x0100;
 
         private Blob _pdbIdBlob;
         private readonly MethodDefinitionHandle _entryPoint;
@@ -33,6 +33,8 @@ namespace System.Reflection.Metadata.Ecma335
         /// </param>
         /// <param name="typeSystemRowCounts">
         /// Row counts of all tables that the associated type-system metadata contain.
+        /// Each slot in the array corresponds to a table (<see cref="TableIndex"/>).
+        /// The length of the array must be equal to <see cref="MetadataTokens.TableCount"/>.
         /// </param>
         /// <param name="entryPoint">
         /// Entry point method definition handle.
@@ -43,6 +45,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// (<see cref="BlobContentId.GetTimeBasedProvider()"/>).
         /// You must specify a deterministic function to produce a deterministic Portable PDB image.
         /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="tablesAndHeaps"/> or <paramref name="typeSystemRowCounts"/> is null.</exception>
         public PortablePdbBuilder(
             MetadataBuilder tablesAndHeaps, 
             ImmutableArray<int> typeSystemRowCounts,
@@ -54,15 +57,46 @@ namespace System.Reflection.Metadata.Ecma335
                 Throw.ArgumentNull(nameof(tablesAndHeaps));
             }
 
+            ValidateTypeSystemRowCounts(typeSystemRowCounts);
+            
+            _builder = tablesAndHeaps;
+            _entryPoint = entryPoint;
+
+            Debug.Assert(BlobUtilities.GetUTF8ByteCount(MetadataVersion) == MetadataVersion.Length);
+            _serializedMetadata = tablesAndHeaps.GetSerializedMetadata(typeSystemRowCounts, MetadataVersion.Length, isStandaloneDebugMetadata: true);
+
+            IdProvider = idProvider ?? BlobContentId.GetTimeBasedProvider();
+        }
+
+        private static void ValidateTypeSystemRowCounts(ImmutableArray<int> typeSystemRowCounts)
+        {
             if (typeSystemRowCounts.IsDefault)
             {
                 Throw.ArgumentNull(nameof(typeSystemRowCounts));
             }
 
-            _builder = tablesAndHeaps;
-            _entryPoint = entryPoint;
-            _serializedMetadata = tablesAndHeaps.GetSerializedMetadata(typeSystemRowCounts, isStandaloneDebugMetadata: true);
-            IdProvider = idProvider ?? BlobContentId.GetTimeBasedProvider();
+            if (typeSystemRowCounts.Length != MetadataTokens.TableCount)
+            {
+                throw new ArgumentException(SR.Format(SR.ExpectedArrayOfSize, MetadataTokens.TableCount), nameof(typeSystemRowCounts));
+            }
+
+            for (int i = 0; i < typeSystemRowCounts.Length; i++)
+            {
+                if (typeSystemRowCounts[i] == 0)
+                {
+                    continue;
+                }
+
+                if ((unchecked((uint)typeSystemRowCounts[i]) & ~TokenTypeIds.RIDMask) != 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(typeSystemRowCounts), SR.Format(SR.RowCountOutOfRange, i));
+                }
+
+                if (((1UL << i) & (ulong)TableMask.ValidPortablePdbExternalTables) == 0)
+                {
+                    throw new ArgumentException(SR.Format(SR.RowCountMustBeZero, i), nameof(typeSystemRowCounts));
+                }
+            }
         }
 
         /// <summary>
@@ -89,6 +123,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         /// <param name="builder">Builder to write to.</param>
         /// <returns>The id of the serialized content.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="builder"/> is null.</exception>
         public BlobContentId Serialize(BlobBuilder builder)
         {
             if (builder == null)
@@ -97,7 +132,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
 
             // header:
-            MetadataBuilder.SerializeMetadataHeader(builder, MetadataVersionString, _serializedMetadata.Sizes);
+            MetadataBuilder.SerializeMetadataHeader(builder, MetadataVersion, _serializedMetadata.Sizes);
 
             // #Pdb stream
             SerializeStandalonePdbStream(builder);
