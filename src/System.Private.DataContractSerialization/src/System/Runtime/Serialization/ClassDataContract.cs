@@ -270,6 +270,8 @@ namespace System.Runtime.Serialization
             { return _helper.GetKeyValuePairMethodInfo; }
         }
 
+        private ConstructorInfo _nonAttributedTypeConstructor;
+
         /// <SecurityNote>
         /// Critical - fetches information about which constructor should be used to initialize non-attributed types that are valid for serialization
         /// Safe - only needs to be protected for write
@@ -277,7 +279,41 @@ namespace System.Runtime.Serialization
         [SecuritySafeCritical]
         internal ConstructorInfo GetNonAttributedTypeConstructor()
         {
-            return _helper.GetNonAttributedTypeConstructor();
+            if (_nonAttributedTypeConstructor == null)
+            {
+                // Cache the ConstructorInfo to improve performance.
+                _nonAttributedTypeConstructor = _helper.GetNonAttributedTypeConstructor();
+            }
+
+            return _nonAttributedTypeConstructor;
+        }
+
+        private Func<object> _makeNewInstance;
+        private Func<object> MakeNewInstance
+        {
+            get
+            {
+                if (_makeNewInstance == null)
+                {
+                    _makeNewInstance = FastInvokerBuilder.GetMakeNewInstanceFunc(UnderlyingType);
+                }
+
+                return _makeNewInstance;
+            }
+        }
+
+        internal object CreateNewInstanceViaDefaultConstructor(ConstructorInfo ci)
+        {
+            Debug.Assert(ci != null);
+            if (ci.IsPublic)
+            {
+                // Optimization for calling public default ctor.
+                return MakeNewInstance();
+            }
+            else
+            {
+                return ci.Invoke(Array.Empty<object>());
+            }
         }
 
 #if NET_NATIVE

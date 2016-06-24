@@ -1518,6 +1518,12 @@ namespace SerializationTypes
         public int B;
     }
 
+    public struct SimpleStructWithProperties
+    {
+        public int Num { get; set; }
+        public string Text { get; set; }
+    }
+
     public class WithEnums
     {
         public IntEnum Int { get; set; }

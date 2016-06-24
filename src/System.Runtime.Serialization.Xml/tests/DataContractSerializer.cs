@@ -1215,6 +1215,16 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    public static void DCS_SimpleStructWithProperties()
+    {
+        SimpleStructWithProperties x = new SimpleStructWithProperties() { Num = 1, Text = "Foo" };
+        var y = SerializeAndDeserialize(x, "<SimpleStructWithProperties xmlns=\"http://schemas.datacontract.org/2004/07/SerializationTypes\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><Num>1</Num><Text>Foo</Text></SimpleStructWithProperties>");
+
+        Assert.True(x.Num == y.Num, "x.Num != y.Num");
+        Assert.True(x.Text == y.Text, "x.Text != y.Text");
+    }
+
+    [Fact]
     public static void DCS_InternalTypeSerialization()
     {
         var value = new InternalType() { InternalProperty = 12 };
@@ -2170,6 +2180,24 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
     }
 
+    [Fact]
+    public static void DCS_ArrayOfSimpleType()
+    {
+        // Intentionally set count to 64 to test array resizing functionality during de-serialization.
+        int count = 64;
+        var value = new SimpleType[count];
+        for (int i = 0; i < count; i++)
+        {
+            value[i] = new SimpleType() { P1 = i.ToString(), P2 = i };
+        }
+
+        var deserialized = SerializeAndDeserialize(value, baseline: null, skipStringCompare: true);
+        Assert.StrictEqual(value.Length, deserialized.Length);
+        Assert.StrictEqual(0, deserialized[0].P2);
+        Assert.StrictEqual(1, deserialized[1].P2);
+        Assert.StrictEqual(count-1, deserialized[count-1].P2);
+    }
+
     #endregion
 
     #region Collection
@@ -2361,10 +2389,10 @@ public static partial class DataContractSerializerTests
             ms.Position = 0;
 
             string actualOutput = new StreamReader(ms).ReadToEnd();
-            Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
 
             if (!skipStringCompare)
             {
+                Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
                 Assert.True(result.Equal, string.Format("{1}{0}Test failed for input: {2}{0}Expected: {3}{0}Actual: {4}",
                     Environment.NewLine, result.ErrorMessage, value, baseline, actualOutput));
             }

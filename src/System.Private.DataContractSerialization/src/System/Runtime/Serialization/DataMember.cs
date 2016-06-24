@@ -157,6 +157,36 @@ namespace System.Runtime.Serialization
             set
             { _helper.ConflictingMember = value; }
         }
+
+        private FastInvokerBuilder.Getter _getter;
+        internal FastInvokerBuilder.Getter Getter
+        {
+            get
+            {
+                if (_getter == null)
+                {
+                    _getter = FastInvokerBuilder.BuildGetAccessor(MemberInfo);
+                }
+
+                return _getter;
+            }
+        }
+
+
+        private FastInvokerBuilder.Setter _setter;
+        internal FastInvokerBuilder.Setter Setter
+        {
+            get
+            {
+                if (_setter == null)
+                {
+                    _setter = FastInvokerBuilder.BuildSetAccessor(MemberInfo);
+                }
+
+                return _setter;
+            }
+        }
+
         [SecurityCritical]
 
         /// <SecurityNote>
