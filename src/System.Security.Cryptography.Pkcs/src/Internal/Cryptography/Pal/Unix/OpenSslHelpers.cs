@@ -139,19 +139,17 @@ namespace Internal.Cryptography.Pal.OpenSsl
                     DerSequenceReader attributeReader = encodedAttributesReader.ReadSequence();
 
                     Oid attributeOid = attributeReader.ReadOid();
-
-                    // This reads a set of unprotected attributes. If the set is empty then no CryptographicObject will 
-                    // be created. In framework this works differently and is documented on issue 9252. In case this
-                    // behavior wants to be emulated the only thing that would need to be done is create a 
-                    // CryptographicObject with the Oid sorted in attributeOid
+                    AsnEncodedDataCollection attributeCollection = new AsnEncodedDataCollection();
                     DerSequenceReader attributeSetReader = attributeReader.ReadSet();
                     
                     while (attributeSetReader.HasData)
                     {
                         byte[] singleEncodedAttribute = attributeSetReader.ReadNextEncodedValue();
                         AsnEncodedData singleAttribute = Helpers.CreateBestPkcs9AttributeObjectAvailable(attributeOid, singleEncodedAttribute);
-                        unprotectedAttributesCollection.Add(singleAttribute);
+                        attributeCollection.Add(singleAttribute);
                     }
+
+                    unprotectedAttributesCollection.Add(new CryptographicAttributeObject(attributeOid, attributeCollection));
                 }
             }
 

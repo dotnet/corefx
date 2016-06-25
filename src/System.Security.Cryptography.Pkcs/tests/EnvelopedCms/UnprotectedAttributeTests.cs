@@ -289,10 +289,10 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             // }
             //
             // The important part of this test is that there are 0 attributes of a type that is declared within the encoded message.
-            // On framework, this would return 2 as explained on issue 9252, that is it would create a CryptographicAttributeObjectCollection
-            // with two CryptographicAttributeObjects, the first one holding a list of document description with the two values, the second one
-            // holding an empty list of document name. This makes ecms.UnprotectedAttributes.Count be 2. Core doesn't create the second
-            // list and as such ecms.UnprotectedAttributes.Count returns 1 as documented here.
+            // This should return 2 as it should create a CryptographicAttributeObjectCollection with two CryptographicAttributeObjects, 
+            // the first one holding a list of document description with the two values, the second one holding an empty list of
+            // document name.
+
             byte[] encodedMessage =
                 ("3082017806092A864886F70D010703A0820169308201650201023181C83081C5020100302E301A311830160603550403"
                 + "130F5253414B65795472616E7366657231021031D935FB63E8CFAB48A0BF7B397B67C0300D06092A864886F70D010101"
@@ -305,8 +305,22 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
+
+            Assert.Equal(2, ecms.UnprotectedAttributes.Count);
             
-            Assert.Equal(1, ecms.UnprotectedAttributes.Count);
+            CryptographicAttributeObjectCollection collection = ecms.UnprotectedAttributes;
+            string attrObj0Oid = collection[0].Oid.Value;
+
+            CryptographicAttributeObject documentDescObj = (attrObj0Oid == Oids.DocumentDescription) ?
+                collection[0] :
+                collection[1];
+
+            CryptographicAttributeObject documentNameObj = (attrObj0Oid == Oids.DocumentName) ?
+                collection[0] :
+                collection[1];
+
+            Assert.Equal(0, documentNameObj.Values.Count);
+            Assert.Equal(2, documentDescObj.Values.Count);
         }
 
         [Fact]
