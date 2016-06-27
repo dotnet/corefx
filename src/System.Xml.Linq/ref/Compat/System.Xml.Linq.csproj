@@ -8,11 +8,6 @@
     <NuGetTargetMoniker>.NETFramework,Version=v4.6</NuGetTargetMoniker>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{F9BD7A56-BE3A-444A-A16E-21D8BD49E2DC}</ProjectGuid>
-    <ReferenceAssemblyOutputPath Condition="'$(ReferenceAssemblyOutputPath)' == ''">$(BaseOutputPath)ref/</ReferenceAssemblyOutputPath>
-    <AssemblyName Condition="'$(AssemblyName)' == ''">$(MSBuildProjectName)</AssemblyName>
-    <OutputPath>$(ReferenceAssemblyOutputPath)$(AssemblyName)/$(AssemblyVersion)/Compat/</OutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)ref/$(AssemblyName)/$(AssemblyVersion)/Compat/</IntermediateOutputPath>
-    <ExcludeReferenceAssembliesImport>true</ExcludeReferenceAssembliesImport>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Xml.Linq.cs" />
@@ -20,5 +15,4 @@
     <ProjectReference Include="..\..\..\System.Xml\ref\Compat\System.Xml.csproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
-  <Import Project="$(CommonPath)/../Compat.targets" />
 </Project>

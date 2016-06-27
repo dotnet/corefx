@@ -7,11 +7,6 @@
     <PackageTargetFramework>net46</PackageTargetFramework>
     <NuGetTargetMoniker>.NETFramework,Version=v4.6</NuGetTargetMoniker>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ReferenceAssemblyOutputPath Condition="'$(ReferenceAssemblyOutputPath)' == ''">$(BaseOutputPath)ref/</ReferenceAssemblyOutputPath>
-    <AssemblyName Condition="'$(AssemblyName)' == ''">$(MSBuildProjectName)</AssemblyName>
-    <OutputPath>$(ReferenceAssemblyOutputPath)$(AssemblyName)/$(AssemblyVersion)/Compat/</OutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)ref/$(AssemblyName)/$(AssemblyVersion)/Compat/</IntermediateOutputPath>
-    <ExcludeReferenceAssembliesImport>true</ExcludeReferenceAssembliesImport>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.IO.Compression.FileSystem.cs" />
@@ -20,5 +15,4 @@
     <ProjectReference Include="..\..\..\System.IO.Compression\ref\Compat\System.IO.Compression.csproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
-  <Import Project="$(CommonPath)/../Compat.targets" />
 </Project>
