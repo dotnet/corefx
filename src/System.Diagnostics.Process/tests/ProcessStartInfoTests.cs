@@ -12,11 +12,14 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using Xunit;
 using System.Text;
+using System.Threading;
 
 namespace System.Diagnostics.Tests
 {
     public partial class ProcessStartInfoTests : ProcessTestBase
     {
+        private static Mutex mut = new Mutex(false, "PROCESS_TEST_USERCREDENTIALS");
+
         [Fact]
         public void TestEnvironmentProperty()
         {
@@ -350,12 +353,17 @@ namespace System.Diagnostics.Tests
         public void TestUserCredentialsPropertiesOnWindows()
         {
             string username = "test", password = "PassWord123!!";
+
+            mut.WaitOne();
+
             try
             {
                 Interop.NetUserAdd(username, password);
             }
             catch (Exception exc)
             {
+                mut.ReleaseMutex();
+
                 Console.Error.WriteLine("TestUserCredentialsPropertiesOnWindows: NetUserAdd failed: {0}", exc.Message);
                 return; // test is irrelevant if we can't add a user
             }
@@ -394,7 +402,11 @@ namespace System.Diagnostics.Tests
             finally
             {
                 IEnumerable<uint> collection = new uint[] { 0 /* NERR_Success */, 2221 /* NERR_UserNotFound */ };
-                Assert.Contains<uint>(Interop.NetUserDel(null, username), collection);
+                uint result = Interop.NetUserDel(null, username);
+
+                mut.ReleaseMutex();
+
+                Assert.Contains<uint>(result, collection);
 
                 if (handle != null)
                     handle.Dispose();
