@@ -6816,8 +6816,10 @@ namespace System.Globalization
     {
         public const int CurrentEra = 0;
         protected Calendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public virtual System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         protected virtual int DaysInYearBeforeMinSupportedYear { get { return default(int); } }
         public abstract int[] Eras { get; }
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
@@ -6870,6 +6872,7 @@ namespace System.Globalization
         public abstract System.DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era);
         public virtual int ToFourDigitYear(int year) { return default(int); }
     }
+#if FEATURE_COREFX_GLOBALIZATION
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public enum CalendarAlgorithmType
     {
@@ -6878,6 +6881,7 @@ namespace System.Globalization
         SolarCalendar = 1,
         Unknown = 0,
     }
+#endif
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public enum CalendarWeekRule
     {
@@ -7164,7 +7168,9 @@ namespace System.Globalization
     public abstract partial class EastAsianLunisolarCalendar : System.Globalization.Calendar
     {
         internal EastAsianLunisolarCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public override int TwoDigitYearMax { get { return default(int); } set { } }
         public override System.DateTime AddMonths(System.DateTime time, int months) { return default(System.DateTime); }
         public override System.DateTime AddYears(System.DateTime time, int years) { return default(System.DateTime); }
@@ -7192,8 +7198,10 @@ namespace System.Globalization
         public const int ADEra = 1;
         public GregorianCalendar() { }
         public GregorianCalendar(System.Globalization.GregorianCalendarTypes type) { }
+#if FEATURE_COREFX_GLOBALIZATION
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public virtual System.Globalization.GregorianCalendarTypes CalendarType { get { return default(System.Globalization.GregorianCalendarTypes); } set { } }
         public override int[] Eras { get { return default(int[]); } }
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
@@ -7235,7 +7243,9 @@ namespace System.Globalization
     {
         public static readonly int HebrewEra;
         public HebrewCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public override int[] Eras { get { return default(int[]); } }
         public override System.DateTime MaxSupportedDateTime { get { return default(System.DateTime); } }
         public override System.DateTime MinSupportedDateTime { get { return default(System.DateTime); } }
@@ -7263,8 +7273,10 @@ namespace System.Globalization
     {
         public static readonly int HijriEra;
         public HijriCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         protected override int DaysInYearBeforeMinSupportedYear { get { return default(int); } }
         public override int[] Eras { get { return default(int[]); } }
         public int HijriAdjustment { [System.Security.SecuritySafeCriticalAttribute]get { return default(int); } set { } }
@@ -7310,8 +7322,10 @@ namespace System.Globalization
     public partial class JapaneseCalendar : System.Globalization.Calendar
     {
         public JapaneseCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public override int[] Eras { get { return default(int[]); } }
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.DateTime MaxSupportedDateTime { get { return default(System.DateTime); } }
@@ -7354,8 +7368,10 @@ namespace System.Globalization
     {
         public static readonly int JulianEra;
         public JulianCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public override int[] Eras { get { return default(int[]); } }
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.DateTime MaxSupportedDateTime { get { return default(System.DateTime); } }
@@ -7386,8 +7402,10 @@ namespace System.Globalization
     {
         public const int KoreanEra = 1;
         public KoreanCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public override int[] Eras { get { return default(int[]); } }
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.DateTime MaxSupportedDateTime { get { return default(System.DateTime); } }
@@ -7492,7 +7510,9 @@ namespace System.Globalization
     {
         public static readonly int PersianEra;
         public PersianCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public override int[] Eras { get { return default(int[]); } }
         public override System.DateTime MaxSupportedDateTime { get { return default(System.DateTime); } }
         public override System.DateTime MinSupportedDateTime { get { return default(System.DateTime); } }
@@ -7587,8 +7607,10 @@ namespace System.Globalization
     public partial class TaiwanCalendar : System.Globalization.Calendar
     {
         public TaiwanCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public override int[] Eras { get { return default(int[]); } }
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.DateTime MaxSupportedDateTime { get { return default(System.DateTime); } }
@@ -7675,8 +7697,10 @@ namespace System.Globalization
     {
         public const int ThaiBuddhistEra = 1;
         public ThaiBuddhistCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         public override int[] Eras { get { return default(int[]); } }
         [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override System.DateTime MaxSupportedDateTime { get { return default(System.DateTime); } }
@@ -7714,7 +7738,9 @@ namespace System.Globalization
     {
         public const int UmAlQuraEra = 1;
         public UmAlQuraCalendar() { }
+#if FEATURE_COREFX_GLOBALIZATION
         public override System.Globalization.CalendarAlgorithmType AlgorithmType { get { return default(System.Globalization.CalendarAlgorithmType); } }
+#endif
         protected override int DaysInYearBeforeMinSupportedYear { get { return default(int); } }
         public override int[] Eras { get { return default(int[]); } }
         public override System.DateTime MaxSupportedDateTime { get { return default(System.DateTime); } }
@@ -7860,7 +7886,7 @@ namespace System.IO
         protected void Write7BitEncodedInt(int value) { }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-    internal sealed partial class BufferedStream : System.IO.Stream
+    public sealed partial class BufferedStream : System.IO.Stream
     {
         public BufferedStream(System.IO.Stream stream) { }
         public BufferedStream(System.IO.Stream stream, int bufferSize) { }
@@ -15493,6 +15519,19 @@ namespace System.Runtime.InteropServices.Expando
 }
 namespace System.Runtime.InteropServices.WindowsRuntime
 {
+    [System.AttributeUsageAttribute((System.AttributeTargets)(5148), Inherited = false)]
+    internal sealed partial class WindowsRuntimeImportAttribute : System.Attribute
+    {
+        internal WindowsRuntimeImportAttribute() { }
+    }
+    [System.Runtime.InteropServices.GuidAttribute("82BA7092-4C88-427D-A7BC-16DD93FEB67E")]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
+    internal partial interface IRestrictedErrorInfo
+    {
+        void GetErrorDetails(out string description, out int error, out string restrictedDescription, out string capabilitySid);
+        void GetReference(out string reference);
+    }
+#if FEATURE_COMINTEROP
     [System.AttributeUsageAttribute((System.AttributeTargets)(1028), AllowMultiple=false, Inherited=false)]
     public sealed partial class DefaultInterfaceAttribute : System.Attribute
     {
@@ -15540,13 +15579,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public byte MinorVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(byte); } }
         public byte RevisionVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(byte); } }
     }
-    [System.Runtime.InteropServices.GuidAttribute("82BA7092-4C88-427D-A7BC-16DD93FEB67E")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
-    internal partial interface IRestrictedErrorInfo
-    {
-        void GetErrorDetails(out string description, out int error, out string restrictedDescription, out string capabilitySid);
-        void GetReference(out string reference);
-    }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public partial class NamespaceResolveEventArgs : System.EventArgs
     {
@@ -15565,11 +15597,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
     {
         public ReturnValueNameAttribute(string name) { }
         public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(string); } }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(5148), Inherited = false)]
-    internal sealed partial class WindowsRuntimeImportAttribute : System.Attribute
-    {
-        internal WindowsRuntimeImportAttribute() { }
     }
     public static partial class WindowsRuntimeMarshal
     {
@@ -15596,6 +15623,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
     {
         public WriteOnlyArrayAttribute() { }
     }
+#endif //FEATURE_COMINTEROP
 }
 namespace System.Runtime.Loader
 {
@@ -23821,7 +23849,9 @@ namespace Windows.Foundation.Diagnostics
     [System.Runtime.InteropServices.GuidAttribute("50850B26-267E-451B-A890-AB6A370245EE")]
     internal partial interface IAsyncCausalityTracerStatics
     {
+#if FEATURE_COMINTEROP
         System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken add_TracingStatusChanged(System.EventHandler<Windows.Foundation.Diagnostics.TracingStatusChangedEventArgs> eventHandler);
+#endif
         void TraceOperationCompletion(Windows.Foundation.Diagnostics.CausalityTraceLevel traceLevel, Windows.Foundation.Diagnostics.CausalitySource source, System.Guid platformId, ulong operationId, Windows.Foundation.Diagnostics.AsyncCausalityStatus status);
         void TraceOperationCreation(Windows.Foundation.Diagnostics.CausalityTraceLevel traceLevel, Windows.Foundation.Diagnostics.CausalitySource source, System.Guid platformId, ulong operationId, string operationName, ulong relatedContext);
         void TraceOperationRelation(Windows.Foundation.Diagnostics.CausalityTraceLevel traceLevel, Windows.Foundation.Diagnostics.CausalitySource source, System.Guid platformId, ulong operationId, Windows.Foundation.Diagnostics.CausalityRelation relation);
