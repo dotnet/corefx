@@ -385,6 +385,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             mdBuilder.GetOrAddDocumentName(@"/");
             mdBuilder.GetOrAddDocumentName(@"\\");
             mdBuilder.GetOrAddDocumentName("\ud800"); // unpaired surrogate
+            mdBuilder.GetOrAddDocumentName("\0");
 
             var serialized = mdBuilder.GetSerializedMetadata(MetadataRootBuilder.EmptyRowCounts, 12, isStandaloneDebugMetadata: false);
 
@@ -446,13 +447,19 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // "\ud800"
                 0x02, (byte)'/', 0x3E,
 
+                // 0x45
+                0x01, 0x00,
+
+                // "\0"
+                0x02, (byte)'/', 0x45,
+
                 // heap padding
-                0x00, 0x00, 0x00
+                0x00, 0x00
             }, heaps.ToArray());
         }
 
         [Fact]
-        public void GetOrAddDocumentName()
+        public void GetOrAddDocumentName2()
         {
             var mdBuilder = new MetadataBuilder();
             mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
@@ -466,6 +473,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var n7 = mdBuilder.GetOrAddDocumentName(@"/");
             var n8 = mdBuilder.GetOrAddDocumentName(@"\\");
             var n9 = mdBuilder.GetOrAddDocumentName("\ud800"); // unpaired surrogate
+            var n10 = mdBuilder.GetOrAddDocumentName("\0");
 
             var root = new MetadataRootBuilder(mdBuilder);
             var rootBuilder = new BlobBuilder();
@@ -484,6 +492,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 Assert.Equal(@"/", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n7))));
                 Assert.Equal(@"\\", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n8))));
                 Assert.Equal("\uFFFd\uFFFd", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n9))));
+                Assert.Equal("\0", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n10))));
             }
         }
 
