@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -52,7 +52,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Diagnostics.Process.pkgproj">
+    <ProjectReference Include="..\..\src\System.Diagnostics.Process.csproj">
       <Project>{63634289-90d7-4947-8bf3-dbbe98d76c85}</Project>
       <Name>System.Diagnostics.Process</Name>
       <OSGroup>$(InputOSGroup)</OSGroup>
@@ -61,6 +61,14 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
       <OSGroup>$(InputOSGroup)</OSGroup>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)'=='true'">
+    <ProjectReference Include="..\System.Diagnostics.Process.NetUserService\System.Diagnostics.Process.NetUserService.vcxproj">
+      <Project>{6c665290-70ac-481a-bc43-4a13f7aa44cd}</Project>
+      <Name>System.Diagnostics.Process.NetUserService</Name>
+      <SetConfiguration>Configuration=Release</SetConfiguration>
+      <SetPlatform Condition="'$(Platform)'=='AnyCPU'">Platform=x64</SetPlatform>
     </ProjectReference>
   </ItemGroup>
   <!--  <ItemGroup>
