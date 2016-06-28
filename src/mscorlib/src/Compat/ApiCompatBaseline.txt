@@ -2501,7 +2501,6 @@ TypesMustExist : Type 'System.Threading.Overlapped' does not exist in the implem
 TypesMustExist : Type 'System.Threading.ParameterizedThreadStart' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Threading.ReaderWriterLock' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Threading.RegisteredWaitHandle' does not exist in the implementation but it does exist in the contract.
-CannotRemoveBaseTypeOrInterface : Type 'System.Threading.Semaphore' does not inherit from base type 'System.MarshalByRefObject' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Threading.SemaphoreFullException' does not inherit from base type 'System.SystemException' in the implementation but it does in the contract.
 MembersMustExist : Member 'System.Threading.SemaphoreFullException..ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Threading.SendOrPostCallback' does not implement interface 'System.ICloneable' in the implementation but it does in the contract.
@@ -2560,4 +2559,4 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Threading.Tasks.TaskCanceledExcep
 MembersMustExist : Member 'System.Threading.Tasks.TaskCanceledException..ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Threading.Tasks.TaskSchedulerException' does not implement interface 'System.Runtime.Serialization.ISerializable' in the implementation but it does in the contract.
 MembersMustExist : Member 'System.Threading.Tasks.TaskSchedulerException..ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
-Total Issues: 2561
+Total Issues: 2560

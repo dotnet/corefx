@@ -22759,22 +22759,6 @@ namespace System.Threading
         [System.Runtime.InteropServices.ComVisibleAttribute(true)]
         public bool Unregister(System.Threading.WaitHandle waitObject) { return default(bool); }
     }
-    public sealed partial class Semaphore : System.Threading.WaitHandle
-    {
-        [System.Security.SecuritySafeCriticalAttribute]
-        public Semaphore(int initialCount, int maximumCount) { }
-        [System.Security.SecurityCriticalAttribute]
-        public Semaphore(int initialCount, int maximumCount, string name) { }
-        [System.Security.SecurityCriticalAttribute]
-        public Semaphore(int initialCount, int maximumCount, string name, out bool createdNew) { createdNew = default(bool); }
-        [System.Security.SecurityCriticalAttribute]
-        public static System.Threading.Semaphore OpenExisting(string name) { throw null; }
-        public int Release() { throw null; }
-        [System.Security.SecuritySafeCriticalAttribute]
-        public int Release(int releaseCount) { throw null; }
-        [System.Security.SecurityCriticalAttribute]
-        public static bool TryOpenExisting(string name, out System.Threading.Semaphore result) { result = default(System.Threading.Semaphore); throw null; }
-    }
     [System.Runtime.CompilerServices.TypeForwardedFromAttribute("System, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089")]
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public partial class SemaphoreFullException : System.SystemException
