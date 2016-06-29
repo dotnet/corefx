@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection.Emit;
-
 namespace System.Reflection.Emit.Tests
 {
     public class TestConstructor
@@ -97,17 +95,6 @@ namespace System.Reflection.Emit.Tests
         public static TypeBuilder DynamicType(TypeAttributes attributes, string assemblyName = "TestAssembly", string moduleName = "TestModule", string typeName = "TestType")
         {
             return DynamicModule(assemblyName, moduleName).DefineType(typeName, attributes);
-        }
-    }
-}
-
-namespace TestLibrary
-{
-    public static class Utilities
-    {
-        public static ModuleBuilder GetModuleBuilder(AssemblyBuilder asmBuild, string moduleName)
-        {
-            return asmBuild.DefineDynamicModule(moduleName);
         }
     }
 }

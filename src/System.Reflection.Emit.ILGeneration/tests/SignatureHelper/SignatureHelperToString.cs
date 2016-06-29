@@ -4,25 +4,18 @@
 
 using Xunit;
 
-namespace System.Reflection.Emit.ILGeneration.Tests
+namespace System.Reflection.Emit.Tests
 {
     public class SignatureHelperToString
     {
         [Fact]
-        public void PosTest1()
+        public void ToString_EqualSignatureHelpers_ReturnsEqualStrings()
         {
-            AssemblyBuilder myAssembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly_SignatureHelperAddArgument"), AssemblyBuilderAccess.Run);
-            ModuleBuilder myModule = TestLibrary.Utilities.GetModuleBuilder(myAssembly, "Module_SignatureHelperAddArgument");
-            SignatureHelper sHelper1 = SignatureHelper.GetFieldSigHelper(myModule);
-            SignatureHelper sHelper2 = SignatureHelper.GetFieldSigHelper(myModule);
+            ModuleBuilder module = Helpers.DynamicModule();
+            SignatureHelper helper1 = SignatureHelper.GetFieldSigHelper(module);
+            SignatureHelper helper2 = SignatureHelper.GetFieldSigHelper(module);
 
-            string expectedValue;
-            string actualValue;
-
-            expectedValue = sHelper1.ToString();
-            actualValue = sHelper2.ToString();
-
-            Assert.True(expectedValue.Equals(actualValue));
+            Assert.Equal(helper1.ToString(), helper2.ToString());
         }
     }
 }
