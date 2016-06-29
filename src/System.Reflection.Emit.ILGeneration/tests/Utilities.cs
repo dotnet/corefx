@@ -11,6 +11,7 @@ namespace System.Reflection.Emit.Tests
         static TestConstructor() { }
         internal TestConstructor(bool b) { }
     }
+
     public class CustomAttributeBuilderTest : Attribute
     {
         public string TestString
@@ -81,6 +82,21 @@ namespace System.Reflection.Emit.Tests
                 properties[i] = name == null ? null : typeof(CustomAttributeBuilderTest).GetProperty(name, Flags);
             }
             return properties;
+        }
+        public static AssemblyBuilder DynamicAssembly(string name = "TestAssembly")
+        {
+            AssemblyName assemblyName = new AssemblyName(name);
+            return AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+        }
+
+        public static ModuleBuilder DynamicModule(string assemblyName = "TestAssembly", string moduleName = "TestModule")
+        {
+            return DynamicAssembly(assemblyName).DefineDynamicModule(moduleName);
+        }
+
+        public static TypeBuilder DynamicType(TypeAttributes attributes, string assemblyName = "TestAssembly", string moduleName = "TestModule", string typeName = "TestType")
+        {
+            return DynamicModule(assemblyName, moduleName).DefineType(typeName, attributes);
         }
     }
 }

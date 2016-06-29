@@ -12,20 +12,15 @@ namespace System.Reflection.Emit.Tests
 
     public class CustomAttributeBuilderCtor4
     {
-        private const int MinStringLength = 1;
-        private const int MaxStringLength = 1024;
         private const string IntField = "TestInt";
         private const string StringField = "TestStringField";
         private const string GetStringField = "GetString";
         private const string GetIntField = "GetInt";
-
-        private const BindingFlags FieldBindingFlag = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
+        
         private const string IntProperty = "TestInt32";
         private const string StringProperty = "TestString";
         private const string GetStringProperty = "GetOnlyString";
         private const string GetIntProperty = "GetOnlyInt32";
-
-        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
 
         public static IEnumerable<object[]> TestData()
         {

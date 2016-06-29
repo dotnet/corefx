@@ -23,7 +23,6 @@
     <Compile Include="CustomAttributeBuilder\CustomAttributeBuilderCtor2.cs" />
     <Compile Include="CustomAttributeBuilder\CustomAttributeBuilderCtor3.cs" />
     <Compile Include="CustomAttributeBuilder\CustomAttributeBuilderCtor4.cs" />
-    <Compile Include="ILGenerator\DeclareLocal.Overload.Tests.cs" />
     <Compile Include="ILGenerator\DeclareLocalTests.cs" />
     <Compile Include="ILGenerator\DefineLabelTests.cs" />
     <Compile Include="ILGenerator\Emit1Tests.cs" />
@@ -32,7 +31,7 @@
     <Compile Include="ILGenerator\EmitWriteLineTests.cs" />
     <Compile Include="ILGenerator\ExceptionEmitTests.cs" />
     <Compile Include="ILGenerator\ILOffsetTests.cs" />
-    <Compile Include="Label\LabelEquals1.cs" />
+    <Compile Include="Label\LabelEquals.cs" />
     <Compile Include="Label\LabelGetHashCode.cs" />
     <Compile Include="LocalBuilder\LocalBuilderIsPinned.cs" />
     <Compile Include="LocalBuilder\LocalBuilderLocalIndex.cs" />
@@ -57,7 +56,6 @@
     <Compile Include="SignatureHelper\SignatureHelperGetSignature.cs" />
     <Compile Include="SignatureHelper\SignatureHelperToString.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
