@@ -12,11 +12,15 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using Xunit;
 using System.Text;
+using System.Threading;
+using System.ComponentModel;
 
 namespace System.Diagnostics.Tests
 {
     public partial class ProcessStartInfoTests : ProcessTestBase
     {
+        private static Mutex mut = new Mutex(false, "PROCESS_TEST_USERCREDENTIALS");
+
         [Fact]
         public void TestEnvironmentProperty()
         {
@@ -349,23 +353,29 @@ namespace System.Diagnostics.Tests
         [Fact, PlatformSpecific(PlatformID.Windows), OuterLoop] // Requires admin privileges
         public void TestUserCredentialsPropertiesOnWindows()
         {
+            const string userService = "System.Diagnostics.Process.NetUserService.exe";
             string username = "test", password = "PassWord123!!";
-            try
-            {
-                Interop.NetUserAdd(username, password);
-            }
-            catch (Exception exc)
-            {
-                Console.Error.WriteLine("TestUserCredentialsPropertiesOnWindows: NetUserAdd failed: {0}", exc.Message);
-                return; // test is irrelevant if we can't add a user
-            }
 
             bool hasStarted = false;
             SafeProcessHandle handle = null;
-            Process p = null;
+            Process p = null, tp = null;
+
+            mut.WaitOne();
 
             try
             {
+                ProcessStartInfo ps = new ProcessStartInfo(userService, string.Format("add {0} {1}", username, password));
+                tp = Process.Start(ps);
+                tp.WaitForExit();
+
+                if (tp.ExitCode != 0)
+                {
+                    mut.ReleaseMutex();
+
+                    Console.Error.WriteLine("TestUserCredentialsPropertiesOnWindows: NetUserAdd failed");
+                    return; // test is irrelevant if we can't add a user
+                }
+
                 p = CreateProcessLong();
 
                 p.StartInfo.LoadUserProfile = true;
@@ -394,7 +404,14 @@ namespace System.Diagnostics.Tests
             finally
             {
                 IEnumerable<uint> collection = new uint[] { 0 /* NERR_Success */, 2221 /* NERR_UserNotFound */ };
-                Assert.Contains<uint>(Interop.NetUserDel(null, username), collection);
+
+                ProcessStartInfo ps = new ProcessStartInfo(userService, string.Format("del {0}", username));
+                tp = Process.Start(ps);
+                tp.WaitForExit();
+
+                mut.ReleaseMutex();
+
+                Assert.Contains<uint>((uint)tp.ExitCode, collection);
 
                 if (handle != null)
                     handle.Dispose();
