@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_cms.h"
+#include <openssl/err.h>
+#include <openssl/evp.h>
 
 extern "C" CMS_ContentInfo* CryptoNative_CmsDecode(const uint8_t* buf, int32_t len)
 {
@@ -102,4 +104,88 @@ extern "C" int CryptoNative_CmsGetRecipientStackFieldCount(CmsRecipientStack* re
     }
 
     return sk_CMS_RecipientInfo_num(recipientStack);
+}
+
+extern "C" CMS_ContentInfo* CryptoNative_CmsInitializeEnvelope(ASN1_OBJECT* algorithmOid, int32_t* status)
+{
+    if (algorithmOid == nullptr || status == nullptr)
+    {
+        *status = -1;
+        return nullptr;
+    }
+
+    const EVP_CIPHER* cipher = EVP_get_cipherbyobj(algorithmOid);
+
+    if (cipher == nullptr)
+    {
+        *status = 0;
+        return nullptr;
+    }
+
+    *status = 1;
+    return CMS_EnvelopedData_create(cipher);
+}
+
+extern "C" int CryptoNative_CmsAddSkidRecipient(CMS_ContentInfo* cms, X509* cert)
+{
+    if (cms == nullptr || cert == nullptr)
+    {
+        return -1;
+    }
+
+    // TODO (3334): here we must evaluate if there's an explicit skid, or we must generate
+    // one according to the fallback behavior seen in CryptoApi. Eg: The SHA-1 hash of the publicKeyInfo
+    // blob of the encoded certificate.
+
+    return (CMS_add1_recipient_cert(cms, cert, CMS_USE_KEYID) == nullptr) ? 0 : 1;
+}
+
+extern "C" int CryptoNative_CmsAddIssuerAndSerialRecipient(CMS_ContentInfo* cms, X509* cert)
+{
+    if (cms == nullptr || cert == nullptr)
+    {
+        return -1;
+    }
+
+    return (CMS_add1_recipient_cert(cms, cert, 0) == nullptr) ? 0 : 1;
+}
+
+extern "C" int CryptoNative_CmsAddOriginatorCert(CMS_ContentInfo* cms, X509* cert)
+{
+    if (cms == nullptr || cert == nullptr)
+    {
+        return -1;
+    }
+
+    return CMS_add1_cert(cms, cert);
+}
+
+extern "C" int CryptoNative_CmsCompleteMessage(CMS_ContentInfo* cms, BIO* data, bool detached)
+{
+    if (cms == nullptr || data == nullptr)
+    {
+        return -1;
+    }
+
+    // This function will allocate a new ASN1_OCTET_STRING to store the message's/signature's content and flag it
+    // as a created octet string instead of one that was read in if detached is false, otherwise it will free the object in the content
+    // of the CMS_ContentInfo structure and set the pointer to null.
+    // If this function is not used with the detached flag as false, the content won't get attached to the CMS_ContentInfo
+    // structure and the i2d function will return the encoding for a CMS with no content inside of it.
+    if (CMS_set_detached(cms, detached) == 0)
+    {
+        return 0;
+    }
+
+    return CMS_final(cms, data, nullptr, 0);
+}
+
+extern "C" int CryptoNative_CmsGetDerSize(CMS_ContentInfo* cms)
+{
+    return i2d_CMS_ContentInfo(cms, nullptr);
+}
+
+extern "C" int CryptoNative_CmsEncode(CMS_ContentInfo* cms, uint8_t* buf)
+{
+    return i2d_CMS_ContentInfo(cms, &buf);
 }

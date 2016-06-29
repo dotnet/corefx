@@ -15,7 +15,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class GeneralTests
     {
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeVersion0_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -177,7 +176,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void MultipleRecipientIdentifiers_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -213,7 +211,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void RoundTrip_ExplicitSki()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });

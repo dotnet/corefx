@@ -144,6 +144,9 @@
   <data name="Cryptography_Cms_Invalid_Subject_Identifier_Type" xml:space="preserve">
     <value>The subject identifier type {0} is not valid.</value>
   </data>
+  <data name="Cryptography_Cms_KeyAgreementPlatformNotSupported" xml:space="preserve">
+    <value>This platform does not support encrypting for KeyAgreement recipients.</value>
+  </data>
   <data name="Cryptography_Cms_Key_Agree_Date_Not_Available" xml:space="preserve">
     <value>The Date property is not available for none KID key agree recipient.</value>
   </data>
@@ -155,6 +158,12 @@
   </data>
   <data name="Cryptography_Cms_Recipient_Not_Found" xml:space="preserve">
     <value>The enveloped-data message does not contain the specified recipient.</value>
+  </data>
+  <data name="Cryptography_Cms_RecipientCertificate_Not_Found" xml:space="preserve">
+    <value>The recipient certificate is not specified.</value>
+  </data>
+  <data name="Cryptography_Cms_UnknownAlgorithm" xml:space="preserve">
+    <value>Unknown cryptographic algorithm.</value>
   </data>
   <data name="Cryptography_Cms_UnknownKeySpec" xml:space="preserve">
     <value>Unable to determine the type of key handle from this keyspec {0}.</value>

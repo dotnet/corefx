@@ -193,6 +193,7 @@
     <Compile Include="Internal\Cryptography\Pal\Unix\KeyTransRecipientInfoPalOpenSsl.cs" />
     <Compile Include="Internal\Cryptography\Pal\Unix\PkcsPal.OpenSsl.cs" />
     <Compile Include="Internal\Cryptography\Pal\Unix\PkcsPalOpenSsl.cs" />
+    <Compile Include="Internal\Cryptography\Pal\Unix\PkcsPalOpenSsl.Encrypt.cs" />
   </ItemGroup>
   <!-- Common types (platform: Unix) -->
   <ItemGroup Condition="'$(TargetsUnix)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true' AND '$(GeneratePlatformNotSupportedAssembly)' != 'true'">
@@ -219,6 +220,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Encode.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Encode.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.ERR.cs</Link>

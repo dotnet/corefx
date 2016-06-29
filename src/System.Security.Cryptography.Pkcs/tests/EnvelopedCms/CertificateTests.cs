@@ -22,7 +22,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class CertificateTests
     {
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeCertificates0_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });

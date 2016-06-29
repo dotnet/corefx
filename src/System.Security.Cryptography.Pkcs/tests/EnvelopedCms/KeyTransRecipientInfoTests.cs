@@ -22,7 +22,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class KeyTransRecipientInfoTests
     {
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransVersion_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -37,7 +36,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransType_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -52,7 +50,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdType_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -69,7 +66,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -124,7 +120,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_ExplicitSki_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -164,7 +159,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransKeyEncryptionAlgorithm_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();
@@ -183,7 +177,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransEncryptedKey_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl();

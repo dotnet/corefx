@@ -13,17 +13,6 @@ namespace Internal.Cryptography.Pal.OpenSsl
 {
     internal sealed partial class PkcsPalOpenSsl : PkcsPal
     {
-        public sealed override byte[] Encrypt(
-            CmsRecipientCollection recipients,
-            ContentInfo contentInfo,
-            AlgorithmIdentifier contentEncryptionAlgorithm,
-            X509Certificate2Collection originatorCerts,
-            CryptographicAttributeObjectCollection unprotectedAttributes)
-        {
-            // TODO(3334): see CMS_ContentInfo *CMS_encrypt(...) in cms.h
-            throw new NotImplementedException();
-        }
-
         public sealed override DecryptorPal Decode(byte[] encodedMessage,
             out int version,
             out ContentInfo contentInfo,

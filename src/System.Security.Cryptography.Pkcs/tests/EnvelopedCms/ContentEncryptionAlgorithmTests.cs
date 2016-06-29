@@ -22,7 +22,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class ContentEncryptionAlgorithmTests
     {
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeAlgorithmRc2_128_RoundTrip()
         {
             AlgorithmIdentifier algorithm = new AlgorithmIdentifier(new Oid(Oids.Rc2));
@@ -61,7 +60,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeAlgorithmDes_RoundTrip()
         {
             AlgorithmIdentifier algorithm = new AlgorithmIdentifier(new Oid(Oids.Des));
@@ -100,7 +98,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeAlgorithm3Des_RoundTrip()
         {
             AlgorithmIdentifier algorithm = new AlgorithmIdentifier(new Oid(Oids.TripleDesCbc));
@@ -178,7 +175,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeAlgorithmAes128_RoundTrip()
         {
             AlgorithmIdentifier algorithm = new AlgorithmIdentifier(new Oid(Oids.Aes128));
@@ -217,7 +213,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeAlgorithmAes192_RoundTrip()
         {
             AlgorithmIdentifier algorithm = new AlgorithmIdentifier(new Oid(Oids.Aes192));
@@ -256,7 +251,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeAlgorithmAes256_RoundTrip()
         {
             AlgorithmIdentifier algorithm = new AlgorithmIdentifier(new Oid(Oids.Aes256));
