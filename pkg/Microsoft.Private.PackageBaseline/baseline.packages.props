@@ -122,7 +122,7 @@
       <Version>4.0.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.IO.FileSystem">
-      <Version>4.0.1</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.IO.FileSystem.Primitives">
       <Version>4.0.1</Version>
