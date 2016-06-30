@@ -31,6 +31,9 @@
     <Project Include="..\pkg\Microsoft.NETCore.Targets\Microsoft.NETCore.Targets.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="System.Diagnostics.StackTrace\pkg\System.Diagnostics.StackTrace.build">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <UsingTask TaskName="GenerateNetStandardSupportTable" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
