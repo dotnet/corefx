@@ -31,7 +31,10 @@
     <Project Include="..\pkg\Microsoft.NETCore.Targets\Microsoft.NETCore.Targets.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="System.Diagnostics.StackTrace\pkg\System.Diagnostics.StackTrace.build">
+    <Project Include="System.Diagnostics.StackTrace\pkg\System.Diagnostics.StackTrace.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="System.IO.Compression\pkg\System.IO.Compression.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
