@@ -5,6 +5,7 @@
   <PropertyGroup>
     <PackageTargetRuntime>win7</PackageTargetRuntime>
     <PreventImplementationReference>true</PreventImplementationReference>
+    <Version>4.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
