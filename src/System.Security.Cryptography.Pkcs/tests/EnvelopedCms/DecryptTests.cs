@@ -175,7 +175,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleAes128_IssuerAndSerial()
         {
@@ -198,7 +197,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleAes192_IssuerAndSerial()
         {
@@ -221,7 +219,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleAes256_IssuerAndSerial()
         {
@@ -244,7 +241,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleTripleDes_IssuerAndSerial()
         {
@@ -267,8 +263,8 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestDecryptSimpleAes256_Ski()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
@@ -290,7 +286,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleAes256_RsaTransferCapi()
         {
@@ -313,7 +308,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleAes256_RsaSha256()
         {
@@ -336,7 +330,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleAes256_RsaSha384()
         {
@@ -359,7 +352,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimpleAes256_RsaSha512()
         {
@@ -377,6 +369,31 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             byte[] expectedContent = { 1, 2, 3, 4 };
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
             CertLoader certLoader = Certificates.RSASha512KeyTransfer1;
+
+            VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
+        }
+
+        [Fact]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void TestDecryptSimple_ExplicitSki()
+        {
+            // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer_ExplicitSkid.GetCertificate()
+            // and of type SubjectKeyIdentifier. The symmetric algorithm used is Aes256
+            byte[] encryptedMessage =
+                ("3082018806092A864886F70D010703A082017930820175020102318201303082012C020102801401952851C"
+                + "55DB594B0C6167F5863C5B6B67AEFE6300D06092A864886F70D010101050004820100269EAF029262C87125"
+                + "314DD3FB02302FA212EB3CC06F73DF1474382BBA2A92845F39FF5A7F5020482849C36B4BC6BC82F7AF0E2E3"
+                + "9143548CC32B93B72EF0659C6895F77E6B5839962678532392185C9431658B34D1ABD31F64F4C4A9B348A77"
+                + "56783D60244519ADDD33560405E9377A91617127C2EECF2BAE53AB930FC13AFD25723FB60DB763286EDF6F1"
+                + "187D8124B6A569AA2BD19294A7D551A0D90F8436274690231520A2254C19EA9BF877FC99566059A29CDF503"
+                + "6BEA1D517916BA2F20AC9F1D8F164B6E8ACDD52BA8B2650EBBCC2ED9103561E11AF422D10DF7405404195FA"
+                + "EF79A1FDC680F3A3DC395E3E9C0B10394DF35AE134E6CB719E35152F8E5303C06092A864886F70D01070130"
+                + "1D060960864801650304012A041085072D8771A2A2BB403E3236A7C60C2A80105C71A04E73C57FE75C1DEDD"
+                + "94B57FD01").HexToByteArray();
+
+            byte[] expectedContent = { 1, 2, 3, 4 };
+            ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
+            CertLoader certLoader = Certificates.RSAKeyTransfer_ExplicitSkid;
 
             VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }

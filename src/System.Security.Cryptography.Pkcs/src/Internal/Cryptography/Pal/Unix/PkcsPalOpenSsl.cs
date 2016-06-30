@@ -149,8 +149,33 @@ namespace Internal.Cryptography.Pal.OpenSsl
         /// </summary>
         public sealed override byte[] GetSubjectKeyIdentifier(X509Certificate2 certificate)
         {
-            // TODO(3334): Use certificate.PublicKey and the Subject properties with the encoder. 
-            throw new NotImplementedException();
+            X509ExtensionCollection certExtensions = certificate.Extensions;
+            foreach (X509Extension ext in certExtensions)
+            {
+                if (ext != null && ext.Oid != null &&
+                    StringComparer.Ordinal.Equals(Oids.SubjectKeyIdentifier, ext.Oid.Value))
+                {
+                    return DerSequenceReader.CreateForPayload(ext.RawData).ReadOctetString();
+                }
+            }
+
+            // If we've reached this point, it means the certificate doesn't explicitly have a SubjectKeyIdentifier
+            // extension, so one must be generated using SHA1
+            //
+            // As stated in OpenSslCertificateFinder:
+            // The Desktop/Windows version of this method use CertGetCertificateContextProperty
+            // with a property ID of CERT_KEY_IDENTIFIER_PROP_ID.
+            //
+            // MSDN says that when there's no extension, this method takes the SHA-1 of the
+            // SubjectPublicKeyInfo block, and returns that.
+            //
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/aa376079%28v=vs.85%29.aspx
+            //
+            // As of now we don't support this fallback, but we can't throw PlatformNotSupportedException yet
+            // as there might be a recipient for which we have a certificate which we can use to decrypt.
+            // If all certificates don't match then TryDecrypt will throw a "recipient not found" cryptographic
+            // exception which explains OpenSSL's behavior.
+            return Array.Empty<byte>();
         }
     }
 }

@@ -28,16 +28,5 @@ namespace Internal.Cryptography.Pal.OpenSsl
                 _decodedMessage = null;
             }
         }
-
-        public sealed override ContentInfo TryDecrypt(
-            RecipientInfo recipientInfo,
-            X509Certificate2 cert,
-            X509Certificate2Collection originatorCerts,
-            X509Certificate2Collection extraStore,
-            out Exception exception)
-        {
-            // TODO(3334): Decrypt look at CMS_decrypt & functions in OpenSsl. 
-            throw new NotImplementedException();
-        }
     }
 }

@@ -14,6 +14,16 @@ extern "C" CMS_ContentInfo* CryptoNative_CmsDecode(const uint8_t* buf, int32_t l
     return d2i_CMS_ContentInfo(nullptr, &buf, len);
 }
 
+extern "C" int CryptoNative_CmsDecrypt(CMS_ContentInfo* cms, X509* cert, EVP_PKEY* pkey, BIO* out)
+{
+    if (cms == nullptr || cert == nullptr || pkey == nullptr || out == nullptr)
+    {
+        return 0;
+    }
+
+    return CMS_decrypt(cms, pkey, cert, nullptr, out, CMS_BINARY);
+}
+
 extern "C" void CryptoNative_CmsDestroy(CMS_ContentInfo* cms)
 {
     if (cms != nullptr)

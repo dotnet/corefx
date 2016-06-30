@@ -38,5 +38,8 @@ namespace Internal.Cryptography
         public const string Pkcs7SignedEnveloped = "1.2.840.113549.1.7.4";
         public const string Pkcs7Hashed = "1.2.840.113549.1.7.5";
         public const string Pkcs7Encrypted = "1.2.840.113549.1.7.6";
+
+        // Recipient identifiers
+        public const string SubjectKeyIdentifier = "2.5.29.14";
     }
 }
