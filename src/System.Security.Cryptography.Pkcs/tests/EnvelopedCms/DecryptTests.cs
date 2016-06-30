@@ -377,7 +377,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void TestDecryptSimple_ExplicitSki()
         {
-            // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer_ExplicitSkid.GetCertificate()
+            // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer_ExplicitSki.GetCertificate()
             // and of type SubjectKeyIdentifier. The symmetric algorithm used is Aes256
             byte[] encryptedMessage =
                 ("3082018806092A864886F70D010703A082017930820175020102318201303082012C020102801401952851C"
@@ -393,7 +393,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             byte[] expectedContent = { 1, 2, 3, 4 };
             ContentInfo expectedContentInfo = new ContentInfo(expectedContent);
-            CertLoader certLoader = Certificates.RSAKeyTransfer_ExplicitSkid;
+            CertLoader certLoader = Certificates.RSAKeyTransfer_ExplicitSki;
 
             VerifySimpleDecrypt(encryptedMessage, certLoader, expectedContentInfo);
         }

@@ -15,7 +15,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         public static readonly CertLoader RSAKeyTransfer1 = new CertLoaderFromRawData(RawData.s_RSAKeyTransfer1Cer, RawData.s_RSAKeyTransfer1Pfx, "1111");
         public static readonly CertLoader RSAKeyTransfer2 = new CertLoaderFromRawData(RawData.s_RSAKeyTransfer2Cer, RawData.s_RSAKeyTransfer2Pfx, "1111");
         public static readonly CertLoader RSAKeyTransfer3 = new CertLoaderFromRawData(RawData.s_RSAKeyTransfer3Cer, RawData.s_RSAKeyTransfer3Pfx, "1111");
-        public static readonly CertLoader RSAKeyTransfer_ExplicitSkid = new CertLoaderFromRawData(RawData.s_RSAKeyTransferCer_ExplicitSkid, RawData.s_RSAKeyTransferPfx_ExplicitSkid, "1111");
+        public static readonly CertLoader RSAKeyTransfer_ExplicitSki = new CertLoaderFromRawData(RawData.s_RSAKeyTransferCer_ExplicitSki, RawData.s_RSAKeyTransferPfx_ExplicitSki, "1111");
         public static readonly CertLoader RSAKeyTransferCapi1 = new CertLoaderFromRawData(RawData.s_RSAKeyTransferCapi1Cer, RawData.s_RSAKeyTransferCapi1Pfx, "1111");
         public static readonly CertLoader RSASha256KeyTransfer1 = new CertLoaderFromRawData(RawData.s_RSASha256KeyTransfer1Cer, RawData.s_RSASha256KeyTransfer1Pfx, "1111");
         public static readonly CertLoader RSASha384KeyTransfer1 = new CertLoaderFromRawData(RawData.s_RSASha384KeyTransfer1Cer, RawData.s_RSASha384KeyTransfer1Pfx, "1111");
@@ -376,7 +376,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 + "73aef677d25ae8657f81ca1cd5dd50404b70b9373eadcd2d276e263105c00607a86f0c10ab26d1aafd986313a36c70389a4d"
                 + "1a8e88").HexToByteArray();
 
-            public static byte[] s_RSAKeyTransferCer_ExplicitSkid =
+            public static byte[] s_RSAKeyTransferCer_ExplicitSki =
                 ("3082033E30820226A003020102020900B5EFA7E1E80518B4300D06092A864886F70D01010B0500304D310B3009060355"
                 + "04061302515A310D300B060355040813044C616E643111300F060355040713084D7974686963616C311C301A06035504"
                 + "03131353656C662D5369676E6564204578616D706C65301E170D3136303632383030323034355A170D31363037323830"
@@ -397,7 +397,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 + "3188DB9364AAD52D4E28169CC898B621FF84").HexToByteArray();
 
             // password = "1111"
-            public static byte[] s_RSAKeyTransferPfx_ExplicitSkid =
+            public static byte[] s_RSAKeyTransferPfx_ExplicitSki =
                 ("308209810201033082094706092A864886F70D010701A08209380482093430820930308203E706092A864886F70D0107"
                 + "06A08203D8308203D4020100308203CD06092A864886F70D010701301C060A2A864886F70D010C0106300E0408101C5A"
                 + "3E2DBE2A9102020800808203A0F58476F5E4741F8834F50ED49D1A3A5B2FC8C345B54255C30556B1426C1BA1D9EE4440"
