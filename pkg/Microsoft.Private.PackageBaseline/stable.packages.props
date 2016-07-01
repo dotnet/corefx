@@ -1316,5 +1316,23 @@
     <StablePackage Include="System.ServiceModel.Security">
       <Version>4.0.1</Version>
     </StablePackage>
+    
+    <!-- Servicing -->
+    <StablePackage Include="Microsoft.NETCore.Portable.Compatibility">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="Microsoft.NETCore.Targets">
+      <Version>1.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win7.System.Private.Uri">
+      <Version>4.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="System.Diagnostics.StackTrace">
+      <Version>4.0.2</Version>
+    </StablePackage>
+    <StablePackage Include="System.IO.Compression">
+      <Version>4.1.1</Version>
+    </StablePackage>
+    
   </ItemGroup>
 </Project>
