@@ -2397,13 +2397,13 @@ namespace SerializationTypes
         public List<SimpleTypeWihtMoreProperties> SimpleTypeList { get; set; }
     }
 
-    public class SimpleTypeWihtMoreFields
+    public class SimpleTypeWithMoreFields
     {
         public string StringField;
         public int IntField;
         public MyEnum EnumField;
         public List<string> CollectionField;
-        public List<SimpleTypeWihtMoreFields> SimpleTypeList;
+        public List<SimpleTypeWithMoreFields> SimpleTypeList;
     }
 
     // New types
