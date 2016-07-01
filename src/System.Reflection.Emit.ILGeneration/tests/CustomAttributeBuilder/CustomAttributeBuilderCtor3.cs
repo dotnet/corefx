@@ -8,8 +8,6 @@ using Xunit;
 
 namespace System.Reflection.Emit.Tests
 {
-    using static Helpers;
-
     public class CustomAttributeBuilderCtor3
     {
         private const string IntProperty = "TestInt32";
@@ -95,11 +93,11 @@ namespace System.Reflection.Emit.Tests
             Type attribute = typeof(CustomAttributeBuilderTest);
 
             ConstructorInfo constructor = attribute.GetConstructor(ctorParams);
-            PropertyInfo[] namedProperties = GetProperties(namedPropertyNames);
+            PropertyInfo[] namedProperties = Helpers.GetProperties(namedPropertyNames);
 
             CustomAttributeBuilder cab = new CustomAttributeBuilder(constructor, constructorArgs, namedProperties, propertyValues);
 
-            PropertyInfo[] properties = GetProperties(IntProperty, StringProperty, GetStringProperty, GetIntProperty);
+            PropertyInfo[] properties = Helpers.GetProperties(IntProperty, StringProperty, GetStringProperty, GetIntProperty);
             VerifyCustomAttribute(cab, attribute, properties, expected);
         }
 
@@ -113,7 +111,7 @@ namespace System.Reflection.Emit.Tests
         public void NamedPropertyAndPropertyValuesDifferentLengths_ThrowsArgumentException(string[] propertyNames, object[] propertyValues, string paramName)
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            PropertyInfo[] namedProperties = GetProperties(propertyNames);
+            PropertyInfo[] namedProperties = Helpers.GetProperties(propertyNames);
 
             Assert.Throws<ArgumentException>(paramName, () => new CustomAttributeBuilder(constructor, new object[0], namedProperties, propertyValues));
         }
@@ -147,14 +145,14 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void NullConstructor_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("con", () => new CustomAttributeBuilder(null, new object[0], GetProperties(), new object[0]));
+            Assert.Throws<ArgumentNullException>("con", () => new CustomAttributeBuilder(null, new object[0], new PropertyInfo[0], new object[0]));
         }
 
         [Fact]
         public void NullConstructorArgs_ThrowsArgumentNullException()
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            Assert.Throws<ArgumentNullException>("constructorArgs", () => new CustomAttributeBuilder(constructor, null, GetProperties(), new object[0]));
+            Assert.Throws<ArgumentNullException>("constructorArgs", () => new CustomAttributeBuilder(constructor, null, new PropertyInfo[0], new object[0]));
         }
 
         [Fact]
@@ -168,21 +166,21 @@ namespace System.Reflection.Emit.Tests
         public void NullPropertyValues_ThrowsArgumentNullException()
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            Assert.Throws<ArgumentNullException>("propertyValues", () => new CustomAttributeBuilder(constructor, new object[0], GetProperties(), null));
+            Assert.Throws<ArgumentNullException>("propertyValues", () => new CustomAttributeBuilder(constructor, new object[0], new PropertyInfo[0], null));
         }
 
         [Fact]
         public void NullObjectInPropertyValues_ThrowsArgumentNullException()
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            Assert.Throws<ArgumentNullException>("propertyValues[0]", () => new CustomAttributeBuilder(constructor, new object[0], GetProperties(IntProperty, StringProperty), new object[] { null, 10 }));
+            Assert.Throws<ArgumentNullException>("propertyValues[0]", () => new CustomAttributeBuilder(constructor, new object[0], Helpers.GetProperties(IntProperty, StringProperty), new object[] { null, 10 }));
         }
 
         [Fact]
         public void NullObjectInNamedProperties_ThrowsArgumentNullException()
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            Assert.Throws<ArgumentNullException>("namedProperties[0]", () => new CustomAttributeBuilder(constructor, new object[0], GetProperties(null, IntProperty), new object[] { "TestString", 10 }));
+            Assert.Throws<ArgumentNullException>("namedProperties[0]", () => new CustomAttributeBuilder(constructor, new object[0], Helpers.GetProperties(null, IntProperty), new object[] { "TestString", 10 }));
         }
 
         private static void VerifyCustomAttribute(CustomAttributeBuilder builder, Type attributeType, PropertyInfo[] namedProperties, object[] propertyValues)

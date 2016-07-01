@@ -8,8 +8,6 @@ using Xunit;
 
 namespace System.Reflection.Emit.Tests
 {
-    using static Helpers;
-
     public class CustomAttributeBuilderCtor2
     {
         private const string IntField = "TestInt";
@@ -94,11 +92,11 @@ namespace System.Reflection.Emit.Tests
         {
             Type attribute = typeof(CustomAttributeBuilderTest);
             ConstructorInfo constructor = attribute.GetConstructor(ctorParams);
-            FieldInfo[] namedField = GetFields(namedFieldNames);
+            FieldInfo[] namedField = Helpers.GetFields(namedFieldNames);
 
             CustomAttributeBuilder cab = new CustomAttributeBuilder(constructor, constructorArgs, namedField, fieldValues);
 
-            FieldInfo[] verifyFields = GetFields(IntField, StringField, GetStringField, GetIntField);
+            FieldInfo[] verifyFields = Helpers.GetFields(IntField, StringField, GetStringField, GetIntField);
             VerifyCustomAttribute(cab, attribute, verifyFields, expected);
         }
 
@@ -110,7 +108,7 @@ namespace System.Reflection.Emit.Tests
         public void NamedFieldAndFieldValuesDifferentLengths_ThrowsArgumentException(string[] fieldNames, object[] fieldValues, string paramName)
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            FieldInfo[] namedFields = GetFields(fieldNames);
+            FieldInfo[] namedFields = Helpers.GetFields(fieldNames);
 
             Assert.Throws<ArgumentException>(paramName, () => new CustomAttributeBuilder(constructor, new object[0], namedFields, fieldValues));
         }
@@ -144,14 +142,14 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void NullConstructor_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("con", () => new CustomAttributeBuilder(null, new object[0], GetFields(), new object[0]));
+            Assert.Throws<ArgumentNullException>("con", () => new CustomAttributeBuilder(null, new object[0], new FieldInfo[0], new object[0]));
         }
 
         [Fact]
         public void NullConstructorArgs_ThrowsArgumentNullException()
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            Assert.Throws<ArgumentNullException>("constructorArgs", () => new CustomAttributeBuilder(constructor, null, GetFields(), new object[0]));
+            Assert.Throws<ArgumentNullException>("constructorArgs", () => new CustomAttributeBuilder(constructor, null, new FieldInfo[0], new object[0]));
         }
 
         [Fact]
@@ -165,21 +163,21 @@ namespace System.Reflection.Emit.Tests
         public void NullFieldValues_ThrowsArgumentNullException()
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            Assert.Throws<ArgumentNullException>("fieldValues", () => new CustomAttributeBuilder(constructor, new object[0], GetFields(), null));
+            Assert.Throws<ArgumentNullException>("fieldValues", () => new CustomAttributeBuilder(constructor, new object[0], new FieldInfo[0], null));
         }
 
         [Fact]
         public void NullObjectInFieldValues_ThrowsArgumentNullException()
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            Assert.Throws<ArgumentNullException>("fieldValues[0]", () => new CustomAttributeBuilder(constructor, new object[0], GetFields(IntField, StringField), new object[] { null, 10 }));
+            Assert.Throws<ArgumentNullException>("fieldValues[0]", () => new CustomAttributeBuilder(constructor, new object[0], Helpers.GetFields(IntField, StringField), new object[] { null, 10 }));
         }
 
         [Fact]
         public void NullObjectInNamedFields_ThrowsArgumentNullException()
         {
             ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
-            Assert.Throws<ArgumentNullException>("namedFields[0]", () => new CustomAttributeBuilder(constructor, new object[0], GetFields(null, IntField), new object[] { "TestString", 10 }));
+            Assert.Throws<ArgumentNullException>("namedFields[0]", () => new CustomAttributeBuilder(constructor, new object[0], Helpers.GetFields(null, IntField), new object[] { "TestString", 10 }));
         }
 
         private static void VerifyCustomAttribute(CustomAttributeBuilder builder, Type attributeType, FieldInfo[] fieldNames, object[] fieldValues)
