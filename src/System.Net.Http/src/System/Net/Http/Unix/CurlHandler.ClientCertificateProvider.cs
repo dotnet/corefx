@@ -101,7 +101,7 @@ namespace System.Net.Http
                     Interop.Crypto.CheckValidOpenSslHandle(certSafeHandle);
                     if (chain != null)
                     {
-                        if (!Ssl.AddExtraChainCertificates(context, chain))
+                        if (!Interop.Ssl.AddExtraChainCertificates(sslHandle, chain))
                         {
                             EventSourceTrace("Failed to add extra chain certificate");
                             return SuspendHandshake;
