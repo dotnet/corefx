@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
@@ -98,6 +99,19 @@ internal static partial class Interop
                 {
                     context.Dispose();
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
+                }
+
+                if (certHandle != null && certHandle.IsInvalid)
+                {
+                    using (X509Certificate2 cert = new X509Certificate2(certHandle.DangerousGetHandle()))
+                    {
+                        X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, false);
+                        if (chain != null)
+                        {
+                            if(!Ssl.AddExtraChainCertificates(context, chain))
+                                throw CreateSslException(SR.net_ssl_use_cert_failed);
+                        }
+                    }
                 }
             }
 
