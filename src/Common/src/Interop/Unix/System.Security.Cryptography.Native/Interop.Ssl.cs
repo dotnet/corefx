@@ -149,7 +149,6 @@ internal static partial class Interop
                 }
                 dupCertHandle.SetHandleAsInvalid(); // ownership has been transferred to sslHandle; do not free via this safe handle
             }
-            
 
             return true;
         }
