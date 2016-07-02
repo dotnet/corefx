@@ -101,7 +101,7 @@ internal static partial class Interop
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
-                if (certHandle != null && certHandle.IsInvalid)
+                if (certHandle != null && !certHandle.IsInvalid)
                 {
                     using (X509Certificate2 cert = new X509Certificate2(certHandle.DangerousGetHandle()))
                     {
