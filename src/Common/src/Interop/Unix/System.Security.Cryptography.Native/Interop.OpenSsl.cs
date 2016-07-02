@@ -105,7 +105,7 @@ internal static partial class Interop
                 {
                     using (X509Certificate2 cert = new X509Certificate2(certHandle.DangerousGetHandle()))
                     {
-                        X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, false);
+                        X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, includeClientApplicationPolicy: false);
                         if (chain != null)
                         {
                             if (!Ssl.AddExtraChainCertificates(context, chain))

@@ -136,20 +136,20 @@ internal static partial class Interop
 
         internal static bool AddExtraChainCertificates(SafeSslHandle sslContext, X509Chain chain)
         {
-            if (chain != null)
+            Debug.Assert(chain != null, "chain != null");
+            
+            for (int i = chain.ChainElements.Count - 2; i > 0; i--)
             {
-                for (int i = chain.ChainElements.Count - 2; i > 0; i--)
+                SafeX509Handle dupCertHandle = Crypto.X509Duplicate(chain.ChainElements[i].Certificate.Handle);
+                Crypto.CheckValidOpenSslHandle(dupCertHandle);
+                if (!SslAddExtraChainCert(sslContext, dupCertHandle))
                 {
-                    SafeX509Handle dupCertHandle = Crypto.X509Duplicate(chain.ChainElements[i].Certificate.Handle);
-                    Crypto.CheckValidOpenSslHandle(dupCertHandle);
-                    if (!SslAddExtraChainCert(sslContext, dupCertHandle))
-                    {
-                        dupCertHandle.Dispose(); // we still own the safe handle; clean it up
-                        return false;
-                    }
-                    dupCertHandle.SetHandleAsInvalid(); // ownership has been transferred to sslHandle; do not free via this safe handle
+                    dupCertHandle.Dispose(); // we still own the safe handle; clean it up
+                    return false;
                 }
+                dupCertHandle.SetHandleAsInvalid(); // ownership has been transferred to sslHandle; do not free via this safe handle
             }
+            
 
             return true;
         }
