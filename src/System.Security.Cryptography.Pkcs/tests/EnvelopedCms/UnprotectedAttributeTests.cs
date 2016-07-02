@@ -417,6 +417,44 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.True(a is Pkcs9AttributeObject);
         }
 
+        [Fact]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        public static void PostEncrypt_UnprotectedAttributes()
+        {
+            ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
+            AsnEncodedData[] attributes = {
+                new AsnEncodedData(Oids.DocumentName, new byte[] { 0x0a, 0x0b, 0x0c }),
+                new AsnEncodedData(Oids.DocumentName, new byte[] { 0x0b, 0x0c, 0x0d }),
+                new AsnEncodedData(Oids.DocumentDescription, new byte[] { 0x0d, 0x0e, 0x0f }) };
+            foreach (AsnEncodedData attribute in attributes)
+            {
+                ecms.UnprotectedAttributes.Add(new AsnEncodedData(attribute));
+            }
+
+            AsnEncodedData[] before = ecms.UnprotectedAttributes.FlattenAndSort();
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                ecms.Encrypt(new CmsRecipient(cert));
+            }
+
+            AsnEncodedData[] after = ecms.UnprotectedAttributes.FlattenAndSort();
+
+            // There are three objects, but ecms.UnprotectedAttributes.Count returns the count of different Oids,
+            // not the amount of objects inside.
+            Assert.Equal(2, ecms.UnprotectedAttributes.Count);
+
+            Assert.Equal(before.Length, after.Length);
+            for (int i = 0; i<before.Length; i++)
+            {
+                Assert.Equal(before[i].GetType(), after[i].GetType());
+                Assert.Equal(before[i].Oid.Value, after[i].Oid.Value);
+                Assert.Equal(before[i].RawData, after[i].RawData);
+            }
+        }
+
         private static void AssertIsDocumentationDescription(this AsnEncodedData attribute, string expectedDocumentDescription)
         {
             Assert.Equal(Oids.DocumentDescription, attribute.Oid.Value);

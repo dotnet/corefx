@@ -70,7 +70,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void DecodeRecipients3_FixedValue()
         {
             byte[] encodedMessage =
@@ -174,6 +173,71 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             cms.Decode(encodedMessage);
 
             Assert.Equal(cms.ContentInfo.Content, new byte[] { 188, 234, 58, 16, 208, 115, 126, 185 });
+        }
+
+        [Fact]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        public static void MultipleRecipientIdentifiers_RoundTrip()
+        {
+            ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(contentInfo);
+            CmsRecipientCollection recipients = new CmsRecipientCollection();
+            using (X509Certificate2 issuerSerialCert = Certificates.RSAKeyTransfer1.GetCertificate())
+            using (X509Certificate2 explicitSkiCert = Certificates.RSAKeyTransfer_ExplicitSki.GetCertificate())
+            {
+                // CmsRecipients have different identifiers to test multiple identifier encryption.
+                recipients.Add(new CmsRecipient(SubjectIdentifierType.IssuerAndSerialNumber, issuerSerialCert));
+                recipients.Add(new CmsRecipient(SubjectIdentifierType.SubjectKeyIdentifier, explicitSkiCert));
+                ecms.Encrypt(recipients);
+            }
+
+            byte[] encodedMessage = ecms.Encode();
+
+            ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            // Try decoding it, doesn't really matter with which cert you want to do it as it's not what this
+            // test aims for.
+
+            using (X509Certificate2 privateCert = Certificates.RSAKeyTransfer_ExplicitSki.TryGetCertificateWithPrivateKey())
+            {
+                if (privateCert == null)
+                    return; // CertLoader can't load the private certificate.
+
+                ecms.Decrypt(new X509Certificate2Collection(privateCert));
+            }
+            Assert.Equal(contentInfo.ContentType.Value, ecms.ContentInfo.ContentType.Value);
+            Assert.Equal<byte>(contentInfo.Content, ecms.ContentInfo.Content);
+        }
+
+        [Fact]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        public static void RoundTrip_ExplicitSki()
+        {
+            ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(contentInfo);
+            using (X509Certificate2 explicitSkiCert = Certificates.RSAKeyTransfer_ExplicitSki.GetCertificate())
+            {
+                CmsRecipient recipient = new CmsRecipient(SubjectIdentifierType.SubjectKeyIdentifier, explicitSkiCert);
+                ecms.Encrypt(recipient);
+            }
+
+            byte[] encodedMessage = ecms.Encode();
+
+            ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            using (X509Certificate2 privateCert = Certificates.RSAKeyTransfer_ExplicitSki.TryGetCertificateWithPrivateKey())
+            {
+                if (privateCert == null)
+                    return; // CertLoader can't load the private certificate.
+
+                ecms.Decrypt(new X509Certificate2Collection(privateCert));
+            }
+            Assert.Equal(contentInfo.ContentType.Value, ecms.ContentInfo.ContentType.Value);
+            Assert.Equal<byte>(contentInfo.Content, ecms.ContentInfo.Content);
         }
 
         private static X509Certificate2[] s_certs =
