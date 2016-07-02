@@ -16,6 +16,7 @@ namespace System.Net.Security
     internal sealed class SafeFreeSslCredentials : SafeFreeCredentials
     {
         private SafeX509Handle _certHandle;
+        private SafeX509Handle[] _certChainHandles;
         private SafeEvpPKeyHandle _certKeyHandle;
         private SslProtocols _protocols = SslProtocols.None;
         private EncryptionPolicy _policy;
@@ -23,6 +24,11 @@ namespace System.Net.Security
         internal SafeX509Handle CertHandle
         {
             get { return _certHandle; }
+        }
+
+        internal SafeX509Handle[] CertChainHandles
+        {
+            get { return _certChainHandles; }
         }
 
         internal SafeEvpPKeyHandle CertKeyHandle
@@ -79,8 +85,22 @@ namespace System.Net.Security
                     throw new NotSupportedException(SR.net_ssl_io_no_server_cert);
                 }
 
-                _certHandle = Interop.Crypto.X509Duplicate(cert.Handle);
+                _certHandle = Interop.Crypto.X509Duplicate(cert.Handle);                
                 Interop.Crypto.CheckValidOpenSslHandle(_certHandle);
+
+                using (var chain = new X509Chain())
+                {
+                    if (chain.Build(cert))
+                    {
+                        var ar = new SafeX509Handle[chain.ChainElements.Count - 1];
+                        for (int i = 0; i < ar.Length; i++)
+                        {
+                            ar[i] = Interop.Crypto.X509Duplicate(chain.ChainElements[1 + i].Certificate.Handle);
+                            Interop.Crypto.CheckValidOpenSslHandle(ar[i]);
+                        }
+                        _certChainHandles = ar;
+                    }
+                }
             }
 
             _protocols = protocols;
@@ -94,6 +114,13 @@ namespace System.Net.Security
 
         protected override bool ReleaseHandle()
         {
+
+            if (_certChainHandles != null)
+            {
+                foreach (var cert in _certChainHandles)
+                    cert.Dispose();
+            }
+
             if (_certHandle != null)
             {
                 _certHandle.Dispose();
