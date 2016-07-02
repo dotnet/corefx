@@ -108,7 +108,7 @@ internal static partial class Interop
                         X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, false);
                         if (chain != null)
                         {
-                            if(!Ssl.AddExtraChainCertificates(context, chain))
+                            if (!Ssl.AddExtraChainCertificates(context, chain))
                                 throw CreateSslException(SR.net_ssl_use_cert_failed);
                         }
                     }
