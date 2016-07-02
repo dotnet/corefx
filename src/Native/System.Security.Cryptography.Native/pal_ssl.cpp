@@ -569,7 +569,7 @@ extern "C" int32_t CryptoNative_SslAddExtraChainCert(SSL* ssl, X509* x509)
 	// when the SSL_CTX is destroyed. An application should not free the x509 object. Incoming X509
 	// is a disposable SafeX509Handle so we have to clone.
 	X509* clone = X509_dup(x509);
-    if (SSL_CTX_add_extra_chain_cert(ssl_ctx, x509) == 1)
+    if (SSL_CTX_add_extra_chain_cert(ssl_ctx, clone) == 1)
     {
         return 1;
     }
