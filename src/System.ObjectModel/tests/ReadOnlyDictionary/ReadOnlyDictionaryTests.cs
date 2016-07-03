@@ -6,13 +6,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit;
 using Tests.Collections;
+using System.Reflection;
+using System.Linq;
 
 namespace System.Collections.ObjectModel.Tests
 {
-    /// <summary>
-    /// Tests the public methods in ReadOnlyDictionary<TKey, Value>.
-    /// properly.
-    /// </summary>
     public class ReadOnlyDictionaryTests
     {
         /// <summary>
@@ -51,6 +49,10 @@ namespace System.Collections.ObjectModel.Tests
 
             IDictionary<int, string> dictAsIDictionary = dictionary;
             Assert.True(dictAsIDictionary.IsReadOnly, "ReadonlyDictionary Should be readonly");
+
+            IDictionary dictAsNonGenericIDictionary = dictionary;
+            Assert.True(dictAsNonGenericIDictionary.IsFixedSize);
+            Assert.True(dictAsNonGenericIDictionary.IsReadOnly);
         }
 
         /// <summary>
@@ -216,6 +218,20 @@ namespace System.Collections.ObjectModel.Tests
 
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ReadOnlyDictionary<int, int>(new Dictionary<int, int>()).Keys);
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ReadOnlyDictionary<int, int>(new Dictionary<int, int>()).Values);
+        }
+
+        [Fact]
+        public static void DebbugerAttribute_NullDictionary_ThrowsArgumentNullException()
+        {
+            TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() =>   DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyDictionary<int, int>), null));
+            Assert.IsType<ArgumentNullException>(ex.InnerException);
+        }
+        
+        [Fact]
+        public static void DebbugerAttribute_NullDictionaryKeys_ThrowsArgumentNullException()
+        {
+            TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() => DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyDictionary<int, int>.KeyCollection), new Type[] { typeof(int) }, null));
+            Assert.IsType<ArgumentNullException>(ex.InnerException);
         }
     }
 
