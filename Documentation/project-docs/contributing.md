@@ -20,10 +20,11 @@ API Changes
 Pull Requests
 -------------
 
-* All code changes should be submitted via pull requests (PRs) rather than direct commit access, and then merged after a peer review by one or more Microsoft employees.
-* PRs should have descriptive names (i.e. not "Fix #1234")
-* Within a PR, refer to any issues, and include [keywords](https://help.github.com/articles/closing-issues-via-commit-messages/) that automatically close issues when the PR is merged, and tag any users to review or look at the change.
-* Try to make sure each commit can produce a successful build (and preferably passes tests).
-* If there is a merge conflict that needs fixing, prefer using `git rebase dotnet/master` instead of a merge commit.
-* PR feedback should be done in seperate commits, and should not be rebased or squashed unless necessary.
-* PRs should not be squashed before they are merged. If necessary, squashing should be handled by the merger using the ["Confirm squash and merge"](https://github.com/blog/2141-squash-your-commits) feature.
+* **DO** submit all code changes via pull requests (PRs) rather than direct commit access. PRs will be merged after a peer review by one or more Microsoft employees.
+* **DO** give PRs have descriptive names (i.e. not "Fix #1234")
+* **DO** refer to any issues, and include [keywords](https://help.github.com/articles/closing-issues-via-commit-messages/) that automatically close issues when the PR is merged
+* **DO** tag any users to review or look at the change.
+* **DO** ensure each commit produces a successful build (and preferably passes tests).
+* **DO** include PR feedback should be done in seperate commits, and only rebase or squash them when necessary.
+* **DO NOT** fix merge conflicts using a merge commit. Prefer `git rebase dotnet/master`.
+* **DO NOT** squash before they are merged. If necessary, squashing should be handled by the merger using the ["Confirm squash and merge"](https://github.com/blog/2141-squash-your-commits) feature.
