@@ -148,7 +148,8 @@ namespace System.Net.Sockets
 
                 return;
             }
-
+            // ReuseAddress is required by Unix.
+            _serverSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             _serverSocket.Bind(_serverSocketEP);
             try
             {
