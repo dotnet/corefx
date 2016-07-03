@@ -136,7 +136,7 @@ internal static partial class Interop
 
         internal static bool AddExtraChainCertificates(SafeSslHandle sslContext, X509Chain chain)
         {
-            Debug.Assert(chain != null, "chain != null");
+            Debug.Assert(chain != null, "X509Chain should not be null");
             
             for (int i = chain.ChainElements.Count - 2; i > 0; i--)
             {
