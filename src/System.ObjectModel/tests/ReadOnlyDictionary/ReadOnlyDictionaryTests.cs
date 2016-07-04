@@ -224,16 +224,16 @@ namespace System.Collections.ObjectModel.Tests
         public static void DebuggerAttribute_NullDictionary_ThrowsArgumentNullException()
         {
             TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() =>   DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyDictionary<int, int>), null));
-            Assert.IsType<ArgumentNullException>(ex.InnerException);
-            Assert.Equal("dictionary", ((ArgumentNullException)ex.InnerException).ParamName);
+            ArgumentNullException argumentNullException = Assert.IsType<ArgumentNullException>(ex.InnerException);
+            Assert.Equal("dictionary", argumentNullException.ParamName);
         }
         
         [Fact]
         public static void DebuggerAttribute_NullDictionaryKeys_ThrowsArgumentNullException()
         {
             TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() => DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyDictionary<int, int>.KeyCollection), new Type[] { typeof(int) }, null));
-            Assert.IsType<ArgumentNullException>(ex.InnerException);
-            Assert.Equal("collection", ((ArgumentNullException)ex.InnerException).ParamName);
+            ArgumentNullException argumentNullException = Assert.IsType<ArgumentNullException>(ex.InnerException);
+            Assert.Equal("collection", argumentNullException.ParamName);
         }
     }
 
