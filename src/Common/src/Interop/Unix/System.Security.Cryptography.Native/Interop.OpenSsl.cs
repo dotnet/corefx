@@ -49,8 +49,8 @@ internal static partial class Interop
 
         internal static SafeSslHandle AllocateSslContext(SslProtocols protocols, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, EncryptionPolicy policy, bool isServer, bool remoteCertRequired)
         {
-            bool hasCertReference = false, 
-                hasCertKeyReference = false;
+            bool hasCertReference = false; 
+            bool hasCertKeyReference = false;
 
             bool hasCertificateAndKey = 
                 certHandle != null && !certHandle.IsInvalid
@@ -62,9 +62,6 @@ internal static partial class Interop
                 {
                     certHandle.DangerousAddRef(ref hasCertReference);
                     certKeyHandle.DangerousAddRef(ref hasCertKeyReference);
-
-                    if (!hasCertReference || !hasCertKeyReference)
-                        throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
                 SafeSslHandle context = null;
