@@ -3,8 +3,14 @@ Developer Guide
 
 This guide provides instructions (mostly as links) on how to build the repo and implement improvements. It will expand over time.
 
+Dev Workflow
+------------
+
+The [dev workflow] (../building/dev-workflow.md) describes the development process to follow when working in this repo. 
+It is divided into specific tasks that are fast, transparent and easy to understand.
+
 Building the repository
-=======================
+-----------------------
 
 The CoreFX repo can be built from a regular, non-admin command prompt. The build produces multiple managed binaries that make up the CoreFX libraries and the accompanying tests. The repo can be built for the following platforms, using the provided instructions.
 
