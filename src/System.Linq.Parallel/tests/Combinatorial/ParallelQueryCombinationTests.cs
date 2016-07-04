@@ -1383,6 +1383,43 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
+        public static void Union(Labeled<Operation> source, Labeled<Operation> operation)
+        {
+            Action<Operation, Operation> union = (left, right) =>
+            {
+                int seen = DefaultStart;
+                ParallelQuery<int> query = left(DefaultStart, DefaultSize * 3 / 4, source.Item)
+                    .Union(right(DefaultStart + DefaultSize / 2, DefaultSize / 2, source.Item));
+                foreach (int i in query)
+                {
+                    Assert.Equal(seen++, i);
+                }
+                Assert.Equal(DefaultStart + DefaultSize, seen);
+            };
+            union(operation.Item, DefaultSource);
+            union(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
+        public static void Union_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
+        {
+            Action<Operation, Operation> union = (left, right) =>
+            {
+                int seen = DefaultStart;
+                ParallelQuery<int> query = left(DefaultStart, DefaultSize * 3 / 4, source.Item)
+                    .Union(right(DefaultStart + DefaultSize / 2, DefaultSize / 2, source.Item));
+                Assert.All(query.ToList(), x => Assert.Equal(seen++, x));
+                Assert.Equal(DefaultStart + DefaultSize, seen);
+            };
+            union(operation.Item, DefaultSource);
+            union(LabeledDefaultSource.AsOrdered().Item, operation.Item);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryOperators))]
+        [MemberData(nameof(BinaryOperators))]
         public static void Where(Labeled<Operation> source, Labeled<Operation> operation)
         {
             int seen = DefaultStart;

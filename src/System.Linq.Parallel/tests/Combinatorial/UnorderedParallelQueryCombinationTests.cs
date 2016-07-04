@@ -598,6 +598,43 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
+        public static void Union_Unordered(Labeled<Operation> operation)
+        {
+            Action<Operation, Operation> union = (left, right) =>
+            {
+                IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
+                ParallelQuery<int> query = left(DefaultStart, DefaultSize * 3 / 4, DefaultSource)
+                    .Union(right(DefaultStart + DefaultSize / 2, DefaultSize / 2, DefaultSource));
+                foreach (int i in query)
+                {
+                    seen.Add(i);
+                }
+                seen.AssertComplete();
+            };
+            union(operation.Item, DefaultSource);
+            union(DefaultSource, operation.Item);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
+        public static void Union_Unordered_NotPipelined(Labeled<Operation> operation)
+        {
+            Action<Operation, Operation> union = (left, right) =>
+            {
+                IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize);
+                ParallelQuery<int> query = left(DefaultStart, DefaultSize * 3 / 4, DefaultSource)
+                    .Union(right(DefaultStart + DefaultSize / 2, DefaultSize / 2, DefaultSource));
+                Assert.All(query.ToList(), x => seen.Add(x));
+                seen.AssertComplete();
+            };
+            union(operation.Item, DefaultSource);
+            union(DefaultSource, operation.Item);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnaryOperations))]
+        [MemberData(nameof(BinaryOperations))]
         public static void Where_Unordered(Labeled<Operation> operation)
         {
             IntegerRangeSet seen = new IntegerRangeSet(DefaultStart, DefaultSize / 2);
