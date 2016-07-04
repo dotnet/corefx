@@ -85,7 +85,7 @@
       <Link>Common\System\Net\InternalException.cs</Link>
     </Compile>
     <!-- HTTP -->
-    <Compile Include="..\..\Common\src\System\Net\Http\TlsCertificateExtensions.cs">
+    <Compile Include="$(CommonPath)\Common\src\System\Net\Http\TlsCertificateExtensions.cs">
       <Link>Common\System\Net\Http\TlsCertificateExtensions.cs</Link>
     </Compile>
     <!-- Debug only -->
