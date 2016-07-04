@@ -49,50 +49,52 @@ internal static partial class Interop
 
         internal static SafeSslHandle AllocateSslContext(SslProtocols protocols, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, EncryptionPolicy policy, bool isServer, bool remoteCertRequired)
         {
-          
-            SafeSslHandle context = null;
+            bool hasCertReference = false; 
+            bool hasCertKeyReference = false;
 
-            IntPtr method = GetSslMethod(protocols);
+            bool hasCertificateAndKey = 
+                certHandle != null && !certHandle.IsInvalid
+                && certKeyHandle != null && !certKeyHandle.IsInvalid;
 
-            using (SafeSslContextHandle innerContext = Ssl.SslCtxCreate(method))
+            try
             {
-                if (innerContext.IsInvalid)
+                if (hasCertificateAndKey)
                 {
-                    throw CreateSslException(SR.net_allocate_ssl_context_failed);
+                    certHandle.DangerousAddRef(ref hasCertReference);
+                    certKeyHandle.DangerousAddRef(ref hasCertKeyReference);
                 }
 
-                // Configure allowed protocols. It's ok to use DangerousGetHandle here without AddRef/Release as we just
-                // create the handle, it's rooted by the using, no one else has a reference to it, etc.
-                Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
+                SafeSslHandle context = null;
 
-                // The logic in SafeSslHandle.Disconnect is simple because we are doing a quiet
-                // shutdown (we aren't negotiating for session close to enable later session
-                // restoration).
-                //
-                // If you find yourself wanting to remove this line to enable bidirectional
-                // close-notify, you'll probably need to rewrite SafeSslHandle.Disconnect().
-                // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
-                Ssl.SslCtxSetQuietShutdown(innerContext);
+                IntPtr method = GetSslMethod(protocols);
 
-                if (!Ssl.SetEncryptionPolicy(innerContext, policy))
+                using (SafeSslContextHandle innerContext = Ssl.SslCtxCreate(method))
                 {
-                    throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
-                }
+                    if (innerContext.IsInvalid)
+                    {
+                        throw CreateSslException(SR.net_allocate_ssl_context_failed);
+                    }
 
-                bool hasCertReference = false;
-                bool hasCertKeyReference = false;
+                    // Configure allowed protocols. It's ok to use DangerousGetHandle here without AddRef/Release as we just
+                    // create the handle, it's rooted by the using, no one else has a reference to it, etc.
+                    Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
 
-                try
-                {
-                    bool hasCertificateAndKey =
-                        certHandle != null && !certHandle.IsInvalid
-                        && certKeyHandle != null && !certKeyHandle.IsInvalid;
+                    // The logic in SafeSslHandle.Disconnect is simple because we are doing a quiet
+                    // shutdown (we aren't negotiating for session close to enable later session
+                    // restoration).
+                    //
+                    // If you find yourself wanting to remove this line to enable bidirectional
+                    // close-notify, you'll probably need to rewrite SafeSslHandle.Disconnect().
+                    // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
+                    Ssl.SslCtxSetQuietShutdown(innerContext);
+
+                    if (!Ssl.SetEncryptionPolicy(innerContext, policy))
+                    {
+                        throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
+                    }
 
                     if (hasCertificateAndKey)
                     {
-                        certHandle.DangerousAddRef(ref hasCertReference);
-                        certKeyHandle.DangerousAddRef(ref hasCertKeyReference);
-
                         SetSslCertificate(innerContext, certHandle, certKeyHandle);
                     }
 
@@ -127,16 +129,16 @@ internal static partial class Interop
                         }
                     }
                 }
-                finally
-                {
-                    if (hasCertReference)
-                        certHandle.DangerousRelease();
-                    if (hasCertKeyReference)
-                        certKeyHandle.DangerousRelease();
-                }
-            }
 
-            return context;
+                return context;
+            }
+            finally
+            {
+                if (hasCertReference)
+                    certHandle.DangerousRelease();
+                if (hasCertKeyReference)
+                    certKeyHandle.DangerousRelease();
+            }
         }
 
         internal static bool DoSslHandshake(SafeSslHandle context, byte[] recvBuf, int recvOffset, int recvCount, out byte[] sendBuf, out int sendCount)
