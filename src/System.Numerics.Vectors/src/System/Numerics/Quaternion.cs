@@ -115,6 +115,23 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Divides each component of the Quaternion by the length of the Quaternion.
+        /// </summary>
+        /// <param name="value">The source Quaternion.</param>
+        /// <param name="result">The normalized Quaternion.</param>
+        public static void Normalize(ref Quaternion value, out Quaternion result)
+        {
+            float ls = value.X * value.X + value.Y * value.Y + value.Z * value.Z + value.W * value.W;
+
+            float invNorm = 1.0f / (float)Math.Sqrt((double)ls);
+
+            result.X = value.X * invNorm;
+            result.Y = value.Y * invNorm;
+            result.Z = value.Z * invNorm;
+            result.W = value.W * invNorm;
+        }
+
+        /// <summary>
         /// Creates the conjugate of a specified Quaternion.
         /// </summary>
         /// <param name="value">The Quaternion of which to return the conjugate.</param>
@@ -129,6 +146,19 @@ namespace System.Numerics
             ans.W = value.W;
 
             return ans;
+        }
+
+        /// <summary>
+        /// Creates the conjugate of a specified Quaternion.
+        /// </summary>
+        /// <param name="value">The Quaternion of which to return the conjugate.</param>
+        /// <param name="result">A new Quaternion that is the conjugate of the specified one.</param>
+        public static void Conjugate(ref Quaternion value, out Quaternion result)
+        {
+            result.X = -value.X;
+            result.Y = -value.Y;
+            result.Z = -value.Z;
+            result.W = value.W;
         }
 
         /// <summary>
@@ -156,6 +186,26 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Returns the inverse of a Quaternion.
+        /// </summary>
+        /// <param name="value">The source Quaternion.</param>
+        /// <param name="result">The inverted Quaternion.</param>
+        public static void Inverse(ref Quaternion value, out Quaternion result)
+        {
+            //  -1   (       a              -v       )
+            // q   = ( -------------   ------------- )
+            //       (  a^2 + |v|^2  ,  a^2 + |v|^2  )
+
+            float ls = value.X * value.X + value.Y * value.Y + value.Z * value.Z + value.W * value.W;
+            float invNorm = 1.0f / ls;
+
+            result.X = -value.X * invNorm;
+            result.Y = -value.Y * invNorm;
+            result.Z = -value.Z * invNorm;
+            result.W = value.W * invNorm;
+        }
+
+        /// <summary>
         /// Creates a Quaternion from a normalized vector axis and an angle to rotate about the vector.
         /// </summary>
         /// <param name="axis">The unit vector to rotate around.
@@ -179,12 +229,31 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a Quaternion from a normalized vector axis and an angle to rotate about the vector.
+        /// </summary>
+        /// <param name="axis">The unit vector to rotate around.
+        /// This vector must be normalized before calling this function or the resulting Quaternion will be incorrect.</param>
+        /// <param name="angle">The angle, in radians, to rotate around the vector.</param>
+        /// <param name="result">The created Quaternion.</param>
+        public static void CreateFromAxisAngle(ref Vector3 axis, float angle, out Quaternion result)
+        {
+            float halfAngle = angle * 0.5f;
+            float s = (float)Math.Sin(halfAngle);
+            float c = (float)Math.Cos(halfAngle);
+
+            result.X = axis.X * s;
+            result.Y = axis.Y * s;
+            result.Z = axis.Z * s;
+            result.W = c;
+        }
+
+        /// <summary>
         /// Creates a new Quaternion from the given yaw, pitch, and roll, in radians.
         /// </summary>
         /// <param name="yaw">The yaw angle, in radians, around the Y-axis.</param>
         /// <param name="pitch">The pitch angle, in radians, around the X-axis.</param>
         /// <param name="roll">The roll angle, in radians, around the Z-axis.</param>
-        /// <returns></returns>
+        /// <returns>The Quaterion representing the specified rotation.</returns>
         public static Quaternion CreateFromYawPitchRoll(float yaw, float pitch, float roll)
         {
             //  Roll first, about axis the object is facing, then
@@ -211,6 +280,37 @@ namespace System.Numerics
             result.W = cy * cp * cr + sy * sp * sr;
 
             return result;
+        }
+
+        /// <summary>
+        /// Creates a new Quaternion from the given yaw, pitch, and roll, in radians.
+        /// </summary>
+        /// <param name="yaw">The yaw angle, in radians, around the Y-axis.</param>
+        /// <param name="pitch">The pitch angle, in radians, around the X-axis.</param>
+        /// <param name="roll">The roll angle, in radians, around the Z-axis.</param>
+        /// <param name="result">The Quaterion representing the specified rotation.</param>
+        public static void CreateFromYawPitchRoll(float yaw, float pitch, float roll, out Quaternion result)
+        {
+            //  Roll first, about axis the object is facing, then
+            //  pitch upward, then yaw to face into the new heading
+            float sr, cr, sp, cp, sy, cy;
+
+            float halfRoll = roll * 0.5f;
+            sr = (float)Math.Sin(halfRoll);
+            cr = (float)Math.Cos(halfRoll);
+
+            float halfPitch = pitch * 0.5f;
+            sp = (float)Math.Sin(halfPitch);
+            cp = (float)Math.Cos(halfPitch);
+
+            float halfYaw = yaw * 0.5f;
+            sy = (float)Math.Sin(halfYaw);
+            cy = (float)Math.Cos(halfYaw);
+
+            result.X = cy * sp * cr + sy * cp * sr;
+            result.Y = sy * cp * cr - cy * sp * sr;
+            result.Z = cy * cp * sr - sy * sp * cr;
+            result.W = cy * cp * cr + sy * sp * sr;
         }
 
         /// <summary>
@@ -268,6 +368,56 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a Quaternion from the given rotation matrix.
+        /// </summary>
+        /// <param name="matrix">The rotation matrix.</param>
+        /// <param name="result">The created Quaternion.</param>
+        public static void CreateFromRotationMatrix(ref Matrix4x4 matrix, out Quaternion result)
+        {
+            float trace = matrix.M11 + matrix.M22 + matrix.M33;
+
+            if (trace > 0.0f)
+            {
+                float s = (float)Math.Sqrt(trace + 1.0f);
+                result.W = s * 0.5f;
+                s = 0.5f / s;
+                result.X = (matrix.M23 - matrix.M32) * s;
+                result.Y = (matrix.M31 - matrix.M13) * s;
+                result.Z = (matrix.M12 - matrix.M21) * s;
+            }
+            else
+            {
+                if (matrix.M11 >= matrix.M22 && matrix.M11 >= matrix.M33)
+                {
+                    float s = (float)Math.Sqrt(1.0f + matrix.M11 - matrix.M22 - matrix.M33);
+                    float invS = 0.5f / s;
+                    result.X = 0.5f * s;
+                    result.Y = (matrix.M12 + matrix.M21) * invS;
+                    result.Z = (matrix.M13 + matrix.M31) * invS;
+                    result.W = (matrix.M23 - matrix.M32) * invS;
+                }
+                else if (matrix.M22 > matrix.M33)
+                {
+                    float s = (float)Math.Sqrt(1.0f + matrix.M22 - matrix.M11 - matrix.M33);
+                    float invS = 0.5f / s;
+                    result.X = (matrix.M21 + matrix.M12) * invS;
+                    result.Y = 0.5f * s;
+                    result.Z = (matrix.M32 + matrix.M23) * invS;
+                    result.W = (matrix.M31 - matrix.M13) * invS;
+                }
+                else
+                {
+                    float s = (float)Math.Sqrt(1.0f + matrix.M33 - matrix.M11 - matrix.M22);
+                    float invS = 0.5f / s;
+                    result.X = (matrix.M31 + matrix.M13) * invS;
+                    result.Y = (matrix.M32 + matrix.M23) * invS;
+                    result.Z = 0.5f * s;
+                    result.W = (matrix.M12 - matrix.M21) * invS;
+                }
+            }
+        }
+
+        /// <summary>
         /// Calculates the dot product of two Quaternions.
         /// </summary>
         /// <param name="quaternion1">The first source Quaternion.</param>
@@ -279,6 +429,20 @@ namespace System.Numerics
                    quaternion1.Y * quaternion2.Y +
                    quaternion1.Z * quaternion2.Z +
                    quaternion1.W * quaternion2.W;
+        }
+
+        /// <summary>
+        /// Calculates the dot product of two Quaternions.
+        /// </summary>
+        /// <param name="quaternion1">The first source Quaternion.</param>
+        /// <param name="quaternion2">The second source Quaternion.</param>
+        /// <param name="result">The dot product of the Quaternions.</param>
+        public static void Dot(ref Quaternion quaternion1, ref Quaternion quaternion2, out float result)
+        {
+            result = quaternion1.X * quaternion2.X +
+                     quaternion1.Y * quaternion2.Y +
+                     quaternion1.Z * quaternion2.Z +
+                     quaternion1.W * quaternion2.W;
         }
 
         /// <summary>
@@ -335,6 +499,55 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Interpolates between two quaternions, using spherical linear interpolation.
+        /// </summary>
+        /// <param name="quaternion1">The first source Quaternion.</param>
+        /// <param name="quaternion2">The second source Quaternion.</param>
+        /// <param name="amount">The relative weight of the second source Quaternion in the interpolation.</param>
+        /// <param name="result">The interpolated Quaternion.</param>
+        public static void Slerp(ref Quaternion quaternion1, ref Quaternion quaternion2, float amount, out Quaternion result)
+        {
+            const float epsilon = 1e-6f;
+
+            float t = amount;
+
+            float cosOmega = quaternion1.X * quaternion2.X + quaternion1.Y * quaternion2.Y +
+                             quaternion1.Z * quaternion2.Z + quaternion1.W * quaternion2.W;
+
+            bool flip = false;
+
+            if (cosOmega < 0.0f)
+            {
+                flip = true;
+                cosOmega = -cosOmega;
+            }
+
+            float s1, s2;
+
+            if (cosOmega > (1.0f - epsilon))
+            {
+                // Too close, do straight linear interpolation.
+                s1 = 1.0f - t;
+                s2 = (flip) ? -t : t;
+            }
+            else
+            {
+                float omega = (float)Math.Acos(cosOmega);
+                float invSinOmega = (float)(1 / Math.Sin(omega));
+
+                s1 = (float)Math.Sin((1.0f - t) * omega) * invSinOmega;
+                s2 = (flip)
+                    ? (float)-Math.Sin(t * omega) * invSinOmega
+                    : (float)Math.Sin(t * omega) * invSinOmega;
+            }
+
+            result.X = s1 * quaternion1.X + s2 * quaternion2.X;
+            result.Y = s1 * quaternion1.Y + s2 * quaternion2.Y;
+            result.Z = s1 * quaternion1.Z + s2 * quaternion2.Z;
+            result.W = s1 * quaternion1.W + s2 * quaternion2.W;
+        }
+
+        /// <summary>
         ///  Linearly interpolates between two quaternions.
         /// </summary>
         /// <param name="quaternion1">The first source Quaternion.</param>
@@ -379,6 +592,46 @@ namespace System.Numerics
         }
 
         /// <summary>
+        ///  Linearly interpolates between two quaternions.
+        /// </summary>
+        /// <param name="quaternion1">The first source Quaternion.</param>
+        /// <param name="quaternion2">The second source Quaternion.</param>
+        /// <param name="amount">The relative weight of the second source Quaternion in the interpolation.</param>
+        /// <param name="result">The interpolated Quaternion.</param>
+        public static void Lerp(ref Quaternion quaternion1, ref Quaternion quaternion2, float amount, out Quaternion result)
+        {
+            float t = amount;
+            float t1 = 1.0f - t;
+
+            float dot = quaternion1.X * quaternion2.X + quaternion1.Y * quaternion2.Y +
+                        quaternion1.Z * quaternion2.Z + quaternion1.W * quaternion2.W;
+
+            if (dot >= 0.0f)
+            {
+                result.X = t1 * quaternion1.X + t * quaternion2.X;
+                result.Y = t1 * quaternion1.Y + t * quaternion2.Y;
+                result.Z = t1 * quaternion1.Z + t * quaternion2.Z;
+                result.W = t1 * quaternion1.W + t * quaternion2.W;
+            }
+            else
+            {
+                result.X = t1 * quaternion1.X - t * quaternion2.X;
+                result.Y = t1 * quaternion1.Y - t * quaternion2.Y;
+                result.Z = t1 * quaternion1.Z - t * quaternion2.Z;
+                result.W = t1 * quaternion1.W - t * quaternion2.W;
+            }
+
+            // Normalize it.
+            float ls = result.X * result.X + result.Y * result.Y + result.Z * result.Z + result.W * result.W;
+            float invNorm = 1.0f / (float)Math.Sqrt((double)ls);
+
+            result.X *= invNorm;
+            result.Y *= invNorm;
+            result.Z *= invNorm;
+            result.W *= invNorm;
+        }
+
+        /// <summary>
         /// Concatenates two Quaternions; the result represents the value1 rotation followed by the value2 rotation.
         /// </summary>
         /// <param name="value1">The first Quaternion rotation in the series.</param>
@@ -416,6 +669,39 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Concatenates two Quaternions; the result represents the value1 rotation followed by the value2 rotation.
+        /// </summary>
+        /// <param name="value1">The first Quaternion rotation in the series.</param>
+        /// <param name="value2">The second Quaternion rotation in the series.</param>
+        /// <param name="result">A new Quaternion representing the concatenation of the value1 rotation followed by the value2 rotation.</param>
+        public static void Concatenate(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        {
+            // Concatenate rotation is actually q2 * q1 instead of q1 * q2.
+            // So that's why value2 goes q1 and value1 goes q2.
+            float q1x = value2.X;
+            float q1y = value2.Y;
+            float q1z = value2.Z;
+            float q1w = value2.W;
+
+            float q2x = value1.X;
+            float q2y = value1.Y;
+            float q2z = value1.Z;
+            float q2w = value1.W;
+
+            // cross(av, bv)
+            float cx = q1y * q2z - q1z * q2y;
+            float cy = q1z * q2x - q1x * q2z;
+            float cz = q1x * q2y - q1y * q2x;
+
+            float dot = q1x * q2x + q1y * q2y + q1z * q2z;
+
+            result.X = q1x * q2w + q2x * q1w + cx;
+            result.Y = q1y * q2w + q2y * q1w + cy;
+            result.Z = q1z * q2w + q2z * q1w + cz;
+            result.W = q1w * q2w - dot;
+        }
+
+        /// <summary>
         /// Flips the sign of each component of the quaternion.
         /// </summary>
         /// <param name="value">The source Quaternion.</param>
@@ -430,6 +716,19 @@ namespace System.Numerics
             ans.W = -value.W;
 
             return ans;
+        }
+
+        /// <summary>
+        /// Flips the sign of each component of the quaternion.
+        /// </summary>
+        /// <param name="value">The source Quaternion.</param>
+        /// <param name="result">The negated Quaternion.</param>
+        public static void Negate(ref Quaternion value, out Quaternion result)
+        {
+            result.X = -value.X;
+            result.Y = -value.Y;
+            result.Z = -value.Z;
+            result.W = -value.W;
         }
 
         /// <summary>
@@ -451,6 +750,20 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Adds two Quaternions element-by-element.
+        /// </summary>
+        /// <param name="value1">The first source Quaternion.</param>
+        /// <param name="value2">The second source Quaternion.</param>
+        /// <param name="result">The result of adding the Quaternions.</param>
+        public static void Add(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        {
+            result.X = value1.X + value2.X;
+            result.Y = value1.Y + value2.Y;
+            result.Z = value1.Z + value2.Z;
+            result.W = value1.W + value2.W;
+        }
+
+        /// <summary>
         /// Subtracts one Quaternion from another.
         /// </summary>
         /// <param name="value1">The first source Quaternion.</param>
@@ -466,6 +779,20 @@ namespace System.Numerics
             ans.W = value1.W - value2.W;
 
             return ans;
+        }
+
+        /// <summary>
+        /// Subtracts one Quaternion from another.
+        /// </summary>
+        /// <param name="value1">The first source Quaternion.</param>
+        /// <param name="value2">The second Quaternion, to be subtracted from the first.</param>
+        /// <param name="result">The result of the subtraction.</param>
+        public static void Subtract(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        {
+            result.X = value1.X - value2.X;
+            result.Y = value1.Y - value2.Y;
+            result.Z = value1.Z - value2.Z;
+            result.W = value1.W - value2.W;
         }
 
         /// <summary>
@@ -504,6 +831,37 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Multiplies two Quaternions together.
+        /// </summary>
+        /// <param name="value1">The Quaternion on the left side of the multiplication.</param>
+        /// <param name="value2">The Quaternion on the right side of the multiplication.</param>
+        /// <param name="result">The result of the multiplication.</param>
+        public static void Multiply(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        {
+            float q1x = value1.X;
+            float q1y = value1.Y;
+            float q1z = value1.Z;
+            float q1w = value1.W;
+
+            float q2x = value2.X;
+            float q2y = value2.Y;
+            float q2z = value2.Z;
+            float q2w = value2.W;
+
+            // cross(av, bv)
+            float cx = q1y * q2z - q1z * q2y;
+            float cy = q1z * q2x - q1x * q2z;
+            float cz = q1x * q2y - q1y * q2x;
+
+            float dot = q1x * q2x + q1y * q2y + q1z * q2z;
+
+            result.X = q1x * q2w + q2x * q1w + cx;
+            result.Y = q1y * q2w + q2y * q1w + cy;
+            result.Z = q1z * q2w + q2z * q1w + cz;
+            result.W = q1w * q2w - dot;
+        }
+
+        /// <summary>
         /// Multiplies a Quaternion by a scalar value.
         /// </summary>
         /// <param name="value1">The source Quaternion.</param>
@@ -519,6 +877,20 @@ namespace System.Numerics
             ans.W = value1.W * value2;
 
             return ans;
+        }
+
+        /// <summary>
+        /// Multiplies a Quaternion by a scalar value.
+        /// </summary>
+        /// <param name="value1">The source Quaternion.</param>
+        /// <param name="value2">The scalar value.</param>
+        /// <param name="result">The result of the multiplication.</param>
+        public static void Multiply(ref Quaternion value1, float value2, out Quaternion result)
+        {
+            result.X = value1.X * value2;
+            result.Y = value1.Y * value2;
+            result.Z = value1.Z * value2;
+            result.W = value1.W * value2;
         }
 
         /// <summary>
@@ -563,6 +935,46 @@ namespace System.Numerics
             ans.W = q1w * q2w - dot;
 
             return ans;
+        }
+
+        /// <summary>
+        /// Divides a Quaternion by another Quaternion.
+        /// </summary>
+        /// <param name="value1">The source Quaternion.</param>
+        /// <param name="value2">The divisor.</param>
+        /// <param name="result">The result of the division.</param>
+        public static void Divide(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        {
+            float q1x = value1.X;
+            float q1y = value1.Y;
+            float q1z = value1.Z;
+            float q1w = value1.W;
+
+            //-------------------------------------
+            // Inverse part.
+            float ls = value2.X * value2.X + value2.Y * value2.Y +
+                       value2.Z * value2.Z + value2.W * value2.W;
+            float invNorm = 1.0f / ls;
+
+            float q2x = -value2.X * invNorm;
+            float q2y = -value2.Y * invNorm;
+            float q2z = -value2.Z * invNorm;
+            float q2w = value2.W * invNorm;
+
+            //-------------------------------------
+            // Multiply part.
+
+            // cross(av, bv)
+            float cx = q1y * q2z - q1z * q2y;
+            float cy = q1z * q2x - q1x * q2z;
+            float cz = q1x * q2y - q1y * q2x;
+
+            float dot = q1x * q2x + q1y * q2y + q1z * q2z;
+
+            result.X = q1x * q2w + q2x * q1w + cx;
+            result.Y = q1y * q2w + q2y * q1w + cy;
+            result.Z = q1z * q2w + q2z * q1w + cz;
+            result.W = q1w * q2w - dot;
         }
 
         /// <summary>
