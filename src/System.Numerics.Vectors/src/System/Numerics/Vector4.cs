@@ -181,6 +181,34 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Returns the Euclidean distance between the two given points.
+        /// </summary>
+        /// <param name="value1">The first point.</param>
+        /// <param name="value2">The second point.</param>
+        /// <param name="result">The distance.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Distance(ref Vector4 value1, ref Vector4 value2, out float result)
+        {
+            if (Vector.IsHardwareAccelerated)
+            {
+                Vector4 difference = value1 - value2;
+                float ls = Vector4.Dot(difference, difference);
+                result = (float)System.Math.Sqrt(ls);
+            }
+            else
+            {
+                float dx = value1.X - value2.X;
+                float dy = value1.Y - value2.Y;
+                float dz = value1.Z - value2.Z;
+                float dw = value1.W - value2.W;
+
+                float ls = dx * dx + dy * dy + dz * dz + dw * dw;
+
+                result = (float)Math.Sqrt((double)ls);
+            }
+        }
+
+        /// <summary>
         /// Returns the Euclidean distance squared between the two given points.
         /// </summary>
         /// <param name="value1">The first point.</param>
@@ -206,6 +234,31 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Returns the Euclidean distance squared between the two given points.
+        /// </summary>
+        /// <param name="value1">The first point.</param>
+        /// <param name="value2">The second point.</param>
+        /// <param name="result">The distance squared.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DistanceSquared(ref Vector4 value1, ref Vector4 value2, out float result)
+        {
+            if (Vector.IsHardwareAccelerated)
+            {
+                Vector4 difference = value1 - value2;
+                result = Vector4.Dot(difference, difference);
+            }
+            else
+            {
+                float dx = value1.X - value2.X;
+                float dy = value1.Y - value2.Y;
+                float dz = value1.Z - value2.Z;
+                float dw = value1.W - value2.W;
+
+                result = dx * dx + dy * dy + dz * dz + dw * dw;
+            }
+        }
+
+        /// <summary>
         /// Returns a vector with the same direction as the given vector, but with a length of 1.
         /// </summary>
         /// <param name="vector">The vector to normalize.</param>
@@ -224,6 +277,32 @@ namespace System.Numerics
                 float invNorm = 1.0f / (float)Math.Sqrt((double)ls);
 
                 return new Vector4(
+                    vector.X * invNorm,
+                    vector.Y * invNorm,
+                    vector.Z * invNorm,
+                    vector.W * invNorm);
+            }
+        }
+
+        /// <summary>
+        /// Returns a vector with the same direction as the given vector, but with a length of 1.
+        /// </summary>
+        /// <param name="vector">The vector to normalize.</param>
+        /// <param name="result">The normalized vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Normalize(ref Vector4 vector, out Vector4 result)
+        {
+            if (Vector.IsHardwareAccelerated)
+            {
+                float length = vector.Length();
+                result = vector / length;
+            }
+            else
+            {
+                float ls = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
+                float invNorm = 1.0f / (float)Math.Sqrt((double)ls);
+
+                result = new Vector4(
                     vector.X * invNorm,
                     vector.Y * invNorm,
                     vector.Z * invNorm,
@@ -264,6 +343,38 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Restricts a vector between a min and max value.
+        /// </summary>
+        /// <param name="value1">The source vector.</param>
+        /// <param name="min">The minimum value.</param>
+        /// <param name="max">The maximum value.</param>
+        /// <param name="result">The restricted vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Clamp(ref Vector4 value1, ref Vector4 min, ref Vector4 max, out Vector4 result)
+        {
+            // This compare order is very important!!!
+            // We must follow HLSL behavior in the case user specified min value is bigger than max value.
+
+            float x = value1.X;
+            x = (x > max.X) ? max.X : x;
+            x = (x < min.X) ? min.X : x;
+
+            float y = value1.Y;
+            y = (y > max.Y) ? max.Y : y;
+            y = (y < min.Y) ? min.Y : y;
+
+            float z = value1.Z;
+            z = (z > max.Z) ? max.Z : z;
+            z = (z < min.Z) ? min.Z : z;
+
+            float w = value1.W;
+            w = (w > max.W) ? max.W : w;
+            w = (w < min.W) ? min.W : w;
+
+            result = new Vector4(x, y, z, w);
+        }
+
+        /// <summary>
         /// Linearly interpolates between two vectors based on the given weighting.
         /// </summary>
         /// <param name="value1">The first source vector.</param>
@@ -274,6 +385,23 @@ namespace System.Numerics
         public static Vector4 Lerp(Vector4 value1, Vector4 value2, float amount)
         {
             return new Vector4(
+                value1.X + (value2.X - value1.X) * amount,
+                value1.Y + (value2.Y - value1.Y) * amount,
+                value1.Z + (value2.Z - value1.Z) * amount,
+                value1.W + (value2.W - value1.W) * amount);
+        }
+
+        /// <summary>
+        /// Linearly interpolates between two vectors based on the given weighting.
+        /// </summary>
+        /// <param name="value1">The first source vector.</param>
+        /// <param name="value2">The second source vector.</param>
+        /// <param name="amount">Value between 0 and 1 indicating the weight of the second source vector.</param>
+        /// <param name="result">The interpolated vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Lerp(ref Vector4 value1, ref Vector4 value2, float amount, out Vector4 result)
+        {
+            result = new Vector4(
                 value1.X + (value2.X - value1.X) * amount,
                 value1.Y + (value2.Y - value1.Y) * amount,
                 value1.Z + (value2.Z - value1.Z) * amount,
@@ -301,11 +429,43 @@ namespace System.Numerics
         /// </summary>
         /// <param name="position">The source vector.</param>
         /// <param name="matrix">The transformation matrix.</param>
+        /// <param name="result">The transformed vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(ref Vector2 position, ref Matrix4x4 matrix, out Vector4 result)
+        {
+            result = new Vector4(
+                position.X * matrix.M11 + position.Y * matrix.M21 + matrix.M41,
+                position.X * matrix.M12 + position.Y * matrix.M22 + matrix.M42,
+                position.X * matrix.M13 + position.Y * matrix.M23 + matrix.M43,
+                position.X * matrix.M14 + position.Y * matrix.M24 + matrix.M44);
+        }
+
+        /// <summary>
+        /// Transforms a vector by the given matrix.
+        /// </summary>
+        /// <param name="position">The source vector.</param>
+        /// <param name="matrix">The transformation matrix.</param>
         /// <returns>The transformed vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 Transform(Vector3 position, Matrix4x4 matrix)
         {
             return new Vector4(
+                position.X * matrix.M11 + position.Y * matrix.M21 + position.Z * matrix.M31 + matrix.M41,
+                position.X * matrix.M12 + position.Y * matrix.M22 + position.Z * matrix.M32 + matrix.M42,
+                position.X * matrix.M13 + position.Y * matrix.M23 + position.Z * matrix.M33 + matrix.M43,
+                position.X * matrix.M14 + position.Y * matrix.M24 + position.Z * matrix.M34 + matrix.M44);
+        }
+
+        /// <summary>
+        /// Transforms a vector by the given matrix.
+        /// </summary>
+        /// <param name="position">The source vector.</param>
+        /// <param name="matrix">The transformation matrix.</param>
+        /// <param name="result">The transformed vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(ref Vector3 position, ref Matrix4x4 matrix, out Vector4 result)
+        {
+            result = new Vector4(
                 position.X * matrix.M11 + position.Y * matrix.M21 + position.Z * matrix.M31 + matrix.M41,
                 position.X * matrix.M12 + position.Y * matrix.M22 + position.Z * matrix.M32 + matrix.M42,
                 position.X * matrix.M13 + position.Y * matrix.M23 + position.Z * matrix.M33 + matrix.M43,
@@ -322,6 +482,22 @@ namespace System.Numerics
         public static Vector4 Transform(Vector4 vector, Matrix4x4 matrix)
         {
             return new Vector4(
+                vector.X * matrix.M11 + vector.Y * matrix.M21 + vector.Z * matrix.M31 + vector.W * matrix.M41,
+                vector.X * matrix.M12 + vector.Y * matrix.M22 + vector.Z * matrix.M32 + vector.W * matrix.M42,
+                vector.X * matrix.M13 + vector.Y * matrix.M23 + vector.Z * matrix.M33 + vector.W * matrix.M43,
+                vector.X * matrix.M14 + vector.Y * matrix.M24 + vector.Z * matrix.M34 + vector.W * matrix.M44);
+        }
+
+        /// <summary>
+        /// Transforms a vector by the given matrix.
+        /// </summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="matrix">The transformation matrix.</param>
+        /// <param name="result">The transformed vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(ref Vector4 vector, ref Matrix4x4 matrix, out Vector4 result)
+        {
+            result = new Vector4(
                 vector.X * matrix.M11 + vector.Y * matrix.M21 + vector.Z * matrix.M31 + vector.W * matrix.M41,
                 vector.X * matrix.M12 + vector.Y * matrix.M22 + vector.Z * matrix.M32 + vector.W * matrix.M42,
                 vector.X * matrix.M13 + vector.Y * matrix.M23 + vector.Z * matrix.M33 + vector.W * matrix.M43,
@@ -363,6 +539,36 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source vector to be rotated.</param>
         /// <param name="rotation">The rotation to apply.</param>
+        /// <param name="result">The transformed vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(ref Vector2 value, ref Quaternion rotation, out Vector4 result)
+        {
+            float x2 = rotation.X + rotation.X;
+            float y2 = rotation.Y + rotation.Y;
+            float z2 = rotation.Z + rotation.Z;
+
+            float wx2 = rotation.W * x2;
+            float wy2 = rotation.W * y2;
+            float wz2 = rotation.W * z2;
+            float xx2 = rotation.X * x2;
+            float xy2 = rotation.X * y2;
+            float xz2 = rotation.X * z2;
+            float yy2 = rotation.Y * y2;
+            float yz2 = rotation.Y * z2;
+            float zz2 = rotation.Z * z2;
+
+            result = new Vector4(
+                value.X * (1.0f - yy2 - zz2) + value.Y * (xy2 - wz2),
+                value.X * (xy2 + wz2) + value.Y * (1.0f - xx2 - zz2),
+                value.X * (xz2 - wy2) + value.Y * (yz2 + wx2),
+                1.0f);
+        }
+
+        /// <summary>
+        /// Transforms a vector by the given Quaternion rotation value.
+        /// </summary>
+        /// <param name="value">The source vector to be rotated.</param>
+        /// <param name="rotation">The rotation to apply.</param>
         /// <returns>The transformed vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 Transform(Vector3 value, Quaternion rotation)
@@ -382,6 +588,36 @@ namespace System.Numerics
             float zz2 = rotation.Z * z2;
 
             return new Vector4(
+                value.X * (1.0f - yy2 - zz2) + value.Y * (xy2 - wz2) + value.Z * (xz2 + wy2),
+                value.X * (xy2 + wz2) + value.Y * (1.0f - xx2 - zz2) + value.Z * (yz2 - wx2),
+                value.X * (xz2 - wy2) + value.Y * (yz2 + wx2) + value.Z * (1.0f - xx2 - yy2),
+                1.0f);
+        }
+
+        /// <summary>
+        /// Transforms a vector by the given Quaternion rotation value.
+        /// </summary>
+        /// <param name="value">The source vector to be rotated.</param>
+        /// <param name="rotation">The rotation to apply.</param>
+        /// <param name="result">The transformed vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(ref Vector3 value, ref Quaternion rotation, out Vector4 result)
+        {
+            float x2 = rotation.X + rotation.X;
+            float y2 = rotation.Y + rotation.Y;
+            float z2 = rotation.Z + rotation.Z;
+
+            float wx2 = rotation.W * x2;
+            float wy2 = rotation.W * y2;
+            float wz2 = rotation.W * z2;
+            float xx2 = rotation.X * x2;
+            float xy2 = rotation.X * y2;
+            float xz2 = rotation.X * z2;
+            float yy2 = rotation.Y * y2;
+            float yz2 = rotation.Y * z2;
+            float zz2 = rotation.Z * z2;
+
+            result = new Vector4(
                 value.X * (1.0f - yy2 - zz2) + value.Y * (xy2 - wz2) + value.Z * (xz2 + wy2),
                 value.X * (xy2 + wz2) + value.Y * (1.0f - xx2 - zz2) + value.Z * (yz2 - wx2),
                 value.X * (xz2 - wy2) + value.Y * (yz2 + wx2) + value.Z * (1.0f - xx2 - yy2),
@@ -417,6 +653,36 @@ namespace System.Numerics
                 value.X * (xz2 - wy2) + value.Y * (yz2 + wx2) + value.Z * (1.0f - xx2 - yy2),
                 value.W);
         }
+
+        /// <summary>
+        /// Transforms a vector by the given Quaternion rotation value.
+        /// </summary>
+        /// <param name="value">The source vector to be rotated.</param>
+        /// <param name="rotation">The rotation to apply.</param>
+        /// <param name="result">The transformed vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(ref Vector4 value, ref Quaternion rotation, out Vector4 result)
+        {
+            float x2 = rotation.X + rotation.X;
+            float y2 = rotation.Y + rotation.Y;
+            float z2 = rotation.Z + rotation.Z;
+
+            float wx2 = rotation.W * x2;
+            float wy2 = rotation.W * y2;
+            float wz2 = rotation.W * z2;
+            float xx2 = rotation.X * x2;
+            float xy2 = rotation.X * y2;
+            float xz2 = rotation.X * z2;
+            float yy2 = rotation.Y * y2;
+            float yz2 = rotation.Y * z2;
+            float zz2 = rotation.Z * z2;
+
+            result = new Vector4(
+                value.X * (1.0f - yy2 - zz2) + value.Y * (xy2 - wz2) + value.Z * (xz2 + wy2),
+                value.X * (xy2 + wz2) + value.Y * (1.0f - xx2 - zz2) + value.Z * (yz2 - wx2),
+                value.X * (xz2 - wy2) + value.Y * (yz2 + wx2) + value.Z * (1.0f - xx2 - yy2),
+                value.W);
+        }
         #endregion Public Static Methods
 
         #region Public operator methods
@@ -436,6 +702,18 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Adds two vectors together.
+        /// </summary>
+        /// <param name="left">The first source vector.</param>
+        /// <param name="right">The second source vector.</param>
+        /// <param name="result">The summed vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Add(ref Vector4 left, ref Vector4 right, out Vector4 result)
+        {
+            result = left + right;
+        }
+
+        /// <summary>
         /// Subtracts the second vector from the first.
         /// </summary>
         /// <param name="left">The first source vector.</param>
@@ -448,6 +726,18 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Subtracts the second vector from the first.
+        /// </summary>
+        /// <param name="left">The first source vector.</param>
+        /// <param name="right">The second source vector.</param>
+        /// <param name="result">The difference vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Subtract(ref Vector4 left, ref Vector4 right, out Vector4 result)
+        {
+            result = left - right;
+        }
+
+        /// <summary>
         /// Multiplies two vectors together.
         /// </summary>
         /// <param name="left">The first source vector.</param>
@@ -457,6 +747,18 @@ namespace System.Numerics
         public static Vector4 Multiply(Vector4 left, Vector4 right)
         {
             return left * right;
+        }
+
+        /// <summary>
+        /// Multiplies two vectors together.
+        /// </summary>
+        /// <param name="left">The first source vector.</param>
+        /// <param name="right">The second source vector.</param>
+        /// <param name="result">The product vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Multiply(ref Vector4 left, ref Vector4 right, out Vector4 result)
+        {
+            result = left * right;
         }
 
         /// <summary>
@@ -474,6 +776,18 @@ namespace System.Numerics
         /// <summary>
         /// Multiplies a vector by the given scalar.
         /// </summary>
+        /// <param name="left">The source vector.</param>
+        /// <param name="right">The scalar value.</param>
+        /// <param name="result">The scaled vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Multiply(ref Vector4 left, Single right, out Vector4 result)
+        {
+            result = left * new Vector4(right, right, right, right);
+        }
+
+        /// <summary>
+        /// Multiplies a vector by the given scalar.
+        /// </summary>
         /// <param name="left">The scalar value.</param>
         /// <param name="right">The source vector.</param>
         /// <returns>The scaled vector.</returns>
@@ -481,6 +795,18 @@ namespace System.Numerics
         public static Vector4 Multiply(Single left, Vector4 right)
         {
             return new Vector4(left, left, left, left) * right;
+        }
+
+        /// <summary>
+        /// Multiplies a vector by the given scalar.
+        /// </summary>
+        /// <param name="left">The scalar value.</param>
+        /// <param name="right">The source vector.</param>
+        /// <param name="result">The scaled vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Multiply(Single left, ref Vector4 right, out Vector4 result)
+        {
+            result = new Vector4(left, left, left, left) * right;
         }
 
         /// <summary>
@@ -496,6 +822,18 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Divides the first vector by the second.
+        /// </summary>
+        /// <param name="left">The first source vector.</param>
+        /// <param name="right">The second source vector.</param>
+        /// <param name="result">The vector resulting from the division.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Divide(ref Vector4 left, ref Vector4 right, out Vector4 result)
+        {
+            result = left / right;
+        }
+
+        /// <summary>
         /// Divides the vector by the given scalar.
         /// </summary>
         /// <param name="left">The source vector.</param>
@@ -508,6 +846,18 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Divides the vector by the given scalar.
+        /// </summary>
+        /// <param name="left">The source vector.</param>
+        /// <param name="divisor">The scalar value.</param>
+        /// <param name="result">The result of the division.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Divide(ref Vector4 left, Single divisor, out Vector4 result)
+        {
+            result = left / divisor;
+        }
+
+        /// <summary>
         /// Negates a given vector.
         /// </summary>
         /// <param name="value">The source vector.</param>
@@ -516,6 +866,17 @@ namespace System.Numerics
         public static Vector4 Negate(Vector4 value)
         {
             return -value;
+        }
+
+        /// <summary>
+        /// Negates a given vector.
+        /// </summary>
+        /// <param name="value">The source vector.</param>
+        /// <param name="result">The negated vector.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Negate(ref Vector4 value, out Vector4 result)
+        {
+            result = -value;
         }
         #endregion Public operator methods
     }

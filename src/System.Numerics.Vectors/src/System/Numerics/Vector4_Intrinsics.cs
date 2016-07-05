@@ -158,6 +158,22 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Returns the dot product of two vectors.
+        /// </summary>
+        /// <param name="vector1">The first vector.</param>
+        /// <param name="vector2">The second vector.</param>
+        /// <param name="result">The dot product.</param>
+        [JitIntrinsic]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Dot(ref Vector4 vector1, ref Vector4 vector2, out float result)
+        {
+            result = vector1.X * vector2.X +
+                     vector1.Y * vector2.Y +
+                     vector1.Z * vector2.Z +
+                     vector1.W * vector2.W;
+        }
+
+        /// <summary>
         /// Returns a vector whose elements are the minimum of each of the pairs of elements in the two source vectors.
         /// </summary>
         /// <param name="value1">The first source vector.</param>
@@ -168,6 +184,23 @@ namespace System.Numerics
         public static Vector4 Min(Vector4 value1, Vector4 value2)
         {
             return new Vector4(
+                (value1.X < value2.X) ? value1.X : value2.X,
+                (value1.Y < value2.Y) ? value1.Y : value2.Y,
+                (value1.Z < value2.Z) ? value1.Z : value2.Z,
+                (value1.W < value2.W) ? value1.W : value2.W);
+        }
+
+        /// <summary>
+        /// Returns a vector whose elements are the minimum of each of the pairs of elements in the two source vectors.
+        /// </summary>
+        /// <param name="value1">The first source vector.</param>
+        /// <param name="value2">The second source vector.</param>
+        /// <param name="result">The minimized vector.</param>
+        [JitIntrinsic]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Min(ref Vector4 value1, ref Vector4 value2, out Vector4 result)
+        {
+            result = new Vector4(
                 (value1.X < value2.X) ? value1.X : value2.X,
                 (value1.Y < value2.Y) ? value1.Y : value2.Y,
                 (value1.Z < value2.Z) ? value1.Z : value2.Z,
@@ -192,6 +225,23 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Returns a vector whose elements are the maximum of each of the pairs of elements in the two source vectors.
+        /// </summary>
+        /// <param name="value1">The first source vector.</param>
+        /// <param name="value2">The second source vector.</param>
+        /// <param name="result">The maximized vector.</param>
+        [JitIntrinsic]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Max(ref Vector4 value1, ref Vector4 value2, out Vector4 result)
+        {
+            result = new Vector4(
+                (value1.X > value2.X) ? value1.X : value2.X,
+                (value1.Y > value2.Y) ? value1.Y : value2.Y,
+                (value1.Z > value2.Z) ? value1.Z : value2.Z,
+                (value1.W > value2.W) ? value1.W : value2.W);
+        }
+
+        /// <summary>
         /// Returns a vector whose elements are the absolute values of each of the source vector's elements.
         /// </summary>
         /// <param name="value">The source vector.</param>
@@ -204,6 +254,18 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Returns a vector whose elements are the absolute values of each of the source vector's elements.
+        /// </summary>
+        /// <param name="value">The source vector.</param>
+        /// <param name="result">The absolute value vector.</param>
+        [JitIntrinsic]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Abs(ref Vector4 value, out Vector4 result)
+        {
+            result = new Vector4(Math.Abs(value.X), Math.Abs(value.Y), Math.Abs(value.Z), Math.Abs(value.W));
+        }
+
+        /// <summary>
         /// Returns a vector whose elements are the square root of each of the source vector's elements.
         /// </summary>
         /// <param name="value">The source vector.</param>
@@ -213,6 +275,18 @@ namespace System.Numerics
         public static Vector4 SquareRoot(Vector4 value)
         {
             return new Vector4((Single)Math.Sqrt(value.X), (Single)Math.Sqrt(value.Y), (Single)Math.Sqrt(value.Z), (Single)Math.Sqrt(value.W));
+        }
+
+        /// <summary>
+        /// Returns a vector whose elements are the square root of each of the source vector's elements.
+        /// </summary>
+        /// <param name="value">The source vector.</param>
+        /// <param name="result">The square root vector.</param>
+        [JitIntrinsic]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SquareRoot(ref Vector4 value, out Vector4 result)
+        {
+            result = new Vector4((Single)Math.Sqrt(value.X), (Single)Math.Sqrt(value.Y), (Single)Math.Sqrt(value.Z), (Single)Math.Sqrt(value.W));
         }
         #endregion Public Static Methods
 
