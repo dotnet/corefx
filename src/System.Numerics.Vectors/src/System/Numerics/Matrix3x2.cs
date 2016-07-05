@@ -120,6 +120,22 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a translation matrix from the given vector.
+        /// </summary>
+        /// <param name="position">The translation position.</param>
+        /// <param name="result">A translation matrix.</param>
+        public static void CreateTranslation(ref Vector2 position, out Matrix3x2 result)
+        {
+            result.M11 = 1.0f;
+            result.M12 = 0.0f;
+            result.M21 = 0.0f;
+            result.M22 = 1.0f;
+
+            result.M31 = position.X;
+            result.M32 = position.Y;
+        }
+
+        /// <summary>
         /// Creates a translation matrix from the given X and Y components.
         /// </summary>
         /// <param name="xPosition">The X position.</param>
@@ -141,6 +157,23 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a translation matrix from the given X and Y components.
+        /// </summary>
+        /// <param name="xPosition">The X position.</param>
+        /// <param name="yPosition">The Y position.</param>
+        /// <param name="result">A translation matrix.</param>
+        public static void CreateTranslation(float xPosition, float yPosition, out Matrix3x2 result)
+        {
+            result.M11 = 1.0f;
+            result.M12 = 0.0f;
+            result.M21 = 0.0f;
+            result.M22 = 1.0f;
+
+            result.M31 = xPosition;
+            result.M32 = yPosition;
+        }
+
+        /// <summary>
         /// Creates a scale matrix from the given X and Y components.
         /// </summary>
         /// <param name="xScale">Value to scale by on the X-axis.</param>
@@ -158,6 +191,22 @@ namespace System.Numerics
             result.M32 = 0.0f;
 
             return result;
+        }
+
+        /// <summary>
+        /// Creates a scale matrix from the given X and Y components.
+        /// </summary>
+        /// <param name="xScale">Value to scale by on the X-axis.</param>
+        /// <param name="yScale">Value to scale by on the Y-axis.</param>
+        /// <param name="result">A scaling matrix.</param>
+        public static void CreateScale(float xScale, float yScale, out Matrix3x2 result)
+        {
+            result.M11 = xScale;
+            result.M12 = 0.0f;
+            result.M21 = 0.0f;
+            result.M22 = yScale;
+            result.M31 = 0.0f;
+            result.M32 = 0.0f;
         }
 
         /// <summary>
@@ -185,6 +234,26 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a scale matrix that is offset by a given center point.
+        /// </summary>
+        /// <param name="xScale">Value to scale by on the X-axis.</param>
+        /// <param name="yScale">Value to scale by on the Y-axis.</param>
+        /// <param name="centerPoint">The center point.</param>
+        /// <param name="result">A scaling matrix.</param>
+        public static void CreateScale(float xScale, float yScale, ref Vector2 centerPoint, out Matrix3x2 result)
+        {
+            float tx = centerPoint.X * (1 - xScale);
+            float ty = centerPoint.Y * (1 - yScale);
+
+            result.M11 = xScale;
+            result.M12 = 0.0f;
+            result.M21 = 0.0f;
+            result.M22 = yScale;
+            result.M31 = tx;
+            result.M32 = ty;
+        }
+
+        /// <summary>
         /// Creates a scale matrix from the given vector scale.
         /// </summary>
         /// <param name="scales">The scale to use.</param>
@@ -201,6 +270,21 @@ namespace System.Numerics
             result.M32 = 0.0f;
 
             return result;
+        }
+
+        /// <summary>
+        /// Creates a scale matrix from the given vector scale.
+        /// </summary>
+        /// <param name="scales">The scale to use.</param>
+        /// <param name="result">A scaling matrix.</param>
+        public static void CreateScale(ref Vector2 scales, out Matrix3x2 result)
+        {
+            result.M11 = scales.X;
+            result.M12 = 0.0f;
+            result.M21 = 0.0f;
+            result.M22 = scales.Y;
+            result.M31 = 0.0f;
+            result.M32 = 0.0f;
         }
 
         /// <summary>
@@ -227,6 +311,25 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a scale matrix from the given vector scale with an offset from the given center point.
+        /// </summary>
+        /// <param name="scales">The scale to use.</param>
+        /// <param name="centerPoint">The center offset.</param>
+        /// <param name="result">A scaling matrix.</param>
+        public static void CreateScale(ref Vector2 scales, ref Vector2 centerPoint, out Matrix3x2 result)
+        {
+            float tx = centerPoint.X * (1 - scales.X);
+            float ty = centerPoint.Y * (1 - scales.Y);
+
+            result.M11 = scales.X;
+            result.M12 = 0.0f;
+            result.M21 = 0.0f;
+            result.M22 = scales.Y;
+            result.M31 = tx;
+            result.M32 = ty;
+        }
+
+        /// <summary>
         /// Creates a scale matrix that scales uniformly with the given scale.
         /// </summary>
         /// <param name="scale">The uniform scale to use.</param>
@@ -243,6 +346,21 @@ namespace System.Numerics
             result.M32 = 0.0f;
 
             return result;
+        }
+
+        /// <summary>
+        /// Creates a scale matrix that scales uniformly with the given scale.
+        /// </summary>
+        /// <param name="scale">The uniform scale to use.</param>
+        /// <param name="result">A scaling matrix.</param>
+        public static void CreateScale(float scale, out Matrix3x2 result)
+        {
+            result.M11 = scale;
+            result.M12 = 0.0f;
+            result.M21 = 0.0f;
+            result.M22 = scale;
+            result.M31 = 0.0f;
+            result.M32 = 0.0f;
         }
 
         /// <summary>
@@ -269,6 +387,25 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a scale matrix that scales uniformly with the given scale with an offset from the given center.
+        /// </summary>
+        /// <param name="scale">The uniform scale to use.</param>
+        /// <param name="centerPoint">The center offset.</param>
+        /// <param name="result">A scaling matrix.</param>
+        public static void CreateScale(float scale, ref Vector2 centerPoint, out Matrix3x2 result)
+        {
+            float tx = centerPoint.X * (1 - scale);
+            float ty = centerPoint.Y * (1 - scale);
+
+            result.M11 = scale;
+            result.M12 = 0.0f;
+            result.M21 = 0.0f;
+            result.M22 = scale;
+            result.M31 = tx;
+            result.M32 = ty;
+        }
+
+        /// <summary>
         /// Creates a skew matrix from the given angles in radians.
         /// </summary>
         /// <param name="radiansX">The X angle, in radians.</param>
@@ -289,6 +426,25 @@ namespace System.Numerics
             result.M32 = 0.0f;
 
             return result;
+        }
+
+        /// <summary>
+        /// Creates a skew matrix from the given angles in radians.
+        /// </summary>
+        /// <param name="radiansX">The X angle, in radians.</param>
+        /// <param name="radiansY">The Y angle, in radians.</param>
+        /// <param name="result">A skew matrix.</param>
+        public static void CreateSkew(float radiansX, float radiansY, out Matrix3x2 result)
+        {
+            float xTan = (float)Math.Tan(radiansX);
+            float yTan = (float)Math.Tan(radiansY);
+
+            result.M11 = 1.0f;
+            result.M12 = yTan;
+            result.M21 = xTan;
+            result.M22 = 1.0f;
+            result.M31 = 0.0f;
+            result.M32 = 0.0f;
         }
 
         /// <summary>
@@ -316,6 +472,29 @@ namespace System.Numerics
             result.M32 = ty;
 
             return result;
+        }
+
+        /// <summary>
+        /// Creates a skew matrix from the given angles in radians and a center point.
+        /// </summary>
+        /// <param name="radiansX">The X angle, in radians.</param>
+        /// <param name="radiansY">The Y angle, in radians.</param>
+        /// <param name="centerPoint">The center point.</param>
+        /// <param name="result">A skew matrix.</param>
+        public static void CreateSkew(float radiansX, float radiansY, ref Vector2 centerPoint, out Matrix3x2 result)
+        {
+            float xTan = (float)Math.Tan(radiansX);
+            float yTan = (float)Math.Tan(radiansY);
+
+            float tx = -centerPoint.Y * xTan;
+            float ty = -centerPoint.X * yTan;
+
+            result.M11 = 1.0f;
+            result.M12 = yTan;
+            result.M21 = xTan;
+            result.M22 = 1.0f;
+            result.M31 = tx;
+            result.M32 = ty;
         }
 
         /// <summary>
@@ -375,6 +554,61 @@ namespace System.Numerics
             result.M32 = 0.0f;
 
             return result;
+        }
+
+        /// <summary>
+        /// Creates a rotation matrix using the given rotation in radians.
+        /// </summary>
+        /// <param name="radians">The amount of rotation, in radians.</param>
+        /// <param name="result">A rotation matrix.</param>
+        public static void CreateRotation(float radians, out Matrix3x2 result)
+        {
+            radians = (float)Math.IEEERemainder(radians, Math.PI * 2);
+
+            float c, s;
+
+            const float epsilon = 0.001f * (float)Math.PI / 180f;     // 0.1% of a degree
+
+            if (radians > -epsilon && radians < epsilon)
+            {
+                // Exact case for zero rotation.
+                c = 1;
+                s = 0;
+            }
+            else if (radians > Math.PI / 2 - epsilon && radians < Math.PI / 2 + epsilon)
+            {
+                // Exact case for 90 degree rotation.
+                c = 0;
+                s = 1;
+            }
+            else if (radians < -Math.PI + epsilon || radians > Math.PI - epsilon)
+            {
+                // Exact case for 180 degree rotation.
+                c = -1;
+                s = 0;
+            }
+            else if (radians > -Math.PI / 2 - epsilon && radians < -Math.PI / 2 + epsilon)
+            {
+                // Exact case for 270 degree rotation.
+                c = 0;
+                s = -1;
+            }
+            else
+            {
+                // Arbitrary rotation.
+                c = (float)Math.Cos(radians);
+                s = (float)Math.Sin(radians);
+            }
+
+            // [  c  s ]
+            // [ -s  c ]
+            // [  0  0 ]
+            result.M11 = c;
+            result.M12 = s;
+            result.M21 = -s;
+            result.M22 = c;
+            result.M31 = 0.0f;
+            result.M32 = 0.0f;
         }
 
         /// <summary>
@@ -441,6 +675,65 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a rotation matrix using the given rotation in radians and a center point.
+        /// </summary>
+        /// <param name="radians">The amount of rotation, in radians.</param>
+        /// <param name="centerPoint">The center point.</param>
+        /// <param name="result">A rotation matrix.</param>
+        public static void CreateRotation(float radians, ref Vector2 centerPoint, out Matrix3x2 result)
+        {
+            radians = (float)Math.IEEERemainder(radians, Math.PI * 2);
+
+            float c, s;
+
+            const float epsilon = 0.001f * (float)Math.PI / 180f;     // 0.1% of a degree
+
+            if (radians > -epsilon && radians < epsilon)
+            {
+                // Exact case for zero rotation.
+                c = 1;
+                s = 0;
+            }
+            else if (radians > Math.PI / 2 - epsilon && radians < Math.PI / 2 + epsilon)
+            {
+                // Exact case for 90 degree rotation.
+                c = 0;
+                s = 1;
+            }
+            else if (radians < -Math.PI + epsilon || radians > Math.PI - epsilon)
+            {
+                // Exact case for 180 degree rotation.
+                c = -1;
+                s = 0;
+            }
+            else if (radians > -Math.PI / 2 - epsilon && radians < -Math.PI / 2 + epsilon)
+            {
+                // Exact case for 270 degree rotation.
+                c = 0;
+                s = -1;
+            }
+            else
+            {
+                // Arbitrary rotation.
+                c = (float)Math.Cos(radians);
+                s = (float)Math.Sin(radians);
+            }
+
+            float x = centerPoint.X * (1 - c) + centerPoint.Y * s;
+            float y = centerPoint.Y * (1 - c) - centerPoint.X * s;
+
+            // [  c  s ]
+            // [ -s  c ]
+            // [  x  y ]
+            result.M11 = c;
+            result.M12 = s;
+            result.M21 = -s;
+            result.M22 = c;
+            result.M31 = x;
+            result.M32 = y;
+        }
+
+        /// <summary>
         /// Calculates the determinant for this matrix. 
         /// The determinant is calculated by expanding the matrix with a third column whose values are (0,0,1).
         /// </summary>
@@ -495,6 +788,35 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Attempts to invert the given matrix. If the operation succeeds, the inverted matrix is stored in the result parameter.
+        /// </summary>
+        /// <param name="matrix">The source matrix.</param>
+        /// <param name="result">The output matrix.</param>
+        /// <param name="succeeded">True if the operation succeeded, False otherwise.</param>
+        public static void Invert(ref Matrix3x2 matrix, out bool succeeded, out Matrix3x2 result)
+        {
+            float det = (matrix.M11 * matrix.M22) - (matrix.M21 * matrix.M12);
+
+            if (Math.Abs(det) < float.Epsilon)
+            {
+                result = new Matrix3x2(float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN);
+                succeeded = false;
+                return;
+            }
+
+            float invDet = 1.0f / det;
+
+            result.M11 = matrix.M22 * invDet;
+            result.M12 = -matrix.M12 * invDet;
+            result.M21 = -matrix.M21 * invDet;
+            result.M22 = matrix.M11 * invDet;
+            result.M31 = (matrix.M21 * matrix.M32 - matrix.M31 * matrix.M22) * invDet;
+            result.M32 = (matrix.M31 * matrix.M12 - matrix.M11 * matrix.M32) * invDet;
+
+            succeeded = true;
+        }
+
+        /// <summary>
         /// Linearly interpolates from matrix1 to matrix2, based on the third parameter.
         /// </summary>
         /// <param name="matrix1">The first source matrix.</param>
@@ -521,6 +843,28 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Linearly interpolates from matrix1 to matrix2, based on the third parameter.
+        /// </summary>
+        /// <param name="matrix1">The first source matrix.</param>
+        /// <param name="matrix2">The second source matrix.</param>
+        /// <param name="amount">The relative weighting of matrix2.</param>
+        /// <param name="result">The interpolated matrix.</param>
+        public static void Lerp(ref Matrix3x2 matrix1, ref Matrix3x2 matrix2, float amount, out Matrix3x2 result)
+        {
+            // First row
+            result.M11 = matrix1.M11 + (matrix2.M11 - matrix1.M11) * amount;
+            result.M12 = matrix1.M12 + (matrix2.M12 - matrix1.M12) * amount;
+
+            // Second row
+            result.M21 = matrix1.M21 + (matrix2.M21 - matrix1.M21) * amount;
+            result.M22 = matrix1.M22 + (matrix2.M22 - matrix1.M22) * amount;
+
+            // Third row
+            result.M31 = matrix1.M31 + (matrix2.M31 - matrix1.M31) * amount;
+            result.M32 = matrix1.M32 + (matrix2.M32 - matrix1.M32) * amount;
+        }
+
+        /// <summary>
         /// Negates the given matrix by multiplying all values by -1.
         /// </summary>
         /// <param name="value">The source matrix.</param>
@@ -537,6 +881,21 @@ namespace System.Numerics
             result.M32 = -value.M32;
 
             return result;
+        }
+
+        /// <summary>
+        /// Negates the given matrix by multiplying all values by -1.
+        /// </summary>
+        /// <param name="value">The source matrix.</param>
+        /// <param name="result">The negated matrix.</param>
+        public static void Negate(ref Matrix3x2 value, out Matrix3x2 result)
+        {
+            result.M11 = -value.M11;
+            result.M12 = -value.M12;
+            result.M21 = -value.M21;
+            result.M22 = -value.M22;
+            result.M31 = -value.M31;
+            result.M32 = -value.M32;
         }
 
         /// <summary>
@@ -560,6 +919,22 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Adds each matrix element in value1 with its corresponding element in value2.
+        /// </summary>
+        /// <param name="value1">The first source matrix.</param>
+        /// <param name="value2">The second source matrix.</param>
+        /// <param name="result">The matrix containing the summed values.</param>
+        public static void Add(ref Matrix3x2 value1, ref Matrix3x2 value2, out Matrix3x2 result)
+        {
+            result.M11 = value1.M11 + value2.M11;
+            result.M12 = value1.M12 + value2.M12;
+            result.M21 = value1.M21 + value2.M21;
+            result.M22 = value1.M22 + value2.M22;
+            result.M31 = value1.M31 + value2.M31;
+            result.M32 = value1.M32 + value2.M32;
+        }
+
+        /// <summary>
         /// Subtracts each matrix element in value2 from its corresponding element in value1.
         /// </summary>
         /// <param name="value1">The first source matrix.</param>
@@ -577,6 +952,22 @@ namespace System.Numerics
             result.M32 = value1.M32 - value2.M32;
 
             return result;
+        }
+
+        /// <summary>
+        /// Subtracts each matrix element in value2 from its corresponding element in value1.
+        /// </summary>
+        /// <param name="value1">The first source matrix.</param>
+        /// <param name="value2">The second source matrix.</param>
+        /// <param name="result">The matrix containing the resulting values.</param>
+        public static void Subtract(ref Matrix3x2 value1, ref Matrix3x2 value2, out Matrix3x2 result)
+        {
+            result.M11 = value1.M11 - value2.M11;
+            result.M12 = value1.M12 - value2.M12;
+            result.M21 = value1.M21 - value2.M21;
+            result.M22 = value1.M22 - value2.M22;
+            result.M31 = value1.M31 - value2.M31;
+            result.M32 = value1.M32 - value2.M32;
         }
 
         /// <summary>
@@ -605,6 +996,27 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Multiplies two matrices together and returns the resulting matrix.
+        /// </summary>
+        /// <param name="value1">The first source matrix.</param>
+        /// <param name="value2">The second source matrix.</param>
+        /// <param name="result">The product matrix.</param>
+        public static void Multiply(ref Matrix3x2 value1, ref Matrix3x2 value2, out Matrix3x2 result)
+        {
+            // First row
+            result.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21;
+            result.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22;
+
+            // Second row
+            result.M21 = value1.M21 * value2.M11 + value1.M22 * value2.M21;
+            result.M22 = value1.M21 * value2.M12 + value1.M22 * value2.M22;
+
+            // Third row
+            result.M31 = value1.M31 * value2.M11 + value1.M32 * value2.M21 + value2.M31;
+            result.M32 = value1.M31 * value2.M12 + value1.M32 * value2.M22 + value2.M32;
+        }
+
+        /// <summary>
         /// Scales all elements in a matrix by the given scalar factor.
         /// </summary>
         /// <param name="value1">The source matrix.</param>
@@ -622,6 +1034,22 @@ namespace System.Numerics
             result.M32 = value1.M32 * value2;
 
             return result;
+        }
+
+        /// <summary>
+        /// Scales all elements in a matrix by the given scalar factor.
+        /// </summary>
+        /// <param name="value1">The source matrix.</param>
+        /// <param name="value2">The scaling value to use.</param>
+        /// <param name="result">The resulting matrix.</param>
+        public static void Multiply(ref Matrix3x2 value1, float value2, out Matrix3x2 result)
+        {
+            result.M11 = value1.M11 * value2;
+            result.M12 = value1.M12 * value2;
+            result.M21 = value1.M21 * value2;
+            result.M22 = value1.M22 * value2;
+            result.M31 = value1.M31 * value2;
+            result.M32 = value1.M32 * value2;
         }
 
         /// <summary>
