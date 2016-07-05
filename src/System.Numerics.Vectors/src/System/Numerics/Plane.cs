@@ -111,6 +111,60 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a Plane that contains the three given points.
+        /// </summary>
+        /// <param name="point1">The first point defining the Plane.</param>
+        /// <param name="point2">The second point defining the Plane.</param>
+        /// <param name="point3">The third point defining the Plane.</param>
+        /// <param name="result">The Plane containing the three points.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CreateFromVertices(ref Vector3 point1, ref Vector3 point2, ref Vector3 point3, out Plane result)
+        {
+            if (Vector.IsHardwareAccelerated)
+            {
+                Vector3 a = point2 - point1;
+                Vector3 b = point3 - point1;
+
+                // N = Cross(a, b)
+                Vector3 n = Vector3.Cross(a, b);
+                Vector3 normal = Vector3.Normalize(n);
+
+                // D = - Dot(N, point1)
+                float d = -Vector3.Dot(normal, point1);
+
+                result = new Plane(normal, d);
+            }
+            else
+            {
+                float ax = point2.X - point1.X;
+                float ay = point2.Y - point1.Y;
+                float az = point2.Z - point1.Z;
+
+                float bx = point3.X - point1.X;
+                float by = point3.Y - point1.Y;
+                float bz = point3.Z - point1.Z;
+
+                // N=Cross(a,b)
+                float nx = ay * bz - az * by;
+                float ny = az * bx - ax * bz;
+                float nz = ax * by - ay * bx;
+
+                // Normalize(N)
+                float ls = nx * nx + ny * ny + nz * nz;
+                float invNorm = 1.0f / (float)Math.Sqrt((double)ls);
+
+                Vector3 normal = new Vector3(
+                    nx * invNorm,
+                    ny * invNorm,
+                    nz * invNorm);
+
+                result = new Plane(
+                    normal,
+                    -(normal.X * point1.X + normal.Y * point1.Y + normal.Z * point1.Z));
+            }
+        }
+
+        /// <summary>
         /// Creates a new Plane whose normal vector is the source Plane's normal vector normalized.
         /// </summary>
         /// <param name="value">The source Plane.</param>
@@ -152,6 +206,47 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Creates a new Plane whose normal vector is the source Plane's normal vector normalized.
+        /// </summary>
+        /// <param name="value">The source Plane.</param>
+        /// <param name="result">The normalized Plane.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Normalize(ref Plane value, out Plane result)
+        {
+            const float FLT_EPSILON = 1.192092896e-07f; // smallest such that 1.0+FLT_EPSILON != 1.0
+            if (Vector.IsHardwareAccelerated)
+            {
+                float normalLengthSquared = value.Normal.LengthSquared();
+                if (Math.Abs(normalLengthSquared - 1.0f) < FLT_EPSILON)
+                {
+                    // It already normalized, so we don't need to farther process.
+                    result = value;
+                }
+                float normalLength = (float)Math.Sqrt(normalLengthSquared);
+                result = new Plane(
+                    value.Normal / normalLength,
+                    value.D / normalLength);
+            }
+            else
+            {
+                float f = value.Normal.X * value.Normal.X + value.Normal.Y * value.Normal.Y + value.Normal.Z * value.Normal.Z;
+
+                if (Math.Abs(f - 1.0f) < FLT_EPSILON)
+                {
+                    result = value; // It already normalized, so we don't need to further process.
+                }
+
+                float fInv = 1.0f / (float)Math.Sqrt(f);
+
+                result = new Plane(
+                    value.Normal.X * fInv,
+                    value.Normal.Y * fInv,
+                    value.Normal.Z * fInv,
+                    value.D * fInv);
+            }
+        }
+
+        /// <summary>
         /// Transforms a normalized Plane by a Matrix.
         /// </summary>
         /// <param name="plane"> The normalized Plane to transform. 
@@ -167,6 +262,28 @@ namespace System.Numerics
             float x = plane.Normal.X, y = plane.Normal.Y, z = plane.Normal.Z, w = plane.D;
 
             return new Plane(
+                x * m.M11 + y * m.M12 + z * m.M13 + w * m.M14,
+                x * m.M21 + y * m.M22 + z * m.M23 + w * m.M24,
+                x * m.M31 + y * m.M32 + z * m.M33 + w * m.M34,
+                x * m.M41 + y * m.M42 + z * m.M43 + w * m.M44);
+        }
+
+        /// <summary>
+        /// Transforms a normalized Plane by a Matrix.
+        /// </summary>
+        /// <param name="plane"> The normalized Plane to transform. 
+        /// This Plane must already be normalized, so that its Normal vector is of unit length, before this method is called.</param>
+        /// <param name="matrix">The transformation matrix to apply to the Plane.</param>
+        /// <param name="result">The transformed Plane.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(ref Plane plane, ref Matrix4x4 matrix, out Plane result)
+        {
+            Matrix4x4 m;
+            Matrix4x4.Invert(matrix, out m);
+
+            float x = plane.Normal.X, y = plane.Normal.Y, z = plane.Normal.Z, w = plane.D;
+
+            result = new Plane(
                 x * m.M11 + y * m.M12 + z * m.M13 + w * m.M14,
                 x * m.M21 + y * m.M22 + z * m.M23 + w * m.M24,
                 x * m.M31 + y * m.M32 + z * m.M33 + w * m.M34,
@@ -220,6 +337,52 @@ namespace System.Numerics
         }
 
         /// <summary>
+        ///  Transforms a normalized Plane by a Quaternion rotation.
+        /// </summary>
+        /// <param name="plane"> The normalized Plane to transform.
+        /// This Plane must already be normalized, so that its Normal vector is of unit length, before this method is called.</param>
+        /// <param name="rotation">The Quaternion rotation to apply to the Plane.</param>
+        /// <param name="result">A new Plane that results from applying the rotation.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(ref Plane plane, ref Quaternion rotation, out Plane result)
+        {
+            // Compute rotation matrix.
+            float x2 = rotation.X + rotation.X;
+            float y2 = rotation.Y + rotation.Y;
+            float z2 = rotation.Z + rotation.Z;
+
+            float wx2 = rotation.W * x2;
+            float wy2 = rotation.W * y2;
+            float wz2 = rotation.W * z2;
+            float xx2 = rotation.X * x2;
+            float xy2 = rotation.X * y2;
+            float xz2 = rotation.X * z2;
+            float yy2 = rotation.Y * y2;
+            float yz2 = rotation.Y * z2;
+            float zz2 = rotation.Z * z2;
+
+            float m11 = 1.0f - yy2 - zz2;
+            float m21 = xy2 - wz2;
+            float m31 = xz2 + wy2;
+
+            float m12 = xy2 + wz2;
+            float m22 = 1.0f - xx2 - zz2;
+            float m32 = yz2 - wx2;
+
+            float m13 = xz2 - wy2;
+            float m23 = yz2 + wx2;
+            float m33 = 1.0f - xx2 - yy2;
+
+            float x = plane.Normal.X, y = plane.Normal.Y, z = plane.Normal.Z;
+
+            result = new Plane(
+                x * m11 + y * m21 + z * m31,
+                x * m12 + y * m22 + z * m32,
+                x * m13 + y * m23 + z * m33,
+                plane.D);
+        }
+
+        /// <summary>
         /// Calculates the dot product of a Plane and Vector4.
         /// </summary>
         /// <param name="plane">The Plane.</param>
@@ -232,6 +395,21 @@ namespace System.Numerics
                    plane.Normal.Y * value.Y +
                    plane.Normal.Z * value.Z +
                    plane.D * value.W;
+        }
+
+        /// <summary>
+        /// Calculates the dot product of a Plane and Vector4.
+        /// </summary>
+        /// <param name="plane">The Plane.</param>
+        /// <param name="value">The Vector4.</param>
+        /// <param name="result">The dot product.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Dot(ref Plane plane, ref Vector4 value, out float result)
+        {
+            result = plane.Normal.X * value.X +
+                     plane.Normal.Y * value.Y +
+                     plane.Normal.Z * value.Z +
+                     plane.D * value.W;
         }
 
         /// <summary>
@@ -257,6 +435,28 @@ namespace System.Numerics
         }
 
         /// <summary>
+        /// Returns the dot product of a specified Vector3 and the normal vector of this Plane plus the distance (D) value of the Plane.
+        /// </summary>
+        /// <param name="plane">The plane.</param>
+        /// <param name="value">The Vector3.</param>
+        /// <param name="result">The resulting value.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DotCoordinate(ref Plane plane, ref Vector3 value, out float result)
+        {
+            if (Vector.IsHardwareAccelerated)
+            {
+                result = Vector3.Dot(plane.Normal, value) + plane.D;
+            }
+            else
+            {
+                result = plane.Normal.X * value.X +
+                         plane.Normal.Y * value.Y +
+                         plane.Normal.Z * value.Z +
+                         plane.D;
+            }
+        }
+
+        /// <summary>
         /// Returns the dot product of a specified Vector3 and the Normal vector of this Plane.
         /// </summary>
         /// <param name="plane">The plane.</param>
@@ -274,6 +474,27 @@ namespace System.Numerics
                 return plane.Normal.X * value.X +
                        plane.Normal.Y * value.Y +
                        plane.Normal.Z * value.Z;
+            }
+        }
+
+        /// <summary>
+        /// Returns the dot product of a specified Vector3 and the Normal vector of this Plane.
+        /// </summary>
+        /// <param name="plane">The plane.</param>
+        /// <param name="value">The Vector3.</param>
+        /// <param name="result">The resulting dot product.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void DotNormal(ref Plane plane, ref Vector3 value, out float result)
+        {
+            if (Vector.IsHardwareAccelerated)
+            {
+                result = Vector3.Dot(plane.Normal, value);
+            }
+            else
+            {
+                result = plane.Normal.X * value.X +
+                         plane.Normal.Y * value.Y +
+                         plane.Normal.Z * value.Z;
             }
         }
 
