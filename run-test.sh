@@ -43,6 +43,7 @@ usage()
     echo "    --restrict-proj <regex>           Run test projects that match regex"
     echo "                                      default: .* (all projects)"
     echo "    --useServerGC                     Enable Server GC for this test run"
+    echo "    --ignore-native-dlls              Do not use *.ni.dll on test. (mscorlib.ni.dll, System.Private.CoreLib.ni.dll)"
     echo
     echo "Runtime Code Coverage options:"
     echo "    --coreclr-coverage                Optional argument to get coreclr code coverage reports"
@@ -171,6 +172,7 @@ run_all_tests()
   pids=""
 }
 
+ignore_dlls=( mscorlib.ni.dll System.Private.CoreLib.ni.dll )
 # $1 is the path to the test folder
 run_test()
 {
@@ -187,6 +189,20 @@ run_test()
   copy_test_overlay $dirName
 
   pushd $dirName > /dev/null
+
+  if [ $IgnoreNativeDLLs -eq 1 ]; then
+      rm -f ${ignore_dlls[@]}
+
+	  if [ ! -f RunTests.sh.save ]; then
+		  mv -f RunTests.sh RunTests.sh.save
+	  fi
+	  cp RunTests.sh.save RunTests.sh
+
+      for file in ${ignore_dlls[@]}; do
+          sed "/$file/d" RunTests.sh > RunTests.out
+	      mv -f RunTests.out RunTests.sh
+      done
+  fi
 
   chmod +x ./RunTests.sh
   chmod +x ./corerun
@@ -261,6 +277,7 @@ coreclr_code_coverage()
 # Parse arguments
 
 ((serverGC = 0))
+IgnoreNativeDLLs=0
 
 while [[ $# > 0 ]]
 do
@@ -304,6 +321,9 @@ do
         ;;
         --useServerGC)
         ((serverGC = 1))
+        ;;
+        --ignore-native-dlls)
+        IgnoreNativeDLLs=1
         ;;
         --outerloop)
         OuterLoop=""
