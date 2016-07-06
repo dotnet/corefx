@@ -71,17 +71,11 @@ namespace System.Net.Http
 
         protected override void Dispose(bool disposing)
         {
-            try
+            if (disposing)
             {
-                if (disposing)
-                {
-                    _innerStream.Dispose();
-                }
+                _innerStream.Dispose();
             }
-            finally
-            {
-                base.Dispose(disposing);
-            }
+            // Stream.Dispose(bool) doesn't do any work
         }
 
         #region Read
