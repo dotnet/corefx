@@ -15,8 +15,6 @@ namespace System
         // fields
 
         private const int NumberOfLabels = 8;
-        // Lower case hex, no leading zeros
-        private const string CanonicalNumberFormat = "{0:x}";
         private const char Separator = ':';
 
         // methods
@@ -43,12 +41,13 @@ namespace System
             bool ipv4Embedded = ShouldHaveIpv4Embedded(numbers);
 
             StringBuilder builder = new StringBuilder();
+	        var formatProvider = CultureInfo.InvariantCulture;
+
             for (int i = 0; i < NumberOfLabels; i++)
             {
                 if (ipv4Embedded && i == (NumberOfLabels - 2))
                 {
                     // Write the remaining digits as an IPv4 address
-                    var formatProvider = CultureInfo.InvariantCulture;
 
                     // Call all of this manually, instead of using AppendFormat,
                     // to avoid boxing
@@ -85,7 +84,7 @@ namespace System
                 {
                     builder.Append(Separator);
                 }
-                builder.AppendFormat(CultureInfo.InvariantCulture, CanonicalNumberFormat, numbers[i]);
+                builder.Append(numbers[i].ToString("x", formatProvider)); // Lower case hex, no leading zeros
             }
 
             return builder.ToString();
