@@ -1,0 +1,392 @@
+﻿{
+  "settings": {
+    "SkipTests":{
+      "description": "Enables/Disables running tests.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": false
+    },
+    "OSGroup": {
+      "description": "OS Group for result binaries.",
+      "valueType": "property",
+      "values": ["AnyOS", "Windows_NT", "Linux", "OSX", "FreeBSD", "NetBSD"],
+      "defaultValue": "AnyOS"
+     },
+    "FilterToOSGroup": {
+      "description": "Target OS for result binaries.",
+      "valueType": "property",
+      "values": ["Windows_NT", "Linux", "OSX", "FreeBSD", "NetBSD"],
+      "defaultValue": "Windows_NT"
+    },
+    "RestoreDuringBuild": {
+      "description": "Enables/Disables the restoration of packages.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": true
+    },
+    "Platform": {
+      "description": "Sets the value of the platform.",
+      "valueType": "property",
+      "values": ["AnyCPU", "x86", "arm", "x64", "amd64"],
+      "defaultValue": "x64"
+    },
+    "ConfigurationGroup": {
+      "description": "Sets the configuration group as Release or Debug",
+      "valueType": "property",
+      "values": ["Release", "Debug"],
+      "defaultValue": "Debug"
+    },
+    "BuildPackages": {
+      "description": "Enables/Disables building packages.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": true
+    },
+    "BuildPackageLibraryReferences": {
+      "description": "Enables/Disables building libraries referenced by packages.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": true
+    },
+    "SkipManagedPackageBuild": {
+      "description": "Enables/Disables building packages for manage builds.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": false
+    },
+    "BuildTests": {
+      "description": "Enables/Disables building tests.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": true
+    },
+    "BuildTestsAgainstPackages": {
+      "description": "Allows to build tests against product packages.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": false
+    },
+    "CloudDropAccountName": {
+      "description": "Azure account name.",
+      "valueType": "property",
+      "values": [],
+      "defaultValue": ""
+    },
+    "CloudDropAccessToken": {
+      "description": "Azure access token",
+      "valueType": "property",
+      "values": [],
+      "defaultValue": ""
+    },
+    "ContainerName": {
+      "description": "Azure container name",
+      "valueType": "property",
+      "values": [],
+      "defaultValue": ""
+    },
+    "MsBuildNodoReuse": {
+      "description": "Disables node reuse.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": "/nodeReuse:false"
+    },
+    "MsBuildLogging": {
+      "description": "MsBuild logging options.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": "/flp:v=normal"
+    },
+    "MsBuildWarning": {
+      "description": "MsBuild warning logging.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": "/flp2:warningsonly;logfile=msbuild.wrn"
+    },
+    "MsBuildError": {
+      "description": "MsBuild error logging.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": "/flp3:errorsonly;logfile=msbuild.err"
+    },
+    "MsBuildParameters": {
+      "description": "MsBuild building options.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": "/nologo /maxcpucount /verbosity:minimal /clp:Summary"
+    },
+    "MsBuildBinClashLogger-Windows": {
+      "description": "MsBuild Bin clash logger options.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": "/l:BinClashLogger,Tools\\net45\\Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
+    },
+    "CmakeDebug": {
+      "description": "Property to build in debug mode.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": "DEBUG"
+    },
+    "Project": {
+      "description": "Project where the commands are going to be applied.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": ""
+    },
+    "ExtraParameters": {
+      "description": "Extra parameters will be passed to the selected command.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": ""
+    },
+    "BatchGenerateTestProjectJsons": {
+      "description": "MsBuild target that generates the project Jsons files to build tests against packages.",
+      "valueType": "target",
+      "values": [],
+      "defaultValue": ""
+    },
+    "BatchRestorePackages": {
+      "description": "MsBuild target that restores the packages.",
+      "valueType": "target",
+      "values": [],
+      "defaultValue": ""
+    },
+    "CleanAllProjects": {
+      "description": "MsBuild target that deletes the binary output directory.",
+      "valueType": "target",
+      "values": [],
+      "defaultValue": ""
+    },
+    "CleanPackages": {
+      "description": "MsBuild target that deletes the repo-local nuget package directory.",
+      "valueType": "target",
+      "values": [],
+      "defaultValue": ""
+    },
+    "CleanPackagesCache": {
+      "description": "MsBuild target that deletes the user-local nuget package cache.",
+      "valueType": "target",
+      "values": [],
+      "defaultValue": ""
+    }
+  },
+  "commands": {
+    "sync":{
+      "alias":{
+        "p":{
+          "description": "Restores all NuGet packages for repository.",
+          "settings":{
+            "RestoreDuringBuild":  true,
+            "BatchRestorePackages": "default"
+          }
+        },
+        "ab":{
+          "description": "Downloads the latests product packages from Azure. The values for '-AzureAccount' and '-AzureToken' are required",
+          "settings":{
+            "Project": "src\\syncAzure.proj",
+          }
+        },
+        "t":{
+          "description": "Generates project.jsons for test projects, restores packages, builds product and then builds tests against the generated project.json files.",
+          "settings":{
+            "RestoreDuringBuild":  true,
+            "BuildTestsAgainstPackages": true,
+            "BatchGenerateTestProjectJsons":  "default",
+            "BatchRestorePackages": "default"
+          }
+        },
+        "AzureAccount":{
+          "description": "Account token to connect to Azure Blob storage.",
+          "settings":{
+            "CloudDropAccessToken": "default"
+          }
+        },
+        "AzureToken":{
+          "description": "Account name to connect to Azure Blob storage.",
+          "settings":{
+            "CloudDropAccountName": "default"
+          }
+        },
+        "verbose":{
+          "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
+          "settings":{
+            "MsBuildLogging": "/flp:v=diag"
+          }
+        }
+      },
+      "defaultValues":{
+        "toolName": "msbuild",
+        "settings": {
+          "MsBuildParameters":"default",
+          "MsBuildLogging":"default"
+        }
+      }
+    },
+    "build-managed":{
+      "alias":{
+        "binaries":{
+          "description": "Only builds binaries. It doesn't restore packages.",
+          "settings":{
+            "RestoreDuringBuild": false,
+            "BuildTests": false,
+            "BuildPackages": false
+          }
+        },
+        "packages":{
+          "description": "Builds the NuGet packages.",
+          "settings":{
+            "Project": "src\\packages.builds",
+            "FilterToOSGroup":"default"
+          }
+        },
+        "tests":{
+          "description": "Builds the tests that are in the repository.",
+          "settings":{
+            "Project": "src\\tests.builds"
+          }
+        },
+        "debug":{
+          "description": "Sets ConfigurationGroup=Debug or the value passed by the user.",
+          "settings":{
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        "release":{
+          "description": "Sets ConfigurationGroup=Release or the value passed by the user.",
+          "settings":{
+            "ConfigurationGroup": "Release"
+          }
+        },
+        "os":{
+          "description": "Sets OSGroup=AnyOS or the value passed by the user.",
+          "settings":{
+            "OSGroup": "default"
+          }
+        },
+        "verbose":{
+          "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
+          "settings":{
+            "MsBuildLogging": "/flp:v=diag"
+          }
+        },
+        "nodoReuse":{
+          "description": "Disables node reuse because it causes file locking issues. Only available in the Desktop MsBuild.",
+          "settings":{
+            "MsBuildNodoReuse": "default"
+          }
+        },
+        "binclashWindows":{
+          "description": "Bin clash logger for Windows.",
+          "settings":{
+            "MsBuildBinClashLogger-Windows":"default"
+          }
+        }
+      },
+      "defaultValues":{
+        "toolName": "msbuild",
+        "settings": {
+          "MsBuildParameters":"default",
+          "MsBuildLogging":"default",
+          "MsBuildWarning":"default",
+          "MsBuildError":"default"
+        }
+      }
+    },
+    "build-native":{
+      "alias":{
+        "debug":{
+          "description": "Passes DEBUG to respective build-native script.",
+          "settings":{
+            "CmakeDebug": "default"
+          }
+        },
+        "release":{
+          "description": "Passes RELEASE to respective build-native script.",
+          "settings":{
+            "CmakeDebug": "RELEASE"
+          }
+        }
+      },
+      "defaultValues":{
+        "toolName": "terminal",
+        "Project": "src\\Native\\Windows\\build-native",
+        "settings": {}
+      }
+    },
+    "publish-packages":{
+      "alias":{
+        "AzureAccount":{
+          "description": "Account token to connect to Azure Blob storage.",
+          "settings":{
+            "CloudDropAccessToken": "default"
+          }
+        },
+        "AzureToken":{
+          "description": "Account name to connect to Azure Blob storage.",
+          "settings":{
+            "CloudDropAccountName": "default"
+          }
+        },
+        "verbose":{
+          "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
+          "settings":{
+            "MsBuildLogging": "/flp:v=diag"
+          }
+        }
+      },
+      "defaultValues":{
+        "toolName": "msbuild",
+        "Project": "src\\publish.proj",
+        "settings": {}
+      }
+    },
+    "clean":{
+      "alias":{
+        "b":{
+          "description": "Deletes the binary output directory.",
+          "settings":{
+            "CleanAllProjects": "default"
+          }
+        },
+        "p":{
+          "description": "Deletes the repo-local nuget package directory.",
+          "settings":{
+            "CleanPackages": "default"
+            }
+        },
+        "c":{
+          "description": "Deletes the user-local nuget package cache.",
+          "settings":{
+            "CleanPackagesCache": "default"
+          }
+        }
+      },
+      "defaultValues":{
+        "toolName": "msbuild",
+        "settings": {
+          "MsBuildParameters":"default",
+          "MsBuildLogging":"default"
+        }
+      }
+    }
+  },
+  "tools": {
+    "msbuild": {
+      "run": {
+        "windows": "Tools\\msbuild.cmd",
+        "unix": "Tools/msbuild.sh"
+      },
+      "valueTypes": {
+        "property": "/p:{name}={value}",
+        "target": "/t:{name}",
+        "internal": "/{name}"
+      }
+    },
+    "terminal": {
+      "run": {
+        "windows": "cmd",
+        "non-windows": "sh"
+      },
+      "valueTypes": {}
+    }
+  }
+}

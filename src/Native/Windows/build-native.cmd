@@ -5,6 +5,7 @@ setlocal
 :: Initialize the args that will be passed to cmake
 set __sourceDir=%~dp0
 set __binDir=%~dp0..\..\..\bin
+set __rootDir=%~dp0..\..\..
 set __CMakeBinDir=""
 set __IntermediatesDir=""
 set __BuildArch=x64
@@ -12,6 +13,12 @@ set __VCBuildArch=x86_amd64
 set CMAKE_BUILD_TYPE=Debug
 set "__LinkArgs= "
 set "__LinkLibraries= "
+
+:GenerateVersionHeader
+set __versionLog=%~dp0version.log
+if not exist "%__binDir%\obj\_version.h" (
+  msbuild "%__rootDir%\build.proj" /nologo /t:GenerateVersionHeader /p:GenerateNativeVersionInfo=true > "%__versionLog%"
+)
 
 :Arg_Loop
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
