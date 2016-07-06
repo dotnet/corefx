@@ -133,8 +133,11 @@ namespace System.Numerics.Tests
             Vector3 point2 = new Vector3(0.0f, 0.0f, 1.0f);
             Vector3 point3 = new Vector3(1.0f, 0.0f, 1.0f);
 
-            Plane target = Plane.CreateFromVertices(point1, point2, point3);
             Plane expected = new Plane(new Vector3(0, 0, 1), -1.0f);
+            Plane target = Plane.CreateFromVertices(point1, point2, point3);
+            Assert.Equal(target, expected);
+
+            Plane.CreateFromVertices(ref point1, ref point2, ref point3, out target);
             Assert.Equal(target, expected);
         }
 
@@ -146,10 +149,13 @@ namespace System.Numerics.Tests
             Vector3 point2 = new Vector3(1.0f, 0.0f, 0.0f);
             Vector3 point3 = new Vector3(1.0f, 1.0f, 0.0f);
 
-            Plane target = Plane.CreateFromVertices(point1, point2, point3);
             float invRoot2 = (float)(1 / Math.Sqrt(2));
-
             Plane expected = new Plane(new Vector3(invRoot2, 0, invRoot2), -invRoot2);
+
+            Plane target = Plane.CreateFromVertices(point1, point2, point3);
+            Assert.True(MathHelper.Equal(target, expected), "Plane.cstor did not return the expected value.");
+
+            Plane.CreateFromVertices(ref point1, ref point2, ref point3, out target);
             Assert.True(MathHelper.Equal(target, expected), "Plane.cstor did not return the expected value.");
         }
 
@@ -187,6 +193,9 @@ namespace System.Numerics.Tests
             float expected = 10 + 12 + 12 + 10;
             float actual = Plane.Dot(target, value);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Dot returns unexpected value.");
+
+            Plane.Dot(ref target, ref value, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Plane.Dot returns unexpected value.");
         }
 
         [Fact]
@@ -198,6 +207,9 @@ namespace System.Numerics.Tests
             float expected = 10 + 12 + 12 + 5;
             float actual = Plane.DotCoordinate(target, value);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.DotCoordinate returns unexpected value.");
+
+            Plane.DotCoordinate(ref target, ref value, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Plane.DotCoordinate returns unexpected value.");
         }
 
         [Fact]
@@ -208,6 +220,9 @@ namespace System.Numerics.Tests
 
             float expected = 10 + 12 + 12;
             float actual = Plane.DotNormal(target, value);
+            Assert.True(MathHelper.Equal(expected, actual), "Plane.DotCoordinate returns unexpected value.");
+
+            Plane.DotNormal(ref target, ref value, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.DotCoordinate returns unexpected value.");
         }
 
@@ -226,6 +241,16 @@ namespace System.Numerics.Tests
             // normalize, normalized normal.
             actual = Plane.Normalize(actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Normalize returns unexpected value.");
+
+            // By-Ref
+
+            Plane.Normalize(ref target, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Plane.Normalize returns unexpected value.");
+
+            // normalize, normalized normal.
+            Plane.Normalize(ref actual, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Plane.Normalize returns unexpected value.");
+
         }
 
         [Fact]
@@ -257,6 +282,9 @@ namespace System.Numerics.Tests
             Plane actual;
             actual = Plane.Transform(target, m);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Transform did not return the expected value.");
+
+            Plane.Transform(ref target, ref m, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Plane.Transform did not return the expected value.");
         }
 
         [Fact]
@@ -282,6 +310,9 @@ namespace System.Numerics.Tests
 
             Plane actual;
             actual = Plane.Transform(target, q);
+            Assert.True(MathHelper.Equal(expected, actual), "Plane.Transform did not return the expected value.");
+
+            Plane.Transform(ref target, ref q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Transform did not return the expected value.");
         }
 
