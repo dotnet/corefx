@@ -5001,7 +5001,6 @@ namespace System.Net
         public System.Net.Cookie this[string name] { get { return default(System.Net.Cookie); } }
         public void Add(System.Net.Cookie cookie) { }
         public void Add(System.Net.CookieCollection cookies) { }
-        public void CopyTo(System.Array array, int index) { }
         void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
         public System.Collections.IEnumerator GetEnumerator() { return default(System.Collections.IEnumerator); }
     }
