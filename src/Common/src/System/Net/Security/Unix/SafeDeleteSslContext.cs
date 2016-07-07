@@ -33,10 +33,7 @@ namespace System.Net.Security
             try
             {
                 _sslContext = Interop.OpenSsl.AllocateSslContext(
-                    credential.Protocols,
-                    credential.CertHandle,
-                    credential.CertKeyHandle,
-                    credential.Policy,
+                    credential,
                     isServer,
                     remoteCertRequired);
             }

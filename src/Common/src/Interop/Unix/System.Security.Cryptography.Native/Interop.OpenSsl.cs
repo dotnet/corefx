@@ -46,11 +46,11 @@ internal static partial class Interop
             return bindingHandle;
         }
 
-        internal static SafeSslHandle AllocateSslContext(SslProtocols protocols, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, EncryptionPolicy policy, bool isServer, bool remoteCertRequired)
+        internal static SafeSslHandle AllocateSslContext(SafeFreeSslCredentials credential, bool isServer, bool remoteCertRequired)
         {
             SafeSslHandle context = null;
-
-            IntPtr method = GetSslMethod(protocols);
+            
+            IntPtr method = GetSslMethod(credential.Protocols);
 
             using (SafeSslContextHandle innerContext = Ssl.SslCtxCreate(method))
             {
@@ -61,7 +61,7 @@ internal static partial class Interop
 
                 // Configure allowed protocols. It's ok to use DangerousGetHandle here without AddRef/Release as we just
                 // create the handle, it's rooted by the using, no one else has a reference to it, etc.
-                Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
+                Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), credential.Protocols);
 
                 // The logic in SafeSslHandle.Disconnect is simple because we are doing a quiet
                 // shutdown (we aren't negotiating for session close to enable later session
@@ -72,14 +72,14 @@ internal static partial class Interop
                 // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
                 Ssl.SslCtxSetQuietShutdown(innerContext);
 
-                if (!Ssl.SetEncryptionPolicy(innerContext, policy))
+                if (!Ssl.SetEncryptionPolicy(innerContext, credential.Policy))
                 {
-                    throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
+                    throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, credential.Policy));
                 }
-
-                if (certHandle != null && certKeyHandle != null)
+               
+                if (credential.CertHandle != null && credential.CertKeyHandle != null)
                 {
-                    SetSslCertificate(innerContext, certHandle, certKeyHandle);
+                    SetSslCertificate(innerContext, credential.CertHandle, credential.CertKeyHandle);
                 }
 
                 if (remoteCertRequired)
@@ -98,6 +98,15 @@ internal static partial class Interop
                 {
                     context.Dispose();
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
+                }
+
+                if (credential.CertChainHandles != null) 
+                {
+                    foreach (SafeX509Handle chainElement in credential.CertChainHandles) 
+                    {
+                        if (!Ssl.SslAddExtraChainCert(context, chainElement))
+                            throw CreateSslException(SR.net_allocate_ssl_context_failed);
+                    }
                 }
             }
 
