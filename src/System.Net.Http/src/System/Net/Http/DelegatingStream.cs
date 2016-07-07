@@ -75,7 +75,7 @@ namespace System.Net.Http
             {
                 _innerStream.Dispose();
             }
-            base.Dispose(disposing);
+            // Stream.Dispose(bool) doesn't do any work
         }
 
         #region Read
