@@ -26,6 +26,7 @@ namespace System.Threading
         public static void Sleep(System.TimeSpan timeout) { }
         public void Start() { }
         public void Start(object parameter) { }
+        public void Abort() { }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public delegate void ThreadStart();
