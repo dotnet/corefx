@@ -142,7 +142,9 @@ namespace System.Net.Http
 
         internal bool TryGetBuffer(out ArraySegment<byte> buffer)
         {
-            return _bufferedContent != null && _bufferedContent.TryGetBuffer(out buffer);
+            bool result = _bufferedContent != null && _bufferedContent.TryGetBuffer(out buffer);
+            Debug.Assert(result, "Performance: TryGetBuffer failed, which means that reads from the content will copy the data!");
+            return result;
         }
 
         protected HttpContent()
