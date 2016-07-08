@@ -1,3 +1,13 @@
+namespace Microsoft.Win32.SafeHandles
+{
+    // Members from SafeHandleMinusOneOrZeroIsInvalid needed after removing base
+    public sealed partial class SafeX509ChainHandle : System.Runtime.InteropServices.SafeHandle
+    {
+        internal SafeX509ChainHandle() : base(default(System.IntPtr), default(bool)) { }
+        protected override bool ReleaseHandle() { return default(bool); }
+        public override bool IsInvalid { [System.Security.SecurityCriticalAttribute]get { return default(bool); } }
+    }
+}
 namespace System
 {
     public partial class FileStyleUriParser : System.UriParser
@@ -82,6 +92,7 @@ namespace System
         public string LocalPath { get { return default(string); } }
         public string OriginalString { get { return default(string); } }
         public string PathAndQuery { get { return default(string); } }
+        public string IdnHost { get { return default(string); } }
         public int Port { get { return default(int); } }
         public string Query { get { return default(string); } }
         public string Scheme { get { return default(string); } }
@@ -4898,9 +4909,11 @@ namespace System.IO.Compression
         public override void EndWrite(System.IAsyncResult async_result) { }
         public override void Flush() { }
         public override int Read(byte[] dest, int dest_offset, int count) { return default(int); }
+        public override System.Threading.Tasks.Task<int> ReadAsync(byte[] array, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { return default(long); }
         public override void SetLength(long value) { }
         public override void Write(byte[] src, int src_offset, int count) { }
+        public override System.Threading.Tasks.Task WriteAsync(byte[] array, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
     public partial class GZipStream : System.IO.Stream
     {
@@ -4921,9 +4934,11 @@ namespace System.IO.Compression
         public override void EndWrite(System.IAsyncResult async_result) { }
         public override void Flush() { }
         public override int Read(byte[] dest, int dest_offset, int count) { return default(int); }
+        public override System.Threading.Tasks.Task<int> ReadAsync(byte[] array, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { return default(long); }
         public override void SetLength(long value) { }
         public override void Write(byte[] src, int src_offset, int count) { }
+        public override System.Threading.Tasks.Task WriteAsync(byte[] array, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
 }
 namespace System.Net
@@ -5657,6 +5672,7 @@ namespace System.Net
         [System.ObsoleteAttribute("This property is obsolete. Use GetAddressBytes.")]
         public long Address { get { return default(long); } set { } }
         public System.Net.Sockets.AddressFamily AddressFamily { get { return default(System.Net.Sockets.AddressFamily); } }
+        public bool IsIPv4MappedToIPv6 { get { return default(bool); } }
         public bool IsIPv6LinkLocal { get { return default(bool); } }
         public bool IsIPv6Multicast { get { return default(bool); } }
         public bool IsIPv6SiteLocal { get { return default(bool); } }
@@ -7582,9 +7598,11 @@ namespace System.Net.Sockets
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public override int Read(byte[] buffer, int offset, int size) { buffer = default(byte[]); return default(int); }
+        public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int size, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { return default(long); }
         public override void SetLength(long value) { }
         public override void Write(byte[] buffer, int offset, int size) { }
+        public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int size, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
     }
     public enum ProtocolFamily
     {
@@ -7728,6 +7746,8 @@ namespace System.Net.Sockets
         public System.IAsyncResult BeginSendFile(string fileName, byte[] preBuffer, byte[] postBuffer, System.Net.Sockets.TransmitFileOptions flags, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
         public System.IAsyncResult BeginSendTo(byte[] buffer, int offset, int size, System.Net.Sockets.SocketFlags socket_flags, System.Net.EndPoint remote_end, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
         public void Bind(System.Net.EndPoint local_end) { }
+        public static void CancelConnectAsync(System.Net.Sockets.SocketAsyncEventArgs e) { }
+        public static bool ConnectAsync(System.Net.Sockets.SocketType socketType, System.Net.Sockets.ProtocolType protocolType, System.Net.Sockets.SocketAsyncEventArgs e) { return default(bool); }
         public void Close() { }
         public void Close(int timeout) { }
         public void Connect(System.Net.EndPoint remoteEP) { }
@@ -7816,7 +7836,9 @@ namespace System.Net.Sockets
         public bool DisconnectReuseSocket { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(bool); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Net.Sockets.SocketAsyncOperation LastOperation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.Net.Sockets.SocketAsyncOperation); } }
         public int Offset { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(int); } }
+        public System.Net.Sockets.IPPacketInformation ReceiveMessageFromPacketInfo { get { return default(System.Net.Sockets.IPPacketInformation); } }
         public System.Net.EndPoint RemoteEndPoint { get { return default(System.Net.EndPoint); } set { } }
+        public System.Net.Sockets.SendPacketsElement[] SendPacketsElements { get { return default(System.Net.Sockets.SendPacketsElement[]); } set { } }
         public int SendPacketsSendSize { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(int); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Net.Sockets.SocketError SocketError { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.Net.Sockets.SocketError); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Net.Sockets.SocketFlags SocketFlags { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.Net.Sockets.SocketFlags); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
@@ -8029,10 +8051,10 @@ namespace System.Net.Sockets
         public System.Threading.Tasks.Task ConnectAsync(System.Net.IPAddress[] addresses, int port) { return default(System.Threading.Tasks.Task); }
         public System.Threading.Tasks.Task ConnectAsync(string host, int port) { return default(System.Threading.Tasks.Task); }
         protected virtual void Dispose(bool disposing) { }
+        public void Dispose() { }
         public void EndConnect(System.IAsyncResult asyncResult) { }
         ~TcpClient() { }
         public System.Net.Sockets.NetworkStream GetStream() { return default(System.Net.Sockets.NetworkStream); }
-        void System.IDisposable.Dispose() { }
     }
     public partial class TcpListener
     {
@@ -8110,7 +8132,7 @@ namespace System.Net.Sockets
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes) { return default(System.Threading.Tasks.Task<int>); }
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes, System.Net.IPEndPoint endPoint) { return default(System.Threading.Tasks.Task<int>); }
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes, string hostname, int port) { return default(System.Threading.Tasks.Task<int>); }
-        void System.IDisposable.Dispose() { }
+        public void Dispose() { }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct UdpReceiveResult : System.IEquatable<System.Net.Sockets.UdpReceiveResult>
@@ -8503,9 +8525,9 @@ namespace System.Security.Cryptography
         public AsnEncodedDataCollection() { }
         public AsnEncodedDataCollection(System.Security.Cryptography.AsnEncodedData asnEncodedData) { }
         public int Count { get { return default(int); } }
-        public bool IsSynchronized { get { return default(bool); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         public System.Security.Cryptography.AsnEncodedData this[int index] { get { return default(System.Security.Cryptography.AsnEncodedData); } }
-        public object SyncRoot { get { return default(object); } }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
         public int Add(System.Security.Cryptography.AsnEncodedData asnEncodedData) { return default(int); }
         public void CopyTo(System.Security.Cryptography.AsnEncodedData[] array, int index) { }
         public System.Security.Cryptography.AsnEncodedDataEnumerator GetEnumerator() { return default(System.Security.Cryptography.AsnEncodedDataEnumerator); }
@@ -8529,15 +8551,17 @@ namespace System.Security.Cryptography
         public Oid(string value, string friendlyName) { }
         public string FriendlyName { get { return default(string); } set { } }
         public string Value { get { return default(string); } set { } }
+        public static System.Security.Cryptography.Oid FromFriendlyName(string friendlyName, System.Security.Cryptography.OidGroup group) { return default(System.Security.Cryptography.Oid); }
+        public static System.Security.Cryptography.Oid FromOidValue(string oidValue, System.Security.Cryptography.OidGroup group) { return default(System.Security.Cryptography.Oid); }
     }
     public sealed partial class OidCollection : System.Collections.ICollection, System.Collections.IEnumerable
     {
         public OidCollection() { }
         public int Count { get { return default(int); } }
-        public bool IsSynchronized { get { return default(bool); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         public System.Security.Cryptography.Oid this[int index] { get { return default(System.Security.Cryptography.Oid); } }
         public System.Security.Cryptography.Oid this[string oid] { get { return default(System.Security.Cryptography.Oid); } }
-        public object SyncRoot { get { return default(object); } }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
         public int Add(System.Security.Cryptography.Oid oid) { return default(int); }
         public void CopyTo(System.Security.Cryptography.Oid[] array, int index) { }
         public System.Security.Cryptography.OidEnumerator GetEnumerator() { return default(System.Security.Cryptography.OidEnumerator); }
@@ -8716,18 +8740,34 @@ namespace System.Security.Cryptography.X509Certificates
         bool System.Collections.IEnumerator.MoveNext() { return default(bool); }
         void System.Collections.IEnumerator.Reset() { }
     }
-    public partial class X509CertificateCollection : System.Collections.CollectionBase
+    public partial class X509CertificateCollection : System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList
     {
         public X509CertificateCollection() { }
         public X509CertificateCollection(System.Security.Cryptography.X509Certificates.X509Certificate[] value) { }
         public X509CertificateCollection(System.Security.Cryptography.X509Certificates.X509CertificateCollection value) { }
+        // Declaring members from stripped base class CollectionBase
+        public int Count { get { return default(int); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
+        bool System.Collections.IList.IsFixedSize { get { return default(bool); } }
+        bool System.Collections.IList.IsReadOnly { get { return default(bool); } }
+        object System.Collections.IList.this[int index] { get { return default(object); } set { } }
+        public void Clear() { }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return default(System.Collections.IEnumerator); }
+        public void RemoveAt(int index) { }
+        void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
+        int System.Collections.IList.Add(object value) { return default(int); }
+        bool System.Collections.IList.Contains(object value) { return default(bool); }
+        int System.Collections.IList.IndexOf(object value) { return default(int); }
+        void System.Collections.IList.Insert(int index, object value) { }
+        void System.Collections.IList.Remove(object value) { }
         public System.Security.Cryptography.X509Certificates.X509Certificate this[int index] { get { return default(System.Security.Cryptography.X509Certificates.X509Certificate); } set { } }
         public int Add(System.Security.Cryptography.X509Certificates.X509Certificate value) { return default(int); }
         public void AddRange(System.Security.Cryptography.X509Certificates.X509Certificate[] value) { }
         public void AddRange(System.Security.Cryptography.X509Certificates.X509CertificateCollection value) { }
         public bool Contains(System.Security.Cryptography.X509Certificates.X509Certificate value) { return default(bool); }
         public void CopyTo(System.Security.Cryptography.X509Certificates.X509Certificate[] array, int index) { }
-        public new System.Security.Cryptography.X509Certificates.X509CertificateCollection.X509CertificateEnumerator GetEnumerator() { return default(System.Security.Cryptography.X509Certificates.X509CertificateCollection.X509CertificateEnumerator); }
+        public  System.Security.Cryptography.X509Certificates.X509CertificateCollection.X509CertificateEnumerator GetEnumerator() { return default(System.Security.Cryptography.X509Certificates.X509CertificateCollection.X509CertificateEnumerator); }
         public override int GetHashCode() { return default(int); }
         public int IndexOf(System.Security.Cryptography.X509Certificates.X509Certificate value) { return default(int); }
         public void Insert(int index, System.Security.Cryptography.X509Certificates.X509Certificate value) { }
@@ -8749,6 +8789,7 @@ namespace System.Security.Cryptography.X509Certificates
         public X509Chain(bool useMachineContext) { }
         public X509Chain(System.IntPtr chainContext) { }
         public System.IntPtr ChainContext { get { return default(System.IntPtr); } }
+        public Microsoft.Win32.SafeHandles.SafeX509ChainHandle SafeHandle { get { return default(Microsoft.Win32.SafeHandles.SafeX509ChainHandle); } }
         public System.Security.Cryptography.X509Certificates.X509ChainElementCollection ChainElements { get { return default(System.Security.Cryptography.X509Certificates.X509ChainElementCollection); } }
         public System.Security.Cryptography.X509Certificates.X509ChainPolicy ChainPolicy { get { return default(System.Security.Cryptography.X509Certificates.X509ChainPolicy); } set { } }
         public System.Security.Cryptography.X509Certificates.X509ChainStatus[] ChainStatus { get { return default(System.Security.Cryptography.X509Certificates.X509ChainStatus[]); } }
@@ -8770,9 +8811,9 @@ namespace System.Security.Cryptography.X509Certificates
     {
         internal X509ChainElementCollection() { }
         public int Count { get { return default(int); } }
-        public bool IsSynchronized { get { return default(bool); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         public System.Security.Cryptography.X509Certificates.X509ChainElement this[int index] { get { return default(System.Security.Cryptography.X509Certificates.X509ChainElement); } }
-        public object SyncRoot { get { return default(object); } }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
         public void CopyTo(System.Security.Cryptography.X509Certificates.X509ChainElement[] array, int index) { }
         public System.Security.Cryptography.X509Certificates.X509ChainElementEnumerator GetEnumerator() { return default(System.Security.Cryptography.X509Certificates.X509ChainElementEnumerator); }
         void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
@@ -8812,10 +8853,13 @@ namespace System.Security.Cryptography.X509Certificates
         CtlNotTimeValid = 131072,
         CtlNotValidForUsage = 524288,
         Cyclic = 128,
+        ExplicitDistrust = 67108864,
         HasExcludedNameConstraint = 32768,
         HasNotDefinedNameConstraint = 8192,
         HasNotPermittedNameConstraint = 16384,
         HasNotSupportedNameConstraint = 4096,
+        HasNotSupportedCriticalExtension = 134217728,
+        HasWeakSignature = 1048576,
         InvalidBasicConstraints = 1024,
         InvalidExtension = 256,
         InvalidNameConstraints = 2048,
@@ -8853,10 +8897,10 @@ namespace System.Security.Cryptography.X509Certificates
     {
         public X509ExtensionCollection() { }
         public int Count { get { return default(int); } }
-        public bool IsSynchronized { get { return default(bool); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         public System.Security.Cryptography.X509Certificates.X509Extension this[int index] { get { return default(System.Security.Cryptography.X509Certificates.X509Extension); } }
         public System.Security.Cryptography.X509Certificates.X509Extension this[string oid] { get { return default(System.Security.Cryptography.X509Certificates.X509Extension); } }
-        public object SyncRoot { get { return default(object); } }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
         public int Add(System.Security.Cryptography.X509Certificates.X509Extension extension) { return default(int); }
         public void CopyTo(System.Security.Cryptography.X509Certificates.X509Extension[] array, int index) { }
         public System.Security.Cryptography.X509Certificates.X509ExtensionEnumerator GetEnumerator() { return default(System.Security.Cryptography.X509Certificates.X509ExtensionEnumerator); }
@@ -8956,6 +9000,7 @@ namespace System.Security.Cryptography.X509Certificates
         public void Add(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
         public void AddRange(System.Security.Cryptography.X509Certificates.X509Certificate2Collection certificates) { }
         public void Close() { }
+        public void Dispose() { }
         public void Open(System.Security.Cryptography.X509Certificates.OpenFlags flags) { }
         public void Remove(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) { }
         public void RemoveRange(System.Security.Cryptography.X509Certificates.X509Certificate2Collection certificates) { }
@@ -9033,16 +9078,17 @@ namespace System.Text.RegularExpressions
         internal CaptureCollection() { }
         public int Count { get { return default(int); } }
         public bool IsReadOnly { get { return default(bool); } }
-        public bool IsSynchronized { get { return default(bool); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         public System.Text.RegularExpressions.Capture this[int i] { get { return default(System.Text.RegularExpressions.Capture); } }
-        public object SyncRoot { get { return default(object); } }
-        public void CopyTo(System.Array array, int arrayIndex) { }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
+        void System.Collections.ICollection.CopyTo(System.Array array, int arrayIndex) { }
         public System.Collections.IEnumerator GetEnumerator() { return default(System.Collections.IEnumerator); }
     }
     public partial class Group : System.Text.RegularExpressions.Capture
     {
         internal Group() { }
         public System.Text.RegularExpressions.CaptureCollection Captures { get { return default(System.Text.RegularExpressions.CaptureCollection); } }
+        public string Name { get { return default(string); } }
         public bool Success { get { return default(bool); } }
         public static System.Text.RegularExpressions.Group Synchronized(System.Text.RegularExpressions.Group inner) { return default(System.Text.RegularExpressions.Group); }
     }
@@ -9051,11 +9097,11 @@ namespace System.Text.RegularExpressions
         internal GroupCollection() { }
         public int Count { get { return default(int); } }
         public bool IsReadOnly { get { return default(bool); } }
-        public bool IsSynchronized { get { return default(bool); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         public System.Text.RegularExpressions.Group this[int groupnum] { get { return default(System.Text.RegularExpressions.Group); } }
         public System.Text.RegularExpressions.Group this[string groupname] { get { return default(System.Text.RegularExpressions.Group); } }
-        public object SyncRoot { get { return default(object); } }
-        public void CopyTo(System.Array array, int arrayIndex) { }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
+        void System.Collections.ICollection.CopyTo(System.Array array, int arrayIndex) { }
         public System.Collections.IEnumerator GetEnumerator() { return default(System.Collections.IEnumerator); }
     }
     public partial class Match : System.Text.RegularExpressions.Group
@@ -9072,17 +9118,17 @@ namespace System.Text.RegularExpressions
         internal MatchCollection() { }
         public int Count { get { return default(int); } }
         public bool IsReadOnly { get { return default(bool); } }
-        public bool IsSynchronized { get { return default(bool); } }
+        bool System.Collections.ICollection.IsSynchronized { get { return default(bool); } }
         public virtual System.Text.RegularExpressions.Match this[int i] { get { return default(System.Text.RegularExpressions.Match); } }
-        public object SyncRoot { get { return default(object); } }
-        public void CopyTo(System.Array array, int arrayIndex) { }
+        object System.Collections.ICollection.SyncRoot { get { return default(object); } }
+        void System.Collections.ICollection.CopyTo(System.Array array, int arrayIndex) { }
         public System.Collections.IEnumerator GetEnumerator() { return default(System.Collections.IEnumerator); }
     }
     public delegate string MatchEvaluator(System.Text.RegularExpressions.Match match);
     public partial class Regex : System.Runtime.Serialization.ISerializable
     {
-        protected internal System.Collections.Hashtable capnames;
-        protected internal System.Collections.Hashtable caps;
+        protected System.Collections.IDictionary CapNames { get; set; }
+        protected System.Collections.IDictionary Caps { get; set; }
         protected internal int capsize;
         protected internal string[] capslist;
         protected internal System.Text.RegularExpressions.RegexRunnerFactory factory;
