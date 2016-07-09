@@ -113,12 +113,9 @@ internal static partial class Interop
                         certHandle.DangerousAddRef(ref hasCertReference);
                         using (X509Certificate2 cert = new X509Certificate2(certHandle.DangerousGetHandle()))
                         {
-                            X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, includeClientApplicationPolicy: false);
-                            if (chain != null)
+                            using (X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, includeClientApplicationPolicy: false))
                             {
-                                bool wasAdded = Ssl.AddExtraChainCertificates(context, chain);
-                                chain.Dispose();
-                                if (!wasAdded)
+                                if (chain != null && !Ssl.AddExtraChainCertificates(context, chain))
                                     throw CreateSslException(SR.net_ssl_use_cert_failed);
                             }
                         }
