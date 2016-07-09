@@ -183,19 +183,24 @@ namespace System.IO.Tests
 
         private T Read<T>(T property, [CallerMemberName] string member = null)
         {
-            _callCounts[member]++;
+            IncrementOrAddCallCount(member);
             return property;
         }
 
         private void Update(Action setter, [CallerMemberName] string member = null)
         {
-            _callCounts[member]++;
+            IncrementOrAddCallCount(member);
             setter();
         }
 
         private void UpdateCallCount([CallerMemberName] string member = null)
         {
-            _callCounts[member]++;
+            IncrementOrAddCallCount(member);
+        }
+
+        private void IncrementOrAddCallCount(string member)
+        {
+            _callCounts[member] = _callCounts.GetOrDefault(member) + 1;
         }
     }
 }
