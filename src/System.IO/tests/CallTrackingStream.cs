@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace System.IO.Tests
 {
+    public class CallTrackingStream : CallTrackingStream<Stream>
+    {
+        public CallTrackingStream(Stream inner) : base(inner) { }
+    }
+
     public class CallTrackingStream<TInner> : Stream where TInner : Stream
     {
         private int _callCount; // keeps track of how many times a method was called on this Stream, excluding CallCount itself
