@@ -23,18 +23,16 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             trackingStream.CopyTo(dest);
 
-            var callCounts = trackingStream.CallCounts;
-
             // When the FEATURE_CORECLR conditional is removed around
             // the CanSeek optimization, this should be uncommented
-            // Assert.Equal(1, callCounts.GetOrDefault(nameof(trackingStream.CanSeek)));
+            // Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.CanSeek)));
 
-            Assert.Equal(0, callCounts.GetOrDefault(nameof(trackingStream.Length)));
-            Assert.Equal(0, callCounts.GetOrDefault(nameof(trackingStream.Position)));
-            // We can't override CopyTo since it's not virtual, so checking callCounts
+            Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Length)));
+            Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Position)));
+            // We can't override CopyTo since it's not virtual, so checking TimesCalled
             // for CopyTo will result in 0. Instead, we check that Read was called,
             // and validate the parameters passed there.
-            Assert.Equal(1, callCounts.GetOrDefault(nameof(trackingStream.Read)));
+            Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.Read)));
 
             byte[] buffer = trackingStream.ReadBuffer;
             int offset = trackingStream.ReadOffset;
@@ -56,15 +54,13 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             await trackingStream.CopyToAsync(dest);
 
-            var callCounts = trackingStream.CallCounts;
-
             // When the FEATURE_CORECLR conditional is removed around
             // the CanSeek optimization, this should be uncommented
-            // Assert.Equal(1, callCounts.GetOrDefault(nameof(trackingStream.CanSeek)));
+            // Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.CanSeek)));
 
-            Assert.Equal(0, callCounts.GetOrDefault(nameof(trackingStream.Length)));
-            Assert.Equal(0, callCounts.GetOrDefault(nameof(trackingStream.Position)));
-            Assert.Equal(1, callCounts.GetOrDefault(nameof(trackingStream.CopyToAsync)));
+            Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Length)));
+            Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Position)));
+            Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.CopyToAsync)));
 
             Assert.Same(dest, trackingStream.CopyToAsyncDestination);
             Assert.True(trackingStream.CopyToAsyncBufferSize > 0);
@@ -82,10 +78,8 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             trackingStream.CopyTo(dest);
 
-            var callCounts = trackingStream.CallCounts;
-
-            Assert.True(callCounts.GetOrDefault(nameof(trackingStream.Length)) <= 1);
-            Assert.True(callCounts.GetOrDefault(nameof(trackingStream.Position)) <= 1);
+            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.Length)) <= 1);
+            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.Position)) <= 1);
         }
 
         [Fact]
@@ -99,10 +93,8 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             await trackingStream.CopyToAsync(dest);
 
-            var callCounts = trackingStream.CallCounts;
-
-            Assert.True(callCounts.GetOrDefault(nameof(trackingStream.Length)) <= 1);
-            Assert.True(callCounts.GetOrDefault(nameof(trackingStream.Position)) <= 1);
+            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.Length)) <= 1);
+            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.Position)) <= 1);
         }
 
         [Theory]

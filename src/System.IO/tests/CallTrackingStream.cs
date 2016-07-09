@@ -24,7 +24,6 @@ namespace System.IO.Tests
         }
 
         public Stream Inner { get; }
-        public IDictionary<string, int> CallCounts => _callCounts;
 
         // Overridden Stream properties
 
@@ -181,6 +180,10 @@ namespace System.IO.Tests
             WriteByteValue = value;
             Inner.WriteByte(value);
         }
+
+        // Bookkeeping logic
+
+        public int TimesCalled(string member) => _callCounts.GetOrDefault(member);
 
         private T Read<T>(T property, [CallerMemberName] string member = null)
         {
