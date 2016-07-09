@@ -242,6 +242,68 @@ namespace System.IO.Tests
             Assert.Equal(ReadLimit - 1, dest.TimesCalled(nameof(dest.Write)));
         }
 
+        [Theory]
+        [MemberData(nameof(LengthIsGreaterThanPositionAndDoesNotOverflow))]
+        public async void AsyncIfLengthIsGreaterThanPositionAndDoesNotOverflowEverythingShouldGoNormally(long length, long position)
+        {
+            const int ReadLimit = 7;
+
+            var srcBase = new ConfigurablePropertyStream();
+            srcBase.SetCanRead(true);
+            srcBase.SetCanSeek(true);
+            srcBase.SetLength(length);
+            srcBase.Position = position;
+
+            // Lambda state
+            byte[] outerBuffer = null;
+            int? outerOffset = null;
+            int? outerCount = null;
+            int readsLeft = ReadLimit;
+
+            srcBase.ReadCore = (buffer, offset, count) =>
+            {
+                Assert.NotNull(buffer);
+                Assert.True(offset >= 0 && offset + count <= buffer.Length);
+                Assert.True(count > 0);
+
+                // CopyTo should always pass in the same buffer/offset/count
+                
+                if (outerBuffer != null) Assert.Same(outerBuffer, buffer);
+                else outerBuffer = buffer;
+
+                if (outerOffset != null) Assert.Equal(outerOffset, offset);
+                else outerOffset = offset;
+
+                if (outerCount != null) Assert.Equal(outerCount, count);
+                else outerCount = count;
+
+                return --readsLeft; // CopyTo will call Read on this ReadLimit times before stopping 
+            };
+
+	        var src = new CallTrackingStream(srcBase);
+
+            var destBase = new ConfigurablePropertyStream();
+            destBase.SetCanWrite(true);
+
+            destBase.WriteCore = (buffer, offset, count) =>
+            {
+                Assert.Same(outerBuffer, buffer);
+                Assert.Equal(outerOffset, offset);
+                Assert.Equal(readsLeft, count);
+            };
+
+            var dest = new CallTrackingStream(destBase);
+            await src.CopyToAsync(dest);
+
+            // Since we override CopyToAsync in CallTrackingStream,
+            // src.Read will actually not get called ReadLimit
+            // times, src.Inner.Read will. So, we just assert that
+            // CopyToAsync was called once for src.
+
+            Assert.Equal(1, src.TimesCalled(nameof(src.CopyToAsync)));
+            Assert.Equal(ReadLimit - 1, dest.TimesCalled(nameof(dest.Write))); // dest.Write will still get called repeatedly
+        }
+
         // Member data
 
         public static IEnumerable<object[]> LengthIsLessThanOrEqualToPosition()
