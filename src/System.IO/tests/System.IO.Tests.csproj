@@ -20,6 +20,7 @@
     <Compile Include="BufferedStream\BufferedStream.InvalidParameters.cs" />
     <Compile Include="BufferedStream\BufferedStreamTests.cs" />
     <Compile Include="CallTrackingStream.cs" />
+    <Compile Include="ConfigurablePropertyStream.cs" />
     <Compile Include="InvalidDataException\InvalidDataExceptionTests.cs" />
     <Compile Include="MemoryStream\MemoryStream.ConstructorTests.cs" />
     <Compile Include="MemoryStream\MemoryStream.TryGetBufferTests.cs" />
