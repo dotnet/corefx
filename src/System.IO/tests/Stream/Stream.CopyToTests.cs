@@ -301,7 +301,7 @@ namespace System.IO.Tests
             // CopyToAsync was called once for src.
 
             Assert.Equal(1, src.TimesCalled(nameof(src.CopyToAsync)));
-            Assert.Equal(ReadLimit - 1, dest.TimesCalled(nameof(dest.Write))); // dest.Write will still get called repeatedly
+            Assert.Equal(ReadLimit - 1, dest.TimesCalled(nameof(dest.WriteAsync))); // dest.WriteAsync will still get called repeatedly
         }
 
         // Member data
