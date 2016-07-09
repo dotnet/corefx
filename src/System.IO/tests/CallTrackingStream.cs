@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,17 +12,18 @@ namespace System.IO.Tests
 {
     public class CallTrackingStream : Stream
     {
-        private int _callCount; // keeps track of how many times a method was called on this Stream, excluding CallCount itself
+        private readonly Dictionary<string, int> _callCounts; // maps names of methods -> how many times they were called
 
         public CallTrackingStream(Stream inner)
         {
             Debug.Assert(inner != null);
 
             Inner = inner;
+            _callCounts = new Dictionary<string, int>();
         }
 
         public Stream Inner { get; }
-        public int CallCount => _callCount;
+        public IDictionary<string, int> CallCounts => _callCounts;
 
         // Overridden Stream properties
 
@@ -91,7 +93,7 @@ namespace System.IO.Tests
 
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
-            _callCount++;
+            UpdateCallCount();
             CopyToAsyncDestination = destination;
             CopyToAsyncBufferSize = bufferSize;
             CopyToAsyncCancellationToken = cancellationToken;
@@ -102,20 +104,20 @@ namespace System.IO.Tests
 
         public override void Flush()
         {
-            _callCount++;
+            UpdateCallCount();
             Inner.Flush();
         }
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
-            _callCount++;
+            UpdateCallCount();
             FlushAsyncCancellationToken = cancellationToken;
             return Inner.FlushAsync(cancellationToken);
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            _callCount++;
+            UpdateCallCount();
             ReadBuffer = buffer;
             ReadOffset = offset;
             ReadCount = count;
@@ -124,7 +126,7 @@ namespace System.IO.Tests
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            _callCount++;
+            UpdateCallCount();
             ReadAsyncBuffer = buffer;
             ReadAsyncOffset = offset;
             ReadAsyncCount = count;
@@ -134,13 +136,13 @@ namespace System.IO.Tests
 
         public override int ReadByte()
         {
-            _callCount++;
+            UpdateCallCount();
             return Inner.ReadByte();
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            _callCount++;
+            UpdateCallCount();
             SeekOffset = offset;
             SeekOrigin = origin;
             return Inner.Seek(offset, origin);
@@ -148,14 +150,14 @@ namespace System.IO.Tests
 
         public override void SetLength(long value)
         {
-            _callCount++;
+            UpdateCallCount();
             SetLengthValue = value;
             Inner.SetLength(value);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            _callCount++;
+            UpdateCallCount();
             WriteBuffer = buffer;
             WriteOffset = offset;
             WriteCount = count;
@@ -164,7 +166,7 @@ namespace System.IO.Tests
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            _callCount++;
+            UpdateCallCount();
             WriteAsyncBuffer = buffer;
             WriteAsyncOffset = offset;
             WriteAsyncCount = count;
@@ -174,21 +176,26 @@ namespace System.IO.Tests
 
         public override void WriteByte(byte value)
         {
-            _callCount++;
+            UpdateCallCount();
             WriteByteValue = value;
             Inner.WriteByte(value);
         }
 
-        private T Read<T>(T property)
+        private T Read<T>(T property, [CallerMemberName] string member = null)
         {
-            _callCount++;
+            _callCounts[member]++;
             return property;
         }
 
-        private void Update(Action setter)
+        private void Update(Action setter, [CallerMemberName] string member = null)
         {
-            _callCount++;
+            _callCounts[member]++;
             setter();
+        }
+
+        private void UpdateCallCount([CallerMemberName] string member = null)
+        {
+            _callCounts[member]++;
         }
     }
 }
