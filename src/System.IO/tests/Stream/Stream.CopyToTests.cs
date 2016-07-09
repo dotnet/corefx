@@ -185,6 +185,63 @@ namespace System.IO.Tests
             Assert.Equal(CancellationToken.None, trackingStream.CopyToAsyncCancellationToken);
         }
 
+        [Theory]
+        [MemberData(nameof(LengthIsGreaterThanPositionAndDoesNotOverflow))]
+        public void IfLengthIsGreaterThanPositionAndDoesNotOverflowEverythingShouldGoNormally(long length, long position)
+        {
+            const int ReadLimit = 7;
+
+            var srcBase = new ConfigurablePropertyStream();
+            srcBase.SetCanRead(true);
+            srcBase.SetCanSeek(true);
+            srcBase.SetLength(length);
+            srcBase.Position = position;
+
+            // Lambda state
+            byte[] outerBuffer = null;
+            int? outerOffset = null;
+            int? outerCount = null;
+            int readsLeft = ReadLimit;
+
+            srcBase.ReadCore = (buffer, offset, count) =>
+            {
+                Assert.NotNull(buffer);
+                Assert.True(offset >= 0 && offset + count <= buffer.Length);
+                Assert.True(count > 0);
+
+                // CopyTo should always pass in the same buffer/offset/count
+                
+                if (outerBuffer != null) Assert.Same(outerBuffer, buffer);
+                else outerBuffer = buffer;
+
+                if (outerOffset != null) Assert.Equal(outerOffset, offset);
+                else outerOffset = offset;
+
+                if (outerCount != null) Assert.Equal(outerCount, count);
+                else outerCount = count;
+
+                return --readsLeft; // CopyTo will call Read on this ReadLimit times before stopping 
+            };
+
+	        var src = new CallTrackingStream(srcBase);
+
+            var destBase = new ConfigurablePropertyStream();
+            destBase.SetCanWrite(true);
+
+            destBase.WriteCore = (buffer, offset, count) =>
+            {
+                Assert.Same(outerBuffer, buffer);
+                Assert.Equal(outerOffset, offset);
+                Assert.Equal(readsLeft, count);
+            };
+
+            var dest = new CallTrackingStream(destBase);
+            src.CopyTo(dest);
+
+            Assert.Equal(ReadLimit, src.TimesCalled(nameof(src.Read)));
+            Assert.Equal(ReadLimit - 1, dest.TimesCalled(nameof(dest.Write)));
+        }
+
         // Member data
 
         public static IEnumerable<object[]> LengthIsLessThanOrEqualToPosition()
@@ -203,6 +260,15 @@ namespace System.IO.Tests
         {
             yield return new object[] { long.MaxValue, long.MinValue }; // length - position will be -1
             yield return new object[] { 1L, -long.MaxValue };
+        }
+
+        public static IEnumerable<object[]> LengthIsGreaterThanPositionAndDoesNotOverflow()
+        {
+            yield return new object[] { 5L, 3L };
+            yield return new object[] { -3L, -6L };
+            yield return new object[] { 0L, -3L };
+            yield return new object[] { long.MaxValue, 0 }; // should not overflow or OOM
+            yield return new object[] { 85000, 123 }; // at least in the current implementation, we max out the bufferSize at 81920
         }
     }
 }
