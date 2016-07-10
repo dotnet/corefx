@@ -259,8 +259,8 @@ namespace System.Collections.Generic
             System.Collections.IEnumerator
         {
             private readonly Stack<T> _stack;
-            private int _index;
             private readonly int _version;
+            private int _index;
             private T _currentElement;
 
             internal Enumerator(Stack<T> stack)
@@ -309,7 +309,7 @@ namespace System.Collections.Generic
                 get
                 {
                     if (_index < 0)
-                        ThrowEnumerationNotStartedOrEnded(); // separated into a new method so the jit can inline this
+                        ThrowEnumerationNotStartedOrEnded();
                     return _currentElement;
                 }
             }
