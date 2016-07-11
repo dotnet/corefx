@@ -24,10 +24,7 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             trackingStream.CopyTo(dest);
 
-            // When the FEATURE_CORECLR conditional is removed around
-            // the CanSeek optimization, this should be uncommented
-            // Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.CanSeek)));
-
+            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.CanSeek)) <= 1);
             Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Length)));
             Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Position)));
             // We can't override CopyTo since it's not virtual, so checking TimesCalled
@@ -56,10 +53,7 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             await trackingStream.CopyToAsync(dest);
 
-            // When the FEATURE_CORECLR conditional is removed around
-            // the CanSeek optimization, this should be uncommented
-            // Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.CanSeek)));
-
+            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.CanSeek)) <= 1);
             Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Length)));
             Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Position)));
             Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.CopyToAsync)));
