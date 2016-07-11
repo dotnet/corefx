@@ -15,9 +15,10 @@ namespace System.IO.Tests
         [Fact]
         public void IfCanSeekIsFalseLengthAndPositionShouldNotBeCalled()
         {
-            var baseStream = new ConfigurablePropertyStream();
-            baseStream.SetCanRead(true);
-            baseStream.SetCanSeek(false);
+            var baseStream = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => false,
+                readFunc: (array, index, length) => 0); // (buffer, offset, count) declared in enclosing scope
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -46,9 +47,10 @@ namespace System.IO.Tests
         [Fact]
         public async void AsyncIfCanSeekIsFalseLengthAndPositionShouldNotBeCalled()
         {
-            var baseStream = new ConfigurablePropertyStream();
-            baseStream.SetCanRead(true);
-            baseStream.SetCanSeek(false);
+            var baseStream = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => false,
+                readFunc: (buffer, offset, count) => 0);
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -70,9 +72,12 @@ namespace System.IO.Tests
         [Fact]
         public void IfCanSeekIsTrueLengthAndPositionShouldOnlyBeCalledOnce()
         {
-            var baseStream = new ConfigurablePropertyStream();
-            baseStream.SetCanRead(true);
-            baseStream.SetCanSeek(true);
+            var baseStream = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => true,
+                readFunc: (buffer, offset, count) => 0,
+                lengthFunc: () => 0L,
+                positionGetFunc: () => 0L);
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -85,9 +90,12 @@ namespace System.IO.Tests
         [Fact]
         public async void AsyncIfCanSeekIsTrueLengthAndPositionShouldOnlyBeCalledOnce()
         {
-            var baseStream = new ConfigurablePropertyStream();
-            baseStream.SetCanRead(true);
-            baseStream.SetCanSeek(true);
+            var baseStream = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => true,
+                readFunc: (buffer, offset, count) => 0,
+                lengthFunc: () => 0L,
+                positionGetFunc: () => 0L);
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -106,11 +114,12 @@ namespace System.IO.Tests
             // should still be called CopyTo{Async} on with a
             // bufferSize of at least 1.
 
-            var baseStream = new ConfigurablePropertyStream();
-            baseStream.SetCanRead(true);
-            baseStream.SetCanSeek(true);
-            baseStream.SetLength(length);
-            baseStream.Position = position;
+            var baseStream = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => true,
+                lengthFunc: () => length,
+                positionGetFunc: () => position,
+                readFunc: (buffer, offset, count) => 0);
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -123,11 +132,12 @@ namespace System.IO.Tests
         [MemberData(nameof(LengthIsLessThanOrEqualToPosition))]
         public async void AsyncIfLengthIsLessThanOrEqualToPositionCopyToShouldStillBeCalledWithAPositiveBufferSize(long length, long position)
         {
-            var baseStream = new ConfigurablePropertyStream();
-            baseStream.SetCanRead(true);
-            baseStream.SetCanSeek(true);
-            baseStream.SetLength(length);
-            baseStream.Position = position;
+            var baseStream = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => true,
+                lengthFunc: () => length,
+                positionGetFunc: () => position,
+                readFunc: (buffer, offset, count) => 0);
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -147,11 +157,12 @@ namespace System.IO.Tests
             // negative number, so this tests that if that happens we don't send
             // in a negative bufferSize.
 
-            var baseStream = new ConfigurablePropertyStream();
-            baseStream.SetCanRead(true);
-            baseStream.SetCanSeek(true);
-            baseStream.SetLength(length);
-            baseStream.Position = position;
+            var baseStream = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => true,
+                lengthFunc: () => length,
+                positionGetFunc: () => position,
+                readFunc: (buffer, offset, count) => 0);
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -166,11 +177,12 @@ namespace System.IO.Tests
         [MemberData(nameof(LengthMinusPositionPositiveOverflows))]
         public async void AsyncIfLengthMinusPositionPositiveOverflowsBufferSizeShouldStillBePositive(long length, long position)
         {
-            var baseStream = new ConfigurablePropertyStream();
-            baseStream.SetCanRead(true);
-            baseStream.SetCanSeek(true);
-            baseStream.SetLength(length);
-            baseStream.Position = position;
+            var baseStream = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => true,
+                lengthFunc: () => length,
+                positionGetFunc: () => position,
+                readFunc: (buffer, offset, count) => 0);
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -191,49 +203,47 @@ namespace System.IO.Tests
         {
             const int ReadLimit = 7;
 
-            var srcBase = new ConfigurablePropertyStream();
-            srcBase.SetCanRead(true);
-            srcBase.SetCanSeek(true);
-            srcBase.SetLength(length);
-            srcBase.Position = position;
-
             // Lambda state
             byte[] outerBuffer = null;
             int? outerOffset = null;
             int? outerCount = null;
             int readsLeft = ReadLimit;
 
-            srcBase.ReadCore = (buffer, offset, count) =>
-            {
-                Assert.NotNull(buffer);
-                Assert.True(offset >= 0 && offset + count <= buffer.Length);
-                Assert.True(count > 0);
+            var srcBase = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => true,
+                lengthFunc: () => length,
+                positionGetFunc: () => position,
+                readFunc: (buffer, offset, count) =>
+                {
+                    Assert.NotNull(buffer);
+                    Assert.True(offset >= 0 && offset + count <= buffer.Length);
+                    Assert.True(count > 0);
 
-                // CopyTo should always pass in the same buffer/offset/count
-                
-                if (outerBuffer != null) Assert.Same(outerBuffer, buffer);
-                else outerBuffer = buffer;
+                    // CopyTo should always pass in the same buffer/offset/count
+                    
+                    if (outerBuffer != null) Assert.Same(outerBuffer, buffer);
+                    else outerBuffer = buffer;
 
-                if (outerOffset != null) Assert.Equal(outerOffset, offset);
-                else outerOffset = offset;
+                    if (outerOffset != null) Assert.Equal(outerOffset, offset);
+                    else outerOffset = offset;
 
-                if (outerCount != null) Assert.Equal(outerCount, count);
-                else outerCount = count;
+                    if (outerCount != null) Assert.Equal(outerCount, count);
+                    else outerCount = count;
 
-                return --readsLeft; // CopyTo will call Read on this ReadLimit times before stopping 
-            };
+                    return --readsLeft; // CopyTo will call Read on this ReadLimit times before stopping 
+                });
 
 	        var src = new CallTrackingStream(srcBase);
 
-            var destBase = new ConfigurablePropertyStream();
-            destBase.SetCanWrite(true);
-
-            destBase.WriteCore = (buffer, offset, count) =>
-            {
-                Assert.Same(outerBuffer, buffer);
-                Assert.Equal(outerOffset, offset);
-                Assert.Equal(readsLeft, count);
-            };
+            var destBase = new DelegateStream(
+                canWriteFunc: () => true,
+                writeFunc: (buffer, offset, count) =>
+                {
+                    Assert.Same(outerBuffer, buffer);
+                    Assert.Equal(outerOffset, offset);
+                    Assert.Equal(readsLeft, count);
+                });
 
             var dest = new CallTrackingStream(destBase);
             src.CopyTo(dest);
@@ -248,49 +258,47 @@ namespace System.IO.Tests
         {
             const int ReadLimit = 7;
 
-            var srcBase = new ConfigurablePropertyStream();
-            srcBase.SetCanRead(true);
-            srcBase.SetCanSeek(true);
-            srcBase.SetLength(length);
-            srcBase.Position = position;
-
             // Lambda state
             byte[] outerBuffer = null;
             int? outerOffset = null;
             int? outerCount = null;
             int readsLeft = ReadLimit;
 
-            srcBase.ReadCore = (buffer, offset, count) =>
-            {
-                Assert.NotNull(buffer);
-                Assert.True(offset >= 0 && offset + count <= buffer.Length);
-                Assert.True(count > 0);
+            var srcBase = new DelegateStream(
+                canReadFunc: () => true,
+                canSeekFunc: () => true,
+                lengthFunc: () => length,
+                positionGetFunc: () => position,
+                readFunc: (buffer, offset, count) =>
+                {
+                    Assert.NotNull(buffer);
+                    Assert.True(offset >= 0 && offset + count <= buffer.Length);
+                    Assert.True(count > 0);
 
-                // CopyTo should always pass in the same buffer/offset/count
-                
-                if (outerBuffer != null) Assert.Same(outerBuffer, buffer);
-                else outerBuffer = buffer;
+                    // CopyTo should always pass in the same buffer/offset/count
+                    
+                    if (outerBuffer != null) Assert.Same(outerBuffer, buffer);
+                    else outerBuffer = buffer;
 
-                if (outerOffset != null) Assert.Equal(outerOffset, offset);
-                else outerOffset = offset;
+                    if (outerOffset != null) Assert.Equal(outerOffset, offset);
+                    else outerOffset = offset;
 
-                if (outerCount != null) Assert.Equal(outerCount, count);
-                else outerCount = count;
+                    if (outerCount != null) Assert.Equal(outerCount, count);
+                    else outerCount = count;
 
-                return --readsLeft; // CopyTo will call Read on this ReadLimit times before stopping 
-            };
+                    return --readsLeft; // CopyTo will call Read on this ReadLimit times before stopping 
+                });
 
 	        var src = new CallTrackingStream(srcBase);
 
-            var destBase = new ConfigurablePropertyStream();
-            destBase.SetCanWrite(true);
-
-            destBase.WriteCore = (buffer, offset, count) =>
-            {
-                Assert.Same(outerBuffer, buffer);
-                Assert.Equal(outerOffset, offset);
-                Assert.Equal(readsLeft, count);
-            };
+            var destBase = new DelegateStream(
+                canWriteFunc: () => true,
+                writeFunc: (buffer, offset, count) =>
+                {
+                    Assert.Same(outerBuffer, buffer);
+                    Assert.Equal(outerOffset, offset);
+                    Assert.Equal(readsLeft, count);
+                });
 
             var dest = new CallTrackingStream(destBase);
             await src.CopyToAsync(dest);
