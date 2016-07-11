@@ -42,6 +42,8 @@ usage()
     echo "Execution options:"
     echo "    --restrict-proj <regex>           Run test projects that match regex"
     echo "                                      default: .* (all projects)"
+    echo "    --test-dir <path>                 Run tests only in the specified directory"
+    echo "                                      Multiple of this switch may be specified"
     echo "    --useServerGC                     Enable Server GC for this test run"
     echo
     echo "Runtime Code Coverage options:"
@@ -171,6 +173,30 @@ run_all_tests()
   pids=""
 }
 
+run_selected_tests()
+{
+    for dir in "${TestSelectedDir[@]}"
+    do
+        if [ ! -d "$CoreFxTests/$dir" ]; then
+            echo "Test directory does not exist: $dir"
+            continue
+        fi
+
+        run_test "$CoreFxTests/$dir" &
+        pids="$pids $!"
+        numberOfProcesses=$(($numberOfProcesses+1))
+        if [ "$numberOfProcesses" -ge $maxProcesses ]; then
+            wait_on_pids "$pids"
+            numberOfProcesses=0
+             pids=""
+        fi
+    done
+
+    # Wait on the last processes
+    wait_on_pids "$pids"
+    pids=""
+}
+
 # $1 is the path to the test folder
 run_test()
 {
@@ -287,6 +313,9 @@ do
         --restrict-proj)
         TestSelection=$2
         ;;
+        --test-dir)
+        TestSelectedDir[${#TestSelectedDir[@]}]=$2
+        ;;
         --configurationGroup)
         ConfigurationGroup=$2
         ;;
@@ -398,9 +427,13 @@ else
   maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
 fi
 
-run_all_tests "AnyOS.AnyCPU.$ConfigurationGroup"
-run_all_tests "Unix.AnyCPU.$ConfigurationGroup"
-run_all_tests "$OS.AnyCPU.$ConfigurationGroup"
+if [ -z "$TestSelectedDir" ]; then
+    run_all_tests "AnyOS.AnyCPU.$ConfigurationGroup"
+    run_all_tests "Unix.AnyCPU.$ConfigurationGroup"
+    run_all_tests "$OS.AnyCPU.$ConfigurationGroup"
+else
+    run_selected_tests
+fi
 
 if [ "$CoreClrCoverage" == "ON" ]
 then
