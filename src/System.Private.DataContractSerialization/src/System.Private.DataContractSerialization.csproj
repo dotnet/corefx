@@ -40,6 +40,7 @@
     <Compile Include="$(RuntimeSerializationSources)\CodeGenerator.cs" />
     <Compile Include="$(RuntimeSerializationSources)\ClassDataContract.cs" />
     <Compile Include="$(RuntimeSerializationSources)\CollectionDataContract.cs" />
+    <Compile Include="$(RuntimeSerializationSources)\CultureInfoAdapter.cs" />
     <Compile Include="$(RuntimeSerializationSources)\DataContract.cs" />
     <Compile Include="$(RuntimeSerializationSources)\DateTimeOffsetAdapter.cs" />
     <Compile Include="$(RuntimeSerializationSources)\DiagnosticUtility.cs" />

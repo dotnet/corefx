@@ -3,17 +3,17 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Security;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
-using System.Security;
-using System.Linq;
-using System.Diagnostics;
-
 
 namespace System.Runtime.Serialization
 {
@@ -222,6 +222,32 @@ namespace System.Runtime.Serialization
                 if (s_typeOfDateTimeOffsetAdapter == null)
                     s_typeOfDateTimeOffsetAdapter = typeof(DateTimeOffsetAdapter);
                 return s_typeOfDateTimeOffsetAdapter;
+            }
+        }
+
+        [SecurityCritical]
+        private static Type s_typeOfCultureInfo;
+        internal static Type TypeOfCultureInfo
+        {
+            [SecuritySafeCritical]
+            get
+            {
+                if (s_typeOfCultureInfo == null)
+                    s_typeOfCultureInfo = typeof(CultureInfo);
+                return s_typeOfCultureInfo;
+            }
+        }
+
+        [SecurityCritical]
+        private static Type s_typeOfCultureInfoAdapter;
+        internal static Type TypeOfCultureInfoAdapter
+        {
+            [SecuritySafeCritical]
+            get
+            {
+                if (s_typeOfCultureInfoAdapter == null)
+                    s_typeOfCultureInfoAdapter = typeof(CultureInfoAdapter);
+                return s_typeOfCultureInfoAdapter;
             }
         }
 

@@ -995,6 +995,38 @@ namespace System.Runtime.Serialization
             }
         }
 
+        [SecurityCritical]
+        private static MethodInfo s_getCultureInfoMethod;
+        internal static MethodInfo GetCultureInfoMethod
+        {
+            [SecuritySafeCritical]
+            get
+            {
+                if (s_getCultureInfoMethod == null)
+                {
+                    s_getCultureInfoMethod = typeof(CultureInfoAdapter).GetMethod(nameof(CultureInfoAdapter.GetCultureInfo), Globals.ScanAllMembers);
+                    Debug.Assert(s_getCultureInfoMethod != null);
+                }
+                return s_getCultureInfoMethod;
+            }
+        }
+
+        [SecurityCritical]
+        private static MethodInfo s_getCultureInfoAdapterMethod;
+        internal static MethodInfo GetCultureInfoAdapterMethod
+        {
+            [SecuritySafeCritical]
+            get
+            {
+                if (s_getCultureInfoAdapterMethod == null)
+                {
+                    s_getCultureInfoAdapterMethod = typeof(CultureInfoAdapter).GetMethod(nameof(CultureInfoAdapter.GetCultureInfoAdapter), Globals.ScanAllMembers);
+                    Debug.Assert(s_getCultureInfoAdapterMethod != null);
+                }
+                return s_getCultureInfoAdapterMethod;
+            }
+        }
+
 #if !NET_NATIVE
         private static MethodInfo s_getTypeHandleMethod;
         internal static MethodInfo GetTypeHandleMethod
