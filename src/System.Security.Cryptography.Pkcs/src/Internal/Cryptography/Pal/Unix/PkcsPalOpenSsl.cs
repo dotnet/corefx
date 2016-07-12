@@ -164,7 +164,10 @@ namespace Internal.Cryptography.Pal.OpenSsl
             // as there might be a recipient for which we have a certificate which we can use to decrypt.
             // If all certificates don't match then TryDecrypt will throw a "recipient not found" cryptographic
             // exception which explains OpenSSL's behavior.
-            return Array.Empty<byte>();
+            using (SafeX509Handle certHandle = Interop.Crypto.X509Duplicate(certificate.Handle))
+            {
+                return Interop.Crypto.X509GetImplicitSubjectKeyIdentifier(certHandle);
+            }
         }
     }
 }

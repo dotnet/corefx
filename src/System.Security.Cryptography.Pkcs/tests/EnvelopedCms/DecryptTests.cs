@@ -23,7 +23,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_Ski()
         {
@@ -258,7 +257,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestDecryptSimpleAes256_Ski()
         {
             // Message encrypted on framework for a recipient using the certificate returned by Certificates.RSAKeyTransfer1.GetCertificate()
