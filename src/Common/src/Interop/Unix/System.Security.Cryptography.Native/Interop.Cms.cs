@@ -89,5 +89,26 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsDecrypt")]
         internal static extern int CmsDecrypt(SafeCmsHandle cms, SafeX509Handle recipientCert, SafeEvpPKeyHandle pKeyKandle, SafeBioHandle decryptedBuffered);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsGetDerSize")]
+        internal static extern int CmsGetDerSize(SafeCmsHandle cms);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsEncode")]
+        internal static extern int CmsEncode(SafeCmsHandle cms, byte[] buffer);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsInitializeEnvelope")]
+        internal static extern SafeCmsHandle CmsInitializeEnvelope(SafeAsn1ObjectHandle algoOid, out int status);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsAddSkidRecipient")]
+        internal static extern int CmsAddSkidRecipient(SafeCmsHandle cms, SafeX509Handle skidCert);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsAddIssuerAndSerialRecipient")]
+        internal static extern int CmsAddIssuerAndSerialRecipient(SafeCmsHandle cms, SafeX509Handle issuerAndSerialCert);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsCompleteMessage")]
+        internal static extern int CmsCompleteMessage(SafeCmsHandle cms, SafeBioHandle data, bool detached);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsAddOriginatorCert")]
+        internal static extern int CmsAddOriginatorCert(SafeCmsHandle cms, SafeX509Handle originatorCert);
     }
 }

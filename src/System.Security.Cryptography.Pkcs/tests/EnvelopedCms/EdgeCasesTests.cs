@@ -212,7 +212,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void ReuseEnvelopeCmsEncodeThenDecode()
         {
             // Test ability to encrypt, encode and decode all in one EnvelopedCms instance.
@@ -243,7 +242,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void ReuseEnvelopeCmsDecodeThenEncode()
         {
             byte[] encodedMessage =
