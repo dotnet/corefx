@@ -48,22 +48,28 @@ namespace System.Collections.Tests
 
             foreach (string cultureName in cultureNames)
             {
-                CultureInfo orig = CultureInfo.CurrentCulture;
+                CultureInfo newCulture;
                 try
                 {
-                    CultureInfo.CurrentCulture = new CultureInfo(cultureName);
-                    var provider = new CaseInsensitiveHashCodeProvider();
-                    Assert.Equal(provider.GetHashCode(a), provider.GetHashCode(a));
-                    Assert.Equal(provider.GetHashCode(b), provider.GetHashCode(b));
-                    Assert.Equal(expected, provider.GetHashCode(a) == provider.GetHashCode(b));
+                    newCulture = new CultureInfo(cultureName);
                 }
                 catch (CultureNotFoundException)
                 {
                     continue;
                 }
+
+                CultureInfo origCulture = CultureInfo.CurrentCulture;
+                try
+                {
+                    CultureInfo.CurrentCulture = newCulture;
+                    var provider = new CaseInsensitiveHashCodeProvider();
+                    Assert.Equal(provider.GetHashCode(a), provider.GetHashCode(a));
+                    Assert.Equal(provider.GetHashCode(b), provider.GetHashCode(b));
+                    Assert.Equal(expected, provider.GetHashCode(a) == provider.GetHashCode(b));
+                }
                 finally
                 {
-                    CultureInfo.CurrentCulture = orig;
+                    CultureInfo.CurrentCulture = origCulture;
                 }
             }
         }
@@ -89,17 +95,20 @@ namespace System.Collections.Tests
 
             foreach (string cultureName in cultureNames)
             {
+                CultureInfo culture;
                 try
                 {
-                    var provider = new CaseInsensitiveHashCodeProvider(new CultureInfo(cultureName));
-                    Assert.Equal(provider.GetHashCode(a), provider.GetHashCode(a));
-                    Assert.Equal(provider.GetHashCode(b), provider.GetHashCode(b));
-                    Assert.Equal(expected, provider.GetHashCode(a) == provider.GetHashCode(b));
+                    culture = new CultureInfo(cultureName);
                 }
                 catch (CultureNotFoundException)
                 {
                     continue;
                 }
+
+                var provider = new CaseInsensitiveHashCodeProvider(culture);
+                Assert.Equal(provider.GetHashCode(a), provider.GetHashCode(a));
+                Assert.Equal(provider.GetHashCode(b), provider.GetHashCode(b));
+                Assert.Equal(expected, provider.GetHashCode(a) == provider.GetHashCode(b));
             }
         }
 
@@ -117,21 +126,23 @@ namespace System.Collections.Tests
 
             foreach (string cultureName in cultureNames)
             {
+                CultureInfo culture;
                 try
                 {
-                    var culture = new CultureInfo(cultureName);
-                    var provider = new CaseInsensitiveHashCodeProvider(culture);
-
-                    // Turkish has lower-case and upper-case version of the dotted "i", so the upper case of "i" (U+0069) isn't "I" (U+0049)
-                    // but rather "İ" (U+0130)
-                    Assert.Equal(
-                        culture.Name != "tr-TR",
-                        provider.GetHashCode("file") == provider.GetHashCode("FILE"));
+                    culture = new CultureInfo(cultureName);
                 }
                 catch (CultureNotFoundException)
                 {
                     continue;
                 }
+
+                var provider = new CaseInsensitiveHashCodeProvider(culture);
+
+                // Turkish has lower-case and upper-case version of the dotted "i", so the upper case of "i" (U+0069) isn't "I" (U+0049)
+                // but rather "İ" (U+0130)
+                Assert.Equal(
+                    culture.Name != "tr-TR",
+                    provider.GetHashCode("file") == provider.GetHashCode("FILE"));
             }
         }
 
@@ -168,7 +179,7 @@ namespace System.Collections.Tests
         {
             // Turkish has lower-case and upper-case version of the dotted "i", so the upper case of "i" (U+0069) isn't "I" (U+0049)
             // but rather "İ" (U+0130)
-            CultureInfo orig = CultureInfo.CurrentCulture;
+            CultureInfo origCulture = CultureInfo.CurrentCulture;
             try
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
@@ -180,7 +191,7 @@ namespace System.Collections.Tests
             }
             finally
             {
-                CultureInfo.CurrentCulture = orig;
+                CultureInfo.CurrentCulture = origCulture;
             }
         }
     }

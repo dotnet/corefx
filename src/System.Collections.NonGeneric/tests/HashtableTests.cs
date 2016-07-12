@@ -819,6 +819,37 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        public static void HashCodeProvider_Comparer_CompatibleGetSet_Success()
+        {
+            var hash = new ComparableHashtable();
+            Assert.Null(hash.HashCodeProvider);
+            Assert.Null(hash.Comparer);
+
+            hash = new ComparableHashtable();
+            hash.HashCodeProvider = null;
+            hash.Comparer = null;
+
+            hash = new ComparableHashtable();
+            hash.Comparer = null;
+            hash.HashCodeProvider = null;
+
+            hash.HashCodeProvider = CaseInsensitiveHashCodeProvider.DefaultInvariant;
+            hash.Comparer = StringComparer.OrdinalIgnoreCase;
+        }
+
+        [Fact]
+        public static void HashCodeProvider_Comparer_IncompatibleGetSet_Throws()
+        {
+            var hash = new ComparableHashtable(StringComparer.CurrentCulture);
+
+            Assert.Throws<ArgumentException>(() => hash.HashCodeProvider);
+            Assert.Throws<ArgumentException>(() => hash.Comparer);
+
+            Assert.Throws<ArgumentException>(() => hash.HashCodeProvider = CaseInsensitiveHashCodeProvider.DefaultInvariant);
+            Assert.Throws<ArgumentException>(() => hash.Comparer = StringComparer.OrdinalIgnoreCase);
+        }
+
+        [Fact]
         public static void Comparer_Set_ImpactsSearch()
         {
             var hash = new ComparableHashtable(CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
@@ -963,34 +994,6 @@ namespace System.Collections.Tests
             }
 
             public override int GetHashCode() => StringValue.GetHashCode();
-        }
-
-        private sealed class HashCodeProviderComparer : IEqualityComparer
-        {
-            private readonly IComparer _comparer;
-            private readonly IHashCodeProvider _hcp;
-
-            internal HashCodeProviderComparer(IHashCodeProvider hashCodeProvider, IComparer comparer)
-            {
-                _comparer = comparer;
-                _hcp = hashCodeProvider;
-            }
-
-            public new bool Equals(object a, object b)
-            {
-                if (a == b) return true;
-                if (a == null || b == null) return false;
-                return _comparer.Compare(a, b) == 0;
-            }
-
-            public int GetHashCode(object obj)
-            {
-                if (obj == null)
-                {
-                    throw new ArgumentNullException(nameof(obj));
-                }
-                return _hcp.GetHashCode(obj);
-            }
         }
     }
 
