@@ -39,16 +39,6 @@ namespace System.Tests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(ExitCodeValues))]
-        public static void ExitCode_Roundtrips(int exitCode)
-        {
-            Environment.ExitCode = exitCode;
-            Assert.Equal(exitCode, Environment.ExitCode);
-
-            Environment.ExitCode = 0; // in case the test host has a void returning Main
-        }
-
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/6206")]
         [Theory]
         [MemberData(nameof(ExitCodeValues))]

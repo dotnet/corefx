@@ -8,6 +8,7 @@
     <ProjectGuid>{879C23DC-D828-4DFB-8E92-ABBC11B71035}</ProjectGuid>
     <AssemblyName>System.IO.FileSystem</AssemblyName>
     <AssemblyVersion>4.0.2.0</AssemblyVersion>
+    <ContractProject>../ref/4.0/System.IO.FileSystem.depproj</ContractProject>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableWinRT Condition="'$(PackageTargetFramework)' == 'netcore50'">true</EnableWinRT>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>

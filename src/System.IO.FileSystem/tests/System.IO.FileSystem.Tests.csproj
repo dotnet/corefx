@@ -44,7 +44,6 @@
     <Compile Include="DirectoryInfo\Root.cs" />
     <Compile Include="Directory\EnumerableAPIs.cs" />
     <Compile Include="Directory\GetFileSystemEntries_str_str_so.cs" />
-    <Compile Include="Directory\GetLogicalDrives.cs" />
     <Compile Include="Directory\GetParent.cs" />
     <Compile Include="FileInfo\GetSetAttributes.cs" />
     <Compile Include="FileInfo\Length.cs" />

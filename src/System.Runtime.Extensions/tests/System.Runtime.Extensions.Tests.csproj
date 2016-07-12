@@ -22,7 +22,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
-    <Compile Include="System\EnvironmentTests.cs" />
     <Compile Include="System\Environment.MachineName.cs" />
     <Compile Include="System\IO\Path.Combine.cs" />
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />

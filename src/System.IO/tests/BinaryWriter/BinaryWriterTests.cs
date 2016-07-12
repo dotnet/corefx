@@ -317,36 +317,12 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void BinaryWriter_CloseTests()
-        {
-            // Closing multiple times should not throw an exception
-            using (Stream memStream = CreateStream())
-            using (BinaryWriter binaryWriter = new BinaryWriter(memStream))
-            {
-                binaryWriter.Close();
-                binaryWriter.Close();
-                binaryWriter.Close();
-            }
-        }
-
-        [Fact]
         public void BinaryWriter_DisposeTests_Negative()
         {
             using (Stream memStream = CreateStream())
             {
                 BinaryWriter binaryWriter = new BinaryWriter(memStream);
                 binaryWriter.Dispose();
-                ValidateDisposedExceptions(binaryWriter);
-            }
-        }
-
-        [Fact]
-        public void BinaryWriter_CloseTests_Negative()
-        {
-            using (Stream memStream = CreateStream())
-            {
-                BinaryWriter binaryWriter = new BinaryWriter(memStream);
-                binaryWriter.Close();
                 ValidateDisposedExceptions(binaryWriter);
             }
         }

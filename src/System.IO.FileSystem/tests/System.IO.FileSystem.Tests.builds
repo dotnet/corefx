@@ -5,6 +5,11 @@
     <Project Include="System.IO.FileSystem.Tests.csproj">
       <OSGroup>Unix</OSGroup>
     </Project>
+    <!-- Uncomment when empty TestTFM cause test not to run
+    <Project Include="System.IO.FileSystem.netstandard.1.7.Tests.csproj">
+      <TestTFMs></TestTFMs>
+    </Project>
+    -->
     <Project Include="System.IO.FileSystem.Tests.csproj">
       <TestTFMs>netcoreapp1.0;net46</TestTFMs>
       <OSGroup>Windows_NT</OSGroup>

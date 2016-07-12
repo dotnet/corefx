@@ -3,6 +3,11 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="System.IO.Tests.csproj"/>
+    <!--
+    <Project Include="System.IO.netstandard.1.7.Tests.csproj">
+      <TestTFMs></TestTFMs>
+    </Project>
+	-->
     <Project Include="System.IO.Tests.csproj">
       <TestTFMs>net462;net463</TestTFMs>
       <OSGroup>Windows_NT</OSGroup>
