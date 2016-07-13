@@ -11,19 +11,6 @@ using System.Threading.Tasks;
 
 namespace System.IO.Tests
 {
-    // Static helper class put in here, so projects don't have to include another file
-    internal static class DictionaryExtensions
-    {
-        public static V GetOrDefault<K, V>(this IDictionary<K, V> dictionary, K key)
-        {
-            Debug.Assert(dictionary != null);
-
-            V value;
-            dictionary.TryGetValue(key, out value);
-            return value;
-        }
-    }
-
     public class CallTrackingStream : Stream
     {
         private readonly Dictionary<string, int> _callCounts; // maps names of methods -> how many times they were called
@@ -196,7 +183,12 @@ namespace System.IO.Tests
 
         // Bookkeeping logic
 
-        public int TimesCalled(string member) => _callCounts.GetOrDefault(member);
+        public int TimesCalled(string member)
+        {
+            int result;
+            _callCounts.TryGetValue(member, out result);
+            return result; // not present means we haven't called it yet, so return 0
+        }
 
         // [CallerMemberName] causes the member parameter to be set to the name
         // of the calling member if not specified, e.g. calling this method
@@ -215,7 +207,7 @@ namespace System.IO.Tests
 
         private void UpdateCallCount([CallerMemberName] string member = null)
         {
-            _callCounts[member] = _callCounts.GetOrDefault(member) + 1;
+            _callCounts[member] = TimesCalled(member) + 1;
         }
     }
 }
