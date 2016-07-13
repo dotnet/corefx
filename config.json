@@ -115,10 +115,16 @@
       "defaultValue": "/nologo /maxcpucount /verbosity:minimal /clp:Summary"
     },
     "MsBuildBinClashLogger-Windows": {
-      "description": "MsBuild Bin clash logger options.",
+      "description": "MsBuild Bin clash logger options for Windows.",
       "valueType": "passThrough",
       "values": [],
       "defaultValue": "/l:BinClashLogger,Tools\\net45\\Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
+    },
+    "MsBuildBinClashLogger-Unix": {
+      "description": "MsBuild Bin clash logger options for Unix.",
+      "valueType": "passThrough",
+      "values": [],
+      "defaultValue": "/l:BinClashLogger,Tools/Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
     },
     "CmakeDebug": {
       "description": "Property to build in debug mode.",
@@ -182,7 +188,7 @@
         "ab":{
           "description": "Downloads the latests product packages from Azure. The values for '-AzureAccount' and '-AzureToken' are required",
           "settings":{
-            "Project": "src\\syncAzure.proj",
+            "Project": "src/syncAzure.proj",
           }
         },
         "t":{
@@ -234,14 +240,14 @@
         "packages":{
           "description": "Builds the NuGet packages.",
           "settings":{
-            "Project": "src\\packages.builds",
+            "Project": "src/packages.builds",
             "FilterToOSGroup":"default"
           }
         },
         "tests":{
           "description": "Builds the tests that are in the repository.",
           "settings":{
-            "Project": "src\\tests.builds"
+            "Project": "src/tests.builds"
           }
         },
         "debug":{
@@ -279,6 +285,12 @@
           "settings":{
             "MsBuildBinClashLogger-Windows":"default"
           }
+        },
+        "binclashUnix":{
+          "description": "Bin clash logger for Unix.",
+          "settings":{
+            "MsBuildBinClashLogger-Unix":"default"
+          }
         }
       },
       "defaultValues":{
@@ -308,7 +320,7 @@
       },
       "defaultValues":{
         "toolName": "terminal",
-        "Project": "src\\Native\\Windows\\build-native",
+        "Project": "src/Native/build-native",
         "settings": {}
       }
     },
@@ -335,7 +347,7 @@
       },
       "defaultValues":{
         "toolName": "msbuild",
-        "Project": "src\\publish.proj",
+        "Project": "src/publish.proj",
         "settings": {}
       }
     },
@@ -372,7 +384,7 @@
   "tools": {
     "msbuild": {
       "run": {
-        "windows": "Tools\\msbuild.cmd",
+        "windows": "Tools/msbuild.cmd",
         "unix": "Tools/msbuild.sh"
       },
       "valueTypes": {
@@ -384,7 +396,7 @@
     "terminal": {
       "run": {
         "windows": "cmd",
-        "non-windows": "sh"
+        "unix": "sh"
       },
       "valueTypes": {}
     }
