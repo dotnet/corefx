@@ -24,7 +24,7 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             trackingStream.CopyTo(dest);
 
-            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.CanSeek)) <= 1);
+            Assert.InRange(trackingStream.TimesCalled(nameof(trackingStream.CanSeek)), 0, 1);
             Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Length)));
             Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Position)));
             // We can't override CopyTo since it's not virtual, so checking TimesCalled
@@ -37,8 +37,8 @@ namespace System.IO.Tests
             int count = trackingStream.ReadCount;
 
             Assert.NotNull(buffer);
-            Assert.True(offset >= 0 && offset + count <= buffer.Length);
-            Assert.True(count > 0); // the buffer can't be size 0
+            Assert.InRange(offset, 0, buffer.Length - count);
+            Assert.InRange(count, 1, int.MaxValue); // the buffer can't be size 0
         }
 
         [Fact]
@@ -53,13 +53,13 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             await trackingStream.CopyToAsync(dest);
 
-            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.CanSeek)) <= 1);
+            Assert.InRange(trackingStream.TimesCalled(nameof(trackingStream.CanSeek)), 0, 1);
             Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Length)));
             Assert.Equal(0, trackingStream.TimesCalled(nameof(trackingStream.Position)));
             Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.CopyToAsync)));
 
             Assert.Same(dest, trackingStream.CopyToAsyncDestination);
-            Assert.True(trackingStream.CopyToAsyncBufferSize > 0);
+            Assert.InRange(trackingStream.CopyToAsyncBufferSize, 1, int.MaxValue);
             Assert.Equal(CancellationToken.None, trackingStream.CopyToAsyncCancellationToken);
         }
 
@@ -77,8 +77,8 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             trackingStream.CopyTo(dest);
 
-            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.Length)) <= 1);
-            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.Position)) <= 1);
+            Assert.InRange(trackingStream.TimesCalled(nameof(trackingStream.Length)), 0, 1);
+            Assert.InRange(trackingStream.TimesCalled(nameof(trackingStream.Position)), 0, 1);
         }
 
         [Fact]
@@ -95,8 +95,8 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             await trackingStream.CopyToAsync(dest);
 
-            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.Length)) <= 1);
-            Assert.True(trackingStream.TimesCalled(nameof(trackingStream.Position)) <= 1);
+            Assert.InRange(trackingStream.TimesCalled(nameof(trackingStream.Length)), 0, 1);
+            Assert.InRange(trackingStream.TimesCalled(nameof(trackingStream.Position)), 0, 1);
         }
 
         [Theory]
@@ -138,7 +138,7 @@ namespace System.IO.Tests
             await trackingStream.CopyToAsync(dest);
 
             Assert.Same(dest, trackingStream.CopyToAsyncDestination);
-            Assert.True(trackingStream.CopyToAsyncBufferSize > 0);
+            Assert.InRange(trackingStream.CopyToAsyncBufferSize, 1, int.MaxValue);
             Assert.Equal(CancellationToken.None, trackingStream.CopyToAsyncCancellationToken);
         }
 
@@ -187,7 +187,7 @@ namespace System.IO.Tests
             // validate the arguments
 
             Assert.Same(dest, trackingStream.CopyToAsyncDestination);
-            Assert.True(trackingStream.CopyToAsyncBufferSize > 0);
+            Assert.InRange(trackingStream.CopyToAsyncBufferSize, 1, int.MaxValue);
             Assert.Equal(CancellationToken.None, trackingStream.CopyToAsyncCancellationToken);
         }
 
@@ -211,8 +211,8 @@ namespace System.IO.Tests
                 readFunc: (buffer, offset, count) =>
                 {
                     Assert.NotNull(buffer);
-                    Assert.True(offset >= 0 && offset + count <= buffer.Length);
-                    Assert.True(count > 0);
+                    Assert.InRange(offset, 0, buffer.Length - count);
+                    Assert.InRange(count, 1, int.MaxValue);
 
                     // CopyTo should always pass in the same buffer/offset/count
                     
@@ -266,8 +266,8 @@ namespace System.IO.Tests
                 readFunc: (buffer, offset, count) =>
                 {
                     Assert.NotNull(buffer);
-                    Assert.True(offset >= 0 && offset + count <= buffer.Length);
-                    Assert.True(count > 0);
+                    Assert.InRange(offset, 0, buffer.Length - count);
+                    Assert.InRange(count, 1, int.MaxValue);
 
                     // CopyTo should always pass in the same buffer/offset/count
                     
