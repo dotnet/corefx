@@ -14,6 +14,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="BinaryReader\BinaryReaderTests.cs" />
     <Compile Include="BinaryWriter\BinaryWriter.WriteByteCharTests.cs" />
     <Compile Include="BinaryWriter\BinaryWriter.WriteTests.cs" />
     <Compile Include="BinaryWriter\BinaryWriterTests.cs" />
@@ -42,7 +43,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <!-- Compile tests against the contract, but copy our local-built implementation for testing -->
     <ProjectReference Include="..\pkg\System.IO.pkgproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
