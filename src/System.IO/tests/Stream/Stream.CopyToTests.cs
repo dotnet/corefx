@@ -18,7 +18,7 @@ namespace System.IO.Tests
             var baseStream = new DelegateStream(
                 canReadFunc: () => true,
                 canSeekFunc: () => false,
-                readFunc: (array, index, length) => 0); // (buffer, offset, count) declared in enclosing scope
+                readFunc: (buffer, offset, count) => 0);
             var trackingStream = new CallTrackingStream(baseStream);
 
             var dest = Stream.Null;
@@ -32,13 +32,13 @@ namespace System.IO.Tests
             // and validate the parameters passed there.
             Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.Read)));
 
-            byte[] buffer = trackingStream.ReadBuffer;
-            int offset = trackingStream.ReadOffset;
-            int count = trackingStream.ReadCount;
+            byte[] outerBuffer = trackingStream.ReadBuffer;
+            int outerOffset = trackingStream.ReadOffset;
+            int outerCount = trackingStream.ReadCount;
 
-            Assert.NotNull(buffer);
-            Assert.InRange(offset, 0, buffer.Length - count);
-            Assert.InRange(count, 1, int.MaxValue); // the buffer can't be size 0
+            Assert.NotNull(outerBuffer);
+            Assert.InRange(outerOffset, 0, outerBuffer.Length - outerCount);
+            Assert.InRange(outerCount, 1, int.MaxValue); // the buffer can't be size 0
         }
 
         [Fact]
@@ -119,7 +119,19 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             trackingStream.CopyTo(dest);
 
-            // No argument checking needed; see notes below
+            // CopyTo is not virtual, so we can't override it in
+            // CallTrackingStream and record the arguments directly.
+            // Instead, validate the arguments passed to Read.
+            
+            Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.Read)));
+
+            byte[] outerBuffer = trackingStream.ReadBuffer;
+            int outerOffset = trackingStream.ReadOffset;
+            int outerCount = trackingStream.ReadCount;
+
+            Assert.NotNull(outerBuffer);
+            Assert.InRange(outerOffset, 0, outerBuffer.Length - outerCount);
+            Assert.InRange(outerCount, 1, int.MaxValue);
         }
 
         [Theory]
@@ -162,9 +174,19 @@ namespace System.IO.Tests
             var dest = Stream.Null;
             trackingStream.CopyTo(dest);
 
-            // We don't need to do any argument checking here;
-            // if bufferSize was null CopyTo will throw an exception
-            // during argument validation
+            // CopyTo is not virtual, so we can't override it in
+            // CallTrackingStream and record the arguments directly.
+            // Instead, validate the arguments passed to Read.
+            
+            Assert.Equal(1, trackingStream.TimesCalled(nameof(trackingStream.Read)));
+
+            byte[] outerBuffer = trackingStream.ReadBuffer;
+            int outerOffset = trackingStream.ReadOffset;
+            int outerCount = trackingStream.ReadCount;
+
+            Assert.NotNull(outerBuffer);
+            Assert.InRange(outerOffset, 0, outerBuffer.Length - outerCount);
+            Assert.InRange(outerCount, 1, int.MaxValue);
         }
 
         [Theory]
@@ -181,10 +203,10 @@ namespace System.IO.Tests
 
             var dest = Stream.Null;
             await trackingStream.CopyToAsync(dest);
-            
-            // We do need to check the arguments here, since both
-            // of the mock streams override CopyToAsync and don't
-            // validate the arguments
+
+            // Note: We can't check how many times ReadAsync was called
+            // here, since trackingStream overrides CopyToAsync and forwards
+            // to the inner (non-tracking) stream for the implementation
 
             Assert.Same(dest, trackingStream.CopyToAsyncDestination);
             Assert.InRange(trackingStream.CopyToAsyncBufferSize, 1, int.MaxValue);
