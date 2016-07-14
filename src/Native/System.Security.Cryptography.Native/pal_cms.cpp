@@ -2,9 +2,120 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#include <assert.h>
 #include "pal_cms.h"
+#include "pal_x509.h"
 #include <openssl/err.h>
 #include <openssl/evp.h>
+
+static X509* X509CloneWithImplicitSkid(X509* cert)
+{
+    if (cert == nullptr || X509_get_ext_by_NID(cert, NID_subject_key_identifier, -1) >= 0)
+    {
+        return nullptr;
+    }
+
+    uint8_t* buf = reinterpret_cast<uint8_t*>(OPENSSL_malloc(SHA_DIGEST_LENGTH));
+    uint8_t* tmpPtr = buf;
+    X509* copy = X509_dup(cert);
+    ASN1_OCTET_STRING* data = nullptr;
+    X509_EXTENSION* skidExt = nullptr;
+    bool success = false;
+    int status = -1;
+    int i2dlen = -1;
+    int i2dlen2 = -1;
+
+    if (buf == nullptr || copy == nullptr)
+    {
+        goto err;
+    }
+
+    status = CryptoNative_X509GetImplicitSubjectKeyIdentifier(copy, buf, SHA_DIGEST_LENGTH);
+
+    if (status != 1)
+    {
+        goto err;
+    }
+
+    data = ASN1_OCTET_STRING_new();
+
+    if (data == nullptr)
+    {
+        goto err;
+    }
+
+    status = ASN1_OCTET_STRING_set(data, buf, SHA_DIGEST_LENGTH);
+
+    if (status != 1)
+    {
+        goto err;
+    }
+
+    i2dlen = i2d_ASN1_OCTET_STRING(data, nullptr);
+
+    if (i2dlen < 1)
+    {
+        goto err;
+    }
+
+    OPENSSL_free(buf);
+    buf = reinterpret_cast<uint8_t*>(OPENSSL_malloc(i2dlen));
+    tmpPtr = buf;
+
+    if (buf == nullptr)
+    {
+        goto err;
+    }
+
+    i2dlen2 = i2d_ASN1_OCTET_STRING(data, &tmpPtr);
+    assert(i2dlen == i2dlen2);
+
+    status = ASN1_OCTET_STRING_set(data, buf, i2dlen);
+
+    if (status != 1)
+    {
+        goto err;
+    }
+
+    skidExt = X509_EXTENSION_create_by_NID(nullptr, NID_subject_key_identifier, 0, data);
+
+    if (skidExt == nullptr)
+    {
+        goto err;
+    }
+
+    if (X509_add_ext(copy, skidExt, -1) == 0)
+    {
+        goto err;
+    }
+    else
+    {
+        success = true;
+    }
+
+err:
+    if (buf != nullptr)
+    {
+        OPENSSL_free(buf);
+    }
+
+    if (data != nullptr)
+    {
+        ASN1_OCTET_STRING_free(data);
+    }
+
+    if (skidExt != nullptr)
+    {
+        X509_EXTENSION_free(skidExt);
+    }
+
+    if (!success && copy != nullptr)
+    {
+        X509_free(copy);
+    }
+
+    return (success) ? copy : nullptr;
+}
 
 extern "C" CMS_ContentInfo* CryptoNative_CmsDecode(const uint8_t* buf, int32_t len)
 {
@@ -16,14 +127,33 @@ extern "C" CMS_ContentInfo* CryptoNative_CmsDecode(const uint8_t* buf, int32_t l
     return d2i_CMS_ContentInfo(nullptr, &buf, len);
 }
 
-extern "C" int CryptoNative_CmsDecrypt(CMS_ContentInfo* cms, X509* cert, EVP_PKEY* pkey, BIO* out)
+extern "C" int CryptoNative_CmsDecrypt(CMS_ContentInfo* cms, X509* cert, EVP_PKEY* pkey, BIO* out, SubjectIdentifierType type)
 {
     if (cms == nullptr || cert == nullptr || pkey == nullptr || out == nullptr)
     {
         return 0;
     }
 
-    return CMS_decrypt(cms, pkey, cert, nullptr, out, CMS_BINARY);
+    X509* matchedCert = cert;
+    X509* copyCert = nullptr;
+
+    if (type == SubjectIdentifierType::SubjectKeyIdentifier && X509_get_ext_by_NID(cert, NID_subject_key_identifier, -1) < 0)
+    {
+        matchedCert = copyCert = X509CloneWithImplicitSkid(cert);
+        if (matchedCert == nullptr)
+        {
+            return -1;
+        }
+    }
+
+    int status = CMS_decrypt(cms, pkey, matchedCert, nullptr, out, CMS_BINARY);
+
+    if (copyCert != nullptr)
+    {
+        X509_free(copyCert);
+    }
+
+    return status;
 }
 
 extern "C" void CryptoNative_CmsDestroy(CMS_ContentInfo* cms)
@@ -133,11 +263,29 @@ extern "C" int CryptoNative_CmsAddSkidRecipient(CMS_ContentInfo* cms, X509* cert
         return -1;
     }
 
-    // TODO (3334): here we must evaluate if there's an explicit skid, or we must generate
-    // one according to the fallback behavior seen in CryptoApi. Eg: The SHA-1 hash of the publicKeyInfo
-    // blob of the encoded certificate.
+    X509* matchedCert = cert;
+    X509* copyCert = nullptr;
 
-    return (CMS_add1_recipient_cert(cms, cert, CMS_USE_KEYID) == nullptr) ? 0 : 1;
+    int pos = X509_get_ext_by_NID(cert, NID_subject_key_identifier, -1);
+
+    if (pos < 0)
+    {
+        matchedCert = copyCert = X509CloneWithImplicitSkid(cert);
+
+        if (matchedCert == nullptr)
+        {
+            return 0;
+        }
+    }
+
+    int status = (CMS_add1_recipient_cert(cms, matchedCert, CMS_USE_KEYID) == nullptr) ? 0 : 1;
+
+    if (copyCert != nullptr)
+    {
+        X509_free(copyCert);
+    }
+
+    return status;
 }
 
 extern "C" int CryptoNative_CmsAddIssuerAndSerialRecipient(CMS_ContentInfo* cms, X509* cert)

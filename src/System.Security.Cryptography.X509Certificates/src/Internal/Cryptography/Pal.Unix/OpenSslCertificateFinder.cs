@@ -264,16 +264,7 @@ namespace Internal.Cryptography.Pal
                         // https://msdn.microsoft.com/en-us/library/windows/desktop/aa376079%28v=vs.85%29.aspx
 
                         OpenSslX509CertificateReader certPal = (OpenSslX509CertificateReader)cert.Pal;
-
-                        using (HashAlgorithm hash = SHA1.Create())
-                        {
-                            byte[] publicKeyInfoBytes = Interop.Crypto.OpenSslEncode(
-                                Interop.Crypto.GetX509SubjectPublicKeyInfoDerSize,
-                                Interop.Crypto.EncodeX509SubjectPublicKeyInfo,
-                                certPal.SafeHandle);
-
-                            certKeyId = hash.ComputeHash(publicKeyInfoBytes);
-                        }
+                        certKeyId = Interop.Crypto.X509GetImplicitSubjectKeyIdentifier(certPal.SafeHandle);
                     }
 
                     return keyIdentifier.ContentsEqual(certKeyId);

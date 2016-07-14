@@ -34,7 +34,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
             switch (type)
             {
                 case RecipientInfoType.KeyTransport:
-                    decryptedContent = TryDecryptTrans(cert, out exception);
+                    decryptedContent = TryDecryptTrans(cert, out exception, recipientInfo.RecipientIdentifier.Type);
                     break;
 
                 case RecipientInfoType.KeyAgreement:
@@ -59,7 +59,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
             return decryptedContent;
         }
 
-        private ContentInfo TryDecryptTrans(X509Certificate2 recipientCert, out Exception exception)
+        private ContentInfo TryDecryptTrans(X509Certificate2 recipientCert, out Exception exception, SubjectIdentifierType type)
         {
             // If there's no content OpenSSL will fail to decrypt, so do the check manually before
             // delegating to OpenSSL
@@ -91,7 +91,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
                     Interop.Crypto.CheckValidOpenSslHandle(recipientCertHandle);
                     Interop.Crypto.CheckValidOpenSslHandle(pKey);
 
-                    int status = Interop.Crypto.CmsDecrypt(_decodedMessage, recipientCertHandle, pKey, decryptionBuffer);
+                    int status = Interop.Crypto.CmsDecrypt(_decodedMessage, recipientCertHandle, pKey, decryptionBuffer, type);
 
                     exception = status == 1 ?
                         null :

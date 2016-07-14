@@ -291,3 +291,43 @@ extern "C" int32_t CryptoNative_EncodeX509SubjectPublicKeyInfo(X509* x509, uint8
     // X509_get_X509_PUBKEY returns an interior pointer, so should not be freed
     return i2d_X509_PUBKEY(X509_get_X509_PUBKEY(x509), &buf);
 }
+
+extern "C" int32_t CryptoNative_X509GetImplicitSubjectKeyIdentifier(X509* x509, uint8_t* pBuf, int cBuf)
+{
+    if (x509 == nullptr || pBuf == nullptr || cBuf != SHA_DIGEST_LENGTH)
+    {
+        return -1;
+    }
+
+    // Interior pointer, do not free.
+    X509_PUBKEY* pubkey = X509_get_X509_PUBKEY(x509);
+
+    if (pubkey == nullptr)
+    {
+        return 0;
+    }
+
+    int i2dlen = i2d_X509_PUBKEY(pubkey, NULL);
+
+    if (i2dlen < 1)
+    {
+        return 0;
+    }
+
+    uint8_t* i2d = reinterpret_cast<uint8_t*>(OPENSSL_malloc(i2dlen));
+
+    if (i2d == nullptr)
+    {
+        return 0;
+    }
+
+    uint8_t* i2dTmp = i2d;
+    int i2dlen2 = i2d_X509_PUBKEY(pubkey, &i2dTmp);
+
+    assert(i2dlen == i2dlen2);
+
+    SHA1(i2d, static_cast<size_t>(i2dlen2), pBuf);
+    OPENSSL_free(i2d);
+
+    return 1;
+}

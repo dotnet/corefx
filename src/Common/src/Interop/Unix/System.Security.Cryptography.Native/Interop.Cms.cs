@@ -5,6 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Pkcs;
 
 using Microsoft.Win32.SafeHandles;
 
@@ -88,7 +89,8 @@ internal static partial class Interop
         }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsDecrypt")]
-        internal static extern int CmsDecrypt(SafeCmsHandle cms, SafeX509Handle recipientCert, SafeEvpPKeyHandle pKeyKandle, SafeBioHandle decryptedBuffered);
+        internal static extern int CmsDecrypt(
+            SafeCmsHandle cms, SafeX509Handle recipientCert, SafeEvpPKeyHandle pKeyKandle, SafeBioHandle decryptedBuffered, SubjectIdentifierType type);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsGetDerSize")]
         internal static extern int CmsGetDerSize(SafeCmsHandle cms);

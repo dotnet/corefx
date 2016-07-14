@@ -7,14 +7,25 @@
 #include <openssl/cms.h>
 
 /*
+These values should be kept in sync with System.Security.Cryptography.Pkcs.SubjectIdentifierType.cs
+*/
+enum SubjectIdentifierType : int32_t
+{
+    Unknown = 0,
+    IssuerAndSerialNumber = 1,
+    SubjectKeyIdentifier = 2,
+    NoSignature = 3
+};
+
+/*
 Shims the d2i_CMS_ContentInfo method
 */
 extern "C" CMS_ContentInfo* CryptoNative_CmsDecode(const uint8_t* buf, int32_t len);
 
 /*
-Shims the CMS_decrypt method
+Shims the CMS_decrypt method and provides the implicit skid to the cert if necessary
 */
-extern "C" int CryptoNative_CmsDecrypt(CMS_ContentInfo* cms, X509* cert, EVP_PKEY* pkey, BIO* out);
+extern "C" int CryptoNative_CmsDecrypt(CMS_ContentInfo* cms, X509* cert, EVP_PKEY* pkey, BIO* out, SubjectIdentifierType type);
 
 /*
 Shim the CMS_ContentInfo_free method

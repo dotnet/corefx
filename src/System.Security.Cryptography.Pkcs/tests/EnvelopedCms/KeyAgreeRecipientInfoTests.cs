@@ -86,7 +86,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeRecipientIdType_Ski_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -103,7 +102,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyAgreeRecipientIdValue_Ski_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = FixedValueKeyAgree1(SubjectIdentifierType.SubjectKeyIdentifier);

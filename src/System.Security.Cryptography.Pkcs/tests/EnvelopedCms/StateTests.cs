@@ -99,7 +99,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostCtor_Decrypt()
         {
             EnvelopedCms ecms = new EnvelopedCms();

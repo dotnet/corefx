@@ -90,7 +90,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdType_Ski_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -107,7 +106,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestKeyTransRecipientIdValue_Ski_RoundTrip()
         {
             KeyTransRecipientInfo recipient = EncodeKeyTransl(SubjectIdentifierType.SubjectKeyIdentifier);

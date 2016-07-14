@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
+using System.Diagnostics;
 
 internal static partial class Interop
 {
@@ -145,6 +146,29 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EncodeX509SubjectPublicKeyInfo")]
         internal static extern int EncodeX509SubjectPublicKeyInfo(SafeX509Handle x509, byte[] buf);
+
+        [DllImport(Libraries.CryptoNative)]
+        private static extern int CryptoNative_X509GetImplicitSubjectKeyIdentifier(SafeX509Handle x509, byte[] buf, int cBuf);
+
+        internal static byte[] X509GetImplicitSubjectKeyIdentifier(SafeX509Handle x509)
+        {
+            Debug.Assert(x509 != null && !x509.IsInvalid);
+
+            // The answer is a SHA-1 hash, so 20 bytes.
+            byte[] skid = new byte[20];
+            int ret = CryptoNative_X509GetImplicitSubjectKeyIdentifier(x509, skid, skid.Length);
+
+            switch (ret)
+            {
+                case 1:
+                    return skid;
+                case -1:
+                    throw CreateOpenSslCryptographicException();
+                default:
+                    Debug.Fail($"CryptoNative_X509GetImplicitSubjectKeyIdentifier should only return 1 or -1, returned {ret}");
+                    throw new CryptographicException();
+            }
+        }
 
         internal enum X509VerifyStatusCode : int
         {

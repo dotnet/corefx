@@ -293,3 +293,11 @@ Shims the i2d_X509_PUBKEY method, providing X509_get_X509_PUBKEY(x) as the input
 Returns the number of bytes written to buf.
 */
 extern "C" int32_t CryptoNative_EncodeX509SubjectPublicKeyInfo(X509* x, uint8_t* buf);
+
+/*
+This method calculates the implicit skid of an X509 certificate by calculating the SHA-1 hash of the
+publicKeyInfo binary blob of the DER representation of the certificate and stores it in pBuf.
+
+Returns -1 on input error, 0 on OpenSSL error, and 1 on success.
+*/
+extern "C" int32_t CryptoNative_X509GetImplicitSubjectKeyIdentifier(X509* x509, uint8_t* pBuf, int cBuf);
