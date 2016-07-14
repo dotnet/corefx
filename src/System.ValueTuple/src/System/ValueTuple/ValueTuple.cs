@@ -141,12 +141,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length => 0;
+        int ITuple.Length => 0;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -451,12 +451,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length => 1;
+        int ITuple.Length => 1;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -654,12 +654,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length => 2;
+        int ITuple.Length => 2;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -857,12 +857,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length => 3;
+        int ITuple.Length => 3;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -1079,12 +1079,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length => 4;
+        int ITuple.Length => 4;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -1320,12 +1320,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length => 5;
+        int ITuple.Length => 5;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -1580,12 +1580,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length => 6;
+        int ITuple.Length => 6;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -1859,12 +1859,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length => 7;
+        int ITuple.Length => 7;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -1904,7 +1904,7 @@ namespace System
     /// <typeparam name="TRest">The type of the tuple's eigth component.</typeparam>
     public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>
         : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, ITupleInternal, ITuple
-        where TRest : struct
+        where TRest : struct, ITuple
     {
         /// <summary>
         /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's first component.
@@ -2272,19 +2272,18 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Length
+        int ITuple.Length
         {
             get
             {
-                ITupleInternal rest = Rest as ITupleInternal;
-                return rest == null ? 8 : 7 + rest.Length;
+                return 7 + ((ITuple)Rest).Length;
             }
         }
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        public object this[int index]
+        object ITuple.this[int index]
         {
             get
             {
@@ -2306,15 +2305,7 @@ namespace System
                         return Item7;
                 }
 
-                ITupleInternal rest = Rest as ITupleInternal;
-                if (index > 0 && index < Length && rest != null)
-                {
-                    return rest[index - 7];
-                }
-                else
-                {
-                    throw new IndexOutOfRangeException();
-                }
+                return ((ITuple)Rest)[index - 7];
             }
         }
     }

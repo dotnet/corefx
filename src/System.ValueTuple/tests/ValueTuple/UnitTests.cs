@@ -995,7 +995,7 @@ public class ValueTupleTests
         Assert.Throws<IndexOutOfRangeException>(() => it[7]);
     }
 
-    public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> CreateLong<T1, T2, T3, T4, T5, T6, T7, TRest>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest) where TRest : struct =>
+    public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> CreateLong<T1, T2, T3, T4, T5, T6, T7, TRest>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest) where TRest : struct, ITuple =>
         new ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>(item1, item2, item3, item4, item5, item6, item7, rest);
 
     public static Tuple<T1, T2, T3, T4, T5, T6, T7, TRest> CreateLongRef<T1, T2, T3, T4, T5, T6, T7, TRest>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest) =>
@@ -1147,12 +1147,11 @@ public class ValueTupleTests
     [Fact]
     public static void EightTuplesWithBadRest()
     {
-        var d = default(ValueTuple<int, int, int, int, int, int, int, int>);
+        var d = default(ValueTuple<int, int, int, int, int, int, int, BadTuple>);
         d.Item1 = 1;
-        d.Rest = 42;
         Assert.Equal(35937, d.GetHashCode());
         Assert.Equal(35937, ((IStructuralEquatable)d).GetHashCode());
-        Assert.Equal("(1, 0, 0, 0, 0, 0, 0, 42)", d.ToString());
+        Assert.Equal("(1, 0, 0, 0, 0, 0, 0, BadTuple)", d.ToString());
 
         Assert.Equal(35937, CreateLong(1, 2, 3, 4, 5, 6, 7, d).GetHashCode());
 
@@ -1160,7 +1159,9 @@ public class ValueTupleTests
         Assert.Equal(ValueTuple.Create(1, 0, 0, 0, 0, 0, 0).GetHashCode(), d.GetHashCode());
         Assert.Equal(((IStructuralEquatable)ValueTuple.Create(1, 0, 0, 0, 0, 0, 0)).GetHashCode(TestEqualityComparer.Instance), ((IStructuralEquatable)d).GetHashCode(TestEqualityComparer.Instance));
 
-        Assert.Equal("(1, 2, 3, 4, 5, 6, 7, 1, 0, 0, 0, 0, 0, 0, 42)", CreateLong(1, 2, 3, 4, 5, 6, 7, d).ToString());
+        Assert.Equal("(1, 2, 3, 4, 5, 6, 7, 1, 0, 0, 0, 0, 0, 0, BadTuple)", CreateLong(1, 2, 3, 4, 5, 6, 7, d).ToString());
+
+        Assert.Throws<ArgumentException>(() => CreateLong(1, 2, 3, 4, 5, 6, 7, new BadTuple()));
 
         ITuple it = d;
         Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
@@ -1171,7 +1172,35 @@ public class ValueTupleTests
         Assert.Equal(0, it[4]);
         Assert.Equal(0, it[5]);
         Assert.Equal(0, it[6]);
-        Assert.Throws<IndexOutOfRangeException>(() => it[7]);
+        Assert.Equal(42, it[7]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[8]);
+    }
+
+    private struct BadTuple : ITuple
+    {
+        // doesn't implement ITupleInternal
+
+        int ITuple.Length => 1;
+
+        object ITuple.this[int index]
+        {
+            get
+            {
+                if (index == 0)
+                {
+                    return 42;
+                }
+                else
+                {
+                    throw new IndexOutOfRangeException();
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return "BadTuple";
+        }
     }
 
     private class TestClass : IComparable
