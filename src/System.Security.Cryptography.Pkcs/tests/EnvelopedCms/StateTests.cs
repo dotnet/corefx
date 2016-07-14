@@ -178,8 +178,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal<byte>(expectedContentInfo.Content, actualContentInfo.Content);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(EncryptionSupportsAddingOriginatorCerts))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void PostEncrypt_Certs()
         {
@@ -195,6 +194,20 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             Assert.Equal(Certificates.RSAKeyTransfer2.GetCertificate(), ecms.Certificates[0]);
             Assert.Equal(Certificates.RSAKeyTransfer3.GetCertificate(), ecms.Certificates[1]);
+        }
+
+        [ConditionalFact(nameof(EncryptionDoesNotSupportAddingOriginatorCerts))]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void AddCertsInUnix_PlatformNotSupported()
+        {
+            ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
+            ecms.Certificates.Add(Certificates.RSAKeyTransfer2.GetCertificate());
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => ecms.Encrypt(new CmsRecipient(cert)));
+            }
         }
 
         //
@@ -396,6 +409,11 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             Assert.Equal<byte>(expected, actual);
         }
+
+        private static bool EncryptionSupportsAddingOriginatorCerts =>
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        private static bool EncryptionDoesNotSupportAddingOriginatorCerts => !EncryptionSupportsAddingOriginatorCerts;
     }
 }
 

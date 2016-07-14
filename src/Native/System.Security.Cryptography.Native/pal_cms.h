@@ -82,15 +82,6 @@ Status is set to 1 on success, 0 on unsupported algorithm, and -1 on invalid inp
 extern "C" CMS_ContentInfo* CryptoNative_CmsInitializeEnvelope(ASN1_OBJECT* algorithmOid, int32_t* status);
 
 /*
-Adds an originator certificate to the CMS_ContentInfo structure. If the CMS_ContentInfo structure
-is of type EnvelopedData it will be added to OriginatorInfo, and for SignedData it will be added to
-the certificates.
-
-Returns 1 on success, 0 on OpenSSL failure, and -1 on invalid input.
-*/
-extern "C" int CryptoNative_CmsAddOriginatorCert(CMS_ContentInfo* cms, X509* cert);
-
-/*
 Creates a KeyTransportRecipientInfo using the IssuerAndSerial identification method for
 the provided certificate and adds it to the CMS_ContentInfo structure.
 
@@ -124,3 +115,10 @@ extern "C" int CryptoNative_CmsGetDerSize(CMS_ContentInfo* cms);
 Shims the i2d_CMS_ContentInfo method.
 */
 extern "C" int CryptoNative_CmsEncode(CMS_ContentInfo* cms, uint8_t* buf);
+
+/*
+Shims the CMS_set1_eContentType method.
+
+Returns -1 on invalid input, 0 on OpenSSL error, and 1 on success.
+*/
+extern "C" int CryptoNative_CmsSetEmbeddedContentType(CMS_ContentInfo* cms, ASN1_OBJECT* oid);
