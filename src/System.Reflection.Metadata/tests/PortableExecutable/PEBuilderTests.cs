@@ -61,7 +61,7 @@ namespace System.Reflection.PortableExecutable.Tests
         {
             var peBuilder = new ManagedPEBuilder(
                 entryPointHandle.IsNil ? PEHeaderBuilder.CreateLibraryHeader() : PEHeaderBuilder.CreateExecutableHeader(),
-                new TypeSystemMetadataSerializer(metadataBuilder, "v4.0.30319", isMinimalDelta: false),
+                new MetadataRootBuilder(metadataBuilder),
                 ilBuilder,
                 entryPoint: entryPointHandle,
                 flags: CorFlags.ILOnly | (privateKeyOpt != null ? CorFlags.StrongNameSigned : 0),
@@ -91,7 +91,7 @@ namespace System.Reflection.PortableExecutable.Tests
         public void ManagedPEBuilder_Errors()
         {
             var hdr = new PEHeaderBuilder();
-            var ms = new TypeSystemMetadataSerializer(new MetadataBuilder(), "v4.0.30319", false);
+            var ms = new MetadataRootBuilder(new MetadataBuilder());
             var il = new BlobBuilder();
 
             Assert.Throws<ArgumentNullException>(() => new ManagedPEBuilder(null, ms, il));
@@ -282,7 +282,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 metadata.GetOrAddString("Main"),
                 metadata.GetOrAddBlob(mainSignature),
                 mainBodyOffset,
-                paramList: default(ParameterHandle));
+                parameterList: default(ParameterHandle));
 
             var ctorDef = metadata.AddMethodDefinition(
                 MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
@@ -290,7 +290,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 metadata.GetOrAddString(".ctor"),
                 parameterlessCtorBlobIndex,
                 ctorBodyOffset,
-                paramList: default(ParameterHandle));
+                parameterList: default(ParameterHandle));
 
             metadata.AddTypeDefinition(
                 default(TypeAttributes),
@@ -486,7 +486,7 @@ namespace System.Reflection.PortableExecutable.Tests
             
             var peBuilder = new ManagedPEBuilder(
                 PEHeaderBuilder.CreateLibraryHeader(),
-                new TypeSystemMetadataSerializer(metadataBuilder, "v4.0.30319", false),
+                new MetadataRootBuilder(metadataBuilder),
                 ilBuilder,
                 nativeResources: new TestResourceSectionBuilder(),
                 deterministicIdProvider: content => s_contentId);
@@ -531,7 +531,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var peBuilder = new ManagedPEBuilder(
                 PEHeaderBuilder.CreateLibraryHeader(),
-                new TypeSystemMetadataSerializer(metadataBuilder, "v4.0.30319", false),
+                new MetadataRootBuilder(metadataBuilder),
                 ilBuilder,
                 nativeResources: new BadResourceSectionBuilder(),
                 deterministicIdProvider: content => s_contentId);

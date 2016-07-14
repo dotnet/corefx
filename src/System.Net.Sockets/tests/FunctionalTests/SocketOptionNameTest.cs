@@ -94,7 +94,9 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
+        private static bool IsNotFedora23 => !PlatformDetection.IsFedora23;
+
+        [ConditionalFact(nameof(IsNotFedora23))] // (#9538) Receive times out
         public void MulticastInterface_Set_AnyInterface_Succeeds()
         {
             // On all platforms, index 0 means "any interface"
@@ -127,7 +129,7 @@ namespace System.Net.Sockets.Tests
 
                 sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex));
 
-                for (int i = 0; i < Configuration.UDPRedundancy; i++)
+                for (int i = 0; i < TestSettings.UDPRedundancy; i++)
                 {
                     sendSocket.SendTo(Encoding.UTF8.GetBytes(message), new IPEndPoint(multicastAddress, port));
                 }
