@@ -724,6 +724,11 @@ public class ValueTupleTests
         Assert.Throws<ArgumentException>(() => ((IStructuralComparable)a).CompareTo("string", DummyTestComparer.Instance));
 
         Assert.Equal("(1, 2, 3, 4, 5, 6, 7, )", CreateLong(1, 2, 3, 4, 5, 6, 7, new ValueTuple()).ToString());
+
+        ITuple it = ValueTuple.Create();
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[0]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[1]);
     }
 
     [Fact]
@@ -748,6 +753,11 @@ public class ValueTupleTests
         var tupleWithNull = new Tuple<string>(null);
         Assert.Equal("()", vtWithNull.ToString());
         Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+        ITuple it = ValueTuple.Create(1);
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[1]);
     }
 
     [Fact]
@@ -773,6 +783,12 @@ public class ValueTupleTests
         var tupleWithNull = new Tuple<string, string>(null, null);
         Assert.Equal("(, )", vtWithNull.ToString());
         Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+        ITuple it = ValueTuple.Create(1, 2);
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Equal(2, it[1]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[2]);
     }
 
     [Fact]
@@ -800,6 +816,13 @@ public class ValueTupleTests
         var tupleWithNull = new Tuple<string, string, string>(null, null, null);
         Assert.Equal("(, , )", vtWithNull.ToString());
         Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+        ITuple it = ValueTuple.Create(1, 2, 3);
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Equal(2, it[1]);
+        Assert.Equal(3, it[2]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[3]);
     }
 
     [Fact]
@@ -830,6 +853,14 @@ public class ValueTupleTests
         var tupleWithNull = new Tuple<string, string, string, string>(null, null, null, null);
         Assert.Equal("(, , , )", vtWithNull.ToString());
         Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+        ITuple it = ValueTuple.Create(1, 2, 3, 4);
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Equal(2, it[1]);
+        Assert.Equal(3, it[2]);
+        Assert.Equal(4, it[3]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[4]);
     }
 
     [Fact]
@@ -862,6 +893,15 @@ public class ValueTupleTests
         var tupleWithNull = new Tuple<string, string, string, string, string>(null, null, null, null, null);
         Assert.Equal("(, , , , )", vtWithNull.ToString());
         Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+        ITuple it = ValueTuple.Create(1, 2, 3, 4, 5);
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Equal(2, it[1]);
+        Assert.Equal(3, it[2]);
+        Assert.Equal(4, it[3]);
+        Assert.Equal(5, it[4]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[5]);
     }
 
     [Fact]
@@ -896,6 +936,16 @@ public class ValueTupleTests
         var tupleWithNull = new Tuple<string, string, string, string, string, string>(null, null, null, null, null, null);
         Assert.Equal("(, , , , , )", vtWithNull.ToString());
         Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+        ITuple it = ValueTuple.Create(1, 2, 3, 4, 5, 6);
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Equal(2, it[1]);
+        Assert.Equal(3, it[2]);
+        Assert.Equal(4, it[3]);
+        Assert.Equal(5, it[4]);
+        Assert.Equal(6, it[5]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[6]);
     }
 
     [Fact]
@@ -932,6 +982,17 @@ public class ValueTupleTests
         var tupleWithNull = new Tuple<string, string, string, string, string, string, string>(null, null, null, null, null, null, null);
         Assert.Equal("(, , , , , , )", vtWithNull.ToString());
         Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+        ITuple it = ValueTuple.Create(1, 2, 3, 4, 5, 6, 7);
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Equal(2, it[1]);
+        Assert.Equal(3, it[2]);
+        Assert.Equal(4, it[3]);
+        Assert.Equal(5, it[4]);
+        Assert.Equal(6, it[5]);
+        Assert.Equal(7, it[6]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[7]);
     }
 
     public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> CreateLong<T1, T2, T3, T4, T5, T6, T7, TRest>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest) where TRest : struct =>
@@ -1009,6 +1070,18 @@ public class ValueTupleTests
         var tupleWithNull = new Tuple<string, string, string, string, string, string, string, Tuple<string>>(null, null, null, null, null, null, null, new Tuple<string>(null));
         Assert.Equal("(, , , , , , , )", vtWithNull.ToString());
         Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+        ITuple it = CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8));
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Equal(2, it[1]);
+        Assert.Equal(3, it[2]);
+        Assert.Equal(4, it[3]);
+        Assert.Equal(5, it[4]);
+        Assert.Equal(6, it[5]);
+        Assert.Equal(7, it[6]);
+        Assert.Equal(8, it[7]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[8]);
     }
 
     [Fact]
@@ -1088,6 +1161,17 @@ public class ValueTupleTests
         Assert.Equal(((IStructuralEquatable)ValueTuple.Create(1, 0, 0, 0, 0, 0, 0)).GetHashCode(TestEqualityComparer.Instance), ((IStructuralEquatable)d).GetHashCode(TestEqualityComparer.Instance));
 
         Assert.Equal("(1, 2, 3, 4, 5, 6, 7, 1, 0, 0, 0, 0, 0, 0, 42)", CreateLong(1, 2, 3, 4, 5, 6, 7, d).ToString());
+
+        ITuple it = d;
+        Assert.Throws<IndexOutOfRangeException>(() => it[-1]);
+        Assert.Equal(1, it[0]);
+        Assert.Equal(0, it[1]);
+        Assert.Equal(0, it[2]);
+        Assert.Equal(0, it[3]);
+        Assert.Equal(0, it[4]);
+        Assert.Equal(0, it[5]);
+        Assert.Equal(0, it[6]);
+        Assert.Throws<IndexOutOfRangeException>(() => it[7]);
     }
 
     private class TestClass : IComparable

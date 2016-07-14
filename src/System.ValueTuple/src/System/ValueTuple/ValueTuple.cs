@@ -9,12 +9,27 @@ using System.Diagnostics;
 namespace System
 {
     /// <summary>
+    /// This interface is required for types that want to be indexed into by dynamic patterns.
+    /// </summary>
+    public interface ITuple
+    {
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        int Size { get; }
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        object this[int index] { get; }
+    }
+
+    /// <summary>
     /// Helper so we can call some tuple methods recursively without knowing the underlying types.
     /// </summary>
-    internal interface ITupleInternal
+    internal interface ITupleInternal : ITuple
     {
         int GetHashCode(IEqualityComparer comparer);
-        int Size { get; }
         string ToStringEnd();
     }
 
@@ -27,7 +42,7 @@ namespace System
     /// - their members (such as Item1, Item2, etc) are fields rather than properties.
     /// </summary>
     public struct ValueTuple
-        : IEquatable<ValueTuple>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple>, ITupleInternal
+        : IEquatable<ValueTuple>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple>, ITupleInternal, ITuple
     {
         /// <summary>
         /// Returns a value that indicates whether the current <see cref="ValueTuple"/> instance is equal to a specified object.
@@ -69,7 +84,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple other)
@@ -123,7 +138,21 @@ namespace System
             return ")";
         }
 
-        int ITupleInternal.Size => 0;
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        public int Size => 0;
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                throw new IndexOutOfRangeException();
+            }
+        }
 
         /// <summary>Creates a new struct 0-tuple.</summary>
         /// <returns>A 0-tuple.</returns>
@@ -282,7 +311,7 @@ namespace System
     /// <summary>Represents a 1-tuple, or singleton, as a value type.</summary>
     /// <typeparam name="T1">The type of the tuple's only component.</typeparam>
     public struct ValueTuple<T1>
-        : IEquatable<ValueTuple<T1>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1>>, ITupleInternal
+        : IEquatable<ValueTuple<T1>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1>>, ITupleInternal, ITuple
     {
         /// <summary>
         /// The current <see cref="ValueTuple{T1}"/> instance's first component.
@@ -359,7 +388,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple<T1> other)
@@ -419,7 +448,25 @@ namespace System
             return Item1?.ToString() + ")";
         }
 
-        int ITupleInternal.Size => 1;
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        public int Size => 1;
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                if (index != 0)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+                return Item1;
+            }
+        }
     }
 
     /// <summary>
@@ -428,7 +475,7 @@ namespace System
     /// <typeparam name="T1">The type of the tuple's first component.</typeparam>
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     public struct ValueTuple<T1, T2>
-        : IEquatable<ValueTuple<T1, T2>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2>>, ITupleInternal
+        : IEquatable<ValueTuple<T1, T2>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2>>, ITupleInternal, ITuple
     {
         /// <summary>
         /// The current <see cref="ValueTuple{T1, T2}"/> instance's first component.
@@ -530,7 +577,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple<T1, T2> other)
@@ -604,7 +651,29 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ")";
         }
 
-        int ITupleInternal.Size => 2;
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        public int Size => 2;
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return Item1;
+                    case 1:
+                        return Item2;
+                    default:
+                        throw new IndexOutOfRangeException();
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -614,7 +683,7 @@ namespace System
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     /// <typeparam name="T3">The type of the tuple's third component.</typeparam>
     public struct ValueTuple<T1, T2, T3>
-        : IEquatable<ValueTuple<T1, T2, T3>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3>>, ITupleInternal
+        : IEquatable<ValueTuple<T1, T2, T3>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3>>, ITupleInternal, ITuple
     {
         /// <summary>
         /// The current <see cref="ValueTuple{T1, T2, T3}"/> instance's first component.
@@ -705,7 +774,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple<T1, T2, T3> other)
@@ -785,7 +854,31 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ")";
         }
 
-        int ITupleInternal.Size => 3;
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        public int Size => 3;
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return Item1;
+                    case 1:
+                        return Item2;
+                    case 2:
+                        return Item3;
+                    default:
+                        throw new IndexOutOfRangeException();
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -796,7 +889,7 @@ namespace System
     /// <typeparam name="T3">The type of the tuple's third component.</typeparam>
     /// <typeparam name="T4">The type of the tuple's fourth component.</typeparam>
     public struct ValueTuple<T1, T2, T3, T4>
-        : IEquatable<ValueTuple<T1, T2, T3, T4>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4>>, ITupleInternal
+        : IEquatable<ValueTuple<T1, T2, T3, T4>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4>>, ITupleInternal, ITuple
     {
         /// <summary>
         /// The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's first component.
@@ -895,7 +988,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple<T1, T2, T3, T4> other)
@@ -983,7 +1076,33 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ")";
         }
 
-        int ITupleInternal.Size => 4;
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        public int Size => 4;
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return Item1;
+                    case 1:
+                        return Item2;
+                    case 2:
+                        return Item3;
+                    case 3:
+                        return Item4;
+                    default:
+                        throw new IndexOutOfRangeException();
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -995,7 +1114,7 @@ namespace System
     /// <typeparam name="T4">The type of the tuple's fourth component.</typeparam>
     /// <typeparam name="T5">The type of the tuple's fifth component.</typeparam>
     public struct ValueTuple<T1, T2, T3, T4, T5>
-        : IEquatable<ValueTuple<T1, T2, T3, T4, T5>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5>>, ITupleInternal
+        : IEquatable<ValueTuple<T1, T2, T3, T4, T5>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5>>, ITupleInternal, ITuple
     {
         /// <summary>
         /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's first component.
@@ -1102,7 +1221,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple<T1, T2, T3, T4, T5> other)
@@ -1198,7 +1317,35 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ", " + Item5?.ToString() + ")";
         }
 
-        int ITupleInternal.Size => 5;
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        public int Size => 5;
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return Item1;
+                    case 1:
+                        return Item2;
+                    case 2:
+                        return Item3;
+                    case 3:
+                        return Item4;
+                    case 4:
+                        return Item5;
+                    default:
+                        throw new IndexOutOfRangeException();
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -1211,7 +1358,7 @@ namespace System
     /// <typeparam name="T5">The type of the tuple's fifth component.</typeparam>
     /// <typeparam name="T6">The type of the tuple's sixth component.</typeparam>
     public struct ValueTuple<T1, T2, T3, T4, T5, T6>
-        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6>>, ITupleInternal
+        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6>>, ITupleInternal, ITuple
     {
         /// <summary>
         /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's first component.
@@ -1326,7 +1473,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple<T1, T2, T3, T4, T5, T6> other)
@@ -1430,7 +1577,37 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ", " + Item5?.ToString() + ", " + Item6?.ToString() + ")";
         }
 
-        int ITupleInternal.Size => 6;
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        public int Size => 6;
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return Item1;
+                    case 1:
+                        return Item2;
+                    case 2:
+                        return Item3;
+                    case 3:
+                        return Item4;
+                    case 4:
+                        return Item5;
+                    case 5:
+                        return Item6;
+                    default:
+                        throw new IndexOutOfRangeException();
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -1444,7 +1621,7 @@ namespace System
     /// <typeparam name="T6">The type of the tuple's sixth component.</typeparam>
     /// <typeparam name="T7">The type of the tuple's seventh component.</typeparam>
     public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7>
-        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, ITupleInternal
+        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, ITupleInternal, ITuple
     {
         /// <summary>
         /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's first component.
@@ -1567,7 +1744,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple<T1, T2, T3, T4, T5, T6, T7> other)
@@ -1679,7 +1856,39 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ", " + Item5?.ToString() + ", " + Item6?.ToString() + ", " + Item7?.ToString() + ")";
         }
 
-        int ITupleInternal.Size => 7;
+        /// <summary>
+        ///
+        /// </summary>
+        public int Size => 7;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return Item1;
+                    case 1:
+                        return Item2;
+                    case 2:
+                        return Item3;
+                    case 3:
+                        return Item4;
+                    case 4:
+                        return Item5;
+                    case 5:
+                        return Item6;
+                    case 6:
+                        return Item7;
+                    default:
+                        throw new IndexOutOfRangeException();
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -1694,7 +1903,7 @@ namespace System
     /// <typeparam name="T7">The type of the tuple's seventh component.</typeparam>
     /// <typeparam name="TRest">The type of the tuple's eigth component.</typeparam>
     public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>
-        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, ITupleInternal
+        : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, ITupleInternal, ITuple
         where TRest : struct
     {
         /// <summary>
@@ -1831,7 +2040,7 @@ namespace System
         /// <returns>
         /// A signed number indicating the relative values of this instance and <paramref name="other"/>.
         /// Returns less than zero if this instance is less than <paramref name="other"/>, zero if this
-        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater 
+        /// instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater
         /// than <paramref name="other"/>.
         /// </returns>
         public int CompareTo(ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other)
@@ -2060,12 +2269,52 @@ namespace System
             }
         }
 
-        int ITupleInternal.Size
+        /// <summary>
+        /// The number of positions in this data structure.
+        /// </summary>
+        public int Size
         {
             get
             {
                 ITupleInternal rest = Rest as ITupleInternal;
                 return rest == null ? 8 : 7 + rest.Size;
+            }
+        }
+
+        /// <summary>
+        /// Get the element at position <param name="index"/>.
+        /// </summary>
+        public object this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return Item1;
+                    case 1:
+                        return Item2;
+                    case 2:
+                        return Item3;
+                    case 3:
+                        return Item4;
+                    case 4:
+                        return Item5;
+                    case 5:
+                        return Item6;
+                    case 6:
+                        return Item7;
+                }
+
+                ITupleInternal rest = Rest as ITupleInternal;
+                if (index > 0 && index < Size && rest != null)
+                {
+                    return rest[index - 7];
+                }
+                else
+                {
+                    throw new IndexOutOfRangeException();
+                }
             }
         }
     }
