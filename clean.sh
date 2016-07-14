@@ -16,12 +16,12 @@ usage()
 
 __working_tree_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ $# == -? ]
+if [ $* == -? ]
 then
    usage
 fi
 
-if [ $# == -all ]
+if [ $* == -all ]
 then
    echo "Removing all untracked files in the working tree"
    git clean -xdf $__working_tree_root
