@@ -3,9 +3,9 @@ setlocal
 
 :SetupArgs
 :: Initialize the args that will be passed to cmake
-set __sourceDir=%~dp0
-set __binDir=%~dp0..\..\..\bin
-set __rootDir=%~dp0..\..\..
+set __nativeWindowsDir=%~dp0\Windows
+set __binDir=%~dp0..\..\bin
+set __rootDir=%~dp0..\..
 set __CMakeBinDir=""
 set __IntermediatesDir=""
 set __BuildArch=x64
@@ -118,7 +118,7 @@ exit /b 1
 :GenVSSolution
 :: Regenerate the VS solution
 pushd "%__IntermediatesDir%"
-call "%__sourceDir%\gen-buildsys-win.bat" %__sourceDir% %__VSVersion% %__BuildArch%
+call "%__nativeWindowsDir%\gen-buildsys-win.bat" %__nativeWindowsDir% %__VSVersion% %__BuildArch%
 popd
 
 :CheckForProj
