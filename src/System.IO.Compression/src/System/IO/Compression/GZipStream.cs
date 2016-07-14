@@ -33,6 +33,44 @@ namespace System.IO.Compression
             _deflateStream = new DeflateStream(stream, compressionLevel, leaveOpen, ZLibNative.GZip_DefaultWindowBits);
         }
 
+        /* Uncomment when Stream.BeginRead, Stream.EndRead, Stream.BeginWrite and Stream.EndWrite are added.
+        public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
+        {
+            if (_deflateStream == null)
+            {
+                throw new InvalidOperationException(SR.ObjectDisposed_StreamClosed);
+            }
+            return _deflateStream.BeginRead(array, offset, count, asyncCallback, asyncState);
+        }
+
+        public override int EndRead(IAsyncResult asyncResult)
+        {
+            if (_deflateStream == null)
+            {
+                throw new InvalidOperationException(SR.ObjectDisposed_StreamClosed);
+            }
+            return _deflateStream.EndRead(asyncResult);
+        }
+
+        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
+        {
+            if ( _deflateStream == null )
+            {
+                throw new InvalidOperationException(SR.ObjectDisposed_StreamClosed);
+            }
+            return _deflateStream.BeginWrite(array, offset, count, asyncCallback, asyncState);
+        }
+
+        public override void EndWrite(IAsyncResult asyncResult)
+        {
+            if ( _deflateStream == null )
+            {
+                throw new InvalidOperationException(SR.ObjectDisposed_StreamClosed);
+            }
+            return _deflateStream.EndWrite(asyncResult);
+        }
+        */
+
         public override bool CanRead
         {
             get

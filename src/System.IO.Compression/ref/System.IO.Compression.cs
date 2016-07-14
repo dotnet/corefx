@@ -26,6 +26,10 @@ namespace System.IO.Compression
         public DeflateStream(System.IO.Stream stream, System.IO.Compression.CompressionMode mode) { }
         public DeflateStream(System.IO.Stream stream, System.IO.Compression.CompressionMode mode, bool leaveOpen) { }
         public System.IO.Stream BaseStream { get { return default(System.IO.Stream); } }
+        /* Uncomment when Stream.BeginRead and Stream.BeginWrite are available.
+        public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) { return default(IAsyncResult); }
+        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) { return default(IAsyncResult); }
+        */
         public override bool CanRead { get { return default(bool); } }
         public override bool CanSeek { get { return default(bool); } }
         public override bool CanWrite { get { return default(bool); } }
@@ -33,6 +37,10 @@ namespace System.IO.Compression
         public override long Position { get { return default(long); } set { } }
         protected override void Dispose(bool disposing) { }
         public override void Flush() { }
+        /* Uncomment when Stream.EndRead and Stream.EndWrite are available.
+        public override int EndRead(IAsyncResult asyncResult) { return default(int); }
+        public override void EndWrite(IAsyncResult asyncResult) { }
+        */
         public override int Read(byte[] array, int offset, int count) { return default(int); }
         public override System.Threading.Tasks.Task<int> ReadAsync(byte[] array, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { return default(long); }
@@ -47,6 +55,12 @@ namespace System.IO.Compression
         public GZipStream(System.IO.Stream stream, System.IO.Compression.CompressionMode mode) { }
         public GZipStream(System.IO.Stream stream, System.IO.Compression.CompressionMode mode, bool leaveOpen) { }
         public System.IO.Stream BaseStream { get { return default(System.IO.Stream); } }
+        /* Uncomment when Stream.BeginRead, Stream.EndRead, Stream.BeginWrite and Stream.EndWrite are added.
+        public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) { return default(IAsyncResult); }
+        public override int EndRead(IAsyncResult asyncResult) { return default(int); }
+        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) { return default(IAsyncResult); }
+        public override void EndWrite(IAsyncResult asyncResult) { }
+        */
         public override bool CanRead { get { return default(bool); } }
         public override bool CanSeek { get { return default(bool); } }
         public override bool CanWrite { get { return default(bool); } }
