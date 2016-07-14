@@ -16,7 +16,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        int Size { get; }
+        int Length { get; }
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -141,7 +141,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Size => 0;
+        public int Length => 0;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -451,7 +451,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Size => 1;
+        public int Length => 1;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -654,7 +654,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Size => 2;
+        public int Length => 2;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -857,7 +857,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Size => 3;
+        public int Length => 3;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -1079,7 +1079,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Size => 4;
+        public int Length => 4;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -1320,7 +1320,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Size => 5;
+        public int Length => 5;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -1580,7 +1580,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Size => 6;
+        public int Length => 6;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -1857,12 +1857,12 @@ namespace System
         }
 
         /// <summary>
-        ///
+        /// The number of positions in this data structure.
         /// </summary>
-        public int Size => 7;
+        public int Length => 7;
 
         /// <summary>
-        ///
+        /// Get the element at position <param name="index"/>.
         /// </summary>
         public object this[int index]
         {
@@ -2123,7 +2123,7 @@ namespace System
                                                    EqualityComparer<T7>.Default.GetHashCode(Item7));
             }
 
-            int size = rest.Size;
+            int size = rest.Length;
             if (size >= 8) { return rest.GetHashCode(); }
 
             // In this case, the rest member has less than 8 elements so we need to combine some our elements with the elements in rest
@@ -2195,7 +2195,7 @@ namespace System
                                                    comparer.GetHashCode(Item7));
             }
 
-            int size = rest.Size;
+            int size = rest.Length;
             if (size >= 8) { return rest.GetHashCode(comparer); }
 
             // In this case, the rest member has less than 8 elements so we need to combine some our elements with the elements in rest
@@ -2272,12 +2272,12 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        public int Size
+        public int Length
         {
             get
             {
                 ITupleInternal rest = Rest as ITupleInternal;
-                return rest == null ? 8 : 7 + rest.Size;
+                return rest == null ? 8 : 7 + rest.Length;
             }
         }
 
@@ -2307,7 +2307,7 @@ namespace System
                 }
 
                 ITupleInternal rest = Rest as ITupleInternal;
-                if (index > 0 && index < Size && rest != null)
+                if (index > 0 && index < Length && rest != null)
                 {
                     return rest[index - 7];
                 }
