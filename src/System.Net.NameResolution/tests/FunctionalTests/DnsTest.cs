@@ -161,11 +161,8 @@ namespace System.Net.NameResolution.Tests
             var address = (IPAddress)addressParam;
             string addressString = address.ToString();
 
-            SocketException ex = await Assert.ThrowsAsync<SocketException>(() => Dns.GetHostEntryAsync(address));
-            Assert.Equal(SocketError.HostNotFound, ex.SocketErrorCode);
-
-            ex = await Assert.ThrowsAsync<SocketException>(() => Dns.GetHostEntryAsync(addressString));
-            Assert.Equal(SocketError.HostNotFound, ex.SocketErrorCode);
+            await Assert.ThrowsAsync<SocketException>(() => Dns.GetHostEntryAsync(address));
+            await Assert.ThrowsAsync<SocketException>(() => Dns.GetHostEntryAsync(addressString));
         }
     }
 }
