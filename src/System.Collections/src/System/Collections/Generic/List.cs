@@ -16,7 +16,6 @@ namespace System.Collections.Generic
     // of the internal array. As elements are added to a List, the capacity
     // of the List is automatically increased as required by reallocating the
     // internal array.
-    // 
     [DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     public class List<T> : IList<T>, System.Collections.IList, IReadOnlyList<T>
@@ -46,7 +45,11 @@ namespace System.Collections.Generic
         // 
         public List(int capacity)
         {
-            if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity), capacity, SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity), capacity, SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+            
             Contract.EndContractBlock();
 
             if (capacity == 0)
@@ -62,10 +65,14 @@ namespace System.Collections.Generic
         public List(IEnumerable<T> collection)
         {
             if (collection == null)
+            {
                 throw new ArgumentNullException(nameof(collection));
+            }
+                
             Contract.EndContractBlock();
 
             ICollection<T> c = collection as ICollection<T>;
+            
             if (c != null)
             {
                 int count = c.Count;
@@ -84,9 +91,9 @@ namespace System.Collections.Generic
             {
                 _size = 0;
                 _items = _emptyArray;
+                
                 // This enumerable could be empty.  Let Add allocate a new array, if needed.
                 // Note it will also go to _defaultCapacity first, not 1, then 2, etc.
-
                 using (IEnumerator<T> en = collection.GetEnumerator())
                 {
                     while (en.MoveNext())
@@ -114,6 +121,7 @@ namespace System.Collections.Generic
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), value, SR.ArgumentOutOfRange_SmallCapacity);
                 }
+
                 Contract.EndContractBlock();
 
                 if (value != _items.Length)
@@ -144,24 +152,36 @@ namespace System.Collections.Generic
 
         bool System.Collections.IList.IsFixedSize
         {
-            get { return false; }
+            get
+            {
+                return false;
+            }
         }
 
         // Is this List read-only?
         bool ICollection<T>.IsReadOnly
         {
-            get { return false; }
+            get
+            {
+                return false;
+            }
         }
 
         bool System.Collections.IList.IsReadOnly
         {
-            get { return false; }
+            get
+            {
+                return false;
+            }
         }
 
         // Is this List synchronized (thread-safe)?
         bool System.Collections.ICollection.IsSynchronized
         {
-            get { return false; }
+            get
+            {
+                return false;
+            }
         }
 
         // Synchronization root for this object.
@@ -173,6 +193,7 @@ namespace System.Collections.Generic
                 {
                     System.Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
                 }
+
                 return _syncRoot;
             }
         }
@@ -187,6 +208,7 @@ namespace System.Collections.Generic
                 {
                     throw new ArgumentOutOfRangeException();
                 }
+
                 Contract.EndContractBlock();
                 return _items[index];
             }
@@ -197,7 +219,9 @@ namespace System.Collections.Generic
                 {
                     throw new ArgumentOutOfRangeException();
                 }
+
                 Contract.EndContractBlock();
+
                 _items[index] = value;
                 _version++;
             }
@@ -219,7 +243,9 @@ namespace System.Collections.Generic
             set
             {
                 if (value == null && !(default(T) == null))
+                {
                     throw new ArgumentNullException(nameof(value));
+                }
 
                 try
                 {
@@ -237,7 +263,11 @@ namespace System.Collections.Generic
         // before adding the new element.
         public void Add(T item)
         {
-            if (_size == _items.Length) EnsureCapacity(_size + 1);
+            if (_size == _items.Length)
+            {
+                EnsureCapacity(_size + 1);
+            }
+
             _items[_size++] = item;
             _version++;
         }
@@ -245,7 +275,9 @@ namespace System.Collections.Generic
         int System.Collections.IList.Add(object item)
         {
             if (item == null && !(default(T) == null))
+            {
                 throw new ArgumentNullException(nameof(item));
+            }
 
             try
             {
@@ -296,11 +328,20 @@ namespace System.Collections.Generic
         public int BinarySearch(int index, int count, T item, IComparer<T> comparer)
         {
             if (index < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+
             if (count < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(count), count, SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+
             if (_size - index < count)
+            {
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
+            }
+
             Contract.Ensures(Contract.Result<int>() <= index + count);
             Contract.EndContractBlock();
 
@@ -319,7 +360,6 @@ namespace System.Collections.Generic
             return BinarySearch(0, Count, item, comparer);
         }
 
-
         // Clears the contents of List.
         public void Clear()
         {
@@ -328,6 +368,7 @@ namespace System.Collections.Generic
                 Array.Clear(_items, 0, _size); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
                 _size = 0;
             }
+
             _version++;
         }
 
@@ -353,6 +394,7 @@ namespace System.Collections.Generic
             {
                 return Contains((T)item);
             }
+
             return false;
         }
 
@@ -371,6 +413,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             }
+
             Contract.EndContractBlock();
 
             try
@@ -393,6 +436,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
+
             Contract.EndContractBlock();
 
             // Delegate rest of error checking to Array.Copy.
@@ -414,10 +458,15 @@ namespace System.Collections.Generic
             if (_items.Length < min)
             {
                 int newCapacity = _items.Length == 0 ? _defaultCapacity : _items.Length * 2;
+
                 // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
                 // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
                 //if ((uint)newCapacity > Array.MaxArrayLength) newCapacity = Array.MaxArrayLength;
-                if (newCapacity < min) newCapacity = min;
+                if (newCapacity < min)
+                {
+                    newCapacity = min;
+                }
+
                 Capacity = newCapacity;
             }
         }
@@ -433,6 +482,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(match));
             }
+
             Contract.EndContractBlock();
 
             for (int i = 0; i < _size; i++)
@@ -442,6 +492,7 @@ namespace System.Collections.Generic
                     return _items[i];
                 }
             }
+
             return default(T);
         }
 
@@ -451,6 +502,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(match));
             }
+
             Contract.EndContractBlock();
 
             List<T> list = new List<T>();
@@ -461,6 +513,7 @@ namespace System.Collections.Generic
                     list.Add(_items[i]);
                 }
             }
+
             return list;
         }
 
@@ -494,6 +547,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(match));
             }
+
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(Contract.Result<int>() < startIndex + count);
             Contract.EndContractBlock();
@@ -503,6 +557,7 @@ namespace System.Collections.Generic
             {
                 if (match(_items[i])) return i;
             }
+
             return -1;
         }
 
@@ -512,6 +567,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(match));
             }
+
             Contract.EndContractBlock();
 
             for (int i = _size - 1; i >= 0; i--)
@@ -521,6 +577,7 @@ namespace System.Collections.Generic
                     return _items[i];
                 }
             }
+
             return default(T);
         }
 
@@ -544,6 +601,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(match));
             }
+
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(Contract.Result<int>() <= startIndex);
             Contract.EndContractBlock();
@@ -575,6 +633,7 @@ namespace System.Collections.Generic
                     return i;
                 }
             }
+
             return -1;
         }
 
@@ -593,11 +652,14 @@ namespace System.Collections.Generic
                 {
                     break;
                 }
+
                 action(_items[i]);
             }
 
             if (version != _version)
+            {
                 throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+            }
         }
 
         // Returns an enumerator for this list with the given
@@ -636,12 +698,14 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
+
             Contract.Ensures(Contract.Result<List<T>>() != null);
             Contract.EndContractBlock();
 
             List<T> list = new List<T>(count);
             Array.Copy(_items, index, list._items, 0, count);
             list._size = count;
+
             return list;
         }
 
@@ -666,6 +730,7 @@ namespace System.Collections.Generic
             {
                 return IndexOf((T)item);
             }
+
             return -1;
         }
 
@@ -680,10 +745,14 @@ namespace System.Collections.Generic
         public int IndexOf(T item, int index)
         {
             if (index > _size)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
+            }
+
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(Contract.Result<int>() < Count);
             Contract.EndContractBlock();
+
             return Array.IndexOf(_items, item, index, _size - index);
         }
 
@@ -698,10 +767,15 @@ namespace System.Collections.Generic
         public int IndexOf(T item, int index, int count)
         {
             if (index > _size)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
+            }
 
             if (count < 0 || index > _size - count)
+            {
                 throw new ArgumentOutOfRangeException(nameof(count), count, SR.ArgumentOutOfRange_Count);
+            }
+
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(Contract.Result<int>() < Count);
             Contract.EndContractBlock();
@@ -719,12 +793,19 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_BiggerThanCollection);
             }
+
             Contract.EndContractBlock();
-            if (_size == _items.Length) EnsureCapacity(_size + 1);
+
+            if (_size == _items.Length)
+            {
+                EnsureCapacity(_size + 1);
+            }
+
             if (index < _size)
             {
                 Array.Copy(_items, index, _items, index + 1, _size - index);
             }
+
             _items[index] = item;
             _size++;
             _version++;
@@ -733,7 +814,9 @@ namespace System.Collections.Generic
         void System.Collections.IList.Insert(int index, object item)
         {
             if (item == null && !(default(T) == null))
+            {
                 throw new ArgumentNullException(nameof(item));
+            }
 
             try
             {
@@ -760,6 +843,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
             }
+
             Contract.EndContractBlock();
 
             ICollection<T> c = collection as ICollection<T>;
@@ -788,6 +872,7 @@ namespace System.Collections.Generic
                         c.CopyTo(itemsToInsert, 0);
                         Array.Copy(itemsToInsert, 0, _items, index, count);
                     }
+
                     _size += count;
                 }
             }
@@ -801,6 +886,7 @@ namespace System.Collections.Generic
                     }
                 }
             }
+
             _version++;
         }
 
@@ -815,6 +901,7 @@ namespace System.Collections.Generic
         {
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(Contract.Result<int>() < Count);
+
             if (_size == 0)
             {  // Special case for empty list
                 return -1;
@@ -836,10 +923,14 @@ namespace System.Collections.Generic
         public int LastIndexOf(T item, int index)
         {
             if (index >= _size)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
+            }
+
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(((Count == 0) && (Contract.Result<int>() == -1)) || ((Count > 0) && (Contract.Result<int>() <= index)));
             Contract.EndContractBlock();
+
             return LastIndexOf(item, index, index + 1);
         }
 
@@ -862,12 +953,14 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentOutOfRangeException(nameof(count), count, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
+
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(((Count == 0) && (Contract.Result<int>() == -1)) || ((Count > 0) && (Contract.Result<int>() <= index)));
             Contract.EndContractBlock();
 
             if (_size == 0)
-            {  // Special case for empty list
+            {
+                // Special case for empty list
                 return -1;
             }
 
@@ -914,6 +1007,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(match));
             }
+
             Contract.Ensures(Contract.Result<int>() >= 0);
             Contract.Ensures(Contract.Result<int>() <= Contract.OldValue(Count));
             Contract.EndContractBlock();
@@ -921,8 +1015,15 @@ namespace System.Collections.Generic
             int freeIndex = 0;   // the first free slot in items array
 
             // Find the first item which needs to be removed.
-            while (freeIndex < _size && !match(_items[freeIndex])) freeIndex++;
-            if (freeIndex >= _size) return 0;
+            while (freeIndex < _size && !match(_items[freeIndex]))
+            {
+                freeIndex++;
+            }
+            
+            if (freeIndex >= _size)
+            {
+                return 0;
+            }
 
             int current = freeIndex + 1;
             while (current < _size)
@@ -941,6 +1042,7 @@ namespace System.Collections.Generic
             int result = _size - freeIndex;
             _size = freeIndex;
             _version++;
+
             return result;
         }
 
@@ -952,12 +1054,15 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
             }
+
             Contract.EndContractBlock();
             _size--;
+
             if (index < _size)
             {
                 Array.Copy(_items, index + 1, _items, index, _size - index);
             }
+
             _items[_size] = default(T);
             _version++;
         }
@@ -976,17 +1081,22 @@ namespace System.Collections.Generic
             }
 
             if (_size - index < count)
+            {
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
+            }
+
             Contract.EndContractBlock();
 
             if (count > 0)
             {
                 int i = _size;
                 _size -= count;
+
                 if (index < _size)
                 {
                     Array.Copy(_items, index + count, _items, index, _size - index);
                 }
+
                 Array.Clear(_items, _size, count);
                 _version++;
             }
@@ -1015,7 +1125,10 @@ namespace System.Collections.Generic
             }
 
             if (_size - index < count)
+            {
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
+            }
+
             Contract.EndContractBlock();
 
             // The non-generic Array.Reverse is not used because it does not perform
@@ -1025,6 +1138,7 @@ namespace System.Collections.Generic
             int i = index;
             int j = index + count - 1;
             T[] array = _items;
+
             while (i < j)
             {
                 T temp = array[i];
@@ -1033,6 +1147,7 @@ namespace System.Collections.Generic
                 i++;
                 j--;
             }
+
             _version++;
         }
 
@@ -1070,7 +1185,10 @@ namespace System.Collections.Generic
             }
 
             if (_size - index < count)
+            {
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
+            }
+
             Contract.EndContractBlock();
 
             Array.Sort<T>(_items, index, count, comparer);
@@ -1083,6 +1201,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(comparison));
             }
+
             Contract.EndContractBlock();
 
             if (_size > 0)
@@ -1106,6 +1225,7 @@ namespace System.Collections.Generic
 
             T[] array = new T[_size];
             Array.Copy(_items, 0, array, 0, _size);
+
             return array;
         }
 
@@ -1132,6 +1252,7 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(match));
             }
+
             Contract.EndContractBlock();
 
             for (int i = 0; i < _size; i++)
@@ -1141,6 +1262,7 @@ namespace System.Collections.Generic
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -1173,6 +1295,7 @@ namespace System.Collections.Generic
                     index++;
                     return true;
                 }
+
                 return MoveNextRare();
             }
 
@@ -1185,6 +1308,7 @@ namespace System.Collections.Generic
 
                 index = list._size + 1;
                 current = default(T);
+
                 return false;
             }
 
@@ -1204,6 +1328,7 @@ namespace System.Collections.Generic
                     {
                         throw new InvalidOperationException(SR.InvalidOperation_EnumOpCantHappen);
                     }
+
                     return Current;
                 }
             }
