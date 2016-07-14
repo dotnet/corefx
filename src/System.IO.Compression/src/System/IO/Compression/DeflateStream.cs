@@ -13,7 +13,6 @@ namespace System.IO.Compression
     public partial class DeflateStream : Stream
     {
         internal const int DefaultBufferSize = 8192;
-
         internal delegate void AsyncWriteDelegate(byte[] array, int offset, int count, bool isAsync);
 
         private Stream _stream;
@@ -70,7 +69,7 @@ namespace System.IO.Compression
 
                 case CompressionMode.Compress:
                     InitializeDeflater(stream, leaveOpen, windowBits, CompressionLevel.Optimal);
-                    _m_AsyncWriterDelegate = new AsyncWriteDelegate(this.InternalWrite);
+                    _m_AsyncWriterDelegate = new AsyncWriteDelegate(InternalWrite);
                     _m_Callback = new AsyncCallback(WriteCallback);
                     break;
 
@@ -88,7 +87,7 @@ namespace System.IO.Compression
                 throw new ArgumentNullException(nameof(stream));
 
             InitializeDeflater(stream, leaveOpen, windowBits, compressionLevel);
-            _m_AsyncWriterDelegate = new AsyncWriteDelegate(this.InternalWrite);
+            _m_AsyncWriterDelegate = new AsyncWriteDelegate(InternalWrite);
             _m_Callback = new AsyncCallback(WriteCallback);
         }
 
@@ -456,7 +455,7 @@ namespace System.IO.Compression
         private void WriteCallback(IAsyncResult asyncResult)
         {
             DeflateStreamAsyncResult outerResult = (DeflateStreamAsyncResult)asyncResult.AsyncState;
-            outerResult.m_CompletedSynchronously &= asyncResult.CompletedSynchronously;
+            outerResult._m_CompletedSynchronously &= asyncResult.CompletedSynchronously;
 
             try
             {

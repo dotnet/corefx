@@ -13,13 +13,11 @@ namespace System.IO.Compression {
 #pragma warning disable 0649
         public bool isWrite;
 #pragma warning restore 0649
-
-        private object m_AsyncObject;               // Caller's async object.
-        private object m_AsyncState;                // Caller's state object.
-        private AsyncCallback m_AsyncCallback;      // Caller's callback method.
-
-        private object m_Result;                     // Final IO result to be returned byt the End*() method.
-        internal bool m_CompletedSynchronously;      // true if the operation completed synchronously.
+        private object _m_AsyncObject;               // Caller's async object.
+        private object _m_AsyncState;                // Caller's state object.
+        private AsyncCallback _m_AsyncCallback;      // Caller's callback method.
+        private object _m_Result;                     // Final IO result to be returned byt the End*() method.
+        internal bool _m_CompletedSynchronously;      // true if the operation completed synchronously.
         private int m_InvokedCallback;               // 0 is callback is not called
         private int m_Completed;                     // 0 if not completed >0 otherwise.
         private object m_Event;                      // lazy allocated event to be returned in the IAsyncResult for the client to wait on
@@ -32,10 +30,10 @@ namespace System.IO.Compression {
             this.buffer = buffer;
             this.offset = offset;
             this.count = count;
-            m_CompletedSynchronously = true;
-            m_AsyncObject = asyncObject;
-            m_AsyncState = asyncState;
-            m_AsyncCallback = asyncCallback;
+            _m_CompletedSynchronously = true;
+            _m_AsyncObject = asyncObject;
+            _m_AsyncState = asyncState;
+            _m_AsyncCallback = asyncCallback;
         }
 
         // Interface method to return the caller's state object.
@@ -43,7 +41,7 @@ namespace System.IO.Compression {
         {
             get
             {
-                return m_AsyncState;
+                return _m_AsyncState;
             }
         }
 
@@ -81,7 +79,7 @@ namespace System.IO.Compression {
         {
             get
             {
-                return m_CompletedSynchronously;
+                return _m_CompletedSynchronously;
             }
         }
 
@@ -99,7 +97,7 @@ namespace System.IO.Compression {
         {
             get
             {
-                return m_Result;
+                return _m_Result;
             }
         }
 
@@ -126,13 +124,13 @@ namespace System.IO.Compression {
         // As a side effect, we'll signal the WaitHandle event and clean up.
         private void Complete(bool completedSynchronously, object result)
         {
-            m_CompletedSynchronously = completedSynchronously;
+            _m_CompletedSynchronously = completedSynchronously;
             Complete(result);
         }
 
         private void Complete(object result)
         {
-            m_Result = result;
+            _m_Result = result;
 
             // Set IsCompleted and the event only after the usercallback method. 
             Interlocked.Increment(ref m_Completed);
@@ -144,9 +142,9 @@ namespace System.IO.Compression {
 
             if (Interlocked.Increment(ref m_InvokedCallback) == 1)
             {
-                if (m_AsyncCallback != null)
+                if (_m_AsyncCallback != null)
                 {
-                    m_AsyncCallback(this);
+                    _m_AsyncCallback(this);
                 }
             }
         }
