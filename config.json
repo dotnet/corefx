@@ -19,7 +19,7 @@
       "defaultValue": "${OSName}"
     },
     "FilterToOSGroup": {
-      "description": "Target OS for result binaries.",
+      "description": "FilterToOSGroup for result binaries.",
       "valueType": "property",
       "values": ["Windows_NT", "Linux", "OSX", "FreeBSD", "NetBSD"],
       "defaultValue": "Windows_NT"

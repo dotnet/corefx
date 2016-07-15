@@ -24,5 +24,5 @@ done
 
 export CORECLR_SERVER_GC="$__ServerGC"
 
-$__scriptpath/run.sh build-managed -binclashUnix -os -target-os -osversion $*
+$__scriptpath/run.sh build-managed -binclashUnix -os -target-os -osversion $__UnprocessedBuildArgs
 exit $?
