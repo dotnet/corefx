@@ -147,6 +147,12 @@
   <data name="Cryptography_Cms_KeyAgreementPlatformNotSupported" xml:space="preserve">
     <value>This platform does not support encrypting for KeyAgreement recipients.</value>
   </data>
+  <data name="Cryptography_Cms_Rc4VariableKeyLengthPlatformNotSupported" xml:space="preserve">
+    <value>This platform does not support encrypting messages using RC4 with a keylength other than the default one.</value>
+  </data>
+  <data name="Cryptography_Cms_Rc2VariableKeyLengthPlatformNotSupported" xml:space="preserve">
+    <value>This platform does not support encrypting messages using RC2 with a keylength other than the default one.</value>
+  </data>
   <data name="Cryptography_Cms_AddOriginatorCertsPlatformNotSupported" xml:space="preserve">
     <value>This platform does not support encoding originator certificates in an Enveloped CMS.</value>
   </data>

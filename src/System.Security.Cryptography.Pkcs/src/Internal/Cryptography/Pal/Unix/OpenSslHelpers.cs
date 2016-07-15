@@ -86,32 +86,38 @@ namespace Internal.Cryptography.Pal.OpenSsl
                 "Expected to skip an OID while reading EncryptedContentInfo");
             encryptedContentInfo.SkipValue();
 
-            return encryptedContentInfo.ReadAlgoIdentifier();
-        }
+            byte[] contentEncryptionAlgorithmIdentifier = encryptedContentInfo.ReadNextEncodedValue();
 
-        public static AlgorithmIdentifier ReadAlgoIdentifier(this DerSequenceReader encryptedContentInfo)
-        {
-            // The encoding for a ContentEncryptionAlgorithmIdentifier is just a sequence of the OID and the parameters, 
-            // but we just need the OID 
-            DerSequenceReader contentEncryptionAlgorithmIdentifier = encryptedContentInfo.ReadSequence();
-            string algoOid = contentEncryptionAlgorithmIdentifier.ReadOidAsString();
+            DerSequenceReader encryptionAlgorithmReader = new DerSequenceReader(contentEncryptionAlgorithmIdentifier);
+            string algoOid = encryptionAlgorithmReader.ReadOidAsString();
+
             int keyLength = 0;
-
-            // TODO(3334): Get the Key length from the algorithm parameters.
-            // The hardcoded values for RC2 and RC4 are not right. Will update accordingly when we work out how to
-            // get them from the parameters. 
             switch (algoOid)
             {
                 case Oids.Rc2:
-                    keyLength = KeyLengths.Rc2_128Bit;
+                    keyLength = Interop.Crypto.CmsGetAlgorithmKeyLength(
+                        contentEncryptionAlgorithmIdentifier, contentEncryptionAlgorithmIdentifier.Length);
+
+                    if (keyLength == -2)
+                    {
+                        System.Diagnostics.Debug.Fail("Call to the shim recieved unexpected invalid input.");
+                        throw new ArgumentNullException();
+                    }
+
+                    if (keyLength == -1)
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
+
                     break;
+                    
                 case Oids.Rc4:
-                    int saltLength = 8;
-                    keyLength = KeyLengths.Rc4Max_128Bit - 8 * saltLength;
+                    // We should also set this to the right value but OpenSSL throws an exception when trying to set the ASN1 parameters
+                    // to extract the key length as documented on issue 10311.
                     break;
+
                 case Oids.Des:
                     keyLength = KeyLengths.Des_64Bit;
                     break;
+
                 case Oids.TripleDesCbc:
                     keyLength = KeyLengths.TripleDes_192Bit;
                     break;
@@ -121,6 +127,17 @@ namespace Internal.Cryptography.Pal.OpenSsl
             }
 
             return new AlgorithmIdentifier(new Oid(algoOid), keyLength);
+        }
+
+        public static AlgorithmIdentifier ReadAlgoIdentifier(this DerSequenceReader encryptedContentInfo)
+        {
+            // The encoding for a ContentEncryptionAlgorithmIdentifier is just a sequence of the OID and the parameters,
+            // but we just need the OID
+            
+            DerSequenceReader contentEncryptionAlgorithmIdentifier = encryptedContentInfo.ReadSequence();
+            string algoOid = contentEncryptionAlgorithmIdentifier.ReadOidAsString();
+
+            return new AlgorithmIdentifier(new Oid(algoOid), 0);
         }
 
         public static CryptographicAttributeObjectCollection ReadUnprotectedAttributes(this DerSequenceReader encodedCms)

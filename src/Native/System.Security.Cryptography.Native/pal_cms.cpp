@@ -337,3 +337,57 @@ extern "C" int CryptoNative_CmsSetEmbeddedContentType(CMS_ContentInfo* cms, ASN1
 
     return CMS_set1_eContentType(cms, oid);
 }
+
+extern "C" int CryptoNative_CmsGetAlgorithmKeyLength(const uint8_t* algor, int32_t len)
+{
+    if (algor == nullptr || len < 1)
+    {
+        return -2;
+    }
+
+    X509_ALGOR* calg = d2i_X509_ALGOR(nullptr, &algor, len);
+    EVP_CIPHER_CTX ctx;
+    const EVP_CIPHER* ciph;
+    int keylen;
+
+    EVP_CIPHER_CTX_init(&ctx);
+
+    if (calg == nullptr)
+    {
+        keylen = -1;
+        goto err;
+    }
+
+    ciph = EVP_get_cipherbyobj(calg->algorithm);
+
+    if (ciph == nullptr)
+    {
+        keylen = -1;
+        goto err;
+    }
+
+    if (EVP_CipherInit_ex(&ctx, ciph, NULL, NULL, NULL, 0) <= 0)
+    {
+        keylen = -1;
+        goto err;
+    }
+
+    if (EVP_CIPHER_asn1_to_param(&ctx, calg->parameter) <= 0) {
+        keylen = -1;
+        goto err;
+    }
+
+    // OpenSSL handles key lengths in bytes, but .NET does so in bits, so convert.
+    keylen = 8*EVP_CIPHER_CTX_key_length(&ctx);
+
+err:
+
+    if (calg != nullptr)
+    {
+        X509_ALGOR_free(calg);
+    }
+
+    OPENSSL_cleanse(reinterpret_cast<char*>(&ctx), sizeof(ctx));
+
+    return keylen;
+}

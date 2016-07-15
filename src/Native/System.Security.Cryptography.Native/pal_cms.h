@@ -122,3 +122,10 @@ Shims the CMS_set1_eContentType method.
 Returns -1 on invalid input, 0 on OpenSSL error, and 1 on success.
 */
 extern "C" int CryptoNative_CmsSetEmbeddedContentType(CMS_ContentInfo* cms, ASN1_OBJECT* oid);
+
+/*
+Given a DER encoded AlgorithmIdentifier returns key length in bits.
+
+keylen is set to -1 in case there's an OpenSSL error, or -2 or input error.
+*/
+extern "C" int CryptoNative_CmsGetAlgorithmKeyLength(const uint8_t* algor, int32_t len);
