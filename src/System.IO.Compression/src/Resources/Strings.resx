@@ -324,7 +324,4 @@
   <data name="FileNameContainsInvalidCharacters" xml:space="preserve">
     <value>An entry in the ZipArchive has a path that contains invalid characters.</value>
   </data>
-  <data name="InvalidEndCall" xml:space="preserve">
-    <value>EndRead is only callable when there is one pending asynchronous reader.</value>
-  </data>
 </root>

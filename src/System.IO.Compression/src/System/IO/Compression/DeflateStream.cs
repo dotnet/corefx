@@ -13,7 +13,6 @@ namespace System.IO.Compression
     public partial class DeflateStream : Stream
     {
         internal const int DefaultBufferSize = 8192;
-        internal delegate void AsyncWriteDelegate(byte[] array, int offset, int count, bool isAsync);
 
         private Stream _stream;
         private CompressionMode _mode;
@@ -23,8 +22,6 @@ namespace System.IO.Compression
         private byte[] _buffer;
         private int _asyncOperations;
         private bool _wroteBytes;
-        private readonly AsyncCallback _m_Callback;
-        private readonly AsyncWriteDelegate _m_AsyncWriterDelegate;
 
         #region Public Constructors
 
@@ -63,14 +60,10 @@ namespace System.IO.Compression
             {
                 case CompressionMode.Decompress:
                     InitializeInflater(stream, leaveOpen, windowBits);
-                    // Uncomment when Stream.BeginRead and Stream.EndRead are available
-                    //_m_Callback = new AsyncCallback(ReadCallback);
                     break;
 
                 case CompressionMode.Compress:
                     InitializeDeflater(stream, leaveOpen, windowBits, CompressionLevel.Optimal);
-                    _m_AsyncWriterDelegate = new AsyncWriteDelegate(InternalWrite);
-                    _m_Callback = new AsyncCallback(WriteCallback);
                     break;
 
                 default:
@@ -87,8 +80,6 @@ namespace System.IO.Compression
                 throw new ArgumentNullException(nameof(stream));
 
             InitializeDeflater(stream, leaveOpen, windowBits, compressionLevel);
-            _m_AsyncWriterDelegate = new AsyncWriteDelegate(InternalWrite);
-            _m_Callback = new AsyncCallback(WriteCallback);
         }
 
         /// <summary>
@@ -134,86 +125,6 @@ namespace System.IO.Compression
                 return _stream;
             }
         }
-        // Uncomment when Stream.BeginRead is available
-        //public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-        //{
-        //    EnsureDecompressionMode();
-
-        //    //We use this checking order for compat to earlier versions:
-        //    if (_asyncOperations != 0)
-        //        throw new InvalidOperationException(SR.InvalidBeginCall);
-
-        //    ValidateParameters(array, offset, count);
-        //    EnsureNotDisposed();
-
-        //    Interlocked.Increment(ref _asyncOperations);
-        //    try
-        //    {
-        //        DeflateStreamAsyncResult userResult = new DeflateStreamAsyncResult(this, asyncState, asyncCallback, array, offset, count);
-        //        userResult.isWrite = false;
-
-        //        // Try to read decompressed data in output buffer
-        //        int bytesRead = _inflater.Inflate(array, offset, count);
-        //        if (bytesRead != 0)
-        //        {
-        //            //If decompression output buffer is not empty, return immediately.
-        //            // 'true' means we complete synchronously.
-        //            userResult.InvokeCallback(true, (object) bytesRead);
-        //            return userResult;
-        //        }
-
-        //        if (_inflater.Finished())
-        //        {
-        //            // end of compression stream
-        //            userResult.InvokeCallback(true, (object) 0);
-        //            return userResult;
-        //        }
-
-        //        // If there is no data on the output buffer and we are not at
-        //        // the end of the stream, we need to get more data from the base stream
-        //        _stream.BeginRead(_buffer, 0, _buffer.Length, _m_Callback, userResult);
-        //        userResult.m_CompletedSynchronously &= userResult.IsCompleted;
-
-        //        return userResult;
-        //    }
-        //    catch
-        //    {
-        //        Interlocked.Decrement(ref _asyncOperations);
-        //        throw;
-        //    }
-        //}
-
-        // Uncomment when Strem.BeginWrite is available
-        //public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-        //{
-        //    EnsureCompressionMode();
-
-        //    // We use this checking order for compat to earlier versions:
-        //    if (_asyncOperations != 0 )
-        //    {
-        //        throw new InvalidOperationException(SR.InvalidBeginCall);
-        //    }
-
-        //    ValidateParameters(array, offset, count);
-        //    EnsureNotDisposed();
-
-        //    Interlocked.Increment(ref _asyncOperations);
-        //    try
-        //    {
-        //        DeflateStreamAsyncResult userResult = new DeflateStreamAsyncResult(this, asyncState, asyncCallback, array, offset, count);
-        //        userResult.isWrite = true;
-
-        //        _m_AsyncWriterDelegate.BeginInvoke(array, offset, count, true, _m_Callback, userResult);
-        //        userResult.m_CompletedSynchronously &= userResult.IsCompleted;
-
-        //        return userResult;
-        //    }
-        //    catch
-        //    {
-        //        Interlocked.Decrement(ref _asyncOperations);
-        //        throw;
-        //    }
-        //}
 
         public override bool CanRead
         {
@@ -267,78 +178,6 @@ namespace System.IO.Compression
             set
             {
                 throw new NotSupportedException(SR.NotSupported);
-            }
-        }
-
-        // Uncomment when Stream.EndRead is available
-        //public override int EndRead(IAsyncResult asyncResult)
-        //{
-        //    EnsureDecompressionMode();
-        //    CheckEndXxxxLegalStateAndParams(asyncResult);
-
-        //    // We checked that this will work in CheckEndXxxxLegalStateAndParams:
-        //    DeflateStreamAsyncResult deflateStrmAsyncResult = (DeflateStreamAsyncResult)asyncResult;
-
-        //    AwaitAsyncResultCompletion(deflateStrmAsyncResult);
-
-        //    Exception previousException = deflateStrmAsyncResult.Result as Exception;
-        //    if (previousException != null)
-        //    {
-        //        // Rethrowing will delete the stack trace. Let's help future debuggers:
-        //        // previousException.Data.Add(OriginStackTrace_ExceptionDataKey, previousException.StackTrace);
-        //        throw previousException;
-        //    }
-        //    return (int)deflateStrmAsyncResult.Result;
-        //}
-
-        // Uncomment when Stream.EndWrite is available
-        //public override void EndWrite(IAsyncResult asyncResult)
-        //{
-        //    EnsureCompressionMode();
-        //    CheckEndXxxxLegalStateAndParams(asyncResult);
-
-        //    // We checked that this will work in CheckEndXxxxLegalStateAndParams:
-        //    DeflateStreamAsyncResult deflateStrmAsyncResult = (DeflateStreamAsyncResult)asyncResult;
-
-        //    AwaitAsyncResultCompletion(deflateStrmAsyncResult);
-
-        //    Exception previousException = deflateStrmAsyncResult.Result as Exception;
-        //    if (previousException != null)
-        //    {
-        //        // Rethrowing will delete the stack trace. Let's help future debuggers:
-        //        // previousException.Data.Add(OrigStackTrace_ExceptionDataKey, previousException.StackTrace);
-        //        throw previousException;
-        //    }
-        //}
-
-        private void CheckEndXxxxLegalStateAndParams(IAsyncResult asyncResult)
-        {
-            if (_asyncOperations != 1)
-                throw new InvalidOperationException(SR.InvalidEndCall);
-
-            if (asyncResult == null)
-                throw new ArgumentNullException("asyncResult");
-
-            EnsureNotDisposed();
-
-            DeflateStreamAsyncResult myResult = asyncResult as DeflateStreamAsyncResult;
-
-            //This should really be an ArgumentException but we keep this for compat to previous versions:
-            if (myResult == null)
-                throw new ArgumentNullException("asyncResult");
-        }
-
-        private void AwaitAsyncResultCompletion(DeflateStreamAsyncResult asyncResult)
-        {
-            try
-            {
-                if (!asyncResult.IsCompleted)
-                    asyncResult.AsyncWaitHandle.WaitOne();
-            }
-            finally
-            {
-                Interlocked.Decrement(ref _asyncOperations);
-                asyncResult.Close(); //this will just close the wait handle
             }
         }
 
@@ -408,65 +247,6 @@ namespace System.IO.Compression
             // If zlib doesn't have any data, fall back to the base stream implementation, which will do that.
             byte b;
             return _inflater.Inflate(out b) ? b : base.ReadByte();
-        }
-
-        // Uncomment when Sream.BeginRead and Stream.EndRead is available
-        //private void ReadCallback(IAsyncResult baseStreamResult)
-        //{
-        //    DeflateStreamAsyncResult outerResult = (DeflateStreamAsyncResult)baseStreamResult.AsyncState;
-        //    outerResult.m_CompletedSynchronously &= baseStreamResult.CompletedSynchronously;
-        //    int bytesRead = 0;
-        //    try
-        //    {
-        //        EnsureNotDisposed();
-        //        bytesRead = _stream.EndRead(baseStreamResult);
-        //        if ( bytesRead <= 0 )
-        //        {
-        //            //This indicates the base stream has received EOF
-        //            outerResult.InvokeCallback((object) 0);
-        //            return;
-        //        }
-
-        //        // Feed the data from base stream into decompression engine
-        //        _inflater.SetInput(_buffer, 0, bytesRead);
-        //        bytesRead = _inflater.Inflate(outerResult.buffer, outerResult.offset, outerResult.count);
-
-        //        if (bytesRead == 0 && !_inflater.Finished())
-        //        {
-        //            // We could have read in head information and didn't get any data.
-        //            // Read from the base stream again.
-        //            // Need to solve recusion.
-        //            _stream.BeginRead(_buffer, 0, _buffer.Length, _m_Callback, outerResult);
-        //        }
-        //        else
-        //        {
-        //            outerResult.InvokeCallback((object)bytesRead);
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        // Defer throwing this until EndRead where we will likely have user code on the stack
-        //        outerResult.InvokeCallback(e);
-        //        return;
-        //    }
-        //}
-
-        // Callback function for asynchrous reading on base stream
-        private void WriteCallback(IAsyncResult asyncResult)
-        {
-            DeflateStreamAsyncResult outerResult = (DeflateStreamAsyncResult)asyncResult.AsyncState;
-            outerResult._m_CompletedSynchronously &= asyncResult.CompletedSynchronously;
-
-            try
-            {
-                _m_AsyncWriterDelegate.EndInvoke(asyncResult);
-            }
-            catch (Exception e)
-            {
-                //Defer throwing this until EndWrite where there is user code on the stack:
-                outerResult.InvokeCallback(e);
-                return;
-            }
         }
 
         public override int Read(byte[] array, int offset, int count)
@@ -565,6 +345,13 @@ namespace System.IO.Compression
         {
             throw new InvalidOperationException(SR.CannotWriteToDeflateStream);
         }
+
+        // Uncomment when Stream Begin/End Read is available
+        //public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+        //    TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        //public override int EndRead(IAsyncResult asyncResult) =>
+        //    TaskToApm.End<int>(asyncResult);
 
         public override Task<int> ReadAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
@@ -676,7 +463,13 @@ namespace System.IO.Compression
             EnsureCompressionMode();
             ValidateParameters(array, offset, count);
             EnsureNotDisposed();
-            InternalWrite(array, offset, count, false);
+
+            // Write compressed the bytes we already passed to the deflater:
+            WriteDeflaterOutput();
+
+            // Pass new bytes through deflater and write them too:
+            _deflater.SetInput(array, offset, count);
+            WriteDeflaterOutput();
             _wroteBytes = true;
         }
 
@@ -802,15 +595,12 @@ namespace System.IO.Compression
             }
         }
 
-        internal void InternalWrite(byte[] array, int offset, int count, bool isAsync)
-        {
-            // Write compressed the bytes we already passed to the deflater:
-            WriteDeflaterOutput();
+        // Uncomment when Stream Begin/End Write is available
+        //public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+        //    TaskToApm.Begin(WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
 
-            // Pass new bytes through deflater and write them too:
-            _deflater.SetInput(array, offset, count);
-            WriteDeflaterOutput();
-        }
+        //public override void EndWrite(IAsyncResult asyncResult) =>
+        //    TaskToApm.End(asyncResult);
 
         public override Task WriteAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
         {

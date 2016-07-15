@@ -33,44 +33,6 @@ namespace System.IO.Compression
             _deflateStream = new DeflateStream(stream, compressionLevel, leaveOpen, ZLibNative.GZip_DefaultWindowBits);
         }
 
-        /* Uncomment when Stream.BeginRead, Stream.EndRead, Stream.BeginWrite and Stream.EndWrite are added.
-        public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-        {
-            if (_deflateStream == null)
-            {
-                throw new InvalidOperationException(SR.ObjectDisposed_StreamClosed);
-            }
-            return _deflateStream.BeginRead(array, offset, count, asyncCallback, asyncState);
-        }
-
-        public override int EndRead(IAsyncResult asyncResult)
-        {
-            if (_deflateStream == null)
-            {
-                throw new InvalidOperationException(SR.ObjectDisposed_StreamClosed);
-            }
-            return _deflateStream.EndRead(asyncResult);
-        }
-
-        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-        {
-            if ( _deflateStream == null )
-            {
-                throw new InvalidOperationException(SR.ObjectDisposed_StreamClosed);
-            }
-            return _deflateStream.BeginWrite(array, offset, count, asyncCallback, asyncState);
-        }
-
-        public override void EndWrite(IAsyncResult asyncResult)
-        {
-            if ( _deflateStream == null )
-            {
-                throw new InvalidOperationException(SR.ObjectDisposed_StreamClosed);
-            }
-            return _deflateStream.EndWrite(asyncResult);
-        }
-        */
-
         public override bool CanRead
         {
             get
@@ -154,11 +116,25 @@ namespace System.IO.Compression
             return _deflateStream.ReadByte();
         }
 
+        // Uncomment once Stream Begin/End Read are available.
+        //public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+        //    TaskToApm.Begin(WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        //public override int EndRead(IAsyncResult asyncResult) =>
+        //    TaskToApm.End<int>(asyncResult);
+
         public override int Read(byte[] array, int offset, int count)
         {
             CheckDeflateStream();
             return _deflateStream.Read(array, offset, count);
         }
+
+        // Uncomment once Stream Begin/End Write are available.
+        //public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+        //    TaskToApm.Begin(WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        //public override void EndWrite(IAsyncResult asyncResult) =>
+        //    TaskToApm.End(asyncResult);
 
         public override void Write(byte[] array, int offset, int count)
         {
