@@ -230,6 +230,12 @@ def osShortName = ['Windows 10': 'win10',
             if (os == 'Windows_NT' || os == 'OSX') {
                 Utilities.setMachineAffinity(newJob, os, "latest-or-auto-elevated")
             }
+            if (os == 'Ubuntu16.04') {
+                Utilities.setMachineAffinity(newJob, os, "outer-linux462")
+            }
+            if (os == 'Centos7.1') {
+                Utilities.setMachineAffinity(newJob, os, "outer-linux464")
+            }
             else if (osGroupMap[os] == 'Linux') {
                 Utilities.setMachineAffinity(newJob, os, 'outer-latest-or-auto')
             } else {
