@@ -3,7 +3,7 @@
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 
 "$__scriptpath/build-native.sh" $*
-if [ $? -ne 0 ]
+if [ $? -ne 0 ];then
     exit 1
 fi
 

@@ -15,6 +15,12 @@ while :; do
         useservergc)
             __ServerGC=1
             ;;
+         debug)
+            buildType="-debug"
+            ;;
+        release)
+            buildType="-release"
+            ;;
         *)
             __UnprocessedBuildArgs="$__UnprocessedBuildArgs $1"
     esac
@@ -24,5 +30,5 @@ done
 
 export CORECLR_SERVER_GC="$__ServerGC"
 
-$__scriptpath/run.sh build-managed -binclashUnix -os -target-os -osversion $__UnprocessedBuildArgs
+$__scriptpath/run.sh build-managed -binclashUnix -os -target-os -osversion $buildType $__UnprocessedBuildArgs
 exit $?
