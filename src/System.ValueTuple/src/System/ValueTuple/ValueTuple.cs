@@ -2276,7 +2276,7 @@ namespace System
         {
             get
             {
-                return 7 + ((ITuple)Rest).Length;
+                return 7 + Rest.Length;
             }
         }
 
@@ -2305,7 +2305,7 @@ namespace System
                         return Item7;
                 }
 
-                return ((ITuple)Rest)[index - 7];
+                return Rest[index - 7];
             }
         }
     }
