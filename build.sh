@@ -105,7 +105,7 @@ build_managed()
     __binclashlog=$__scriptpath/binclash.log
     __binclashloggerdll=$__scriptpath/Tools/Microsoft.DotNet.Build.Tasks.dll
 
-    $__scriptpath/Tools/dotnetcli/dotnet $__scriptpath/Tools/MSBuild.exe "$__buildproj" /m /nologo /verbosity:minimal "/flp:Verbosity=normal;LogFile=$__buildlog" "/flp2:warningsonly;logfile=$__scriptpath/msbuild.wrn" "/flp3:errorsonly;logfile=$__scriptpath/msbuild.err" "/l:BinClashLogger,$__binclashloggerdll;LogFile=$__binclashlog" /p:ConfigurationGroup=$__BuildType /p:TargetOS=$__BuildOS /p:OSGroup=$__BuildOS /p:SkipTests=$__SkipTests /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) /p:TestNugetRuntimeId=$__TestNugetRuntimeId $__UnprocessedBuildArgs
+    $__scriptpath/Tools/dotnetcli/dotnet $__scriptpath/Tools/MSBuild.exe "$__buildproj" /m /nologo /verbosity:minimal "/flp:Verbosity=normal;LogFile=$__buildlog" "/flp2:warningsonly;logfile=$__scriptpath/msbuild.wrn" "/flp3:errorsonly;logfile=$__scriptpath/msbuild.err" "/l:BinClashLogger,$__binclashloggerdll;LogFile=$__binclashlog" /p:ConfigurationGroup=$__BuildType /p:TargetOS=$__BuildOS /p:OSGroup=$__BuildOS /p:SkipTests=$__SkipTests /p:BuildTests=$__BuildTests /p:COMPUTERNAME=$(hostname) /p:USERNAME=$(id -un) /p:TestNugetRuntimeId=$__TestNugetRuntimeId $__UnprocessedBuildArgs
     BUILDERRORLEVEL=$?
 
     echo
@@ -248,6 +248,7 @@ __UnprocessedBuildArgs=
 __CleanBuild=false
 __CrossBuild=0
 __SkipTests=false
+__BuildTests=true
 __ServerGC=0
 __VerboseBuild=false
 __ClangMajorVersion=3
@@ -349,6 +350,7 @@ while :; do
             ;;
         skiptests)
             __SkipTests=true
+            __BuildTests=false
             ;;
         cmakeargs)
             if [ -n "$2" ]; then
