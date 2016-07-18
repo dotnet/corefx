@@ -1202,6 +1202,7 @@ namespace System
     public partial class Lazy<T>
     {
         public Lazy() { }
+        public Lazy(T value) { }
         public Lazy(bool isThreadSafe) { }
         public Lazy(System.Func<T> valueFactory) { }
         public Lazy(System.Func<T> valueFactory, bool isThreadSafe) { }
