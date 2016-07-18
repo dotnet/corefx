@@ -147,6 +147,9 @@
   <data name="Cryptography_Cms_KeyAgreementPlatformNotSupported" xml:space="preserve">
     <value>This platform does not support encrypting for KeyAgreement recipients.</value>
   </data>
+  <data name="Cryptography_Cms_AddOriginatorCertsPlatformNotSupported" xml:space="preserve">
+    <value>This platform does not support encoding originator certificates in an Enveloped CMS.</value>
+  </data>
   <data name="Cryptography_Cms_Key_Agree_Date_Not_Available" xml:space="preserve">
     <value>The Date property is not available for none KID key agree recipient.</value>
   </data>

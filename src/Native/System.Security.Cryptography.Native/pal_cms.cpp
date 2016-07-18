@@ -298,16 +298,6 @@ extern "C" int CryptoNative_CmsAddIssuerAndSerialRecipient(CMS_ContentInfo* cms,
     return (CMS_add1_recipient_cert(cms, cert, 0) == nullptr) ? 0 : 1;
 }
 
-extern "C" int CryptoNative_CmsAddOriginatorCert(CMS_ContentInfo* cms, X509* cert)
-{
-    if (cms == nullptr || cert == nullptr)
-    {
-        return -1;
-    }
-
-    return CMS_add1_cert(cms, cert);
-}
-
 extern "C" int CryptoNative_CmsCompleteMessage(CMS_ContentInfo* cms, BIO* data, bool detached)
 {
     if (cms == nullptr || data == nullptr)
@@ -336,4 +326,14 @@ extern "C" int CryptoNative_CmsGetDerSize(CMS_ContentInfo* cms)
 extern "C" int CryptoNative_CmsEncode(CMS_ContentInfo* cms, uint8_t* buf)
 {
     return i2d_CMS_ContentInfo(cms, &buf);
+}
+
+extern "C" int CryptoNative_CmsSetEmbeddedContentType(CMS_ContentInfo* cms, ASN1_OBJECT* oid)
+{
+    if (cms == nullptr || oid == nullptr)
+    {
+        return -1;
+    }
+
+    return CMS_set1_eContentType(cms, oid);
 }

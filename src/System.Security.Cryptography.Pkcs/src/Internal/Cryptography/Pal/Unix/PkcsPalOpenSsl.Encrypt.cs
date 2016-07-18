@@ -22,6 +22,13 @@ namespace Internal.Cryptography.Pal.OpenSsl
         {
             int status;
 
+            if (originatorCerts.Count != 0)
+            {
+                // OpenSSL doesn't support adding certificates to a freshly created EnvelopedCMS (CMS_ContentInfo inside OpenSSL)
+                // these are used normally for KeyAgreement, but OpenSSL doesn't have support for it so we can't add these.
+                throw new PlatformNotSupportedException(SR.Cryptography_Cms_AddOriginatorCertsPlatformNotSupported);
+            }
+
             using (SafeBioHandle contentBio = Interop.Crypto.CreateMemoryBio())
             using (SafeAsn1ObjectHandle algoOid = Interop.Crypto.ObjTxt2Obj(contentEncryptionAlgorithm.Oid.Value))
             {
@@ -37,26 +44,34 @@ namespace Internal.Cryptography.Pal.OpenSsl
 
                     ClassifyAndAddRecipients(cms, recipients);
 
-                    foreach (X509Certificate2 cert in originatorCerts)
+                    if (contentInfo.ContentType.Value != Oids.Pkcs7Data)
                     {
-                        using (SafeX509Handle certHandle = Interop.Crypto.X509Duplicate(cert.Handle))
+                        using (SafeAsn1ObjectHandle oid = Interop.Crypto.ObjTxt2Obj(contentInfo.ContentType.Value))
                         {
-                            Interop.Crypto.CheckValidOpenSslHandle(certHandle);
-                            status = Interop.Crypto.CmsAddOriginatorCert(cms, certHandle);
+                            Interop.Crypto.CheckValidOpenSslHandle(oid);
+                            status = Interop.Crypto.CmsSetEmbeddedContentType(cms, oid);
                             CheckStatus(status);
                         }
                     }
-                        
+
                     Interop.Crypto.BioWrite(contentBio, contentInfo.Content, contentInfo.Content.Length);
-                    status = Interop.Crypto.CmsCompleteMessage(cms, contentBio, false);
+
+                    // We have to do this to simulate the behavior for zero length content  
+                    bool detached = (contentInfo.Content.Length == 0);
+
+                    status = Interop.Crypto.CmsCompleteMessage(cms, contentBio, detached);
                     CheckStatus(status);
 
                     byte[] encryptedMessage = Interop.Crypto.OpenSslEncode(
                         handle => Interop.Crypto.CmsGetDerSize(handle),
                         (handle, buf) => Interop.Crypto.CmsEncode(handle, buf),
                         cms);
-
-                    // TODO(3334): Add support for unprotected attributes here.
+                    
+                    if (unprotectedAttributes.Count != 0)
+                    {
+                        // TODO(3334): Add support for unprotected attributes here.
+                        throw new NotImplementedException();
+                    }
 
                     return encryptedMessage;
                 }
