@@ -32,7 +32,6 @@ namespace System.Collections.Tests
                 Assert.False(bitArray.Get(i));
             }
             Assert.Equal(length, bitArray.Count);
-            Assert.False(bitArray.IsSynchronized);
         }
 
         [Theory]
@@ -62,7 +61,6 @@ namespace System.Collections.Tests
                 Assert.Equal(defaultValue, bitArray.Get(i));
             }
             Assert.Equal(length, bitArray.Count);
-            Assert.False(bitArray.IsSynchronized);
         }
 
         [Fact]
@@ -95,7 +93,6 @@ namespace System.Collections.Tests
                 Assert.Equal(values[i], bitArray.Get(i));
             }
             Assert.Equal(values.Length, bitArray.Count);
-            Assert.False(bitArray.IsSynchronized);
         }
 
         public static IEnumerable<object[]> Ctor_BitArray_TestData()
@@ -139,7 +136,6 @@ namespace System.Collections.Tests
                 Assert.Equal(bits[i], bitArray.Get(i));
             }
             Assert.Equal(bits.Length, bitArray.Count);
-            Assert.False(bitArray.IsSynchronized);
         }
 
         public static IEnumerable<object[]> Ctor_IntArray_TestData()
@@ -165,7 +161,6 @@ namespace System.Collections.Tests
                 Assert.Equal(expected[i], bitArray.Get(i));
             }
             Assert.Equal(expected.Length, bitArray.Count);
-            Assert.False(bitArray.IsSynchronized);
         }
 
         [Fact]
@@ -209,13 +204,22 @@ namespace System.Collections.Tests
                 Assert.Equal(expected[i], bitArray.Get(i));
             }
             Assert.Equal(expected.Length, bitArray.Count);
-            Assert.False(bitArray.IsSynchronized);
         }
 
         [Fact]
         public static void Ctor_ByteArray_Null_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("bytes", () => new BitArray((byte[])null));
+        }
+
+        [Fact]
+        public static void Ctor_Simple_Method_Tests()
+        {
+            int length = 0;
+            BitArray bitArray = new BitArray(length);
+
+            Assert.NotNull(bitArray.SyncRoot);
+            Assert.False(bitArray.IsSynchronized);
         }
     }
 }
