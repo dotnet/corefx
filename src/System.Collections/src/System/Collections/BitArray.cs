@@ -451,6 +451,19 @@ namespace System.Collections
             }
         }
 
+        public bool IsReadOnly
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public object Clone()
+        {
+            return new BitArray(this);
+        }
+
         public IEnumerator GetEnumerator()
         {
             return new BitArrayEnumeratorSimple(this);

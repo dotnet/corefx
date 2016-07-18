@@ -220,6 +220,8 @@ namespace System.Collections.Tests
 
             Assert.NotNull(bitArray.SyncRoot);
             Assert.False(bitArray.IsSynchronized);
+            Assert.False(bitArray.IsReadOnly);
+            Assert.Equal(bitArray, bitArray.Clone());
         }
     }
 }

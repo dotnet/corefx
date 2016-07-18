@@ -19,7 +19,9 @@ namespace System.Collections
         public bool this[int index] { get { return default(bool); } set { } }
         public int Length { get { return default(int); } set { } }
         public int Count { get { return default(int); } }
+        public bool IsReadOnly { get { return default(bool); } }
         public bool IsSynchronized { get { return default(bool); } }
+        public object Clone() { return default(System.Collections.BitArray); }
         public object SyncRoot { get { return default(object); } }
         public System.Collections.BitArray And(System.Collections.BitArray value) { return default(System.Collections.BitArray); }
         public bool Get(int index) { return default(bool); }
