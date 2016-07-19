@@ -34,6 +34,14 @@ namespace System.Reflection
 }
 namespace System.Runtime.InteropServices
 {
+    public partial class ExternalException : System.SystemException
+    {
+        public ExternalException() { }
+        public ExternalException(string message) { }
+        public ExternalException(string message, Exception inner) { }
+        public ExternalException(string message, int errorCode) { }
+        public virtual int ErrorCode { get; }
+    }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ArrayWithOffset
     {

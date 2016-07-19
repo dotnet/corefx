@@ -20,7 +20,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Helpers.cs" />
+    <Compile Include="System\AccessViolationExceptionTests.cs" />
     <Compile Include="System\ActivatorTests.cs" />
+    <Compile Include="System\ApplicationExceptionTests.cs" />
     <Compile Include="System\ArrayTests.cs" />
     <Compile Include="System\AttributeTests.cs" />
     <Compile Include="System\ArraySegmentTests.cs" />
@@ -39,6 +41,8 @@
     <Compile Include="System\DelegateTests.cs" />
     <Compile Include="System\DoubleTests.cs" />
     <Compile Include="System\EnumTests.cs" />
+    <Compile Include="System\EntryPointNotFoundExceptionTests.cs" />
+    <Compile Include="System\ExecutionEngineExceptionTests.cs" />
     <Compile Include="System\FieldAccessExceptionTests.cs" />
     <Compile Include="System\GCTests.cs" />
     <Compile Include="System\GuidTests.cs" />
@@ -60,6 +64,7 @@
     <Compile Include="System\MissingFieldExceptionTests.cs" />
     <Compile Include="System\MissingMethodExceptionTests.cs" />
     <Compile Include="System\MulticastDelegateTests.cs" />
+    <Compile Include="System\NotFiniteNumberExceptionTests.cs" />
     <Compile Include="System\NullableTests.cs" />
     <Compile Include="System\ExceptionTests.cs" />
     <Compile Include="System\ObjectTests.cs" />
@@ -68,8 +73,10 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.cs" />
     <Compile Include="System\SByteTests.cs" />
     <Compile Include="System\SingleTests.cs" />
+    <Compile Include="System\StackOverflowExceptionTests.cs" />
     <Compile Include="System\StringTests.cs" />
     <Compile Include="System\String.SplitTests.cs" />
+    <Compile Include="System\SystemExceptionTests.cs" />
     <Compile Include="System\Text\StringBuilderTests.cs" />
     <Compile Include="System\Threading\WaitHandleTests.cs" />
     <Compile Include="System\TimeSpanTests.cs" />
