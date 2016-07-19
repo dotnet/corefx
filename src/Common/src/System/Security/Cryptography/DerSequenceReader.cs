@@ -110,6 +110,78 @@ namespace System.Security.Cryptography
             return encodedValue;
         }
 
+        /// <summary>
+        /// This method returns the next value encoded (including tag and length), as
+        /// a byte[][3] to be fed to DerEncoder when needed.
+        /// </summary>
+        internal byte[][] ReadAndSplitNextEncodedValue()
+        {
+            int lengthLength;
+            int contentLength = ScanContentLength(_data, _position + 1, out lengthLength);
+
+            byte[] encodedLength = new byte[lengthLength];
+
+            byte tag = _data[_position++];
+
+            Buffer.BlockCopy(_data, _position, encodedLength, 0, lengthLength);
+            _position += lengthLength;
+
+            byte[] value;
+            if (contentLength != 0)
+            {
+                value = new byte[contentLength];
+                Buffer.BlockCopy(_data, _position, value, 0, contentLength);
+            }
+            else
+                value = Array.Empty<byte>();
+
+            _position += contentLength;
+
+            return new byte[][] {
+                new byte[] { tag },
+                encodedLength,
+                value};
+        }
+
+        /// <summary>
+        /// Splits a DER encoded value in a byte[] into a byte[][3] containing {tag, encodedLength, value}
+        /// </summary>
+        /// <param name="payload">DER payload to split</param>
+        /// <returns>paylot split into a byte[][3]</returns>
+        internal static byte[][] SplitValue(byte[] payload)
+        {
+            if (payload.Length < 2)
+            {
+                throw new InvalidOperationException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            byte tag = payload[0];
+
+            int lengthLength;
+            int contentLength = ScanContentLength(payload, 1, out lengthLength);
+
+            Debug.Assert(payload.Length == 1 + lengthLength + contentLength);
+            if (payload.Length != 1 + lengthLength + contentLength)
+                throw new InvalidOperationException(SR.Cryptography_Der_Invalid_Encoding);
+
+            byte[] encodedLength = new byte[lengthLength];
+            Buffer.BlockCopy(payload, 1, encodedLength, 0, lengthLength);
+
+            byte[] value;
+            if (contentLength != 0)
+            {
+                value = new byte[contentLength];
+                Buffer.BlockCopy(payload, 1 + lengthLength, value, 0, contentLength);
+            }
+            else
+                value = Array.Empty<byte>();
+
+            return new byte[][] {
+                new byte[] { tag },
+                encodedLength,
+                value};
+        }
+
         internal int ReadInteger()
         {
             byte[] integerBytes = ReadIntegerBytes();

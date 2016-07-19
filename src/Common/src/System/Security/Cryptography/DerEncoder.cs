@@ -18,6 +18,7 @@ namespace System.Security.Cryptography
         private const byte ConstructedFlag = 0x20;
         private const byte ConstructedSequenceTag = ConstructedFlag | (byte)DerSequenceReader.DerTag.Sequence;
         private const byte ConstructedSetTag = ConstructedFlag | (byte)DerSequenceReader.DerTag.Set;
+        private const byte ConstructedImplicitTag = ConstructedFlag | (byte)DerSequenceReader.ContextSpecificTagFlag;
 
         private static byte[] EncodeLength(int length)
         {
@@ -524,6 +525,20 @@ namespace System.Security.Cryptography
             };
         }
 
+        private static byte[][] ConstructSequenceWithTag(byte tag, params byte[][][] items)
+        {
+            Debug.Assert(items != null);
+
+            byte[] data = ConcatenateArrays(items);
+
+            return new byte[][]
+            {
+                new byte[] { tag },
+                EncodeLength(data.Length),
+                data,
+            };
+        }
+
         /// <summary>
         /// Make a constructed SEQUENCE of the byte-triplets of the contents, but leave
         /// the value in a segmented form (to be included in a larger SEQUENCE).
@@ -532,16 +547,18 @@ namespace System.Security.Cryptography
         /// <returns>The encoded segments { tag, length, value }</returns>
         internal static byte[][] ConstructSegmentedSequence(params byte[][][] items)
         {
-            Debug.Assert(items != null);
+            return ConstructSequenceWithTag(ConstructedSequenceTag, items);
+        }
 
-            byte[] data = ConcatenateArrays(items);
+        internal static byte[][] ConstructSegmentedImplicitSequence(int contextNumber, params byte[][][] items)
+        {
+            return ConstructSequenceWithTag((byte)(ConstructedImplicitTag | contextNumber), items);
+        }
 
-            return new byte[][]
-            {
-                new byte[] { ConstructedSequenceTag }, 
-                EncodeLength(data.Length),
-                data,
-            };
+        internal static byte[][] ConstructSegmentedExplicitSequence(int contextNumber, params byte[][][] items)
+        {
+            byte[][] innerSequence = ConstructSegmentedSequence(items);
+            return ConstructSegmentedImplicitSequence(contextNumber, innerSequence);
         }
 
         /// <summary>

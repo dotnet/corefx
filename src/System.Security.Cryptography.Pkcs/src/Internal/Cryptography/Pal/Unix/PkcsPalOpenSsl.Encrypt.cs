@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
@@ -70,12 +71,92 @@ namespace Internal.Cryptography.Pal.OpenSsl
                     if (unprotectedAttributes.Count != 0)
                     {
                         // TODO(3334): Add support for unprotected attributes here.
-                        throw new NotImplementedException();
+                        encryptedMessage = AddAttributesToEncoding(encryptedMessage, unprotectedAttributes);
                     }
 
                     return encryptedMessage;
                 }
             }
+        }
+
+        private byte[] AddAttributesToEncoding(byte[] encryptedMessage, CryptographicAttributeObjectCollection unprotectedAttributes)
+        {
+            DerSequenceReader originalMessage = new DerSequenceReader(encryptedMessage);
+
+            // EnvelopedCms has the following underlying structure:
+            //
+            // ContentInfo ::= SEQUENCE {
+            //      contentType ContentType,
+            //      content[0] EXPLICIT ANY DEFINED BY contentType }
+            //
+            // ContentType ::= OBJECT IDENTIFIER
+            //
+            // According to RFC2630, the enveloped type we have support for has the following structure
+            // EnvelopedData ::= SEQUENCE {
+            //     version CMSVersion,
+            //     originatorInfo[0] IMPLICIT OriginatorInfo OPTIONAL,
+            //     recipientInfos RecipientInfos,
+            //     encryptedContentInfo EncryptedContentInfo,
+            //     unprotectedAttrs[1] IMPLICIT UnprotectedAttributes OPTIONAL }
+
+            byte[][] contentType = originalMessage.ReadAndSplitNextEncodedValue();
+            DerSequenceReader envelopedDataReader = originalMessage.ReadExplicitContextSequence();
+
+            byte[][] version = envelopedDataReader.ReadAndSplitNextEncodedValue();
+
+            const byte ConstructedContextSpecificTag = DerSequenceReader.ContextSpecificTagFlag | DerSequenceReader.ConstructedFlag;
+
+            byte[][] originatorInfo = (envelopedDataReader.PeekTag() == ConstructedContextSpecificTag) ?
+                originatorInfo = envelopedDataReader.ReadAndSplitNextEncodedValue() :
+                new byte[][] { Array.Empty<byte>(), Array.Empty<byte>(), Array.Empty<byte>() };
+
+            byte[][] recipientInfos = envelopedDataReader.ReadAndSplitNextEncodedValue();
+            byte[][] encryptedContentInfo = envelopedDataReader.ReadAndSplitNextEncodedValue();
+
+            byte[][] envelopedData = DerEncoder.ConstructSegmentedExplicitSequence(
+                0 /* Context number */,
+                version,
+                originatorInfo,
+                recipientInfos,
+                encryptedContentInfo,
+                EncodeAttributes(unprotectedAttributes));
+
+            return DerEncoder.ConstructSequence(
+                contentType,
+                envelopedData);
+        }
+
+        private byte[][] EncodeAttributes(CryptographicAttributeObjectCollection unprotectedAttributes)
+        {
+            // In EnvelopedData UnprotectedAttributes are included as:
+            //
+            // unprotectedAttrs[1] IMPLICIT UnprotectedAttributes OPTIONAL
+            //
+            // UnprotectedAttributes ::= SET SIZE (1..MAX) OF Attribute
+            // Attribute::= SEQUENCE {
+            //      attrType OBJECT IDENTIFIER,
+            //      attrValues SET OF AttributeValue }
+
+            byte[][][] setOfAttrs = new byte[unprotectedAttributes.Count][][];
+            
+            for (int i = 0; i < unprotectedAttributes.Count; i++)
+            {
+                byte[][] attrType = DerEncoder.SegmentedEncodeOid(unprotectedAttributes[i].Oid);
+                byte[][][] attrValues = new byte[unprotectedAttributes[i].Values.Count][][];
+
+                for (int j = 0; j < attrValues.Length; j++)
+                {
+                    attrValues[j] = DerSequenceReader.SplitValue(unprotectedAttributes[i].Values[j].RawData);
+                }
+
+                byte[][] attrValueSet = DerEncoder.ConstructSegmentedSet(attrValues);
+                byte[][] encodedAttribute = DerEncoder.ConstructSegmentedSequence(attrType, attrValueSet);
+                setOfAttrs[i] = encodedAttribute;
+            }
+
+            // There's no difference between an implicit set and an implicit sequence in the tag,
+            // so we can just call this.
+            return DerEncoder.ConstructSegmentedImplicitSequence(1 /* Context number */, setOfAttrs);
         }
 
         private void CheckStatus(int status)

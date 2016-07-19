@@ -152,5 +152,87 @@ namespace System.Security.Cryptography.Encoding.Tests
 
             Assert.Throws<InvalidOperationException>(() => DerSequenceReader.CreateForPayload(encodedMessage).ReadOid());
         }
+
+        [Fact]
+        public static void SplitValues_SingleByteLength()
+        {
+            byte[] payload = ("180f31393932303732323133323130305a").HexToByteArray();
+            byte[][] splitPayload = DerSequenceReader.SplitValue(payload);
+
+            byte[] expectedTag = new byte[] { 0x18 };
+            byte[] expectedLength = new byte[] { 0x0f };
+            byte[] expectedValue = ("31393932303732323133323130305a").HexToByteArray();
+
+            Assert.Equal<byte>(expectedTag, splitPayload[0]);
+            Assert.Equal<byte>(expectedLength, splitPayload[1]);
+            Assert.Equal<byte>(expectedValue, splitPayload[2]);
+        }
+
+        [Fact]
+        public static void SplitValues_MultipleByteLength()
+        {
+            byte[] payload =
+                ("3181C83081C5020100302E301A311830160603550403130F5253414B65795472616E7366657231021031D935FB63E8CF"
+                + "AB48A0BF7B397B67C0300D06092A864886F70D01010105000481809203EC6AD0877AE56DBC8A480E59E94CA953839F8F"
+                + "769EC1B262B4F4916C9863EE9C41007C356FBF2FC3F3D03E4AA1EA46575D0FBC0C5F47E41778F34535EEA84E64800995"
+                + "5F271A9E3C24F8C192D31406D46A40396B78D4013CFE3DCC443AC9CA92137FFA503297CA1D241F68E905C60134C02E7C"
+                + "E8E1E67481ABEBE3D7FAA1").HexToByteArray();
+
+            byte[][] splitPayload = DerSequenceReader.SplitValue(payload);
+
+            byte[] expectedTag = new byte[] { 0x31 };
+            byte[] expectedLength = new byte[] { 0x81, 0xc8 };
+            byte[] expectedValue =
+                ("3081C5020100302E301A311830160603550403130F5253414B65795472616E7366657231021031D935FB63E8CF"
+                + "AB48A0BF7B397B67C0300D06092A864886F70D01010105000481809203EC6AD0877AE56DBC8A480E59E94CA953839F8F"
+                + "769EC1B262B4F4916C9863EE9C41007C356FBF2FC3F3D03E4AA1EA46575D0FBC0C5F47E41778F34535EEA84E64800995"
+                + "5F271A9E3C24F8C192D31406D46A40396B78D4013CFE3DCC443AC9CA92137FFA503297CA1D241F68E905C60134C02E7C"
+                + "E8E1E67481ABEBE3D7FAA1").HexToByteArray();
+
+            Assert.Equal<byte>(expectedTag, splitPayload[0]);
+            Assert.Equal<byte>(expectedLength, splitPayload[1]);
+            Assert.Equal<byte>(expectedValue, splitPayload[2]);
+        }
+
+        [Fact]
+        public static void ReadAndSplitNextEncodedValue_SingleByteLength()
+        {
+            DerSequenceReader reader = DerSequenceReader.CreateForPayload(("180f31393932303732323133323130305a").HexToByteArray());
+            byte[][] splitPayload = reader.ReadAndSplitNextEncodedValue();
+
+            byte[] expectedTag = new byte[] { 0x18 };
+            byte[] expectedLength = new byte[] { 0x0f };
+            byte[] expectedValue = ("31393932303732323133323130305a").HexToByteArray();
+
+            Assert.Equal<byte>(expectedTag, splitPayload[0]);
+            Assert.Equal<byte>(expectedLength, splitPayload[1]);
+            Assert.Equal<byte>(expectedValue, splitPayload[2]);
+        }
+
+        [Fact]
+        public static void ReadAndSplitNextEncodedValue_MultipleByteLength()
+        {
+            byte[] payload =
+                ("3181C83081C5020100302E301A311830160603550403130F5253414B65795472616E7366657231021031D935FB63E8CF"
+                + "AB48A0BF7B397B67C0300D06092A864886F70D01010105000481809203EC6AD0877AE56DBC8A480E59E94CA953839F8F"
+                + "769EC1B262B4F4916C9863EE9C41007C356FBF2FC3F3D03E4AA1EA46575D0FBC0C5F47E41778F34535EEA84E64800995"
+                + "5F271A9E3C24F8C192D31406D46A40396B78D4013CFE3DCC443AC9CA92137FFA503297CA1D241F68E905C60134C02E7C"
+                + "E8E1E67481ABEBE3D7FAA1").HexToByteArray();
+            DerSequenceReader reader = DerSequenceReader.CreateForPayload(payload);
+            byte[][] splitPayload = reader.ReadAndSplitNextEncodedValue();
+
+            byte[] expectedTag = new byte[] { 0x31 };
+            byte[] expectedLength = new byte[] { 0x81, 0xc8 };
+            byte[] expectedValue =
+                ("3081C5020100302E301A311830160603550403130F5253414B65795472616E7366657231021031D935FB63E8CF"
+                + "AB48A0BF7B397B67C0300D06092A864886F70D01010105000481809203EC6AD0877AE56DBC8A480E59E94CA953839F8F"
+                + "769EC1B262B4F4916C9863EE9C41007C356FBF2FC3F3D03E4AA1EA46575D0FBC0C5F47E41778F34535EEA84E64800995"
+                + "5F271A9E3C24F8C192D31406D46A40396B78D4013CFE3DCC443AC9CA92137FFA503297CA1D241F68E905C60134C02E7C"
+                + "E8E1E67481ABEBE3D7FAA1").HexToByteArray();
+
+            Assert.Equal<byte>(expectedTag, splitPayload[0]);
+            Assert.Equal<byte>(expectedLength, splitPayload[1]);
+            Assert.Equal<byte>(expectedValue, splitPayload[2]);
+        }
     }
 }
