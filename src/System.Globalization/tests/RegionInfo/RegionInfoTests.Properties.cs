@@ -36,6 +36,16 @@ namespace System.Globalization.Tests
         }
 
         [Theory]
+        [InlineData("GB", "United Kingdom")]
+        [InlineData("SE", "Sverige")]
+        [InlineData("FR", "France")]
+        [InlineData("cy-GB", "Y Deyrnas Unedig")]
+        public void NativeName(string name, string expected)
+        {
+            Assert.Equal(expected, new RegionInfo(name).NativeName);
+        }
+
+        [Theory]
         [InlineData("en-US", new string[] { "United States" })]
         [InlineData("US", new string[] { "United States" })]
         [InlineData("zh-CN", new string[] { "China", "People's Republic of China" })]
