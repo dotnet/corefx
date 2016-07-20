@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Extensions",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Extensions.Tests", "tests\System.Runtime.Extensions.Tests.csproj", "{6C314C9B-3D28-4B05-9B4C-B57A00A9B3B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.Extensions.netstandard.1.7.Tests", "tests\System.Runtime.Extensions.netstandard.1.7.Tests.csproj", "{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,22 @@ Global
 		{6C314C9B-3D28-4B05-9B4C-B57A00A9B3B9}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C314C9B-3D28-4B05-9B4C-B57A00A9B3B9}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C314C9B-3D28-4B05-9B4C-B57A00A9B3B9}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.net46_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.net46_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.net46_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.net46_Release|Any CPU.Build.0 = Release|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Unix_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Unix_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Unix_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Unix_Release|Any CPU.Build.0 = Release|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Windows_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Windows_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Windows_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1}.Windows_Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,5 +101,6 @@ Global
 		{845D2B72-D8A4-42E5-9BE9-17639EC4FC1A} = {1962877E-782F-499B-8468-F0F2A0692E96}
 		{E73B023E-609E-4281-866A-3AECB1AB5D48} = {8C66E70A-65C3-443E-A23A-18A1C12972B0}
 		{6C314C9B-3D28-4B05-9B4C-B57A00A9B3B9} = {4253F45C-FA2F-4743-9FC8-20666C416A68}
+		{D6B76E68-32E7-4F3E-8DB6-FD6F668731A1} = {4253F45C-FA2F-4743-9FC8-20666C416A68}
 	EndGlobalSection
 EndGlobal
