@@ -404,9 +404,12 @@ namespace System.Security.Cryptography.Encoding.Tests
         {
             byte[][] expected =
             {
-                /* Tag */     new byte[] { 0x30 },
-                /* Length */   new byte[] { 0x07 },
-                /* Load */ new byte[] { 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
+                // Tag
+                new byte[] { 0x30 },
+                // Length
+                new byte[] { 0x07 },
+                // Payload
+                new byte[] { 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
             };
 
             byte[][] encoded = DerEncoder.ConstructSegmentedSequence(
@@ -426,12 +429,16 @@ namespace System.Security.Cryptography.Encoding.Tests
         {
             byte[][] expected =
             {
-                /* Tag */     new byte[] { 0xA1 },
-                /* Length */   new byte[] { 0x07 },
-                /* Load */ new byte[] { 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
+                // Tag
+                new byte[] { 0xA1 },
+                // Length
+                new byte[] { 0x07 },
+                // Payload
+                new byte[] { 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
             };
 
-            byte[][] encoded = DerEncoder.ConstructSegmentedImplicitSequence(1,
+            byte[][] encoded = DerEncoder.ConstructSegmentedImplicitSequence(
+                1,
                 DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x00 }),
                 DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x01, 0x00 }));
 
@@ -448,12 +455,16 @@ namespace System.Security.Cryptography.Encoding.Tests
         {
             byte[][] expected =
             {
-                /* Tag */     new byte[] { 0xA2 },
-                /* Length */   new byte[] { 0x09 },
-                /* Load (Has the sequence inside) */ new byte[] { 0x30, 0x07, 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
+                // Tag
+                new byte[] { 0xA2 },
+                // Length
+                new byte[] { 0x09 },
+                // Payload
+                new byte[] { 0x30, 0x07, 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
             };
 
-            byte[][] encoded = DerEncoder.ConstructSegmentedExplicitSequence(2,
+            byte[][] encoded = DerEncoder.ConstructSegmentedExplicitSequence(
+                2,
                 DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x00 }),
                 DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x01, 0x00 }));
 

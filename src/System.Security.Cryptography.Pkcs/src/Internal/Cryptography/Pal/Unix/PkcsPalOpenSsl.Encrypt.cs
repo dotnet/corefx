@@ -70,7 +70,6 @@ namespace Internal.Cryptography.Pal.OpenSsl
                     
                     if (unprotectedAttributes.Count != 0)
                     {
-                        // TODO(3334): Add support for unprotected attributes here.
                         encryptedMessage = AddAttributesToEncoding(encryptedMessage, unprotectedAttributes);
                     }
 
@@ -98,65 +97,112 @@ namespace Internal.Cryptography.Pal.OpenSsl
             //     recipientInfos RecipientInfos,
             //     encryptedContentInfo EncryptedContentInfo,
             //     unprotectedAttrs[1] IMPLICIT UnprotectedAttributes OPTIONAL }
+            //
+            // As well as it remarks that "If unprotectedAttrs is present, then version shall be 2."
 
             byte[][] contentType = originalMessage.ReadAndSplitNextEncodedValue();
             DerSequenceReader envelopedDataReader = originalMessage.ReadExplicitContextSequence();
 
-            byte[][] version = envelopedDataReader.ReadAndSplitNextEncodedValue();
+            int versionNumber = envelopedDataReader.ReadInteger();
 
-            const byte ConstructedContextSpecificTag = DerSequenceReader.ContextSpecificTagFlag | DerSequenceReader.ConstructedFlag;
+            if (versionNumber > 4)
+                throw new PlatformNotSupportedException(SR.Cryptography_Cms_VersionNumberPlatformNotSupported);
 
-            byte[][] originatorInfo = (envelopedDataReader.PeekTag() == ConstructedContextSpecificTag) ?
-                originatorInfo = envelopedDataReader.ReadAndSplitNextEncodedValue() :
-                new byte[][] { Array.Empty<byte>(), Array.Empty<byte>(), Array.Empty<byte>() };
+            if (versionNumber == 0)
+                versionNumber = 2;
 
-            byte[][] recipientInfos = envelopedDataReader.ReadAndSplitNextEncodedValue();
-            byte[][] encryptedContentInfo = envelopedDataReader.ReadAndSplitNextEncodedValue();
+            byte[] version = ConcatenateArrays(DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { (byte)versionNumber }));
 
-            byte[][] envelopedData = DerEncoder.ConstructSegmentedExplicitSequence(
+            // We don't need to parse the OriginatorInfo, RecipientInfos, or EncryptedContentInfo, so
+            // we can just extract it to concatenate it.
+            byte[] remainingDataOfSequence = envelopedDataReader.ReadRemainingData();
+
+            byte[][] envelopedData = DerEncoder.ConstructSegmentedExplicitSequenceFromPayload(
                 0 /* Context number */,
                 version,
-                originatorInfo,
-                recipientInfos,
-                encryptedContentInfo,
-                EncodeAttributes(unprotectedAttributes));
+                remainingDataOfSequence,
+                EncodeUnprotectedAttributes(unprotectedAttributes));
 
             return DerEncoder.ConstructSequence(
                 contentType,
                 envelopedData);
         }
 
-        private byte[][] EncodeAttributes(CryptographicAttributeObjectCollection unprotectedAttributes)
+        private static byte[] ConcatenateArrays(params byte[][] data)
+        {
+            int length = 0;
+            foreach (byte[] innerData in data)
+            {
+                length += innerData.Length;
+            }
+
+            byte[] concatenatedArray = new byte[length];
+
+            int offset = 0;
+            foreach(byte[] innerData in data)
+            {
+                Buffer.BlockCopy(innerData, 0, concatenatedArray, offset, innerData.Length);
+                offset += innerData.Length;
+            }
+
+            return concatenatedArray;
+        }
+
+        private byte[] EncodeUnprotectedAttributes(CryptographicAttributeObjectCollection unprotectedAttributes)
         {
             // In EnvelopedData UnprotectedAttributes are included as:
             //
             // unprotectedAttrs[1] IMPLICIT UnprotectedAttributes OPTIONAL
             //
             // UnprotectedAttributes ::= SET SIZE (1..MAX) OF Attribute
+            
+            byte[][][] setOfAttrs = new byte[unprotectedAttributes.Count][][];
+
+            for (int i = 0; i < unprotectedAttributes.Count; i++)
+            {
+                setOfAttrs[i] = EncodeAttribute(unprotectedAttributes[i]);
+            }
+            
+            byte[][] segmentedSet = DerEncoder.ConstructSegmentedImplicitSet(1 /* Context number */, setOfAttrs);
+            return ConcatenateArrays(segmentedSet);
+        }
+
+        private byte[][] EncodeAttribute(CryptographicAttributeObject attribute)
+        {
             // Attribute::= SEQUENCE {
             //      attrType OBJECT IDENTIFIER,
             //      attrValues SET OF AttributeValue }
 
-            byte[][][] setOfAttrs = new byte[unprotectedAttributes.Count][][];
+            byte[][] attrType = DerEncoder.SegmentedEncodeOid(attribute.Oid);
             
-            for (int i = 0; i < unprotectedAttributes.Count; i++)
+            List<byte[]> attrValues = new List<byte[]>(attribute.Values.Count);
+
+            foreach(AsnEncodedData encodedData in attribute.Values)
             {
-                byte[][] attrType = DerEncoder.SegmentedEncodeOid(unprotectedAttributes[i].Oid);
-                byte[][][] attrValues = new byte[unprotectedAttributes[i].Values.Count][][];
-
-                for (int j = 0; j < attrValues.Length; j++)
-                {
-                    attrValues[j] = DerSequenceReader.SplitValue(unprotectedAttributes[i].Values[j].RawData);
-                }
-
-                byte[][] attrValueSet = DerEncoder.ConstructSegmentedSet(attrValues);
-                byte[][] encodedAttribute = DerEncoder.ConstructSegmentedSequence(attrType, attrValueSet);
-                setOfAttrs[i] = encodedAttribute;
+                attrValues.Add(encodedData.RawData);
             }
 
-            // There's no difference between an implicit set and an implicit sequence in the tag,
-            // so we can just call this.
-            return DerEncoder.ConstructSegmentedImplicitSequence(1 /* Context number */, setOfAttrs);
+            // According to X.690:
+            // The encodings of the component values of a set-of value shall appear in ascending order, the encodings being 
+            // compared as octet strings with the shorter components being padded at their trailing end with 0 - octets.
+            attrValues.Sort((a, b) => CompareByteArrays(a,b));
+
+            return DerEncoder.ConstructSegmentedSequence(
+                attrType,
+                DerEncoder.ConstructSegmentedSetFromPayload(attrValues.ToArray()));
+        }
+
+        private int CompareByteArrays(byte[] a, byte[] b)
+        {
+            int len = Math.Min(a.Length, b.Length);
+
+            for (int i = 0; i < len; i++)
+            {
+                if (a[i] != b[i])
+                    return a[i] - b[i];
+            }
+
+            return a.Length - b.Length;
         }
 
         private void CheckStatus(int status)

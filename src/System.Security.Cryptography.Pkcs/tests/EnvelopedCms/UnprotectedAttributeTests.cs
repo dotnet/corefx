@@ -418,9 +418,10 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 new AsnEncodedData(Oids.DocumentName, docName1),
                 new AsnEncodedData(Oids.DocumentName, docName2),
                 new AsnEncodedData(Oids.DocumentDescription, docDescription)};
+
             foreach (AsnEncodedData attribute in attributes)
             {
-                ecms.UnprotectedAttributes.Add(new AsnEncodedData(attribute));
+                ecms.UnprotectedAttributes.Add(attribute);
             }
 
             AsnEncodedData[] before = ecms.UnprotectedAttributes.FlattenAndSort();
@@ -443,6 +444,29 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 Assert.Equal(before[i].Oid.Value, after[i].Oid.Value);
                 Assert.Equal(before[i].RawData, after[i].RawData);
             }
+        }
+
+        [Fact]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void TestVersionNumber_RoundTrip()
+        {
+            ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            byte[] docName = ("0410AA00790020004E0061006D0065000000").HexToByteArray();
+            EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
+
+            ecms.UnprotectedAttributes.Add(new AsnEncodedData(new Oid(Oids.DocumentName), docName));
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                ecms.Encrypt(new CmsRecipient(cert));
+            }
+
+            byte[] encodedMessage = ecms.Encode();
+
+            ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            Assert.Equal(2, ecms.Version);
         }
 
         private static void AssertIsDocumentationDescription(this AsnEncodedData attribute, string expectedDocumentDescription)
