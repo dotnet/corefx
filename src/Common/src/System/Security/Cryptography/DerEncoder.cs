@@ -118,6 +118,13 @@ namespace System.Security.Cryptography
             return SegmentedEncodeUnsignedInteger(bigEndianBytes, 0, bigEndianBytes.Length);
         }
 
+        internal static byte[] EncodeUnsignedInteger(byte[] bigEndianBytes)
+        {
+            Debug.Assert(bigEndianBytes != null);
+
+            return ConcatenateArrays(SegmentedEncodeUnsignedInteger(bigEndianBytes, 0, bigEndianBytes.Length));
+        }
+
         /// <summary>
         /// Encode the segments { tag, length, value } of an unsigned integer represented within a bounded array.
         /// </summary>

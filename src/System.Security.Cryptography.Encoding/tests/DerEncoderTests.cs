@@ -451,7 +451,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Fact]
-        public static void TestConstructSegmentedExplicitSequence()
+        public static void TestConstructSegmentedExplicitSequenceFromPayload()
         {
             byte[][] expected =
             {
@@ -463,10 +463,10 @@ namespace System.Security.Cryptography.Encoding.Tests
                 new byte[] { 0x30, 0x07, 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
             };
 
-            byte[][] encoded = DerEncoder.ConstructSegmentedExplicitSequence(
+            byte[][] encoded = DerEncoder.ConstructSegmentedExplicitSequenceFromPayload(
                 2,
-                DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x00 }),
-                DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x01, 0x00 }));
+                DerEncoder.EncodeUnsignedInteger(new byte[] { 0x00 }),
+                DerEncoder.EncodeUnsignedInteger(new byte[] { 0x01, 0x00 }));
 
             Assert.Equal(expected.Length, encoded.Length);
 
