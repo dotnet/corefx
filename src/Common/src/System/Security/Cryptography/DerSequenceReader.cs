@@ -112,12 +112,22 @@ namespace System.Security.Cryptography
 
         internal byte[] ReadRemainingData()
         {
+            if (_end <= _position)
+                return Array.Empty<byte>();
+
             int remainingBytes = _end - _position;
             byte[] remainingData = new byte[remainingBytes];
             Buffer.BlockCopy(_data, _position, remainingData, 0, remainingBytes);
             return remainingData;
         }
 
+        /// <summary>
+        /// Splits a DER encoded value in a byte[] into a byte[][3] containing {tag, encodedLength, value}
+        /// </summary>
+        /// <param name="payload">DER value</param>
+        /// <param name="offset">REference parameter on where to start splitting. it will change to the value
+        /// after the end of the element being split as specified by the encoded length</param>
+        /// <returns>DER value split as byte[][3] containing {tag, encodedLength, value}</returns>
         private static byte[][] SplitValue(byte[] payload, ref int offset)
         {
             int lengthLength;

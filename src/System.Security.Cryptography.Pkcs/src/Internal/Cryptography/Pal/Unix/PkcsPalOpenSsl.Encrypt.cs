@@ -155,16 +155,16 @@ namespace Internal.Cryptography.Pal.OpenSsl
             //
             // UnprotectedAttributes ::= SET SIZE (1..MAX) OF Attribute
 
-            List<byte[]> setOfAttrs = new List<byte[]>(unprotectedAttributes.Count);
+            byte[][] setOfAttrs = new byte[unprotectedAttributes.Count][];
 
-            foreach (CryptographicAttributeObject attribute in unprotectedAttributes)
+            for (int i = 0; i < setOfAttrs.Length; i++)
             {
-                setOfAttrs.Add(EncodeAttribute(attribute));
+                setOfAttrs[i] = EncodeAttribute(unprotectedAttributes[i]);
             }
 
-            setOfAttrs.Sort((a, b) => CompareByteArrays(a, b));
+            Array.Sort(setOfAttrs, (a, b) => CompareByteArrays(a, b));
 
-            byte[][] segmentedSet = DerEncoder.ConstructSegmentedImplicitSetFromPayload(1 /* Context number */, setOfAttrs.ToArray());
+            byte[][] segmentedSet = DerEncoder.ConstructSegmentedImplicitSetFromPayload(1 /* Context number */, setOfAttrs);
             return ConcatenateArrays(segmentedSet);
         }
 
@@ -176,21 +176,21 @@ namespace Internal.Cryptography.Pal.OpenSsl
 
             byte[][] attrType = DerEncoder.SegmentedEncodeOid(attribute.Oid);
             
-            List<byte[]> attrValues = new List<byte[]>(attribute.Values.Count);
+            byte[][] attrValues = new byte[attribute.Values.Count][];
 
-            foreach(AsnEncodedData encodedData in attribute.Values)
+            for (int i = 0; i < attrValues.Length; i++)
             {
-                attrValues.Add(encodedData.RawData);
+                attrValues[i] = attribute.Values[i].RawData;
             }
 
             // According to X.690:
             // The encodings of the component values of a set-of value shall appear in ascending order, the encodings being 
             // compared as octet strings with the shorter components being padded at their trailing end with 0 - octets.
-            attrValues.Sort((a, b) => CompareByteArrays(a,b));
+            Array.Sort(attrValues, (a, b) => CompareByteArrays(a,b));
 
             return ConcatenateArrays(DerEncoder.ConstructSegmentedSequence(
                 attrType,
-                DerEncoder.ConstructSegmentedSetFromPayload(attrValues.ToArray())));
+                DerEncoder.ConstructSegmentedSetFromPayload(attrValues)));
         }
 
         private int CompareByteArrays(byte[] a, byte[] b)
