@@ -97,8 +97,6 @@ namespace Internal.Cryptography.Pal.OpenSsl
             //     recipientInfos RecipientInfos,
             //     encryptedContentInfo EncryptedContentInfo,
             //     unprotectedAttrs[1] IMPLICIT UnprotectedAttributes OPTIONAL }
-            //
-            // As well as it remarks that "If unprotectedAttrs is present, then version shall be 2."
 
             byte[][] contentType = originalMessage.ReadAndSplitNextEncodedValue();
             DerSequenceReader envelopedDataReader = originalMessage.ReadExplicitContextSequence();
@@ -106,8 +104,9 @@ namespace Internal.Cryptography.Pal.OpenSsl
             int versionNumber = envelopedDataReader.ReadInteger();
 
             if (versionNumber > 4)
-                throw new PlatformNotSupportedException(SR.Cryptography_Cms_VersionNumberPlatformNotSupported);
+                throw new PlatformNotSupportedException(SR.Cryptography_Cms_EncodeUnsupportedVersionPlatformNotSupported);
 
+            // "If unprotectedAttrs is present, then version shall be 2." - RFC 2630
             if (versionNumber == 0)
                 versionNumber = 2;
 
@@ -128,7 +127,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
                 envelopedData);
         }
 
-        private static byte[] ConcatenateArrays(params byte[][] data)
+        private static byte[] ConcatenateArrays(byte[][] data)
         {
             int length = 0;
             foreach (byte[] innerData in data)
@@ -155,19 +154,21 @@ namespace Internal.Cryptography.Pal.OpenSsl
             // unprotectedAttrs[1] IMPLICIT UnprotectedAttributes OPTIONAL
             //
             // UnprotectedAttributes ::= SET SIZE (1..MAX) OF Attribute
-            
-            byte[][][] setOfAttrs = new byte[unprotectedAttributes.Count][][];
 
-            for (int i = 0; i < unprotectedAttributes.Count; i++)
+            List<byte[]> setOfAttrs = new List<byte[]>(unprotectedAttributes.Count);
+
+            foreach (CryptographicAttributeObject attribute in unprotectedAttributes)
             {
-                setOfAttrs[i] = EncodeAttribute(unprotectedAttributes[i]);
+                setOfAttrs.Add(EncodeAttribute(attribute));
             }
-            
-            byte[][] segmentedSet = DerEncoder.ConstructSegmentedImplicitSet(1 /* Context number */, setOfAttrs);
+
+            setOfAttrs.Sort((a, b) => CompareByteArrays(a, b));
+
+            byte[][] segmentedSet = DerEncoder.ConstructSegmentedImplicitSetFromPayload(1 /* Context number */, setOfAttrs.ToArray());
             return ConcatenateArrays(segmentedSet);
         }
 
-        private byte[][] EncodeAttribute(CryptographicAttributeObject attribute)
+        private byte[] EncodeAttribute(CryptographicAttributeObject attribute)
         {
             // Attribute::= SEQUENCE {
             //      attrType OBJECT IDENTIFIER,
@@ -187,9 +188,9 @@ namespace Internal.Cryptography.Pal.OpenSsl
             // compared as octet strings with the shorter components being padded at their trailing end with 0 - octets.
             attrValues.Sort((a, b) => CompareByteArrays(a,b));
 
-            return DerEncoder.ConstructSegmentedSequence(
+            return ConcatenateArrays(DerEncoder.ConstructSegmentedSequence(
                 attrType,
-                DerEncoder.ConstructSegmentedSetFromPayload(attrValues.ToArray()));
+                DerEncoder.ConstructSegmentedSetFromPayload(attrValues.ToArray())));
         }
 
         private int CompareByteArrays(byte[] a, byte[] b)
@@ -199,7 +200,9 @@ namespace Internal.Cryptography.Pal.OpenSsl
             for (int i = 0; i < len; i++)
             {
                 if (a[i] != b[i])
+                {
                     return a[i] - b[i];
+                }
             }
 
             return a.Length - b.Length;

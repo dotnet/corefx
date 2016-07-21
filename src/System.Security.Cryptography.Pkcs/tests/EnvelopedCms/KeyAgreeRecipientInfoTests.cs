@@ -391,10 +391,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             return (KeyAgreeRecipientInfo)recipientInfo;
         }
 
-        private static bool EncryptionSupportsKeyAgreementCerts => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-
-        private static bool EncryptionDoesNotSupportKeyAgreementCerts => !EncryptionSupportsKeyAgreementCerts;
-
         private static byte[] s_KeyAgreeEncodedMessage =
              ("3082019b06092a864886f70d010703a082018c3082018802010231820154a1820150020103a08195a18192300906072a8648"
             + "ce3e0201038184000281806f96ef8c53a6919cc976e88b8f426696e7b7970abc6bd4abbdcf4cf34f89ceb6e8ef675000fad2"

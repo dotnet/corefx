@@ -550,7 +550,7 @@ namespace System.Security.Cryptography
             return ConstructSequenceWithTag(ConstructedSequenceTag, items);
         }
 
-        private static byte[][] ConstructSegmentedConstructedImplicit(int contextNumber, params byte[][][] items)
+        private static byte[][] ConstructSegmentedImplicitSequenceOrSet(int contextNumber, params byte[][][] items)
         {
             Debug.Assert(contextNumber >= 0 && contextNumber < 32);
             return ConstructSequenceWithTag((byte)(ConstructedImplicitTag | contextNumber), items);
@@ -558,18 +558,7 @@ namespace System.Security.Cryptography
 
         internal static byte[][] ConstructSegmentedImplicitSequence(int contextNumber, params byte[][][] items)
         {
-            return ConstructSegmentedConstructedImplicit(contextNumber, items);
-        }
-
-        internal static byte[][] ConstructSegmentedImplicitSet(int contextNumber, params byte[][][] items)
-        {
-            return ConstructSegmentedConstructedImplicit(contextNumber, items);
-        }
-
-        internal static byte[][] ConstructSegmentedExplicitSequence(int contextNumber, params byte[][][] items)
-        {
-            byte[][] innerSequence = ConstructSegmentedSequence(items);
-            return ConstructSegmentedImplicitSequence(contextNumber, innerSequence);
+            return ConstructSegmentedImplicitSequenceOrSet(contextNumber, items);
         }
 
         internal static byte[][] ConstructSegmentedExplicitSequenceFromPayload(int contextNumber, params byte[][] items)
@@ -578,7 +567,7 @@ namespace System.Security.Cryptography
             return ConstructSegmentedImplicitSequence(contextNumber, innerSequence);
         }
 
-        private static byte[][] ConstructSegmentedFromPayloadWithTag(byte tag, params byte[][] items)
+        private static byte[][] ConstructSegmentedFromPayloadWithTag(byte tag, byte[][] items)
         {
             Debug.Assert(items != null);
 
@@ -592,14 +581,19 @@ namespace System.Security.Cryptography
             };
         }
 
-        internal static byte[][] ConstructSegmentedSequenceFromPayload(params byte[][] items)
+        internal static byte[][] ConstructSegmentedSequenceFromPayload(byte[][] items)
         {
             return ConstructSegmentedFromPayloadWithTag(ConstructedSequenceTag, items);
         }
 
-        internal static byte[][] ConstructSegmentedSetFromPayload(params byte[][] items)
+        internal static byte[][] ConstructSegmentedSetFromPayload(byte[][] items)
         {
             return ConstructSegmentedFromPayloadWithTag(ConstructedSetTag, items);
+        }
+
+        internal static byte[][] ConstructSegmentedImplicitSetFromPayload(int contextNumber, byte[][] items)
+        {
+            return ConstructSegmentedFromPayloadWithTag((byte)(ConstructedImplicitTag | contextNumber), items);
         }
 
         /// <summary>

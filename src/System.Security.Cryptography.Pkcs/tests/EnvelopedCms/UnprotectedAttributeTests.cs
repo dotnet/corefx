@@ -446,15 +446,18 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(false, 0)]
+        [InlineData(true, 2)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void TestVersionNumber_RoundTrip()
+        public static void TestVersionNumber_RoundTrip(bool addUnprotectedAttrs, int expectedVersion)
         {
             ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
             byte[] docName = ("0410AA00790020004E0061006D0065000000").HexToByteArray();
             EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
 
-            ecms.UnprotectedAttributes.Add(new AsnEncodedData(new Oid(Oids.DocumentName), docName));
+            if (addUnprotectedAttrs)
+                ecms.UnprotectedAttributes.Add(new AsnEncodedData(new Oid(Oids.DocumentName), docName));
 
             using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
             {
@@ -466,7 +469,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
 
-            Assert.Equal(2, ecms.Version);
+            Assert.Equal(expectedVersion, ecms.Version);
         }
 
         private static void AssertIsDocumentationDescription(this AsnEncodedData attribute, string expectedDocumentDescription)
