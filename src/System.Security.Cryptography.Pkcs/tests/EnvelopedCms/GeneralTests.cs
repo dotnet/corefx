@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.Pkcs.Tests;
 using System.Security.Cryptography.Xml;
 using System.Security.Cryptography.X509Certificates;
-using Xunit;
 
 using Test.Cryptography;
-using System.Security.Cryptography.Pkcs.Tests;
+using Xunit;
 
 namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
@@ -51,8 +52,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(0, version);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(EncryptionSupportsAddingOriginatorCerts))]
         public static void DecodeRecipients3_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -236,6 +236,10 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(contentInfo.ContentType.Value, ecms.ContentInfo.ContentType.Value);
             Assert.Equal<byte>(contentInfo.Content, ecms.ContentInfo.Content);
         }
+
+        private static bool EncryptionSupportsAddingOriginatorCerts => SupportedBehaviors.EncryptionSupportsAddingOriginatorCerts;
+
+        private static bool EncryptionDoesNotSupportAddingOriginatorCerts => SupportedBehaviors.EncryptionSupportsAddingOriginatorCerts;
 
         private static X509Certificate2[] s_certs =
         {

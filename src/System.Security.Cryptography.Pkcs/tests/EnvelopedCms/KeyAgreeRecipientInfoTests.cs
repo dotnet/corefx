@@ -4,8 +4,8 @@
 
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Pkcs.Tests;
-using System.Security.Cryptography.Xml;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
 
 using Test.Cryptography;
 using Xunit;
@@ -14,8 +14,19 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class KeyAgreeRecipientInfoTests
     {
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(DoesNotSupportKeyAgreementCerts))]
+        public static void TestKeyAgreement_PlatformNotSupported()
+        {
+            ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(contentInfo);
+            using (X509Certificate2 cert = Certificates.DHKeyAgree1.GetCertificate())
+            {
+                CmsRecipient cmsRecipient = new CmsRecipient(cert);
+                Assert.Throws<PlatformNotSupportedException>(() => ecms.Encrypt(cmsRecipient));
+            }
+        }
+
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeVersion_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -29,8 +40,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(3, recipient.Version);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeType_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -44,8 +54,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(RecipientInfoType.KeyAgreement, recipient.Type);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreesRecipientIdType_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -61,8 +70,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(SubjectIdentifierType.IssuerAndSerialNumber, subjectIdentifier.Type);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeRecipientIdValue_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -124,8 +132,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal("10DA1370316788112EB8594C864C2420AE7FBA42", ski);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeKeyEncryptionAlgorithm_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -143,8 +150,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(0, a.KeyLength);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeEncryptedKey_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -162,8 +168,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal<byte>(expectedEncryptedKey, encryptedKey);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeOriginatorIdentifierOrKey_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -199,8 +204,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(expectedKey, key);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeDate_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -216,8 +220,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Throws<InvalidOperationException>(() => ignore = recipient.Date);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeDate_RoundTrip_Ski()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel(SubjectIdentifierType.SubjectKeyIdentifier);
@@ -238,8 +241,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(SupportsKeyAgreementCerts))]
         public static void TestKeyAgreeOtherKeyAttribute_RoundTrip()
         {
             KeyAgreeRecipientInfo recipient = EncodeKeyAgreel();
@@ -390,6 +392,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.True(recipientInfo is KeyAgreeRecipientInfo);
             return (KeyAgreeRecipientInfo)recipientInfo;
         }
+        
+        private static bool SupportsKeyAgreementCerts => SupportedBehaviors.SupportsKeyAgreementCerts;
+        private static bool DoesNotSupportKeyAgreementCerts => SupportedBehaviors.DoesNotSupportKeyAgreementCerts;
 
         private static byte[] s_KeyAgreeEncodedMessage =
              ("3082019b06092a864886f70d010703a082018c3082018802010231820154a1820150020103a08195a18192300906072a8648"
