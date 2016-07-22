@@ -13,7 +13,7 @@ usage()
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 
 __UnprocessedBuildArgs=
-__TestNugetRuntimeId=-osversion
+__TestNugetRuntimeId=-distroRid
 __BuildOS=-os
 __TargetOS=-target-os
 __ServerGC=0

@@ -298,7 +298,7 @@ def osShortName = ['Windows 10': 'win10',
                 // On Windows we use the packer to put together everything. On *nix we use tar
                 steps {
                     if (osName == 'Windows 10' || osName == 'Windows 7' || osName == 'Windows_NT') {
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -os=${osGroup} /p:WithoutCategories=IgnoreForCI")
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -os=${osGroup} -- /p:WithoutCategories=IgnoreForCI")
                         batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
                     }
                     else {

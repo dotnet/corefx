@@ -360,7 +360,7 @@
             "TargetOS": "default"
           }
         },
-        "osversion":{
+        "distroRid":{
           "description": "Sets the OS version to the TestNugetRuntimeId property.",
           "settings":{
             "TestNugetRuntimeId": "default"
