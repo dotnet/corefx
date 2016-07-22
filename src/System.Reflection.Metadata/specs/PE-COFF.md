@@ -45,11 +45,14 @@ Declares that debugging information is embedded in the PE file at location speci
 
 | Offset | Size           | Field            | Description                                           |
 |:-------|:---------------|:-----------------|-------------------------------------------------------|
-| 0      | 4              | UncompressedSize | The size of decompressed Portable PDB image           |
-| 4      | SizeOfData - 4 | PortablePdbImage | Portable PDB image compressed using Deflate algorithm | 
+| 0      | 4              | Signature        | 0x4D 0x50 0x44 0x42                                   |
+| 4      | 4              | UncompressedSize | The size of decompressed Portable PDB image           |
+| 8      | SizeOfData - 8 | PortablePdbImage | Portable PDB image compressed using Deflate algorithm | 
 
 If this entry is present and the reader recognizes this entry the debugging information for the PE file shall be read from the embedded data. If a CodeView entry is also present it shall be ignored. 
 
 > Note: Including both entries enables a tool that does not recognize Embedded Portable PDB entry to locate debug infomration as long as it is also available in a file specified in CodeView entry. Such file can be created by extracting the embedded Portable PDB image to a separate file.
 
 The Major version specified in the entry indicates the version of the Portable PDB format. The Minor version indicates the version of the Embedded Portable PDB data format.
+
+The value of Stamp field in the entry shall be 0.

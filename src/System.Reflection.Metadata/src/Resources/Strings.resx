@@ -348,6 +348,9 @@
   <data name="UnexpectedCodeViewDataSignature" xml:space="preserve">
     <value>Unexpected CodeView data signature value.</value>
   </data>
+  <data name="UnexpectedEmbeddedPortablePdbDataSignature" xml:space="preserve">
+    <value>Unexpected Embedded Portable PDB data signature value.</value>
+  </data>
   <data name="InvalidPathPadding" xml:space="preserve">
     <value>The path must be padded with NUL characters.</value>
   </data>

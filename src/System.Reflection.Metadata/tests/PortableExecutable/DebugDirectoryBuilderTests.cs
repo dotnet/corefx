@@ -245,10 +245,11 @@ namespace System.Reflection.PortableExecutable.Tests
                 0x00, 0x00, 0x00, 0x00, // Stamp
                 0x00, 0x01, 0x00, 0x01, // Version
                 0x11, 0x00, 0x00, 0x00, // Type
-                0x0E, 0x00, 0x00, 0x00, // SizeOfData
+                0x12, 0x00, 0x00, 0x00, // SizeOfData
                 0x1C, 0x00, 0x00, 0x00, // AddressOfRawData
                 0x1C, 0x00, 0x00, 0x00, // PointerToRawData
 
+                0x4D, 0x50, 0x44, 0x42, // signature
                 0x08, 0x00, 0x00, 0x00, // uncompressed size
                 0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
             }, bytes);
@@ -261,7 +262,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(0x0100, actual[0].MajorVersion);
                 Assert.Equal(0x0100, actual[0].MinorVersion);
                 Assert.Equal(DebugDirectoryEntryType.EmbeddedPortablePdb, actual[0].Type);
-                Assert.Equal(0x0000000E, actual[0].DataSize);
+                Assert.Equal(0x00000012, actual[0].DataSize);
                 Assert.Equal(0x0000001c, actual[0].DataRelativeVirtualAddress);
                 Assert.Equal(0x0000001c, actual[0].DataPointer);
 
@@ -279,6 +280,7 @@ namespace System.Reflection.PortableExecutable.Tests
         {
             var bytes1 = ImmutableArray.Create(new byte[]
             {
+                0x4D, 0x50, 0x44, 0x42, // signature
                 0xFF, 0xFF, 0xFF, 0xFF, // uncompressed size
                 0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
             });
@@ -290,6 +292,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var bytes2 = ImmutableArray.Create(new byte[]
             {
+                0x4D, 0x50, 0x44, 0x42, // signature
                 0x09, 0x00, 0x00, 0x00, // uncompressed size
                 0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
             });
@@ -301,6 +304,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var bytes3 = ImmutableArray.Create(new byte[]
             {
+                0x4D, 0x50, 0x44, 0x42, // signature
                 0x00, 0x00, 0x00, 0x00, // uncompressed size
                 0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
             });
@@ -312,6 +316,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var bytes4 = ImmutableArray.Create(new byte[]
             {
+                0x4D, 0x50, 0x44, 0x42, // signature
                 0xff, 0xff, 0xff, 0x7f, // uncompressed size
                 0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
             });
@@ -323,11 +328,46 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var bytes5 = ImmutableArray.Create(new byte[]
             {
+                0x4D, 0x50, 0x44, 0x42, // signature
                 0x08, 0x00, 0x00, 0x00, // uncompressed size
                 0xEF, 0xFF, 0x4F, 0xFF, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
             });
 
             using (var block = new ByteArrayMemoryProvider(bytes4).GetMemoryBlock(0, bytes4.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes6 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x43, // signature
+                0x08, 0x00, 0x00, 0x00, // uncompressed size
+                0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes6).GetMemoryBlock(0, bytes6.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes7 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x43, // signature
+                0x08, 0x00, 0x00, 
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes7).GetMemoryBlock(0, bytes7.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes8 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x43, // signature
+                0x08, 0x00, 0x00,
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes8).GetMemoryBlock(0, bytes8.Length))
             {
                 Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
             }

@@ -83,7 +83,8 @@ namespace System.Reflection.PortableExecutable
         {
             int start = builder.Count;
 
-            // header (decompressed size):
+            // header (signature, decompressed size):
+            builder.WriteUInt32(PortablePdbVersions.DebugDirectoryEmbeddedSignature);
             builder.WriteInt32(debugMetadata.Count);
 
             // compressed data:

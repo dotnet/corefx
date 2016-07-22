@@ -586,9 +586,15 @@ namespace System.Reflection.PortableExecutable
         {
             byte[] decompressed;
             
-            const int headerSize = sizeof(int);
+            const int headerSize = 2 * sizeof(int);
 
             var headerReader = new BlobReader(block.Pointer, headerSize);
+
+            if (headerReader.ReadUInt32() != PortablePdbVersions.DebugDirectoryEmbeddedSignature)
+            {
+                throw new BadImageFormatException(SR.UnexpectedEmbeddedPortablePdbDataSignature);
+            }
+
             int decompressedSize = headerReader.ReadInt32();
 
             try
