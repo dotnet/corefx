@@ -3113,3 +3113,12 @@ public class RecursiveCollection3 : List<RecursiveCollection>
 {
 
 }
+
+[DataContract]
+public class TypeWithEmitDefaultValueFalse
+{
+    [DataMember(EmitDefaultValue = false)]
+    public string Name = null;
+    [DataMember(EmitDefaultValue = false)]
+    public int ID = 0;
+}
