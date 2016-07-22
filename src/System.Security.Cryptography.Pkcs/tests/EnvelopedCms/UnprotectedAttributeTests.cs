@@ -15,7 +15,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class UnprotectedAttributeTests
     {
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes0_RoundTrip()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes();
@@ -44,7 +43,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_DocumentDescription_RoundTrip()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes(new Pkcs9DocumentDescription("My Description"));
@@ -75,7 +73,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_DocumenName_RoundTrip()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes(new Pkcs9DocumentName("My Name"));
@@ -106,7 +103,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_SigningTime_RoundTrip()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes(new Pkcs9SigningTime(new DateTime(2018, 4, 1, 8, 30, 05)));
@@ -114,7 +110,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_SigningTime_FixedValue()
         {
             byte[] encodedMessage =
@@ -140,7 +135,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_ContentType_RoundTrip()
         {
             byte[] rawData = "06072a9fa20082f300".HexToByteArray();
@@ -174,7 +168,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_MessageDigest_RoundTrip()
         {
             byte[] rawData = "0405032d58805d".HexToByteArray();
@@ -209,7 +202,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_Merge3_RoundTrip()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes(
@@ -247,7 +239,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_Heterogenous3_RoundTrip()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes(
@@ -324,7 +315,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_Arbitrary_RoundTrip()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes(
@@ -359,7 +349,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes1_OutOfNamespace_RoundTrip()
         {
             byte[] constraintsRawData = "30070101ff02020100".HexToByteArray();
@@ -398,7 +387,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void TestUnprotectedAttributes_AlwaysReturnsPkcs9AttributeObject()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes(
@@ -419,18 +407,21 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
         [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
         public static void PostEncrypt_UnprotectedAttributes()
         {
+            byte[] docDescription = ("041E4D00790020004400650073006300720069007000740069006F006E000000").HexToByteArray();
+            byte[] docName1 = ("0410AA00790020004E0061006D0065000000").HexToByteArray();
+            byte[] docName2 = ("04104D00790020004E0061006D0065000000").HexToByteArray();
             ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
             EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
             AsnEncodedData[] attributes = {
-                new AsnEncodedData(Oids.DocumentName, new byte[] { 0x0a, 0x0b, 0x0c }),
-                new AsnEncodedData(Oids.DocumentName, new byte[] { 0x0b, 0x0c, 0x0d }),
-                new AsnEncodedData(Oids.DocumentDescription, new byte[] { 0x0d, 0x0e, 0x0f }) };
+                new AsnEncodedData(Oids.DocumentName, docName1),
+                new AsnEncodedData(Oids.DocumentName, docName2),
+                new AsnEncodedData(Oids.DocumentDescription, docDescription)};
+
             foreach (AsnEncodedData attribute in attributes)
             {
-                ecms.UnprotectedAttributes.Add(new AsnEncodedData(attribute));
+                ecms.UnprotectedAttributes.Add(attribute);
             }
 
             AsnEncodedData[] before = ecms.UnprotectedAttributes.FlattenAndSort();
@@ -453,6 +444,32 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 Assert.Equal(before[i].Oid.Value, after[i].Oid.Value);
                 Assert.Equal(before[i].RawData, after[i].RawData);
             }
+        }
+
+        [Theory]
+        [InlineData(false, 0)]
+        [InlineData(true, 2)]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void TestVersionNumber_RoundTrip(bool addUnprotectedAttrs, int expectedVersion)
+        {
+            ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            byte[] docName = ("0410AA00790020004E0061006D0065000000").HexToByteArray();
+            EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
+
+            if (addUnprotectedAttrs)
+                ecms.UnprotectedAttributes.Add(new AsnEncodedData(new Oid(Oids.DocumentName), docName));
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                ecms.Encrypt(new CmsRecipient(cert));
+            }
+
+            byte[] encodedMessage = ecms.Encode();
+
+            ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            Assert.Equal(expectedVersion, ecms.Version);
         }
 
         private static void AssertIsDocumentationDescription(this AsnEncodedData attribute, string expectedDocumentDescription)

@@ -398,5 +398,82 @@ namespace System.Security.Cryptography.Encoding.Tests
 
             Assert.Equal(encodedExpected, encodedLocal);
         }
+
+        [Fact]
+        public static void TestConstructSegmentedSequence()
+        {
+            byte[][] expected =
+            {
+                // Tag
+                new byte[] { 0x30 },
+                // Length
+                new byte[] { 0x07 },
+                // Payload
+                new byte[] { 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
+            };
+
+            byte[][] encoded = DerEncoder.ConstructSegmentedSequence(
+                DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x00 }),
+                DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x01, 0x00 }));
+
+            Assert.Equal(expected.Length, encoded.Length);
+
+            for (int i = 0; i < encoded.Length; i++)
+            {
+                Assert.Equal<byte>(expected[i], encoded[i]);
+            }
+        }
+
+        [Fact]
+        public static void TestConstructSegmentedImplicitSequence()
+        {
+            byte[][] expected =
+            {
+                // Tag
+                new byte[] { 0xA1 },
+                // Length
+                new byte[] { 0x07 },
+                // Payload
+                new byte[] { 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
+            };
+
+            byte[][] encoded = DerEncoder.ConstructSegmentedImplicitSequence(
+                1,
+                DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x00 }),
+                DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { 0x01, 0x00 }));
+
+            Assert.Equal(expected.Length, encoded.Length);
+
+            for (int i = 0; i < encoded.Length; i++)
+            {
+                Assert.Equal<byte>(expected[i], encoded[i]);
+            }
+        }
+
+        [Fact]
+        public static void TestConstructSegmentedExplicitSequenceFromPayload()
+        {
+            byte[][] expected =
+            {
+                // Tag
+                new byte[] { 0xA2 },
+                // Length
+                new byte[] { 0x09 },
+                // Payload
+                new byte[] { 0x30, 0x07, 0x02, 0x01, 0x00, 0x02, 0x02, 0x01, 0x00},
+            };
+
+            byte[][] encoded = DerEncoder.ConstructSegmentedExplicitSequenceFromPayload(
+                2,
+                DerEncoder.EncodeUnsignedInteger(new byte[] { 0x00 }),
+                DerEncoder.EncodeUnsignedInteger(new byte[] { 0x01, 0x00 }));
+
+            Assert.Equal(expected.Length, encoded.Length);
+
+            for (int i = 0; i < encoded.Length; i++)
+            {
+                Assert.Equal<byte>(expected[i], encoded[i]);
+            }
+        }
     }
 }

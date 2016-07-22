@@ -110,6 +110,77 @@ namespace System.Security.Cryptography
             return encodedValue;
         }
 
+        internal byte[] ReadRemainingData()
+        {
+            if (_end <= _position)
+                return Array.Empty<byte>();
+
+            int remainingBytes = _end - _position;
+            byte[] remainingData = new byte[remainingBytes];
+            Buffer.BlockCopy(_data, _position, remainingData, 0, remainingBytes);
+            return remainingData;
+        }
+
+        /// <summary>
+        /// Splits a DER encoded value in a byte[] into a byte[][3] containing {tag, encodedLength, value}
+        /// </summary>
+        /// <param name="payload">DER value</param>
+        /// <param name="offset">REference parameter on where to start splitting. it will change to the value
+        /// after the end of the element being split as specified by the encoded length</param>
+        /// <returns>DER value split as byte[][3] containing {tag, encodedLength, value}</returns>
+        private static byte[][] SplitValue(byte[] payload, ref int offset)
+        {
+            int lengthLength;
+            int contentLength = ScanContentLength(payload, offset + 1, out lengthLength);
+
+            byte[] encodedLength = new byte[lengthLength];
+
+            byte tag = payload[offset];
+            offset++;
+
+            Buffer.BlockCopy(payload, offset, encodedLength, 0, lengthLength);
+            offset += lengthLength;
+
+            byte[] value;
+            if (contentLength != 0)
+            {
+                value = new byte[contentLength];
+                Buffer.BlockCopy(payload, offset, value, 0, contentLength);
+            }
+            else
+            {
+                value = Array.Empty<byte>();
+            }
+
+            offset += contentLength;
+
+            return new byte[][] {
+                new byte[] { tag },
+                encodedLength,
+                value
+            };
+        }
+
+        /// <summary>
+        /// This method returns the next value encoded (including tag and length), as
+        /// a byte[][3] to be fed to DerEncoder when needed.
+        /// </summary>
+        internal byte[][] ReadAndSplitNextEncodedValue()
+        {
+            return SplitValue(_data, ref _position);
+        }
+
+        /// <summary>
+        /// Splits a DER encoded value in a byte[] into a byte[][3] containing {tag, encodedLength, value}
+        /// </summary>
+        /// <param name="payload">DER payload to split</param>
+        /// <returns>paylot split into a byte[][3]</returns>
+        internal static byte[][] SplitValue(byte[] payload)
+        {
+            int offset = 0;
+            return SplitValue(payload, ref offset);
+        }
+
         internal int ReadInteger()
         {
             byte[] integerBytes = ReadIntegerBytes();

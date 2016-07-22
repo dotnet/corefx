@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
@@ -69,13 +70,142 @@ namespace Internal.Cryptography.Pal.OpenSsl
                     
                     if (unprotectedAttributes.Count != 0)
                     {
-                        // TODO(3334): Add support for unprotected attributes here.
-                        throw new NotImplementedException();
+                        encryptedMessage = AddAttributesToEncoding(encryptedMessage, unprotectedAttributes);
                     }
 
                     return encryptedMessage;
                 }
             }
+        }
+
+        private byte[] AddAttributesToEncoding(byte[] encryptedMessage, CryptographicAttributeObjectCollection unprotectedAttributes)
+        {
+            DerSequenceReader originalMessage = new DerSequenceReader(encryptedMessage);
+
+            // EnvelopedCms has the following underlying structure:
+            //
+            // ContentInfo ::= SEQUENCE {
+            //      contentType ContentType,
+            //      content[0] EXPLICIT ANY DEFINED BY contentType }
+            //
+            // ContentType ::= OBJECT IDENTIFIER
+            //
+            // According to RFC2630, the enveloped type we have support for has the following structure
+            // EnvelopedData ::= SEQUENCE {
+            //     version CMSVersion,
+            //     originatorInfo[0] IMPLICIT OriginatorInfo OPTIONAL,
+            //     recipientInfos RecipientInfos,
+            //     encryptedContentInfo EncryptedContentInfo,
+            //     unprotectedAttrs[1] IMPLICIT UnprotectedAttributes OPTIONAL }
+
+            byte[][] contentType = originalMessage.ReadAndSplitNextEncodedValue();
+            DerSequenceReader envelopedDataReader = originalMessage.ReadExplicitContextSequence();
+
+            int versionNumber = envelopedDataReader.ReadInteger();
+
+            if (versionNumber > 4)
+                throw new PlatformNotSupportedException(SR.Cryptography_Cms_EncodeUnsupportedVersionPlatformNotSupported);
+
+            // "If unprotectedAttrs is present, then version shall be 2." - RFC 2630
+            if (versionNumber == 0)
+                versionNumber = 2;
+
+            byte[] version = ConcatenateArrays(DerEncoder.SegmentedEncodeUnsignedInteger(new byte[] { (byte)versionNumber }));
+
+            // We don't need to parse the OriginatorInfo, RecipientInfos, or EncryptedContentInfo, so
+            // we can just extract it to concatenate it.
+            byte[] remainingDataOfSequence = envelopedDataReader.ReadRemainingData();
+
+            byte[][] envelopedData = DerEncoder.ConstructSegmentedExplicitSequenceFromPayload(
+                0 /* Context number */,
+                version,
+                remainingDataOfSequence,
+                EncodeUnprotectedAttributes(unprotectedAttributes));
+
+            return DerEncoder.ConstructSequence(
+                contentType,
+                envelopedData);
+        }
+
+        private static byte[] ConcatenateArrays(byte[][] data)
+        {
+            int length = 0;
+            foreach (byte[] innerData in data)
+            {
+                length += innerData.Length;
+            }
+
+            byte[] concatenatedArray = new byte[length];
+
+            int offset = 0;
+            foreach(byte[] innerData in data)
+            {
+                Buffer.BlockCopy(innerData, 0, concatenatedArray, offset, innerData.Length);
+                offset += innerData.Length;
+            }
+
+            return concatenatedArray;
+        }
+
+        private byte[] EncodeUnprotectedAttributes(CryptographicAttributeObjectCollection unprotectedAttributes)
+        {
+            // In EnvelopedData UnprotectedAttributes are included as:
+            //
+            // unprotectedAttrs[1] IMPLICIT UnprotectedAttributes OPTIONAL
+            //
+            // UnprotectedAttributes ::= SET SIZE (1..MAX) OF Attribute
+
+            byte[][] setOfAttrs = new byte[unprotectedAttributes.Count][];
+
+            for (int i = 0; i < setOfAttrs.Length; i++)
+            {
+                setOfAttrs[i] = EncodeAttribute(unprotectedAttributes[i]);
+            }
+
+            Array.Sort(setOfAttrs, (a, b) => CompareByteArrays(a, b));
+
+            byte[][] segmentedSet = DerEncoder.ConstructSegmentedImplicitSetFromPayload(1 /* Context number */, setOfAttrs);
+            return ConcatenateArrays(segmentedSet);
+        }
+
+        private byte[] EncodeAttribute(CryptographicAttributeObject attribute)
+        {
+            // Attribute::= SEQUENCE {
+            //      attrType OBJECT IDENTIFIER,
+            //      attrValues SET OF AttributeValue }
+
+            byte[][] attrType = DerEncoder.SegmentedEncodeOid(attribute.Oid);
+            
+            byte[][] attrValues = new byte[attribute.Values.Count][];
+
+            for (int i = 0; i < attrValues.Length; i++)
+            {
+                attrValues[i] = attribute.Values[i].RawData;
+            }
+
+            // According to X.690:
+            // The encodings of the component values of a set-of value shall appear in ascending order, the encodings being 
+            // compared as octet strings with the shorter components being padded at their trailing end with 0 - octets.
+            Array.Sort(attrValues, (a, b) => CompareByteArrays(a,b));
+
+            return ConcatenateArrays(DerEncoder.ConstructSegmentedSequence(
+                attrType,
+                DerEncoder.ConstructSegmentedSetFromPayload(attrValues)));
+        }
+
+        private int CompareByteArrays(byte[] a, byte[] b)
+        {
+            int len = Math.Min(a.Length, b.Length);
+
+            for (int i = 0; i < len; i++)
+            {
+                if (a[i] != b[i])
+                {
+                    return a[i] - b[i];
+                }
+            }
+
+            return a.Length - b.Length;
         }
 
         private void CheckStatus(int status)

@@ -18,6 +18,7 @@ namespace System.Security.Cryptography
         private const byte ConstructedFlag = 0x20;
         private const byte ConstructedSequenceTag = ConstructedFlag | (byte)DerSequenceReader.DerTag.Sequence;
         private const byte ConstructedSetTag = ConstructedFlag | (byte)DerSequenceReader.DerTag.Set;
+        private const byte ConstructedImplicitTag = ConstructedFlag | (byte)DerSequenceReader.ContextSpecificTagFlag;
 
         private static byte[] EncodeLength(int length)
         {
@@ -115,6 +116,13 @@ namespace System.Security.Cryptography
             Debug.Assert(bigEndianBytes != null);
 
             return SegmentedEncodeUnsignedInteger(bigEndianBytes, 0, bigEndianBytes.Length);
+        }
+
+        internal static byte[] EncodeUnsignedInteger(byte[] bigEndianBytes)
+        {
+            Debug.Assert(bigEndianBytes != null);
+
+            return ConcatenateArrays(SegmentedEncodeUnsignedInteger(bigEndianBytes, 0, bigEndianBytes.Length));
         }
 
         /// <summary>
@@ -524,6 +532,20 @@ namespace System.Security.Cryptography
             };
         }
 
+        private static byte[][] ConstructSequenceWithTag(byte tag, params byte[][][] items)
+        {
+            Debug.Assert(items != null);
+
+            byte[] data = ConcatenateArrays(items);
+
+            return new byte[][]
+            {
+                new byte[] { tag },
+                EncodeLength(data.Length),
+                data,
+            };
+        }
+
         /// <summary>
         /// Make a constructed SEQUENCE of the byte-triplets of the contents, but leave
         /// the value in a segmented form (to be included in a larger SEQUENCE).
@@ -532,16 +554,53 @@ namespace System.Security.Cryptography
         /// <returns>The encoded segments { tag, length, value }</returns>
         internal static byte[][] ConstructSegmentedSequence(params byte[][][] items)
         {
+            return ConstructSequenceWithTag(ConstructedSequenceTag, items);
+        }
+
+        private static byte[][] ConstructSegmentedImplicitSequenceOrSet(int contextNumber, params byte[][][] items)
+        {
+            Debug.Assert(contextNumber >= 0 && contextNumber < 32);
+            return ConstructSequenceWithTag((byte)(ConstructedImplicitTag | contextNumber), items);
+        }
+
+        internal static byte[][] ConstructSegmentedImplicitSequence(int contextNumber, params byte[][][] items)
+        {
+            return ConstructSegmentedImplicitSequenceOrSet(contextNumber, items);
+        }
+
+        internal static byte[][] ConstructSegmentedExplicitSequenceFromPayload(int contextNumber, params byte[][] items)
+        {
+            byte[][] innerSequence = ConstructSegmentedSequenceFromPayload(items);
+            return ConstructSegmentedImplicitSequence(contextNumber, innerSequence);
+        }
+
+        private static byte[][] ConstructSegmentedFromPayloadWithTag(byte tag, byte[][] items)
+        {
             Debug.Assert(items != null);
 
             byte[] data = ConcatenateArrays(items);
 
             return new byte[][]
             {
-                new byte[] { ConstructedSequenceTag }, 
+                new byte[] { tag },
                 EncodeLength(data.Length),
                 data,
             };
+        }
+
+        internal static byte[][] ConstructSegmentedSequenceFromPayload(byte[][] items)
+        {
+            return ConstructSegmentedFromPayloadWithTag(ConstructedSequenceTag, items);
+        }
+
+        internal static byte[][] ConstructSegmentedSetFromPayload(byte[][] items)
+        {
+            return ConstructSegmentedFromPayloadWithTag(ConstructedSetTag, items);
+        }
+
+        internal static byte[][] ConstructSegmentedImplicitSetFromPayload(int contextNumber, byte[][] items)
+        {
+            return ConstructSegmentedFromPayloadWithTag((byte)(ConstructedImplicitTag | contextNumber), items);
         }
 
         /// <summary>
@@ -552,16 +611,7 @@ namespace System.Security.Cryptography
         /// <returns>The encoded segments { tag, length, value }</returns>
         internal static byte[][] ConstructSegmentedSet(params byte[][][] items)
         {
-            Debug.Assert(items != null);
-
-            byte[] data = ConcatenateArrays(items);
-
-            return new byte[][]
-            {
-                new byte[] { ConstructedSetTag },
-                EncodeLength(data.Length),
-                data,
-            };
+            return ConstructSequenceWithTag(ConstructedSetTag, items);
         }
 
         /// <summary>

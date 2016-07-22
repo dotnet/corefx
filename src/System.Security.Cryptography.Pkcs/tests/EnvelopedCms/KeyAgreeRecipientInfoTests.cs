@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.Pkcs.Tests;
 using System.Security.Cryptography.Xml;
 using System.Security.Cryptography.X509Certificates;
-using Xunit;
 
 using Test.Cryptography;
-using System.Security.Cryptography.Pkcs.Tests;
+using Xunit;
 
 namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
@@ -389,8 +390,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.True(recipientInfo is KeyAgreeRecipientInfo);
             return (KeyAgreeRecipientInfo)recipientInfo;
         }
-
-
 
         private static byte[] s_KeyAgreeEncodedMessage =
              ("3082019b06092a864886f70d010703a082018c3082018802010231820154a1820150020103a08195a18192300906072a8648"
