@@ -50,7 +50,7 @@ Declares that debugging information is embedded in the PE file at location speci
 | 8      | SizeOfData - 8 | PortablePdbImage | Portable PDB image compressed using Deflate algorithm | 
 
 
-If both CodeView and Embedded Portable PDB entries are present then either the file specified in the CodeView entry doesn't exist or its content shall be the same as the decompressed content of the embedded PDB.
+If both CodeView and Embedded Portable PDB entries are present then they shall represent the same data.
 
 > Note: The reader may prefer to read from the file if it exists. This may be more efficient as it avoids in-memory decompression.
 
