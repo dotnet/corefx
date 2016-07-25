@@ -609,7 +609,7 @@ namespace System.Net.Sockets.Tests
 
         [Theory]
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
-        [ActiveIssue(4002, PlatformID.AnyUnix)]
+        [PlatformSpecific(PlatformID.Windows)] // "localhost" only guaranteed to resolve to v4 *and* v6 on Windows.
         public void DualModeConnectAsync_Static_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
             int port;
