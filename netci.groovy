@@ -308,13 +308,9 @@ def osShortName = ['Windows 10': 'win10',
             // Add the unit test results
             Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
             def archiveContents = "msbuild.log"
-            if (os.contains('Windows')) {
-                // Packer.exe is a .NET Framework application. When we can use it from the tool-runtime, we can archive the ".pack" file here.
-                archiveContents += ",bin/build.pack"
-            }
-            else {
-                archiveContents += ",bin/build.tar.gz"
-            }
+            // Packer.exe is a .NET Framework application. When we can use it from the tool-runtime, we can archive the ".pack" file here.
+            archiveContents += ",bin/build.pack"
+            
             // Add archival for the built data.
             Utilities.addArchival(newJob, archiveContents)
             // Set up triggers
