@@ -285,6 +285,45 @@ def osShortName = ['Windows 10': 'win10',
 }
 
 // **************************
+// Define perf testing.  These tests should be run daily, and will run on Jenkins not in Helix
+// **************************
+[true, false].each { isPR ->
+    ['Release'].each { configurationGroup ->
+        ['Windows_NT'].each { os ->
+            def osGroup = osGroupMap[os]
+            def newJobName = "perf_${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
+
+            def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
+                // On Windows we use the packer to put together everything. On *nix we use tar
+                steps {
+                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd /p:ConfigurationGroup=${configurationGroup} /p:OSGroup=${osGroup} /p:Performance=true")
+                    batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack .\\bin")
+                }
+            }
+
+            // Set the affinity.
+            Utilities.setMachineAffinity(newJob, os, 'latest-or-auto')
+            // Set up standard options.
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+            // Add the unit test results
+            Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
+            def archiveContents = "msbuild.log"
+            if (os.contains('Windows')) {
+                // Packer.exe is a .NET Framework application. When we can use it from the tool-runtime, we can archive the ".pack" file here.
+                archiveContents += ",bin/build.pack"
+            }
+            else {
+                archiveContents += ",bin/build.tar.gz"
+            }
+            // Add archival for the built data.
+            Utilities.addArchival(newJob, archiveContents)
+            // Set up triggers
+            Utilities.addPeriodicTrigger(newJob, '@daily')
+        }
+    }
+}
+
+// **************************
 // Define innerloop testing.  These jobs run on every merge and a subset of them run on every PR, the ones
 // that don't run per PR can be requested via a magic phrase.
 // **************************
