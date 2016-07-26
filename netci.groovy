@@ -56,7 +56,7 @@ def osShortName = ['Windows 10': 'win10',
         def isLocal = (localType == 'local')
 
         def newJobName = 'code_coverage_windows'
-        def batchCommand = 'call build.cmd -- /p:Coverage=true /p:Outerloop=true /p:WithoutCategories=IgnoreForCI'
+        def batchCommand = 'call build.cmd -coverage -outerloop -- /p:WithoutCategories=IgnoreForCI'
         if (isLocal) {
             newJobName = "${newJobName}_local"
             batchCommand = "${batchCommand} /p:TestWithLocalLibraries=true"
@@ -129,7 +129,7 @@ def osShortName = ['Windows 10': 'win10',
 
             def newBuildJob = job(Utilities.getFullJobName(project, newBuildJobName, isPR)) {
                 steps {
-                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -os=Windows_NT -${configurationGroup} -- /p:SkipTests=true /p:Outerloop=true /p:WithoutCategories=IgnoreForCI")
+                    batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -os=Windows_NT -${configurationGroup} -skipTests -outerloop -- /p:WithoutCategories=IgnoreForCI")
                     // Package up the results.
                     batchFile("C:\\Packer\\Packer.exe .\\bin\\build.pack . bin packages")
                 }
@@ -215,13 +215,13 @@ def osShortName = ['Windows 10': 'win10',
             def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
                 steps {
                     if (osName == 'Windows 10' || osName == 'Windows 7' || osName == 'Windows_NT') {
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -- /p:Outerloop=true /p:WithoutCategories=IgnoreForCI")
+                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -${configurationGroup} -outerloop -- /p:WithoutCategories=IgnoreForCI")
                     }
                     else if (osName == 'OSX') {
-                        shell("HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()} -- /p:Outerloop=true /p:TestWithLocalLibraries=true /p:WithoutCategories=IgnoreForCI")
+                        shell("HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()} -outerloop -testWithLocalLibraries -- /p:WithoutCategories=IgnoreForCI")
                     }
                     else {
-                        shell("sudo HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()} -- /p:TestNugetRuntimeId=${targetNugetRuntimeMap[osName]} /p:Outerloop=true /p:TestWithLocalLibraries=true /p:WithoutCategories=IgnoreForCI")
+                        shell("sudo HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()} -outerloop -testWithLocalLibraries -- /p:TestNugetRuntimeId=${targetNugetRuntimeMap[osName]} /p:WithoutCategories=IgnoreForCI")
                     }
                 }
             }
@@ -304,7 +304,7 @@ def osShortName = ['Windows 10': 'win10',
                     else {
                         // Use Server GC for Ubuntu/OSX Debug PR build & test
                         def useServerGC = (configurationGroup == 'Release' && isPR) ? 'useServerGC' : ''
-                        shell("HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()} -- ${useServerGC} /p:TestNugetRuntimeId=${targetNugetRuntimeMap[osName]} /p:TestWithLocalLibraries=true /p:WithoutCategories=IgnoreForCI")
+                        shell("HOME=\$WORKSPACE/tempHome ./build.sh -${configurationGroup.toLowerCase()} -testWithLocalLibraries -- ${useServerGC} /p:TestNugetRuntimeId=${targetNugetRuntimeMap[osName]} /p:WithoutCategories=IgnoreForCI")
                         // Tar up the appropriate bits.  On OSX the tarring is a different syntax for exclusion.
                         if (osName == 'OSX') {
                             shell("tar -czf bin/build.tar.gz --exclude *.Tests bin/*.${configurationGroup} bin/ref bin/packages")

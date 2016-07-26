@@ -30,6 +30,12 @@
       "values": ["win7-x64", "osx.10.10-x64", "ubuntu.14.04-x64", "ubuntu.16.04-x64", "etc-other-rids"],
       "defaultValue": "${OSRid}-x64"
     },
+    "TestWithLocalLibraries": {
+      "description": "Enables/Disables run test with local libraries.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": true
+    },
     "RestoreDuringBuild": {
       "description": "Enables/Disables the restoration of packages.",
       "valueType": "property",
@@ -77,6 +83,30 @@
       "valueType": "property",
       "values": ["True", "False"],
       "defaultValue": false
+    },
+    "Coverage":{
+      "description": "Enables code coverage runs.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": true
+    },
+    "Outerloop":{
+      "description": "Enables outerloops tests scenarios.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": true
+    },
+    "BuildAllOSGroups":{
+      "description": "Enables building the libraries for all OSes.",
+      "valueType": "property",
+      "values": ["True", "False"],
+      "defaultValue": true
+    },
+    "OfficialBuildId":{
+      "description": "Specifies the SeedDate and the revision of the build to generate the version of the libraries.",
+      "valueType": "property",
+      "values": [],
+      "defaultValue": ""
     },
     "CloudDropAccountName": {
       "description": "Azure account name.",
@@ -218,6 +248,12 @@
     },
     "GenerateVersionHeader": {
       "description": "MsBuild target that generates the version header.",
+      "valueType": "target",
+      "values": [],
+      "defaultValue": ""
+    },
+    "UpdateInvalidPackageVersions": {
+      "description": "MsBuild target that looks through all dependencies and using the validation rules, it updates any invalid versions.",
       "valueType": "target",
       "values": [],
       "defaultValue": ""
