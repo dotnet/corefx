@@ -39,7 +39,7 @@
   <ItemGroup Condition="'$(TargetGroup)' != 'net462' And '$(TargetGroup)' != 'net463'">
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj">
       <OSGroup>Windows_NT</OSGroup>
-      <UndefineProperties>TargetGroup</UndefineProperties>
+      <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='netcore50aot'">
