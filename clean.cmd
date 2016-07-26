@@ -1,8 +1,6 @@
 @if "%_echo%" neq "on" echo off
 setlocal EnableDelayedExpansion
 
-if /I [%1] == [-?] goto Usage
-
 echo Stop VBCSCompiler.exe execution.
 for /f "tokens=2 delims=," %%F in ('tasklist /nh /fi "imagename eq VBCSCompiler.exe" /fo csv') do taskkill /f /PID %%~F
 
@@ -21,9 +19,9 @@ echo.
 echo Repository cleaning script.
 echo.
 echo Options:
-echo     -b     - Deletes the binary output directory. It uses the Run Command Tool to do it.
-echo     -p     - Deletes the repo-local nuget package directory. It uses the Run Command Tool to do it.
-echo     -c     - Deletes the user-local nuget package cache. It uses the Run Command Tool to do it.
+echo     -b     - Deletes the binary output directory.
+echo     -p     - Deletes the repo-local nuget package directory.
+echo     -c     - Deletes the user-local nuget package cache.
 echo     -all   - Combines all of the above.
 echo.
 echo If no option is specified then clean.cmd -b is implied.
