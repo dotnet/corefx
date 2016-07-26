@@ -1,3 +1,11 @@
+namespace System.IdentityModel.Selectors
+{
+    public abstract partial class X509CertificateValidator
+    {
+        protected X509CertificateValidator() { }
+        public abstract void Validate(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate);
+    }
+}
 namespace System.Collections.Generic
 {
     public partial class KeyedByTypeCollection<TItem> : System.Collections.ObjectModel.KeyedCollection<System.Type, TItem>
@@ -142,6 +150,7 @@ namespace System.ServiceModel
         public System.ServiceModel.WSMessageEncoding MessageEncoding { get { return default(System.ServiceModel.WSMessageEncoding); } set { } }
         public override string Scheme { get { return default(string); } }
         public System.ServiceModel.BasicHttpSecurity Security { get { return default(System.ServiceModel.BasicHttpSecurity); } set { } }
+        public override System.ServiceModel.Channels.IChannelFactory<TChannel> BuildChannelFactory<TChannel>(System.ServiceModel.Channels.BindingParameterCollection parameters) { return default(System.ServiceModel.Channels.IChannelFactory<TChannel>); }
         public override System.ServiceModel.Channels.BindingElementCollection CreateBindingElements() { return default(System.ServiceModel.Channels.BindingElementCollection); }
     }
     public enum BasicHttpMessageCredentialType
@@ -160,7 +169,8 @@ namespace System.ServiceModel
         public BasicHttpsBinding(System.ServiceModel.BasicHttpsSecurityMode securityMode) { }
         public System.ServiceModel.WSMessageEncoding MessageEncoding { get { return default(System.ServiceModel.WSMessageEncoding); } set { } }
         public override string Scheme { get { return default(string); } }
-        public System.ServiceModel.BasicHttpsSecurity Security { get { return default(System.ServiceModel.BasicHttpsSecurity); } }
+        public System.ServiceModel.BasicHttpsSecurity Security { get { return default(System.ServiceModel.BasicHttpsSecurity); } set { } }
+        public override System.ServiceModel.Channels.IChannelFactory<TChannel> BuildChannelFactory<TChannel>(System.ServiceModel.Channels.BindingParameterCollection parameters) { return default(System.ServiceModel.Channels.IChannelFactory<TChannel>); }
         public override System.ServiceModel.Channels.BindingElementCollection CreateBindingElements() { return default(System.ServiceModel.Channels.BindingElementCollection); }
     }
     public sealed partial class BasicHttpSecurity
@@ -183,7 +193,7 @@ namespace System.ServiceModel
         public BasicHttpsSecurity() { }
         public System.ServiceModel.BasicHttpMessageSecurity Message { get { return default(System.ServiceModel.BasicHttpMessageSecurity); } }
         public System.ServiceModel.BasicHttpsSecurityMode Mode { get { return default(System.ServiceModel.BasicHttpsSecurityMode); } set { } }
-        public System.ServiceModel.HttpTransportSecurity Transport { get { return default(System.ServiceModel.HttpTransportSecurity); } }
+        public System.ServiceModel.HttpTransportSecurity Transport { get { return default(System.ServiceModel.HttpTransportSecurity); } set { } }
     }
     public enum BasicHttpsSecurityMode
     {
@@ -260,12 +270,12 @@ namespace System.ServiceModel
         event System.EventHandler System.ServiceModel.ICommunicationObject.Opened { add { } remove { } }
         event System.EventHandler System.ServiceModel.ICommunicationObject.Opening { add { } remove { } }
         public void Abort() { }
-        public void Close() { }
+        void System.ServiceModel.ICommunicationObject.Close() { }
         protected virtual TChannel CreateChannel() { return default(TChannel); }
         public void DisplayInitializationUI() { }
         protected T GetDefaultValueForInitialization<T>() { return default(T); }
         protected void InvokeAsync(System.ServiceModel.ClientBase<TChannel>.BeginOperationDelegate beginOperationDelegate, object[] inValues, System.ServiceModel.ClientBase<TChannel>.EndOperationDelegate endOperationDelegate, System.Threading.SendOrPostCallback operationCompletedCallback, object userState) { }
-        public void Open() { }
+        void System.ServiceModel.ICommunicationObject.Open() { }
         void System.IDisposable.Dispose() { }
         System.IAsyncResult System.ServiceModel.ICommunicationObject.BeginClose(System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
         System.IAsyncResult System.ServiceModel.ICommunicationObject.BeginClose(System.TimeSpan timeout, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
@@ -279,31 +289,33 @@ namespace System.ServiceModel
         protected internal partial class ChannelBase<T> : System.IDisposable, System.ServiceModel.Channels.IChannel, System.ServiceModel.Channels.IOutputChannel, System.ServiceModel.Channels.IRequestChannel, System.ServiceModel.IClientChannel, System.ServiceModel.ICommunicationObject, System.ServiceModel.IContextChannel, System.ServiceModel.IExtensibleObject<System.ServiceModel.IContextChannel> where T : class
         {
             protected ChannelBase(System.ServiceModel.ClientBase<T> client) { }
-            public bool AllowInitializationUI { get { return default(bool); } set { } }
-                    public bool AllowOutputBatching { get { return default(bool); } set { } }
-            public bool DidInteractiveInitialization { get { return default(bool); } }
-                    public System.ServiceModel.Channels.IInputSession InputSession { get { return default(System.ServiceModel.Channels.IInputSession); } }
-            public System.ServiceModel.EndpointAddress LocalAddress { get { return default(System.ServiceModel.EndpointAddress); } }
-                    public System.TimeSpan OperationTimeout { get { return default(System.TimeSpan); } set { } }
-                    public System.ServiceModel.Channels.IOutputSession OutputSession { get { return default(System.ServiceModel.Channels.IOutputSession); } }
-            public System.ServiceModel.EndpointAddress RemoteAddress { get { return default(System.ServiceModel.EndpointAddress); } }
-                    public string SessionId { get { return default(string); } }
+            bool System.ServiceModel.IClientChannel.AllowInitializationUI { get { return default(bool); } set { } }
+            bool System.ServiceModel.IContextChannel.AllowOutputBatching { get { return default(bool); } set { } }
+            bool System.ServiceModel.IClientChannel.DidInteractiveInitialization { get { return default(bool); } }
+            System.Uri System.ServiceModel.IClientChannel.Via { get { return default(System.Uri); } }
+            System.ServiceModel.Channels.IInputSession System.ServiceModel.IContextChannel.InputSession { get { return default(System.ServiceModel.Channels.IInputSession); } }
+            System.ServiceModel.EndpointAddress System.ServiceModel.IContextChannel.LocalAddress { get { return default(System.ServiceModel.EndpointAddress); } }
+            System.TimeSpan System.ServiceModel.IContextChannel.OperationTimeout { get { return default(System.TimeSpan); } set { } }
+            System.ServiceModel.Channels.IOutputSession System.ServiceModel.IContextChannel.OutputSession { get { return default(System.ServiceModel.Channels.IOutputSession); } }
+            System.ServiceModel.EndpointAddress System.ServiceModel.Channels.IOutputChannel.RemoteAddress { get { return default(System.ServiceModel.EndpointAddress); } }
+            System.ServiceModel.EndpointAddress System.ServiceModel.IContextChannel.RemoteAddress { get { return default(System.ServiceModel.EndpointAddress); } }
+            string System.ServiceModel.IContextChannel.SessionId { get { return default(string); } }
             System.ServiceModel.EndpointAddress System.ServiceModel.Channels.IRequestChannel.RemoteAddress { get { return default(System.ServiceModel.EndpointAddress); } }
             System.Uri System.ServiceModel.Channels.IRequestChannel.Via { get { return default(System.Uri); } }
             System.ServiceModel.CommunicationState System.ServiceModel.ICommunicationObject.State { get { return default(System.ServiceModel.CommunicationState); } }
             System.ServiceModel.IExtensionCollection<System.ServiceModel.IContextChannel> System.ServiceModel.IExtensibleObject<System.ServiceModel.IContextChannel>.Extensions { get { return default(System.ServiceModel.IExtensionCollection<System.ServiceModel.IContextChannel>); } }
-            public System.Uri Via { get { return default(System.Uri); } }
+            System.Uri System.ServiceModel.Channels.IOutputChannel.Via { get { return default(System.Uri); } }
             event System.EventHandler System.ServiceModel.ICommunicationObject.Closed { add { } remove { } }
             event System.EventHandler System.ServiceModel.ICommunicationObject.Closing { add { } remove { } }
             event System.EventHandler System.ServiceModel.ICommunicationObject.Faulted { add { } remove { } }
             event System.EventHandler System.ServiceModel.ICommunicationObject.Opened { add { } remove { } }
             event System.EventHandler System.ServiceModel.ICommunicationObject.Opening { add { } remove { } }
-            public event System.EventHandler<System.ServiceModel.UnknownMessageReceivedEventArgs> UnknownMessageReceived { add { } remove { } }
-            public System.IAsyncResult BeginDisplayInitializationUI(System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
+            event System.EventHandler<System.ServiceModel.UnknownMessageReceivedEventArgs> System.ServiceModel.IClientChannel.UnknownMessageReceived { add { } remove { } }
+            System.IAsyncResult System.ServiceModel.IClientChannel.BeginDisplayInitializationUI(System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
             protected System.IAsyncResult BeginInvoke(string methodName, object[] args, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
-            public void DisplayInitializationUI() { }
-            public void Dispose() { }
-            public void EndDisplayInitializationUI(System.IAsyncResult result) { }
+            void System.ServiceModel.IClientChannel.DisplayInitializationUI() { }
+            void System.IDisposable.Dispose() { }
+            void System.ServiceModel.IClientChannel.EndDisplayInitializationUI(System.IAsyncResult result) { }
             protected object EndInvoke(string methodName, object[] args, System.IAsyncResult result) { return default(object); }
             protected object Invoke(string methodName, object[] args) { return default(object); }
             TProperty System.ServiceModel.Channels.IChannel.GetProperty<TProperty>() { return default(TProperty); }
@@ -423,6 +435,7 @@ namespace System.ServiceModel
     {
         public EndpointAddressBuilder() { }
         public EndpointAddressBuilder(System.ServiceModel.EndpointAddress address) { }
+        public System.ServiceModel.EndpointIdentity Identity { get { return default(System.ServiceModel.EndpointIdentity); } set { } }
         public System.Collections.ObjectModel.Collection<System.ServiceModel.Channels.AddressHeader> Headers { get { return default(System.Collections.ObjectModel.Collection<System.ServiceModel.Channels.AddressHeader>); } }
         public System.Uri Uri { get { return default(System.Uri); } set { } }
         public System.ServiceModel.EndpointAddress ToEndpointAddress() { return default(System.ServiceModel.EndpointAddress); }
@@ -430,6 +443,9 @@ namespace System.ServiceModel
     public partial class EndpointIdentity
     {
         public EndpointIdentity() { }
+        public override bool Equals(object obj) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public override string ToString() { return default(string); }
     }
     public partial class EndpointNotFoundException : System.ServiceModel.CommunicationException
     {
@@ -677,9 +693,25 @@ namespace System.ServiceModel
         NotAllowed = 0,
         Required = 2,
     }
-    public partial class InstanceContext
+    public partial class InstanceContext : System.ServiceModel.Channels.CommunicationObject, System.ServiceModel.IExtensibleObject<System.ServiceModel.InstanceContext>
     {
         public InstanceContext(object dummy) { }
+        protected internal override System.TimeSpan DefaultCloseTimeout { get { return default(System.TimeSpan); } }
+        protected internal override System.TimeSpan DefaultOpenTimeout { get { return default(System.TimeSpan); } }
+        public System.Threading.SynchronizationContext SynchronizationContext { get { return default(System.Threading.SynchronizationContext); } set { } }
+        System.ServiceModel.IExtensionCollection<System.ServiceModel.InstanceContext> System.ServiceModel.IExtensibleObject<System.ServiceModel.InstanceContext>.Extensions { get { return default(System.ServiceModel.IExtensionCollection<System.ServiceModel.InstanceContext>); } }
+        public object GetServiceInstance(System.ServiceModel.Channels.Message message) { return default(object); }
+        protected override void OnAbort() { }
+        protected override System.IAsyncResult OnBeginClose(System.TimeSpan timeout, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
+        protected override System.IAsyncResult OnBeginOpen(System.TimeSpan timeout, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
+        protected override void OnClose(System.TimeSpan timeout) { }
+        protected override void OnClosed() { }
+        protected override void OnEndClose(System.IAsyncResult result) { }
+        protected override void OnEndOpen(System.IAsyncResult result) { }
+        protected override void OnFaulted() { }
+        protected override void OnOpen(System.TimeSpan timeout) { }
+        protected override void OnOpened() { }
+        protected override void OnOpening() { }
     }
     public enum InstanceContextMode
     {
@@ -801,6 +833,7 @@ namespace System.ServiceModel
         public NetHttpBinding(System.ServiceModel.BasicHttpSecurityMode securityMode) { }
         public NetHttpBinding(System.ServiceModel.BasicHttpSecurityMode securityMode, bool reliableSessionEnabled) { }
         public NetHttpBinding(string configurationName) { }
+        public override System.ServiceModel.Channels.IChannelFactory<TChannel> BuildChannelFactory<TChannel>(System.ServiceModel.Channels.BindingParameterCollection parameters) { return default(System.ServiceModel.Channels.IChannelFactory<TChannel>); }
         public System.ServiceModel.NetHttpMessageEncoding MessageEncoding { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.ServiceModel.NetHttpMessageEncoding); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.ServiceModel.OptionalReliableSession ReliableSession { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.ServiceModel.OptionalReliableSession); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override string Scheme { get { return default(string); } }
@@ -1059,6 +1092,18 @@ namespace System.ServiceModel
         public System.ServiceModel.OperationFormatStyle Style { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.ServiceModel.OperationFormatStyle); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
             public bool SupportFaults { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(bool); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.ServiceModel.OperationFormatUse Use { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.ServiceModel.OperationFormatUse); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+    }
+    public abstract partial class MessageSecurityVersion
+    {
+        internal MessageSecurityVersion() { }
+        public abstract System.ServiceModel.Security.BasicSecurityProfileVersion BasicSecurityProfileVersion { get; }
+        public System.ServiceModel.Security.SecureConversationVersion SecureConversationVersion { get { return default(System.ServiceModel.Security.SecureConversationVersion); } }
+        public abstract System.ServiceModel.Security.SecurityPolicyVersion SecurityPolicyVersion { get; }
+        public System.ServiceModel.Security.SecurityVersion SecurityVersion { get { return default(System.ServiceModel.Security.SecurityVersion); } }
+        public System.ServiceModel.Security.TrustVersion TrustVersion { get { return default(System.ServiceModel.Security.TrustVersion); } }
+        public static System.ServiceModel.MessageSecurityVersion WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10 { get { return default(System.ServiceModel.MessageSecurityVersion); } }
+        public static System.ServiceModel.MessageSecurityVersion WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11 { get { return default(System.ServiceModel.MessageSecurityVersion); } }
+        public static System.ServiceModel.MessageSecurityVersion WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10 { get { return default(System.ServiceModel.MessageSecurityVersion); } }
     }
 }
 namespace System.ServiceModel.Activation
@@ -1759,7 +1804,7 @@ namespace System.ServiceModel.Channels
         public int Count { get { return default(int); } }
         public System.ServiceModel.Channels.MessageEncoder Encoder { get { return default(System.ServiceModel.Channels.MessageEncoder); } set { } }
         public bool IsFixedSize { get { return default(bool); } }
-        public bool IsReadOnly { get { return default(bool); } }
+        bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<System.String, System.Object>>.IsReadOnly { get { return default(bool); } }
         public object this[string name] { get { return default(object); } set { } }
         public System.Collections.Generic.ICollection<string> Keys { get { return default(System.Collections.Generic.ICollection<string>); } }
         public System.Collections.Generic.ICollection<object> Values { get { return default(System.Collections.Generic.ICollection<object>); } }
@@ -1844,13 +1889,18 @@ namespace System.ServiceModel.Channels
     public abstract partial class SecurityBindingElement : System.ServiceModel.Channels.BindingElement
     {
         internal SecurityBindingElement() { }
+        public System.ServiceModel.Security.Tokens.SupportingTokenParameters EndpointSupportingTokenParameters { get { return default(System.ServiceModel.Security.Tokens.SupportingTokenParameters); } }
+        public System.ServiceModel.MessageSecurityVersion MessageSecurityVersion { get { return default(System.ServiceModel.MessageSecurityVersion); } set { } }
+        public System.ServiceModel.Channels.SecurityHeaderLayout SecurityHeaderLayout { get { return default(System.ServiceModel.Channels.SecurityHeaderLayout); } set { } }
+        public static System.ServiceModel.Channels.SecurityBindingElement CreateSecureConversationBindingElement(System.ServiceModel.Channels.SecurityBindingElement bootstrapSecurity) { return default(System.ServiceModel.Channels.SecurityBindingElement); }
         public bool IncludeTimestamp { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(bool); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.ServiceModel.Channels.LocalClientSecuritySettings LocalClientSettings { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.ServiceModel.Channels.LocalClientSecuritySettings); } }
         public override System.ServiceModel.Channels.IChannelFactory<TChannel> BuildChannelFactory<TChannel>(System.ServiceModel.Channels.BindingContext context) { return default(System.ServiceModel.Channels.IChannelFactory<TChannel>); }
         protected abstract System.ServiceModel.Channels.IChannelFactory<TChannel> BuildChannelFactoryCore<TChannel>(System.ServiceModel.Channels.BindingContext context);
         public override bool CanBuildChannelFactory<TChannel>(System.ServiceModel.Channels.BindingContext context) { return default(bool); }
-            public static System.ServiceModel.Channels.TransportSecurityBindingElement CreateUserNameOverTransportBindingElement() { return default(System.ServiceModel.Channels.TransportSecurityBindingElement); }
-            public override T GetProperty<T>(System.ServiceModel.Channels.BindingContext context) { return default(T); }
+        public static System.ServiceModel.Channels.TransportSecurityBindingElement CreateUserNameOverTransportBindingElement() { return default(System.ServiceModel.Channels.TransportSecurityBindingElement); }
+        public override T GetProperty<T>(System.ServiceModel.Channels.BindingContext context) { return default(T); }
+        public override string ToString() { return default(string); }
     }
     public enum SecurityHeaderLayout
     {
@@ -1898,8 +1948,9 @@ namespace System.ServiceModel.Channels
     public sealed partial class TransportSecurityBindingElement : System.ServiceModel.Channels.SecurityBindingElement
     {
         public TransportSecurityBindingElement() { }
-            protected override System.ServiceModel.Channels.IChannelFactory<TChannel> BuildChannelFactoryCore<TChannel>(System.ServiceModel.Channels.BindingContext context) { return default(System.ServiceModel.Channels.IChannelFactory<TChannel>); }
+        protected override System.ServiceModel.Channels.IChannelFactory<TChannel> BuildChannelFactoryCore<TChannel>(System.ServiceModel.Channels.BindingContext context) { return default(System.ServiceModel.Channels.IChannelFactory<TChannel>); }
         public override System.ServiceModel.Channels.BindingElement Clone() { return default(System.ServiceModel.Channels.BindingElement); }
+        public override T GetProperty<T>(System.ServiceModel.Channels.BindingContext context) { return default(T); }
     }
     public sealed partial class UnderstoodHeaders : System.Collections.Generic.IEnumerable<System.ServiceModel.Channels.MessageHeaderInfo>, System.Collections.IEnumerable
     {
@@ -1936,6 +1987,8 @@ namespace System.ServiceModel.Channels
         public string SubProtocol { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(string); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.ServiceModel.Channels.WebSocketTransportUsage TransportUsage { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { return default(System.ServiceModel.Channels.WebSocketTransportUsage); } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool Equals(System.ServiceModel.Channels.WebSocketTransportSettings other) { return default(bool); }
+        public override bool Equals(object obj) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
     }
     public enum WebSocketTransportUsage
     {
@@ -1953,9 +2006,13 @@ namespace System.ServiceModel.Description
     public partial class ClientCredentials : System.ServiceModel.Description.IEndpointBehavior
     {
         public ClientCredentials() { }
-            protected ClientCredentials(System.ServiceModel.Description.ClientCredentials source) { }
+        protected ClientCredentials(System.ServiceModel.Description.ClientCredentials source) { }
+        public System.ServiceModel.Security.X509CertificateInitiatorClientCredential ClientCertificate { get { return default(System.ServiceModel.Security.X509CertificateInitiatorClientCredential); } }
+        public System.ServiceModel.Security.HttpDigestClientCredential HttpDigest { get { return default(System.ServiceModel.Security.HttpDigestClientCredential); } }
+        public System.ServiceModel.Security.X509CertificateRecipientClientCredential ServiceCertificate { get { return default(System.ServiceModel.Security.X509CertificateRecipientClientCredential); } }
+        public System.ServiceModel.Security.WindowsClientCredential Windows { get { return default(System.ServiceModel.Security.WindowsClientCredential); } }
         public System.ServiceModel.Security.UserNamePasswordClientCredential UserName { get { return default(System.ServiceModel.Security.UserNamePasswordClientCredential); } }
-            public virtual void ApplyClientBehavior(System.ServiceModel.Description.ServiceEndpoint endpoint, System.ServiceModel.Dispatcher.ClientRuntime behavior) { }
+        public virtual void ApplyClientBehavior(System.ServiceModel.Description.ServiceEndpoint endpoint, System.ServiceModel.Dispatcher.ClientRuntime behavior) { }
         public System.ServiceModel.Description.ClientCredentials Clone() { return default(System.ServiceModel.Description.ClientCredentials); }
         protected virtual System.ServiceModel.Description.ClientCredentials CloneCore() { return default(System.ServiceModel.Description.ClientCredentials); }
         void System.ServiceModel.Description.IEndpointBehavior.AddBindingParameters(System.ServiceModel.Description.ServiceEndpoint endpoint, System.ServiceModel.Channels.BindingParameterCollection parameters) { }
@@ -2372,6 +2429,75 @@ namespace System.ServiceModel.Security
         public bool AllowNtlm { get { return default(bool); } set { } }
             public System.Net.NetworkCredential ClientCredential { get { return default(System.Net.NetworkCredential); } set { } }
     }
+    public sealed partial class X509ServiceCertificateAuthentication
+    {
+        public X509ServiceCertificateAuthentication() { }
+        public System.ServiceModel.Security.X509CertificateValidationMode CertificateValidationMode { get { return default(System.ServiceModel.Security.X509CertificateValidationMode); } set { } }
+        public System.IdentityModel.Selectors.X509CertificateValidator CustomCertificateValidator { get { return default(System.IdentityModel.Selectors.X509CertificateValidator); } set { } }
+        public System.Security.Cryptography.X509Certificates.X509RevocationMode RevocationMode { get { return default(System.Security.Cryptography.X509Certificates.X509RevocationMode); } set { } }
+        public System.Security.Cryptography.X509Certificates.StoreLocation TrustedStoreLocation { get { return default(System.Security.Cryptography.X509Certificates.StoreLocation); } set { } }
+    }
+    public sealed partial class X509CertificateRecipientClientCredential
+    {
+        internal X509CertificateRecipientClientCredential() { }
+        public System.ServiceModel.Security.X509ServiceCertificateAuthentication Authentication { get { return default(System.ServiceModel.Security.X509ServiceCertificateAuthentication); } }
+        public System.Security.Cryptography.X509Certificates.X509Certificate2 DefaultCertificate { get { return default(System.Security.Cryptography.X509Certificates.X509Certificate2); } set { } }
+        public System.Collections.Generic.Dictionary<System.Uri, System.Security.Cryptography.X509Certificates.X509Certificate2> ScopedCertificates { get { return default(System.Collections.Generic.Dictionary<System.Uri, System.Security.Cryptography.X509Certificates.X509Certificate2>); } }
+        public System.ServiceModel.Security.X509ServiceCertificateAuthentication SslCertificateAuthentication { get { return default(System.ServiceModel.Security.X509ServiceCertificateAuthentication); } set { } }
+        public void SetDefaultCertificate(System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.StoreName storeName, System.Security.Cryptography.X509Certificates.X509FindType findType, object findValue) { }
+        public void SetDefaultCertificate(string subjectName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.StoreName storeName) { }
+        public void SetScopedCertificate(System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.StoreName storeName, System.Security.Cryptography.X509Certificates.X509FindType findType, object findValue, System.Uri targetService) { }
+        public void SetScopedCertificate(string subjectName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.StoreName storeName, System.Uri targetService) { }
+    }
+    public sealed partial class X509CertificateInitiatorClientCredential
+    {
+        internal X509CertificateInitiatorClientCredential() { }
+        public System.Security.Cryptography.X509Certificates.X509Certificate2 Certificate { get { return default(System.Security.Cryptography.X509Certificates.X509Certificate2); } set { } }
+        public void SetCertificate(System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.StoreName storeName, System.Security.Cryptography.X509Certificates.X509FindType findType, object findValue) { }
+        public void SetCertificate(string subjectName, System.Security.Cryptography.X509Certificates.StoreLocation storeLocation, System.Security.Cryptography.X509Certificates.StoreName storeName) { }
+    }
+    public abstract partial class BasicSecurityProfileVersion
+    {
+        internal BasicSecurityProfileVersion() { }
+        public static System.ServiceModel.Security.BasicSecurityProfileVersion BasicSecurityProfile10 { get { return default(System.ServiceModel.Security.BasicSecurityProfileVersion); } }
+    }
+    public abstract partial class SecureConversationVersion
+    {
+        internal SecureConversationVersion() { }
+        public static System.ServiceModel.Security.SecureConversationVersion Default { get { return default(System.ServiceModel.Security.SecureConversationVersion); } }
+        public System.Xml.XmlDictionaryString Namespace { get { return default(System.Xml.XmlDictionaryString); } }
+        public System.Xml.XmlDictionaryString Prefix { get { return default(System.Xml.XmlDictionaryString); } }
+        public static System.ServiceModel.Security.SecureConversationVersion WSSecureConversationFeb2005 { get { return default(System.ServiceModel.Security.SecureConversationVersion); } }
+    }
+    public abstract partial class SecurityPolicyVersion
+    {
+        internal SecurityPolicyVersion() { }
+        public string Namespace { get { return default(string); } }
+        public string Prefix { get { return default(string); } }
+        public static System.ServiceModel.Security.SecurityPolicyVersion WSSecurityPolicy11 { get { return default(System.ServiceModel.Security.SecurityPolicyVersion); } }
+    }
+    public abstract partial class SecurityVersion
+    {
+        internal SecurityVersion() { }
+        public static System.ServiceModel.Security.SecurityVersion WSSecurity10 { get { return default(System.ServiceModel.Security.SecurityVersion); } }
+        public static System.ServiceModel.Security.SecurityVersion WSSecurity11 { get { return default(System.ServiceModel.Security.SecurityVersion); } }
+    }
+    public abstract partial class TrustVersion
+    {
+        internal TrustVersion() { }
+        public static System.ServiceModel.Security.TrustVersion Default { get { return default(System.ServiceModel.Security.TrustVersion); } }
+        public System.Xml.XmlDictionaryString Namespace { get { return default(System.Xml.XmlDictionaryString); } }
+        public System.Xml.XmlDictionaryString Prefix { get { return default(System.Xml.XmlDictionaryString); } }
+        public static System.ServiceModel.Security.TrustVersion WSTrustFeb2005 { get { return default(System.ServiceModel.Security.TrustVersion); } }
+    }
+    public enum X509CertificateValidationMode
+    {
+        ChainTrust = 2,
+        Custom = 4,
+        None = 0,
+        PeerOrChainTrust = 3,
+        PeerTrust = 1,
+    }
 }
 namespace System.ServiceModel.Security.Tokens
 {
@@ -2389,5 +2515,17 @@ namespace System.ServiceModel.Security.Tokens
         RawDataKeyIdentifier = 4,
         SubjectKeyIdentifier = 3,
         Thumbprint = 1,
+    }
+    public partial class SupportingTokenParameters
+    {
+        public SupportingTokenParameters() { }
+        public System.Collections.ObjectModel.Collection<System.ServiceModel.Security.Tokens.SecurityTokenParameters> Endorsing { get { return default(System.Collections.ObjectModel.Collection<System.ServiceModel.Security.Tokens.SecurityTokenParameters>); } }
+        public System.Collections.ObjectModel.Collection<System.ServiceModel.Security.Tokens.SecurityTokenParameters> SignedEncrypted { get { return default(System.Collections.ObjectModel.Collection<System.ServiceModel.Security.Tokens.SecurityTokenParameters>); } }
+        public System.ServiceModel.Security.Tokens.SupportingTokenParameters Clone() { return default(System.ServiceModel.Security.Tokens.SupportingTokenParameters); }
+    }
+    public abstract partial class SecurityTokenParameters
+    {
+        internal SecurityTokenParameters() { }
+        public System.ServiceModel.Security.Tokens.SecurityTokenParameters Clone() { return default(System.ServiceModel.Security.Tokens.SecurityTokenParameters); }
     }
 }

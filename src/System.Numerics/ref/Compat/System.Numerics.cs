@@ -27,7 +27,7 @@ namespace System.Numerics
         public static int Compare(System.Numerics.BigInteger left, System.Numerics.BigInteger right) { return default(int); }
         public int CompareTo(long other) { return default(int); }
         public int CompareTo(System.Numerics.BigInteger other) { return default(int); }
-        public int CompareTo(object obj) { return default(int); }
+        int System.IComparable.CompareTo(object obj) { return default(int); }
         [System.CLSCompliantAttribute(false)]
         public int CompareTo(ulong other) { return default(int); }
         public static System.Numerics.BigInteger Divide(System.Numerics.BigInteger dividend, System.Numerics.BigInteger divisor) { return default(System.Numerics.BigInteger); }
