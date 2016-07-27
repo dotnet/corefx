@@ -19,7 +19,7 @@ echo Before                Now
 echo build.cmd native      build-native.cmd
 echo build.cmd managed     build-managed.cmd
 echo.
-echo For more information: "link to documentation"
+echo For more information: "https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md"
 echo ----------------------------------------------------------------------------
 echo.
 echo.

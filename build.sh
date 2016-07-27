@@ -11,7 +11,7 @@ usage()
     echo "build.sh native      build-native.sh"
     echo "build.sh managed     build-managed.sh"
     echo
-    echo "For more information: 'link to documentation'"
+    echo "For more information: https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md"
     echo "----------------------------------------------------------------------------"
     echo
     echo
