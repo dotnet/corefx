@@ -103,11 +103,6 @@ namespace System.Reflection.Metadata.Ecma335
         /// first <see cref="FixedArgumentsEncoder"/> to encode fixed arguments, 
         /// then <see cref="CustomAttributeNamedArgumentsEncoder"/> to encode named arguments.
         /// </summary>
-        /// <returns>
-        /// Returns a pair of encoders that must be used in the order they appear in the tuple: 
-        /// first <see cref="FixedArgumentsEncoder"/> to encode fixed arguments, 
-        /// then <see cref="CustomAttributeNamedArgumentsEncoder"/> to encode named arguments.
-        /// </returns>
         public ValueTuple<FixedArgumentsEncoder, CustomAttributeNamedArgumentsEncoder> CustomAttributeSignature()
         {
             Builder.WriteUInt16(0x0001);
@@ -213,11 +208,6 @@ namespace System.Reflection.Metadata.Ecma335
         /// then <see cref="ParametersEncoder"/> to encode the actual parameters.
         /// </summary>
         /// <param name="parameterCount">Number of parameters.</param>
-        /// <returns>
-        /// Returns a pair of encoders that must be used in the order they appear in the tuple:
-        /// first <see cref="ReturnTypeEncoder"/> to encode the return type,
-        /// then <see cref="ParametersEncoder"/> to encode the actual parameters.
-        /// </returns>
         public ValueTuple<ReturnTypeEncoder, ParametersEncoder> Parameters(int parameterCount)
         {
             if (unchecked((uint)parameterCount) > BlobWriterImpl.MaxCompressedIntegerValue)
@@ -435,11 +425,6 @@ namespace System.Reflection.Metadata.Ecma335
         /// first <see cref="CustomAttributeArrayTypeEncoder"/> to encode the type of the vector,
         /// then <see cref="VectorEncoder"/> to encode the items of the vector.
         /// </summary>
-        /// <returns>
-        /// Returns a pair of encoders that must be used in the order they appear in the tuple:
-        /// first <see cref="CustomAttributeArrayTypeEncoder"/> to encode the type of the vector,
-        /// then <see cref="VectorEncoder"/> to encode the items of the vector.
-        /// </returns>
         public ValueTuple<CustomAttributeArrayTypeEncoder, VectorEncoder> TaggedVector()
         {
             return ValueTuple.Create(new CustomAttributeArrayTypeEncoder(Builder), new VectorEncoder(Builder));
@@ -477,11 +462,6 @@ namespace System.Reflection.Metadata.Ecma335
         /// first <see cref="CustomAttributeElementTypeEncoder"/> to encode the type of the literal,
         /// then <see cref="ScalarEncoder"/> to encode the value of the literal.
         /// </summary>
-        /// <returns>
-        /// Returns a pair of encoders that must be used in the order they appear in the tuple:
-        /// first <see cref="CustomAttributeElementTypeEncoder"/> to encode the type of the literal,
-        /// then <see cref="ScalarEncoder"/> to encode the value of the literal.
-        /// </returns>
         public ValueTuple<CustomAttributeElementTypeEncoder, ScalarEncoder> TaggedScalar()
         {
             return ValueTuple.Create(new CustomAttributeElementTypeEncoder(Builder), new ScalarEncoder(Builder));
@@ -669,12 +649,6 @@ namespace System.Reflection.Metadata.Ecma335
         /// third <see cref="LiteralEncoder"/> to encode the literal value of the argument.
         /// </summary>
         /// <param name="isField">True to encode a field, false to encode a property.</param>
-        /// <returns>
-        /// Returns a triplet of encoders that must be used in the order they appear in the tuple:
-        /// first <see cref="NamedArgumentTypeEncoder"/> to encode the type of the argument,
-        /// second <see cref="NameEncoder"/> to encode the name of the field or property,
-        /// third <see cref="LiteralEncoder"/> to encode the literal value of the argument.
-        /// </returns>
         public ValueTuple<NamedArgumentTypeEncoder, NameEncoder, LiteralEncoder> AddArgument(bool isField)
         {
             Builder.WriteByte(isField ? (byte)CustomAttributeNamedArgumentKind.Field : (byte)CustomAttributeNamedArgumentKind.Property);
@@ -897,11 +871,6 @@ namespace System.Reflection.Metadata.Ecma335
         /// first <see cref="SignatureTypeEncoder"/> to encode the type of the element,
         /// second <see cref="ArrayShapeEncoder"/> to encode the shape of the array.
         /// </summary>
-        /// <returns>
-        /// Returns a pair of encoders that must be used in the order they appear in the tuple:
-        /// first <see cref="SignatureTypeEncoder"/> to encode the type of the element,
-        /// second <see cref="ArrayShapeEncoder"/> to encode the shape of the array.
-        /// </returns>
         public ValueTuple<SignatureTypeEncoder, ArrayShapeEncoder> Array()
         {
             Builder.WriteByte((byte)SignatureTypeCode.Array);
