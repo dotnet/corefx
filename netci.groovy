@@ -292,7 +292,7 @@ def osShortName = ['Windows 10': 'win10',
 		def osGroup = osGroupMap[os]
 		def newJobName = "perf_${os.toLowerCase()}_${configurationGroup.toLowerCase()}"
 
-		def newJob = job(Utilities.getFullJobName(project, newJobName, isPR)) {
+		def newJob = job(Utilities.getFullJobName(project, newJobName, false)) {
 			// On Windows we use the packer to put together everything. On *nix we use tar
 			steps {
 				//We need to specify the max cpu count to be one as we do not want to be executing performance tests in parallel
@@ -304,7 +304,7 @@ def osShortName = ['Windows 10': 'win10',
 		// Set the affinity.
 		Utilities.setMachineAffinity(newJob, os, 'latest-or-auto')
 		// Set up standard options.
-		Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+		Utilities.standardJobSetup(newJob, project, false, "*/${branch}")
 		// Add the unit test results
 		Utilities.addXUnitDotNETResults(newJob, 'bin/tests/**/testResults.xml')
 		def archiveContents = "msbuild.log"
