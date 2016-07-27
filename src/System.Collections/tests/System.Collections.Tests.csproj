@@ -25,7 +25,7 @@
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
       <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
-    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
+    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

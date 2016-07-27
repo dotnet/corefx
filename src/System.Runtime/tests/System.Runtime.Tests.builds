@@ -4,6 +4,11 @@
   <ItemGroup>
     <Project Include="System.Runtime.Tests.csproj"/>
     <Project Include="System.Runtime.Tests.csproj">
+    	<TestsTFMs>netcoreapp1.1</TestsTFMs>
+    	<TargetGroup>netstandard1.7</TargetGroup>
+    	<SkipTestRun>true</SkipTestRun>
+    </Project>
+    <Project Include="System.Runtime.Tests.csproj">
       <TestTFMs>net462</TestTFMs>
       <OSGroup>Windows_NT</OSGroup>
     </Project>
