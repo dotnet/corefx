@@ -235,6 +235,7 @@ namespace System.IO.Tests
             Assert.Equal(sb.ToString(), sw.GetStringBuilder().ToString());
         }
 
+#if FEATURE_NS_1_7
         [Fact]
         public static void Closed_DisposedExceptions()
         {
@@ -242,6 +243,7 @@ namespace System.IO.Tests
             sw.Close();
             ValidateDisposedExceptions(sw);
         }
+#endif //FEATURE_NS_1_7
 
         [Fact]
         public static void Disposed_DisposedExceptions()

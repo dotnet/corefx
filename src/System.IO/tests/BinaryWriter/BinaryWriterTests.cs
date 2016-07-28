@@ -316,6 +316,7 @@ namespace System.IO.Tests
             }
         }
 
+#if FEATURE_NS_1_7
         [Fact]
         public void BinaryWriter_CloseTests()
         {
@@ -328,6 +329,7 @@ namespace System.IO.Tests
                 binaryWriter.Close();
             }
         }
+#endif //FEATURE_NS_1_7
 
         [Fact]
         public void BinaryWriter_DisposeTests_Negative()
@@ -340,6 +342,7 @@ namespace System.IO.Tests
             }
         }
 
+#if FEATURE_NS_1_7
         [Fact]
         public void BinaryWriter_CloseTests_Negative()
         {
@@ -350,6 +353,7 @@ namespace System.IO.Tests
                 ValidateDisposedExceptions(binaryWriter);
             }
         }
+#endif //FEATURE_NS_1_7
 
         private void ValidateDisposedExceptions(BinaryWriter binaryWriter)
         {
