@@ -101,7 +101,7 @@ prepare_native_build()
 build_managed()
 {
     __buildproj=$__scriptpath/build.proj
-    __buildlog=$__scriptpath/msbuild.log
+    __buildlog=$__scriptpath/msbuild.$__BuildArch.log
     __binclashlog=$__scriptpath/binclash.log
     __binclashloggerdll=$__scriptpath/Tools/Microsoft.DotNet.Build.Tasks.dll
 
@@ -123,8 +123,8 @@ build_native()
     cd "$__IntermediatesDir"
 
     # Regenerate the CMake solution
-    echo "Invoking cmake with arguments: \"$__nativeroot\" $__CMakeArgs $__CMakeExtraArgs"
-    "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__CMakeArgs "$__CMakeExtraArgs"
+    echo "Invoking cmake with arguments: \"$__scriptpath\" $__BuildType $__CMakeExtraArgs"
+    "$__scriptpath/src/Native/gen-buildsys-clang.sh" "$__scriptpath" $__ClangMajorVersion $__ClangMinorVersion $__BuildArch $__BuildType "$__CMakeExtraArgs"
 
     # Check that the makefiles were created.
 
@@ -159,7 +159,6 @@ build_native()
 }
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
-__nativeroot=$__scriptpath/src/Native
 __packageroot=$__scriptpath/packages
 __sourceroot=$__scriptpath/src
 __rootbinpath="$__scriptpath/bin"
@@ -237,7 +236,6 @@ case $OSName in
 esac
 __BuildOS=$__HostOS
 __BuildType=Debug
-__CMakeArgs=DEBUG
 __CMakeExtraArgs=""
 __MakeExtraArgs=""
 
@@ -252,6 +250,7 @@ __ServerGC=0
 __VerboseBuild=false
 __ClangMajorVersion=3
 __ClangMinorVersion=5
+__CrossBuild=0
 
 while :; do
     if [ $# -le 0 ]; then
@@ -290,7 +289,6 @@ while :; do
             ;;
         release)
             __BuildType=Release
-            __CMakeArgs=RELEASE
             ;;
         clean)
             __CleanBuild=1
@@ -388,12 +386,20 @@ fi
 # Disable the native build when targeting Windows.
 
 if [ "$__BuildOS" != "$__HostOS" ]; then
-    echo "Warning: cross compiling native components is not yet supported"
+    echo "Warning: compiling native components for a different OS is not yet supported"
     __buildnative=false
 fi
 
-if [ ! -e "$__nativeroot" ]; then
+if [ ! -e "$__scriptpath/src/Native" ]; then
    __buildnative=false
+fi
+
+# Configure environment if we are doing a cross compile.
+if [ $__CrossBuild == 1 ]; then
+    export CROSSCOMPILE=1
+    if ! [[ -n "$ROOTFS_DIR" ]]; then
+        export ROOTFS_DIR="$__scriptpath/cross/rootfs/$__BuildArch"
+    fi
 fi
 
 # Set the remaining variables based upon the determined build configuration
@@ -403,14 +409,6 @@ __BinDir="$__rootbinpath/$__BuildOS.$__BuildArch.$__BuildType/Native"
 # Make the directories necessary for build if they don't exist
 
 setup_dirs
-
-# Configure environment if we are doing a cross compile.
-if [ "$__CrossBuild" == 1 ]; then
-    export CROSSCOMPILE=1
-    if ! [[ -n "$ROOTFS_DIR" ]]; then
-        export ROOTFS_DIR="$__scriptpath/cross/rootfs/$__BuildArch"
-    fi
-fi
 
 export CORECLR_SERVER_GC="$__ServerGC"
 
