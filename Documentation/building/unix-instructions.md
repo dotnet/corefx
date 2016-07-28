@@ -62,10 +62,10 @@ download the .NET Core CLI.
 For Ubuntu 14.04, install the following packages:
 
 * libunwind8
-* libicu52
+* libicu55
 * curl
 
-`sudo apt-get install libunwind8 libicu52 curl`
+`sudo apt-get install libunwind8 libicu55 curl`
 
 In addition to the above pacakges, the runtime versions of the packages listed
 in the native section should also be installed (this happens automatically on
@@ -122,7 +122,7 @@ mozroots --import --sync
 
 1. Install the prerequisites
  * `sudo apt-get install git clang-3.5 cmake make libc6-dev libssl-dev
-   libkrb5-dev libcurl4-openssl-dev zlib1g-dev libunwind8 libicu52 curl`
+   libkrb5-dev libcurl4-openssl-dev zlib1g-dev libunwind8 libicu55 curl`
 2. Clone the corefx repo `git clone https://github.com/dotnet/corefx.git`
 3. Navigate to the `corefx` directory
 4. Run the build script `./build.sh`
