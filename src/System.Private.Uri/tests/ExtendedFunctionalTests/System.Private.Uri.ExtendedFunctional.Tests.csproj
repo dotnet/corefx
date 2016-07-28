@@ -2,8 +2,6 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <TestTFM>netcoreapp1.1</TestTFM>
-    <FilterToTestTFM>netcoreapp1.1</FilterToTestTFM>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0febe054-68ac-446f-b999-9068736d3cec}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -22,7 +20,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <TestNugetTargetMoniker Include=".NETStandard,Version=v1.7" />
     <ProjectReference Include="..\..\..\System.Runtime\pkg\System.Runtime.pkgproj">
       <Project>{1e689c1b-690c-4799-bde9-6e7990585894}</Project>
       <Name>System.Runtime</Name>
