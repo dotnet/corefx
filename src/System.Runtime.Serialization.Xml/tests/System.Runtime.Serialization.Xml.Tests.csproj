@@ -11,7 +11,7 @@
     <AssemblyName>System.Runtime.Serialization.Xml.Tests</AssemblyName>
     <ProjectGuid>{30CAB353-089E-4294-B23B-F2DD1D945654}</ProjectGuid>
     <IncludePerformanceTests>true</IncludePerformanceTests>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition="'$(UseContractReferences)' == 'true'" >
     <ProjectJson>Performance/project.json</ProjectJson>
@@ -50,6 +50,7 @@
       <Project>{D62A6082-5229-4845-8BE9-75753E08C65A}</Project>
       <Name>System.Xml.XmlSerializer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
