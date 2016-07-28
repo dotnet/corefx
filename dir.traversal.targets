@@ -122,7 +122,7 @@
       </Project>
 
       <!-- for projects not defining TestTFM in .builds files, we assume the TestTFM is the default which is netcoreapp1.0 -->
-      <ProjectsToTest Include="@(Project)" Condition="'%(Project.Extension)'=='.csproj' And '$(FilterToTestTFM)' == 'netcoreapp1.0' And '%(Project.TestTFMs)' == '' And '%(Project.SkipTestRun)'!='true'" />
+      <ProjectsToTest Include="@(Project)" Condition="'%(Project.Extension)'=='.csproj' And '$(FilterToTestTFM)' == 'netcoreapp1.0' And '%(Project.TestTFMs)' == ''" />
 
       <!-- include the projects have TestTFM value match FilterToTestTFM -->
       <ProjectsToTest Include="@(Project)" Condition="'%(Project.Extension)'=='.csproj' And $([System.String]::new('%(Project.TestTFMs)').Contains(';$(FilterToTestTFM);'))" /> 
