@@ -93,9 +93,11 @@ namespace Internal.Cryptography.Pal.OpenSsl
 
                     int status = Interop.Crypto.CmsDecrypt(_decodedMessage, recipientCertHandle, pKey, decryptionBuffer, type);
 
-                    exception = status == 1 ?
-                        null :
-                        Interop.Crypto.CreateOpenSslCryptographicException();
+                    if (status != 1)
+                    {
+                        exception = Interop.Crypto.CreateOpenSslCryptographicException();
+                        return null;
+                    }
 
                     int bioSize = Interop.Crypto.GetMemoryBioSize(decryptionBuffer);
 
@@ -115,6 +117,7 @@ namespace Internal.Cryptography.Pal.OpenSsl
                 oid = Interop.Crypto.GetOidValue(oidAsn1);
             }
 
+            exception = null;
             return new ContentInfo(new Oid(oid), decryptedMessage);
         }
     }
