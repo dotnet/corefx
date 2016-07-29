@@ -20,6 +20,18 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData(21)]
+        [InlineData(366.58)]
+        [InlineData("hello")]
+        public static void Ctor_T_PreInitialized<T>(T value)
+        {
+            var lazyObject = new Lazy<T>(value);
+
+            Assert.True(lazyObject.IsValueCreated);
+            Assert.Equal(value, lazyObject.Value);
+        }
+
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public static void Ctor_Bool(bool isThreadSafe)
