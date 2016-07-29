@@ -79,7 +79,7 @@ function unmount_rootfs {
     local rootfsFolder="$1"
 
     if grep -qs "$rootfsFolder" /proc/mounts; then
-        sudo umount "$rootfsFolder"
+        sudo umount -l "$rootfsFolder"
     fi
 }
 
