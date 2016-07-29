@@ -52,6 +52,24 @@ namespace System
             return other is ValueTuple;
         }
 
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        public static bool operator ==(ValueTuple left, ValueTuple right)
+        {
+            return true;
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        public static bool operator !=(ValueTuple left, ValueTuple right)
+        {
+            return false;
+        }
+
         int IComparable.CompareTo(object other)
         {
             if (other == null) return 1;
@@ -340,6 +358,32 @@ namespace System
             return comparer.Equals(Item1, objTuple.Item1);
         }
 
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be equal if their field
+        /// are equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator ==(ValueTuple<T1> left, ValueTuple<T1> right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be not equal if their field
+        /// are not equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator !=(ValueTuple<T1> left, ValueTuple<T1> right)
+        {
+            return !left.Equals(right);
+        }
+
         int IComparable.CompareTo(object other)
         {
             if (other == null) return 1;
@@ -511,6 +555,32 @@ namespace System
 
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be equal if each of their fields
+        /// are equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator ==(ValueTuple<T1, T2> left, ValueTuple<T1,T2> right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be not equal if one of their fields
+        /// are not equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator !=(ValueTuple<T1, T2> left, ValueTuple<T1, T2> right)
+        {
+            return !left.Equals(right);
         }
 
         int IComparable.CompareTo(object other)
@@ -686,6 +756,32 @@ namespace System
             return comparer.Equals(Item1, objTuple.Item1)
                 && comparer.Equals(Item2, objTuple.Item2)
                 && comparer.Equals(Item3, objTuple.Item3);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be equal if each of their fields
+        /// are equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator ==(ValueTuple<T1, T2, T3> left, ValueTuple<T1, T2, T3> right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be not equal if one of their fields
+        /// are not equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator !=(ValueTuple<T1, T2, T3> left, ValueTuple<T1, T2, T3> right)
+        {
+            return !left.Equals(right);
         }
 
         int IComparable.CompareTo(object other)
@@ -876,6 +972,32 @@ namespace System
                 && comparer.Equals(Item2, objTuple.Item2)
                 && comparer.Equals(Item3, objTuple.Item3)
                 && comparer.Equals(Item4, objTuple.Item4);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be equal if each of their fields
+        /// are equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator ==(ValueTuple<T1, T2, T3, T4> left, ValueTuple<T1, T2, T3, T4> right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be not equal if one of their fields
+        /// are not equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator !=(ValueTuple<T1, T2, T3, T4> left, ValueTuple<T1, T2, T3, T4> right)
+        {
+            return !left.Equals(right);
         }
 
         int IComparable.CompareTo(object other)
@@ -1083,6 +1205,32 @@ namespace System
                 && comparer.Equals(Item3, objTuple.Item3)
                 && comparer.Equals(Item4, objTuple.Item4)
                 && comparer.Equals(Item5, objTuple.Item5);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be equal if each of their fields
+        /// are equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator ==(ValueTuple<T1, T2, T3, T4, T5> left, ValueTuple<T1, T2, T3, T4, T5> right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be not equal if one of their fields
+        /// are not equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator !=(ValueTuple<T1, T2, T3, T4, T5> left, ValueTuple<T1, T2, T3, T4, T5> right)
+        {
+            return !left.Equals(right);
         }
 
         int IComparable.CompareTo(object other)
@@ -1307,6 +1455,32 @@ namespace System
                 && comparer.Equals(Item4, objTuple.Item4)
                 && comparer.Equals(Item5, objTuple.Item5)
                 && comparer.Equals(Item6, objTuple.Item6);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be equal if each of their fields
+        /// are equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator ==(ValueTuple<T1, T2, T3, T4, T5, T6> left, ValueTuple<T1, T2, T3, T4, T5, T6> right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be not equal if one of their fields
+        /// are not equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator !=(ValueTuple<T1, T2, T3, T4, T5, T6> left, ValueTuple<T1, T2, T3, T4, T5, T6> right)
+        {
+            return !left.Equals(right);
         }
 
         int IComparable.CompareTo(object other)
@@ -1548,6 +1722,32 @@ namespace System
                 && comparer.Equals(Item5, objTuple.Item5)
                 && comparer.Equals(Item6, objTuple.Item6)
                 && comparer.Equals(Item7, objTuple.Item7);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be equal if each of their fields
+        /// are equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator ==(ValueTuple<T1, T2, T3, T4, T5, T6, T7> left, ValueTuple<T1, T2, T3, T4, T5, T6, T7> right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be not equal if one of their fields
+        /// are not equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator !=(ValueTuple<T1, T2, T3, T4, T5, T6, T7> left, ValueTuple<T1, T2, T3, T4, T5, T6, T7> right)
+        {
+            return !left.Equals(right);
         }
 
         int IComparable.CompareTo(object other)
@@ -1812,6 +2012,32 @@ namespace System
                 && comparer.Equals(Item6, objTuple.Item6)
                 && comparer.Equals(Item7, objTuple.Item7)
                 && comparer.Equals(Rest, objTuple.Rest);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the equality.</param>
+        /// <param name="right">The right hand side of the equality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be equal if each of their fields
+        /// are equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator ==(ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> left, ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary> Returns a value indicating whether this instance is not equal to a specified value.</summary>
+        /// <param name="left">The left hand side of the inequality.</param>
+        /// <param name="right">The right hand side of the inequality.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> has a different same value than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+        /// <remarks>
+        /// <paramref name="left"/> and <paramref name="right"/> are considered to be not equal if one of their fields
+        /// are not equal, using the default comparer for that field's type.
+        /// </remarks>
+        public static bool operator !=(ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> left, ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> right)
+        {
+            return !left.Equals(right);
         }
 
         int IComparable.CompareTo(object other)
