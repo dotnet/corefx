@@ -248,7 +248,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         [Trait("IPv4", "true")]
         [Trait("IPv6", "true")]
-        [ActiveIssue(4002, PlatformID.AnyUnix)]
+        [PlatformSpecific(PlatformID.Windows)] // "localhost" only guaranteed to resolve to v4 *and* v6 on Windows.
         public void Socket_StaticConnectAsync_Success(SocketImplementationType type)
         {
             Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
