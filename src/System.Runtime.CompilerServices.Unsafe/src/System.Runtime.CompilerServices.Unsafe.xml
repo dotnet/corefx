@@ -72,6 +72,42 @@
             <param name="source">The location of the value to reference.</param>
             <returns>A reference to a value of type T.</returns>
         </member>
+        <member name="M:System.Runtime.CompilerServices.Unsafe.As``2(``0@)">
+            <summary>
+            Reinterprets the given reference as a reference to a value of type U.
+            </summary>
+            <typeparam name="TFrom">The type of reference to reinterpret.</typeparam>
+            <typeparam name="TTo">The desired type of the reference.</typeparam>
+            <param name="source">The reference to reinterpret.</param>
+            <returns>A reference to a value of type TTo.</returns>
+        </member>
+        <member name="M:System.Runtime.CompilerServices.Unsafe.Add``1(``0@,System.Int32)">
+            <summary>
+            Adds element offset to the given reference.
+            </summary>
+            <typeparam name="T">The type of reference.</typeparam>
+            <param name="source">The reference to add the offset to.</param>
+            <param name="elementOffset">The offset to add.</param>
+            <returns>A new reference that reflects the addition of offset to pointer.</returns>
+        </member>
+        <member name="M:System.Runtime.CompilerServices.Unsafe.Subtract``1(``0@,System.Int32)">
+            <summary>
+            Adds element offset to the given reference.
+            </summary>
+            <typeparam name="T">The type of reference.</typeparam>
+            <param name="source">The reference to subtract the offset from.</param>
+            <param name="elementOffset">The offset to subtract.</param>
+            <returns>A new reference that reflects the addition of offset to pointer.</returns>
+        </member>
+        <member name="M:System.Runtime.CompilerServices.Unsafe.AreSame``1(``0@,``0@)">
+            <summary>
+            Determines whether the specified references point to the same location.
+            </summary>
+            <param name="left">The first reference to compare.</param>
+            <param name="right">The second reference to compare.</param>
+            <returns>true if left and right point to the same location; otherwise false.</returns>
+        </member>
+
         <member name="M:System.Runtime.CompilerServices.Unsafe.CopyBlock(System.Void*,System.Void*,System.UInt32)">
             <summary>
             Copies bytes from the source address to the destination address.
