@@ -79,7 +79,6 @@ namespace System
                     _username = userInfo;
                 }
             }
-            SetFieldsFromUri(uri);
         }
 
         public UriBuilder(string schemeName, string hostName)
@@ -322,7 +321,6 @@ namespace System
                 if (_changed)
                 {
                     _uri = new Uri(ToString());
-                    SetFieldsFromUri(_uri);
                     _changed = false;
                 }
                 return _uri;
@@ -377,34 +375,6 @@ namespace System
         public override int GetHashCode()
         {
             return Uri.GetHashCode();
-        }
-
-        private void SetFieldsFromUri(Uri uri)
-        {
-            _fragment = uri.Fragment;
-            _query = uri.Query;
-            _host = uri.Host;
-            _path = uri.AbsolutePath;
-            _port = uri.Port;
-            _scheme = uri.Scheme;
-            _schemeDelimiter = uri.HasAuthority ? Uri.SchemeDelimiter : ":";
-
-            string userInfo = uri.UserInfo;
-
-            if (userInfo.Length > 0)
-            {
-                int index = userInfo.IndexOf(':');
-
-                if (index != -1)
-                {
-                    _password = userInfo.Substring(index + 1);
-                    _username = userInfo.Substring(0, index);
-                }
-                else
-                {
-                    _username = userInfo;
-                }
-            }
         }
 
         public override string ToString()
