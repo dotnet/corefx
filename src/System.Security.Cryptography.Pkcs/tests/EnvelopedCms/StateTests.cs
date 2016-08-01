@@ -409,11 +409,10 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             Assert.Equal<byte>(expected, actual);
         }
+        
+        private static bool EncryptionSupportsAddingOriginatorCerts => SupportedBehaviors.EncryptionSupportsAddingOriginatorCerts;
 
-        private static bool EncryptionSupportsAddingOriginatorCerts =>
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-
-        private static bool EncryptionDoesNotSupportAddingOriginatorCerts => !EncryptionSupportsAddingOriginatorCerts;
+        private static bool EncryptionDoesNotSupportAddingOriginatorCerts => SupportedBehaviors.EncryptionDoesNotSupportAddingOriginatorCerts;
     }
 }
 

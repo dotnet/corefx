@@ -58,8 +58,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(0, certs.Count);
         }
 
-        [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(EncryptionSupportsAddingOriginatorCerts))]
         public static void DecodeCertificates3_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
@@ -157,6 +156,8 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 Assert.Equal<byte>(expectedDer, actualDer);
             }
         }
+
+        private static bool EncryptionSupportsAddingOriginatorCerts => SupportedBehaviors.EncryptionSupportsAddingOriginatorCerts;
 
         private static X509Certificate2[] s_certs =
         {
