@@ -206,16 +206,10 @@ namespace System.Data.SqlClient.SNI
 
             string[] serverNameParts = fullServerName.Split(':');
 
-            if (serverNameParts.Length > 2)
+            if (serverNameParts.Length != 2)
             {
                 SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.InvalidConnStringError, string.Empty);
                 return null;
-            }
-
-            // Default to using tcp if no protocol is provided
-            if (serverNameParts.Length == 1)
-            {
-                return CreateTcpHandle(serverNameParts[0], timerExpire, callbackObject, parallel);
             }
 
             switch (serverNameParts[0])

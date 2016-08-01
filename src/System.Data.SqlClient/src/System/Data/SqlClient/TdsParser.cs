@@ -338,11 +338,13 @@ namespace System.Data.SqlClient
 
             bool fParallel = _connHandler.ConnectionOptions.MultiSubnetFailover;
 
+            string fullServerName = SetDefaultProtocolIfMissing(serverInfo.ExtendedServerName);
+
 #if MANAGED_SNI
-            _physicalStateObj.CreateConnectionHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire,
+            _physicalStateObj.CreateConnectionHandle(fullServerName, ignoreSniOpenTimeout, timerExpire,
                         out instanceName, _sniSpnBuffer, false, true, fParallel);
 #else
-            _physicalStateObj.CreatePhysicalSNIHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire,
+            _physicalStateObj.CreatePhysicalSNIHandle(fullServerName, ignoreSniOpenTimeout, timerExpire,
                         out instanceName, _sniSpnBuffer, false, true, fParallel);
 #endif // MANAGED_SNI
 
@@ -404,9 +406,9 @@ namespace System.Data.SqlClient
                 // On Instance failure re-connect and flush SNI named instance cache.
                 _physicalStateObj.SniContext = SniContext.Snix_Connect;
 #if MANAGED_SNI
-                _physicalStateObj.CreateConnectionHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire, out instanceName, _sniSpnBuffer, true, true, fParallel);
+                _physicalStateObj.CreateConnectionHandle(fullServerName, ignoreSniOpenTimeout, timerExpire, out instanceName, _sniSpnBuffer, true, true, fParallel);
 #else
-                _physicalStateObj.CreatePhysicalSNIHandle(serverInfo.ExtendedServerName, ignoreSniOpenTimeout, timerExpire, out instanceName, _sniSpnBuffer, true, true, fParallel);
+                _physicalStateObj.CreatePhysicalSNIHandle(fullServerName, ignoreSniOpenTimeout, timerExpire, out instanceName, _sniSpnBuffer, true, true, fParallel);
 #endif // MANAGED_SNI
 
                 if (TdsEnums.SNI_SUCCESS != _physicalStateObj.Status)
@@ -445,6 +447,64 @@ namespace System.Data.SqlClient
             }
             return;
         }
+
+        private static string SetDefaultProtocolIfMissing(string dataSource)
+        {
+            if (dataSource.IndexOf(":") < 0)
+            {
+                const string defaultProtocol = TdsEnums.TCP;
+#if MANAGED_SNI
+                // Default to using tcp if no protocol is provided
+                dataSource = defaultProtocol + ":" + dataSource;
+#else
+                // Default to using tcp if no protocol is provided, and it's targeting Azure SQL Server
+                if (IsAzureSqlServerEndpoint(dataSource))
+                {
+                    dataSource = defaultProtocol + ":" + dataSource;
+                }
+#endif
+            }
+            return dataSource;
+        }
+
+        private static readonly string[] AzureSqlServerEndpoints =
+        {
+            ".database.windows.net",       // AZURESQL_GenericEndpoint
+            ".database.cloudapi.de",       // AZURESQL_GermanEndpoint
+            ".database.usgovcloudapi.net", // AZURESQL_UsGovEndpoint
+            ".database.chinacloudapi.cn"   // AZURESQL_ChinaEndpoint
+        };
+
+        private static bool IsAzureSqlServerEndpoint(string dataSource)
+        {
+            // remove server port
+            var i = dataSource.LastIndexOf(',');
+            if (i >= 0)
+            {
+                dataSource = dataSource.Substring(0, i);
+            }
+
+            // check for the instance name
+            i = dataSource.LastIndexOf('\\');
+            if (i >= 0)
+            {
+                dataSource = dataSource.Substring(0, i);
+            }
+
+            // trim redundant whitespaces
+            dataSource = dataSource.Trim();
+
+            // check if servername end with any azure endpoints
+            for (i = 0; i < AzureSqlServerEndpoints.Length; i++)
+            {
+                if (dataSource.EndsWith(AzureSqlServerEndpoints[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
 
         internal void RemoveEncryption()
         {
