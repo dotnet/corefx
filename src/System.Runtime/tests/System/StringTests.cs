@@ -1126,39 +1126,39 @@ namespace System.Tests
         [InlineData("H" + c_SoftHyphen + "ello", 'e', 0, 3, 2)]
         [InlineData("Hello", '\0', 0, 5, -1)] // .NET strings are terminated with a null character, but they should not be included as part of the string
         [InlineData("\ud800\udfff", '\ud800', 0, 1, 0)] // Surrogate characters
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'A', 0, 26, 0)] // (64-bit) Character is 2 chars before the first char with an aligned address, otherwise it'd enter the main loop
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'B', 1, 25, 1)] // (64-bit) Character is 1 char before the first char with an aligned address, otherwise it'd enter the main loop
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'C', 2, 24, 2)] // (64-bit) Character is aligned and enters the main loop, stops at first check of first iteration
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'D', 3, 23, 3)] // (64-bit) Character is 3 chars before the first char with an aligned address, otherwise it'd enter the main loop
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'G', 2, 24, 6)] // (64-bit) Main loop is entered, stops at second check of first iteration
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'K', 2, 24, 10)] // (64-bit) Main loop is entered, stops at third check of first iteration
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'O', 2, 24, 14)] // (64-bit) Main loop is entered, stops at first check of second iteration
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'P', 2, 24, 15)] // (64-bit) Character is after an aligned character, at an offset of 1
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'Q', 2, 24, 16)] // (64-bit) Character is after an aligned character, at an offset of 2
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'R', 2, 24, 17)] // (64-bit) Character is after an aligned character, at an offset of 3
-        [InlineData("________\u8080\u8080\u8080________", '\u0080', 0, 19, -1)] // (64-bit) value | 0x8000 is present in the string, which should not cause misfires
-        [InlineData("________\u8000\u8000\u8000________", '\u0080', 0, 19, -1)] // (64-bit) A char >= 0x8000 other than value | 0x8000 is present in the string, which should cause misfires
-        [InlineData("__\u8080\u8000\u0080______________", '\u0080', 0, 19, 4)] // (64-bit) Both of the above, except value is present this time
-        [InlineData("__\u8080\u8000__\u0080____________", '\u0080', 0, 19, 6)] // (64-bit) Same as above, except value is found in the word after the misfire (we should skip 4 chars, not 12)
-        [InlineData("__________________________________", '\ufffd', 0, 34, -1)] // (64-bit) Value itself is >= 0x8000, which means we go to the fallback loop
-        [InlineData("____________________________\ufffd", '\ufffd', 0, 29, 28)] // (64-bit) Same as above, except it's actually present this time
-        [InlineData("ABCDEFGHIJKLM", 'M', 0, 13, 12)] // (64-bit) String is too small for main loop to actually kick in
-        [InlineData("ABCDEFGHIJKLMN", 'N', 0, 14, 13)] // (64-bit) String is barely big enough for main loop to kick in
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", '@', 0, 26, -1)] // (64-bit) 26 letters is exactly enough to fit 2 iterations of the main loop (2 to align, 12 per iteration)
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXY", '@', 0, 25, -1)] // (64-bit) 25 letters is 1 below being able to fit another iteration (the last 11 chars will be processed in the fallback loop)
-        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ#", '@', 0, 27, -1)] // (64-bit) 27 letters is 1 above fitting an iteration (only the last char will be processed in the fallback loop)
-        [InlineData("_____________\u807f", '\u007f', 0, 14, -1)] // (64-bit) There is a misfire, and then no chunks available to process after the misfire
-        [InlineData("_____________\u807f__", '\u007f', 0, 16, -1)] // (64-bit) Same as above, except there are 2 more chars after the misfire we still need to process
-        [InlineData("_____________\u807f\u007f_", '\u007f', 0, 16, 14)] // (64-bit) Same as above, except the string actually contains the value after the misfire
-        [InlineData("__\u807f_______________", '\u007f', 0, 18, -1)] // (64-bit) There are exactly 12 chars left after misfiring, so we do one more iteration of the loop
-        [InlineData("__\u807f___\u007f___________", '\u007f', 0, 18, 6)] // (64-bit) Same as above, except value is present at first check of that iteration
-        [InlineData("ABCDEFGHIJKLMN", 'N', 2, 11, -1)] // (64-bit) Value is present, but not in range; the range can't fit one chunk forcing us to go to the fallback loop
-        [InlineData("!@#$%^&", '%', 0, 7, 4)] // (32-bit) We have to go to the fallback loop to find the character
-        [InlineData("!@#$", '!', 0, 4, 0)] // (32-bit) Character is found on first check/first iteration of main loop
-        [InlineData("!@#$", '@', 0, 4, 1)] // (32-bit) Character is found on second check/first iteration of main loop
-        [InlineData("!@#$", '#', 0, 4, 2)] // (32-bit) Character is found on third check/first iteration of main loop
-        [InlineData("!@#$", '$', 0, 4, 3)] // (32-bit) Character is found on fourth check/first iteration of main loop
-        [InlineData("!@#$%^&*", '%', 0, 8, 4)] // (32-bit) Character is found on first check/second iteration of main loop
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'A', 0, 26, 0)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'B', 1, 25, 1)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'C', 2, 24, 2)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'D', 3, 23, 3)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'G', 2, 24, 6)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'K', 2, 24, 10)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'O', 2, 24, 14)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'P', 2, 24, 15)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'Q', 2, 24, 16)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 'R', 2, 24, 17)]
+        [InlineData("________\u8080\u8080\u8080________", '\u0080', 0, 19, -1)]
+        [InlineData("________\u8000\u8000\u8000________", '\u0080', 0, 19, -1)]
+        [InlineData("__\u8080\u8000\u0080______________", '\u0080', 0, 19, 4)]
+        [InlineData("__\u8080\u8000__\u0080____________", '\u0080', 0, 19, 6)]
+        [InlineData("__________________________________", '\ufffd', 0, 34, -1)]
+        [InlineData("____________________________\ufffd", '\ufffd', 0, 29, 28)]
+        [InlineData("ABCDEFGHIJKLM", 'M', 0, 13, 12)]
+        [InlineData("ABCDEFGHIJKLMN", 'N', 0, 14, 13)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ", '@', 0, 26, -1)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXY", '@', 0, 25, -1)]
+        [InlineData("ABCDEFGHIJKLMNOPQRSTUVWXYZ#", '@', 0, 27, -1)]
+        [InlineData("_____________\u807f", '\u007f', 0, 14, -1)]
+        [InlineData("_____________\u807f__", '\u007f', 0, 16, -1)]
+        [InlineData("_____________\u807f\u007f_", '\u007f', 0, 16, 14)]
+        [InlineData("__\u807f_______________", '\u007f', 0, 18, -1)]
+        [InlineData("__\u807f___\u007f___________", '\u007f', 0, 18, 6)]
+        [InlineData("ABCDEFGHIJKLMN", 'N', 2, 11, -1)]
+        [InlineData("!@#$%^&", '%', 0, 7, 4)]
+        [InlineData("!@#$", '!', 0, 4, 0)]
+        [InlineData("!@#$", '@', 0, 4, 1)]
+        [InlineData("!@#$", '#', 0, 4, 2)]
+        [InlineData("!@#$", '$', 0, 4, 3)]
+        [InlineData("!@#$%^&*", '%', 0, 8, 4)]
         public static void IndexOf_SingleLetter(string s, char target, int startIndex, int count, int expected)
         {
             if (count + startIndex == s.Length)
