@@ -751,6 +751,11 @@ namespace System.Runtime.Serialization
                 {
                     return Globals.TypeOfDateTimeOffsetAdapter;
                 }
+
+                if (type == Globals.TypeOfCultureInfo)
+                {
+                    return Globals.TypeOfCultureInfoAdapter;
+                }
 #if !NET_NATIVE
                 if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == Globals.TypeOfKeyValuePair)
                 {
@@ -1236,6 +1241,10 @@ namespace System.Runtime.Serialization
                 {
                     return true;
                 }
+            }
+            if (ClassDataContract.IsKnownSerializableType(type))
+            {
+                return true;
             }
             return DataContract.GetBuiltInDataContract(type) != null ||
                    ClassDataContract.IsNonAttributedTypeValidForSerialization(type);

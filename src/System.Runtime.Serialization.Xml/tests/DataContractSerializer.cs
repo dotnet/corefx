@@ -2174,6 +2174,34 @@ public static partial class DataContractSerializerTests
         Assert.True(root2.Children[0] == root2.Children[2], "root2.Children[0] != root2.Children[2]");
     }
 
+    [Fact]
+    public static void DCS_CultureInfo()
+    {
+        CultureInfo value = new CultureInfo("zh-cn");
+
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"<CultureInfo xmlns=""http://schemas.datacontract.org/2004/07/System.Globalization"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><calendar i:nil=""true""/><compareInfo i:nil=""true""/><dateTimeInfo i:nil=""true""/><m_isReadOnly>false</m_isReadOnly><m_name>zh-CN</m_name><m_useUserOverride>true</m_useUserOverride><numInfo i:nil=""true""/><textInfo i:nil=""true""/></CultureInfo>");
+
+        Assert.NotNull(deserialized);
+        Assert.Equal(value.Name, deserialized.Name);
+        Assert.Equal(value, deserialized);
+    }
+
+    [Fact]
+    public static void DCS_CultureInfoLazyInitialized()
+    {
+        CultureInfo value = new CultureInfo("zh-cn");
+        // Use these properties to force lazy initialization
+        Assert.NotNull(value.Name);
+        Assert.NotNull(value.CompareInfo);
+        Assert.NotNull(value.TextInfo);
+
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"<CultureInfo xmlns=""http://schemas.datacontract.org/2004/07/System.Globalization"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><calendar i:nil=""true""/><compareInfo i:nil=""true""/><dateTimeInfo i:nil=""true""/><m_isReadOnly>false</m_isReadOnly><m_name>zh-CN</m_name><m_useUserOverride>true</m_useUserOverride><numInfo i:nil=""true""/><textInfo i:nil=""true""/></CultureInfo>");
+
+        Assert.NotNull(deserialized);
+        Assert.Equal(value.Name, deserialized.Name);
+        Assert.Equal(value, deserialized);
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractSerializer dcs;

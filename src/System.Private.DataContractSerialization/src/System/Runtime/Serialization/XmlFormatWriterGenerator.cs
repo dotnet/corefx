@@ -151,6 +151,11 @@ namespace System.Runtime.Serialization
                     _ilg.ConvertValue(objectArg.ArgType, Globals.TypeOfKeyValuePair.MakeGenericType(dc.KeyValuePairGenericArguments));
                     _ilg.New(dc.KeyValuePairAdapterConstructorInfo);
                 }
+                else if (objType == Globals.TypeOfCultureInfoAdapter)
+                {
+                    _ilg.ConvertValue(objectArg.ArgType, Globals.TypeOfCultureInfo);
+                    _ilg.Call(XmlFormatGeneratorStatics.GetCultureInfoAdapterMethod);
+                }
                 else
                 {
                     _ilg.ConvertValue(objectArg.ArgType, objType);

@@ -1825,6 +1825,31 @@ public static partial class DataContractJsonSerializerTests
         });
     }
 
+    [Fact]
+    public static void DCJS_CultureInfo()
+    {
+        CultureInfo value = new CultureInfo("zh-cn");
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"{""calendar"":null,""compareInfo"":null,""dateTimeInfo"":null,""m_isReadOnly"":false,""m_name"":""zh-CN"",""m_useUserOverride"":true,""numInfo"":null,""textInfo"":null}");
+
+        Assert.NotNull(deserialized);
+        Assert.Equal(value, deserialized);
+    }
+
+    [Fact]
+    public static void DCJS_CultureInfoLazyInitialized()
+    {
+        CultureInfo value = new CultureInfo("zh-cn");
+        // Use these properties to force lazy initialization
+        Assert.NotNull(value.Name);
+        Assert.NotNull(value.CompareInfo);
+        Assert.NotNull(value.TextInfo);
+
+        CultureInfo deserialized = SerializeAndDeserialize(value, @"{""calendar"":null,""compareInfo"":null,""dateTimeInfo"":null,""m_isReadOnly"":false,""m_name"":""zh-CN"",""m_useUserOverride"":true,""numInfo"":null,""textInfo"":null}");
+
+        Assert.NotNull(deserialized);
+        Assert.Equal(value, deserialized);
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractJsonSerializer dcjs;

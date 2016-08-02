@@ -148,6 +148,12 @@ namespace System.Runtime.Serialization
                         _ilg.Call(classContract.GetKeyValuePairMethodInfo);
                         _ilg.ConvertValue(Globals.TypeOfKeyValuePair.MakeGenericType(classContract.KeyValuePairGenericArguments), _ilg.CurrentMethod.ReturnType);
                     }
+                    else if (classContract.UnderlyingType == Globals.TypeOfCultureInfoAdapter)
+                    {
+                        _ilg.ConvertValue(_objectLocal.LocalType, Globals.TypeOfCultureInfoAdapter);
+                        _ilg.Call(XmlFormatGeneratorStatics.GetCultureInfoMethod);
+                        _ilg.ConvertValue(Globals.TypeOfCultureInfo, _ilg.CurrentMethod.ReturnType);
+                    }
                     else
                     {
                         _ilg.ConvertValue(_objectLocal.LocalType, _ilg.CurrentMethod.ReturnType);
