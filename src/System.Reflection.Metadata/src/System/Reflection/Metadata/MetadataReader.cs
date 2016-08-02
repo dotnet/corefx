@@ -986,7 +986,7 @@ namespace System.Reflection.Metadata
         /// <summary>
         /// Pointer to the underlying data.
         /// </summary>
-        public unsafe byte* MetadataPointer => Block.Pointer;
+        public unsafe byte* MetadataPointer => Block.StartPointer;
 
         /// <summary>
         /// Length of the underlying data.

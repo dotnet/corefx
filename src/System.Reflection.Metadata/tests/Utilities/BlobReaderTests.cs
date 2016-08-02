@@ -377,7 +377,7 @@ namespace System.Reflection.Metadata.Tests
                 Assert.Throws<BadImageFormatException>(() => block.GetMemoryBlockAt(-int.MaxValue, int.MaxValue));
                 Assert.Throws<BadImageFormatException>(() => block.GetMemoryBlockAt(int.MaxValue, -int.MaxValue));
                 Assert.Throws<BadImageFormatException>(() => block.GetMemoryBlockAt(int.MaxValue, int.MaxValue));
-                Assert.Throws<BadImageFormatException>(() => block.GetMemoryBlockAt(block.Length, -1));
+                Assert.Throws<BadImageFormatException>(() => block.GetMemoryBlockAt(block.  Length, -1));
                 Assert.Throws<BadImageFormatException>(() => block.GetMemoryBlockAt(-1, block.Length));
 
 

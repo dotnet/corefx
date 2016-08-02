@@ -16,7 +16,7 @@ namespace System.Reflection.Metadata
         /// <summary>An array containing the '\0' character.</summary>
         private static readonly char[] s_nullCharArray = new char[1] { '\0' };
 
-        internal const int InvalidCompressedInteger = Int32.MaxValue;
+        internal const int InvalidCompressedInteger = int.MaxValue;
         
         private readonly byte* _startPointer;
         
@@ -41,9 +41,9 @@ namespace System.Reflection.Metadata
 
         internal BlobReader(MemoryBlock block)
         {
-            Debug.Assert(BitConverter.IsLittleEndian && block.Length >= 0 && (block.Pointer != null || block.Length == 0));
-            _currentPointer = _startPointer = block.Pointer;
-            _endPointer = block.Pointer + block.Length;
+            Debug.Assert(BitConverter.IsLittleEndian && block.Length >= 0 && (block.StartPointer != null || block.Length == 0));
+            _currentPointer = _startPointer = block.StartPointer;
+            _endPointer = block.EndPointer;
         }
 
         internal string GetDebuggerDisplay()

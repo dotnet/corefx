@@ -13,14 +13,16 @@ namespace System.Reflection.Internal
     [DebuggerDisplay("{GetDebuggerDisplay(),nq}")]
     internal unsafe struct MemoryBlock
     {
-        internal readonly byte* Pointer;
-        internal readonly int Length;
+        internal readonly byte* StartPointer;
+        internal readonly byte* EndPointer;
+
+        internal int Length => (int)(EndPointer - StartPointer);
 
         internal MemoryBlock(byte* buffer, int length)
         {
             Debug.Assert(length >= 0 && (buffer != null || length == 0));
-            this.Pointer = buffer;
-            this.Length = length;
+            StartPointer = buffer;
+            EndPointer = buffer + length;
         }
 
         internal static MemoryBlock CreateChecked(byte* buffer, int length)
@@ -45,22 +47,37 @@ namespace System.Reflection.Internal
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CheckBounds(int offset, int byteCount)
+        private byte* GetPointerChecked(int offset)
         {
-            if (unchecked((ulong)(uint)offset + (uint)byteCount) > (ulong)Length)
+            byte* newPointer = StartPointer + offset;
+            if (newPointer < StartPointer || newPointer > EndPointer)
             {
                 Throw.OutOfBounds();
             }
+
+            return newPointer;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private byte* GetPointerChecked(int offset, int byteCount)
+        {
+            byte* newPointer = StartPointer + offset;
+            if (newPointer < StartPointer || newPointer > EndPointer - byteCount)
+            {
+                Throw.OutOfBounds();
+            }
+
+            return newPointer;
         }
 
         internal byte[] ToArray()
         {
-            return Pointer == null ? null : PeekBytes(0, Length);
+            return StartPointer == null ? null : PeekBytes(0, Length);
         }
 
         private string GetDebuggerDisplay()
         {
-            if (Pointer == null)
+            if (StartPointer == null)
             {
                 return "<null>";
             }
@@ -83,7 +100,7 @@ namespace System.Reflection.Internal
 
         internal string GetDebuggerDisplay(int offset)
         {
-            if (Pointer == null)
+            if (StartPointer == null)
             {
                 return "<null>";
             }
@@ -108,14 +125,12 @@ namespace System.Reflection.Internal
 
         internal MemoryBlock GetMemoryBlockAt(int offset, int length)
         {
-            CheckBounds(offset, length);
-            return new MemoryBlock(Pointer + offset, length);
+            return new MemoryBlock(GetPointerChecked(offset, length), length);
         }
 
         internal byte PeekByte(int offset)
         {
-            CheckBounds(offset, sizeof(byte));
-            return Pointer[offset];
+            return *GetPointerChecked(offset, sizeof(byte));
         }
 
         internal int PeekInt32(int offset)
@@ -131,8 +146,7 @@ namespace System.Reflection.Internal
 
         internal uint PeekUInt32(int offset)
         {
-            CheckBounds(offset, sizeof(uint));
-            return *(uint*)(Pointer + offset);
+            return *(uint*)GetPointerChecked(offset, sizeof(uint));
         }
 
         /// <summary>
@@ -146,10 +160,8 @@ namespace System.Reflection.Internal
         /// </returns>
         internal int PeekCompressedInteger(int offset, out int numberOfBytesRead)
         {
-            CheckBounds(offset, 0);
-
-            byte* ptr = Pointer + offset;
-            long limit = Length - offset;
+            byte* ptr = GetPointerChecked(offset);
+            int limit = Length - offset;
 
             if (limit == 0)
             {
@@ -186,8 +198,7 @@ namespace System.Reflection.Internal
 
         internal ushort PeekUInt16(int offset)
         {
-            CheckBounds(offset, sizeof(ushort));
-            return *(ushort*)(Pointer + offset);
+            return *(ushort*)GetPointerChecked(offset, sizeof(ushort));
         }
 
         // When reference has tag bits.
@@ -241,22 +252,18 @@ namespace System.Reflection.Internal
 
         internal Guid PeekGuid(int offset)
         {
-            CheckBounds(offset, sizeof(Guid));
-            return *(Guid*)(Pointer + offset);
+            return *(Guid*)GetPointerChecked(offset, sizeof(Guid));
         }
 
         internal string PeekUtf16(int offset, int byteCount)
         {
-            CheckBounds(offset, byteCount);
-
             // doesn't allocate a new string if byteCount == 0
-            return new string((char*)(Pointer + offset), 0, byteCount / sizeof(char));
+            return new string((char*)GetPointerChecked(offset, byteCount), 0, byteCount / sizeof(char));
         }
 
         internal string PeekUtf8(int offset, int byteCount)
         {
-            CheckBounds(offset, byteCount);
-            return Encoding.UTF8.GetString(Pointer + offset, byteCount);
+            return Encoding.UTF8.GetString(GetPointerChecked(offset, byteCount), byteCount);
         }
 
         /// <summary>
@@ -272,9 +279,9 @@ namespace System.Reflection.Internal
         internal string PeekUtf8NullTerminated(int offset, byte[] prefix, MetadataStringDecoder utf8Decoder, out int numberOfBytesRead, char terminator = '\0')
         {
             Debug.Assert(terminator <= 0x7F);
-            CheckBounds(offset, 0);
+            byte* newPointer = GetPointerChecked(offset);
             int length = GetUtf8NullTerminatedLength(offset, out numberOfBytesRead, terminator);
-            return EncodingHelper.DecodeUtf8(Pointer + offset, length, prefix, utf8Decoder);
+            return EncodingHelper.DecodeUtf8(newPointer, length, prefix, utf8Decoder);
         }
 
         /// <summary>
@@ -288,12 +295,10 @@ namespace System.Reflection.Internal
         /// <returns>Length (byte count) not including terminator.</returns>
         internal int GetUtf8NullTerminatedLength(int offset, out int numberOfBytesRead, char terminator = '\0')
         {
-            CheckBounds(offset, 0);
-
             Debug.Assert(terminator <= 0x7f);
 
-            byte* start = Pointer + offset;
-            byte* end = Pointer + Length;
+            byte* start = GetPointerChecked(offset);
+            byte* end = EndPointer;
             byte* current = start;
 
             while (current < end)
@@ -320,13 +325,13 @@ namespace System.Reflection.Internal
 
         internal int Utf8NullTerminatedOffsetOfAsciiChar(int startOffset, char asciiChar)
         {
-            CheckBounds(startOffset, 0);
-
             Debug.Assert(asciiChar != 0 && asciiChar <= 0x7f);
 
-            for (int i = startOffset; i < Length; i++)
+            byte* ptr = GetPointerChecked(startOffset);
+            byte* start = ptr;
+            while (ptr < EndPointer)
             {
-                byte b = Pointer[i];
+                byte b = *ptr;
 
                 if (b == 0)
                 {
@@ -335,7 +340,7 @@ namespace System.Reflection.Internal
 
                 if (b == asciiChar)
                 {
-                    return i;
+                    return (int)(ptr - start);
                 }
             }
 
@@ -394,13 +399,10 @@ namespace System.Reflection.Internal
         // comparison stops at null terminator, terminator parameter, or end-of-block -- whichever comes first.
         internal FastComparisonResult Utf8NullTerminatedFastCompare(int offset, string text, int textStart, out int firstDifferenceIndex, char terminator, bool ignoreCase)
         {
-            CheckBounds(offset, 0);
-
             Debug.Assert(terminator <= 0x7F);
 
-            byte* startPointer = Pointer + offset;
-            byte* endPointer = Pointer + Length;
-            byte* currentPointer = startPointer;
+            byte* currentPointer = GetPointerChecked(offset);
+            byte* endPointer = EndPointer;
 
             int ignoreCaseMask = StringUtils.IgnoreCaseMask(ignoreCase);
             int currentIndex = textStart;
@@ -447,15 +449,13 @@ namespace System.Reflection.Internal
         {
             // Assumes stringAscii only contains ASCII characters and no nil characters.
 
-            CheckBounds(offset, 0);
+            byte* p = GetPointerChecked(offset);
 
             // Make sure that we won't read beyond the block even if the block doesn't end with 0 byte.
             if (asciiPrefix.Length > Length - offset)
             {
                 return false;
             }
-
-            byte* p = Pointer + offset;
 
             for (int i = 0; i < asciiPrefix.Length; i++)
             {
@@ -476,9 +476,7 @@ namespace System.Reflection.Internal
         {
             // Assumes stringAscii only contains ASCII characters and no nil characters.
 
-            CheckBounds(offset, 0);
-
-            byte* p = Pointer + offset;
+            byte* p = GetPointerChecked(offset);
             int limit = Length - offset;
 
             for (int i = 0; i < asciiString.Length; i++)
@@ -508,21 +506,18 @@ namespace System.Reflection.Internal
 
         internal byte[] PeekBytes(int offset, int byteCount)
         {
-            CheckBounds(offset, byteCount);
-            return BlobUtilities.ReadBytes(Pointer + offset, byteCount);
+            return BlobUtilities.ReadBytes(GetPointerChecked(offset, byteCount), byteCount);
         }
 
         internal int IndexOf(byte b, int start)
         {
-            CheckBounds(start, 0);
-
-            byte* p = Pointer + start;
-            byte* end = Pointer + Length;
+            byte* p = GetPointerChecked(start);
+            byte* end = EndPointer;
             while (p < end)
             {
                 if (*p == b)
                 {
-                    return (int)(p - Pointer);
+                    return (int)(p - StartPointer);
                 }
 
                 p++;

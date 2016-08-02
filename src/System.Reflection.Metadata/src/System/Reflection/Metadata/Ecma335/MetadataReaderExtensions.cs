@@ -120,7 +120,7 @@ namespace System.Reflection.Metadata.Ecma335
                 Throw.ArgumentNull(nameof(reader));
             }
 
-            return (int)(reader.GetTableMetadataBlock(tableIndex).Pointer - reader.Block.Pointer);
+            return (int)(reader.GetTableMetadataBlock(tableIndex).StartPointer - reader.Block.StartPointer);
         }
 
         private static MemoryBlock GetTableMetadataBlock(this MetadataReader reader, TableIndex tableIndex)
@@ -217,7 +217,7 @@ namespace System.Reflection.Metadata.Ecma335
                 Throw.ArgumentNull(nameof(reader));
             }
 
-            return (int)(reader.GetMetadataBlock(heapIndex).Pointer - reader.Block.Pointer);
+            return (int)(reader.GetMetadataBlock(heapIndex).StartPointer - reader.Block.StartPointer);
         }
 
         /// <summary>
