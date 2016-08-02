@@ -19,5 +19,11 @@ namespace System.Security.Cryptography.Pkcs.Tests
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         public static bool EncryptionDoesNotSupportAddingOriginatorCerts => !EncryptionSupportsAddingOriginatorCerts;
+
+        // As OpenSSL uses EVP_CIPHER_CTX to support ciphers with variable key length but their CMS API uses a EVP_CIPHER
+        // there's no direct way to support changing the key length.
+        public static bool EncryptionSupportsVariableKeyLengths => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        public static bool EncryptionDoesNotSupportVariableKeyLengths => !EncryptionSupportsVariableKeyLengths;
     }
 }

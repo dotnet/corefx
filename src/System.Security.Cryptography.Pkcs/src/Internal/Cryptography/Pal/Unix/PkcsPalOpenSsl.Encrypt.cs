@@ -30,6 +30,20 @@ namespace Internal.Cryptography.Pal.OpenSsl
                 throw new PlatformNotSupportedException(SR.Cryptography_Cms_AddOriginatorCertsPlatformNotSupported);
             }
 
+            if (contentEncryptionAlgorithm.KeyLength != 0 && contentEncryptionAlgorithm.KeyLength != KeyLengths.DefaultKeyLengthForRc2AndRc4)
+            {
+                switch (contentEncryptionAlgorithm.Oid.Value)
+                {
+                    case Oids.Rc2:
+                        throw new PlatformNotSupportedException(SR.Cryptography_Cms_Rc2VariableKeyLengthPlatformNotSupported);
+                    case Oids.Rc4:
+                        throw new PlatformNotSupportedException(SR.Cryptography_Cms_Rc4VariableKeyLengthPlatformNotSupported);
+                    default:
+                        // RC2 and RC4 are the only ciphers for which we support a variable key length that we need to worry about.
+                        break;
+                }
+            }
+
             using (SafeBioHandle contentBio = Interop.Crypto.CreateMemoryBio())
             using (SafeAsn1ObjectHandle algoOid = Interop.Crypto.ObjTxt2Obj(contentEncryptionAlgorithm.Oid.Value))
             {

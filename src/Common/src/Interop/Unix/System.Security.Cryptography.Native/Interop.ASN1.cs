@@ -67,6 +67,23 @@ internal static partial class Interop
             }
         }
 
+        internal static string GetOidValue(SafeAsn1ObjectHandle asn1Object)
+        {
+            Debug.Assert(asn1Object != null);
+
+            bool added = false;
+            try
+            {
+                asn1Object.DangerousAddRef(ref added);
+                return GetOidValue(asn1Object.DangerousGetHandle());
+            }
+            finally
+            {
+                if (added)
+                    asn1Object.DangerousRelease();
+            }
+        }
+
         internal static unsafe string GetOidValue(IntPtr asn1ObjectPtr)
         {
             // OBJ_obj2txt returns the number of bytes that should have been in the answer, but it does not accept

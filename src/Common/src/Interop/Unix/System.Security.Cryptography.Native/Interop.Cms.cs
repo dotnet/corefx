@@ -112,5 +112,8 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsSetEmbeddedContentType")]
         internal static extern int CmsSetEmbeddedContentType(SafeCmsHandle cms, SafeAsn1ObjectHandle oid);
+        
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_CmsGetAlgorithmKeyLength")]
+        internal static extern int CmsGetAlgorithmKeyLength(byte[] algorithmIdentifier, int length);
     }
 }
