@@ -15,7 +15,7 @@ namespace System.Diagnostics.Debug.SymbolReader
 
     public class SymbolReader
     {
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct DebugInfo
         {
             public int lineNumber;
@@ -53,7 +53,8 @@ namespace System.Diagnostics.Debug.SymbolReader
         /// <param name="lineNumber">source line number</param>
         /// <param name="methToken">method token return</param>
         /// <param name="ilOffset">IL offset return</param>
-        public static void ResolveSequencePoint(string assemblyFileName, string fileName, int lineNumber, out int methToken, out int ilOffset)
+        /// <returns> true if information is available</returns>
+        public static bool ResolveSequencePoint(string assemblyFileName, string fileName, int lineNumber, out int methToken, out int ilOffset)
         {
             MetadataReader peReader, pdbReader;
             methToken = 0;
@@ -61,7 +62,7 @@ namespace System.Diagnostics.Debug.SymbolReader
             
             try {
                 if (!GetReaders(assemblyFileName, out peReader, out pdbReader))
-                    return;
+                    return false;
                 
                 foreach (MethodDefinitionHandle methodDefHandle in peReader.MethodDefinitions)
                 {
@@ -74,7 +75,7 @@ namespace System.Diagnostics.Debug.SymbolReader
                         {
                             methToken = MetadataTokens.GetToken(peReader, methodDefHandle);
                             ilOffset = point.Offset;
-                            return;
+                            return true;
                         }
                     }
                 }
@@ -84,6 +85,7 @@ namespace System.Diagnostics.Debug.SymbolReader
                 peReader = null;
                 pdbReader = null;
             }
+            return false;
         }
 
 
@@ -103,7 +105,7 @@ namespace System.Diagnostics.Debug.SymbolReader
                 return false;
             }
 
-            var structSize = Marshal.SizeOf(typeof(DebugInfo));
+            var structSize = Marshal.SizeOf<DebugInfo>();
 
             debugInfo.size = points.Count;
             var ptr = debugInfo.points;
@@ -173,7 +175,7 @@ namespace System.Diagnostics.Debug.SymbolReader
         /// <param name="lineNumber">source line number return</param>
         /// <param name="fileName">source file name return</param>
         /// <returns> true if information is available</returns>
-        public static bool GetLineByILOffset(string assemblyFileName, int methodToken, int ilOffset, out int lineNumber, out IntPtr fileName)
+        public static bool GetLineByILOffset(string assemblyFileName, int methodToken, long ilOffset, out int lineNumber, out IntPtr fileName)
         {
             lineNumber = 0;
             fileName = IntPtr.Zero;
@@ -197,7 +199,7 @@ namespace System.Diagnostics.Debug.SymbolReader
         /// <param name="lineNumber">source line number return</param>
         /// <param name="fileName">source file name return</param>
         /// <returns> true if information is available</returns>
-        private static bool GetSourceLineByILOffset(string assemblyFileName, int methodToken, int ilOffset, out int lineNumber, out string fileName)
+        private static bool GetSourceLineByILOffset(string assemblyFileName, int methodToken, long ilOffset, out int lineNumber, out string fileName)
         {
             MetadataReader peReader, pdbReader;
             lineNumber = 0;
