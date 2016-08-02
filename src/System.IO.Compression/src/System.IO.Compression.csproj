@@ -12,7 +12,7 @@
     <OutputType>Library</OutputType>
     <ProjectGuid>{5471BFE8-8071-466F-838E-5ADAA779E742}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <UseECMAKey Condition="'$(UseECMAKey)'==''">true</UseECMAKey>
+    <UseECMAKey>true</UseECMAKey>
     <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.7</PackageTargetFramework>
     <DefineConstants Condition="'$(TargetGroup)' != 'net46' And '$(TargetGroup)' != 'net463'">$(DefineConstants);FEATURE_ZLIB</DefineConstants>
     <DefineConstants Condition="'$(AssemblyVersion)'!='4.1.2.0'">$(DefineConstants);FEATURE_NS_1_7</DefineConstants>
