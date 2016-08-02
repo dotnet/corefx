@@ -206,7 +206,7 @@ namespace System.Reflection.Metadata
 
             int numberOfBytesRead;
             versionString = memReader.GetMemoryBlockAt(0, versionStringSize).PeekUtf8NullTerminated(0, null, UTF8Decoder, out numberOfBytesRead, '\0');
-            memReader.SkipBytes(versionStringSize);
+            memReader.Offset += versionStringSize;
         }
 
         private MetadataKind GetMetadataKind(string versionString)

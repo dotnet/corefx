@@ -17,9 +17,9 @@ namespace System.Reflection.Metadata
         private static readonly char[] s_nullCharArray = new char[1] { '\0' };
 
         internal const int InvalidCompressedInteger = Int32.MaxValue;
-
-        private readonly MemoryBlock _block;
-
+        
+        private readonly byte* _startPointer;
+        
         // Points right behind the last byte of the block.
         private readonly byte* _endPointer;
 
@@ -42,25 +42,24 @@ namespace System.Reflection.Metadata
         internal BlobReader(MemoryBlock block)
         {
             Debug.Assert(BitConverter.IsLittleEndian && block.Length >= 0 && (block.Pointer != null || block.Length == 0));
-            _block = block;
-            _currentPointer = block.Pointer;
+            _currentPointer = _startPointer = block.Pointer;
             _endPointer = block.Pointer + block.Length;
         }
 
         internal string GetDebuggerDisplay()
         {
-            if (_block.Pointer == null)
+            if (StartPointer == null)
             {
                 return "<null>";
             }
 
             int displayedBytes;
-            string display = _block.GetDebuggerDisplay(out displayedBytes);
-            if (this.Offset < displayedBytes)
+            string display = new MemoryBlock(StartPointer, Length).GetDebuggerDisplay(out displayedBytes);
+            if (Offset < displayedBytes)
             {
-                display = display.Insert(this.Offset * 3, "*");
+                display = display.Insert(Offset * 3, "*");
             }
-            else if (displayedBytes == _block.Length)
+            else if (displayedBytes == Length)
             {
                 display += "*";
             }
@@ -77,7 +76,7 @@ namespace System.Reflection.Metadata
         /// <summary>
         /// Pointer to the byte at the start of the underlying memory block.
         /// </summary>
-        public byte* StartPointer => _block.Pointer;
+        public byte* StartPointer => _startPointer;
 
         /// <summary>
         /// Pointer to the byte at the current position of the reader.
@@ -87,12 +86,31 @@ namespace System.Reflection.Metadata
         /// <summary>
         /// The total length of the underlying memory block.
         /// </summary>
-        public int Length => _block.Length;
+        public int Length => (int)(_endPointer - _startPointer);
 
         /// <summary>
         /// Offset from start of underlying memory block to current position.
         /// </summary>
-        public int Offset => (int)(_currentPointer - _block.Pointer);
+        /// <exception cref="BadImageFormatException">Offset is set outside the bounds of underlying reader.</exception>
+        public int Offset
+        {
+            get
+            {
+                return (int)(_currentPointer - StartPointer);
+            }
+
+            set
+            {
+                byte* newPointer = StartPointer + value;
+
+                if (newPointer > _endPointer)
+                {
+                    Throw.OutOfBounds();
+                }
+
+                _currentPointer = newPointer;
+            }
+        }
 
         /// <summary>
         /// Bytes remaining from current position to end of underlying memory block.
@@ -104,38 +122,7 @@ namespace System.Reflection.Metadata
         /// </summary>
         public void Reset()
         {
-            _currentPointer = _block.Pointer;
-        }
-
-        /// <summary>
-        /// Repositions the reader to the given offset from the start of the underlying memory block.
-        /// </summary>
-        /// <exception cref="BadImageFormatException">Offset is outside the bounds of underlying reader.</exception>
-        public void SeekOffset(int offset)
-        {
-            if (!TrySeekOffset(offset))
-            {
-                Throw.OutOfBounds();
-            }
-        }
-
-        internal bool TrySeekOffset(int offset)
-        {
-            if (unchecked((uint)offset) >= (uint)_block.Length)
-            {
-                return false;
-            }
-
-            _currentPointer = _block.Pointer + offset;
-            return true;
-        }
-
-        /// <summary>
-        /// Repositions the reader forward by the given number of bytes.
-        /// </summary>
-        public void SkipBytes(int count)
-        {
-            GetCurrentPointerAndAdvance(count);
+            _currentPointer = StartPointer;
         }
 
         /// <summary>
@@ -353,7 +340,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="BadImageFormatException"><paramref name="byteCount"/> bytes not available.</exception>
         public string ReadUTF8(int byteCount)
         {
-            string s = _block.PeekUtf8(this.Offset, byteCount);
+            string s = new MemoryBlock(StartPointer, Length).PeekUtf8(this.Offset, byteCount);
             _currentPointer += byteCount;
             return s;
         }
@@ -366,7 +353,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="BadImageFormatException"><paramref name="byteCount"/> bytes not available.</exception>
         public string ReadUTF16(int byteCount)
         {
-            string s = _block.PeekUtf16(this.Offset, byteCount);
+            string s = new MemoryBlock(StartPointer, Length).PeekUtf16(this.Offset, byteCount);
             _currentPointer += byteCount;
             return s;
         }
@@ -379,7 +366,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="BadImageFormatException"><paramref name="byteCount"/> bytes not available.</exception>
         public byte[] ReadBytes(int byteCount)
         {
-            byte[] bytes = _block.PeekBytes(this.Offset, byteCount);
+            byte[] bytes = new MemoryBlock(StartPointer, Length).PeekBytes(this.Offset, byteCount);
             _currentPointer += byteCount;
             return bytes;
         }
@@ -399,7 +386,7 @@ namespace System.Reflection.Metadata
         internal string ReadUtf8NullTerminated()
         {
             int bytesRead;
-            string value = _block.PeekUtf8NullTerminated(this.Offset, null, MetadataStringDecoder.DefaultUTF8, out bytesRead, '\0');
+            string value = new MemoryBlock(StartPointer, Length).PeekUtf8NullTerminated(this.Offset, null, MetadataStringDecoder.DefaultUTF8, out bytesRead, '\0');
             _currentPointer += bytesRead;
             return value;
         }
@@ -407,7 +394,7 @@ namespace System.Reflection.Metadata
         private int ReadCompressedIntegerOrInvalid()
         {
             int bytesRead;
-            int value = _block.PeekCompressedInteger(this.Offset, out bytesRead);
+            int value = new MemoryBlock(StartPointer, Length).PeekCompressedInteger(this.Offset, out bytesRead);
             _currentPointer += bytesRead;
             return value;
         }
@@ -449,7 +436,7 @@ namespace System.Reflection.Metadata
         public bool TryReadCompressedSignedInteger(out int value)
         {
             int bytesRead;
-            value = _block.PeekCompressedInteger(this.Offset, out bytesRead);
+            value = new MemoryBlock(StartPointer, Length).PeekCompressedInteger(this.Offset, out bytesRead);
 
             if (value == InvalidCompressedInteger)
             {
