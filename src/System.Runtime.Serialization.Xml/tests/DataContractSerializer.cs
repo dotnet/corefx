@@ -904,6 +904,19 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
+    public static void DCS_DataMemberNames()
+    {
+        var obj = new AppEnvironment()
+        {
+            ScreenDpi = 440,
+            ScreenOrientation = "horizontal"
+        };
+        var actual = SerializeAndDeserialize(obj, "<AppEnvironment xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><screen_dpi_x0028_x_x003A_y_x0029_>440</screen_dpi_x0028_x_x003A_y_x0029_><screen_x003A_orientation>horizontal</screen_x003A_orientation></AppEnvironment>");
+        Assert.StrictEqual(obj.ScreenDpi, actual.ScreenDpi);
+        Assert.StrictEqual(obj.ScreenOrientation, actual.ScreenOrientation);
+    }
+
+    [Fact]
     public static void DCS_GenericBase()
     {
         var actual = SerializeAndDeserialize<GenericBase2<SimpleBaseDerived, SimpleBaseDerived2>>(new GenericBase2<SimpleBaseDerived, SimpleBaseDerived2>(true), @"<GenericBase2OfSimpleBaseDerivedSimpleBaseDerived2zbP0weY4 z:Id=""i1"" xmlns=""http://schemas.datacontract.org/2004/07/SerializationTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""><genericData1 z:Id=""i2""><BaseData/><DerivedData/></genericData1><genericData2 z:Id=""i3""><BaseData/><DerivedData/></genericData2></GenericBase2OfSimpleBaseDerivedSimpleBaseDerived2zbP0weY4>");
@@ -2198,6 +2211,18 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(count-1, deserialized[count-1].P2);
     }
 
+    [Fact]
+    public static void DCS_TypeWithEmitDefaultValueFalse()
+    {
+        var value = new TypeWithEmitDefaultValueFalse();
+
+        var actual = SerializeAndDeserialize(value, "<TypeWithEmitDefaultValueFalse xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"/>");
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.Name, actual.Name);
+        Assert.Equal(value.ID, actual.ID);
+    }
+
     #endregion
 
     #region Collection
@@ -2290,6 +2315,18 @@ public static partial class DataContractSerializerTests
         var deserialized = SerializeAndDeserialize(value, @"<ArrayOfTypeWithPrimitiveProperties xmlns=""http://schemas.datacontract.org/2004/07/SerializationTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><TypeWithPrimitiveProperties><P1>abc</P1><P2>123</P2></TypeWithPrimitiveProperties><TypeWithPrimitiveProperties><P1>def</P1><P2>456</P2></TypeWithPrimitiveProperties></ArrayOfTypeWithPrimitiveProperties>");
         Assert.StrictEqual(value.Count, deserialized.Count);
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+    }
+
+    [Fact]
+    public static void DCS_CollectionOfTypeWithNonDefaultNamcespace()
+    {
+        var value = new CollectionOfTypeWithNonDefaultNamcespace();
+        value.Add(new TypeWithNonDefaultNamcespace() { Name = "foo" });
+
+        var actual = SerializeAndDeserialize(value, "<CollectionOfTypeWithNonDefaultNamcespace xmlns=\"CollectionNamespace\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:a=\"ItemTypeNamespace\"><TypeWithNonDefaultNamcespace><a:Name>foo</a:Name></TypeWithNonDefaultNamcespace></CollectionOfTypeWithNonDefaultNamcespace>");
+        Assert.NotNull(actual);
+        Assert.NotNull(actual[0]);
+        Assert.Equal(value[0].Name, actual[0].Name);
     }
 
     #endregion

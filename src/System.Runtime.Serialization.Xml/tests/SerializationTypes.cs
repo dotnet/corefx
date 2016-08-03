@@ -2397,13 +2397,13 @@ namespace SerializationTypes
         public List<SimpleTypeWihtMoreProperties> SimpleTypeList { get; set; }
     }
 
-    public class SimpleTypeWihtMoreFields
+    public class SimpleTypeWithMoreFields
     {
         public string StringField;
         public int IntField;
         public MyEnum EnumField;
         public List<string> CollectionField;
-        public List<SimpleTypeWihtMoreFields> SimpleTypeList;
+        public List<SimpleTypeWithMoreFields> SimpleTypeList;
     }
 
     // New types
@@ -3113,3 +3113,26 @@ public class RecursiveCollection3 : List<RecursiveCollection>
 {
 
 }
+
+[DataContract]
+public class TypeWithEmitDefaultValueFalse
+{
+    [DataMember(EmitDefaultValue = false)]
+    public string Name = null;
+    [DataMember(EmitDefaultValue = false)]
+    public int ID = 0;
+}
+
+[DataContract(Namespace = "ItemTypeNamespace")]
+public class TypeWithNonDefaultNamcespace
+{
+    [DataMember]
+    public string Name;
+}
+
+[CollectionDataContract(Namespace = "CollectionNamespace")]
+public class CollectionOfTypeWithNonDefaultNamcespace : List<TypeWithNonDefaultNamcespace>
+{
+
+}
+
