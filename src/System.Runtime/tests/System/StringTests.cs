@@ -680,6 +680,7 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 0, "foo", -1, 0)); // then indexB
             Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", 4, "foo", 4, 0)); // indexA > strA.Length first
             Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 3, "foo", 4, 0)); // then indexB > strB.Length
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => string.CompareOrdinal("foo", 0, "foo", 0, -1)); // early return should not kick in if count is invalid
         }
 
         [Theory]
