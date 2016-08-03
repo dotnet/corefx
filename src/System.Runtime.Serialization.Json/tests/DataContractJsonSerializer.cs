@@ -429,7 +429,7 @@ public static partial class DataContractJsonSerializerTests
     [Fact]
     public static void DCJS_GetOonlyDictionary_UseSimpleDictionaryFormat()
     {
-        TypeWithDictionaryGenericMembers x = new TypeWithDictionaryGenericMembers();
+        var x = new TypeWithDictionaryGenericMembers();
 
         x.RO1.Add(true, 't');
         x.RO1.Add(false, 'f');
@@ -439,7 +439,7 @@ public static partial class DataContractJsonSerializerTests
 
         var settings = new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true };
         string baseline = "{\"F1\":null,\"F2\":null,\"P1\":null,\"P2\":null,\"RO1\":{\"True\":\"t\",\"False\":\"f\"},\"RO2\":{\"True\":\"a\",\"False\":\"b\"}}";
-        TypeWithDictionaryGenericMembers y = SerializeAndDeserialize<TypeWithDictionaryGenericMembers>(x, baseline, settings);
+        var y = SerializeAndDeserialize(x, baseline, settings);
         Assert.NotNull(y);
 
         Assert.NotNull(y.RO1);
@@ -1844,16 +1844,16 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_RecursiveCollection()
+    public static void DCJS_RecursiveCollection()
     {
         Assert.Throws<InvalidDataContractException>(() =>
         {
-            (new DataContractSerializer(typeof(RecursiveCollection))).WriteObject(new MemoryStream(), new RecursiveCollection());
+            (new DataContractJsonSerializer(typeof(RecursiveCollection))).WriteObject(new MemoryStream(), new RecursiveCollection());
         });
     }
 
     [Fact]
-    public static void DCS_TypeWithPrimitiveProperties()
+    public static void DCJS_TypeWithPrimitiveProperties()
     {
         TypeWithPrimitiveProperties x = new TypeWithPrimitiveProperties { P1 = "abc", P2 = 11 };
         TypeWithPrimitiveProperties y = SerializeAndDeserialize<TypeWithPrimitiveProperties>(x, "{\"P1\":\"abc\",\"P2\":11}");
@@ -1862,7 +1862,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_TypeWithPrimitiveFields()
+    public static void DCJS_TypeWithPrimitiveFields()
     {
         TypeWithPrimitiveFields x = new TypeWithPrimitiveFields { P1 = "abc", P2 = 11 };
         TypeWithPrimitiveFields y = SerializeAndDeserialize<TypeWithPrimitiveFields>(x, "{\"P1\":\"abc\",\"P2\":11}");
@@ -1871,7 +1871,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_TypeWithAllPrimitiveProperties()
+    public static void DCJS_TypeWithAllPrimitiveProperties()
     {
         TypeWithAllPrimitiveProperties x = new TypeWithAllPrimitiveProperties
         {
@@ -1903,7 +1903,7 @@ public static partial class DataContractJsonSerializerTests
     #region Array of primitive types
 
     [Fact]
-    public static void DCS_ArrayOfBoolean()
+    public static void DCJS_ArrayOfBoolean()
     {
         var value = new bool[] { true, false, true };
         var deserialized = SerializeAndDeserialize(value, "[true,false,true]");
@@ -1912,7 +1912,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArrayOfDateTime()
+    public static void DCJS_ArrayOfDateTime()
     {
         var value = new DateTime[] { new DateTime(2000, 1, 2, 3, 4, 5), new DateTime(2011, 2, 3, 4, 5, 6) };
         var deserialized = SerializeAndDeserialize(value, "[\"\\/Date(946811045000-0800)\\/\",\"\\/Date(1296734706000-0800)\\/\"]");
@@ -1921,7 +1921,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArrayOfDecimal()
+    public static void DCJS_ArrayOfDecimal()
     {
         var value = new decimal[] { new decimal(1, 2, 3, false, 1), new decimal(4, 5, 6, true, 2) };
         var deserialized = SerializeAndDeserialize(value, "[5534023222971858944.1,-1106804644637321461.80]");
@@ -1930,7 +1930,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArrayOfInt32()
+    public static void DCJS_ArrayOfInt32()
     {
         var value = new int[] { 123, int.MaxValue, int.MinValue };
         var deserialized = SerializeAndDeserialize(value, "[123,2147483647,-2147483648]");
@@ -1939,7 +1939,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArrayOfInt64()
+    public static void DCJS_ArrayOfInt64()
     {
         var value = new long[] { 123, long.MaxValue, long.MinValue };
         var deserialized = SerializeAndDeserialize(value, "[123,9223372036854775807,-9223372036854775808]");
@@ -1948,7 +1948,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArrayOfSingle()
+    public static void DCJS_ArrayOfSingle()
     {
         var value = new float[] { 1.23f, 4.56f, 7.89f };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
@@ -1957,7 +1957,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArrayOfDouble()
+    public static void DCJS_ArrayOfDouble()
     {
         var value = new double[] { 1.23, 4.56, 7.89 };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
@@ -1966,7 +1966,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArrayOfString()
+    public static void DCJS_ArrayOfString()
     {
         var value = new string[] { "abc", "def", "xyz" };
         var deserialized = SerializeAndDeserialize(value, "[\"abc\",\"def\",\"xyz\"]");
@@ -1975,7 +1975,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_ArrayOfTypeWithPrimitiveProperties()
+    public static void DCJS_ArrayOfTypeWithPrimitiveProperties()
     {
         var value = new TypeWithPrimitiveProperties[]
         {
@@ -1992,7 +1992,7 @@ public static partial class DataContractJsonSerializerTests
     #region Collection
 
     [Fact]
-    public static void DCS_GenericICollectionOfBoolean()
+    public static void DCJS_GenericICollectionOfBoolean()
     {
         var value = new TypeImplementsGenericICollection<bool>() { true, false, true };
         var deserialized = SerializeAndDeserialize(value, "[true,false,true]");
@@ -2001,7 +2001,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericICollectionOfDecimal()
+    public static void DCJS_GenericICollectionOfDecimal()
     {
         var value = new TypeImplementsGenericICollection<decimal>() { new decimal(1, 2, 3, false, 1), new decimal(4, 5, 6, true, 2) };
         var deserialized = SerializeAndDeserialize(value, "[5534023222971858944.1,-1106804644637321461.80]");
@@ -2010,7 +2010,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericICollectionOfInt32()
+    public static void DCJS_GenericICollectionOfInt32()
     {
         TypeImplementsGenericICollection<int> x = new TypeImplementsGenericICollection<int>(123, int.MaxValue, int.MinValue);
         TypeImplementsGenericICollection<int> y = SerializeAndDeserialize(x, "[123,2147483647,-2147483648]");
@@ -2021,7 +2021,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericICollectionOfInt64()
+    public static void DCJS_GenericICollectionOfInt64()
     {
         var value = new TypeImplementsGenericICollection<long>() { 123, long.MaxValue, long.MinValue };
         var deserialized = SerializeAndDeserialize(value, "[123,9223372036854775807,-9223372036854775808]");
@@ -2030,7 +2030,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericICollectionOfSingle()
+    public static void DCJS_GenericICollectionOfSingle()
     {
         var value = new TypeImplementsGenericICollection<float>() { 1.23f, 4.56f, 7.89f };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
@@ -2039,7 +2039,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericICollectionOfDouble()
+    public static void DCJS_GenericICollectionOfDouble()
     {
         var value = new TypeImplementsGenericICollection<double>() { 1.23, 4.56, 7.89 };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
@@ -2048,7 +2048,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericICollectionOfString()
+    public static void DCJS_GenericICollectionOfString()
     {
         TypeImplementsGenericICollection<string> value = new TypeImplementsGenericICollection<string>("a1", "a2");
         TypeImplementsGenericICollection<string> deserialized = SerializeAndDeserialize(value, "[\"a1\",\"a2\"]");
@@ -2059,7 +2059,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericICollectionOfTypeWithPrimitiveProperties()
+    public static void DCJS_GenericICollectionOfTypeWithPrimitiveProperties()
     {
         var value = new TypeImplementsGenericICollection<TypeWithPrimitiveProperties>()
         {
@@ -2076,7 +2076,7 @@ public static partial class DataContractJsonSerializerTests
     #region Generic Dictionary
 
     [Fact]
-    public static void DCS_GenericDictionaryOfInt32Boolean()
+    public static void DCJS_GenericDictionaryOfInt32Boolean()
     {
         var value = new Dictionary<int, bool>();
         value.Add(123, true);
@@ -2087,7 +2087,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericDictionaryOfInt32String()
+    public static void DCJS_GenericDictionaryOfInt32String()
     {
         var value = new Dictionary<int, string>();
         value.Add(123, "abc");
@@ -2098,7 +2098,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_GenericDictionaryOfStringInt32()
+    public static void DCJS_GenericDictionaryOfStringInt32()
     {
         var value = new Dictionary<string, int>();
         value.Add("abc", 123);
@@ -2113,7 +2113,7 @@ public static partial class DataContractJsonSerializerTests
     #region Non-Generic Dictionary
 
     [Fact]
-    public static void DCS_NonGenericDictionaryOfInt32Boolean()
+    public static void DCJS_NonGenericDictionaryOfInt32Boolean()
     {
         var value = new MyNonGenericDictionary();
         value.Add(123, true);
@@ -2125,7 +2125,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_NonGenericDictionaryOfInt32String()
+    public static void DCJS_NonGenericDictionaryOfInt32String()
     {
         var value = new MyNonGenericDictionary();
         value.Add(123, "abc");
@@ -2137,7 +2137,7 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    public static void DCS_NonGenericDictionaryOfStringInt32()
+    public static void DCJS_NonGenericDictionaryOfStringInt32()
     {
         var value = new MyNonGenericDictionary();
         value.Add("abc", 123);
