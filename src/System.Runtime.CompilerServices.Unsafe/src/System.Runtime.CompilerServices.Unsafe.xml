@@ -105,7 +105,7 @@
             </summary>
             <param name="left">The first reference to compare.</param>
             <param name="right">The second reference to compare.</param>
-            <returns>><c>true</c> if <paramref name="left"/> and <paramref name="right"/> point to the same location; otherwise ><c>false</c>.</returns>
+            <returns><c>true</c> if <paramref name="left"/> and <paramref name="right"/> point to the same location; otherwise <c>false</c>.</returns>
         </member>
         <member name="M:System.Runtime.CompilerServices.Unsafe.CopyBlock(System.Void*,System.Void*,System.UInt32)">
             <summary>
