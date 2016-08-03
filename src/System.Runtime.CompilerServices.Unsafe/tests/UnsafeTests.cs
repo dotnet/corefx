@@ -246,10 +246,10 @@ namespace System.Runtime.CompilerServices
             fixed (byte * p = b)
             {
                 ref int r = ref Unsafe.AsRef<int>(p);
-                Assert.Equal(r, 0x42424242);
+                Assert.Equal(0x42424242, r);
 
                 r = 0x0EF00EF0;
-                Assert.Equal(b[0] | b[1] | b[2] | b[3], 0xFE);
+                Assert.Equal(0xFE, b[0] | b[1] | b[2] | b[3]);
             }
         }
 
@@ -259,10 +259,10 @@ namespace System.Runtime.CompilerServices
             byte[] b = new byte[4] { 0x42, 0x42, 0x42, 0x42 };
 
             ref int r = ref Unsafe.As<byte, int>(ref b[0]);
-            Assert.Equal(r, 0x42424242);
+            Assert.Equal(0x42424242, r);
 
             r = 0x0EF00EF0;
-            Assert.Equal(b[0] | b[1] | b[2] | b[3], 0xFE);
+            Assert.Equal(0xFE, b[0] | b[1] | b[2] | b[3]);
         }
 
         [Fact]
@@ -271,13 +271,13 @@ namespace System.Runtime.CompilerServices
             int[] a = new int[] { 0x123, 0x234, 0x345, 0x456 };
 
             ref int r1 = ref Unsafe.Add(ref a[0], 1);
-            Assert.Equal(r1, 0x234);
+            Assert.Equal(0x234, r1);
 
             ref int r2 = ref Unsafe.Add(ref r1, 2);
-            Assert.Equal(r2, 0x456);
+            Assert.Equal(0x456, r2);
 
             ref int r3 = ref Unsafe.Add(ref r2, -3);
-            Assert.Equal(r3, 0x123);
+            Assert.Equal(0x123, r3);
         }
 
         [Fact]
@@ -286,13 +286,13 @@ namespace System.Runtime.CompilerServices
             string[] a = new string[] { "abc", "def", "ghi", "jkl" };
 
             ref string r1 = ref Unsafe.Subtract(ref a[0], -2);
-            Assert.Equal(r1, "ghi");
+            Assert.Equal("ghi", r1);
 
             ref string r2 = ref Unsafe.Subtract(ref r1, -1);
-            Assert.Equal(r2, "jkl");
+            Assert.Equal("jkl", r2);
 
             ref string r3 = ref Unsafe.Subtract(ref r2, 3);
-            Assert.Equal(r3, "abc");
+            Assert.Equal("abc", r3);
         }
 
         [Fact]
