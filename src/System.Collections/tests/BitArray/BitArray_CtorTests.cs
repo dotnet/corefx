@@ -224,7 +224,7 @@ namespace System.Collections.Tests
             Assert.Throws<ArgumentNullException>("bytes", () => new BitArray((byte[])null));
         }
 
-#if FEATURE_NS_1_7
+#if netstandard17
         [Fact]
         public static void Ctor_Simple_Method_Tests()
         {
@@ -236,6 +236,6 @@ namespace System.Collections.Tests
             Assert.False(bitArray.IsReadOnly);
             Assert.Equal(bitArray, bitArray.Clone());
         }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
     }
 }

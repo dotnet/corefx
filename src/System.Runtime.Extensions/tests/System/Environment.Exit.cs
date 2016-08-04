@@ -39,7 +39,7 @@ namespace System.Tests
             }
         }
 
-#if FEATURE_NS_1_7
+#if netstandard17
         [Theory]
         [MemberData(nameof(ExitCodeValues))]
         public static void ExitCode_Roundtrips(int exitCode)
@@ -49,7 +49,7 @@ namespace System.Tests
 
             Environment.ExitCode = 0; // in case the test host has a void returning Main
         }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
         [ActiveIssue("https://github.com/dotnet/coreclr/issues/6206")]
         [Theory]

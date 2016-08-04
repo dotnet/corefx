@@ -20,7 +20,7 @@ namespace System.Collections.Tests
             var hash = new ComparableHashtable();
             VerifyHashtable(hash, null, null);
         }
-#if FEATURE_NS_1_7
+#if netstandard17
         [Fact]
         public static void Ctor_HashCodeProvider_Comparer()
         {
@@ -42,7 +42,7 @@ namespace System.Collections.Tests
                 nullComparer ? null : StringComparer.OrdinalIgnoreCase);
             VerifyHashtable(hash, null, hash.EqualityComparer);
         }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
         [Fact]
         public static void Ctor_IDictionary()
@@ -66,7 +66,7 @@ namespace System.Collections.Tests
             Assert.Throws<ArgumentNullException>("d", () => new Hashtable((IDictionary)null)); // Dictionary is null
         }
 
-#if FEATURE_NS_1_7
+#if netstandard17
         [Fact]
         public static void Ctor_IDictionary_HashCodeProvider_Comparer()
         {
@@ -88,7 +88,7 @@ namespace System.Collections.Tests
         {
             Assert.Throws<ArgumentNullException>("d", () => new Hashtable(null, CaseInsensitiveHashCodeProvider.Default, StringComparer.OrdinalIgnoreCase)); // Dictionary is null
         }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
         [Fact]
         public static void Ctor_IEqualityComparer()
@@ -116,7 +116,7 @@ namespace System.Collections.Tests
             VerifyHashtable(hash, null, null);
         }
 
-#if FEATURE_NS_1_7
+#if netstandard17
         [Theory]
         [InlineData(0)]
         [InlineData(10)]
@@ -126,7 +126,7 @@ namespace System.Collections.Tests
             var hash = new ComparableHashtable(capacity, CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
             VerifyHashtable(hash, null, hash.EqualityComparer);
         }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
         [Fact]
         public static void Ctor_Int_Invalid()
@@ -135,7 +135,7 @@ namespace System.Collections.Tests
             Assert.Throws<ArgumentException>("capacity", () => new Hashtable(int.MaxValue)); // Capacity / load factor > int.MaxValue
         }
 
-#if FEATURE_NS_1_7
+#if netstandard17
         [Fact]
         public static void Ctor_IDictionary_Int()
         {
@@ -152,7 +152,7 @@ namespace System.Collections.Tests
 
             VerifyHashtable(hash1, hash2, hash1.EqualityComparer);
         }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
         [Fact]
         public static void Ctor_IDictionary_Int_Invalid()
@@ -225,7 +225,7 @@ namespace System.Collections.Tests
             VerifyHashtable(hash, null, null);
         }
 
-#if FEATURE_NS_1_7
+#if netstandard17
         [Theory]
         [InlineData(0, 0.1)]
         [InlineData(10, 0.2)]
@@ -236,7 +236,7 @@ namespace System.Collections.Tests
             var hash = new ComparableHashtable(capacity, loadFactor, CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
             VerifyHashtable(hash, null, hash.EqualityComparer);
         }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
         [Fact]
         public static void Ctor_Int_Int_GenerateNewPrime()
@@ -803,7 +803,7 @@ namespace System.Collections.Tests
             }
         }
 
-#if FEATURE_NS_1_7
+#if netstandard17
         [Fact]
         public static void HashCodeProvider_Set_ImpactsSearch()
         {
@@ -885,7 +885,7 @@ namespace System.Collections.Tests
             public int FixedHashCode;
             public int GetHashCode(object obj) => FixedHashCode;
         }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
         private static void VerifyHashtable(ComparableHashtable hash1, Hashtable hash2, IEqualityComparer ikc)
         {
@@ -936,15 +936,15 @@ namespace System.Collections.Tests
 
             public ComparableHashtable(int capacity, float loadFactor) : base(capacity, loadFactor) { }
 
-#if FEATURE_NS_1_7
+#if netstandard17
             public ComparableHashtable(int capacity, IHashCodeProvider hcp, IComparer comparer) : base(capacity, hcp, comparer) { }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
             public ComparableHashtable(int capacity, IEqualityComparer ikc) : base(capacity, ikc) { }
 
-#if FEATURE_NS_1_7
+#if netstandard17
             public ComparableHashtable(IHashCodeProvider hcp, IComparer comparer) : base(hcp, comparer) { }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
             public ComparableHashtable(IEqualityComparer ikc) : base(ikc) { }
 
@@ -952,29 +952,29 @@ namespace System.Collections.Tests
 
             public ComparableHashtable(IDictionary d, float loadFactor) : base(d, loadFactor) { }
 
-#if FEATURE_NS_1_7
+#if netstandard17
             public ComparableHashtable(IDictionary d, IHashCodeProvider hcp, IComparer comparer) : base(d, hcp, comparer) { }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
             public ComparableHashtable(IDictionary d, IEqualityComparer ikc) : base(d, ikc) { }
 
-#if FEATURE_NS_1_7
+#if netstandard17
             public ComparableHashtable(IDictionary d, float loadFactor, IHashCodeProvider hcp, IComparer comparer) : base(d, loadFactor, hcp, comparer) { }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
             public ComparableHashtable(IDictionary d, float loadFactor, IEqualityComparer ikc) : base(d, loadFactor, ikc) { }
 
-#if FEATURE_NS_1_7
+#if netstandard17
             public ComparableHashtable(int capacity, float loadFactor, IHashCodeProvider hcp, IComparer comparer) : base(capacity, loadFactor, hcp, comparer) { }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
 
             public ComparableHashtable(int capacity, float loadFactor, IEqualityComparer ikc) : base(capacity, loadFactor, ikc) { }
 
             public new IEqualityComparer EqualityComparer => base.EqualityComparer;
-#if FEATURE_NS_1_7
+#if netstandard17
             public IHashCodeProvider HashCodeProvider { get { return hcp; } set { hcp = value; } }
             public IComparer Comparer { get { return comparer; } set { comparer = value; } }
-#endif //FEATURE_NS_1_7
+#endif //netstandard17
         }
 
         private class BadHashCode
