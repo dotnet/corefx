@@ -15,7 +15,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)'!='netcore50' and '$(TargetGroup)' != 'uap101aot'">
+  <ItemGroup Condition="'$(TargetGroup)'!='netcore50'">
     <TargetingPackReference Include="mscorlib" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcore50'">
@@ -28,11 +28,6 @@
     <Compile Include="System\Reflection\ParameterAttributes.cs" />
     <Compile Include="System\Reflection\PropertyAttributes.cs" />
     <Compile Include="System\Reflection\TypeAttributes.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='uap101aot'">
-    <Compile Include="System\Reflection\TypeForwarders.uap101aot.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcore50' or '$(TargetGroup)'=='uap101aot'">
     <Compile Include="System\Reflection\Emit\FlowControl.cs" />
     <Compile Include="System\Reflection\Emit\Opcode.cs" />
     <Compile Include="System\Reflection\Emit\OpCodes.cs" />
@@ -40,9 +35,6 @@
     <Compile Include="System\Reflection\Emit\OperandType.cs" />
     <Compile Include="System\Reflection\Emit\PackingSize.cs" />
     <Compile Include="System\Reflection\Emit\StackBehaviour.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='uap101aot'">
-    <TargetingPackReference Include="System.Private.CoreLib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
