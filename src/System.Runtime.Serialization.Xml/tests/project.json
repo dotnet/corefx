@@ -15,9 +15,7 @@
     "System.Runtime.Extensions": "4.1.1-beta-devapi-24401-01",
     "System.Text.Encoding": "4.0.12-beta-devapi-24401-01",
     "System.Threading.Tasks": "4.0.12-beta-devapi-24401-01",
-    "System.Xml.ReaderWriter": "4.1.0-beta-devapi-24401-01",
-    "System.Xml.XDocument": "4.0.12-beta-devapi-24401-01",
-    "System.Xml.XmlDocument": "4.0.2-beta-devapi-24401-01",
+    "Microsoft.Win32.Registry": "4.0.1-beta-devapi-24401-01",
     "test-runtime": {
       "target": "project",
       "exclude": "compile"
@@ -30,7 +28,6 @@
     "netstandard1.3": {}
   },
   "supports": {
-    "coreFx.Test.netcore50": {},
     "coreFx.Test.netcoreapp1.0": {},
     "coreFx.Test.net46": {},
     "coreFx.Test.net461": {},
