@@ -1,4 +1,8 @@
-﻿using Xunit;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Xunit;
 
 namespace System.Security.Permissions.Tests
 {
@@ -7,7 +11,7 @@ namespace System.Security.Permissions.Tests
         [Fact]
         public static void ApplicationTrustCollectionCallMethods()
         {
-            Policy.ApplicationTrustCollection atc = (Policy.ApplicationTrustCollection) Activator.CreateInstance(typeof(Policy.ApplicationTrustCollection), true);
+            Policy.ApplicationTrustCollection atc = (Policy.ApplicationTrustCollection)Activator.CreateInstance(typeof(Policy.ApplicationTrustCollection), true);
             Policy.ApplicationTrust at = new Policy.ApplicationTrust();
             int testint = atc.Add(at);
             Policy.ApplicationTrust[] atarray = new Policy.ApplicationTrust[1];

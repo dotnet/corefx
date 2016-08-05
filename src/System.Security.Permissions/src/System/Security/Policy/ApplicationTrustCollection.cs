@@ -1,4 +1,8 @@
-﻿namespace System.Security.Policy
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace System.Security.Policy
 {
     public sealed partial class ApplicationTrustCollection : System.Collections.ICollection, System.Collections.IEnumerable
     {
@@ -13,9 +17,7 @@
         public void AddRange(System.Security.Policy.ApplicationTrustCollection trusts) { }
         public void Clear() { }
         public void CopyTo(System.Security.Policy.ApplicationTrust[] array, int index) { }
-        //    public System.Security.Policy.ApplicationTrustCollection Find(System.ApplicationIdentity applicationIdentity, System.Security.Policy.ApplicationVersionMatch versionMatch) { return default(System.Security.Policy.ApplicationTrustCollection); }
         public System.Security.Policy.ApplicationTrustEnumerator GetEnumerator() { return default(System.Security.Policy.ApplicationTrustEnumerator); }
-        //    public void Remove(System.ApplicationIdentity applicationIdentity, System.Security.Policy.ApplicationVersionMatch versionMatch) { }
         public void Remove(System.Security.Policy.ApplicationTrust trust) { }
         public void RemoveRange(System.Security.Policy.ApplicationTrust[] trusts) { }
         public void RemoveRange(System.Security.Policy.ApplicationTrustCollection trusts) { }

@@ -1,11 +1,15 @@
-﻿namespace System.Security
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace System.Security
 {
     public static partial class SecurityManager
     {
         [System.ObsoleteAttribute]
-        public static bool CheckExecutionRights { get { return default(bool); } set { } }
+        public static bool CheckExecutionRights { get; set; }
         [System.ObsoleteAttribute("The security manager cannot be turned off on MS runtime")]
-        public static bool SecurityEnabled { get { return default(bool); } set { } }
+        public static bool SecurityEnabled { get; set; }
         public static void GetZoneAndOrigin(out System.Collections.ArrayList zone, out System.Collections.ArrayList origin) { zone = default(System.Collections.ArrayList); origin = default(System.Collections.ArrayList); }
         [System.ObsoleteAttribute]
         public static bool IsGranted(System.Security.IPermission perm) { return default(bool); }

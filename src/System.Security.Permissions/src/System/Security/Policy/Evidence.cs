@@ -1,4 +1,8 @@
-﻿namespace System.Security.Policy
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace System.Security.Policy
 {
     public sealed partial class Evidence : System.Collections.ICollection, System.Collections.IEnumerable
     {
@@ -10,7 +14,7 @@
         public int Count { get { return default(int); } }
         public bool IsReadOnly { get { return default(bool); } }
         public bool IsSynchronized { get { return default(bool); } }
-        public bool Locked { get { return default(bool); } set { } }
+        public bool Locked { get; set; }
         public object SyncRoot { get { return default(object); } }
         [System.ObsoleteAttribute]
         public void AddAssembly(object id) { }

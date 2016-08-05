@@ -1,17 +1,21 @@
-﻿namespace System.Security.Permissions
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace System.Security.Permissions
 {
     [System.AttributeUsageAttribute((System.AttributeTargets)(109), AllowMultiple = true, Inherited = false)]
     public sealed partial class RegistryPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
     {
         public RegistryPermissionAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
         [System.ObsoleteAttribute("use newer properties")]
-        public string All { get { return default(string); } set { } }
-        public string ChangeAccessControl { get { return default(string); } set { } }
-        public string Create { get { return default(string); } set { } }
-        public string Read { get { return default(string); } set { } }
-        public string ViewAccessControl { get { return default(string); } set { } }
-        public string ViewAndModify { get { return default(string); } set { } }
-        public string Write { get { return default(string); } set { } }
+        public string All { get; set; }
+        public string ChangeAccessControl { get; set; }
+        public string Create { get; set; }
+        public string Read { get; set; }
+        public string ViewAccessControl { get; set; }
+        public string ViewAndModify { get; set; }
+        public string Write { get; set; }
         public override System.Security.IPermission CreatePermission() { return default(System.Security.IPermission); }
     }
 }

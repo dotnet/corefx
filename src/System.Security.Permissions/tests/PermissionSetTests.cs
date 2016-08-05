@@ -1,4 +1,8 @@
-﻿using Xunit;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Xunit;
 
 namespace System.Security.Permissions.Tests
 {
@@ -10,11 +14,9 @@ namespace System.Security.Permissions.Tests
             PermissionSet ps = new PermissionSet(new PermissionState());
             ps.Assert();
             bool containspermissions = ps.ContainsNonCodeAccessPermissions();
-            byte[] testbytearray = PermissionSet.ConvertPermissionSet("TestFormat", new byte[1], "TestFormat");
             PermissionSet ps2 = ps.Copy();
             ps.CopyTo(new int[1], 0);
             ps.Demand();
-            ps.Deny();
             ps.Equals(ps2);
             System.Collections.IEnumerator ie = ps.GetEnumerator();
             int hash = ps.GetHashCode();
@@ -22,7 +24,6 @@ namespace System.Security.Permissions.Tests
             bool isempty = ps.IsEmpty();
             bool issubsetof = ps.IsSubsetOf(ps2);
             bool isunrestricted = ps.IsUnrestricted();
-            ps.PermitOnly();
             string s = ps.ToString();
             PermissionSet ps4 = ps.Union(ps2);
         }

@@ -1,4 +1,8 @@
-﻿namespace System.Security.Policy
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace System.Security.Policy
 {
     public partial class CodeConnectAccess
     {
@@ -11,7 +15,7 @@
         public string Scheme { get { return default(string); } }
         public static System.Security.Policy.CodeConnectAccess CreateAnySchemeAccess(int allowPort) { return default(System.Security.Policy.CodeConnectAccess); }
         public static System.Security.Policy.CodeConnectAccess CreateOriginSchemeAccess(int allowPort) { return default(System.Security.Policy.CodeConnectAccess); }
-        public override bool Equals(object o) { return default(bool); }
-        public override int GetHashCode() { return default(int); }
+        public override bool Equals(object o) => base.Equals(o);
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

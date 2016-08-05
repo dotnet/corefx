@@ -1,15 +1,18 @@
-﻿namespace System.Security.Policy
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace System.Security.Policy
 {
     public partial class TrustManagerContext
     {
         public TrustManagerContext() { }
         public TrustManagerContext(System.Security.Policy.TrustManagerUIContext uiContext) { }
-        public virtual bool IgnorePersistedDecision { get { return default(bool); } set { } }
-        public virtual bool KeepAlive { get { return default(bool); } set { } }
-        public virtual bool NoPrompt { get { return default(bool); } set { } }
-        public virtual bool Persist { get { return default(bool); } set { } }
-        //    public virtual System.ApplicationIdentity PreviousApplicationIdentity { get { return default(System.ApplicationIdentity); } set { } }
-        public virtual System.Security.Policy.TrustManagerUIContext UIContext { get { return default(System.Security.Policy.TrustManagerUIContext); } set { } }
+        public virtual bool IgnorePersistedDecision { get; set; }
+        public virtual bool KeepAlive { get; set; }
+        public virtual bool NoPrompt { get; set; }
+        public virtual bool Persist { get; set; }
+        public virtual System.Security.Policy.TrustManagerUIContext UIContext { get; set; }
     }
     public enum TrustManagerUIContext
     {

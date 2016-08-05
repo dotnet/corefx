@@ -1,4 +1,8 @@
-﻿using Xunit;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Xunit;
 using System.Reflection;
 
 namespace System.Security.Permissions.Tests
@@ -19,7 +23,6 @@ namespace System.Security.Permissions.Tests
         {
             EnvironmentPermissionAttribute epa = new EnvironmentPermissionAttribute(new Permissions.SecurityAction());
             IPermission ip = epa.CreatePermission();
-
         }
         [Fact]
         public static void FileDialogPermissionCallMethods()
@@ -44,7 +47,7 @@ namespace System.Security.Permissions.Tests
             FileIOPermission fiop = new FileIOPermission(fiopa, "testpath");
             FileIOPermission fiop2 = new FileIOPermission(new Permissions.PermissionState());
             fiop.AddPathList(fiopa, "testpath");
-            fiop.AddPathList(fiopa, new string[1] {"testpath"});
+            fiop.AddPathList(fiopa, new string[1] { "testpath" });
             IPermission ip = fiop.Copy();
             fiop.Equals(new object());
             int hash = fiop.GetHashCode();
@@ -78,7 +81,6 @@ namespace System.Security.Permissions.Tests
             PrincipalPermission pp2 = new PrincipalPermission("name", "role");
             PrincipalPermission pp3 = new PrincipalPermission("name", "role", true);
             IPermission ip = pp.Copy();
-            pp.Demand();
             bool testbool = pp.Equals(new object());
             int testint = pp.GetHashCode();
             IPermission ip2 = pp.Intersect(ip);
