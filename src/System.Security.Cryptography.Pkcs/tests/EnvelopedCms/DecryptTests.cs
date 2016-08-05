@@ -95,7 +95,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
-        [ActiveIssue(3334, PlatformID.AnyUnix)]
+        [ActiveIssue(10621, PlatformID.AnyUnix)]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void Decrypt_EnvelopedWithinEnveloped()
         {
