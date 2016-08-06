@@ -2382,12 +2382,10 @@ namespace System.Collections.Generic
     /// </summary>    
     internal class SortedSetEqualityComparer<T> : IEqualityComparer<SortedSet<T>> 
     {
-        private IComparer<T> comparer;
-        private IEqualityComparer<T> e_comparer;
+        private readonly IComparer<T> _comparer;
+        private readonly IEqualityComparer<T> _memberEqualityComparer;
 
         public SortedSetEqualityComparer() : this(null, null) { }
-
-        public SortedSetEqualityComparer(IComparer<T> comparer) : this(comparer, null) { }
 
         public SortedSetEqualityComparer(IEqualityComparer<T> memberEqualityComparer) : this(null, memberEqualityComparer) { }
 
@@ -2397,20 +2395,14 @@ namespace System.Collections.Generic
         /// </summary>        
         public SortedSetEqualityComparer(IComparer<T> comparer, IEqualityComparer<T> memberEqualityComparer)
         {
-            if (comparer == null)
-                this.comparer = Comparer<T>.Default;
-            else
-                this.comparer = comparer;
-            if (memberEqualityComparer == null)
-                e_comparer = EqualityComparer<T>.Default;
-            else
-                e_comparer = memberEqualityComparer;
+            _comparer = comparer ?? Comparer<T>.Default;
+            _memberEqualityComparer = memberEqualityComparer ?? EqualityComparer<T>.Default;
         }
 
         // using comparer to keep equals properties in tact; don't want to choose one of the comparers
         public bool Equals(SortedSet<T> x, SortedSet<T> y)
         {
-            return SortedSet<T>.SortedSetEquals(x, y, comparer);
+            return SortedSet<T>.SortedSetEquals(x, y, _comparer);
         }
 
         //IMPORTANT: this part uses the fact that GetHashCode() is consistent with the notion of equality in
@@ -2422,7 +2414,7 @@ namespace System.Collections.Generic
             {
                 foreach (T t in obj)
                 {
-                    hashCode = hashCode ^ (e_comparer.GetHashCode(t) & 0x7FFFFFFF);
+                    hashCode = hashCode ^ (_memberEqualityComparer.GetHashCode(t) & 0x7FFFFFFF);
                 }
             } // else returns hashcode of 0 for null HashSets
             return hashCode;
@@ -2436,12 +2428,12 @@ namespace System.Collections.Generic
             {
                 return false;
             }
-            return (this.comparer == comparer.comparer);
+            return (this._comparer == comparer._comparer);
         }
 
         public override int GetHashCode()
         {
-            return comparer.GetHashCode() ^ e_comparer.GetHashCode();
+            return _comparer.GetHashCode() ^ _memberEqualityComparer.GetHashCode();
         }
     }
 }
