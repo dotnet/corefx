@@ -11,30 +11,17 @@ namespace System.Collections.Generic
     /// <typeparam name="T"></typeparam>
     internal class HashSetEqualityComparer<T> : IEqualityComparer<HashSet<T>>
     {
-
-        private IEqualityComparer<T> m_comparer;
+        private readonly IEqualityComparer<T> _comparer;
 
         public HashSetEqualityComparer()
         {
-            m_comparer = EqualityComparer<T>.Default;
-        }
-
-        public HashSetEqualityComparer(IEqualityComparer<T> comparer)
-        {
-            if (comparer == null)
-            {
-                m_comparer = EqualityComparer<T>.Default;
-            }
-            else
-            {
-                m_comparer = comparer;
-            }
+            _comparer = EqualityComparer<T>.Default;
         }
 
         // using m_comparer to keep equals properties in tact; don't want to choose one of the comparers
         public bool Equals(HashSet<T> x, HashSet<T> y)
         {
-            return HashSet<T>.HashSetEquals(x, y, m_comparer);
+            return HashSet<T>.HashSetEquals(x, y, _comparer);
         }
 
         public int GetHashCode(HashSet<T> obj)
@@ -44,7 +31,7 @@ namespace System.Collections.Generic
             {
                 foreach (T t in obj)
                 {
-                    hashCode = hashCode ^ (m_comparer.GetHashCode(t) & 0x7FFFFFFF);
+                    hashCode = hashCode ^ (_comparer.GetHashCode(t) & 0x7FFFFFFF);
                 }
             } // else returns hashcode of 0 for null hashsets
             return hashCode;
@@ -58,12 +45,12 @@ namespace System.Collections.Generic
             {
                 return false;
             }
-            return (this.m_comparer == comparer.m_comparer);
+            return (this._comparer == comparer._comparer);
         }
 
         public override int GetHashCode()
         {
-            return m_comparer.GetHashCode();
+            return _comparer.GetHashCode();
         }
     }
 }
