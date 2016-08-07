@@ -59,17 +59,17 @@ namespace System.Linq.Expressions.Tests
 
         protected class TestVistor : ExpressionVisitor
         {
-            protected override Expression VisitDefault(DefaultExpression node)
+            protected internal override Expression VisitDefault(DefaultExpression node)
             {
                 return Expression.Default(node.Type);
             }
 
-            protected override Expression VisitConstant(ConstantExpression node)
+            protected internal override Expression VisitConstant(ConstantExpression node)
             {
                 return Expression.Constant(node.Value, node.Type);
             }
 
-            protected override Expression VisitParameter(ParameterExpression node)
+            protected internal override Expression VisitParameter(ParameterExpression node)
             {
                 return Expression.Parameter(node.Type.IsByRef ? node.Type.MakeByRefType() : node.Type, node.Name);
             }

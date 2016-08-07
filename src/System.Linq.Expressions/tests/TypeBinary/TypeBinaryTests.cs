@@ -13,7 +13,7 @@ namespace System.Linq.Expressions.Tests
         protected class TypeBinaryVisitCheckingVisitor : ExpressionVisitor
         {
             public TypeBinaryExpression LastTypeBinaryVisited { get; private set; }
-            protected override Expression VisitTypeBinary(TypeBinaryExpression node)
+            protected internal override Expression VisitTypeBinary(TypeBinaryExpression node)
             {
                 LastTypeBinaryVisited = node;
                 return base.VisitTypeBinary(node);

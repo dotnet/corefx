@@ -118,7 +118,7 @@ namespace System.Linq.Expressions.Tests
 
         private class ParameterChangingVisitor : ExpressionVisitor
         {
-            protected override Expression VisitParameter(ParameterExpression node)
+            protected internal override Expression VisitParameter(ParameterExpression node)
             {
                 return Expression.Parameter(node.IsByRef ? node.Type.MakeByRefType() : node.Type, node.Name);
             }

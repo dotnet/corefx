@@ -158,7 +158,7 @@ namespace System.Linq.Expressions.Tests
 
         class Visitor : ExpressionVisitor
         {
-            protected override Expression VisitConstant(ConstantExpression node)
+            protected internal override Expression VisitConstant(ConstantExpression node)
             {
                 return Expression.Constant(node.Value, node.Type); // clones
             }

@@ -117,9 +117,32 @@ namespace System.Linq.Expressions.Tests
 
         private class ConstantRefreshingVisitor : ExpressionVisitor
         {
-            protected override Expression VisitConstant(ConstantExpression node)
+            protected internal override Expression VisitConstant(ConstantExpression node)
                 => Expression.Constant(node.Value, node.Type);
         }
+ 
+        private class IndexVisitor : ExpressionVisitor
+        {
+            private static readonly IndexExpression.SampleClassWithProperties DefaultObjectWithProperty = new IndexExpression.SampleClassWithProperties
+            {
+                DefaultProperty = new List<int> { 0 }
+            };
+
+            public readonly Expression DefaultSubstitutionExpression =
+                Expression.Property(Expression.Constant(DefaultObjectWithProperty),
+                    typeof(IndexExpression.SampleClassWithProperties).GetProperty("AlternativeProperty"));
+
+            public override Expression Visit(Expression node)
+            {
+                if (node is MemberExpression)
+                {
+                    return DefaultSubstitutionExpression;
+                }
+
+                return base.Visit(node);
+            }
+        }
+
 
         private class ResultExpression : Expression
         {
@@ -127,12 +150,12 @@ namespace System.Linq.Expressions.Tests
 
         private class SourceExpression : Expression
         {
-            protected override Expression Accept(ExpressionVisitor visitor) => new ResultExpression();
+            protected internal override Expression Accept(ExpressionVisitor visitor) => new ResultExpression();
         }
 
         private class NullBecomingExpression : Expression
         {
-            protected override Expression Accept(ExpressionVisitor visitor) => null;
+            protected internal override Expression Accept(ExpressionVisitor visitor) => null;
         }
 
         private static string UpperCaseIfNotAlready(string value)
@@ -338,6 +361,23 @@ namespace System.Linq.Expressions.Tests
             var call = (MethodCallExpression)innerBlock.Expressions.Last();
             var instance = (ConstantExpression)call.Object;
             Assert.Same(list, instance.Value);
+        }
+
+        [Fact]
+        public void VisitIndexedExpressionRewrite()
+        {
+            var obj = new IndexExpression.SampleClassWithProperties {DefaultProperty = new List<int> {0}};
+            PropertyInfo indexer = typeof(List<int>).GetProperty("Item");
+            MemberExpression propertyExpression = Expression.Property(Expression.Constant(obj),
+                typeof(IndexExpression.SampleClassWithProperties).GetProperty("DefaultProperty"));
+            ConstantExpression[] arguments = {Expression.Constant(0)};
+            Expressions.IndexExpression expr = Expression.MakeIndex(propertyExpression, indexer, arguments);
+            var visitor = new IndexVisitor();
+            var expected = Expression.MakeIndex(visitor.DefaultSubstitutionExpression, expr.Indexer, expr.Arguments);
+
+            var actual = (Expressions.IndexExpression) visitor.Visit(expr);
+
+            Assert.NotSame(expected, actual);
         }
     }
 }
