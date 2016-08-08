@@ -192,14 +192,20 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(typeof(SByteEnum), (sbyte)42, (SByteEnum)42)]
-        [InlineData(typeof(SByteEnum), (SByteEnum)0x42, (SByteEnum)0x42)]
-        [InlineData(typeof(UInt64Enum), (ulong)0x0123456789abcdefL, (UInt64Enum)0x0123456789abcdefL)]
-        [InlineData(typeof(ByteEnum), (ulong)0x0ccccccccccccc2aL, (ByteEnum)0x2a)] // Value overflows
+        [InlineData(typeof(ByteEnum), (byte)42, (ByteEnum)42)]
+        [InlineData(typeof(Int16Enum), (short)42, (Int16Enum)42)]
+        [InlineData(typeof(Int32Enum), (int)42, (Int32Enum)42)]
         [InlineData(typeof(Int32Enum), false, (Int32Enum)0)] // Value is a bool
         [InlineData(typeof(Int32Enum), true, (Int32Enum)1)] // Value is a bool
         [InlineData(typeof(Int32Enum), 'a', (Int32Enum)97)] // Value is a char
         [InlineData(typeof(Int32Enum), 'b', (Int32Enum)98)] // Value is a char
+        [InlineData(typeof(Int64Enum), (long)42, (Int64Enum)42)]
+        [InlineData(typeof(SByteEnum), (sbyte)42, (SByteEnum)42)]
+        [InlineData(typeof(SByteEnum), (SByteEnum)0x42, (SByteEnum)0x42)]
+        [InlineData(typeof(UInt16Enum), (ushort)42, (UInt16Enum)42)]
+        [InlineData(typeof(UInt32Enum), (ushort)42, (UInt32Enum)42)]
+        [InlineData(typeof(UInt64Enum), (ulong)0x0123456789abcdefL, (UInt64Enum)0x0123456789abcdefL)]
+        [InlineData(typeof(ByteEnum), (ulong)0x0ccccccccccccc2aL, (ByteEnum)0x2a)] // Value overflows
         public static void ToObject(Type enumType, object value, object expected)
         {
             Assert.Equal(expected, Enum.ToObject(enumType, value));
@@ -459,7 +465,7 @@ namespace System.Tests
             {
                 Assert.Equal(expected, e.ToString());
                 Assert.Equal(expected, e.ToString(""));
-                Assert.Equal(expected, e.ToString(null));
+                Assert.Equal(expected, e.ToString((string)null));
             }
             // Format string is non-case-sensitive
             Assert.Equal(expected, e.ToString(format));
