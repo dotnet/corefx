@@ -40,7 +40,7 @@ namespace System.Tests
             Assert.Equal(message, exception.Message);
             Assert.Equal(exception.GetBaseException().Message, "Created inner exception");
             Assert.Equal(COR_E_ENTRYPOINTNOTFOUND, exception.HResult);
-            Assert.Same(innerException, exception.InnerException);
+            Assert.Equal(innerException, exception.InnerException);
             Assert.Equal(innerException.HResult, exception.InnerException.HResult);
         }
     }

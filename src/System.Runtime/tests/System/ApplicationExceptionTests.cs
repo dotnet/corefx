@@ -37,7 +37,7 @@ namespace System.Tests
             var exception = new ApplicationException(message, innerException);
             Assert.Equal(message, exception.Message);
             Assert.Equal(COR_E_APPLICATION, exception.HResult);
-            Assert.Same(innerException, exception.InnerException);
+            Assert.Equal(innerException, exception.InnerException);
             Assert.Equal(innerException.HResult, exception.InnerException.HResult);
         }
     }

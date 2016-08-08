@@ -93,6 +93,7 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.7'">
     <Compile Include="Array.1.7.Tests.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
+    <Compile Include="System\ExternalExceptionTests.cs" />
     <Compile Include="System\ApplicationExceptionTests.cs" />
     <Compile Include="System\EntryPointNotFoundExceptionTests.cs" />
     <Compile Include="System\ExecutionEngineExceptionTests.cs" />

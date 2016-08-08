@@ -37,7 +37,7 @@ namespace System.Tests
 
             Assert.Equal(message, exception.Message);
             Assert.Equal(COR_E_SYSTEM, exception.HResult);
-            Assert.Same(innerException, exception.InnerException);
+            Assert.Equal(innerException, exception.InnerException);
             Assert.Equal(innerException.HResult, exception.InnerException.HResult);
         }
     }

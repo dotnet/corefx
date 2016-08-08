@@ -37,7 +37,7 @@ namespace System
     {
         public EntryPointNotFoundException() { }
         public EntryPointNotFoundException(string message) { }
-        public EntryPointNotFoundException(string message, Exception inner) { }
+        public EntryPointNotFoundException(string message, Exception innerException) { }
     }
 
     public sealed partial class StackOverflowException : System.SystemException
@@ -2422,6 +2422,19 @@ namespace System
         public bool TryGetTarget(out T target) { target = default(T); return default(bool); }
     }
 }
+
+namespace System.Runtime.InteropServices
+{
+    public partial class ExternalException : System.SystemException
+    {
+        public ExternalException() { }
+        public ExternalException(string message) { }
+        public ExternalException(string message, Exception inner) { }
+        public ExternalException(string message, int errorCode) { }
+        public virtual int ErrorCode { get; }
+    }
+}
+
 namespace System.Collections
 {
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
