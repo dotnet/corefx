@@ -285,7 +285,7 @@ namespace System.Collections.Tests
 
         #region CreateSetComparer
 
-#if FEATURE_NS_1_7
+#if netstandard17
         [Fact]
         public void SetComparer_SetEqualsTests()
         {
