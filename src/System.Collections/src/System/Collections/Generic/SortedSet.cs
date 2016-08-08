@@ -2393,7 +2393,7 @@ namespace System.Collections.Generic
         /// Create a new SetEqualityComparer, given a comparer for member order and another for member equality (these
         /// must be consistent in their definition of equality)
         /// </summary>        
-        public SortedSetEqualityComparer(IComparer<T> comparer, IEqualityComparer<T> memberEqualityComparer)
+        private SortedSetEqualityComparer(IComparer<T> comparer, IEqualityComparer<T> memberEqualityComparer)
         {
             _comparer = comparer ?? Comparer<T>.Default;
             _memberEqualityComparer = memberEqualityComparer ?? EqualityComparer<T>.Default;
@@ -2421,14 +2421,14 @@ namespace System.Collections.Generic
         }
 
         // Equals method for the comparer itself. 
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             SortedSetEqualityComparer<T> comparer = obj as SortedSetEqualityComparer<T>;
             if (comparer == null)
             {
                 return false;
             }
-            return (this._comparer == comparer._comparer);
+            return (_comparer == comparer._comparer);
         }
 
         public override int GetHashCode()
