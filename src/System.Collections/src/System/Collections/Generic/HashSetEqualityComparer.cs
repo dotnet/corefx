@@ -9,7 +9,7 @@ namespace System.Collections.Generic
     /// Equality comparer for hashsets of hashsets
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class HashSetEqualityComparer<T> : IEqualityComparer<HashSet<T>>
+    internal sealed class HashSetEqualityComparer<T> : IEqualityComparer<HashSet<T>>
     {
         private readonly IEqualityComparer<T> _comparer;
 
@@ -38,14 +38,14 @@ namespace System.Collections.Generic
         }
 
         // Equals method for the comparer itself. 
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             HashSetEqualityComparer<T> comparer = obj as HashSetEqualityComparer<T>;
             if (comparer == null)
             {
                 return false;
             }
-            return (this._comparer == comparer._comparer);
+            return (_comparer == comparer._comparer);
         }
 
         public override int GetHashCode()
