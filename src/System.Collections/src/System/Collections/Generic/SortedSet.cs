@@ -2380,7 +2380,7 @@ namespace System.Collections.Generic
     /// equality defined by the IComparer for this SortedSet be consistent with the default IEqualityComparer
     /// for the type T. If not, such an IEqualityComparer should be provided through the constructor.
     /// </summary>    
-    internal class SortedSetEqualityComparer<T> : IEqualityComparer<SortedSet<T>> 
+    internal sealed class SortedSetEqualityComparer<T> : IEqualityComparer<SortedSet<T>> 
     {
         private readonly IComparer<T> _comparer;
         private readonly IEqualityComparer<T> _memberEqualityComparer;
