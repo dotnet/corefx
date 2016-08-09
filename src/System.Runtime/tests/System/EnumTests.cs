@@ -450,8 +450,56 @@ namespace System.Tests
         [InlineData((SimpleEnum)0, "G", "0")] // Not found
 
         [InlineData((ByteEnum)0, "G", "Min")]
-        [InlineData((ByteEnum)3, "G", "3")] // No [Flags] attribute
         [InlineData((ByteEnum)0xff, "F", "Max")] // Larger values take precedence (and remove the bits from consideration.)
+
+        [InlineData(ByteEnum.Min, "G", "Min")]
+        [InlineData(ByteEnum.One, "G", "One")]
+        [InlineData(ByteEnum.Two, "G", "Two")]
+        [InlineData((ByteEnum)3, "G", "3")] // No [Flags] attribute
+        [InlineData(ByteEnum.Max, "G", "Max")]
+
+        [InlineData(SByteEnum.Min, "G", "Min")]
+        [InlineData(SByteEnum.One, "G", "One")]
+        [InlineData(SByteEnum.Two, "G", "Two")]
+        [InlineData((SByteEnum)3, "G", "3")] // No [Flags] attribute
+        [InlineData(SByteEnum.Max, "G", "Max")]
+
+        [InlineData(UInt16Enum.Min, "G", "Min")]
+        [InlineData(UInt16Enum.One, "G", "One")]
+        [InlineData(UInt16Enum.Two, "G", "Two")]
+        [InlineData((UInt16Enum)3, "G", "3")] // No [Flags] attribute
+        [InlineData(UInt16Enum.Max, "G", "Max")]
+
+        [InlineData(Int16Enum.Min, "G", "Min")]
+        [InlineData(Int16Enum.One, "G", "One")]
+        [InlineData(Int16Enum.Two, "G", "Two")]
+        [InlineData((Int16Enum)3, "G", "3")] // No [Flags] attribute
+        [InlineData(Int16Enum.Max, "G", "Max")]
+
+        [InlineData(UInt32Enum.Min, "G", "Min")]
+        [InlineData(UInt32Enum.One, "G", "One")]
+        [InlineData(UInt32Enum.Two, "G", "Two")]
+        [InlineData((UInt32Enum)3, "G", "3")] // No [Flags] attribute
+        [InlineData(UInt32Enum.Max, "G", "Max")]
+
+        [InlineData(Int32Enum.Min, "G", "Min")]
+        [InlineData(Int32Enum.One, "G", "One")]
+        [InlineData(Int32Enum.Two, "G", "Two")]
+        [InlineData((Int32Enum)3, "G", "3")] // No [Flags] attribute
+        [InlineData(Int32Enum.Max, "G", "Max")]
+
+        [InlineData(UInt64Enum.Min, "G", "Min")]
+        [InlineData(UInt64Enum.One, "G", "One")]
+        [InlineData(UInt64Enum.Two, "G", "Two")]
+        [InlineData((UInt64Enum)3, "G", "3")] // No [Flags] attribute
+        [InlineData(UInt64Enum.Max, "G", "Max")]
+
+        [InlineData(Int64Enum.Min, "G", "Min")]
+        [InlineData(Int64Enum.One, "G", "One")]
+        [InlineData(Int64Enum.Two, "G", "Two")]
+        [InlineData((Int64Enum)3, "G", "3")] // No [Flags] attribute
+        [InlineData(Int64Enum.Max, "G", "Max")]
+
         [InlineData(AttributeTargets.Class | AttributeTargets.Delegate, "F", "Class, Delegate")] // [Flags] attribute
         public static void ToString_Format(Enum e, string format, string expected)
         {
