@@ -100,7 +100,7 @@ namespace System.Composition.TypedParts.Discovery
 
                 if (_constructor == null)
                     _constructor = _partType.DeclaredConstructors
-                        .FirstOrDefault(ci => ci.IsPublic && !(ci.IsStatic || ci.GetParameters().Any()));
+                        .FirstOrDefault(ci => ci.IsPublic && !ci.IsStatic && ci.GetParameters().All(p => p.ParameterType.GetTypeInfo().IsInterface));
 
                 if (_constructor == null)
                 {
