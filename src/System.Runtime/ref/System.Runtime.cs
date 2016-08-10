@@ -1550,6 +1550,10 @@ namespace System
         public static int Compare(string strA, string strB) { return default(int); }
         public static int Compare(string strA, string strB, bool ignoreCase) { return default(int); }
         public static int Compare(string strA, string strB, System.StringComparison comparisonType) { return default(int); }
+        public static int Compare(string strA, string strB, bool ignoreCase, System.Globalization.CultureInfo culture) { return default(int); }
+        public static int Compare(string strA, string strB, System.Globalization.CultureInfo culture, System.Globalization.CompareOptions options) { return default(int); }
+        public static int Compare(string strA, int indexA, string strB, int indexB, int length, bool ignoreCase, System.Globalization.CultureInfo culture) { return default(int); }
+        public static int Compare(string strA, int indexA, string strB, int indexB, int length, System.Globalization.CultureInfo culture, System.Globalization.CompareOptions options) { return default(int); }
         public static int CompareOrdinal(string strA, int indexA, string strB, int indexB, int length) { return default(int); }
         public static int CompareOrdinal(string strA, string strB) { return default(int); }
         public int CompareTo(string strB) { return default(int); }
@@ -1567,6 +1571,7 @@ namespace System
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
         public bool EndsWith(string value) { return default(bool); }
         public bool EndsWith(string value, System.StringComparison comparisonType) { return default(bool); }
+        public bool EndsWith(string value, bool ignoreCase, System.Globalization.CultureInfo culture) { return default(bool); }
         public override bool Equals(object obj) { return default(bool); }
         public bool Equals(string value) { return default(bool); }
         public static bool Equals(string a, string b) { return default(bool); }
@@ -1631,6 +1636,7 @@ namespace System
         public string[] Split(string[] separator, System.StringSplitOptions options) { return default(string[]); }
         public bool StartsWith(string value) { return default(bool); }
         public bool StartsWith(string value, System.StringComparison comparisonType) { return default(bool); }
+        public bool StartsWith(string value, bool ignoreCase, System.Globalization.CultureInfo culture) { return default(bool); }
         public string Substring(int startIndex) { return default(string); }
         public string Substring(int startIndex, int length) { return default(string); }
         System.Collections.Generic.IEnumerator<char> System.Collections.Generic.IEnumerable<System.Char>.GetEnumerator() { return default(System.Collections.Generic.IEnumerator<char>); }
@@ -1656,9 +1662,11 @@ namespace System
         public char[] ToCharArray() { return default(char[]); }
         public char[] ToCharArray(int startIndex, int length) { return default(char[]); }
         public string ToLower() { return default(string); }
+        public string ToLower(System.Globalization.CultureInfo culture) { return default(string); }
         public string ToLowerInvariant() { return default(string); }
         public override string ToString() { return default(string); }
         public string ToUpper() { return default(string); }
+        public string ToUpper(System.Globalization.CultureInfo culture) { return default(string); }
         public string ToUpperInvariant() { return default(string); }
         public string Trim() { return default(string); }
         public string Trim(params char[] trimChars) { return default(string); }
