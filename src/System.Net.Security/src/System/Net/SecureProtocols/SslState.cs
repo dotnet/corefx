@@ -470,6 +470,8 @@ namespace System.Net.Security
         //
         internal void Close()
         {
+            // TODO: Close_Alert sequence (ApplyControlToken(SCHANNEL_SHUTDOWN))
+
             _exception = ExceptionDispatchInfo.Capture(new ObjectDisposedException("SslStream"));
             if (Context != null)
             {
@@ -951,6 +953,7 @@ namespace System.Net.Security
                     Buffer.BlockCopy(buffer, offset, buffer, 0, count);
                 }
             }
+
             StartSendBlob(buffer, count, asyncRequest);
         }
 
@@ -1851,6 +1854,17 @@ namespace System.Net.Security
 
                 FinishHandshake(exception, null);
             }
+        }
+
+        internal void BeginShutdownChannel(LazyAsyncResult asyncRequest)
+        {
+            // Call ApplyControlToken(SCHANNEL_SHUTDOWN)
+            
+        }
+
+        internal void EndShutdownChannel(IAsyncResult result)
+        {
+
         }
     }
 }

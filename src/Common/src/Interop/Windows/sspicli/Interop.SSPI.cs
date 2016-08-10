@@ -511,6 +511,12 @@ internal static partial class Interop
                   );
 
         [DllImport(Interop.Libraries.Sspi, ExactSpelling = true, SetLastError = true)]
+        internal unsafe static extern int ApplyControlToken(
+          [In] void* inContextPtr,
+          [In, Out] SecurityBufferDescriptor inputBuffers
+          );
+
+        [DllImport(Interop.Libraries.Sspi, ExactSpelling = true, SetLastError = true)]
         internal unsafe static extern SecurityStatus SspiFreeAuthIdentity(
             [In] IntPtr authData);
 
