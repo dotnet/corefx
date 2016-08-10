@@ -872,15 +872,15 @@ namespace System.Net.Security
 
             if (input != null)
             {
-                incomingSecurity = new SecurityBuffer(input, offset, count, SecurityBufferType.Token);
+                incomingSecurity = new SecurityBuffer(input, offset, count, SecurityBufferType.SECBUFFER_TOKEN);
                 incomingSecurityBuffers = new SecurityBuffer[]
                 {
                     incomingSecurity,
-                    new SecurityBuffer(null, 0, 0, SecurityBufferType.Empty)
+                    new SecurityBuffer(null, 0, 0, SecurityBufferType.SECBUFFER_EMPTY)
                 };
             }
 
-            SecurityBuffer outgoingSecurity = new SecurityBuffer(null, SecurityBufferType.Token);
+            SecurityBuffer outgoingSecurity = new SecurityBuffer(null, SecurityBufferType.SECBUFFER_TOKEN);
 
             SecurityStatusPal status = default(SecurityStatusPal);
 
@@ -986,16 +986,16 @@ namespace System.Net.Security
                 GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::ProcessHandshakeSuccess");
             }
 
-            StreamSizes streamSizes;
+            SecPkgContext_StreamSizes streamSizes;
             SslStreamPal.QueryContextStreamSizes(_securityContext, out streamSizes);
 
             if (streamSizes != null)
             {
                 try
                 {
-                    _headerSize = streamSizes.header;
-                    _trailerSize = streamSizes.trailer;
-                    _maxDataSize = checked(streamSizes.maximumMessage - (_headerSize + _trailerSize));
+                    _headerSize = streamSizes.cbHeader;
+                    _trailerSize = streamSizes.cbTrailer;
+                    _maxDataSize = checked(streamSizes.cbMaximumMessage - (_headerSize + _trailerSize));
                 }
                 catch (Exception e)
                 {

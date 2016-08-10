@@ -137,7 +137,7 @@ namespace System.Net
             return outCredential;
         }
 
-        public static SafeFreeCredentials AcquireCredentialsHandle(SSPIInterface secModule, string package, Interop.SspiCli.CredentialUse intent, ref Interop.SspiCli.AuthIdentity authdata)
+        public static SafeFreeCredentials AcquireCredentialsHandle(SSPIInterface secModule, string package, Interop.SspiCli.CredentialUse intent, ref Interop.SspiCli.SEC_WINNT_AUTH_IDENTITY_W authdata)
         {
             if (GlobalLog.IsEnabled)
             {
@@ -196,7 +196,7 @@ namespace System.Net
             return credentialsHandle;
         }
 
-        public static SafeFreeCredentials AcquireCredentialsHandle(SSPIInterface secModule, string package, Interop.SspiCli.CredentialUse intent, Interop.SspiCli.SecureCredential scc)
+        public static SafeFreeCredentials AcquireCredentialsHandle(SSPIInterface secModule, string package, Interop.SspiCli.CredentialUse intent, Interop.SspiCli.SCHANNEL_CRED scc)
         {
             if (GlobalLog.IsEnabled)
             {
@@ -362,12 +362,12 @@ namespace System.Net
 
         private unsafe static int EncryptDecryptHelper(OP op, SSPIInterface secModule, SafeDeleteContext context, SecurityBuffer[] input, uint sequenceNumber)
         {
-            Interop.SspiCli.SecurityBufferDescriptor sdcInOut = new Interop.SspiCli.SecurityBufferDescriptor(input.Length);
-            var unmanagedBuffer = new Interop.SspiCli.SecurityBufferStruct[input.Length];
+            Interop.SspiCli.SecBufferDesc sdcInOut = new Interop.SspiCli.SecBufferDesc(input.Length);
+            var unmanagedBuffer = new Interop.SspiCli.SecBuffer[input.Length];
 
-            fixed (Interop.SspiCli.SecurityBufferStruct* unmanagedBufferPtr = unmanagedBuffer)
+            fixed (Interop.SspiCli.SecBuffer* unmanagedBufferPtr = unmanagedBuffer)
             {
-                sdcInOut.UnmanagedPointer = unmanagedBufferPtr;
+                sdcInOut.pBuffers = unmanagedBufferPtr;
                 GCHandle[] pinnedBuffers = new GCHandle[input.Length];
                 byte[][] buffers = new byte[input.Length][];
                 try
@@ -375,16 +375,16 @@ namespace System.Net
                     for (int i = 0; i < input.Length; i++)
                     {
                         SecurityBuffer iBuffer = input[i];
-                        unmanagedBuffer[i].count = iBuffer.size;
-                        unmanagedBuffer[i].type = iBuffer.type;
+                        unmanagedBuffer[i].cbBuffer = iBuffer.size;
+                        unmanagedBuffer[i].BufferType = iBuffer.type;
                         if (iBuffer.token == null || iBuffer.token.Length == 0)
                         {
-                            unmanagedBuffer[i].token = IntPtr.Zero;
+                            unmanagedBuffer[i].pvBuffer = IntPtr.Zero;
                         }
                         else
                         {
                             pinnedBuffers[i] = GCHandle.Alloc(iBuffer.token, GCHandleType.Pinned);
-                            unmanagedBuffer[i].token = Marshal.UnsafeAddrOfPinnedArrayElement(iBuffer.token, iBuffer.offset);
+                            unmanagedBuffer[i].pvBuffer = Marshal.UnsafeAddrOfPinnedArrayElement(iBuffer.token, iBuffer.offset);
                             buffers[i] = iBuffer.token;
                         }
                     }
@@ -423,8 +423,8 @@ namespace System.Net
                     for (int i = 0; i < input.Length; i++)
                     {
                         SecurityBuffer iBuffer = input[i];
-                        iBuffer.size = unmanagedBuffer[i].count;
-                        iBuffer.type = unmanagedBuffer[i].type;
+                        iBuffer.size = unmanagedBuffer[i].cbBuffer;
+                        iBuffer.type = unmanagedBuffer[i].BufferType;
 
                         if (iBuffer.size == 0)
                         {
@@ -445,10 +445,10 @@ namespace System.Net
                                     }
 
                                     byte* bufferAddress = (byte*)Marshal.UnsafeAddrOfPinnedArrayElement(buffers[j], 0);
-                                    if ((byte*)unmanagedBuffer[i].token >= bufferAddress &&
-                                        (byte*)unmanagedBuffer[i].token + iBuffer.size <= bufferAddress + buffers[j].Length)
+                                    if ((byte*)unmanagedBuffer[i].pvBuffer >= bufferAddress &&
+                                        (byte*)unmanagedBuffer[i].pvBuffer + iBuffer.size <= bufferAddress + buffers[j].Length)
                                     {
-                                        iBuffer.offset = (int)((byte*)unmanagedBuffer[i].token - bufferAddress);
+                                        iBuffer.offset = (int)((byte*)unmanagedBuffer[i].pvBuffer - bufferAddress);
                                         iBuffer.token = buffers[j];
                                         break;
                                     }
@@ -561,44 +561,44 @@ namespace System.Net
 
             switch (contextAttribute)
             {
-                case Interop.SspiCli.ContextAttribute.Sizes:
-                    nativeBlockSize = SecSizes.SizeOf;
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_SIZES:
+                    nativeBlockSize = SecPkgContext_Sizes.SizeOf;
                     break;
-                case Interop.SspiCli.ContextAttribute.StreamSizes:
-                    nativeBlockSize = StreamSizes.SizeOf;
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_STREAM_SIZES:
+                    nativeBlockSize = SecPkgContext_StreamSizes.SizeOf;
                     break;
 
-                case Interop.SspiCli.ContextAttribute.Names:
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NAMES:
                     handleType = typeof(SafeFreeContextBuffer);
                     break;
 
-                case Interop.SspiCli.ContextAttribute.PackageInfo:
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_PACKAGE_INFO:
                     handleType = typeof(SafeFreeContextBuffer);
                     break;
 
-                case Interop.SspiCli.ContextAttribute.NegotiationInfo:
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NEGOTIATION_INFO:
                     handleType = typeof(SafeFreeContextBuffer);
-                    nativeBlockSize = Marshal.SizeOf<NegotiationInfo>();
+                    nativeBlockSize = Marshal.SizeOf<SecPkgContext_NegotiationInfoW>();
                     break;
 
-                case Interop.SspiCli.ContextAttribute.ClientSpecifiedSpn:
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CLIENT_SPECIFIED_TARGET:
                     handleType = typeof(SafeFreeContextBuffer);
                     break;
 
-                case Interop.SspiCli.ContextAttribute.RemoteCertificate:
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_REMOTE_CERT_CONTEXT:
                     handleType = typeof(SafeFreeCertContext);
                     break;
 
-                case Interop.SspiCli.ContextAttribute.LocalCertificate:
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_LOCAL_CERT_CONTEXT:
                     handleType = typeof(SafeFreeCertContext);
                     break;
 
-                case Interop.SspiCli.ContextAttribute.IssuerListInfoEx:
-                    nativeBlockSize = Marshal.SizeOf<Interop.SspiCli.IssuerListInfoEx>();
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_ISSUER_LIST_EX:
+                    nativeBlockSize = Marshal.SizeOf<Interop.SspiCli.SecPkgContext_IssuerListInfoEx>();
                     handleType = typeof(SafeFreeContextBuffer);
                     break;
 
-                case Interop.SspiCli.ContextAttribute.ConnectionInfo:
+                case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CONNECTION_INFO:
                     nativeBlockSize = Marshal.SizeOf<SslConnectionInfo>();
                     break;
 
@@ -624,49 +624,49 @@ namespace System.Net
 
                 switch (contextAttribute)
                 {
-                    case Interop.SspiCli.ContextAttribute.Sizes:
-                        attribute = new SecSizes(nativeBuffer);
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_SIZES:
+                        attribute = new SecPkgContext_Sizes(nativeBuffer);
                         break;
 
-                    case Interop.SspiCli.ContextAttribute.StreamSizes:
-                        attribute = new StreamSizes(nativeBuffer);
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_STREAM_SIZES:
+                        attribute = new SecPkgContext_StreamSizes(nativeBuffer);
                         break;
 
-                    case Interop.SspiCli.ContextAttribute.Names:
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NAMES:
                         attribute = Marshal.PtrToStringUni(sspiHandle.DangerousGetHandle());
                         break;
 
-                    case Interop.SspiCli.ContextAttribute.PackageInfo:
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_PACKAGE_INFO:
                         attribute = new SecurityPackageInfoClass(sspiHandle, 0);
                         break;
 
-                    case Interop.SspiCli.ContextAttribute.NegotiationInfo:
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NEGOTIATION_INFO:
                         unsafe
                         {
                             fixed (void* ptr = nativeBuffer)
                             {
-                                attribute = new NegotiationInfoClass(sspiHandle, Marshal.ReadInt32(new IntPtr(ptr), NegotiationInfo.NegotiationStateOffest));
+                                attribute = new NegotiationInfoClass(sspiHandle, Marshal.ReadInt32(new IntPtr(ptr), SecPkgContext_NegotiationInfoW.NegotiationStateOffest));
                             }
                         }
                         break;
 
-                    case Interop.SspiCli.ContextAttribute.ClientSpecifiedSpn:
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CLIENT_SPECIFIED_TARGET:
                         attribute = Marshal.PtrToStringUni(sspiHandle.DangerousGetHandle());
                         break;
 
-                    case Interop.SspiCli.ContextAttribute.LocalCertificate:
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_LOCAL_CERT_CONTEXT:
                     // Fall-through to RemoteCertificate is intentional.
-                    case Interop.SspiCli.ContextAttribute.RemoteCertificate:
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_REMOTE_CERT_CONTEXT:
                         attribute = sspiHandle;
                         sspiHandle = null;
                         break;
 
-                    case Interop.SspiCli.ContextAttribute.IssuerListInfoEx:
-                        attribute = new Interop.SspiCli.IssuerListInfoEx(sspiHandle, nativeBuffer);
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_ISSUER_LIST_EX:
+                        attribute = new Interop.SspiCli.SecPkgContext_IssuerListInfoEx(sspiHandle, nativeBuffer);
                         sspiHandle = null;
                         break;
 
-                    case Interop.SspiCli.ContextAttribute.ConnectionInfo:
+                    case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CONNECTION_INFO:
                         attribute = new SslConnectionInfo(nativeBuffer);
                         break;
                     default:

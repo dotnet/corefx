@@ -4,21 +4,25 @@
 
 namespace System.Net.Security
 {
+    // sspi.h
     internal enum SecurityBufferType
     {
-        Empty = 0x00,
-        Data = 0x01,
-        Token = 0x02,
-        Parameters = 0x03,
-        Missing = 0x04,
-        Extra = 0x05,
-        Trailer = 0x06,
-        Header = 0x07,
-        Padding = 0x09,    // non-data padding
-        Stream = 0x0A,
-        ChannelBindings = 0x0E,
-        TargetHost = 0x10,
-        ReadOnlyFlag = unchecked((int)0x80000000),
-        ReadOnlyWithChecksum = 0x10000000
+        SECBUFFER_EMPTY = 0,
+        SECBUFFER_DATA = 1,
+        SECBUFFER_TOKEN = 2,
+        SECBUFFER_PKG_PARAMS = 3,
+        SECBUFFER_MISSING = 4,
+        SECBUFFER_EXTRA = 5,
+        SECBUFFER_STREAM_TRAILER = 6,
+        SECBUFFER_STREAM_HEADER = 7,
+        SECBUFFER_PADDING = 9,    // non-data padding
+        SECBUFFER_STREAM = 10,
+        SECBUFFER_CHANNEL_BINDINGS = 14,
+        SECBUFFER_TARGET_HOST = 16,
+        SECBUFFER_ALERT = 17,
+        SECBUFFER_APPLICATION_PROTOCOLS = 18,
+        
+        SECBUFFER_READONLY = unchecked((int)0x80000000),
+        SECBUFFER_READONLY_WITH_CHECKSUM = 0x10000000
     }
 }
