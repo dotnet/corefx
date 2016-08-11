@@ -65,7 +65,7 @@ namespace System.Tests
         public static void Ctor_String_Double_Exception()
         {
             string message = "Created NotFiniteNumberException";
-            double offendingNumber = double.IsNaN;
+            double offendingNumber = double.NaN;
             var innerException = new Exception("Created inner exception");
             var exception = new NotFiniteNumberException(message, offendingNumber, innerException);
             Assert.Equal(offendingNumber, exception.OffendingNumber);
