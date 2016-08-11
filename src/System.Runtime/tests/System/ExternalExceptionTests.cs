@@ -48,7 +48,6 @@ namespace System.Runtime.InteropServices.Tests
             string msg = "Created ExternalException";
             int errorCode = -2000607220;
             ExternalException exception = new ExternalException(msg, errorCode);
-            Assert.Equal(errorCode, ex.ErrorCode);
             Assert.Equal(msg, exception.Message);
             Assert.Equal(COR_E_EXTERNAL, exception.HResult);
         }
