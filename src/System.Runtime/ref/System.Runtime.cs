@@ -55,6 +55,7 @@ namespace System
         public NotFiniteNumberException(string message, double offendingNumber) { }
         public NotFiniteNumberException(string message, Exception innerException) { }
         public NotFiniteNumberException(string message, double offendingNumber, Exception innerException) { }
+        public double OffendingNumber { get; }
     }
 
     public partial class AccessViolationException : System.SystemException
