@@ -663,6 +663,7 @@ namespace System.Runtime.Serialization
 #if !NET_NATIVE
                             type = UnwrapNullableType(type);
 #endif
+                            var originalType = type;
                             type = GetDataContractAdapterType(type);
 #if !NET_NATIVE
                             dataContract = GetBuiltInDataContract(type);
@@ -690,6 +691,15 @@ namespace System.Runtime.Serialization
                                             ThrowInvalidDataContractException(SR.Format(SR.TypeNotSerializable, type), type);
                                         }
                                         dataContract = new ClassDataContract(type);
+                                        if (type != originalType)
+                                        {
+                                            var originalDataContract = new ClassDataContract(originalType);
+                                            if (dataContract.StableName != originalDataContract.StableName)
+                                            {
+                                                // for non-DC types, type adapters will not have the same stable name (contract name).
+                                                dataContract.StableName = originalDataContract.StableName;
+                                            }
+                                        }
                                     }
                                 }
                             }
