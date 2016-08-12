@@ -91,7 +91,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.7'">
-    <Compile Include="Array.1.7.Tests.cs" />
     <Compile Include="ArrayTests.netstandard1.7.cs" />
     <Compile Include="EnumTests.netstandard1.7.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
