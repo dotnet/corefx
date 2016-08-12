@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq.Expressions.Tests.IndexExpression;
 using System.Reflection;
 using Xunit;
 
@@ -123,20 +124,19 @@ namespace System.Linq.Expressions.Tests
  
         private class IndexVisitor : ExpressionVisitor
         {
-            private static readonly IndexExpression.SampleClassWithProperties DefaultObjectWithProperty = new IndexExpression.SampleClassWithProperties
+            public IndexVisitor(SampleClassWithProperties instance)
             {
-                DefaultProperty = new List<int> { 0 }
-            };
+                _instanceSample = instance;
+            }
 
-            public readonly Expression DefaultSubstitutionExpression =
-                Expression.Property(Expression.Constant(DefaultObjectWithProperty),
-                    typeof(IndexExpression.SampleClassWithProperties).GetProperty("AlternativeProperty"));
+            private readonly SampleClassWithProperties _instanceSample;
 
             public override Expression Visit(Expression node)
             {
                 if (node is MemberExpression)
                 {
-                    return DefaultSubstitutionExpression;
+                    return Expression.Property(Expression.Constant(_instanceSample),
+                        typeof(SampleClassWithProperties).GetProperty("AlternativeProperty"));
                 }
 
                 return base.Visit(node);
@@ -366,18 +366,30 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void VisitIndexedExpressionRewrite()
         {
-            var obj = new IndexExpression.SampleClassWithProperties {DefaultProperty = new List<int> {0}};
+            var obj = new SampleClassWithProperties
+            {
+                DefaultProperty = new List<int> {100},
+                AlternativeProperty = new List<int> {200}
+            };
+
             PropertyInfo indexer = typeof(List<int>).GetProperty("Item");
             MemberExpression propertyExpression = Expression.Property(Expression.Constant(obj),
-                typeof(IndexExpression.SampleClassWithProperties).GetProperty("DefaultProperty"));
+                typeof(SampleClassWithProperties).GetProperty("DefaultProperty"));
             ConstantExpression[] arguments = {Expression.Constant(0)};
             Expressions.IndexExpression expr = Expression.MakeIndex(propertyExpression, indexer, arguments);
-            var visitor = new IndexVisitor();
-            var expected = Expression.MakeIndex(visitor.DefaultSubstitutionExpression, expr.Indexer, expr.Arguments);
+
+            var visitor = new IndexVisitor(obj);
+            var expectedPropertyExpresstion = Expression.Property(
+                Expression.Constant(obj),
+                typeof(SampleClassWithProperties).GetProperty("AlternativeProperty"));
+            var expected = Expression.MakeIndex(expectedPropertyExpresstion, expr.Indexer, expr.Arguments);
 
             var actual = (Expressions.IndexExpression) visitor.Visit(expr);
 
             Assert.NotSame(expected, actual);
+
+            IndexExpressionTests.AssertInvokeCorrect(100, expr, obj);
+            IndexExpressionTests.AssertInvokeCorrect(200, actual, obj);
         }
     }
 }
