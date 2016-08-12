@@ -92,6 +92,8 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.7'">
     <Compile Include="Array.1.7.Tests.cs" />
+    <Compile Include="ArrayTests.netstandard1.7.cs" />
+    <Compile Include="EnumTests.netstandard1.7.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
     <Compile Include="System\ExternalExceptionTests.cs" />
     <Compile Include="System\ApplicationExceptionTests.cs" />
@@ -108,10 +110,6 @@
     <ProjectReference Include="..\pkg\System.Runtime.pkgproj">
       <Project>{1e689c1b-690c-4799-bde9-6e7990585894}</Project>
       <Name>System.Runtime</Name>
-    </ProjectReference>
-    <!-- ToDo: Remove this reference to the live package of System.Globalization once prerelease gets updated again -->
-    <ProjectReference Include="..\..\System.Globalization\pkg\System.Globalization.pkgproj">
-      <Name>System.Globalization</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\System.Private.Uri\pkg\System.Private.Uri.pkgproj">
     </ProjectReference>
