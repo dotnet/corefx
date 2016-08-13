@@ -525,6 +525,64 @@ public class ValueTupleTests
     }
 
     [Fact]
+    public static void EqualityOperatorTest()
+    {
+        //ValueTuple-0
+        Assert.True(ValueTuple.Create() == ValueTuple.Create());
+        Assert.False(ValueTuple.Create() != ValueTuple.Create());
+
+        //ValueTuple-1
+        Assert.True(ValueTuple.Create(42) == ValueTuple.Create(42));
+        Assert.False(ValueTuple.Create(0) == ValueTuple.Create(42));
+        Assert.True(ValueTuple.Create(0) != ValueTuple.Create(42));
+        Assert.False(ValueTuple.Create(42) != ValueTuple.Create(42));
+
+        //ValueTuple-2
+        Assert.True(ValueTuple.Create(42, 42) == ValueTuple.Create(42, 42));
+        Assert.False(ValueTuple.Create(0, 42) == ValueTuple.Create(42, 42));
+        Assert.True(ValueTuple.Create(0, 42) != ValueTuple.Create(42, 42));
+        Assert.False(ValueTuple.Create(42, 42) != ValueTuple.Create(42, 42));
+
+        //ValueTuple-3
+        Assert.True(ValueTuple.Create(42, 42, 42) == ValueTuple.Create(42, 42, 42));
+        Assert.False(ValueTuple.Create(0, 42, 42) == ValueTuple.Create(42, 42, 42));
+        Assert.True(ValueTuple.Create(0, 42, 42) != ValueTuple.Create(42, 42, 42));
+        Assert.False(ValueTuple.Create(42, 42, 42) != ValueTuple.Create(42, 42, 42));
+
+        //ValueTuple-4
+        Assert.True(ValueTuple.Create(42, 42, 42, "") == ValueTuple.Create(42, 42, 42, ""));
+        Assert.False(ValueTuple.Create(0, 42, 42, "") == ValueTuple.Create(42, 42, 42, ""));
+        Assert.True(ValueTuple.Create(0, 42, 42, "") != ValueTuple.Create(42, 42, 42, ""));
+        Assert.False(ValueTuple.Create(42, 42, 42, "") != ValueTuple.Create(42, 42, 42, ""));
+
+        //ValueTuple-5
+        Assert.True(ValueTuple.Create(42, 42, 42, "", false) == ValueTuple.Create(42, 42, 42, "", false));
+        Assert.False(ValueTuple.Create(0, 42, 42, "", false) == ValueTuple.Create(42, 42, 42, "", false));
+        Assert.True(ValueTuple.Create(0, 42, 42, "", false) != ValueTuple.Create(42, 42, 42, "", false));
+        Assert.False(ValueTuple.Create(42, 42, 42, "", false) != ValueTuple.Create(42, 42, 42, "", false));
+
+        //ValueTuple-6
+        Assert.True(ValueTuple.Create(42, 42, 42, "", false, 'c') == ValueTuple.Create(42, 42, 42, "", false, 'c'));
+        Assert.False(ValueTuple.Create(0, 42, 42, "", false, 'c') == ValueTuple.Create(42, 42, 42, "", false, 'c'));
+        Assert.True(ValueTuple.Create(0, 42, 42, "", false, 'c') != ValueTuple.Create(42, 42, 42, "", false, 'c'));
+        Assert.False(ValueTuple.Create(42, 42, 42, "", false, 'c') != ValueTuple.Create(42, 42, 42, "", false, 'c'));
+
+        //ValueTuple-7
+        Assert.True(ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5) == ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5));
+        Assert.False(ValueTuple.Create(0, 42, 42, "", false, 'c', 0.5) == ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5));
+        Assert.True(ValueTuple.Create(0, 42, 42, "", false, 'c', 0.5) != ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5));
+        Assert.False(ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5) != ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5));
+
+        //ValueTuple-8
+        Assert.True(ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5, (short)-1) == ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5, (short)-1));
+        Assert.False(ValueTuple.Create(0, 42, 42, "", false, 'c', 0.5, (short)-1) == ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5, (short)-1));
+        Assert.True(ValueTuple.Create(0, 42, 42, "", false, 'c', 0.5, (short)-1) != ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5, (short)-1));
+        Assert.False(ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5, (short)-1) != ValueTuple.Create(42, 42, 42, "", false, 'c', 0.5, (short)-1));
+
+        //ValueTuple-9 and ValueTuple-10 are not necessary because they use the same code path as ValueTuple-8
+    }
+
+    [Fact]
     public static void IncomparableTypes()
     {
         ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan> ValueTupleDriverA;
