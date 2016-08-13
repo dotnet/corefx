@@ -51,21 +51,6 @@ namespace System.Collections.ObjectModel
             CopyFrom(collection);
         }
 
-        private void CopyFrom(IEnumerable<T> collection)
-        {
-            IList<T> items = Items;
-            if (collection != null && items != null)
-            {
-                using (IEnumerator<T> enumerator = collection.GetEnumerator())
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        items.Add(enumerator.Current);
-                    }
-                }
-            }
-        }
-
         #endregion Constructors
 
 
@@ -83,6 +68,29 @@ namespace System.Collections.ObjectModel
         public void Move(int oldIndex, int newIndex)
         {
             MoveItem(oldIndex, newIndex);
+        }
+        
+        /// <summary>
+        /// Adds a range of objects but does not raise the OnCollectionChanged event until all objects are added.
+        /// </summary>
+        /// <param name="collection">The set of objects to be added.</param>
+        /// <param name="clearFirst">Determines whether or not to remove any existing items in the collection first. Defaults to False.</param>
+        public void AddRange(IEnumerable<T> collection, bool clearFirst = false)
+        {
+            CheckReentrancy();
+
+            if (clearFirst) Items.Clear();
+
+            var newIndex = Items.Count;
+            foreach (var item in collection)
+            {
+                base.InsertItem(newIndex, item);
+                newIndex++;
+            }
+
+            OnPropertyChanged(CountString);
+            OnPropertyChanged(IndexerName);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T>(collection)));
         }
 
         #endregion Public Methods
@@ -292,6 +300,24 @@ namespace System.Collections.ObjectModel
         //------------------------------------------------------
 
         #region Private Methods
+        /// <summary>
+        /// Copies an existing collection into this one.
+        /// </summary>
+        private void CopyFrom(IEnumerable<T> collection)
+        {
+            IList<T> items = Items;
+            if (collection != null && items != null)
+            {
+                using (IEnumerator<T> enumerator = collection.GetEnumerator())
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        items.Add(enumerator.Current);
+                    }
+                }
+            }
+        }
+        
         /// <summary>
         /// Helper to raise a PropertyChanged event  />).
         /// </summary>
