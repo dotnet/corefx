@@ -63,6 +63,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="ArgumentNullException"><paramref name="metadata"/> is null.</exception>
         /// <exception cref="ArgumentException">The encoding of <paramref name="utf8Decoder"/> is not <see cref="UTF8Encoding"/>.</exception>
         /// <exception cref="PlatformNotSupportedException">The current platform is big-endian.</exception>
+        /// <exception cref="BadImageFormatException">Bad metadata header.</exception>
         public unsafe MetadataReader(byte* metadata, int length, MetadataReaderOptions options, MetadataStringDecoder utf8Decoder)
         {
             // Do not throw here when length is 0. We'll throw BadImageFormatException later on, so that the caller doesn't need to 
