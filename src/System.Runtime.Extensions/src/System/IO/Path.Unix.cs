@@ -15,8 +15,8 @@ namespace System.IO
         public static readonly char PathSeparator = ':';
 
         private const string DirectorySeparatorCharAsString = "/";
-
-        private static readonly char[] InvalidFileNameChars = { '\0', '/' };
+        
+        public static char[] GetInvalidFileNameChars() => new char[] { '\0', '/' };
 
         private static readonly int MaxPath = Interop.Sys.MaxPath;
         private static readonly int MaxLongPath = MaxPath;

@@ -12,8 +12,8 @@ namespace System.IO
     {
         // There is only one invalid path character in Unix
         private const char InvalidPathChar = '\0';
-        internal static readonly char[] InvalidPathChars = { InvalidPathChar };
-
+        internal static char[] GetInvalidPathChars() => new char[] { InvalidPathChar };
+        
         internal static readonly int MaxComponentLength = Interop.Sys.MaxName;
 
         /// <summary>Returns a value indicating if the given path contains invalid characters.</summary>

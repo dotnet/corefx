@@ -83,15 +83,7 @@ namespace System.IO
             return null;
         }
 
-        public static char[] GetInvalidPathChars()
-        {
-            return (char[])PathInternal.InvalidPathChars.Clone();
-        }
-
-        public static char[] GetInvalidFileNameChars()
-        {
-            return (char[])InvalidFileNameChars.Clone();
-        }
+        public static char[] GetInvalidPathChars() => PathInternal.GetInvalidPathChars();
 
         // Returns the extension of the given path. The returned value includes the
         // period (".") character of the extension except when you have a terminal period when you get string.Empty, such as ".exe" or

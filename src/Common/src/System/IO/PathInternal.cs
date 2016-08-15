@@ -10,6 +10,8 @@ namespace System.IO
     /// <summary>Contains internal path helpers that are shared between many projects.</summary>
     internal static partial class PathInternal
     {
+        internal static readonly char[] InvalidPathChars = GetInvalidPathChars();
+        
         /// <summary>
         /// Checks for invalid path characters in the given path.
         /// </summary>
