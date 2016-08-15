@@ -321,12 +321,15 @@ extern "C" int32_t SystemNative_GetDirentSize()
 //    size of the dirent struct.
 // 2) The managed code creates a byte[] buffer of the size of the native dirent
 //    and passes a pointer to this buffer to this function.
-// 3) This function passes input byte[] buffer to the OS to fill with dirent data
-//    which makes the 1st strcpy.
-// 4) The ConvertDirent function will set a pointer to the start of the inode name
-//    in the byte[] buffer so the managed code and find it and copy it out of the
+// 3) This function gets a pointer to the possibly staticly allocated directory entry.
+// 4) Then, byte[] entry is copied into the byte[] buffer for bufferSize bytes.
+//    This makes the 1st strcpy.
+// 5) The ConvertDirent function will set a pointer to the start of the inode name
+//    in the byte[] buffer so the managed code can find it and copy it out of the
 //    buffer into a managed string that the caller of the framework can use, making
 //    the 2nd and final strcpy.
+//
+//    To make this function thread safe ensure calls on the same DIR* dir never happen concurrently.
 extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferSize, DirectoryEntry* outputEntry)
 {
     assert(buffer != nullptr);
@@ -339,10 +342,10 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
         return ERANGE;
     }
 
-    // readdir returns a pointer to memory that may be staticly allocated
-    // by glibc. Data returned by readdir may be overwritten by other readdir
-    // calls for the same directory stream.
     errno = 0;
+    // returns a pointer to memory that may be staticly allocated by glibc.
+    // Data returned by readdir may be overwritten by other readdir calls 
+    // on the same directory stream.
     dirent* entry = readdir(dir);
 
     // positive error number returned -> failure
