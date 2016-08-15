@@ -2565,6 +2565,10 @@ namespace System.Diagnostics
     public sealed partial class DebuggableAttribute : System.Attribute
     {
         public DebuggableAttribute(System.Diagnostics.DebuggableAttribute.DebuggingModes modes) { }
+        public DebuggableAttribute(bool isJITTrackingEnabled, bool isJITOptimizerDisabled) { }
+        public System.Diagnostics.DebuggableAttribute.DebuggingModes DebuggingFlags { get { return default(System.Diagnostics.DebuggableAttribute.DebuggingModes); } }
+        public bool IsJITOptimizerDisabled { get { return default(bool); } }
+        public bool IsJITTrackingEnabled { get { return default(bool); } }
         [System.FlagsAttribute]
         public enum DebuggingModes
         {
