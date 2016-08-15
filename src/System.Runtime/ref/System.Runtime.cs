@@ -2972,6 +2972,7 @@ namespace System.Runtime.CompilerServices
         public static object GetObjectValue(object obj) { return default(object); }
         public static void InitializeArray(System.Array array, System.RuntimeFieldHandle fldHandle) { }
         public static void RunClassConstructor(System.RuntimeTypeHandle type) { }
+        public static object GetUninitializedObject(Type type) { return default(object); }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited = false, AllowMultiple = false)]
     public partial class StateMachineAttribute : System.Attribute
