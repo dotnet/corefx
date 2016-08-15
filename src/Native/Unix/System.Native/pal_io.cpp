@@ -339,27 +339,28 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
         return ERANGE;
     }
 
-    dirent* result = nullptr;
-    dirent* entry = static_cast<dirent*>(buffer);
-    int error = readdir_r(dir, entry, &result);
+    // readdir returns a pointer to memory that may be staticly allocated
+    // by glibc. Data returned by readdir may be overwritten by other readdir
+    // calls for the same directory stream.
+    errno = 0;
+    dirent* entry = readdir(dir);
 
     // positive error number returned -> failure
-    if (error != 0)
+    if (errno != 0)
     {
-        assert(error > 0);
+        assert(error == EBADF); // Invalid directory stream discriptor dir.
         *outputEntry = {}; // managed out param must be initialized
-        return error;
+        return errno;
     }
 
     // 0 returned with null result -> end-of-stream
-    if (result == nullptr)
+    if (entry == nullptr)
     {
         *outputEntry = {}; // managed out param must be initialized
         return -1;         // shim convention for end-of-stream
     }
 
-    // 0 returned with non-null result (guaranteed to be set to entry arg) -> success
-    assert(result == entry);
+    memcpy(buffer,entry,static_cast<size_t>(bufferSize));
     ConvertDirent(*entry, outputEntry);
     return 0;
 }
