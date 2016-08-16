@@ -5,8 +5,14 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Threading.Tasks.Tests</AssemblyName>
     <ProjectGuid>{B6C09633-D161-499A-8FE1-46B2D53A16E7}</ProjectGuid>
-    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
+    <NugetTargetMoniker Condition="'$(TargetGroup)'=='netstandard1.7'">.NETStandard,Version=v1.7</NugetTargetMoniker>
+    <NugetTargetMoniker Condition="'$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.5</NugetTargetMoniker>
   </PropertyGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.7'">
+    <TestNugetTargetMoniker Include="$(NugetTargetMoniker)">
+      <Folder>netcoreapp1.1</Folder>
+    </TestNugetTargetMoniker>
+  </ItemGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
@@ -56,8 +62,17 @@
       <Link>CommonTest\System\Threading\ThreadPoolHelpers.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.7'">
+    <Compile Include="Task\TaskDisposeTests.netstandard1.7.cs" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
+  <!-- ToDo: Remove this target once the infrastructure for testing in netcoreapp1.1 is ready -->
+  <Target Name="RemoveUnwantedTestMonikers" Condition="'$(TargetGroup)'=='netstandard1.7'" BeforeTargets="CopyTestToTestDirectory">
+    <ItemGroup>
+        <TestNugetTargetMoniker Remove=".NETCoreApp,Version=v1.1" />
+    </ItemGroup>
+  </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

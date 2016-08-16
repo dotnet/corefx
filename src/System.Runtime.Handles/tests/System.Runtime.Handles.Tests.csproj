@@ -12,6 +12,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
+    <!-- ToDo: Remove this reference once prerelease gets updated again -->
+    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj" />
     <!-- Compile tests against the contract, but copy our local-built implementation for testing -->
     <ProjectReference Include="..\pkg\System.Runtime.Handles.pkgproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
