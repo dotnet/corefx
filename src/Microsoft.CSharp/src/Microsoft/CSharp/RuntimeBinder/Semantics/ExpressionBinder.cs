@@ -1255,7 +1255,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // invocation.
         internal EXPR BindMethodGroupToArguments(BindingFlag bindFlags, EXPRMEMGRP grp, EXPR args)
         {
-            Debug.Assert(grp.sk == SYMKIND.SK_MethodSymbol || grp.sk == SYMKIND.SK_PropertySymbol && ((grp.flags & EXPRFLAG.EXF_INDEXER) != 0));
+            Debug.Assert(grp.sk == SymbolKind.MethodSymbol || grp.sk == SymbolKind.PropertySymbol && ((grp.flags & EXPRFLAG.EXF_INDEXER) != 0));
 
             // Count the args.
             bool argTypeErrors;
@@ -1295,7 +1295,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             EXPR exprRes;
             MethPropWithInst mpwiBest = result.GetBestResult();
 
-            if (grp.sk == SYMKIND.SK_PropertySymbol)
+            if (grp.sk == SymbolKind.PropertySymbol)
             {
                 Debug.Assert((grp.flags & EXPRFLAG.EXF_INDEXER) != 0);
                 //PropWithType pwt = new PropWithType(mpwiBest.Prop(), mpwiBest.GetType());

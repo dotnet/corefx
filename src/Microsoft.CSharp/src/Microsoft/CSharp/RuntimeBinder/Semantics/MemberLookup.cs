@@ -143,7 +143,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Check for arity.
                 switch (symCur.getKind())
                 {
-                    case SYMKIND.SK_MethodSymbol:
+                    case SymbolKind.MethodSymbol:
                         // For non-zero arity, only methods of the correct arity are considered.
                         // For zero arity, don't filter out any methods since we do type argument
                         // inferencing.
@@ -155,7 +155,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         break;
 
-                    case SYMKIND.SK_AggregateSymbol:
+                    case SymbolKind.AggregateSymbol:
                         // For types, always filter on arity.
                         if (symCur.AsAggregateSymbol().GetTypeVars().size != _arity)
                         {
@@ -165,7 +165,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         break;
 
-                    case SYMKIND.SK_TypeParameterSymbol:
+                    case SymbolKind.TypeParameterSymbol:
                         if ((_flags & MemLookFlags.TypeVarsAllowed) == 0)
                             continue;
                         if (_arity > 0)
@@ -545,10 +545,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (swt.Sym.getKind())
             {
-                case SYMKIND.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     break;
 
-                case SYMKIND.SK_PropertySymbol:
+                case SymbolKind.PropertySymbol:
                     if (swt.Prop().useMethInstead)
                     {
                         meth1 = swt.Prop().methGet;
@@ -558,7 +558,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     break;
 
-                case SYMKIND.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     if (swt.Meth().name == GetSymbolLoader().GetNameManager().GetPredefName(PredefinedName.PN_INVOKE) && swt.Meth().getClass().IsDelegate())
                     {
                         swt.Set(swt.Meth().getClass(), swt.GetType());
@@ -813,12 +813,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 switch (_swtBadArity.Sym.getKind())
                 {
-                    case SYMKIND.SK_MethodSymbol:
+                    case SymbolKind.MethodSymbol:
                         Debug.Assert(_arity != 0);
                         cvar = _swtBadArity.Sym.AsMethodSymbol().typeVars.size;
                         GetErrorContext().ErrorRef(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
                         break;
-                    case SYMKIND.SK_AggregateSymbol:
+                    case SymbolKind.AggregateSymbol:
                         cvar = _swtBadArity.Sym.AsAggregateSymbol().GetTypeVars().size;
                         GetErrorContext().ErrorRef(cvar > 0 ? ErrorCode.ERR_BadArity : ErrorCode.ERR_HasNoTypeVars, _swtBadArity, new ErrArgSymKind(_swtBadArity.Sym), cvar);
                         break;

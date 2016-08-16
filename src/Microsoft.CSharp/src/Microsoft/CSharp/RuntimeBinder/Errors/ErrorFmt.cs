@@ -62,7 +62,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         public ErrArgFlags eaf;
         internal MessageID ids;
         internal int n;
-        internal SYMKIND sk;
+        internal SymbolKind sk;
         internal PredefinedName pdn;
         internal Name name;
         internal Symbol sym;
@@ -80,9 +80,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             this.eaf = ErrArgFlags.None;
             this.n = n;
         }
-        public ErrArg(SYMKIND sk)
+        public ErrArg(SymbolKind sk)
         {
-            Debug.Assert(sk != SYMKIND.SK_AssemblyQualifiedNamespaceSymbol);
+            Debug.Assert(sk != SymbolKind.AssemblyQualifiedNamespaceSymbol);
             this.eaf = ErrArgFlags.None;
             this.eak = ErrArgKind.SymKind;
             this.sk = sk;
@@ -148,7 +148,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             return new ErrArg(n);
         }
-        public static implicit operator ErrArg(SYMKIND sk)
+        public static implicit operator ErrArg(SymbolKind sk)
         {
             return new ErrArg(sk);
         }
@@ -294,18 +294,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             eak = ErrArgKind.SymKind;
             eaf = ErrArgFlags.None;
             sk = sym.getKind();
-            if (sk == SYMKIND.SK_AssemblyQualifiedNamespaceSymbol)
+            if (sk == SymbolKind.AssemblyQualifiedNamespaceSymbol)
             {
                 if (!String.IsNullOrEmpty(sym.AsAssemblyQualifiedNamespaceSymbol().GetNS().name.Text))
                 {
                     // Non-empty namespace name means it's not the root
                     // so treat it like a namespace instead of an alias
-                    sk = SYMKIND.SK_NamespaceSymbol;
+                    sk = SymbolKind.NamespaceSymbol;
                 }
                 else
                 {
                     // An empty namespace name means it's just an alias for the root
-                    sk = SYMKIND.SK_ExternalAliasDefinitionSymbol;
+                    sk = SymbolKind.ExternalAliasDefinitionSymbol;
                 }
             }
         }

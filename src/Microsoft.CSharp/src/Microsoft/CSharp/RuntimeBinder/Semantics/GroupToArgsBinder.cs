@@ -100,7 +100,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             public bool Bind(bool bReportErrors)
             {
-                Debug.Assert(_pGroup.sk == SYMKIND.SK_MethodSymbol || _pGroup.sk == SYMKIND.SK_PropertySymbol && 0 != (_pGroup.flags & EXPRFLAG.EXF_INDEXER));
+                Debug.Assert(_pGroup.sk == SymbolKind.MethodSymbol || _pGroup.sk == SymbolKind.PropertySymbol && 0 != (_pGroup.flags & EXPRFLAG.EXF_INDEXER));
 
                 // We need the EXPRs for error reporting for non-delegates
                 Debug.Assert(_pDelegate != null || _pArguments.fHasExprs);
@@ -1265,8 +1265,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private void ReportErrorsOnSuccess()
             {
                 // used for Methods and Indexers
-                Debug.Assert(_pGroup.sk == SYMKIND.SK_MethodSymbol || _pGroup.sk == SYMKIND.SK_PropertySymbol && 0 != (_pGroup.flags & EXPRFLAG.EXF_INDEXER));
-                Debug.Assert(_pGroup.typeArgs.size == 0 || _pGroup.sk == SYMKIND.SK_MethodSymbol);
+                Debug.Assert(_pGroup.sk == SymbolKind.MethodSymbol || _pGroup.sk == SymbolKind.PropertySymbol && 0 != (_pGroup.flags & EXPRFLAG.EXF_INDEXER));
+                Debug.Assert(_pGroup.typeArgs.size == 0 || _pGroup.sk == SymbolKind.MethodSymbol);
 
                 // if this is a binding to finalize on object, then complain:
                 if (_results.GetBestResult().MethProp().name == GetSymbolLoader().GetNameManager().GetPredefName(PredefinedName.PN_DTOR) &&
@@ -1284,7 +1284,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(0 == (_pGroup.flags & EXPRFLAG.EXF_USERCALLABLE) || _results.GetBestResult().MethProp().isUserCallable());
 
-                if (_pGroup.sk == SYMKIND.SK_MethodSymbol)
+                if (_pGroup.sk == SymbolKind.MethodSymbol)
                 {
                     Debug.Assert(_results.GetBestResult().MethProp().IsMethodSymbol());
 

@@ -27,7 +27,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public Scope CreateScope(Scope parent)
         {
-            Scope sym = newBasicSym(SYMKIND.SK_Scope, null, parent).AsScope();
+            Scope sym = newBasicSym(SymbolKind.Scope, null, parent).AsScope();
             if (parent != null)
             {
                 sym.nestingOrder = parent.nestingOrder + 1;
@@ -38,8 +38,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public IndexerSymbol CreateIndexer(Name name, ParentSymbol parent, Name realName, AggregateDeclaration declaration)
         {
-            IndexerSymbol sym = (IndexerSymbol)newBasicSym(SYMKIND.SK_IndexerSymbol, name, parent);
-            sym.setKind(SYMKIND.SK_PropertySymbol);
+            IndexerSymbol sym = (IndexerSymbol)newBasicSym(SymbolKind.IndexerSymbol, name, parent);
+            sym.setKind(SymbolKind.PropertySymbol);
             sym.isOperator = true;
             sym.declaration = declaration;
 

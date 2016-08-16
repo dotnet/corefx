@@ -47,10 +47,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 default:
                     break;
-                case SYMKIND.SK_MethodSymbol:
-                case SYMKIND.SK_PropertySymbol:
-                case SYMKIND.SK_FieldSymbol:
-                case SYMKIND.SK_EventSymbol:
+                case SymbolKind.MethodSymbol:
+                case SymbolKind.PropertySymbol:
+                case SymbolKind.FieldSymbol:
+                case SymbolKind.EventSymbol:
                     Debug.Assert(atsCheck != null);
                     break;
             }

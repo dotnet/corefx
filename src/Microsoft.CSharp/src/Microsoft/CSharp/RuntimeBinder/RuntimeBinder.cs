@@ -283,7 +283,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         (callPayload.Flags & CSharpCallFlags.EventHookup) != 0,
                         true);
 
-                if (swt != null && swt.Sym.getKind() != SYMKIND.SK_MethodSymbol)
+                if (swt != null && swt.Sym.getKind() != SymbolKind.MethodSymbol)
                 {
                     // The GetMember only has one argument, and we need to just take the first arg info.
                     CSharpGetMemberBinder getMember = new CSharpGetMemberBinder(callPayload.Name, false, callPayload.CallingContext, new CSharpArgumentInfo[] { callPayload.ArgumentInfo[0] });
@@ -928,7 +928,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             string Name,
             IList<Type> typeArguments,
             EXPR callingObject,
-            SYMKIND kind)
+            SymbolKind kind)
         {
             Name name = SymbolTable.GetName(Name, _semanticChecker.GetNameManager());
             AggregateType callingType;
@@ -964,11 +964,11 @@ namespace Microsoft.CSharp.RuntimeBinder
             symbmask_t mask = symbmask_t.MASK_MethodSymbol;
             switch (kind)
             {
-                case SYMKIND.SK_PropertySymbol:
-                case SYMKIND.SK_IndexerSymbol:
+                case SymbolKind.PropertySymbol:
+                case SymbolKind.IndexerSymbol:
                     mask = symbmask_t.MASK_PropertySymbol;
                     break;
-                case SYMKIND.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     mask = symbmask_t.MASK_MethodSymbol;
                     break;
                 default:
@@ -1064,7 +1064,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             PropertySymbol property = swt.Prop();
             AggregateType propertyType = swt.GetType();
             PropWithType pwt = new PropWithType(property, propertyType);
-            EXPRMEMGRP pMemGroup = CreateMemberGroupEXPR(property.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
+            EXPRMEMGRP pMemGroup = CreateMemberGroupEXPR(property.name.Text, null, callingObject, SymbolKind.PropertySymbol);
 
             return _binder.BindToProperty(// For a static property instance, don't set the object.
                     callingObject.isCLASS() ? null : callingObject, pwt, flags, null, null, pMemGroup);
@@ -1076,7 +1076,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             IndexerSymbol index = swt.Sym as IndexerSymbol;
             AggregateType ctype = swt.GetType();
-            EXPRMEMGRP memgroup = CreateMemberGroupEXPR(index.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
+            EXPRMEMGRP memgroup = CreateMemberGroupEXPR(index.name.Text, null, callingObject, SymbolKind.PropertySymbol);
 
             EXPR result = _binder.BindMethodGroupToArguments(bindFlags, memgroup, arguments);
             return ReorderArgumentsForNamedAndOptional(callingObject, result);
@@ -1195,7 +1195,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 Debug.Assert(false, "Why didn't member lookup report an error?");
             }
 
-            if (swt.Sym.getKind() != SYMKIND.SK_MethodSymbol)
+            if (swt.Sym.getKind() != SymbolKind.MethodSymbol)
             {
                 Debug.Assert(false, "Unexpected type returned from lookup");
                 throw Error.InternalCompilerError();
@@ -1239,11 +1239,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
 
                 CType eventCType = null;
-                if (swtEvent.Sym.getKind() == SYMKIND.SK_FieldSymbol)
+                if (swtEvent.Sym.getKind() == SymbolKind.FieldSymbol)
                 {
                     eventCType = swtEvent.Field().GetType();
                 }
-                else if (swtEvent.Sym.getKind() == SYMKIND.SK_EventSymbol)
+                else if (swtEvent.Sym.getKind() == SymbolKind.EventSymbol)
                 {
                     eventCType = swtEvent.Event().type;
                 }
@@ -1257,7 +1257,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 memGroup.flags &= ~EXPRFLAG.EXF_USERCALLABLE;
 
-                if (swtEvent.Sym.getKind() == SYMKIND.SK_EventSymbol && swtEvent.Event().IsWindowsRuntimeEvent)
+                if (swtEvent.Sym.getKind() == SymbolKind.EventSymbol && swtEvent.Event().IsWindowsRuntimeEvent)
                 {
                     return BindWinRTEventAccessor(
                                     new EventWithType(swtEvent.Event(), swtEvent.Ats),
@@ -1333,7 +1333,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type windowsRuntimeMarshalType = SymbolTable.WindowsRuntimeMarshalType;
             _symbolTable.PopulateSymbolTableWithName(methodName, new List<Type> { evtType }, windowsRuntimeMarshalType);
             EXPRCLASS marshalClass = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(windowsRuntimeMarshalType), null, null);
-            EXPRMEMGRP addEventGrp = CreateMemberGroupEXPR(methodName, new List<Type> { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
+            EXPRMEMGRP addEventGrp = CreateMemberGroupEXPR(methodName, new List<Type> { evtType }, marshalClass, SymbolKind.MethodSymbol);
             EXPR expr = _binder.BindMethodGroupToArguments(
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY,
                 addEventGrp,
@@ -1793,10 +1793,10 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             switch (swt.Sym.getKind())
             {
-                case SYMKIND.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     throw Error.BindPropertyFailedMethodGroup(name);
 
-                case SYMKIND.SK_PropertySymbol:
+                case SymbolKind.PropertySymbol:
                     if (swt.Sym is IndexerSymbol)
                     {
                         return CreateIndexer(swt, callingObject, optionalIndexerArguments, bindFlags);
@@ -1814,10 +1814,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                         return CreateProperty(swt, callingObject, flags);
                     }
 
-                case SYMKIND.SK_FieldSymbol:
+                case SymbolKind.FieldSymbol:
                     return CreateField(swt, callingObject);
 
-                case SYMKIND.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     if (fEventsPermitted)
                     {
                         return CreateEvent(swt, callingObject);
@@ -1979,7 +1979,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     false);
 
             // If lookup returns an actual event, then this is an event.
-            if (swt != null && swt.Sym.getKind() == SYMKIND.SK_EventSymbol)
+            if (swt != null && swt.Sym.getKind() == SymbolKind.EventSymbol)
             {
                 result = true;
             }
@@ -1988,7 +1988,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // this is an event. This is due to the Dev10 design change around
             // the binding of +=, and the fact that the "IsEvent" binding question
             // is only ever asked about the LHS of a += or -=.
-            if (swt != null && swt.Sym.getKind() == SYMKIND.SK_FieldSymbol && swt.Sym.AsFieldSymbol().isEvent)
+            if (swt != null && swt.Sym.getKind() == SymbolKind.FieldSymbol && swt.Sym.AsFieldSymbol().isEvent)
             {
                 result = true;
             }
