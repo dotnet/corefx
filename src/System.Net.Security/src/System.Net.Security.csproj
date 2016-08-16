@@ -166,6 +166,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CloseHandle.cs">
       <Link>Common\Interop\Windows\mincore\Interop.CloseHandle.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.Alerts.cs">
+      <Link>Common\Interop\Windows\SChannel\Interop.Alerts.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SchProtocols.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SchProtocols.cs</Link>
     </Compile>

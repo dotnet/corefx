@@ -215,5 +215,10 @@ namespace System.Net
                 phContext.DangerousRelease();
             }
         }
+
+        public int ApplyControlToken(ref SafeDeleteContext refContext, SecurityBuffer[] inputBuffers)
+        {
+            throw new NotSupportedException();
+        }
     }
 }

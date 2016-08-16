@@ -9,6 +9,7 @@ using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
@@ -249,7 +250,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return CipherAlgorithmType.None;
@@ -263,7 +264,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -278,7 +279,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return (HashAlgorithmType)0;
@@ -292,7 +293,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -307,7 +308,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return (ExchangeAlgorithmType)0;
@@ -322,7 +323,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -337,7 +338,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return SslProtocols.None;
@@ -1006,23 +1007,29 @@ namespace System.Net.Security
 
             Context.ProcessHandshakeSuccess();
 
+            // TODO: May throw CryptographicException.
+            // The stack should reply back with TLS1_ALERT_BAD_CERTIFICATE or TLS1_ALERT_HANDSHAKE_FAILURE.
             if (!Context.VerifyRemoteCertificate(_certValidationDelegate))
             {
                 _handshakeCompleted = false;
                 _certValidationFailed = true;
+
                 if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Leave("CompleteHandshake", false);
                 }
+
                 return false;
             }
 
             _certValidationFailed = false;
             _handshakeCompleted = true;
+
             if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Leave("CompleteHandshake", true);
             }
+
             return true;
         }
 
@@ -1856,13 +1863,18 @@ namespace System.Net.Security
             }
         }
 
-        internal void BeginShutdownChannel(LazyAsyncResult asyncRequest)
+        internal void BeginSendAlert(int alertType, int alertMessage, LazyAsyncResult asyncRequest)
         {
             // Call ApplyControlToken(SCHANNEL_SHUTDOWN)
             
         }
 
-        internal void EndShutdownChannel(IAsyncResult result)
+        internal void BeginSendAlertInternal(int alertType, int alertMessage)
+        {
+
+        }
+
+        internal void EndSendAlert(IAsyncResult result)
         {
 
         }

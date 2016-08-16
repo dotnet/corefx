@@ -327,6 +327,18 @@ namespace System.Net
             return errorCode;
         }
 
+        internal static int ApplyControlToken(SSPIInterface secModule, ref SafeDeleteContext context, SecurityBuffer[] inputBuffers)
+        {
+            int errorCode = secModule.ApplyControlToken(ref context, inputBuffers);
+
+            if (SecurityEventSource.Log.IsEnabled())
+            {
+                SecurityEventSource.Log.OperationReturnedSomething("ApplyControlToken()", (Interop.SecurityStatus)errorCode);
+            }
+
+            return errorCode;
+        }
+
         public static int QuerySecurityContextToken(SSPIInterface secModule, SafeDeleteContext context, out SecurityContextTokenHandle token)
         {
             return secModule.QuerySecurityContextToken(context, out token);
@@ -599,7 +611,7 @@ namespace System.Net
                     break;
 
                 case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CONNECTION_INFO:
-                    nativeBlockSize = Marshal.SizeOf<SslConnectionInfo>();
+                    nativeBlockSize = Marshal.SizeOf<SecPkgContext_ConnectionInfo>();
                     break;
 
                 default:
@@ -667,7 +679,7 @@ namespace System.Net
                         break;
 
                     case Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CONNECTION_INFO:
-                        attribute = new SslConnectionInfo(nativeBuffer);
+                        attribute = new SecPkgContext_ConnectionInfo(nativeBuffer);
                         break;
                     default:
                         // Will return null.

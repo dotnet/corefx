@@ -30,5 +30,14 @@ namespace System.Net.Security.Tests
             var server = new TlsTestServer(_serverCertificate, 4431, sslAlertFilter);
             await server.RunTest();
         }
+
+        //[Fact]
+        public async Task TlsTest_Client()
+        {
+            IInspectionTest sslAlertFilter = new SslAlertsTest();
+
+            var server = new TlsTestClient("localhost", 4431, sslAlertFilter);
+            await server.RunTest();
+        }
     }
 }

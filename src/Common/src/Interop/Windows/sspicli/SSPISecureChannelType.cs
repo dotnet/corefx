@@ -159,5 +159,10 @@ namespace System.Net
         {
             throw new NotSupportedException();
         }
+
+        public int ApplyControlToken(ref SafeDeleteContext refContext, SecurityBuffer[] inputBuffers)
+        {
+            return SafeDeleteContext.ApplyControlToken(ref refContext, inputBuffers);
+        }
     }
 }

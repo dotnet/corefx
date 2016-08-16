@@ -152,16 +152,17 @@ namespace System.Net.Security
             _sslState.EndProcessAuthentication(asyncResult);
         }
 
-        internal virtual IAsyncResult BeginClose(AsyncCallback asyncCallback, object asyncState)
+        // TODO: Add proper enums for AlertType and AlertMessage.
+        internal virtual IAsyncResult BeginSendAlert(int alertType, int alertMessage, AsyncCallback asyncCallback, object asyncState)
         {
             var result = new LazyAsyncResult(_sslState, asyncState, asyncCallback);
-            _sslState.BeginShutdownChannel(result);
+            _sslState.BeginSendAlert(alertType, alertMessage, result);
             return result;
         }
 
-        internal virtual void EndClose(IAsyncResult asyncResult)
+        internal virtual void EndSendAlert(IAsyncResult asyncResult)
         {
-            _sslState.EndShutdownChannel(asyncResult);
+            _sslState.EndSendAlert(asyncResult);
         }
 
         public TransportContext TransportContext
@@ -202,9 +203,20 @@ namespace System.Net.Security
             return Task.Factory.FromAsync((callback, state) => BeginAuthenticateAsServer(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation, callback, state), EndAuthenticateAsServer, null);
         }
 
+        public virtual Task SendAlertAsync(int alertType, int alertMessage)
+        {
+            return Task.Factory.FromAsync(
+                (callback, state) => BeginSendAlert(alertType, alertMessage, callback, state),
+                EndSendAlert,
+                null);
+        }
+
         public virtual Task CloseAsync()
         {
-            return Task.Factory.FromAsync((callback, state) => BeginClose(callback, state), EndClose, null);
+            return Task.Factory.FromAsync(
+                (callback, state) => BeginSendAlert(Interop.SChannel.TLS1_ALERT_WARNING, Interop.SChannel.TLS1_ALERT_CLOSE_NOTIFY, callback, state),
+                EndSendAlert, 
+                null);
         }
         #endregion
 

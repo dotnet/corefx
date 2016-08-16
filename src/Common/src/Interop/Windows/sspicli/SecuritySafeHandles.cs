@@ -1241,6 +1241,120 @@ namespace System.Net.Security
 
             return errorCode;
         }
+
+        internal unsafe static int ApplyControlToken(
+            ref SafeDeleteContext refContext,
+            SecurityBuffer[] inSecBuffers)
+        {
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SafeDeleteContext::ApplyControlToken");
+                GlobalLog.Print("    refContext       = " + LoggingHash.ObjectToString(refContext));
+#if TRACE_VERBOSE
+                GlobalLog.Print("    inSecBuffers[]   = length:" + inSecBuffers.Length);
+#endif
+            }
+
+            if (inSecBuffers == null)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SafeDeleteContext::ApplyControlToken()|inSecBuffers == null");
+                }
+
+                Debug.Fail("SafeDeleteContext::ApplyControlToken()|inSecBuffers == null");
+            }
+
+            var inSecurityBufferDescriptor = new Interop.SspiCli.SecBufferDesc(inSecBuffers.Length);
+
+            int errorCode = (int)Interop.SecurityStatus.InvalidHandle;
+
+            // These are pinned user byte arrays passed along with SecurityBuffers.
+            GCHandle[] pinnedInBytes = null;
+
+            var inUnmanagedBuffer = new Interop.SspiCli.SecBuffer[inSecurityBufferDescriptor.cBuffers];
+            fixed (void* inUnmanagedBufferPtr = inUnmanagedBuffer)
+            {
+                // Fix Descriptor pointer that points to unmanaged SecurityBuffers.
+                inSecurityBufferDescriptor.pBuffers = inUnmanagedBufferPtr;
+                pinnedInBytes = new GCHandle[inSecurityBufferDescriptor.cBuffers];
+                SecurityBuffer securityBuffer;
+                for (int index = 0; index < inSecurityBufferDescriptor.cBuffers; ++index)
+                {
+                    securityBuffer = inSecBuffers[index];
+                    if (securityBuffer != null)
+                    {
+                        inUnmanagedBuffer[index].cbBuffer = securityBuffer.size;
+                        inUnmanagedBuffer[index].BufferType = securityBuffer.type;
+
+                        // Use the unmanaged token if it's not null; otherwise use the managed buffer.
+                        if (securityBuffer.unmanagedToken != null)
+                        {
+                            inUnmanagedBuffer[index].pvBuffer = securityBuffer.unmanagedToken.DangerousGetHandle();
+                        }
+                        else if (securityBuffer.token == null || securityBuffer.token.Length == 0)
+                        {
+                            inUnmanagedBuffer[index].pvBuffer = IntPtr.Zero;
+                        }
+                        else
+                        {
+                            pinnedInBytes[index] = GCHandle.Alloc(securityBuffer.token, GCHandleType.Pinned);
+                            inUnmanagedBuffer[index].pvBuffer = Marshal.UnsafeAddrOfPinnedArrayElement(securityBuffer.token, securityBuffer.offset);
+                        }
+#if TRACE_VERBOSE
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.Print("SecBuffer: cbBuffer:" + securityBuffer.size + " BufferType:" + securityBuffer.type);
+                        }
+#endif
+                    }
+                }
+
+                Interop.SspiCli.CredHandle contextHandle = new Interop.SspiCli.CredHandle();
+                if (refContext != null)
+                {
+                    contextHandle = refContext._handle;
+                }
+                try
+                {
+                    if (refContext == null || refContext.IsInvalid)
+                    {
+                        refContext = new SafeDeleteContext_SECURITY();
+                    }
+
+                    try
+                    {
+                        bool ignore = false;
+                        refContext.DangerousAddRef(ref ignore);
+                        errorCode = Interop.SspiCli.ApplyControlToken(contextHandle.IsZero ? null : &contextHandle, inSecurityBufferDescriptor);
+                    }
+                    finally
+                    {
+                        refContext.DangerousRelease();
+                    }
+                }
+                finally
+                {
+                    if (pinnedInBytes != null)
+                    {
+                        for (int index = 0; index < pinnedInBytes.Length; index++)
+                        {
+                            if (pinnedInBytes[index].IsAllocated)
+                            {
+                                pinnedInBytes[index].Free();
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SafeDeleteContext::ApplyControlToken() unmanaged ApplyControlToken()", "errorCode:0x" + errorCode.ToString("x8") + " refContext:" + LoggingHash.ObjectToString(refContext));
+            }
+
+            return errorCode;
+        }
     }
 
     internal sealed class SafeDeleteContext_SECURITY : SafeDeleteContext

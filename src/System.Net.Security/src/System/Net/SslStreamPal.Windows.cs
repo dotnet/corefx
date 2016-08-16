@@ -220,6 +220,11 @@ namespace System.Net
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(errorCode);
         }
 
+        public static SecurityStatusPal ApplyControlToken(SafeDeleteContext securityContext, int alertType, int alertMessage)
+        {
+
+        }
+
         public unsafe static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
         {
             return SSPIWrapper.QueryContextChannelBinding(GlobalSSPI.SSPISecureChannel, securityContext, (Interop.SspiCli.ContextAttribute)attribute);
@@ -233,12 +238,12 @@ namespace System.Net
                 Interop.SspiCli.ContextAttribute.SECPKG_ATTR_STREAM_SIZES) as SecPkgContext_StreamSizes;
         }
 
-        public static void QueryContextConnectionInfo(SafeDeleteContext securityContext, out SslConnectionInfo connectionInfo)
+        public static void QueryContextConnectionInfo(SafeDeleteContext securityContext, out SecPkgContext_ConnectionInfo connectionInfo)
         {
             connectionInfo = SSPIWrapper.QueryContextAttributes(
                 GlobalSSPI.SSPISecureChannel,
                 securityContext,
-                Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CONNECTION_INFO) as SslConnectionInfo;
+                Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CONNECTION_INFO) as SecPkgContext_ConnectionInfo;
         }
 
         private static int GetProtocolFlagsFromSslProtocols(SslProtocols protocols, bool isServer)

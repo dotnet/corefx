@@ -75,17 +75,22 @@ Connection: close
 
                         var inspectionStream = new InspectionNetworkStream(requestClient.GetStream(), _inspectionTest.OnServerSocketOperation);
 
-                        using (var tls = new SslStream(inspectionStream))
+                        using (var tls = new SslStream(inspectionStream, true, RemoteCertValidationCallback, LocalCertSelectionCallback, EncryptionPolicy.RequireEncryption))
                         {
                             await tls.AuthenticateAsServerAsync(
                             _serverCertificate,
-                            false,
+                            true,
                             System.Security.Authentication.SslProtocols.Tls,
                             false);
 
                             Console.WriteLine("[Server] Client authenticated.");
 
                             done = await HttpConversation(tls);
+
+                            // Should await close_notify.
+
+                            requestClient.Client.Shutdown(SocketShutdown.Send);
+                            await WaitForTcpShutdown(inspectionStream);
                         }
                     }
                 }
@@ -94,6 +99,37 @@ Connection: close
                     // Ignore I/O issues as browsers attempt to connect only to detect crypto information.
                 }
             }
+        }
+
+        private X509Certificate LocalCertSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+        {
+            Console.WriteLine("LocalCertSelectionCallback:");
+            foreach (X509Certificate2 cert in localCertificates)
+            {
+                Console.WriteLine("\tLocal: {0}", cert.Subject);
+            }
+
+            Console.WriteLine("\n\tRemote:{0}", ((X509Certificate2)remoteCertificate)?.Subject);
+
+            return localCertificates[0];
+        }
+
+        private bool RemoteCertValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            Console.WriteLine("RemoteCertValidationCallback: PolicyErrors: {0}", sslPolicyErrors);
+
+            Console.WriteLine("\tRemote:{0}", ((X509Certificate2)certificate)?.Subject);
+            
+            if (chain != null)
+            {
+                Console.WriteLine("\rChain:");
+                foreach (X509ChainElement chainElement in chain.ChainElements)
+                {
+                    Console.WriteLine("\tChain: {0}", chainElement.Certificate?.Subject);
+                }
+            }
+
+            return true;
         }
 
         private async Task<bool> HttpConversation(SslStream tls)
@@ -144,6 +180,19 @@ Connection: close
 
             Console.WriteLine("[Server] Replied with {0} bytes.", responseBuffer.Length);
             return true;
+        }
+
+
+        private async Task WaitForTcpShutdown(Stream s)
+        {
+            int bytesRead = 0;
+            var drainBuffer = new byte[256];
+
+            do
+            {
+                bytesRead = await s.ReadAsync(drainBuffer, 0, drainBuffer.Length);
+                Console.WriteLine("Drained {0} bytes.", bytesRead);
+            } while (bytesRead > 0);
         }
     }
 }

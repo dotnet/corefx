@@ -28,7 +28,7 @@ namespace System.Net.Security
         private readonly bool _remoteCertRequired;
         private readonly SslProtocols _sslProtocols;
         private readonly EncryptionPolicy _encryptionPolicy;
-        private SslConnectionInfo _connectionInfo;
+        private SecPkgContext_ConnectionInfo _connectionInfo;
 
         private X509Certificate _serverCertificate;
         private X509Certificate _selectedClientCertificate;
@@ -47,6 +47,17 @@ namespace System.Net.Security
 
         private bool _refreshCredentialNeeded;
 
+        internal int AlertType
+        {
+            get;
+            private set;
+        }
+
+        internal int AlertMessage
+        {
+            get;
+            private set;
+        }
 
         internal SecureChannel(string hostname, bool serverMode, SslProtocols sslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertName,
                                                   bool checkCertRevocationStatus, EncryptionPolicy encryptionPolicy, LocalCertSelectionCallback certSelectionDelegate)
@@ -87,6 +98,7 @@ namespace System.Net.Security
             _certSelectionDelegate = certSelectionDelegate;
             _refreshCredentialNeeded = true;
             _encryptionPolicy = encryptionPolicy;
+            
             if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::.ctor");
@@ -178,7 +190,7 @@ namespace System.Net.Security
             }
         }
 
-        internal SslConnectionInfo ConnectionInfo
+        internal SecPkgContext_ConnectionInfo ConnectionInfo
         {
             get
             {
@@ -821,6 +833,34 @@ namespace System.Net.Security
             return token;
         }
 
+        internal ProtocolToken CreateAlertToken(int alertType, int alertMessage)
+        {
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage");
+            }
+
+            SecurityStatusPal status = GenerateToken(null, 0, 0, ref nextmsg);
+
+            if (!_serverMode && status.ErrorCode == SecurityStatusPalErrorCode.CredentialsNeeded)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage() returned SecurityStatusPal.CredentialsNeeded");
+                }
+
+                SetRefreshCredentialNeeded();
+                status = GenerateToken(incoming, offset, count, ref nextmsg);
+            }
+
+            ProtocolToken token = new ProtocolToken(nextmsg, status);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage", token.ToString());
+            }
+            return token;
+        }
+
         /*++
             GenerateToken - Called after each successive state
             in the Client - Server handshake.  This function
@@ -1235,6 +1275,7 @@ namespace System.Net.Security
                             SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), chainStatusString);
                         }
                     }
+
                     if (success)
                     {
                         if (remoteCertValidationCallback != null)

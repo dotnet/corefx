@@ -30,5 +30,6 @@ namespace System.Net
         int SetContextAttributes(SafeDeleteContext phContext, Interop.SspiCli.ContextAttribute attribute, byte[] buffer);
         int QuerySecurityContextToken(SafeDeleteContext phContext, out SecurityContextTokenHandle phToken);
         int CompleteAuthToken(ref SafeDeleteContext refContext, SecurityBuffer[] inputBuffers);
+        int ApplyControlToken(ref SafeDeleteContext refContext, SecurityBuffer[] inputBuffers);
     }
 }
