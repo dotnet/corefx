@@ -8,6 +8,9 @@
 
 namespace Microsoft.Win32.SafeHandles
 {
+    /// <summary>
+    /// Represents a safe handle to the Windows registry.
+    /// </summary>
     public partial class SafeRegistryHandle
     {
         // Manually added because SafeHandleZeroOrMinusOneIsInvalid is removed.
