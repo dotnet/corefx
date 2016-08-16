@@ -316,6 +316,56 @@ extern "C" int32_t SystemNative_GetDirentSize()
     return sizeof(dirent);
 }
 
+#if defined HAVE_GNU_READDIR_R
+// To reduce the number of string copies, this function calling pattern works as follows:
+// 1) The managed code calls GetDirentSize() to get the platform-specific
+//    size of the dirent struct.
+// 2) The managed code creates a byte[] buffer of the size of the native dirent
+//    and passes a pointer to this buffer to this function.
+// 3) This function passes input byte[] buffer to the OS to fill with dirent data
+//    which makes the 1st strcpy.
+// 4) The ConvertDirent function will set a pointer to the start of the inode name
+//    in the byte[] buffer so the managed code and find it and copy it out of the
+//    buffer into a managed string that the caller of the framework can use, making
+//    the 2nd and final strcpy.
+extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferSize, DirectoryEntry* outputEntry)
+{
+    assert(buffer != nullptr);
+    assert(dir != nullptr);
+    assert(outputEntry != nullptr);
+
+    if (bufferSize < static_cast<int32_t>(sizeof(dirent)))
+    {
+        assert(false && "Buffer size too small; use GetDirentSize to get required buffer size");
+        return ERANGE;
+    }
+
+    dirent* result = nullptr;
+    dirent* entry = static_cast<dirent*>(buffer);
+    int error = readdir_r(dir, entry, &result);
+
+    // positive error number returned -> failure
+    if (error != 0)
+    {
+        assert(error > 0);
+        *outputEntry = {}; // managed out param must be initialized
+        return error;
+    }
+
+    // 0 returned with null result -> end-of-stream
+    if (result == nullptr)
+    {
+        *outputEntry = {}; // managed out param must be initialized
+        return -1;         // shim convention for end-of-stream
+    }
+
+    // 0 returned with non-null result (guaranteed to be set to entry arg) -> success
+    assert(result == entry);
+    ConvertDirent(*entry, outputEntry);
+    return 0;
+}
+
+#else
 // To reduce the number of string copies, this function calling pattern works as follows:
 // 1) The managed code calls GetDirentSize() to get the platform-specific
 //    size of the dirent struct.
@@ -367,6 +417,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     ConvertDirent(*entry, outputEntry);
     return 0;
 }
+#endif
 
 extern "C" DIR* SystemNative_OpenDir(const char* path)
 {
