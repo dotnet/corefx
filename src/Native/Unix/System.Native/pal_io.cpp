@@ -401,7 +401,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     // positive error number returned -> failure
     if (errno != 0)
     {
-        assert(error == EBADF); // Invalid directory stream discriptor dir.
+        assert(errno == EBADF); // Invalid directory stream discriptor dir.
         *outputEntry = {}; // managed out param must be initialized
         return errno;
     }
