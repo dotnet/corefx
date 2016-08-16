@@ -365,7 +365,7 @@
           }
         },
         "nodeReuse":{
-          "description": "Disables node reuse because it causes file locking issues. Only available in the Desktop MsBuild.",
+          "description": "Disables node reuse because it causes file locking issues. Only available when running MsBuild on Windows.",
           "settings":{
             "MsBuildNodeReuse": "default"
           }
@@ -494,6 +494,12 @@
             "ContainerName": "default"
           }
         },
+        "nodeReuse":{
+          "description": "Disables node reuse because it causes file locking issues. Only available when running MsBuild on Windows.",
+          "settings":{
+            "MsBuildNodeReuse": "default"
+          }
+        },
         "verbose":{
           "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
           "settings":{
@@ -562,6 +568,12 @@
           "description": "To download a specific group of product packages, specify build number. The value for -BuildMajor required.",
           "settings": {
             "BuildNumberMinor": "default"
+          }
+        },
+        "nodeReuse":{
+          "description": "Disables node reuse because it causes file locking issues. Only available when running MsBuild on Windows.",
+          "settings":{
+            "MsBuildNodeReuse": "default"
           }
         },
         "verbose":{

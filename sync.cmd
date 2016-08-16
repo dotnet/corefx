@@ -1,4 +1,4 @@
 @setlocal
 @if [%1]==[] set __args=-p
-@call %~dp0run.cmd sync %__args% %*
+@call %~dp0run.cmd sync -nodeReuse %__args% %*
 @exit /b %ERRORLEVEL%

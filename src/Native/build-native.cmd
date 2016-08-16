@@ -14,7 +14,7 @@ set CMAKE_BUILD_TYPE=Debug
 set "__LinkArgs= "
 set "__LinkLibraries= "
 
-call %__rootDir%/run.cmd build-managed -GenerateVersion -project=%__rootDir%/build.proj
+call %__rootDir%/run.cmd build-managed -nodeReuse -GenerateVersion -project=%__rootDir%/build.proj
 
 :Arg_Loop
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
