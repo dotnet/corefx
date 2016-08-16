@@ -143,11 +143,19 @@ namespace System.Diagnostics.Tests
             p.StartInfo.StandardOutputEncoding = Encoding.Unicode;
             p.OutputDataReceived += (s, e) =>
             {
-                if (!receivedOutput)
+                try
                 {
-                    Assert.Equal(e.Data, "a");
+                    if (!receivedOutput)
+                    {
+                        Assert.Equal(e.Data, "a");
+                    }
+                    receivedOutput = true;
                 }
-                receivedOutput = true;
+                catch (System.Exception)
+                {
+                    // This ensures that the exception in event handlers does not break
+                    // the whole unittest
+                }
             };
             p.Start();
             p.BeginOutputReadLine();
