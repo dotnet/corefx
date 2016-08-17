@@ -380,9 +380,10 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
         return -1;         // shim convention for end-of-stream
     }
 
-    memcpy(buffer,entry,static_cast<size_t>(bufferSize));
+    assert(entry->d_reclen <= bufferSize);
+    memcpy(buffer, entry, static_cast<size_t>(entry->d_reclen));
 #endif
-    ConvertDirent(*entry, outputEntry);
+    ConvertDirent(static_cast<dirent*>(buffer), outputEntry);
     return 0;
 }
 
