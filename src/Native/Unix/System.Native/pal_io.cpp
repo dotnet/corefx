@@ -339,9 +339,9 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
         return ERANGE;
     }
 
-#if defined HAVE_GNU_READDIR_R
     dirent* result = nullptr;
     dirent* entry = static_cast<dirent*>(buffer);
+#if defined HAVE_GNU_READDIR_R
     int error = readdir_r(dir, entry, &result);
 
     // positive error number returned -> failure
@@ -353,7 +353,6 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     }
 
     // 0 returned with null result -> end-of-stream
-    if (result == nullptr)
     {
         *outputEntry = {}; // managed out param must be initialized
         return -1;         // shim convention for end-of-stream
@@ -363,7 +362,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     assert(result == entry);
 #else
     errno = 0;
-    dirent* entry = readdir(dir);
+    result = readdir(dir);
 
     //  kernel set errno -> failure
     if (errno != 0)
@@ -374,16 +373,16 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     }
 
     // 0 returned with null result -> end-of-stream
-    if (entry == nullptr)
+    if (result == nullptr)
     {
         *outputEntry = {}; // managed out param must be initialized
         return -1;         // shim convention for end-of-stream
     }
 
-    assert(entry->d_reclen <= bufferSize);
-    memcpy(buffer, entry, static_cast<size_t>(entry->d_reclen));
+    assert(result->d_reclen <= bufferSize);
+    memcpy(entry, result, static_cast<size_t>(result->d_reclen));
 #endif
-    ConvertDirent(static_cast<dirent*>(buffer), outputEntry);
+    ConvertDirent(*entry, outputEntry);
     return 0;
 }
 
