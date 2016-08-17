@@ -14,7 +14,7 @@ set CMAKE_BUILD_TYPE=Debug
 set "__LinkArgs= "
 set "__LinkLibraries= "
 
-call %__rootDir%/run.cmd build-managed -nodeReuse -GenerateVersion -project=%__rootDir%/build.proj
+call %__rootDir%/run.cmd build-managed -MsBuildParametersWindows -GenerateVersion -project=%__rootDir%/build.proj
 
 :Arg_Loop
 :: Since the native build requires some configuration information before msbuild is called, we have to do some manual args parsing
@@ -117,7 +117,7 @@ if "%__BuildArch%" == "arm64" (
     set __msbuildArgs=/p:Platform=%__BuildArch% /p:PlatformToolset="%__PlatformToolset%"
 )
 
-call %__rootDir%/run.cmd build-managed -project="%__IntermediatesDir%\install.vcxproj" -- /t:rebuild /p:Configuration=%CMAKE_BUILD_TYPE% %__msbuildArgs%
+call %__rootDir%/run.cmd build-managed -MsBuildParametersWindows -project="%__IntermediatesDir%\install.vcxproj" -- /t:rebuild /p:Configuration=%CMAKE_BUILD_TYPE% %__msbuildArgs%
 IF ERRORLEVEL 1 (
     goto :Failure
 )
