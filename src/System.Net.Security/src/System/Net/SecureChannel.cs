@@ -837,7 +837,7 @@ namespace System.Net.Security
         {
             if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken");
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken(" + alertType + ", " + alertMessage + ")");
             }
 
             SecurityStatusPal status = SslStreamPal.ApplyAlertToken(ref _credentialsHandle, _securityContext, alertType, alertMessage);
@@ -863,6 +863,7 @@ namespace System.Net.Security
             {
                 GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken", token.ToString());
             }
+
             return token;
         }
 
@@ -1239,6 +1240,7 @@ namespace System.Net.Security
                         _hostName);
                 }
 
+                // TODO: Never null.
                 if (remoteCertValidationCallback != null)
                 {
                     success = remoteCertValidationCallback(_hostName, remoteCertificateEx, chain, sslPolicyErrors);
@@ -1257,53 +1259,39 @@ namespace System.Net.Security
 
                 if (SecurityEventSource.Log.IsEnabled())
                 {
-                    if (sslPolicyErrors != SslPolicyErrors.None)
-                    {
-                        SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_has_errors);
-                        if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateNotAvailable) != 0)
-                        {
-                            SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_not_available);
-                        }
-
-                        if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateNameMismatch) != 0)
-                        {
-                            SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_name_mismatch);
-                        }
-
-                        if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateChainErrors) != 0)
-                        {
-                            string chainStatusString = "ChainStatus: ";
-                            foreach (X509ChainStatus chainStatus in chain.ChainStatus)
-                            {
-                                chainStatusString += "\t" + chainStatus.StatusInformation;
-                            }
-                            SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), chainStatusString);
-                        }
-                    }
-
-                    if (success)
-                    {
-                        if (remoteCertValidationCallback != null)
-                        {
-                            SecurityEventSource.Log.RemoteCertDeclaredValid(LoggingHash.HashInt(this));
-                        }
-                        else
-                        {
-                            SecurityEventSource.Log.RemoteCertHasNoErrors(LoggingHash.HashInt(this));
-                        }
-                    }
-                    else
-                    {
-                        if (remoteCertValidationCallback != null)
-                        {
-                            SecurityEventSource.Log.RemoteCertUserDeclaredInvalid(LoggingHash.HashInt(this));
-                        }
-                    }
+                    LogCertificateValidation(remoteCertValidationCallback, sslPolicyErrors, success, chain);
                 }
 
                 if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Print("Cert Validation, remote cert = " + (remoteCertificateEx == null ? "<null>" : remoteCertificateEx.ToString(true)));
+                }
+
+                if (!success)
+                {
+                    // Prepare Alert Token.
+                    int alertMessage;
+
+                    switch (sslPolicyErrors)
+                    {
+                        // TODO: TLS1_ALERT_CERTIFICATE_EXPIRED if CERT_E_VALIDITYPERIODNESTING or CERT_E_EXPIRED
+                        //       TLS1_ALERT_CERTIFICATE_REVOKED if CERT_E_REVOKED
+
+                        case SslPolicyErrors.RemoteCertificateChainErrors:
+                            alertMessage = Interop.SChannel.TLS1_ALERT_UNKNOWN_CA;
+                            break;
+                        case SslPolicyErrors.RemoteCertificateNameMismatch:
+                            alertMessage = Interop.SChannel.TLS1_ALERT_CERTIFICATE_UNKNOWN;
+                            break;
+                        case SslPolicyErrors.RemoteCertificateNotAvailable:
+                        default:
+                            alertMessage = Interop.SChannel.TLS1_ALERT_HANDSHAKE_FAILURE;
+                            break;
+                    }
+
+                    alertToken = CreateAlertToken(
+                        Interop.SChannel.TLS1_ALERT_FATAL,
+                        alertMessage);
                 }
             }
             finally
@@ -1321,14 +1309,7 @@ namespace System.Net.Security
                 }
             }
 
-            if (!success)
-            {
-                // Prepare Alert Token.
-                // TODO: generate proper alerts based on certificate validation.
-                alertToken = CreateAlertToken(
-                    Interop.SChannel.TLS1_ALERT_FATAL,
-                    Interop.SChannel.TLS1_ALERT_HANDSHAKE_FAILURE);
-            }
+
             
             if (GlobalLog.IsEnabled)
             {
@@ -1336,6 +1317,52 @@ namespace System.Net.Security
             }
 
             return success;
+        }
+
+        private void LogCertificateValidation(RemoteCertValidationCallback remoteCertValidationCallback, SslPolicyErrors sslPolicyErrors, bool success, X509Chain chain)
+        {
+            if (sslPolicyErrors != SslPolicyErrors.None)
+            {
+                SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_has_errors);
+                if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateNotAvailable) != 0)
+                {
+                    SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_not_available);
+                }
+
+                if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateNameMismatch) != 0)
+                {
+                    SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_name_mismatch);
+                }
+
+                if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateChainErrors) != 0)
+                {
+                    string chainStatusString = "ChainStatus: ";
+                    foreach (X509ChainStatus chainStatus in chain.ChainStatus)
+                    {
+                        chainStatusString += "\t" + chainStatus.StatusInformation;
+                    }
+                    SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), chainStatusString);
+                }
+            }
+
+            if (success)
+            {
+                if (remoteCertValidationCallback != null)
+                {
+                    SecurityEventSource.Log.RemoteCertDeclaredValid(LoggingHash.HashInt(this));
+                }
+                else
+                {
+                    SecurityEventSource.Log.RemoteCertHasNoErrors(LoggingHash.HashInt(this));
+                }
+            }
+            else
+            {
+                if (remoteCertValidationCallback != null)
+                {
+                    SecurityEventSource.Log.RemoteCertUserDeclaredInvalid(LoggingHash.HashInt(this));
+                }
+            }
         }
     }
 

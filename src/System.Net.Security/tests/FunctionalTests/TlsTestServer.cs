@@ -78,13 +78,18 @@ Connection: close
 
                         try
                         {
-                            using (var tls = new SslStream(inspectionStream, true, RemoteCertValidationCallback, LocalCertSelectionCallback, EncryptionPolicy.RequireEncryption))
+                            using (var tls = new SslStream(
+                                inspectionStream, 
+                                true, 
+                                null, //RemoteCertValidationCallback, 
+                                LocalCertSelectionCallback, 
+                                EncryptionPolicy.RequireEncryption))
                             {
                                 await tls.AuthenticateAsServerAsync(
-                                _serverCertificate,
-                                clientCertificateRequired: false,
-                                enabledSslProtocols: SslProtocols.Tls,
-                                checkCertificateRevocation: false);
+                                    _serverCertificate,
+                                    clientCertificateRequired: true,
+                                    enabledSslProtocols: SslProtocols.Tls,
+                                    checkCertificateRevocation: false);
 
                                 Console.WriteLine("[Server] Client authenticated.");
 
