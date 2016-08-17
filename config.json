@@ -4,7 +4,7 @@
       "description": "Enables/Disables running tests.",
       "valueType": "property",
       "values": ["True", "False"],
-      "defaultValue": false
+      "defaultValue": true
     },
     "OSGroup": {
       "description": "OS Group for result binaries.",
@@ -70,7 +70,7 @@
       "description": "Enables/Disables building packages for managed builds.",
       "valueType": "property",
       "values": ["True", "False"],
-      "defaultValue": false
+      "defaultValue": true
     },
     "BuildTests": {
       "description": "Enables/Disables building tests.",
@@ -82,7 +82,7 @@
       "description": "Allows building tests against product packages.",
       "valueType": "property",
       "values": ["True", "False"],
-      "defaultValue": false
+      "defaultValue": true
     },
     "Coverage":{
       "description": "Enables code coverage runs.",
@@ -144,24 +144,6 @@
       "values": ["True", "False"],
       "defaultValue": true
     },
-    "SkipManagedPackageBuild": {
-      "description": "Skips building packages from managed binaries.",
-      "valueType": "property",
-      "values": ["True", "False"],
-      "defaultValue": false
-    },
-    "BuildPackageLibraryReferences": {
-      "description": "Enables building libraries referenced by packages",
-      "valueType": "property",
-      "values": ["True", "False"],
-      "defaultValue": true
-    },
-    "MsBuildNodeReuse": {
-      "description": "Disables node reuse.",
-      "valueType": "passThrough",
-      "values": [],
-      "defaultValue": "/nodeReuse:false"
-    },
     "MsBuildLogging": {
       "description": "MsBuild logging options.",
       "valueType": "passThrough",
@@ -180,23 +162,17 @@
       "values": [],
       "defaultValue": "/flp3:errorsonly;logfile=msbuild.err"
     },
-    "MsBuildParameters": {
-      "description": "MsBuild building options.",
+    "MsBuildParametersWindows": {
+      "description": "MsBuild building options for Windows.",
       "valueType": "passThrough",
       "values": [],
-      "defaultValue": "/nologo /maxcpucount /verbosity:minimal /clp:Summary"
+      "defaultValue": "/nologo /verbosity:minimal /clp:Summary /maxcpucount /nodeReuse:false /l:BinClashLogger,Tools\\net45\\Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
     },
-    "MsBuildBinClashLogger-Windows": {
-      "description": "MsBuild Bin clash logger options for Windows.",
+    "MsBuildParametersUnix": {
+      "description": "MsBuild building options for Unix.",
       "valueType": "passThrough",
       "values": [],
-      "defaultValue": "/l:BinClashLogger,Tools\\net45\\Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
-    },
-    "MsBuildBinClashLogger-Unix": {
-      "description": "MsBuild Bin clash logger options for Unix.",
-      "valueType": "passThrough",
-      "values": [],
-      "defaultValue": "/l:BinClashLogger,Tools/Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
+      "defaultValue": "/nologo /verbosity:minimal /clp:Summary /maxcpucount /l:BinClashLogger,Tools/Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
     },
     "BuildArchitecture": {
       "description": "Sets the value of the build architecture.",
@@ -363,24 +339,6 @@
           "settings":{
             "MsBuildLogging": "/flp:v=diag;LogFile=build-managed.log"
           }
-        },
-        "nodeReuse":{
-          "description": "Disables node reuse because it causes file locking issues. Only available when running MsBuild on Windows.",
-          "settings":{
-            "MsBuildNodeReuse": "default"
-          }
-        },
-        "binclashWindows":{
-          "description": "Bin clash logger for Windows.",
-          "settings":{
-            "MsBuildBinClashLogger-Windows":"default"
-          }
-        },
-        "binclashUnix":{
-          "description": "Bin clash logger for Unix.",
-          "settings":{
-            "MsBuildBinClashLogger-Unix":"default"
-          }
         }
       },
       "defaultValues":{
@@ -389,7 +347,6 @@
           "OSGroup": "default",
           "TargetOS": "default",
           "ConfigurationGroup": "default",
-          "MsBuildParameters":"default",
           "MsBuildLogging":"default",
           "MsBuildWarning":"default",
           "MsBuildError":"default"
@@ -458,7 +415,6 @@
       "defaultValues":{
         "toolName": "msbuild",
         "settings": {
-          "MsBuildParameters":"default",
           "MsBuildLogging":"/flp:v=normal;LogFile=clean.log"
         }
       }
@@ -494,12 +450,6 @@
             "ContainerName": "default"
           }
         },
-        "nodeReuse":{
-          "description": "Disables node reuse because it causes file locking issues. Only available when running MsBuild on Windows.",
-          "settings":{
-            "MsBuildNodeReuse": "default"
-          }
-        },
         "verbose":{
           "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
           "settings":{
@@ -511,7 +461,6 @@
         "toolName": "msbuild",
         "settings": {
           "Project": "src/publish.proj",
-          "MsBuildParameters":"default",
           "MsBuildLogging":"/flp:v=normal;LogFile=publish-packages.log"
         }
       }
@@ -570,12 +519,6 @@
             "BuildNumberMinor": "default"
           }
         },
-        "nodeReuse":{
-          "description": "Disables node reuse because it causes file locking issues. Only available when running MsBuild on Windows.",
-          "settings":{
-            "MsBuildNodeReuse": "default"
-          }
-        },
         "verbose":{
           "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
           "settings":{
@@ -586,7 +529,6 @@
       "defaultValues":{
         "toolName": "msbuild",
         "settings": {
-          "MsBuildParameters":"default",
           "MsBuildLogging":"/flp:v=normal;LogFile=sync.log"
         }
       }
