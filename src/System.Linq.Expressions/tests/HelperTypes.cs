@@ -5,6 +5,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+#pragma warning disable 0067
+
 namespace System.Linq.Expressions.Tests
 {
     public interface I
@@ -266,5 +268,23 @@ namespace System.Linq.Expressions.Tests
         private NoOpVisitor()
         {
         }
+    }
+
+    public static class Unreadable<T>
+    {
+        public static T WriteOnly { set { } }
+    }
+
+    public class GenericClass<T>
+    {
+        public void Method() { }
+    }
+
+    public class NonGenericClass
+    {
+        public event EventHandler Event;
+
+        public void GenericMethod<T>() { }
+        public static void StaticMethod() { }
     }
 }
