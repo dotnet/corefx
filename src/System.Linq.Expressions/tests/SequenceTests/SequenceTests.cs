@@ -679,7 +679,7 @@ namespace System.Linq.Expressions.Tests
         {
             object st_local = new TC1();
             var mi = typeof(object).GetMethod("ToString");
-            var lam = Expression.Lambda<Func<string>>(Expression.Call(Expression.Constant(st_local), mi, (IEnumerable<Expression>) null), null);
+            var lam = Expression.Lambda<Func<string>>(Expression.Call(Expression.Constant(st_local), mi, null), null);
             var f = lam.Compile(useInterpreter);
         }
 
@@ -1792,7 +1792,7 @@ namespace System.Linq.Expressions.Tests
         public static void InvokeNonTypedLambdaFails()
         {
             Expression call = Expression.Call(null, typeof(Compiler_Tests).GetMethod("ComputeDynamicLambda", BindingFlags.Static | BindingFlags.Public), new Expression[] { });
-            Assert.Throws<ArgumentException>("expression", () => Expression.Invoke(call, (Expression) null));
+            Assert.Throws<ArgumentException>("expression", () => Expression.Invoke(call, null));
         }
 
         public static LambdaExpression ComputeDynamicLambda()
@@ -1804,7 +1804,7 @@ namespace System.Linq.Expressions.Tests
         public static void InvokeNonTypedDelegateFails()
         {
             Expression call = Expression.Call(null, typeof(Compiler_Tests).GetMethod("ComputeDynamicDelegate", BindingFlags.Static | BindingFlags.Public), new Expression[] { });
-            Assert.Throws<ArgumentException>("expression", () => Expression.Invoke(call, (Expression) null));
+            Assert.Throws<ArgumentException>("expression", () => Expression.Invoke(call, null));
         }
 
         public static Delegate ComputeDynamicDelegate()

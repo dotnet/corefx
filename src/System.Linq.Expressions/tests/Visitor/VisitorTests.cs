@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq.Expressions.Tests.IndexExpression;
 using System.Reflection;
 using Xunit;
 
@@ -118,31 +117,9 @@ namespace System.Linq.Expressions.Tests
 
         private class ConstantRefreshingVisitor : ExpressionVisitor
         {
-            protected internal override Expression VisitConstant(ConstantExpression node)
+            protected override Expression VisitConstant(ConstantExpression node)
                 => Expression.Constant(node.Value, node.Type);
         }
- 
-        private class IndexVisitor : ExpressionVisitor
-        {
-            public IndexVisitor(SampleClassWithProperties instance)
-            {
-                _instanceSample = instance;
-            }
-
-            private readonly SampleClassWithProperties _instanceSample;
-
-            public override Expression Visit(Expression node)
-            {
-                if (node is MemberExpression)
-                {
-                    return Expression.Property(Expression.Constant(_instanceSample),
-                        typeof(SampleClassWithProperties).GetProperty("AlternativeProperty"));
-                }
-
-                return base.Visit(node);
-            }
-        }
-
 
         private class ResultExpression : Expression
         {
@@ -150,12 +127,12 @@ namespace System.Linq.Expressions.Tests
 
         private class SourceExpression : Expression
         {
-            protected internal override Expression Accept(ExpressionVisitor visitor) => new ResultExpression();
+            protected override Expression Accept(ExpressionVisitor visitor) => new ResultExpression();
         }
 
         private class NullBecomingExpression : Expression
         {
-            protected internal override Expression Accept(ExpressionVisitor visitor) => null;
+            protected override Expression Accept(ExpressionVisitor visitor) => null;
         }
 
         private static string UpperCaseIfNotAlready(string value)
@@ -361,35 +338,6 @@ namespace System.Linq.Expressions.Tests
             var call = (MethodCallExpression)innerBlock.Expressions.Last();
             var instance = (ConstantExpression)call.Object;
             Assert.Same(list, instance.Value);
-        }
-
-        [Fact]
-        public void VisitIndexedExpressionRewrite()
-        {
-            var obj = new SampleClassWithProperties
-            {
-                DefaultProperty = new List<int> {100},
-                AlternativeProperty = new List<int> {200}
-            };
-
-            PropertyInfo indexer = typeof(List<int>).GetProperty("Item");
-            MemberExpression propertyExpression = Expression.Property(Expression.Constant(obj),
-                typeof(SampleClassWithProperties).GetProperty("DefaultProperty"));
-            ConstantExpression[] arguments = {Expression.Constant(0)};
-            Expressions.IndexExpression expr = Expression.MakeIndex(propertyExpression, indexer, arguments);
-
-            var visitor = new IndexVisitor(obj);
-            var expectedPropertyExpresstion = Expression.Property(
-                Expression.Constant(obj),
-                typeof(SampleClassWithProperties).GetProperty("AlternativeProperty"));
-            var expected = Expression.MakeIndex(expectedPropertyExpresstion, expr.Indexer, expr.Arguments);
-
-            var actual = (Expressions.IndexExpression) visitor.Visit(expr);
-
-            Assert.NotSame(expected, actual);
-
-            IndexExpressionTests.AssertInvokeCorrect(100, expr, obj);
-            IndexExpressionTests.AssertInvokeCorrect(200, actual, obj);
         }
     }
 }

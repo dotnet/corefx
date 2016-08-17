@@ -26,7 +26,7 @@ namespace System.Linq.Expressions.Tests
         {
             public class Visitor : ExpressionVisitor
             {
-                protected internal override Expression VisitExtension(Expression node)
+                protected override Expression VisitExtension(Expression node)
                 {
                     return MarkerExtension;
                 }

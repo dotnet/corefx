@@ -111,6 +111,8 @@
     <Compile Include="Goto\MakeGoto.cs" />
     <Compile Include="Goto\Return.cs" />
     <Compile Include="HelperTypes.cs" />
+    <Compile Include="IndexExpression\IndexExpressionHelpers.cs" />
+    <Compile Include="IndexExpression\IndexExpressionVisitorTests.cs" />
     <Compile Include="IndexExpression\SampleClassWithProperties.cs" />
     <Compile Include="IndexExpression\IndexExpressionTests.cs" />
     <Compile Include="Invoke\InvocationTests.cs" />
@@ -219,6 +221,5 @@
       <Name>System.Linq.Expressions</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
