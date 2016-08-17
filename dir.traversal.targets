@@ -86,6 +86,40 @@
              ContinueOnError="ErrorAndContinue" />
   </Target>
 
+  <Target Name="ProducesPackageId"
+          Returns="@(PackageIds)" 
+          DependsOnTargets="FilterProjects">
+        <MSBuild Targets="ProducesPackageId"
+             Projects="@(Project)"
+             BuildInParallel="true"
+             ContinueOnError="ErrorAndContinue">
+          <Output TaskParameter="TargetOutputs"
+                  ItemName="PackageIds" />             
+        </MSBuild>
+    <ItemGroup>
+      <PackageIds Include="@(PackageIds)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="Produces" DependsOnTargets="FilterProjects">
+    <PropertyGroup>
+      <ProducesJsonFilename>$(BinDir)produces.json</ProducesJsonFilename>
+    </PropertyGroup>
+
+    <MSBuild Targets="ProducesPackageId"
+             Projects="@(Project)"
+             BuildInParallel="true"
+             ContinueOnError="ErrorAndContinue">
+          <Output TaskParameter="TargetOutputs"
+                  ItemName="PackageIds" />      
+    </MSBuild>
+    <WriteLinesToFile File="$(ProducesJsonFilename)"
+                      Overwrite="true"
+                      Lines="@(PackageIds)" />
+    <Message Text="%(PackageIds.Identity)" Importance="High" />
+    <Message Text="Results written to file $(ProducesJsonFilename)" Importance="High" />
+  </Target>
+
   <Target Name="BuildAllProjects" DependsOnTargets="FilterProjects">
     <PropertyGroup>
       <DefaultBuildAllTarget Condition="'$(DefaultBuildAllTarget)'==''">$(MSBuildProjectDefaultTargets)</DefaultBuildAllTarget>
