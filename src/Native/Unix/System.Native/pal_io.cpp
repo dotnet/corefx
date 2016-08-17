@@ -365,7 +365,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     errno = 0;
     dirent* entry = readdir(dir);
 
-    // positive error number returned -> failure
+    //  kernel set errno -> failure
     if (errno != 0)
     {
         assert(errno == EBADF); // Invalid directory stream descriptor dir.
