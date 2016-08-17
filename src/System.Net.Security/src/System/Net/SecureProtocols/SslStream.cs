@@ -155,9 +155,7 @@ namespace System.Net.Security
         // TODO: Add proper enums for AlertType and AlertMessage.
         internal virtual IAsyncResult BeginSendAlert(int alertType, int alertMessage, AsyncCallback asyncCallback, object asyncState)
         {
-            var result = new LazyAsyncResult(_sslState, asyncState, asyncCallback);
-            _sslState.BeginSendAlert(alertType, alertMessage, result);
-            return result;
+            return _sslState.BeginSendAlert(alertType, alertMessage, asyncCallback, asyncState);
         }
 
         internal virtual void EndSendAlert(IAsyncResult asyncResult)

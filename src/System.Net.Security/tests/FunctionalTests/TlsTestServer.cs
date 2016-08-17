@@ -81,26 +81,32 @@ Connection: close
                             using (var tls = new SslStream(
                                 inspectionStream, 
                                 true, 
-                                null, //RemoteCertValidationCallback, 
+                                RemoteCertValidationCallback, 
                                 LocalCertSelectionCallback, 
                                 EncryptionPolicy.RequireEncryption))
                             {
                                 await tls.AuthenticateAsServerAsync(
                                     _serverCertificate,
-                                    clientCertificateRequired: true,
+                                    clientCertificateRequired: false,
                                     enabledSslProtocols: SslProtocols.Tls,
                                     checkCertificateRevocation: false);
 
                                 Console.WriteLine("[Server] Client authenticated.");
 
                                 done = await HttpConversation(tls);
+
+                                await tls.CloseAsync();
+
+                                Console.WriteLine("Waiting for TLS termination.");
+                                await WaitForShutdown(tls);
                             }
                         }
                         finally
                         {
                             // Gracefully terminate the TCP connection.
+                            Console.WriteLine("Waiting for TCP termination.");
                             requestClient.Client.Shutdown(SocketShutdown.Send);
-                            await WaitForTcpShutdown(inspectionStream);
+                            await WaitForShutdown(inspectionStream);
                         }
                     }
                 }
@@ -139,7 +145,7 @@ Connection: close
                 }
             }
 
-            return false;
+            return true;
         }
 
         private async Task<bool> HttpConversation(SslStream tls)
@@ -193,7 +199,7 @@ Connection: close
         }
 
 
-        private async Task WaitForTcpShutdown(Stream s)
+        private async Task WaitForShutdown(Stream s)
         {
             int bytesRead = 0;
             var drainBuffer = new byte[256];
@@ -201,7 +207,7 @@ Connection: close
             do
             {
                 bytesRead = await s.ReadAsync(drainBuffer, 0, drainBuffer.Length);
-                Console.WriteLine("Drained {0} bytes.", bytesRead);
+                Console.WriteLine("Drained {0} bytes: {1}", bytesRead, BitConverter.ToString(drainBuffer, 0, bytesRead));
             } while (bytesRead > 0);
         }
     }

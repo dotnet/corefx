@@ -254,6 +254,22 @@ namespace System.Net
             }
         }
 
+        public static SecurityStatusPal ApplyShutdownToken(ref SafeFreeCredentials credentialsHandle, SafeDeleteContext securityContext)
+        {
+            int shutdownToken = Interop.SChannel.SCHANNEL_SHUTDOWN;
+
+            var bufferDesc = new SecurityBuffer[1];
+            var buffer = BitConverter.GetBytes(shutdownToken);
+
+            bufferDesc[0] = new SecurityBuffer(buffer, SecurityBufferType.SECBUFFER_TOKEN);
+            var errorCode = (Interop.SecurityStatus)SSPIWrapper.ApplyControlToken(
+                GlobalSSPI.SSPISecureChannel,
+                ref securityContext,
+                bufferDesc);
+
+            return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(errorCode);
+        }
+
         public unsafe static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
         {
             return SSPIWrapper.QueryContextChannelBinding(GlobalSSPI.SSPISecureChannel, securityContext, (Interop.SspiCli.ContextAttribute)attribute);

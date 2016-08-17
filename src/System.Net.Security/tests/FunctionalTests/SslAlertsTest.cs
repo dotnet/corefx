@@ -27,6 +27,8 @@ namespace System.Net.Security.Tests
             {
                 case InspectionNetworkStream.Direction.Read:
                     _clientRecordsReadCount++;
+                    
+                    // TODO: BitConverter.ToString(drainBuffer, 0, bytesRead)
                     Console.WriteLine("[ClientInspection]: Read {0}", _clientRecordsReadCount);
                     
                     // TODO: Causes Hang

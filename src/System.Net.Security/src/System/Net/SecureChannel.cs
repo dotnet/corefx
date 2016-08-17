@@ -47,18 +47,6 @@ namespace System.Net.Security
 
         private bool _refreshCredentialNeeded;
 
-        internal int AlertType
-        {
-            get;
-            private set;
-        }
-
-        internal int AlertMessage
-        {
-            get;
-            private set;
-        }
-
         internal SecureChannel(string hostname, bool serverMode, SslProtocols sslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertName,
                                                   bool checkCertRevocationStatus, EncryptionPolicy encryptionPolicy, LocalCertSelectionCallback certSelectionDelegate)
         {
@@ -840,7 +828,17 @@ namespace System.Net.Security
                 GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken(" + alertType + ", " + alertMessage + ")");
             }
 
-            SecurityStatusPal status = SslStreamPal.ApplyAlertToken(ref _credentialsHandle, _securityContext, alertType, alertMessage);
+            SecurityStatusPal status;
+
+            if (alertType == Interop.SChannel.TLS1_ALERT_WARNING && 
+                alertMessage == Interop.SChannel.TLS1_ALERT_CLOSE_NOTIFY)
+            {
+                status = SslStreamPal.ApplyShutdownToken(ref _credentialsHandle, _securityContext);
+            }
+            else
+            {
+                status = SslStreamPal.ApplyAlertToken(ref _credentialsHandle, _securityContext, alertType, alertMessage);
+            }
 
             if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
             {

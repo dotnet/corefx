@@ -448,14 +448,14 @@ namespace System.Net.Security
             }
         }
 
-        internal void CheckThrow(bool authSucessCheck)
+        internal void CheckThrow(bool authSuccessCheck)
         {
             if (_exception != null)
             {
                 _exception.Throw();
             }
 
-            if (authSucessCheck && !IsAuthenticated)
+            if (authSuccessCheck && !IsAuthenticated)
             {
                 throw new InvalidOperationException(SR.net_auth_noauth);
             }
@@ -1865,20 +1865,30 @@ namespace System.Net.Security
             }
         }
 
-        internal void BeginSendAlert(int alertType, int alertMessage, LazyAsyncResult asyncRequest)
+        internal void SendAlert(int alertType, int alertMessage)
         {
-            // Call ApplyControlToken(SCHANNEL_SHUTDOWN)
-            
+            CheckThrow(authSuccessCheck: true);
+
+            ProtocolToken message = Context.CreateAlertToken(alertType, alertMessage);
+            InnerStream.Write(message.Payload, 0, message.Payload.Length);
         }
 
-        internal void BeginSendAlertInternal(int alertType, int alertMessage)
+        internal IAsyncResult BeginSendAlert(int alertType, int alertMessage, AsyncCallback asyncCallback, object asyncState)
         {
+            CheckThrow(authSuccessCheck:true);
+            // TODO:
+            // 1. Ensure that no other data is sent after close_notify.
+            // 2. Ensure that the channel is invalidated after sending alert_fatal.
 
+            ProtocolToken message = Context.CreateAlertToken(alertType, alertMessage);
+            return InnerStream.BeginWrite(message.Payload, 0, message.Payload.Length, asyncCallback, asyncState);
         }
 
         internal void EndSendAlert(IAsyncResult result)
         {
+            CheckThrow(authSuccessCheck: true);
 
+            InnerStream.EndWrite(result);
         }
     }
 }
