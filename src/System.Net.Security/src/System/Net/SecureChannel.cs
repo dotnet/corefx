@@ -837,26 +837,31 @@ namespace System.Net.Security
         {
             if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage");
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken");
             }
 
-            SecurityStatusPal status = GenerateToken(null, 0, 0, ref nextmsg);
+            SecurityStatusPal status = SslStreamPal.ApplyAlertToken(ref _credentialsHandle, _securityContext, alertType, alertMessage);
 
-            if (!_serverMode && status.ErrorCode == SecurityStatusPalErrorCode.CredentialsNeeded)
+            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
                 if (GlobalLog.IsEnabled)
                 {
-                    GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage() returned SecurityStatusPal.CredentialsNeeded");
+                    GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::ApplyAlertToken() returned " + status.ErrorCode);
                 }
 
-                SetRefreshCredentialNeeded();
-                status = GenerateToken(incoming, offset, count, ref nextmsg);
+                throw status.Exception;
             }
 
+            byte[] nextmsg = null;
+
+            // TODO: ensure that the other params passed to ISC/ASC are correct for the generation of a new alert.
+            status = GenerateToken(null, 0, 0, ref nextmsg);
+
             ProtocolToken token = new ProtocolToken(nextmsg, status);
+
             if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage", token.ToString());
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken", token.ToString());
             }
             return token;
         }

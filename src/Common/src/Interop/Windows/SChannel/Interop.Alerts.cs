@@ -28,9 +28,9 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         public struct SCHANNEL_ALERT_TOKEN
         {
-            uint dwTokenType;            // SCHANNEL_ALERT
-            uint dwAlertType;
-            uint dwAlertNumber;
+            public uint dwTokenType;            // SCHANNEL_ALERT
+            public uint dwAlertType;
+            public uint dwAlertNumber;
         }
 
         // Alert types.

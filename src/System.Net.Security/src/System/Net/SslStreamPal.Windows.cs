@@ -6,6 +6,7 @@ using Microsoft.Win32.SafeHandles;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Security;
+using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
@@ -220,9 +221,37 @@ namespace System.Net
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(errorCode);
         }
 
-        public static SecurityStatusPal ApplyControlToken(SafeDeleteContext securityContext, int alertType, int alertMessage)
+        public static SecurityStatusPal ApplyAlertToken(ref SafeFreeCredentials credentialsHandle, SafeDeleteContext securityContext, int alertType, int alertMessage)
         {
+            Interop.SChannel.SCHANNEL_ALERT_TOKEN alertToken;
+            alertToken.dwTokenType = Interop.SChannel.SCHANNEL_ALERT;
+            alertToken.dwAlertType = (uint)alertType;       // TODO: Verify this matches Interop.SChannel.TLS1_ALERT_WARNING or _FATAL
+            alertToken.dwAlertNumber = (uint)alertMessage;  // TODO: Verify this matches Interop.SChannel.TLS1_ALERT_*
 
+            var bufferDesc = new SecurityBuffer[1];
+
+            int alertTokenByteSize = Marshal.SizeOf<Interop.SChannel.SCHANNEL_ALERT_TOKEN>();
+            IntPtr p = Marshal.AllocHGlobal(alertTokenByteSize);
+
+            try
+            {
+                // TODO: This could be optimized to avoid copying the struct to the managed byte array.
+                var buffer = new byte[alertTokenByteSize];
+                Marshal.StructureToPtr<Interop.SChannel.SCHANNEL_ALERT_TOKEN>(alertToken, p, false);
+                Marshal.Copy(p, buffer, 0, alertTokenByteSize);
+
+                bufferDesc[0] = new SecurityBuffer(buffer, SecurityBufferType.SECBUFFER_TOKEN);
+                var errorCode = (Interop.SecurityStatus)SSPIWrapper.ApplyControlToken(
+                    GlobalSSPI.SSPISecureChannel,
+                    ref securityContext,
+                    bufferDesc);
+
+                return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(errorCode);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(p);
+            }
         }
 
         public unsafe static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)

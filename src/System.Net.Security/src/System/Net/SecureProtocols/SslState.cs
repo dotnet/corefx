@@ -805,7 +805,13 @@ namespace System.Net.Security
             {
                 if (!CompleteHandshake())
                 {
-                    StartSendAuthResetSignal(null, asyncRequest, ExceptionDispatchInfo.Capture(new AuthenticationException(SR.net_ssl_io_cert_validation, null)));
+                    // Prepare Alert Token.
+                    // TODO: generate proper alerts based on certificate validation.
+                    ProtocolToken token = _context.CreateAlertToken(
+                        Interop.SChannel.TLS1_ALERT_FATAL, 
+                        Interop.SChannel.TLS1_ALERT_HANDSHAKE_FAILURE);
+
+                    StartSendAuthResetSignal(token, asyncRequest, ExceptionDispatchInfo.Capture(new AuthenticationException(SR.net_ssl_io_cert_validation, null)));
                     return;
                 }
 
