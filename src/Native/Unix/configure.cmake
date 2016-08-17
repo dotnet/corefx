@@ -177,11 +177,11 @@ check_cxx_source_compiles(
     #include <dirent.h>
     int main(void)
     {
-	DIR* dir;
+    DIR* dir;
         struct dirent* entry;
-	struct dirent* result;
+    struct dirent* result;
         readdir_r(dir,entry,&result);
-	return 0;
+    return 0;
     }
     "
     HAVE_GNU_READDIR_R)
