@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -75,20 +76,24 @@ Connection: close
 
                         var inspectionStream = new InspectionNetworkStream(requestClient.GetStream(), _inspectionTest.OnServerSocketOperation);
 
-                        using (var tls = new SslStream(inspectionStream, true, RemoteCertValidationCallback, LocalCertSelectionCallback, EncryptionPolicy.RequireEncryption))
+                        try
                         {
-                            await tls.AuthenticateAsServerAsync(
-                            _serverCertificate,
-                            true,
-                            System.Security.Authentication.SslProtocols.Tls,
-                            false);
+                            using (var tls = new SslStream(inspectionStream, true, RemoteCertValidationCallback, LocalCertSelectionCallback, EncryptionPolicy.RequireEncryption))
+                            {
+                                await tls.AuthenticateAsServerAsync(
+                                _serverCertificate,
+                                clientCertificateRequired: false,
+                                enabledSslProtocols: SslProtocols.Tls,
+                                checkCertificateRevocation: false);
 
-                            Console.WriteLine("[Server] Client authenticated.");
+                                Console.WriteLine("[Server] Client authenticated.");
 
-                            done = await HttpConversation(tls);
-
-                            // Should await close_notify.
-
+                                done = await HttpConversation(tls);
+                            }
+                        }
+                        finally
+                        {
+                            // Gracefully terminate the TCP connection.
                             requestClient.Client.Shutdown(SocketShutdown.Send);
                             await WaitForTcpShutdown(inspectionStream);
                         }
@@ -129,7 +134,7 @@ Connection: close
                 }
             }
 
-            return true;
+            return false;
         }
 
         private async Task<bool> HttpConversation(SslStream tls)

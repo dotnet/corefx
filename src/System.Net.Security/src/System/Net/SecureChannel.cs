@@ -1193,7 +1193,7 @@ namespace System.Net.Security
         //SECURITY: The scenario is allowed in semitrust StorePermission is asserted for Chain.Build
         //          A user callback has unique signature so it is safe to call it under permission assert.
         //
-        internal bool VerifyRemoteCertificate(RemoteCertValidationCallback remoteCertValidationCallback)
+        internal bool VerifyRemoteCertificate(RemoteCertValidationCallback remoteCertValidationCallback, ref ProtocolToken alertToken)
         {
             if (GlobalLog.IsEnabled)
             {
@@ -1321,10 +1321,20 @@ namespace System.Net.Security
                 }
             }
 
+            if (!success)
+            {
+                // Prepare Alert Token.
+                // TODO: generate proper alerts based on certificate validation.
+                alertToken = CreateAlertToken(
+                    Interop.SChannel.TLS1_ALERT_FATAL,
+                    Interop.SChannel.TLS1_ALERT_HANDSHAKE_FAILURE);
+            }
+            
             if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::VerifyRemoteCertificate", success.ToString());
             }
+
             return success;
         }
     }

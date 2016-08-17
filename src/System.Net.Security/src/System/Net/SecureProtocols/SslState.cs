@@ -803,15 +803,11 @@ namespace System.Net.Security
             }
             else if (message.Done && !_pendingReHandshake)
             {
-                if (!CompleteHandshake())
-                {
-                    // Prepare Alert Token.
-                    // TODO: generate proper alerts based on certificate validation.
-                    ProtocolToken token = _context.CreateAlertToken(
-                        Interop.SChannel.TLS1_ALERT_FATAL, 
-                        Interop.SChannel.TLS1_ALERT_HANDSHAKE_FAILURE);
+                ProtocolToken alertToken = null;
 
-                    StartSendAuthResetSignal(token, asyncRequest, ExceptionDispatchInfo.Capture(new AuthenticationException(SR.net_ssl_io_cert_validation, null)));
+                if (!CompleteHandshake(ref alertToken))
+                {
+                    StartSendAuthResetSignal(alertToken, asyncRequest, ExceptionDispatchInfo.Capture(new AuthenticationException(SR.net_ssl_io_cert_validation, null)));
                     return;
                 }
 
@@ -1004,7 +1000,7 @@ namespace System.Net.Security
         //
         // - Returns false if failed to verify the Remote Cert
         //
-        private bool CompleteHandshake()
+        private bool CompleteHandshake(ref ProtocolToken alertToken)
         {
             if (GlobalLog.IsEnabled)
             {
@@ -1015,7 +1011,7 @@ namespace System.Net.Security
 
             // TODO: May throw CryptographicException.
             // The stack should reply back with TLS1_ALERT_BAD_CERTIFICATE or TLS1_ALERT_HANDSHAKE_FAILURE.
-            if (!Context.VerifyRemoteCertificate(_certValidationDelegate))
+            if (!Context.VerifyRemoteCertificate(_certValidationDelegate, ref alertToken))
             {
                 _handshakeCompleted = false;
                 _certValidationFailed = true;
