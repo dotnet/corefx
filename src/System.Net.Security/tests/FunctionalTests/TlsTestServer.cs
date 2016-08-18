@@ -95,7 +95,7 @@ Connection: close
 
                                 done = await HttpConversation(tls);
 
-                                await tls.CloseAsync();
+                                await tls.ShutdownAsync();
 
                                 Console.WriteLine("Waiting for TLS termination.");
                                 await WaitForShutdown(tls);
@@ -139,6 +139,7 @@ Connection: close
             if (chain != null)
             {
                 Console.WriteLine("\rChain:");
+
                 foreach (X509ChainElement chainElement in chain.ChainElements)
                 {
                     Console.WriteLine("\tChain: {0}", chainElement.Certificate?.Subject);

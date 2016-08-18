@@ -209,7 +209,7 @@ namespace System.Net.Security
                 null);
         }
 
-        public virtual Task CloseAsync()
+        public virtual Task ShutdownAsync()
         {
             return Task.Factory.FromAsync(
                 (callback, state) => BeginSendAlert(Interop.SChannel.TLS1_ALERT_WARNING, Interop.SChannel.TLS1_ALERT_CLOSE_NOTIFY, callback, state),

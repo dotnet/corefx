@@ -6,6 +6,8 @@ internal static partial class Interop
 {
     internal enum SecurityStatus
     {
+        // TODO: change to Windows include define names.
+
         // Success / Informational
         OK = 0x00000000,
         ContinueNeeded = unchecked((int)0x00090312),

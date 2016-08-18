@@ -833,10 +833,12 @@ namespace System.Net.Security
             if (alertType == Interop.SChannel.TLS1_ALERT_WARNING && 
                 alertMessage == Interop.SChannel.TLS1_ALERT_CLOSE_NOTIFY)
             {
+                // close_notify is a special case.
                 status = SslStreamPal.ApplyShutdownToken(ref _credentialsHandle, _securityContext);
             }
             else
             {
+                // TODO: protocol validation for alertType, alertMessage.
                 status = SslStreamPal.ApplyAlertToken(ref _credentialsHandle, _securityContext, alertType, alertMessage);
             }
 
@@ -1272,11 +1274,8 @@ namespace System.Net.Security
 
                     switch (sslPolicyErrors)
                     {
-                        // TODO: TLS1_ALERT_CERTIFICATE_EXPIRED if CERT_E_VALIDITYPERIODNESTING or CERT_E_EXPIRED
-                        //       TLS1_ALERT_CERTIFICATE_REVOKED if CERT_E_REVOKED
-
                         case SslPolicyErrors.RemoteCertificateChainErrors:
-                            alertMessage = Interop.SChannel.TLS1_ALERT_UNKNOWN_CA;
+                            alertMessage = GetAlertMessageFromChain(chain);
                             break;
                         case SslPolicyErrors.RemoteCertificateNameMismatch:
                             alertMessage = Interop.SChannel.TLS1_ALERT_CERTIFICATE_UNKNOWN;
@@ -1287,9 +1286,7 @@ namespace System.Net.Security
                             break;
                     }
 
-                    alertToken = CreateAlertToken(
-                        Interop.SChannel.TLS1_ALERT_FATAL,
-                        alertMessage);
+                    alertToken = CreateAlertToken(Interop.SChannel.TLS1_ALERT_FATAL, alertMessage);
                 }
             }
             finally
@@ -1315,6 +1312,58 @@ namespace System.Net.Security
             }
 
             return success;
+        }
+
+        private static int GetAlertMessageFromChain(X509Chain chain)
+        {
+            foreach (X509ChainStatus chainStatus in chain.ChainStatus)
+            {
+                if (chainStatus.Status == X509ChainStatusFlags.NoError)
+                {
+                    continue;
+                }
+
+                if ((chainStatus.Status & 
+                    (X509ChainStatusFlags.UntrustedRoot | X509ChainStatusFlags.PartialChain | 
+                     X509ChainStatusFlags.Cyclic)) != 0)
+                {
+                    return Interop.SChannel.TLS1_ALERT_UNKNOWN_CA;
+                }
+
+                if ((chainStatus.Status & 
+                    (X509ChainStatusFlags.Revoked | X509ChainStatusFlags.OfflineRevocation | 
+                     X509ChainStatusFlags.RevocationStatusUnknown)) != 0)
+                {
+                    return Interop.SChannel.TLS1_ALERT_CERTIFICATE_REVOKED;
+                }
+
+                if ((chainStatus.Status &
+                    (X509ChainStatusFlags.CtlNotTimeValid | X509ChainStatusFlags.NotTimeNested | 
+                     X509ChainStatusFlags.NotTimeValid)) != 0)
+                {
+                    return Interop.SChannel.TLS1_ALERT_CERTIFICATE_EXPIRED;
+                }
+
+                if ((chainStatus.Status & 
+                    (X509ChainStatusFlags.NotValidForUsage | X509ChainStatusFlags.CtlNotValidForUsage)) != 0)
+                {
+                    return Interop.SChannel.TLS1_ALERT_UNSUPPORTED_CERT;
+                }
+
+                if ((chainStatus.Status &
+                    (X509ChainStatusFlags.CtlNotSignatureValid | X509ChainStatusFlags.InvalidExtension |
+                     X509ChainStatusFlags.NotSignatureValid | X509ChainStatusFlags.InvalidPolicyConstraints) | 
+                     X509ChainStatusFlags.NoIssuanceChainPolicy) != 0)
+                {
+                    return Interop.SChannel.TLS1_ALERT_BAD_CERTIFICATE;
+                }
+
+                // All other errors:
+                return Interop.SChannel.TLS1_ALERT_CERTIFICATE_UNKNOWN;
+            }
+
+            Debug.Fail("GetAlertMessageFromChain was called but none of the chain elements had errors.");
+            return Interop.SChannel.TLS1_ALERT_BAD_CERTIFICATE;
         }
 
         private void LogCertificateValidation(RemoteCertValidationCallback remoteCertValidationCallback, SslPolicyErrors sslPolicyErrors, bool success, X509Chain chain)
