@@ -5,14 +5,11 @@ namespace System.Linq.Expressions.Tests.IndexExpression
 {
     internal class SampleClassWithProperties
     {
-        internal readonly string DefaultPropertyName = "DefaultProperty";
-        internal readonly string AlternativePropertyName = "AlternativeProperty";
-
         internal readonly PropertyInfo DefaultIndexer = typeof(List<int>).GetProperty("Item");
         internal readonly ConstantExpression[] DefaultArguments = { Expression.Constant(0) };
 
         internal MemberExpression DefaultPropertyExpression => Expression.Property(Expression.Constant(this),
-            typeof(SampleClassWithProperties).GetProperty(DefaultPropertyName));
+            typeof(SampleClassWithProperties).GetProperty(nameof(DefaultProperty)));
 
         internal Expressions.IndexExpression DefaultIndexExpression => Expression.MakeIndex(
             DefaultPropertyExpression,

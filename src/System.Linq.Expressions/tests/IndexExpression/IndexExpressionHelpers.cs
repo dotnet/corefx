@@ -11,9 +11,9 @@ namespace System.Linq.Expressions.Tests.IndexExpression
             Assert.Equal(expected.Arguments, actual.Arguments);
         }
 
-        internal static void AssertInvokeCorrect<T>(T expected, Expressions.IndexExpression expr, SampleClassWithProperties parameter)
+        internal static void AssertInvokeCorrect<T>(T expected, Expressions.IndexExpression expression)
         {
-            var lambda = Expression.Lambda<Func<T>>(expr);
+            var lambda = Expression.Lambda<Func<T>>(expression);
 
             // Compile and evaluate with interpretation flag and without
             // in case there are bugs in the compiler/interpreter. 
