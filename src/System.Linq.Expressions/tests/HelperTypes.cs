@@ -5,8 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-#pragma warning disable 0067
-
 namespace System.Linq.Expressions.Tests
 {
     public interface I
@@ -282,7 +280,9 @@ namespace System.Linq.Expressions.Tests
 
     public class NonGenericClass
     {
+        #pragma warning disable 0067
         public event EventHandler Event;
+        #pragma warning restore 0067
 
         public void GenericMethod<T>() { }
         public static void StaticMethod() { }
