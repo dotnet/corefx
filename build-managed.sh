@@ -57,5 +57,5 @@ done
 
 export CORECLR_SERVER_GC="$__ServerGC"
 
-$__scriptpath/run.sh build-managed -MsBuildParametersUnix $__BuildOS $__TargetOS $__TestNugetRuntimeId $__UnprocessedBuildArgs
+$__scriptpath/run.sh build-managed $__BuildOS $__TargetOS $__TestNugetRuntimeId $__UnprocessedBuildArgs
 exit $?

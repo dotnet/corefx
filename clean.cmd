@@ -11,7 +11,7 @@ if [%1] == [-all] (
 )
 
 if [%1]==[] set __args=-b
-call %~dp0run.cmd clean -MsBuildParametersWindows %__args% %*
+call %~dp0run.cmd clean %__args% %*
 exit /b %ERRORLEVEL%
 
 :Usage

@@ -162,18 +162,6 @@
       "values": [],
       "defaultValue": "/flp3:errorsonly;logfile=msbuild.err"
     },
-    "MsBuildParametersWindows": {
-      "description": "MsBuild building options for Windows.",
-      "valueType": "passThrough",
-      "values": [],
-      "defaultValue": "/nologo /verbosity:minimal /clp:Summary /maxcpucount /nodeReuse:false /l:BinClashLogger,Tools\\net45\\Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
-    },
-    "MsBuildParametersUnix": {
-      "description": "MsBuild building options for Unix.",
-      "valueType": "passThrough",
-      "values": [],
-      "defaultValue": "/nologo /verbosity:minimal /clp:Summary /maxcpucount /l:BinClashLogger,Tools/Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log"
-    },
     "BuildArchitecture": {
       "description": "Sets the value of the build architecture.",
       "valueType": "passThrough",
@@ -381,7 +369,7 @@
         }
       },
       "defaultValues":{
-        "toolName": "terminal",
+        "toolName": "script",
         "Project": "src/Native/build-native",
         "settings": {
            "BuildArchitecture": "default", 
@@ -536,9 +524,15 @@
   },
   "tools": {
     "msbuild": {
-      "run": {
-        "windows": "Tools/msbuild.cmd",
-        "unix": "Tools/msbuild.sh"
+      "osSpecific":{
+        "windows": {
+          "defaultParameters": "/nologo /verbosity:minimal /clp:Summary /maxcpucount /nodeReuse:false /l:BinClashLogger,Tools\\net45\\Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log",
+          "path": "Tools/msbuild.cmd"
+        },
+        "unix":{
+          "defaultParameters": "/nologo /verbosity:minimal /clp:Summary /maxcpucount /l:BinClashLogger,Tools/Microsoft.DotNet.Build.Tasks.dll;LogFile=binclash.log",
+          "path": "Tools/msbuild.sh"
+        }
       },
       "valueTypes": {
         "property": "/p:{name}={value}",
@@ -546,10 +540,14 @@
         "internal": "/{name}"
       }
     },
-    "terminal": {
-      "run": {
-        "windows": "cmd",
-        "unix": "sh"
+    "script": {
+      "osSpecific":{
+        "windows": {
+          "filesExtension": "cmd"
+        },
+        "unix":{
+          "filesExtension": "sh"
+        }
       },
       "valueTypes": {}
     }
