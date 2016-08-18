@@ -250,15 +250,15 @@ namespace System.Linq.Expressions
                 for (int i = 0, n = arguments.Count; i < n; i++)
                 {
                     Expression arg = arguments[i];
-                    RequiresCanRead(arg, $"{nameof(arguments)}[{i}]");
+                    RequiresCanRead(arg, nameof(arguments));
                     MemberInfo member = members[i];
-                    ContractUtils.RequiresNotNull(member, $"{nameof(members)}[{i}]");
+                    ContractUtils.RequiresNotNull(member, nameof(members));
                     if (!TypeUtils.AreEquivalent(member.DeclaringType, constructor.DeclaringType))
                     {
-                        throw Error.ArgumentMemberNotDeclOnType(member.Name, constructor.DeclaringType.Name, $"{nameof(members)}[{i}]");
+                        throw Error.ArgumentMemberNotDeclOnType(member.Name, constructor.DeclaringType.Name, nameof(members));
                     }
                     Type memberType;
-                    ValidateAnonymousTypeMember(ref member, out memberType, $"{nameof(members)}[{i}]");
+                    ValidateAnonymousTypeMember(ref member, out memberType, nameof(members));
                     if (!TypeUtils.AreReferenceAssignable(memberType, arg.Type))
                     {
                         if (!TryQuote(memberType, ref arg))
@@ -276,7 +276,7 @@ namespace System.Linq.Expressions
                     {
                         if (!TryQuote(pType, ref arg))
                         {
-                            throw Error.ExpressionTypeDoesNotMatchConstructorParameter(arg.Type, pType, $"{nameof(arguments)}[{i}]");
+                            throw Error.ExpressionTypeDoesNotMatchConstructorParameter(arg.Type, pType, nameof(arguments));
                         }
                     }
                     if (newArguments == null && arg != arguments[i])

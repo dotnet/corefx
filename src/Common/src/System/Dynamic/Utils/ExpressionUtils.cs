@@ -100,7 +100,7 @@ namespace System.Dynamic.Utils
             {
                 Expression arg = arguments[i];
                 ParameterInfo pi = pis[i];
-                arg = ValidateOneArgument(method, nodeKind, arg, pi, methodParamName, $"{nameof(arguments)}[{i}]");
+                arg = ValidateOneArgument(method, nodeKind, arg, pi, methodParamName, nameof(arguments));
 
                 if (newArgs == null && arg != arguments[i])
                 {
