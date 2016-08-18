@@ -285,6 +285,7 @@ namespace System.Tests
 
             validate(string.Concat(values));
             validate(string.Concat((IEnumerable<string>)values));
+            validate(string.Concat<string>((IEnumerable<string>)values)); // Call the generic IEnumerable<T>-based overload
         }
 
         [Fact]
@@ -1412,9 +1413,11 @@ namespace System.Tests
 
                 var iEnumerableStringOptimized = new List<string>(values);
                 Assert.Equal(expected, string.Join(seperator, iEnumerableStringOptimized));
+                Assert.Equal(expected, string.Join<string>(seperator, iEnumerableStringOptimized)); // Call the generic IEnumerable<T>-based overload
 
                 var iEnumerableStringNotOptimized = new Queue<string>(values);
                 Assert.Equal(expected, string.Join(seperator, iEnumerableStringNotOptimized));
+                Assert.Equal(expected, string.Join<string>(seperator, iEnumerableStringNotOptimized));
 
                 var iEnumerableObject = new List<object>(values);
                 Assert.Equal(expected, string.Join(seperator, iEnumerableObject));
