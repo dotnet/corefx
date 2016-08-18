@@ -1426,8 +1426,6 @@ namespace System.Tests
                 var iEnumerableObject = new List<object>(values);
                 Assert.Equal(expected, string.Join(seperator, iEnumerableObject));
 
-                // We're taking advantage of covariant arrays (which is bad) here,
-                // but this should not be a problem since Join shouldn't write to the array
                 var arrayOfObjects = (object[])values;
                 Assert.Equal(expected, string.Join(separator, arrayOfObjects));
             }
