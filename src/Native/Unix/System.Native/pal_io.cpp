@@ -353,6 +353,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     }
 
     // 0 returned with null result -> end-of-stream
+    if (result == nullptr)
     {
         *outputEntry = {}; // managed out param must be initialized
         return -1;         // shim convention for end-of-stream
