@@ -392,6 +392,7 @@ namespace System.Tests
         public static void Concat_Invalid()
         {
             Assert.Throws<ArgumentNullException>("values", () => string.Concat((IEnumerable<string>)null)); // Values is null
+            Assert.Throws<ArgumentNullException>("values", () => string.Concat<string>((IEnumerable<string>)null)); // Generic overload
             Assert.Throws<ArgumentNullException>("values", () => string.Concat(null)); // Values is null
 
             Assert.Throws<ArgumentNullException>("args", () => string.Concat((object[])null)); // Values is null
@@ -1432,6 +1433,7 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("value", () => string.Join("$$", null));
             Assert.Throws<ArgumentNullException>("value", () => string.Join("$$", null, 0, 0));
             Assert.Throws<ArgumentNullException>("values", () => string.Join("|", (IEnumerable<string>)null));
+            Assert.Throws<ArgumentNullException>("values", () => string.Join<string>("|", (IEnumerable<string>)null)); // Generic overload
 
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, -1, 0)); // Start index < 0
             Assert.Throws<ArgumentOutOfRangeException>("count", () => string.Join("$$", new string[] { "Foo" }, 0, -1)); // Count < 0
