@@ -1169,6 +1169,7 @@ namespace System.Tests
                 {
                     Assert.Equal(expected, s.IndexOf(target));
                     Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.Ordinal));
+                    Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.OrdinalIgnoreCase));
 
                     // To be safe we only want to run CurrentCulture comparisons if
                     // both strings are ASCII, otherwise the results may vary depending
@@ -1181,6 +1182,7 @@ namespace System.Tests
                 }
                 Assert.Equal(expected, s.IndexOf(target, startIndex));
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.Ordinal));
+                Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.OrdinalIgnoreCase));
 
                 if (allAscii)
                 {
@@ -1190,6 +1192,7 @@ namespace System.Tests
             }
             Assert.Equal(expected, s.IndexOf(target, startIndex, count));
             Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.Ordinal));
+            Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase));
 
             if (allAscii)
             {
