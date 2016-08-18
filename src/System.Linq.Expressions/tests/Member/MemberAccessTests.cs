@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using Xunit;
 
 namespace System.Linq.Expressions.Tests
@@ -512,6 +513,28 @@ namespace System.Linq.Expressions.Tests
             MemberInfo member = typeof(NonGenericClass).GetEvent("Event");
 
             Assert.Throws<ArgumentException>("member", () => Expression.MakeMemberAccess(Expression.Constant(new PC()), member));
+        }
+
+        [Fact]
+        public static void Property_NoGetOrSetAccessors_ThrowsArgumentException()
+        {
+            AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.Run);
+            ModuleBuilder module = assembly.DefineDynamicModule("Module");
+
+            TypeBuilder type = module.DefineType("Type");
+            PropertyBuilder property = type.DefineProperty("Property", PropertyAttributes.None, typeof(void), new Type[0]);
+
+            TypeInfo createdType = type.CreateTypeInfo();
+            PropertyInfo createdProperty = createdType.DeclaredProperties.First();
+
+            Expression expression = Expression.Constant(Activator.CreateInstance(createdType.AsType()));
+
+            Assert.Throws<ArgumentException>("property", () => Expression.Property(expression, createdProperty));
+            Assert.Throws<ArgumentException>("property", () => Expression.Property(expression, createdProperty.Name));
+
+            Assert.Throws<ArgumentException>("property", () => Expression.PropertyOrField(expression, createdProperty.Name));
+
+            Assert.Throws<ArgumentException>("property", () => Expression.MakeMemberAccess(expression, createdProperty));
         }
     }
 }
