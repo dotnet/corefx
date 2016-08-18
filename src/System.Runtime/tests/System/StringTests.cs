@@ -572,7 +572,7 @@ namespace System.Tests
                 {
                     // Use Compare(string, int, string, int, int) or Compare(string, int, string, int, int, false)
                     Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length)));
-                    // Uncomment when this is exposed in .NET Core
+                    // Uncomment when this is exposed in .NET Core (dotnet/corefx#10963)
                     // Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, ignoreCase: false)));
                 }
             }
@@ -584,7 +584,7 @@ namespace System.Tests
                 if (!skipNonComparisonOverloads)
                 {
                     // Use Compare(string, int, string, int, int, true)
-                    // Uncomment when this is exposed in .NET Core
+                    // Uncomment when this is exposed in .NET Core (dotnet/corefx#10963)
                     // Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, ignoreCase: true)));
                 }
             }
@@ -634,8 +634,8 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("a", 0, "bb", 0, -1, StringComparison.CurrentCulture));
 
             // There is a subtle behavior difference between the string.Compare that accepts a StringComparison parameter,
-            // and the one that does not. The former originally included short-circuiting logic for nulls BEFORE the length/
-            // index parameters were validated (but after the StringComparison was), while the latter did not. As a result,
+            // and the one that does not. The former includes short-circuiting logic for nulls BEFORE the length/
+            // index parameters are validated (but after the StringComparison is), while the latter does not. As a result,
             // this will not throw:
             // string.Compare(null, -1, null, -1, -1, StringComparison.CurrentCulture)
             // but this will:
