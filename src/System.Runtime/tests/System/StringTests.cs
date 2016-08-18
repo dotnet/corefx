@@ -338,6 +338,7 @@ namespace System.Tests
 
             yield return new object[] { new object[] { 1 }, "1" };
             yield return new object[] { new object[] { null }, "" };
+            yield return new object[] { new object[] { new ObjectWithNullToString() }, "" };
 
             yield return new object[] { new object[] { 1, 2 }, "12" };
             yield return new object[] { new object[] { null, 1 }, "1" };
@@ -1453,6 +1454,7 @@ namespace System.Tests
         public static IEnumerable<object[]> Join_ObjectArray_TestData()
         {
             yield return new object[] { "$$", new object[] { }, "" };
+            yield return new object[] { "$$", new object[] { new ObjectWithNullToString() }, "" };
             yield return new object[] { "$$", new object[] { "Foo" }, "Foo" };
             yield return new object[] { "$$", new object[] { "Foo", "Bar", "Baz" }, "Foo$$Bar$$Baz" };
             yield return new object[] { null, new object[] { "Foo", "Bar", "Baz" }, "FooBarBaz" };
