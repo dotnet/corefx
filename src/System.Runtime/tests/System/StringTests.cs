@@ -572,7 +572,7 @@ namespace System.Tests
                 {
                     // Use Compare(string, int, string, int, int) or Compare(string, int, string, int, int, false)
                     Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length)));
-                    // Uncomment when this is exposed in .NET Core (dotnet/corefx#10963)
+                    // Uncomment when this is exposed in .NET Core (dotnet/corefx#10066)
                     // Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, ignoreCase: false)));
                 }
             }
@@ -584,7 +584,7 @@ namespace System.Tests
                 if (!skipNonComparisonOverloads)
                 {
                     // Use Compare(string, int, string, int, int, true)
-                    // Uncomment when this is exposed in .NET Core (dotnet/corefx#10963)
+                    // Uncomment when this is exposed in .NET Core (dotnet/corefx#10066)
                     // Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, ignoreCase: true)));
                 }
             }
