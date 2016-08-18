@@ -2,6 +2,7 @@
   "dependencies": {
     "Microsoft.CSharp": "4.0.2-beta-24418-01",
     "Microsoft.NETCore.Platforms": "1.0.2-beta-24418-01",
+    "runtime.native.System.Data.SqlClient.sni": "4.0.2-beta-24418-01",
     "System.Data.Common": "4.1.1-beta-24418-01",
     "System.Data.SqlClient": "4.1.1-beta-24418-01",
     "System.Text.Encoding.CodePages": "4.0.2-beta-24418-01",
