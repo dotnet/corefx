@@ -1161,18 +1161,53 @@ namespace System.Tests
         [InlineData("!@#$%^&*", '%', 0, 8, 4)]
         public static void IndexOf_SingleLetter(string s, char target, int startIndex, int count, int expected)
         {
+            bool allAscii = IsCompletelyAscii(s) && target <= 0x7f;
+
             if (count + startIndex == s.Length)
             {
                 if (startIndex == 0)
                 {
                     Assert.Equal(expected, s.IndexOf(target));
                     Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.Ordinal));
+
+                    // To be safe we only want to run CurrentCulture comparisons if
+                    // both strings are ASCII, otherwise the results may vary depending
+                    // on location
+                    if (allAscii)
+                    {
+                        Assert.Equal(expected, s.IndexOf(target.ToString()));
+                        Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.CurrentCulture));
+                    }
                 }
                 Assert.Equal(expected, s.IndexOf(target, startIndex));
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.Ordinal));
+
+                if (allAscii)
+                {
+                    Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex));
+                    Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.CurrentCulture));
+                }
             }
             Assert.Equal(expected, s.IndexOf(target, startIndex, count));
             Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.Ordinal));
+
+            if (allAscii)
+            {
+                Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count));
+                Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.CurrentCulture));
+            }
+        }
+
+        private static bool IsCompletelyAscii(string str)
+        {
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] >= 0x80)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         [Theory]
