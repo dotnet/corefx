@@ -8,7 +8,7 @@
     <InputOSGroup>$(OSGroup)</InputOSGroup>
     <InputOSGroup Condition="'$(InputOSGroup)'==''">$(FilterToOSGroup)</InputOSGroup>
   </PropertyGroup>
-  <Import Project="dir.props" />
+  <Import Project="build\dir.props" />
 
   <!-- required to build the projects in their specified order -->
   <PropertyGroup>
@@ -52,9 +52,9 @@
     </Project>
   </ItemGroup>
 
-  <Import Project="dir.targets" />
+  <Import Project="build\dir.targets" />
 
-  <Import Project="dir.traversal.targets" />
+  <Import Project="build\dir.traversal.targets" />
 
   <Import Project="$(ToolsDir)clean.targets" />
 

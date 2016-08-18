@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Version>4.0.2.0</Version>
   </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Net.WebHeaderCollection.csproj">
       <SupportedFramework>net46;netcore50;netcoreapp1.0;$(AllXamarinFrameworks)</SupportedFramework>

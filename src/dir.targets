@@ -3,7 +3,7 @@
     <ErrorIfBuildToolsRestoredFromIndividualProject Condition="!Exists('$(ToolsDir)')">true</ErrorIfBuildToolsRestoredFromIndividualProject>
   </PropertyGroup>
 
-  <Import Project="..\dir.targets" />
+  <Import Project="..\build\dir.targets" />
 
   <!-- Returns the assembly version of the project for consumption
        by the NuGet package generation -->
