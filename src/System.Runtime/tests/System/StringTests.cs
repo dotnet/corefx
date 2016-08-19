@@ -1409,27 +1409,27 @@ namespace System.Tests
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 0, 3, "Foo$$Bar$$Baz")]
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 3, 0, "")]
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 1, 1, "Bar")]
-        public static void Join_StringArray(string seperator, string[] values, int startIndex, int count, string expected)
+        public static void Join_StringArray(string separator, string[] values, int startIndex, int count, string expected)
         {
             if (startIndex + count == values.Length && count != 0)
             {
-                Assert.Equal(expected, string.Join(seperator, values));
+                Assert.Equal(expected, string.Join(separator, values));
 
                 var iEnumerableStringOptimized = new List<string>(values);
-                Assert.Equal(expected, string.Join(seperator, iEnumerableStringOptimized));
-                Assert.Equal(expected, string.Join<string>(seperator, iEnumerableStringOptimized)); // Call the generic IEnumerable<T>-based overload
+                Assert.Equal(expected, string.Join(separator, iEnumerableStringOptimized));
+                Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringOptimized)); // Call the generic IEnumerable<T>-based overload
 
                 var iEnumerableStringNotOptimized = new Queue<string>(values);
-                Assert.Equal(expected, string.Join(seperator, iEnumerableStringNotOptimized));
-                Assert.Equal(expected, string.Join<string>(seperator, iEnumerableStringNotOptimized));
+                Assert.Equal(expected, string.Join(separator, iEnumerableStringNotOptimized));
+                Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringNotOptimized));
 
                 var iEnumerableObject = new List<object>(values);
-                Assert.Equal(expected, string.Join(seperator, iEnumerableObject));
+                Assert.Equal(expected, string.Join(separator, iEnumerableObject));
 
                 var arrayOfObjects = (object[])values;
                 Assert.Equal(expected, string.Join(separator, arrayOfObjects));
             }
-            Assert.Equal(expected, string.Join(seperator, values, startIndex, count));
+            Assert.Equal(expected, string.Join(separator, values, startIndex, count));
         }
 
         [Fact]
@@ -1444,7 +1444,7 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, -1, 0)); // Start index < 0
             Assert.Throws<ArgumentOutOfRangeException>("count", () => string.Join("$$", new string[] { "Foo" }, 0, -1)); // Count < 0
 
-            // Start index > seperators.Length
+            // Start index > separators.Length
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 2, 1));
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 0, 2));
         }
@@ -1467,12 +1467,12 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Join_ObjectArray_TestData))]
-        public static void Join_ObjectArray(string seperator, object[] values, string expected)
+        public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
-            Assert.Equal(expected, string.Join(seperator, values));
+            Assert.Equal(expected, string.Join(separator, values));
             if (!(values.Length > 0 && values[0] == null))
             {
-                Assert.Equal(expected, string.Join(seperator, (IEnumerable<object>)values));
+                Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
             }
         }
 
