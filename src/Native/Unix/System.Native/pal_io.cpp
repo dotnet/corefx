@@ -321,11 +321,13 @@ extern "C" int32_t SystemNative_GetDirentSize()
 //    size of the dirent struct.
 // 2) The managed code creates a byte[] buffer of the size of the native dirent
 //    and passes a pointer to this buffer to this function.
-// 3) This function passes input byte[] buffer to the OS to fill with dirent data
-//    which makes the 1st strcpy.
-// 4) The ConvertDirent function will set a pointer to the start of the inode name
-//    in the byte[] buffer so the managed code and find it and copy it out of the
-//    buffer into a managed string that the caller of the framework can use, making
+// 3) This function passes input byte[] buffer to the OS to fill with dirent
+//    data which makes the 1st strcpy.
+// 4) The ConvertDirent function will fill DirectoryEntry outputEntry with
+//    pointers from byte[] buffer.
+// 5) The managed code uses DirectoryEntry outputEntry to find start of d_name
+//    and the value of d_namelen, if avalable, to copy the name from
+//    byte[] buffer into a managed string that the caller can use; this makes
 //    the 2nd and final strcpy.
 extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferSize, DirectoryEntry* outputEntry)
 {
