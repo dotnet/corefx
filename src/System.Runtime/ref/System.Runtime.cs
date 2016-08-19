@@ -32,7 +32,7 @@ namespace System
         public static object CreateInstance(System.Type type, params object[] args) { return default(object); }
         public static T CreateInstance<T>() { return default(T); }
     }
-
+    
     public partial class EntryPointNotFoundException : System.TypeLoadException
     {
         public EntryPointNotFoundException() { }
@@ -92,6 +92,21 @@ namespace System
         public ExecutionEngineException(string message, Exception innerException) { }
     }
 
+    public partial class AggregateException : System.Exception
+    {
+        public AggregateException() { }
+        public AggregateException(System.Collections.Generic.IEnumerable<System.Exception> innerExceptions) { }
+        public AggregateException(params System.Exception[] innerExceptions) { }
+        public AggregateException(string message) { }
+        public AggregateException(string message, System.Collections.Generic.IEnumerable<System.Exception> innerExceptions) { }
+        public AggregateException(string message, System.Exception innerException) { }
+        public AggregateException(string message, params System.Exception[] innerExceptions) { }
+        public System.Collections.ObjectModel.ReadOnlyCollection<System.Exception> InnerExceptions { get { return default(System.Collections.ObjectModel.ReadOnlyCollection<System.Exception>); } }
+        public System.AggregateException Flatten() { return default(System.AggregateException); }
+        public override System.Exception GetBaseException() { return default(System.Exception); }
+        public void Handle(System.Func<System.Exception, bool> predicate) { }
+        public override string ToString() { return default(string); }
+    }
     public partial class ArgumentException : System.Exception, System.Runtime.Serialization.ISerializable
     {
         public ArgumentException() { }
@@ -2581,6 +2596,78 @@ namespace System.Runtime.InteropServices
     }
 }
 
+namespace System.Runtime.CompilerServices
+{
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct ConfiguredTaskAwaitable
+    {
+        public System.Runtime.CompilerServices.ConfiguredTaskAwaitable.ConfiguredTaskAwaiter GetAwaiter() { return default(System.Runtime.CompilerServices.ConfiguredTaskAwaitable.ConfiguredTaskAwaiter); }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public partial struct ConfiguredTaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
+        {
+            public bool IsCompleted { get { return default(bool); } }
+            public void GetResult() { }
+            public void OnCompleted(System.Action continuation) { }
+            [System.Security.SecurityCriticalAttribute]
+            public void UnsafeOnCompleted(System.Action continuation) { }
+        }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct ConfiguredTaskAwaitable<TResult>
+    {
+        public System.Runtime.CompilerServices.ConfiguredTaskAwaitable<TResult>.ConfiguredTaskAwaiter GetAwaiter() { return default(System.Runtime.CompilerServices.ConfiguredTaskAwaitable<TResult>.ConfiguredTaskAwaiter); }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public partial struct ConfiguredTaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
+        {
+            public bool IsCompleted { get { return default(bool); } }
+            public TResult GetResult() { return default(TResult); }
+            public void OnCompleted(System.Action continuation) { }
+            [System.Security.SecurityCriticalAttribute]
+            public void UnsafeOnCompleted(System.Action continuation) { }
+        }
+    }
+    public partial interface ICriticalNotifyCompletion : System.Runtime.CompilerServices.INotifyCompletion
+    {
+        [System.Security.SecurityCriticalAttribute]
+        void UnsafeOnCompleted(System.Action continuation);
+    }
+    public partial interface INotifyCompletion
+    {
+        void OnCompleted(System.Action continuation);
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct TaskAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
+    {
+        public bool IsCompleted { get { return default(bool); } }
+        public void GetResult() { }
+        public void OnCompleted(System.Action continuation) { }
+        [System.Security.SecurityCriticalAttribute]
+        public void UnsafeOnCompleted(System.Action continuation) { }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct TaskAwaiter<TResult> : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
+    {
+        public bool IsCompleted { get { return default(bool); } }
+        public TResult GetResult() { return default(TResult); }
+        public void OnCompleted(System.Action continuation) { }
+        [System.Security.SecurityCriticalAttribute]
+        public void UnsafeOnCompleted(System.Action continuation) { }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential, Size = 1)]
+    public partial struct YieldAwaitable
+    {
+        public System.Runtime.CompilerServices.YieldAwaitable.YieldAwaiter GetAwaiter() { return default(System.Runtime.CompilerServices.YieldAwaitable.YieldAwaiter); }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential, Size = 1)]
+        public partial struct YieldAwaiter : System.Runtime.CompilerServices.ICriticalNotifyCompletion, System.Runtime.CompilerServices.INotifyCompletion
+        {
+            public bool IsCompleted { get { return default(bool); } }
+            public void GetResult() { }
+            public void OnCompleted(System.Action continuation) { }
+            [System.Security.SecurityCriticalAttribute]
+            public void UnsafeOnCompleted(System.Action continuation) { }
+        }
+    }
+}
 namespace System.Collections
 {
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -3727,9 +3814,96 @@ namespace System.IO
         public PathTooLongException(string message, System.Exception innerException) { }
         protected PathTooLongException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
+    public enum SeekOrigin
+    {
+        Begin = 0,
+        Current = 1,
+        End = 2,
+    }
+    public abstract partial class Stream : System.IDisposable
+    {
+        public static readonly System.IO.Stream Null;
+        protected Stream() { }
+        public abstract bool CanRead { get; }
+        public abstract bool CanSeek { get; }
+        public virtual bool CanTimeout { get { return default(bool); } }
+        public abstract bool CanWrite { get; }
+        public abstract long Length { get; }
+        public abstract long Position { get; set; }
+        public virtual int ReadTimeout { get { return default(int); } set { } }
+        public virtual int WriteTimeout { get { return default(int); } set { } }
+        public virtual System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
+        public virtual System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
+        public void CopyTo(System.IO.Stream destination) { }
+        public void CopyTo(System.IO.Stream destination, int bufferSize) { }
+        public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize) { return default(System.Threading.Tasks.Task); }
+        public virtual System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public virtual void Close() { }
+        public void Dispose() { }
+        protected virtual void Dispose(bool disposing) { }
+        public virtual int EndRead(System.IAsyncResult asyncResult) { return 0; }
+        public virtual void EndWrite(System.IAsyncResult asyncResult) { return; }
+        public abstract void Flush();
+        public System.Threading.Tasks.Task FlushAsync() { return default(System.Threading.Tasks.Task); }
+        public virtual System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public abstract int Read(byte[] buffer, int offset, int count);
+        public System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count) { return default(System.Threading.Tasks.Task<int>); }
+        public virtual System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
+        public virtual int ReadByte() { return default(int); }
+        public abstract long Seek(long offset, System.IO.SeekOrigin origin);
+        public abstract void SetLength(long value);
+        public abstract void Write(byte[] buffer, int offset, int count);
+        public System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count) { return default(System.Threading.Tasks.Task); }
+        public virtual System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public virtual void WriteByte(byte value) { }
+    }
 }
 namespace System.Reflection
 {
+    public sealed partial class AmbiguousMatchException : System.Exception
+    {
+        public AmbiguousMatchException() { }
+        public AmbiguousMatchException(string message) { }
+        public AmbiguousMatchException(string message, System.Exception inner) { }
+    }
+    public abstract partial class Assembly : System.Reflection.ICustomAttributeProvider
+    {
+        internal Assembly() { }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
+        public abstract System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo> DefinedTypes { get; }
+        public virtual System.Collections.Generic.IEnumerable<System.Type> ExportedTypes { get { return default(System.Collections.Generic.IEnumerable<System.Type>); } }
+        public virtual MethodInfo EntryPoint { get { return default(MethodInfo); } }
+        public virtual string FullName { get { return default(string); } }
+        public virtual bool IsDynamic { get { return default(bool); } }
+        public virtual System.Reflection.Module ManifestModule { get { return default(System.Reflection.Module); } }
+        public abstract System.Collections.Generic.IEnumerable<System.Reflection.Module> Modules { get; }
+        public override bool Equals(object o) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public virtual System.Reflection.ManifestResourceInfo GetManifestResourceInfo(string resourceName) { return default(System.Reflection.ManifestResourceInfo); }
+        public virtual string[] GetManifestResourceNames() { return default(string[]); }
+        public virtual System.IO.Stream GetManifestResourceStream(string name) { return default(System.IO.Stream); }
+        public virtual System.Reflection.AssemblyName GetName() { return default(System.Reflection.AssemblyName); }
+        public virtual System.Type GetType(string name) { return default(System.Type); }
+        public virtual System.Type GetType(string name, bool throwOnError, bool ignoreCase) { return default(System.Type); }
+        public static System.Reflection.Assembly Load(System.Reflection.AssemblyName assemblyRef) { return default(System.Reflection.Assembly); }
+        public static System.Reflection.Assembly GetEntryAssembly() { return default(System.Reflection.Assembly); }
+        public virtual string Location { get { return default(string); } }
+        public override string ToString() { return default(string); }
+        public virtual string CodeBase { get { return default(string); } }
+        public virtual string ImageRuntimeVersion { get { return default(string); } }
+        public object CreateInstance(string typeName) { return default(object); }
+        public object CreateInstance(string typeName, bool ignoreCase) { return default(object); }
+        public static string CreateQualifiedName(string assemblyName, string typeName) { return default(string); }
+        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
+        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        public virtual Type[] GetExportedTypes() { return default(Type[]); }
+        public virtual AssemblyName[] GetReferencedAssemblies() { return default(AssemblyName[]); }
+        public virtual Type GetType(string name, bool throwOnError) { return default(Type); }
+        public virtual Type[] GetTypes() { return default(Type[]); }
+        bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited = false)]
     public sealed partial class AssemblyCompanyAttribute : System.Attribute
     {
@@ -3741,6 +3915,11 @@ namespace System.Reflection
     {
         public AssemblyConfigurationAttribute(string configuration) { }
         public string Configuration { get { return default(string); } }
+    }
+    public enum AssemblyContentType
+    {
+        Default = 0,
+        WindowsRuntime = 1,
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited = false)]
     public sealed partial class AssemblyCopyrightAttribute : System.Attribute
@@ -3809,6 +3988,23 @@ namespace System.Reflection
         public string Key { get { return default(string); } }
         public string Value { get { return default(string); } }
     }
+    public sealed partial class AssemblyName
+    {
+        public AssemblyName() { }
+        public AssemblyName(string assemblyName) { }
+        public System.Reflection.AssemblyContentType ContentType { get { return default(System.Reflection.AssemblyContentType); } set { } }
+        public string CultureName { get { return default(string); } set { } }
+        public System.Reflection.AssemblyNameFlags Flags { get { return default(System.Reflection.AssemblyNameFlags); } set { } }
+        public string FullName { get { return default(string); } }
+        public string Name { get { return default(string); } set { } }
+        public System.Reflection.ProcessorArchitecture ProcessorArchitecture { get { return default(System.Reflection.ProcessorArchitecture); } set { } }
+        public System.Version Version { get { return default(System.Version); } set { } }
+        public byte[] GetPublicKey() { return default(byte[]); }
+        public byte[] GetPublicKeyToken() { return default(byte[]); }
+        public void SetPublicKey(byte[] publicKey) { }
+        public void SetPublicKeyToken(byte[] publicKeyToken) { }
+        public override string ToString() { return default(string); }
+    }
     [System.FlagsAttribute]
     public enum AssemblyNameFlags
     {
@@ -3847,11 +4043,401 @@ namespace System.Reflection
         public AssemblyVersionAttribute(string version) { }
         public string Version { get { return default(string); } }
     }
+    [Flags]
+    public enum BindingFlags
+    {
+        CreateInstance = 512,
+        DeclaredOnly = 2,
+        Default = 0,
+        FlattenHierarchy = 64,
+        GetField = 1024,
+        GetProperty = 4096,
+        IgnoreCase = 1,
+        Instance = 4,
+        InvokeMethod = 256,
+        NonPublic = 32,
+        Public = 16,
+        SetField = 2048,
+        SetProperty = 8192,
+        Static = 8,
+    }
+    [System.FlagsAttribute]
+    public enum CallingConventions
+    {
+        Any = 3,
+        ExplicitThis = 64,
+        HasThis = 32,
+        Standard = 1,
+        VarArgs = 2,
+    }
+    public abstract partial class ConstructorInfo : System.Reflection.MethodBase
+    {
+        public static readonly string ConstructorName;
+        public static readonly string TypeConstructorName;
+        internal ConstructorInfo() { }
+        public override bool Equals(object obj) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public virtual object Invoke(object[] parameters) { return default(object); }
+        public override MemberTypes MemberType { get { return default(MemberTypes); } }
+    }
+    public partial class CustomAttributeData
+    {
+        internal CustomAttributeData() { }
+        public virtual System.Type AttributeType { get { return default(System.Type); } }
+        public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeTypedArgument> ConstructorArguments { get { return default(System.Collections.Generic.IList<System.Reflection.CustomAttributeTypedArgument>); } }
+        public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeNamedArgument> NamedArguments { get { return default(System.Collections.Generic.IList<System.Reflection.CustomAttributeNamedArgument>); } }
+        public virtual ConstructorInfo Constructor { get { return default(ConstructorInfo); } }
+        public static System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributes(Assembly target) { return default(System.Collections.Generic.IList<CustomAttributeData>); }
+        public static System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributes(MemberInfo target) { return default(System.Collections.Generic.IList<CustomAttributeData>); }
+        public static System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributes(Module target) { return default(System.Collections.Generic.IList<CustomAttributeData>); }
+        public static System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributes(ParameterInfo target) { return default(System.Collections.Generic.IList<CustomAttributeData>); }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct CustomAttributeNamedArgument
+    {
+        public bool IsField { get { return default(bool); } }
+        public string MemberName { get { return default(string); } }
+        public System.Reflection.CustomAttributeTypedArgument TypedValue { get { return default(System.Reflection.CustomAttributeTypedArgument); } }
+        public static bool operator ==(CustomAttributeNamedArgument left, CustomAttributeNamedArgument right) { return default(bool); }
+        public static bool operator !=(CustomAttributeNamedArgument left, CustomAttributeNamedArgument right) { return default(bool); }
+        public override bool Equals(object obj) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public override string ToString() { return default(string); }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct CustomAttributeTypedArgument
+    {
+        public System.Type ArgumentType { get { return default(System.Type); } }
+        public object Value { get { return default(object); } }
+        public static bool operator ==(CustomAttributeTypedArgument left, CustomAttributeTypedArgument right) { return default(bool); }
+        public static bool operator !=(CustomAttributeTypedArgument left, CustomAttributeTypedArgument right) { return default(bool); }
+        public override bool Equals(object obj) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public override string ToString() { return default(string); }
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1036))]
     public sealed partial class DefaultMemberAttribute : System.Attribute
     {
         public DefaultMemberAttribute(string memberName) { }
         public string MemberName { get { return default(string); } }
+    }
+    [System.FlagsAttribute]
+    public enum EventAttributes
+    {
+        None = 0,
+        RTSpecialName = 1024,
+        SpecialName = 512,
+    }
+    public abstract partial class EventInfo : System.Reflection.MemberInfo
+    {
+        internal EventInfo() { }
+        public virtual System.Reflection.MethodInfo AddMethod { get { return default(System.Reflection.MethodInfo); } }
+        public abstract System.Reflection.EventAttributes Attributes { get; }
+        public virtual System.Type EventHandlerType { get { return default(System.Type); } }
+        public virtual bool IsMulticast { get { return default(bool); } }
+        public bool IsSpecialName { get { return default(bool); } }
+        public virtual System.Reflection.MethodInfo RaiseMethod { get { return default(System.Reflection.MethodInfo); } }
+        public virtual System.Reflection.MethodInfo RemoveMethod { get { return default(System.Reflection.MethodInfo); } }
+        public virtual void AddEventHandler(object target, System.Delegate handler) { }
+        public override bool Equals(object obj) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public virtual void RemoveEventHandler(object target, System.Delegate handler) { }
+        public MethodInfo GetAddMethod() { return default(MethodInfo); }
+        public abstract MethodInfo GetAddMethod(bool nonPublic);
+        public MethodInfo GetRaiseMethod() { return default(MethodInfo); }
+        public abstract MethodInfo GetRaiseMethod(bool nonPublic);
+        public MethodInfo GetRemoveMethod() { return default(MethodInfo); }
+        public abstract MethodInfo GetRemoveMethod(bool nonPublic);
+        public override System.Reflection.MemberTypes MemberType { get { return default(System.Reflection.MemberTypes); } }
+
+    }
+    [System.FlagsAttribute]
+    public enum FieldAttributes
+    {
+        Assembly = 3,
+        FamANDAssem = 2,
+        Family = 4,
+        FamORAssem = 5,
+        FieldAccessMask = 7,
+        HasDefault = 32768,
+        HasFieldMarshal = 4096,
+        HasFieldRVA = 256,
+        InitOnly = 32,
+        Literal = 64,
+        NotSerialized = 128,
+        PinvokeImpl = 8192,
+        Private = 1,
+        PrivateScope = 0,
+        Public = 6,
+        RTSpecialName = 1024,
+        SpecialName = 512,
+        Static = 16,
+    }
+    public abstract partial class FieldInfo : System.Reflection.MemberInfo
+    {
+        internal FieldInfo() { }
+        public abstract System.Reflection.FieldAttributes Attributes { get; }
+        public abstract System.Type FieldType { get; }
+        public bool IsAssembly { get { return default(bool); } }
+        public bool IsFamily { get { return default(bool); } }
+        public bool IsFamilyAndAssembly { get { return default(bool); } }
+        public bool IsFamilyOrAssembly { get { return default(bool); } }
+        public bool IsInitOnly { get { return default(bool); } }
+        public bool IsLiteral { get { return default(bool); } }
+        public bool IsPrivate { get { return default(bool); } }
+        public bool IsPublic { get { return default(bool); } }
+        public bool IsSpecialName { get { return default(bool); } }
+        public bool IsStatic { get { return default(bool); } }
+        public override bool Equals(object obj) { return default(bool); }
+        public static System.Reflection.FieldInfo GetFieldFromHandle(System.RuntimeFieldHandle handle) { return default(System.Reflection.FieldInfo); }
+        public static System.Reflection.FieldInfo GetFieldFromHandle(System.RuntimeFieldHandle handle, System.RuntimeTypeHandle declaringType) { return default(System.Reflection.FieldInfo); }
+        public override int GetHashCode() { return default(int); }
+        public virtual Type[] GetOptionalCustomModifiers() { return default(Type[]); }
+        public virtual object GetRawConstantValue() { return default(object); }
+        public virtual Type[] GetRequiredCustomModifiers() { return default(Type[]); }
+        public abstract object GetValue(object obj);
+        public override MemberTypes MemberType { get { return default(MemberTypes); } }
+        public virtual void SetValue(object obj, object value) { }
+
+    }
+    [System.FlagsAttribute]
+    public enum GenericParameterAttributes
+    {
+        Contravariant = 2,
+        Covariant = 1,
+        DefaultConstructorConstraint = 16,
+        None = 0,
+        NotNullableValueTypeConstraint = 8,
+        ReferenceTypeConstraint = 4,
+        SpecialConstraintMask = 28,
+        VarianceMask = 3,
+    }
+    public interface ICustomAttributeProvider
+    {
+        object[] GetCustomAttributes(bool inherit);
+        object[] GetCustomAttributes(Type attributeType, bool inherit);
+        bool IsDefined(Type attributeType, bool inherit);
+    }
+    public static partial class IntrospectionExtensions
+    {
+        public static System.Reflection.TypeInfo GetTypeInfo(this System.Type type) { return default(System.Reflection.TypeInfo); }
+    }
+    public partial class InvalidFilterCriteriaException : Exception
+    {
+        public InvalidFilterCriteriaException() { }
+        public InvalidFilterCriteriaException(string message) { }
+        public InvalidFilterCriteriaException(string message, Exception inner) { }
+    }
+    public partial interface IReflectableType
+    {
+        System.Reflection.TypeInfo GetTypeInfo();
+    }
+    public partial class LocalVariableInfo
+    {
+        protected LocalVariableInfo() { }
+        public virtual bool IsPinned { get { return default(bool); } }
+        public virtual int LocalIndex { get { return default(int); } }
+        public virtual System.Type LocalType { get { return default(System.Type); } }
+        public override string ToString() { return default(string); }
+    }
+    public partial class ManifestResourceInfo
+    {
+        public ManifestResourceInfo(System.Reflection.Assembly containingAssembly, string containingFileName, System.Reflection.ResourceLocation resourceLocation) { }
+        public virtual string FileName { get { return default(string); } }
+        public virtual System.Reflection.Assembly ReferencedAssembly { get { return default(System.Reflection.Assembly); } }
+        public virtual System.Reflection.ResourceLocation ResourceLocation { get { return default(System.Reflection.ResourceLocation); } }
+    }
+    public delegate bool MemberFilter(MemberInfo m, object filterCriteria);
+    public abstract partial class MemberInfo : System.Reflection.ICustomAttributeProvider
+    {
+        internal MemberInfo() { }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
+        public abstract System.Type DeclaringType { get; }
+        public virtual int MetadataToken { get { return default(int); } }
+        public virtual System.Reflection.Module Module { get { return default(System.Reflection.Module); } }
+        public abstract string Name { get; }
+        public override bool Equals(object obj) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public abstract MemberTypes MemberType { get; }
+        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
+        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+    }
+    [Flags]
+    public enum MemberTypes
+    {
+        Constructor = 0x01,
+        Event = 0x02,
+        Field = 0x04,
+        Method = 0x08,
+        Property = 0x10,
+        TypeInfo = 0x20,
+        Custom = 0x40,
+        NestedType = 0x80,
+        All = Constructor | Event | Field | Method | Property | TypeInfo | NestedType,
+    }
+    [System.FlagsAttribute]
+    public enum MethodAttributes
+    {
+        Abstract = 1024,
+        Assembly = 3,
+        CheckAccessOnOverride = 512,
+        FamANDAssem = 2,
+        Family = 4,
+        FamORAssem = 5,
+        Final = 32,
+        HasSecurity = 16384,
+        HideBySig = 128,
+        MemberAccessMask = 7,
+        NewSlot = 256,
+        PinvokeImpl = 8192,
+        Private = 1,
+        PrivateScope = 0,
+        Public = 6,
+        RequireSecObject = 32768,
+        ReuseSlot = 0,
+        RTSpecialName = 4096,
+        SpecialName = 2048,
+        Static = 16,
+        UnmanagedExport = 8,
+        Virtual = 64,
+        VtableLayoutMask = 256,
+    }
+    public abstract partial class MethodBase : System.Reflection.MemberInfo
+    {
+        internal MethodBase() { }
+        public abstract System.Reflection.MethodAttributes Attributes { get; }
+        public virtual System.Reflection.CallingConventions CallingConvention { get { return default(System.Reflection.CallingConventions); } }
+        public virtual bool ContainsGenericParameters { get { return default(bool); } }
+        public bool IsAbstract { get { return default(bool); } }
+        public bool IsAssembly { get { return default(bool); } }
+        public bool IsConstructor { get { return default(bool); } }
+        public bool IsFamily { get { return default(bool); } }
+        public bool IsFamilyAndAssembly { get { return default(bool); } }
+        public bool IsFamilyOrAssembly { get { return default(bool); } }
+        public bool IsFinal { get { return default(bool); } }
+        public virtual bool IsGenericMethod { get { return default(bool); } }
+        public virtual bool IsGenericMethodDefinition { get { return default(bool); } }
+        public bool IsHideBySig { get { return default(bool); } }
+        public bool IsPrivate { get { return default(bool); } }
+        public bool IsPublic { get { return default(bool); } }
+        public bool IsSpecialName { get { return default(bool); } }
+        public bool IsStatic { get { return default(bool); } }
+        public bool IsVirtual { get { return default(bool); } }
+        public abstract System.Reflection.MethodImplAttributes MethodImplementationFlags { get; }
+        public override bool Equals(object obj) { return default(bool); }
+        public virtual System.Type[] GetGenericArguments() { return default(System.Type[]); }
+        public override int GetHashCode() { return default(int); }
+        public static System.Reflection.MethodBase GetMethodFromHandle(System.RuntimeMethodHandle handle) { return default(System.Reflection.MethodBase); }
+        public static System.Reflection.MethodBase GetMethodFromHandle(System.RuntimeMethodHandle handle, System.RuntimeTypeHandle declaringType) { return default(System.Reflection.MethodBase); }
+        public abstract System.Reflection.ParameterInfo[] GetParameters();
+        public virtual object Invoke(object obj, object[] parameters) { return default(object); }
+        public abstract MethodImplAttributes GetMethodImplementationFlags();
+    }
+    public enum MethodImplAttributes
+    {
+        AggressiveInlining = 256,
+        CodeTypeMask = 3,
+        ForwardRef = 16,
+        IL = 0,
+        InternalCall = 4096,
+        Managed = 0,
+        ManagedMask = 4,
+        Native = 1,
+        NoInlining = 8,
+        NoOptimization = 64,
+        OPTIL = 2,
+        PreserveSig = 128,
+        Runtime = 3,
+        Synchronized = 32,
+        Unmanaged = 4,
+    }
+    public abstract partial class MethodInfo : System.Reflection.MethodBase
+    {
+        internal MethodInfo() { }
+        public abstract MethodInfo GetBaseDefinition();
+        public virtual System.Reflection.ParameterInfo ReturnParameter { get { return default(System.Reflection.ParameterInfo); } }
+        public virtual System.Type ReturnType { get { return default(System.Type); } }
+        public virtual System.Delegate CreateDelegate(System.Type delegateType) { return default(System.Delegate); }
+        public virtual System.Delegate CreateDelegate(System.Type delegateType, object target) { return default(System.Delegate); }
+        public override bool Equals(object obj) { return default(bool); }
+        public override System.Type[] GetGenericArguments() { return default(System.Type[]); }
+        public virtual System.Reflection.MethodInfo GetGenericMethodDefinition() { return default(System.Reflection.MethodInfo); }
+        public override int GetHashCode() { return default(int); }
+        public virtual System.Reflection.MethodInfo MakeGenericMethod(params System.Type[] typeArguments) { return default(System.Reflection.MethodInfo); }
+        public override MemberTypes MemberType { get { return default(MemberTypes); } }
+        public abstract System.Reflection.ICustomAttributeProvider ReturnTypeCustomAttributes { get; }
+    }
+    public abstract partial class Module : System.Reflection.ICustomAttributeProvider
+    {
+        internal Module() { }
+        public virtual System.Reflection.Assembly Assembly { get { return default(System.Reflection.Assembly); } }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
+        public virtual string FullyQualifiedName { get { return default(string); } }
+        public virtual string Name { get { return default(string); } }
+        public override bool Equals(object o) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public virtual System.Type GetType(string className, bool throwOnError, bool ignoreCase) { return default(System.Type); }
+        public override string ToString() { return default(string); }
+        public static readonly TypeFilter FilterTypeName;
+        public static readonly TypeFilter FilterTypeNameIgnoreCase;
+        public virtual Guid ModuleVersionId { get { return default(Guid); } }
+        public virtual string ScopeName { get { return default(string); } }
+        public virtual Type[] FindTypes(TypeFilter filter, object filterCriteria) { return default(Type[]); }
+        public FieldInfo GetField(string name) { return default(FieldInfo); }
+        public virtual FieldInfo GetField(string name, BindingFlags bindingAttr) { return default(FieldInfo); }
+        public FieldInfo[] GetFields() { return default(FieldInfo[]); }
+        public virtual FieldInfo[] GetFields(BindingFlags bindingFlags) { return default(FieldInfo[]); }
+        public MethodInfo GetMethod(string name) { return default(MethodInfo); }
+        public MethodInfo GetMethod(string name, Type[] types) { return default(MethodInfo); }
+        public MethodInfo[] GetMethods() { return default(MethodInfo[]); }
+        public virtual MethodInfo[] GetMethods(BindingFlags bindingFlags) { return default(MethodInfo[]); }
+        public virtual Type GetType(string className) { return default(Type); }
+        public virtual Type GetType(string className, bool ignoreCase) { return default(Type); }
+        public virtual Type[] GetTypes() { return default(Type[]); }
+        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
+        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+    }
+    [System.FlagsAttribute]
+    public enum ParameterAttributes
+    {
+        HasDefault = 4096,
+        HasFieldMarshal = 8192,
+        In = 1,
+        Lcid = 4,
+        None = 0,
+        Optional = 16,
+        Out = 2,
+        Retval = 8,
+    }
+    public partial class ParameterInfo : System.Reflection.ICustomAttributeProvider
+    {
+        internal ParameterInfo() { }
+        public virtual System.Reflection.ParameterAttributes Attributes { get { return default(System.Reflection.ParameterAttributes); } }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
+        public virtual object DefaultValue { get { return default(object); } }
+        public virtual bool HasDefaultValue { get { return default(bool); } }
+        public bool IsIn { get { return default(bool); } }
+        public bool IsOptional { get { return default(bool); } }
+        public bool IsOut { get { return default(bool); } }
+        public bool IsRetval { get { return default(bool); } }
+        public virtual System.Reflection.MemberInfo Member { get { return default(System.Reflection.MemberInfo); } }
+        public virtual string Name { get { return default(string); } }
+        public virtual System.Type ParameterType { get { return default(System.Type); } }
+        public virtual int Position { get { return default(int); } }
+        public virtual Type[] GetOptionalCustomModifiers() { return default(Type[]); }
+        public virtual Type[] GetRequiredCustomModifiers() { return default(Type[]); }
+        public virtual object RawDefaultValue { get { return default(object); } }
+        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
+        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public struct ParameterModifier
+    {
+        public ParameterModifier(int parameterCount) { }
+        public bool this[int index] { get { return default(bool); } set { } }
     }
     public enum ProcessorArchitecture
     {
@@ -3861,6 +4447,191 @@ namespace System.Reflection
         MSIL = 1,
         None = 0,
         X86 = 2,
+    }
+    [System.FlagsAttribute]
+    public enum PropertyAttributes
+    {
+        HasDefault = 4096,
+        None = 0,
+        RTSpecialName = 1024,
+        SpecialName = 512,
+    }
+    public abstract partial class PropertyInfo : System.Reflection.MemberInfo
+    {
+        internal PropertyInfo() { }
+        public abstract System.Reflection.PropertyAttributes Attributes { get; }
+        public abstract bool CanRead { get; }
+        public abstract bool CanWrite { get; }
+        public virtual System.Reflection.MethodInfo GetMethod { get { return default(System.Reflection.MethodInfo); } }
+        public bool IsSpecialName { get { return default(bool); } }
+        public abstract System.Type PropertyType { get; }
+        public virtual System.Reflection.MethodInfo SetMethod { get { return default(System.Reflection.MethodInfo); } }
+        public override bool Equals(object obj) { return default(bool); }
+        public virtual object GetConstantValue() { return default(object); }
+        public override int GetHashCode() { return default(int); }
+        public abstract System.Reflection.ParameterInfo[] GetIndexParameters();
+        public object GetValue(object obj) { return default(object); }
+        public virtual object GetValue(object obj, object[] index) { return default(object); }
+        public void SetValue(object obj, object value) { }
+        public virtual void SetValue(object obj, object value, object[] index) { }
+        public override MemberTypes MemberType { get { return default(MemberTypes); } }
+        public MethodInfo[] GetAccessors() { return default(MethodInfo[]); }
+        public abstract MethodInfo[] GetAccessors(bool nonPublic);
+        public MethodInfo GetGetMethod() { return default(MethodInfo); }
+        public abstract MethodInfo GetGetMethod(bool nonPublic);
+        public MethodInfo GetSetMethod() { return default(MethodInfo); }
+        public abstract MethodInfo GetSetMethod(bool nonPublic);
+        public virtual Type[] GetOptionalCustomModifiers() { return default(Type[]); }
+        public virtual object GetRawConstantValue() { return default(object); }
+        public virtual Type[] GetRequiredCustomModifiers() { return default(Type[]); }
+    }
+    public abstract partial class ReflectionContext
+    {
+        protected ReflectionContext() { }
+        public virtual System.Reflection.TypeInfo GetTypeForObject(object value) { return default(System.Reflection.TypeInfo); }
+        public abstract System.Reflection.Assembly MapAssembly(System.Reflection.Assembly assembly);
+        public abstract System.Reflection.TypeInfo MapType(System.Reflection.TypeInfo type);
+    }
+    public sealed partial class ReflectionTypeLoadException : System.Exception
+    {
+        public ReflectionTypeLoadException(System.Type[] classes, System.Exception[] exceptions) { }
+        public ReflectionTypeLoadException(System.Type[] classes, System.Exception[] exceptions, string message) { }
+        public System.Exception[] LoaderExceptions { get { return default(System.Exception[]); } }
+        public System.Type[] Types { get { return default(System.Type[]); } }
+    }
+    [System.FlagsAttribute]
+    public enum ResourceLocation
+    {
+        ContainedInAnotherAssembly = 2,
+        ContainedInManifestFile = 4,
+        Embedded = 1,
+    }
+    public partial class TargetException : System.Exception
+    {
+        public TargetException() { }
+        public TargetException(string message) { }
+        public TargetException(string message, Exception inner) { }
+    }
+    public sealed partial class TargetInvocationException : System.Exception
+    {
+        public TargetInvocationException(System.Exception inner) { }
+        public TargetInvocationException(string message, System.Exception inner) { }
+    }
+    public sealed partial class TargetParameterCountException : System.Exception
+    {
+        public TargetParameterCountException() { }
+        public TargetParameterCountException(string message) { }
+        public TargetParameterCountException(string message, System.Exception inner) { }
+    }
+    [System.FlagsAttribute]
+    public enum TypeAttributes
+    {
+        Abstract = 128,
+        AnsiClass = 0,
+        AutoClass = 131072,
+        AutoLayout = 0,
+        BeforeFieldInit = 1048576,
+        Class = 0,
+        ClassSemanticsMask = 32,
+        CustomFormatClass = 196608,
+        CustomFormatMask = 12582912,
+        ExplicitLayout = 16,
+        HasSecurity = 262144,
+        Import = 4096,
+        Interface = 32,
+        LayoutMask = 24,
+        NestedAssembly = 5,
+        NestedFamANDAssem = 6,
+        NestedFamily = 4,
+        NestedFamORAssem = 7,
+        NestedPrivate = 3,
+        NestedPublic = 2,
+        NotPublic = 0,
+        Public = 1,
+        RTSpecialName = 2048,
+        Sealed = 256,
+        SequentialLayout = 8,
+        Serializable = 8192,
+        SpecialName = 1024,
+        StringFormatMask = 196608,
+        UnicodeClass = 65536,
+        VisibilityMask = 7,
+        WindowsRuntime = 16384,
+    }
+    public delegate bool TypeFilter(Type m, Object filterCriteria);
+    public abstract partial class TypeInfo : System.Reflection.MemberInfo, System.Reflection.IReflectableType
+    {
+        internal TypeInfo() { }
+        public virtual System.Type AsType() { return default(System.Type); }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo> DeclaredConstructors { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo>); } }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.EventInfo> DeclaredEvents { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.EventInfo>); } }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo> DeclaredFields { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo>); } }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.MemberInfo> DeclaredMembers { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.MemberInfo>); } }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> DeclaredMethods { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo>); } }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo> DeclaredNestedTypes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo>); } }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo> DeclaredProperties { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo>); } }
+        public virtual Type[] FindInterfaces(TypeFilter filter, object filterCriteria) { return default(Type[]); }
+        public virtual MemberInfo[] FindMembers(MemberTypes memberType, BindingFlags bindingAttr, MemberFilter filter, object filterCriteria) { return default(MemberInfo[]); }
+        public virtual System.Type[] GenericTypeParameters { get { return default(System.Type[]); } }
+        public ConstructorInfo GetConstructor(Type[] types) { return default(ConstructorInfo); }
+        public ConstructorInfo[] GetConstructors() { return default(ConstructorInfo[]); }
+        public virtual ConstructorInfo[] GetConstructors(BindingFlags bindingAttr) { return default(ConstructorInfo[]); }
+        public virtual System.Reflection.EventInfo GetDeclaredEvent(string name) { return default(System.Reflection.EventInfo); }
+        public virtual System.Reflection.FieldInfo GetDeclaredField(string name) { return default(System.Reflection.FieldInfo); }
+        public virtual System.Reflection.MethodInfo GetDeclaredMethod(string name) { return default(System.Reflection.MethodInfo); }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> GetDeclaredMethods(string name) { return default(System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo>); }
+        public virtual System.Reflection.TypeInfo GetDeclaredNestedType(string name) { return default(System.Reflection.TypeInfo); }
+        public virtual System.Reflection.PropertyInfo GetDeclaredProperty(string name) { return default(System.Reflection.PropertyInfo); }
+        public virtual MemberInfo[] GetDefaultMembers() { return default(MemberInfo[]); }
+        public virtual string GetEnumName(object value) { return default(string); }
+        public virtual string[] GetEnumNames() { return default(string[]); }
+        public virtual Type GetEnumUnderlyingType() { return default(Type); }
+        public virtual Array GetEnumValues() { return default(Array); }
+        public EventInfo GetEvent(string name) { return default(EventInfo); }
+        public virtual EventInfo GetEvent(string name, BindingFlags bindingAttr) { return default(EventInfo); }
+        public virtual EventInfo[] GetEvents() { return default(EventInfo[]); }
+        public virtual EventInfo[] GetEvents(BindingFlags bindingAttr) { return default(EventInfo[]); }
+        public FieldInfo GetField(string name) { return default(FieldInfo); }
+        public virtual FieldInfo GetField(string name, BindingFlags bindingAttr) { return default(FieldInfo); }
+        public FieldInfo[] GetFields() { return default(FieldInfo[]); }
+        public virtual FieldInfo[] GetFields(BindingFlags bindingAttr) { return default(FieldInfo[]); }
+        public virtual Type[] GetGenericArguments() { return default(Type[]); }
+        public Type GetInterface(string name) { return default(Type); }
+        public virtual Type GetInterface(string name, bool ignoreCase) { return default(Type); }
+        public virtual Type[] GetInterfaces() { return default(Type[]); }
+        public MemberInfo[] GetMember(string name) { return default(MemberInfo[]); }
+        public virtual MemberInfo[] GetMember(string name, BindingFlags bindingAttr) { return default(MemberInfo[]); }
+        public virtual MemberInfo[] GetMember(string name, MemberTypes type, BindingFlags bindingAttr) { return default(MemberInfo[]); }
+        public MemberInfo[] GetMembers() { return default(MemberInfo[]); }
+        public virtual MemberInfo[] GetMembers(BindingFlags bindingAttr) { return default(MemberInfo[]); }
+        public MethodInfo GetMethod(string name) { return default(MethodInfo); }
+        public MethodInfo GetMethod(string name, BindingFlags bindingAttr) { return default(MethodInfo); }
+        public MethodInfo GetMethod(string name, Type[] types) { return default(MethodInfo); }
+        public MethodInfo GetMethod(string name, Type[] types, ParameterModifier[] modifiers) { return default(MethodInfo); }
+        public MethodInfo[] GetMethods() { return default(MethodInfo[]); }
+        public virtual MethodInfo[] GetMethods(BindingFlags bindingAttr) { return default(MethodInfo[]); }
+        public Type GetNestedType(string name) { return default(Type); }
+        public virtual Type GetNestedType(string name, BindingFlags bindingAttr) { return default(Type); }
+        public Type[] GetNestedTypes() { return default(Type[]); }
+        public virtual Type[] GetNestedTypes(BindingFlags bindingAttr) { return default(Type[]); }
+        public PropertyInfo[] GetProperties() { return default(PropertyInfo[]); }
+        public virtual PropertyInfo[] GetProperties(BindingFlags bindingAttr) { return default(PropertyInfo[]); }
+        public PropertyInfo GetProperty(string name) { return default(PropertyInfo); }
+        public PropertyInfo GetProperty(string name, BindingFlags bindingAttr) { return default(PropertyInfo); }
+        public PropertyInfo GetProperty(string name, Type returnType) { return default(PropertyInfo); }
+        public PropertyInfo GetProperty(string name, Type returnType, Type[] types) { return default(PropertyInfo); }
+        public PropertyInfo GetProperty(string name, Type returnType, Type[] types, ParameterModifier[] modifiers) { return default(PropertyInfo); }
+        public PropertyInfo GetProperty(string name, Type[] types) { return default(PropertyInfo); }
+        System.Reflection.TypeInfo System.Reflection.IReflectableType.GetTypeInfo() { return default(System.Reflection.TypeInfo); }
+        public virtual System.Collections.Generic.IEnumerable<System.Type> ImplementedInterfaces { get { return default(System.Collections.Generic.IEnumerable<System.Type>); } }
+        public virtual bool IsAssignableFrom(Type c) { return default(bool); }
+        public virtual bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { return default(bool); }
+        public virtual bool IsEnumDefined(object value) { return default(bool); }
+        public virtual bool IsInstanceOfType(object o) { return default(bool); }
+        public virtual System.Runtime.InteropServices.StructLayoutAttribute StructLayoutAttribute { get { return default(System.Runtime.InteropServices.StructLayoutAttribute); } }
+        public ConstructorInfo TypeInitializer { get { return default(ConstructorInfo); } }
+        public virtual Type UnderlyingSystemType { get { return default(Type); } }
+        public override System.Reflection.MemberTypes MemberType { get { return default(System.Reflection.MemberTypes); } }
     }
 }
 namespace System.Runtime
@@ -4612,6 +5383,35 @@ namespace System.Text
 }
 namespace System.Threading
 {
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct CancellationToken
+    {
+        public CancellationToken(bool canceled) { throw new System.NotImplementedException(); }
+        public bool CanBeCanceled { get { return default(bool); } }
+        public bool IsCancellationRequested { get { return default(bool); } }
+        public static System.Threading.CancellationToken None { get { return default(System.Threading.CancellationToken); } }
+        public System.Threading.WaitHandle WaitHandle { get { return default(System.Threading.WaitHandle); } }
+        public override bool Equals(object other) { return default(bool); }
+        public bool Equals(System.Threading.CancellationToken other) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public static bool operator ==(System.Threading.CancellationToken left, System.Threading.CancellationToken right) { return default(bool); }
+        public static bool operator !=(System.Threading.CancellationToken left, System.Threading.CancellationToken right) { return default(bool); }
+        public System.Threading.CancellationTokenRegistration Register(System.Action callback) { return default(System.Threading.CancellationTokenRegistration); }
+        public System.Threading.CancellationTokenRegistration Register(System.Action callback, bool useSynchronizationContext) { return default(System.Threading.CancellationTokenRegistration); }
+        public System.Threading.CancellationTokenRegistration Register(System.Action<object> callback, object state) { return default(System.Threading.CancellationTokenRegistration); }
+        public System.Threading.CancellationTokenRegistration Register(System.Action<object> callback, object state, bool useSynchronizationContext) { return default(System.Threading.CancellationTokenRegistration); }
+        public void ThrowIfCancellationRequested() { }
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct CancellationTokenRegistration : System.IDisposable, System.IEquatable<System.Threading.CancellationTokenRegistration>
+    {
+        public void Dispose() { }
+        public override bool Equals(object obj) { return default(bool); }
+        public bool Equals(System.Threading.CancellationTokenRegistration other) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public static bool operator ==(System.Threading.CancellationTokenRegistration left, System.Threading.CancellationTokenRegistration right) { return default(bool); }
+        public static bool operator !=(System.Threading.CancellationTokenRegistration left, System.Threading.CancellationTokenRegistration right) { return default(bool); }
+    }
     public enum LazyThreadSafetyMode
     {
         ExecutionAndPublication = 2,
@@ -4639,5 +5439,331 @@ namespace System.Threading
         public virtual bool WaitOne() { return default(bool); }
         public virtual bool WaitOne(int millisecondsTimeout) { return default(bool); }
         public virtual bool WaitOne(System.TimeSpan timeout) { return default(bool); }
+    }
+}
+namespace System.Threading.Tasks
+{
+    public partial class Task : System.IAsyncResult
+    {
+        public Task(System.Action action) { }
+        public Task(System.Action action, System.Threading.CancellationToken cancellationToken) { }
+        public Task(System.Action action, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions) { }
+        public Task(System.Action action, System.Threading.Tasks.TaskCreationOptions creationOptions) { }
+        public Task(System.Action<object> action, object state) { }
+        public Task(System.Action<object> action, object state, System.Threading.CancellationToken cancellationToken) { }
+        public Task(System.Action<object> action, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions) { }
+        public Task(System.Action<object> action, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { }
+        public object AsyncState { get { return default(object); } }
+        public static System.Threading.Tasks.Task CompletedTask { get { return default(System.Threading.Tasks.Task); } }
+        public System.Threading.Tasks.TaskCreationOptions CreationOptions { get { return default(System.Threading.Tasks.TaskCreationOptions); } }
+        public static System.Nullable<int> CurrentId { get { return default(System.Nullable<int>); } }
+        public System.AggregateException Exception { get { return default(System.AggregateException); } }
+        public static System.Threading.Tasks.TaskFactory Factory { get { return default(System.Threading.Tasks.TaskFactory); } }
+        public int Id { get { return default(int); } }
+        public bool IsCanceled { get { return default(bool); } }
+        public bool IsCompleted { get { return default(bool); } }
+        public bool IsFaulted { get { return default(bool); } }
+        public System.Threading.Tasks.TaskStatus Status { get { return default(System.Threading.Tasks.TaskStatus); } }
+        System.Threading.WaitHandle System.IAsyncResult.AsyncWaitHandle { get { return default(System.Threading.WaitHandle); } }
+        bool System.IAsyncResult.CompletedSynchronously { get { return default(bool); } }
+        public System.Runtime.CompilerServices.ConfiguredTaskAwaitable ConfigureAwait(bool continueOnCapturedContext) { return default(System.Runtime.CompilerServices.ConfiguredTaskAwaitable); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task, object> continuationAction, object state) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task, object> continuationAction, object state, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task, object> continuationAction, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task, object> continuationAction, object state, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task, object> continuationAction, object state, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task> continuationAction) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task> continuationAction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task> continuationAction, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, object, TResult> continuationFunction, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, object, TResult> continuationFunction, object state, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, object, TResult> continuationFunction, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, object, TResult> continuationFunction, object state, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWith<TResult>(System.Func<System.Threading.Tasks.Task, object, TResult> continuationFunction, object state, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public static System.Threading.Tasks.Task Delay(int millisecondsDelay) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task Delay(int millisecondsDelay, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task Delay(System.TimeSpan delay) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task Delay(System.TimeSpan delay, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task FromCanceled(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task<TResult> FromCanceled<TResult>(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public static System.Threading.Tasks.Task FromException(System.Exception exception) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task<TResult> FromException<TResult>(System.Exception exception) { return default(System.Threading.Tasks.Task<TResult>); }
+        public static System.Threading.Tasks.Task<TResult> FromResult<TResult>(TResult result) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Runtime.CompilerServices.TaskAwaiter GetAwaiter() { return default(System.Runtime.CompilerServices.TaskAwaiter); }
+        public static System.Threading.Tasks.Task Run(System.Action action) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task Run(System.Action action, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task Run(System.Func<System.Threading.Tasks.Task> function) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task Run(System.Func<System.Threading.Tasks.Task> function, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task<TResult> Run<TResult>(System.Func<TResult> function) { return default(System.Threading.Tasks.Task<TResult>); }
+        public static System.Threading.Tasks.Task<TResult> Run<TResult>(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public static System.Threading.Tasks.Task<TResult> Run<TResult>(System.Func<System.Threading.Tasks.Task<TResult>> function) { return default(System.Threading.Tasks.Task<TResult>); }
+        public static System.Threading.Tasks.Task<TResult> Run<TResult>(System.Func<System.Threading.Tasks.Task<TResult>> function, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public void RunSynchronously() { }
+        public void RunSynchronously(System.Threading.Tasks.TaskScheduler scheduler) { }
+        public void Start() { }
+        public void Start(System.Threading.Tasks.TaskScheduler scheduler) { }
+        public void Wait() { }
+        public bool Wait(int millisecondsTimeout) { return default(bool); }
+        public bool Wait(int millisecondsTimeout, System.Threading.CancellationToken cancellationToken) { return default(bool); }
+        public void Wait(System.Threading.CancellationToken cancellationToken) { }
+        public bool Wait(System.TimeSpan timeout) { return default(bool); }
+        public static void WaitAll(params System.Threading.Tasks.Task[] tasks) { }
+        public static bool WaitAll(System.Threading.Tasks.Task[] tasks, int millisecondsTimeout) { return default(bool); }
+        public static bool WaitAll(System.Threading.Tasks.Task[] tasks, int millisecondsTimeout, System.Threading.CancellationToken cancellationToken) { return default(bool); }
+        public static void WaitAll(System.Threading.Tasks.Task[] tasks, System.Threading.CancellationToken cancellationToken) { }
+        public static bool WaitAll(System.Threading.Tasks.Task[] tasks, System.TimeSpan timeout) { return default(bool); }
+        public static int WaitAny(params System.Threading.Tasks.Task[] tasks) { return default(int); }
+        public static int WaitAny(System.Threading.Tasks.Task[] tasks, int millisecondsTimeout) { return default(int); }
+        public static int WaitAny(System.Threading.Tasks.Task[] tasks, int millisecondsTimeout, System.Threading.CancellationToken cancellationToken) { return default(int); }
+        public static int WaitAny(System.Threading.Tasks.Task[] tasks, System.Threading.CancellationToken cancellationToken) { return default(int); }
+        public static int WaitAny(System.Threading.Tasks.Task[] tasks, System.TimeSpan timeout) { return default(int); }
+        public static System.Threading.Tasks.Task WhenAll(System.Collections.Generic.IEnumerable<System.Threading.Tasks.Task> tasks) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task WhenAll(params System.Threading.Tasks.Task[] tasks) { return default(System.Threading.Tasks.Task); }
+        public static System.Threading.Tasks.Task<TResult[]> WhenAll<TResult>(System.Collections.Generic.IEnumerable<System.Threading.Tasks.Task<TResult>> tasks) { return default(System.Threading.Tasks.Task<TResult[]>); }
+        public static System.Threading.Tasks.Task<TResult[]> WhenAll<TResult>(params System.Threading.Tasks.Task<TResult>[] tasks) { return default(System.Threading.Tasks.Task<TResult[]>); }
+        public static System.Threading.Tasks.Task<System.Threading.Tasks.Task> WhenAny(System.Collections.Generic.IEnumerable<System.Threading.Tasks.Task> tasks) { return default(System.Threading.Tasks.Task<System.Threading.Tasks.Task>); }
+        public static System.Threading.Tasks.Task<System.Threading.Tasks.Task> WhenAny(params System.Threading.Tasks.Task[] tasks) { return default(System.Threading.Tasks.Task<System.Threading.Tasks.Task>); }
+        public static System.Threading.Tasks.Task<System.Threading.Tasks.Task<TResult>> WhenAny<TResult>(System.Collections.Generic.IEnumerable<System.Threading.Tasks.Task<TResult>> tasks) { return default(System.Threading.Tasks.Task<System.Threading.Tasks.Task<TResult>>); }
+        public static System.Threading.Tasks.Task<System.Threading.Tasks.Task<TResult>> WhenAny<TResult>(params System.Threading.Tasks.Task<TResult>[] tasks) { return default(System.Threading.Tasks.Task<System.Threading.Tasks.Task<TResult>>); }
+        public static System.Runtime.CompilerServices.YieldAwaitable Yield() { return default(System.Runtime.CompilerServices.YieldAwaitable); }
+    }
+    public partial class Task<TResult> : System.Threading.Tasks.Task
+    {
+        public Task(System.Func<TResult> function) : base(default(System.Action)) { }
+        public Task(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken) : base(default(System.Action)) { }
+        public Task(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions) : base(default(System.Action)) { }
+        public Task(System.Func<TResult> function, System.Threading.Tasks.TaskCreationOptions creationOptions) : base(default(System.Action)) { }
+        public Task(System.Func<object, TResult> function, object state) : base(default(System.Action)) { }
+        public Task(System.Func<object, TResult> function, object state, System.Threading.CancellationToken cancellationToken) : base(default(System.Action)) { }
+        public Task(System.Func<object, TResult> function, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions) : base(default(System.Action)) { }
+        public Task(System.Func<object, TResult> function, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) : base(default(System.Action)) { }
+        public static new System.Threading.Tasks.TaskFactory<TResult> Factory { get { return default(System.Threading.Tasks.TaskFactory<TResult>); } }
+        public TResult Result { get { return default(TResult); } }
+        public new System.Runtime.CompilerServices.ConfiguredTaskAwaitable<TResult> ConfigureAwait(bool continueOnCapturedContext) { return default(System.Runtime.CompilerServices.ConfiguredTaskAwaitable<TResult>); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>, object> continuationAction, object state) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>, object> continuationAction, object state, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>, object> continuationAction, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>, object> continuationAction, object state, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>, object> continuationAction, object state, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>> continuationAction) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>> continuationAction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWith(System.Action<System.Threading.Tasks.Task<TResult>> continuationAction, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, TNewResult> continuationFunction) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, TNewResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, TNewResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, TNewResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, TNewResult> continuationFunction, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, object, TNewResult> continuationFunction, object state) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, object, TNewResult> continuationFunction, object state, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, object, TNewResult> continuationFunction, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, object, TNewResult> continuationFunction, object state, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public System.Threading.Tasks.Task<TNewResult> ContinueWith<TNewResult>(System.Func<System.Threading.Tasks.Task<TResult>, object, TNewResult> continuationFunction, object state, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TNewResult>); }
+        public new System.Runtime.CompilerServices.TaskAwaiter<TResult> GetAwaiter() { return default(System.Runtime.CompilerServices.TaskAwaiter<TResult>); }
+    }
+    [System.FlagsAttribute]
+    public enum TaskContinuationOptions
+    {
+        AttachedToParent = 4,
+        DenyChildAttach = 8,
+        ExecuteSynchronously = 524288,
+        HideScheduler = 16,
+        LazyCancellation = 32,
+        LongRunning = 2,
+        None = 0,
+        NotOnCanceled = 262144,
+        NotOnFaulted = 131072,
+        NotOnRanToCompletion = 65536,
+        OnlyOnCanceled = 196608,
+        OnlyOnFaulted = 327680,
+        OnlyOnRanToCompletion = 393216,
+        PreferFairness = 1,
+        RunContinuationsAsynchronously = 64,
+    }
+    [System.FlagsAttribute]
+    public enum TaskCreationOptions
+    {
+        AttachedToParent = 4,
+        DenyChildAttach = 8,
+        HideScheduler = 16,
+        LongRunning = 2,
+        None = 0,
+        PreferFairness = 1,
+        RunContinuationsAsynchronously = 64,
+    }
+    public partial class TaskFactory
+    {
+        public TaskFactory() { }
+        public TaskFactory(System.Threading.CancellationToken cancellationToken) { }
+        public TaskFactory(System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { }
+        public TaskFactory(System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { }
+        public TaskFactory(System.Threading.Tasks.TaskScheduler scheduler) { }
+        public System.Threading.CancellationToken CancellationToken { get { return default(System.Threading.CancellationToken); } }
+        public System.Threading.Tasks.TaskContinuationOptions ContinuationOptions { get { return default(System.Threading.Tasks.TaskContinuationOptions); } }
+        public System.Threading.Tasks.TaskCreationOptions CreationOptions { get { return default(System.Threading.Tasks.TaskCreationOptions); } }
+        public System.Threading.Tasks.TaskScheduler Scheduler { get { return default(System.Threading.Tasks.TaskScheduler); } }
+        public System.Threading.Tasks.Task ContinueWhenAll(System.Threading.Tasks.Task[] tasks, System.Action<System.Threading.Tasks.Task[]> continuationAction) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAll(System.Threading.Tasks.Task[] tasks, System.Action<System.Threading.Tasks.Task[]> continuationAction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAll(System.Threading.Tasks.Task[] tasks, System.Action<System.Threading.Tasks.Task[]> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAll(System.Threading.Tasks.Task[] tasks, System.Action<System.Threading.Tasks.Task[]> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TResult>(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task[], TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TResult>(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task[], TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TResult>(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task[], TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TResult>(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task[], TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task ContinueWhenAll<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Action<System.Threading.Tasks.Task<TAntecedentResult>[]> continuationAction) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAll<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Action<System.Threading.Tasks.Task<TAntecedentResult>[]> continuationAction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAll<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Action<System.Threading.Tasks.Task<TAntecedentResult>[]> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAll<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Action<System.Threading.Tasks.Task<TAntecedentResult>[]> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TAntecedentResult, TResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>[], TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TAntecedentResult, TResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>[], TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TAntecedentResult, TResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>[], TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TAntecedentResult, TResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>[], TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task ContinueWhenAny(System.Threading.Tasks.Task[] tasks, System.Action<System.Threading.Tasks.Task> continuationAction) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAny(System.Threading.Tasks.Task[] tasks, System.Action<System.Threading.Tasks.Task> continuationAction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAny(System.Threading.Tasks.Task[] tasks, System.Action<System.Threading.Tasks.Task> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAny(System.Threading.Tasks.Task[] tasks, System.Action<System.Threading.Tasks.Task> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TResult>(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task, TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TResult>(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TResult>(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TResult>(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task ContinueWhenAny<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Action<System.Threading.Tasks.Task<TAntecedentResult>> continuationAction) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAny<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Action<System.Threading.Tasks.Task<TAntecedentResult>> continuationAction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAny<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Action<System.Threading.Tasks.Task<TAntecedentResult>> continuationAction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task ContinueWhenAny<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Action<System.Threading.Tasks.Task<TAntecedentResult>> continuationAction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TAntecedentResult, TResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>, TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TAntecedentResult, TResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TAntecedentResult, TResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TAntecedentResult, TResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>, TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task FromAsync(System.Func<System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Action<System.IAsyncResult> endMethod, object state) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task FromAsync(System.Func<System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Action<System.IAsyncResult> endMethod, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task FromAsync(System.IAsyncResult asyncResult, System.Action<System.IAsyncResult> endMethod) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task FromAsync(System.IAsyncResult asyncResult, System.Action<System.IAsyncResult> endMethod, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task FromAsync(System.IAsyncResult asyncResult, System.Action<System.IAsyncResult> endMethod, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task FromAsync<TArg1>(System.Func<TArg1, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Action<System.IAsyncResult> endMethod, TArg1 arg1, object state) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task FromAsync<TArg1>(System.Func<TArg1, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Action<System.IAsyncResult> endMethod, TArg1 arg1, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TResult>(System.Func<System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TResult>(System.Func<System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TResult>(System.IAsyncResult asyncResult, System.Func<System.IAsyncResult, TResult> endMethod) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TResult>(System.IAsyncResult asyncResult, System.Func<System.IAsyncResult, TResult> endMethod, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TResult>(System.IAsyncResult asyncResult, System.Func<System.IAsyncResult, TResult> endMethod, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task FromAsync<TArg1, TArg2>(System.Func<TArg1, TArg2, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Action<System.IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, object state) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task FromAsync<TArg1, TArg2>(System.Func<TArg1, TArg2, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Action<System.IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TResult>(System.Func<TArg1, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TResult>(System.Func<TArg1, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task FromAsync<TArg1, TArg2, TArg3>(System.Func<TArg1, TArg2, TArg3, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Action<System.IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task FromAsync<TArg1, TArg2, TArg3>(System.Func<TArg1, TArg2, TArg3, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Action<System.IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TArg2, TResult>(System.Func<TArg1, TArg2, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, TArg2 arg2, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TArg2, TResult>(System.Func<TArg1, TArg2, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, TArg2 arg2, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TArg2, TArg3, TResult>(System.Func<TArg1, TArg2, TArg3, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TArg2, TArg3, TResult>(System.Func<TArg1, TArg2, TArg3, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task StartNew(System.Action action) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task StartNew(System.Action action, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task StartNew(System.Action action, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task StartNew(System.Action action, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task StartNew(System.Action<object> action, object state) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task StartNew(System.Action<object> action, object state, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task StartNew(System.Action<object> action, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task StartNew(System.Action<object> action, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task); }
+        public System.Threading.Tasks.Task<TResult> StartNew<TResult>(System.Func<TResult> function) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew<TResult>(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew<TResult>(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew<TResult>(System.Func<TResult> function, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew<TResult>(System.Func<object, TResult> function, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew<TResult>(System.Func<object, TResult> function, object state, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew<TResult>(System.Func<object, TResult> function, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew<TResult>(System.Func<object, TResult> function, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+    }
+    public partial class TaskFactory<TResult>
+    {
+        public TaskFactory() { }
+        public TaskFactory(System.Threading.CancellationToken cancellationToken) { }
+        public TaskFactory(System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { }
+        public TaskFactory(System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { }
+        public TaskFactory(System.Threading.Tasks.TaskScheduler scheduler) { }
+        public System.Threading.CancellationToken CancellationToken { get { return default(System.Threading.CancellationToken); } }
+        public System.Threading.Tasks.TaskContinuationOptions ContinuationOptions { get { return default(System.Threading.Tasks.TaskContinuationOptions); } }
+        public System.Threading.Tasks.TaskCreationOptions CreationOptions { get { return default(System.Threading.Tasks.TaskCreationOptions); } }
+        public System.Threading.Tasks.TaskScheduler Scheduler { get { return default(System.Threading.Tasks.TaskScheduler); } }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task[], TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task[], TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task[], TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task[], TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>[], TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>[], TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>[], TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAll<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>[], TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task, TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny(System.Threading.Tasks.Task[] tasks, System.Func<System.Threading.Tasks.Task, TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>, TResult> continuationFunction) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>, TResult> continuationFunction, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskContinuationOptions continuationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> ContinueWhenAny<TAntecedentResult>(System.Threading.Tasks.Task<TAntecedentResult>[] tasks, System.Func<System.Threading.Tasks.Task<TAntecedentResult>, TResult> continuationFunction, System.Threading.Tasks.TaskContinuationOptions continuationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync(System.Func<System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync(System.Func<System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync(System.IAsyncResult asyncResult, System.Func<System.IAsyncResult, TResult> endMethod) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync(System.IAsyncResult asyncResult, System.Func<System.IAsyncResult, TResult> endMethod, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync(System.IAsyncResult asyncResult, System.Func<System.IAsyncResult, TResult> endMethod, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1>(System.Func<TArg1, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1>(System.Func<TArg1, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TArg2>(System.Func<TArg1, TArg2, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, TArg2 arg2, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TArg2>(System.Func<TArg1, TArg2, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, TArg2 arg2, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TArg2, TArg3>(System.Func<TArg1, TArg2, TArg3, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> FromAsync<TArg1, TArg2, TArg3>(System.Func<TArg1, TArg2, TArg3, System.AsyncCallback, object, System.IAsyncResult> beginMethod, System.Func<System.IAsyncResult, TResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew(System.Func<TResult> function) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew(System.Func<TResult> function, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew(System.Func<TResult> function, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew(System.Func<object, TResult> function, object state) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew(System.Func<object, TResult> function, object state, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew(System.Func<object, TResult> function, object state, System.Threading.CancellationToken cancellationToken, System.Threading.Tasks.TaskCreationOptions creationOptions, System.Threading.Tasks.TaskScheduler scheduler) { return default(System.Threading.Tasks.Task<TResult>); }
+        public System.Threading.Tasks.Task<TResult> StartNew(System.Func<object, TResult> function, object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { return default(System.Threading.Tasks.Task<TResult>); }
+    }
+    public abstract partial class TaskScheduler
+    {
+        protected TaskScheduler() { }
+        public static System.Threading.Tasks.TaskScheduler Current { get { return default(System.Threading.Tasks.TaskScheduler); } }
+        public static System.Threading.Tasks.TaskScheduler Default { get { return default(System.Threading.Tasks.TaskScheduler); } }
+        public int Id { get { return default(int); } }
+        public virtual int MaximumConcurrencyLevel { get { return default(int); } }
+        public static event System.EventHandler<System.Threading.Tasks.UnobservedTaskExceptionEventArgs> UnobservedTaskException { add { } remove { } }
+        public static System.Threading.Tasks.TaskScheduler FromCurrentSynchronizationContext() { return default(System.Threading.Tasks.TaskScheduler); }
+        [System.Security.SecurityCriticalAttribute]
+        protected abstract System.Collections.Generic.IEnumerable<System.Threading.Tasks.Task> GetScheduledTasks();
+        [System.Security.SecurityCriticalAttribute]
+        protected internal abstract void QueueTask(System.Threading.Tasks.Task task);
+        [System.Security.SecurityCriticalAttribute]
+        protected internal virtual bool TryDequeue(System.Threading.Tasks.Task task) { return default(bool); }
+        [System.Security.SecurityCriticalAttribute]
+        protected bool TryExecuteTask(System.Threading.Tasks.Task task) { return default(bool); }
+        [System.Security.SecurityCriticalAttribute]
+        protected abstract bool TryExecuteTaskInline(System.Threading.Tasks.Task task, bool taskWasPreviouslyQueued);
+    }
+    public enum TaskStatus
+    {
+        Canceled = 6,
+        Created = 0,
+        Faulted = 7,
+        RanToCompletion = 5,
+        Running = 3,
+        WaitingForActivation = 1,
+        WaitingForChildrenToComplete = 4,
+        WaitingToRun = 2,
+    }
+    public partial class UnobservedTaskExceptionEventArgs : System.EventArgs
+    {
+        public UnobservedTaskExceptionEventArgs(System.AggregateException exception) { }
+        public System.AggregateException Exception { get { return default(System.AggregateException); } }
+        public bool Observed { get { return default(bool); } }
+        public void SetObserved() { }
     }
 }
