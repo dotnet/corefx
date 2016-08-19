@@ -141,6 +141,7 @@ namespace System.Tests
             yield return new object[] { typeof(Int32Enum), int.MaxValue, "Max" };
             yield return new object[] { typeof(Int32Enum), 3, null };
 
+            yield return new object[] { typeof(SimpleEnum), 99, null };
             yield return new object[] { typeof(SimpleEnum), SimpleEnum.Red, "Red" };
             yield return new object[] { typeof(SimpleEnum), 1, "Red" };
 
@@ -154,10 +155,6 @@ namespace System.Tests
             yield return new object[] { typeof(UInt32Enum), (uint)2, "Two" };
             yield return new object[] { typeof(UInt32Enum), uint.MaxValue, "Max" };
             yield return new object[] { typeof(UInt32Enum), (uint)3, null };
-
-            yield return new object[] { typeof(SimpleEnum), 99, null };
-            yield return new object[] { typeof(SimpleEnum), 1, "Red" };
-            yield return new object[] { typeof(SimpleEnum), SimpleEnum.Red, "Red" };
 
             // Int64
             yield return new object[] { typeof(Int64Enum), Int64Enum.Min, "Min" };
@@ -322,6 +319,21 @@ namespace System.Tests
             yield return new object[] { typeof(UInt64Enum), (UInt64Enum)99, false };
             yield return new object[] { typeof(UInt64Enum), (ulong)1, true };
             yield return new object[] { typeof(UInt64Enum), (ulong)99, false };
+
+            // Char
+            yield return new object[] { s_charEnumType, "Value1", true };
+            yield return new object[] { s_charEnumType, "None", false };
+            yield return new object[] { s_charEnumType, Enum.Parse(s_charEnumType, "Value1"), true };
+            yield return new object[] { s_charEnumType, (char)1, true };
+            yield return new object[] { s_charEnumType, (char)99, false };
+
+            // Boolean
+            yield return new object[] { s_boolEnumType, "Value1", true };
+            yield return new object[] { s_boolEnumType, "None", false };
+            yield return new object[] { s_boolEnumType, Enum.Parse(s_boolEnumType, "Value1"), true };
+            yield return new object[] { s_boolEnumType, "Value1", true };
+            yield return new object[] { s_boolEnumType, true, true };
+            yield return new object[] { s_boolEnumType, false, true };
         }
 
         [Theory]
@@ -435,7 +447,10 @@ namespace System.Tests
             yield return new object[] { Enum.Parse(s_charEnumType, "Value0x3f06"), Enum.Parse(s_charEnumType, "Value0x3f16"), false };
 
             // Bool
-            //yield return new object[] { Enum.Parse(s_charEnumType,  };
+            yield return new object[] { Enum.Parse(s_boolEnumType, "Value1"), Enum.Parse(s_boolEnumType, "Value1"), true };
+            yield return new object[] { Enum.Parse(s_boolEnumType, "Value1"), Enum.Parse(s_boolEnumType, "Value2"), true };
+            yield return new object[] { Enum.Parse(s_boolEnumType, "Value2"), Enum.Parse(s_boolEnumType, "Value2"), true };
+            yield return new object[] { Enum.Parse(s_boolEnumType, "Value2"), Enum.Parse(s_boolEnumType, "Value1"), false };
         }
 
         [Theory]
