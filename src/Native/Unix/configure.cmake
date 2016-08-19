@@ -184,7 +184,7 @@ check_cxx_source_compiles(
         return 0;
     }
     "
-    HAVE_GNU_READDIR_R)
+    HAVE_READDIR_R)
 
 check_cxx_source_compiles(
     "

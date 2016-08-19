@@ -341,7 +341,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
 
     dirent* result = nullptr;
     dirent* entry = static_cast<dirent*>(buffer);
-#if defined HAVE_GNU_READDIR_R
+#if defined HAVE_READDIR_R
     int error = readdir_r(dir, entry, &result);
 
     // positive error number returned -> failure
