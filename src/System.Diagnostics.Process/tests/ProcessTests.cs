@@ -727,7 +727,7 @@ namespace System.Diagnostics.Tests
         }
 
         [PlatformSpecific(PlatformID.Windows)]
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void TestStartOnWindowsWithBadFileFormat()
         {
             string path = GetTestFilePath();
