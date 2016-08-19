@@ -1426,8 +1426,12 @@ namespace System.Tests
                 var iEnumerableObject = new List<object>(values);
                 Assert.Equal(expected, string.Join(separator, iEnumerableObject));
 
-                var arrayOfObjects = (object[])values;
-                Assert.Equal(expected, string.Join(separator, arrayOfObjects));
+                // Bug/Documented behavior: Join(string, object[]) returns "" when the first item in the array is null
+                if (values.Length == 0 || values[0] != null)
+                {
+                    var arrayOfObjects = (object[])values;
+                    Assert.Equal(expected, string.Join(separator, arrayOfObjects));
+                }
             }
             Assert.Equal(expected, string.Join(separator, values, startIndex, count));
         }
