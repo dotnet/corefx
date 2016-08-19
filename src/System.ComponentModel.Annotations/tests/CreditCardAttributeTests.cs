@@ -45,17 +45,31 @@ namespace System.ComponentModel.DataAnnotations
             Assert.Throws<ValidationException>(() => attribute.Validate(value, s_testValidationContext));
         }
 
-        [Theory]
-        [InlineData(null, null, null)]
-        [InlineData("SomeErrorMessage", "SomeErrorMessageResourceName", null)]
-        [InlineData(null, "SomeErrorMessageResourceName", null)]
-        [InlineData(null, null, typeof(ErrorMessageResources))]
-        public static void Validate_InvalidErrorMessage_ThrowsInvalidOperationException(string message, string resourceName, Type resourceType)
+        [Fact]
+        public static void Validate_ErrorMessageNotSet_ThrowsInvalidOperationException()
         {
-            var attribute = new CreditCardAttribute();
-            attribute.ErrorMessage = message;
-            attribute.ErrorMessageResourceName = resourceName;
-            attribute.ErrorMessageResourceType = resourceType;
+            var attribute = new CreditCardAttribute() { ErrorMessage = null };
+            Assert.Throws<InvalidOperationException>(() => attribute.Validate("0000000000000001", s_testValidationContext));
+        }
+
+        [Fact]
+        public static void Validate_ErrorMessageSet_ErrorMessageResourceNameSet_ThrowsInvalidOperationException()
+        {
+            var attribute = new CreditCardAttribute() { ErrorMessage = "Some", ErrorMessageResourceName = "Some" };
+            Assert.Throws<InvalidOperationException>(() => attribute.Validate("0000000000000001", s_testValidationContext));
+        }
+
+        [Fact]
+        public static void Validate_ErrorMessageResourceNameSet_ErrorMessageResourceTypeNotSet_ThrowsInvalidOperationException()
+        {
+            var attribute = new CreditCardAttribute() { ErrorMessageResourceName = "Some", ErrorMessageResourceType = null };
+            Assert.Throws<InvalidOperationException>(() => attribute.Validate("0000000000000001", s_testValidationContext));
+        }
+
+        [Fact]
+        public static void Validate_ErrorMessageResourceNameNotSet_ErrorMessageResourceTypeSet_ThrowsInvalidOperationException()
+        {
+            var attribute = new CreditCardAttribute() { ErrorMessageResourceName = null, ErrorMessageResourceType = typeof(ErrorMessageResources) };
             Assert.Throws<InvalidOperationException>(() => attribute.Validate("0000000000000001", s_testValidationContext));
         }
 
@@ -66,7 +80,7 @@ namespace System.ComponentModel.DataAnnotations
             attribute.ErrorMessage = "SomeErrorMessage";
             var toBeTested = new CreditCardClassToBeTested();
             var validationContext = new ValidationContext(toBeTested);
-            validationContext.MemberName = "CreditCardPropertyToBeTested";
+            validationContext.MemberName = nameof(CreditCardClassToBeTested.CreditCardPropertyToBeTested);
 
             var validationResult = attribute.GetValidationResult(toBeTested, validationContext);
             Assert.Equal("SomeErrorMessage", validationResult.ErrorMessage);
@@ -78,7 +92,7 @@ namespace System.ComponentModel.DataAnnotations
             var attribute = new CreditCardAttribute();
             var toBeTested = new CreditCardClassToBeTested();
             var validationContext = new ValidationContext(toBeTested);
-            validationContext.MemberName = "CreditCardPropertyToBeTested";
+            validationContext.MemberName = nameof(CreditCardClassToBeTested.CreditCardPropertyToBeTested);
             attribute.GetValidationResult(toBeTested, validationContext);
         }
 
@@ -90,7 +104,7 @@ namespace System.ComponentModel.DataAnnotations
             attribute.ErrorMessageResourceType = typeof(ErrorMessageResources);
             var toBeTested = new CreditCardClassToBeTested();
             var validationContext = new ValidationContext(toBeTested);
-            validationContext.MemberName = "CreditCardPropertyToBeTested";
+            validationContext.MemberName = nameof(CreditCardClassToBeTested.CreditCardPropertyToBeTested);
 
             var validationResult = attribute.GetValidationResult(toBeTested, validationContext);
             Assert.Equal("Error Message from ErrorMessageResources.InternalErrorMessageTestProperty", validationResult.ErrorMessage);
