@@ -11,95 +11,79 @@ namespace System.ComponentModel.DataAnnotations
         private static readonly ValidationContext s_testValidationContext = new ValidationContext(new object());
 
         [Fact]
-        public static void CreditCardAttribute_creation_DataType_and_CustomDataType()
+        public static void DataType_CustomDataType()
         {
             var attribute = new CreditCardAttribute();
             Assert.Equal(DataType.CreditCard, attribute.DataType);
             Assert.Null(attribute.CustomDataType);
         }
 
-        [Fact]
-        public static void Validate_successful_for_valid_values()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("0000000000000000")]
+        [InlineData("1234567890123452")]
+        [InlineData("  1 2 3 4 5 6 7 8 9 0  1 2 34 5 2    ")]
+        [InlineData("--1-2-3-4-5-6-7-8-9-0--1-2-34-5-2----")]
+        [InlineData(" - 1- -  2 3 --4 5 6 7 -8- -9- -0 - -1 -2 -3-4- --5-- 2    ")]
+        [InlineData("1234-5678-9012-3452")]
+        [InlineData("1234 5678 9012 3452")]
+        public static void Validate_ValidValue_DoesNotThrow(string value)
         {
             var attribute = new CreditCardAttribute();
-
-            AssertEx.DoesNotThrow(() => attribute.Validate(null, s_testValidationContext)); // Null is valid
-            AssertEx.DoesNotThrow(() => attribute.Validate("0000000000000000", s_testValidationContext)); // Simplest valid value
-            AssertEx.DoesNotThrow(() => attribute.Validate("1234567890123452", s_testValidationContext)); // Good checksum
-            AssertEx.DoesNotThrow(() => attribute.Validate("1234-5678-9012-3452", s_testValidationContext)); // Good checksum, with dashes
-            AssertEx.DoesNotThrow(() => attribute.Validate("1234 5678 9012 3452", s_testValidationContext)); // Good checksum, with spaces
+            attribute.Validate(value, s_testValidationContext);
         }
 
-        [Fact]
-        public static void Validate_throws_for_invalid_values()
+        [Theory]
+        [InlineData("0000000000000001")]
+        [InlineData(0)]
+        [InlineData("000%000000000001")]
+        [InlineData("1234567890123452a")]
+        [InlineData("1234567890123452\0")]
+        public static void Validate_InvalidValue_ThrowsValidationException(object value)
         {
             var attribute = new CreditCardAttribute();
-
-            Assert.Throws<ValidationException>(() => attribute.Validate("0000000000000001", s_testValidationContext)); // Bad checksum
-            Assert.Throws<ValidationException>(() => attribute.Validate(0, s_testValidationContext)); // Non-string
-            Assert.Throws<ValidationException>(() => attribute.Validate("000%000000000001", s_testValidationContext)); // Non-digit
+            Assert.Throws<ValidationException>(() => attribute.Validate(value, s_testValidationContext));
         }
 
-        [Fact]
-        public static void Validate_throws_InvalidOperationException_if_ErrorMessage_is_null()
+        [Theory]
+        [InlineData(null, null, null)]
+        [InlineData("SomeErrorMessage", "SomeErrorMessageResourceName", null)]
+        [InlineData(null, "SomeErrorMessageResourceName", null)]
+        [InlineData(null, null, typeof(ErrorMessageResources))]
+        public static void Validate_InvalidErrorMessage_ThrowsInvalidOperationException(string message, string resourceName, Type resourceType)
         {
             var attribute = new CreditCardAttribute();
-            attribute.ErrorMessage = null; // note: this overrides the default value
+            attribute.ErrorMessage = message;
+            attribute.ErrorMessageResourceName = resourceName;
+            attribute.ErrorMessageResourceType = resourceType;
             Assert.Throws<InvalidOperationException>(() => attribute.Validate("0000000000000001", s_testValidationContext));
         }
 
         [Fact]
-        public static void Validate_throws_InvalidOperationException_if_ErrorMessage_and_ErrorMessageResourceName_are_set()
-        {
-            var attribute = new CreditCardAttribute();
-            attribute.ErrorMessage = "SomeErrorMessage";
-            attribute.ErrorMessageResourceName = "SomeErrorMessageResourceName";
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("0000000000000001", s_testValidationContext));
-        }
-
-        [Fact]
-        public static void Validate_throws_InvalidOperationException_if_ErrorMessageResourceName_set_but_ErrorMessageResourceType_not_set()
-        {
-            var attribute = new CreditCardAttribute();
-            attribute.ErrorMessageResourceName = "SomeErrorMessageResourceName";
-            attribute.ErrorMessageResourceType = null;
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("0000000000000001", s_testValidationContext));
-        }
-
-        [Fact]
-        public static void Validate_throws_InvalidOperationException_if_ErrorMessageResourceType_set_but_ErrorMessageResourceName_not_set()
-        {
-            var attribute = new CreditCardAttribute();
-            attribute.ErrorMessageResourceName = null;
-            attribute.ErrorMessageResourceType = typeof(ErrorMessageResources);
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("0000000000000001", s_testValidationContext));
-        }
-
-        [Fact]
-        public static void GetValidationResult_returns_ErrorMessage_if_ErrorMessage_overrides_default()
+        public static void GetValidationResult_ErrorMessageSet_ReturnsOverridenValue()
         {
             var attribute = new CreditCardAttribute();
             attribute.ErrorMessage = "SomeErrorMessage";
             var toBeTested = new CreditCardClassToBeTested();
             var validationContext = new ValidationContext(toBeTested);
             validationContext.MemberName = "CreditCardPropertyToBeTested";
+
             var validationResult = attribute.GetValidationResult(toBeTested, validationContext);
             Assert.Equal("SomeErrorMessage", validationResult.ErrorMessage);
         }
 
-
         [Fact]
-        public static void GetValidationResult_returns_DefaultErrorMessage_if_ErrorMessage_is_not_set()
+        public static void GetValidationResult_ErrorMessageNotSet_ReturnsDefaultValue()
         {
             var attribute = new CreditCardAttribute();
             var toBeTested = new CreditCardClassToBeTested();
             var validationContext = new ValidationContext(toBeTested);
             validationContext.MemberName = "CreditCardPropertyToBeTested";
-            AssertEx.DoesNotThrow(() => attribute.GetValidationResult(toBeTested, validationContext));
+            attribute.GetValidationResult(toBeTested, validationContext);
         }
 
         [Fact]
-        public static void GetValidationResult_returns_ErrorMessage_from_resource_if_ErrorMessageResourceName_and_ErrorMessageResourceType_both_set()
+        public static void GetValidationResult_ErrorMessageSetFromResource_ReturnsExpectedValue()
         {
             var attribute = new CreditCardAttribute();
             attribute.ErrorMessageResourceName = "InternalErrorMessageTestProperty";
@@ -107,19 +91,14 @@ namespace System.ComponentModel.DataAnnotations
             var toBeTested = new CreditCardClassToBeTested();
             var validationContext = new ValidationContext(toBeTested);
             validationContext.MemberName = "CreditCardPropertyToBeTested";
+
             var validationResult = attribute.GetValidationResult(toBeTested, validationContext);
-            Assert.Equal(
-                "Error Message from ErrorMessageResources.InternalErrorMessageTestProperty",
-                validationResult.ErrorMessage);
+            Assert.Equal("Error Message from ErrorMessageResources.InternalErrorMessageTestProperty", validationResult.ErrorMessage);
         }
     }
 
-
     public class CreditCardClassToBeTested
     {
-        public string CreditCardPropertyToBeTested
-        {
-            get { return "0000000000000001"; }
-        }
+        public string CreditCardPropertyToBeTested => "0000000000000001";
     }
 }
