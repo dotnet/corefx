@@ -346,17 +346,18 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
 #if HAVE_READDIR_R
     int error = readdir_r(dir, entry, &result);
 
+    // positive error number returned -> failure
+    if (error != 0)
+    {
+        assert(error > 0);
+        *outputEntry = {}; // managed out param must be initialized
+        return error;
+    }
+
     // 0 returned with null result -> end-of-stream
     if (result == nullptr)
     {
         *outputEntry = {}; // managed out param must be initialized
-
-        // positive error number returned -> failure
-        if (error != 0)
-        {
-            assert(error > 0);
-            return error;
-        }
         return -1;         // shim convention for end-of-stream
     }
 
