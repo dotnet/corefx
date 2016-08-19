@@ -89,13 +89,13 @@
   <Target Name="ProducesPackageId"
           Returns="@(PackageIds)" 
           DependsOnTargets="FilterProjects">
-        <MSBuild Targets="ProducesPackageId"
+    <MSBuild Targets="ProducesPackageId"
              Projects="@(Project)"
              BuildInParallel="true"
              ContinueOnError="ErrorAndContinue">
-          <Output TaskParameter="TargetOutputs"
-                  ItemName="PackageIds" />             
-        </MSBuild>
+      <Output TaskParameter="TargetOutputs"
+              ItemName="PackageIds" />             
+    </MSBuild>
     <ItemGroup>
       <PackageIds Include="@(PackageIds)" />
     </ItemGroup>
@@ -106,8 +106,8 @@
              Projects="@(Project)"
              BuildInParallel="true"
              ContinueOnError="ErrorAndContinue">
-          <Output TaskParameter="TargetOutputs"
-                  ItemName="PackageIds" />      
+      <Output TaskParameter="TargetOutputs"
+              ItemName="PackageIds" />      
     </MSBuild>
     <Message Text="%(PackageIds.Identity)" Importance="High" />
   </Target>
