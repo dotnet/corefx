@@ -16,5 +16,5 @@
     <ProjectReference Include="@(Package->'$(SourceDir)%(Identity)/pkg/%(Identity).pkgproj')" />
   </ItemGroup>
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.targets" />
 </Project>

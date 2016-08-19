@@ -30,5 +30,5 @@
     <LineupProjectReference Include="@(Package->'$(SourceDir)%(Identity)/pkg/%(Identity).pkgproj')" />
     <LineupProjectReference Include="@(NativePackage->'$(SourceDir)Native/pkg/%(Identity)/%(Identity).pkgproj')" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.targets" />
 </Project>
