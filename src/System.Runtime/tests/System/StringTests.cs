@@ -1161,7 +1161,9 @@ namespace System.Tests
         [InlineData("!@#$%^&*", '%', 0, 8, 4)]
         public static void IndexOf_SingleLetter(string s, char target, int startIndex, int count, int expected)
         {
-            bool allAscii = IsCompletelyAscii(s) && target <= 0x7f;
+            bool safeForCurrentCulture =
+                IsSafeForCurrentCultureComparisons(s)
+                && IsSafeForCurrentCultureComparisons(target.ToString());
 
             if (count + startIndex == s.Length)
             {
@@ -1172,9 +1174,8 @@ namespace System.Tests
                     Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.OrdinalIgnoreCase));
 
                     // To be safe we only want to run CurrentCulture comparisons if
-                    // both strings are ASCII, otherwise the results may vary depending
-                    // on location
-                    if (allAscii)
+                    // we know the results will not vary depending on location
+                    if (safeForCurrentCulture)
                     {
                         Assert.Equal(expected, s.IndexOf(target.ToString()));
                         Assert.Equal(expected, s.IndexOf(target.ToString(), StringComparison.CurrentCulture));
@@ -1184,7 +1185,7 @@ namespace System.Tests
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.Ordinal));
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.OrdinalIgnoreCase));
 
-                if (allAscii)
+                if (safeForCurrentCulture)
                 {
                     Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex));
                     Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, StringComparison.CurrentCulture));
@@ -1194,18 +1195,21 @@ namespace System.Tests
             Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.Ordinal));
             Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase));
 
-            if (allAscii)
+            if (safeForCurrentCulture)
             {
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count));
                 Assert.Equal(expected, s.IndexOf(target.ToString(), startIndex, count, StringComparison.CurrentCulture));
             }
         }
 
-        private static bool IsCompletelyAscii(string str)
+        private static bool IsSafeForCurrentCultureComparisons(string str)
         {
             for (int i = 0; i < str.Length; i++)
             {
-                if (str[i] >= 0x80)
+                char c = str[i];
+                // We only want ASCII chars that you can see
+                // No controls, no delete, nothing >= 0x80
+                if (c < 0x20 || c == 0x7f || c >= 0x80)
                 {
                     return false;
                 }
