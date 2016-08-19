@@ -343,21 +343,20 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
 
     dirent* result = nullptr;
     dirent* entry = static_cast<dirent*>(buffer);
-#if defined HAVE_READDIR_R
+#if HAVE_READDIR_R
     int error = readdir_r(dir, entry, &result);
-
-    // positive error number returned -> failure
-    if (error != 0)
-    {
-        assert(error > 0);
-        *outputEntry = {}; // managed out param must be initialized
-        return error;
-    }
 
     // 0 returned with null result -> end-of-stream
     if (result == nullptr)
     {
         *outputEntry = {}; // managed out param must be initialized
+
+        // positive error number returned -> failure
+        if (error != 0)
+        {
+            assert(error > 0);
+            return error;
+        }
         return -1;         // shim convention for end-of-stream
     }
 
@@ -367,19 +366,18 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     errno = 0;
     result = readdir(dir);
 
-    //  kernel set errno -> failure
-    if (errno != 0)
-    {
-        assert(errno == EBADF); // Invalid directory stream descriptor dir.
-        *outputEntry = {}; // managed out param must be initialized
-        return errno;
-    }
-
     // 0 returned with null result -> end-of-stream
     if (result == nullptr)
     {
         *outputEntry = {}; // managed out param must be initialized
-        return -1;         // shim convention for end-of-stream
+
+        //  kernel set errno -> failure
+        if (errno != 0)
+        {
+            assert(errno == EBADF); // Invalid directory stream descriptor dir.
+            return errno;
+        }
+        return -1;
     }
 
     assert(result->d_reclen <= bufferSize);
