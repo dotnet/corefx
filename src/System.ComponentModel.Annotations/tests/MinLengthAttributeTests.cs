@@ -81,7 +81,8 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [MemberData(nameof(Invalid_TestData))]
         public static void GetValidationResult_InvalidValue_ReturnsNotNull(int length, object value)
         {
-            Assert.NotNull(new MinLengthAttribute(length).GetValidationResult(value, s_testValidationContext));
+            ValidationResult result = new MinLengthAttribute(length).GetValidationResult(value, s_testValidationContext);
+            Assert.NotNull(result.ErrorMessage);
         }
     }
 }
