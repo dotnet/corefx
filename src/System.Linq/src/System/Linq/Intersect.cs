@@ -10,30 +10,16 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Intersect<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
         {
-            if (first == null)
-            {
-                throw Error.ArgumentNull(nameof(first));
-            }
-
-            if (second == null)
-            {
-                throw Error.ArgumentNull(nameof(second));
-            }
+            EnumerableHelpers.ThrowIfNull(first, nameof(first));
+            EnumerableHelpers.ThrowIfNull(second, nameof(second));
 
             return IntersectIterator(first, second, null);
         }
 
         public static IEnumerable<TSource> Intersect<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {
-            if (first == null)
-            {
-                throw Error.ArgumentNull(nameof(first));
-            }
-
-            if (second == null)
-            {
-                throw Error.ArgumentNull(nameof(second));
-            }
+            EnumerableHelpers.ThrowIfNull(first, nameof(first));
+            EnumerableHelpers.ThrowIfNull(second, nameof(second));
 
             return IntersectIterator(first, second, comparer);
         }

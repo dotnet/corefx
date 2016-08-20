@@ -17,10 +17,7 @@ namespace System.Linq
 
         public static IEnumerable<TSource> DefaultIfEmpty<TSource>(this IEnumerable<TSource> source, TSource defaultValue)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             return new DefaultIfEmptyIterator<TSource>(source, defaultValue);
         }

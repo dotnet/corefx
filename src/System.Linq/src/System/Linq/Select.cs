@@ -11,15 +11,8 @@ namespace System.Linq
     {
         public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             Iterator<TSource> iterator = source as Iterator<TSource>;
             if (iterator != null)
@@ -56,15 +49,8 @@ namespace System.Linq
 
         public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, TResult> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             return SelectIterator(source, selector);
         }

@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static TSource Single<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
@@ -46,15 +43,8 @@ namespace System.Linq
 
         public static TSource Single<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -81,10 +71,7 @@ namespace System.Linq
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             IList<TSource> list = source as IList<TSource>;
             if (list != null)
@@ -117,15 +104,8 @@ namespace System.Linq
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {

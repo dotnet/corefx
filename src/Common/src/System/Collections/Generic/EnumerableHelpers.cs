@@ -7,6 +7,19 @@ namespace System.Collections.Generic
     /// <summary>Internal helper functions for working with enumerables.</summary>
     internal static class EnumerableHelpers
     {
+        /// <summary>
+        /// It throws an ArgumentNullException if value is null. The message is name.
+        /// Intended use: EnumerableHelpers.ThrowIfNull(variable,nameof(variable)
+        /// </summary>
+        /// <param name="variable">variable we want to check if null</param>
+        /// <param name="name">nameof(variable)</param>
+        internal static void ThrowIfNull(object variable, string name)
+        {
+            if (variable == null)
+            {
+                Error.ArgumentNull(name);
+            }
+        }
         /// <summary>Converts an enumerable to an array using the same logic as does List{T}.</summary>
         /// <param name="source">The enumerable to convert.</param>
         /// <returns>The resulting array.</returns>

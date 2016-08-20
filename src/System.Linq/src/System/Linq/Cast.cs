@@ -11,10 +11,7 @@ namespace System.Linq
     {
         public static IEnumerable<TResult> OfType<TResult>(this IEnumerable source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             return OfTypeIterator<TResult>(source);
         }
@@ -38,10 +35,7 @@ namespace System.Linq
                 return typedSource;
             }
 
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             return CastIterator<TResult>(source);
         }

@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static bool Any<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -23,15 +20,8 @@ namespace System.Linq
 
         public static bool Any<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             foreach (TSource element in source)
             {
@@ -46,15 +36,8 @@ namespace System.Linq
 
         public static bool All<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             foreach (TSource element in source)
             {

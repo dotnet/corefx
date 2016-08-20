@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static int Min(this IEnumerable<int> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             int value;
             using (IEnumerator<int> e = source.GetEnumerator())
@@ -39,10 +36,7 @@ namespace System.Linq
 
         public static int? Min(this IEnumerable<int?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             int? value = null;
             using (IEnumerator<int?> e = source.GetEnumerator())
@@ -83,10 +77,7 @@ namespace System.Linq
 
         public static long Min(this IEnumerable<long> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             long value;
             using (IEnumerator<long> e = source.GetEnumerator())
@@ -112,10 +103,7 @@ namespace System.Linq
 
         public static long? Min(this IEnumerable<long?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             long? value = null;
             using (IEnumerator<long?> e = source.GetEnumerator())
@@ -152,10 +140,7 @@ namespace System.Linq
 
         public static float Min(this IEnumerable<float> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             float value;
             using (IEnumerator<float> e = source.GetEnumerator())
@@ -194,10 +179,7 @@ namespace System.Linq
 
         public static float? Min(this IEnumerable<float?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             float? value = null;
             using (IEnumerator<float?> e = source.GetEnumerator())
@@ -238,10 +220,7 @@ namespace System.Linq
 
         public static double Min(this IEnumerable<double> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             double value;
             using (IEnumerator<double> e = source.GetEnumerator())
@@ -271,10 +250,7 @@ namespace System.Linq
 
         public static double? Min(this IEnumerable<double?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             double? value = null;
             using (IEnumerator<double?> e = source.GetEnumerator())
@@ -315,10 +291,7 @@ namespace System.Linq
 
         public static decimal Min(this IEnumerable<decimal> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             decimal value;
             using (IEnumerator<decimal> e = source.GetEnumerator())
@@ -344,10 +317,7 @@ namespace System.Linq
 
         public static decimal? Min(this IEnumerable<decimal?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             decimal? value = null;
             using (IEnumerator<decimal?> e = source.GetEnumerator())
@@ -381,10 +351,7 @@ namespace System.Linq
 
         public static TSource Min<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             Comparer<TSource> comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
@@ -439,15 +406,8 @@ namespace System.Linq
 
         public static int Min<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             int value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -473,15 +433,8 @@ namespace System.Linq
 
         public static int? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, int?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             int? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -522,15 +475,8 @@ namespace System.Linq
 
         public static long Min<TSource>(this IEnumerable<TSource> source, Func<TSource, long> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             long value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -556,15 +502,8 @@ namespace System.Linq
 
         public static long? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, long?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             long? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -601,15 +540,8 @@ namespace System.Linq
 
         public static float Min<TSource>(this IEnumerable<TSource> source, Func<TSource, float> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             float value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -648,15 +580,8 @@ namespace System.Linq
 
         public static float? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, float?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             float? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -697,15 +622,8 @@ namespace System.Linq
 
         public static double Min<TSource>(this IEnumerable<TSource> source, Func<TSource, double> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             double value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -735,15 +653,8 @@ namespace System.Linq
 
         public static double? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, double?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             double? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -784,15 +695,8 @@ namespace System.Linq
 
         public static decimal Min<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             decimal value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -818,15 +722,8 @@ namespace System.Linq
 
         public static decimal? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             decimal? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -860,15 +757,8 @@ namespace System.Linq
 
         public static TResult Min<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             Comparer<TResult> comparer = Comparer<TResult>.Default;
             TResult value = default(TResult);

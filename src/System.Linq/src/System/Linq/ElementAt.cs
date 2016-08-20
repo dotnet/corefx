@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static TSource ElementAt<TSource>(this IEnumerable<TSource> source, int index)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             IPartition<TSource> partition = source as IPartition<TSource>;
             if (partition != null)
@@ -55,10 +52,7 @@ namespace System.Linq
 
         public static TSource ElementAtOrDefault<TSource>(this IEnumerable<TSource> source, int index)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             IPartition<TSource> partition = source as IPartition<TSource>;
             if (partition != null)

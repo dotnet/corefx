@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Take<TSource>(this IEnumerable<TSource> source, int count)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             if (count <= 0)
             {
@@ -49,15 +46,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             return TakeWhileIterator(source, predicate);
         }
@@ -77,15 +67,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             return TakeWhileIterator(source, predicate);
         }

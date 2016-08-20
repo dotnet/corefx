@@ -16,15 +16,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> Union<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {
-            if (first == null)
-            {
-                throw Error.ArgumentNull(nameof(first));
-            }
-
-            if (second == null)
-            {
-                throw Error.ArgumentNull(nameof(second));
-            }
+            EnumerableHelpers.ThrowIfNull(first, nameof(first));
+            EnumerableHelpers.ThrowIfNull(second, nameof(second));
 
             UnionIterator<TSource> union = first as UnionIterator<TSource>;
             return union != null && EquivalentEqualityComparers(comparer, union._comparer) ? union.Union(second) : new UnionIterator2<TSource>(first, second, comparer);

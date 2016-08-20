@@ -11,10 +11,7 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Append<TSource>(this IEnumerable<TSource> source, TSource element)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             AppendPrependIterator<TSource> appendable = source as AppendPrependIterator<TSource>;
             if (appendable != null)
@@ -27,10 +24,7 @@ namespace System.Linq
 
         public static IEnumerable<TSource> Prepend<TSource>(this IEnumerable<TSource> source, TSource element)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             AppendPrependIterator<TSource> appendable = source as AppendPrependIterator<TSource>;
             if (appendable != null)

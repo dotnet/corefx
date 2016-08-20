@@ -11,15 +11,8 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             Iterator<TSource> iterator = source as Iterator<TSource>;
             if (iterator != null)
@@ -44,15 +37,8 @@ namespace System.Linq
 
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             return WhereIterator(source, predicate);
         }

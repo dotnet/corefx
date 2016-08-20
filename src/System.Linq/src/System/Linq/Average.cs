@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static double Average(this IEnumerable<int> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<int> e = source.GetEnumerator())
             {
@@ -39,10 +36,7 @@ namespace System.Linq
 
         public static double? Average(this IEnumerable<int?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<int?> e = source.GetEnumerator())
             {
@@ -76,10 +70,7 @@ namespace System.Linq
 
         public static double Average(this IEnumerable<long> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<long> e = source.GetEnumerator())
             {
@@ -105,10 +96,7 @@ namespace System.Linq
 
         public static double? Average(this IEnumerable<long?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<long?> e = source.GetEnumerator())
             {
@@ -142,10 +130,7 @@ namespace System.Linq
 
         public static float Average(this IEnumerable<float> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<float> e = source.GetEnumerator())
             {
@@ -168,10 +153,7 @@ namespace System.Linq
 
         public static float? Average(this IEnumerable<float?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<float?> e = source.GetEnumerator())
             {
@@ -205,10 +187,7 @@ namespace System.Linq
 
         public static double Average(this IEnumerable<double> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<double> e = source.GetEnumerator())
             {
@@ -234,10 +213,7 @@ namespace System.Linq
 
         public static double? Average(this IEnumerable<double?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<double?> e = source.GetEnumerator())
             {
@@ -271,10 +247,7 @@ namespace System.Linq
 
         public static decimal Average(this IEnumerable<decimal> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<decimal> e = source.GetEnumerator())
             {
@@ -297,10 +270,7 @@ namespace System.Linq
 
         public static decimal? Average(this IEnumerable<decimal?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
@@ -331,15 +301,8 @@ namespace System.Linq
 
         public static double Average<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -365,15 +328,8 @@ namespace System.Linq
 
         public static double? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, int?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -407,15 +363,8 @@ namespace System.Linq
 
         public static double Average<TSource>(this IEnumerable<TSource> source, Func<TSource, long> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -441,15 +390,8 @@ namespace System.Linq
 
         public static double? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, long?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -483,15 +425,8 @@ namespace System.Linq
 
         public static float Average<TSource>(this IEnumerable<TSource> source, Func<TSource, float> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -514,15 +449,8 @@ namespace System.Linq
 
         public static float? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, float?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -556,15 +484,8 @@ namespace System.Linq
 
         public static double Average<TSource>(this IEnumerable<TSource> source, Func<TSource, double> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -590,15 +511,8 @@ namespace System.Linq
 
         public static double? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, double?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -632,15 +546,8 @@ namespace System.Linq
 
         public static decimal Average<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -663,15 +570,8 @@ namespace System.Linq
 
         public static decimal? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {

@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static TSource First<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             IPartition<TSource> partition = source as IPartition<TSource>;
             if (partition != null)
@@ -52,15 +49,8 @@ namespace System.Linq
 
         public static TSource First<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
             if (ordered != null)
@@ -81,10 +71,7 @@ namespace System.Linq
 
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             IPartition<TSource> partition = source as IPartition<TSource>;
             if (partition != null)
@@ -117,15 +104,8 @@ namespace System.Linq
 
         public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (predicate == null)
-            {
-                throw Error.ArgumentNull(nameof(predicate));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
             OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
             if (ordered != null)

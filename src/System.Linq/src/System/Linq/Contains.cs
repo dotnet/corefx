@@ -26,10 +26,7 @@ namespace System.Linq
                 comparer = EqualityComparer<TSource>.Default;
             }
 
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             foreach (TSource element in source)
             {

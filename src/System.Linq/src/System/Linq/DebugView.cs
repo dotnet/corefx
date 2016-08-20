@@ -24,10 +24,7 @@ namespace System.Linq
     {
         public SystemCore_EnumerableDebugView(IEnumerable<T> enumerable)
         {
-            if (enumerable == null)
-            {
-                throw new ArgumentNullException(nameof(enumerable));
-            }
+            EnumerableHelpers.ThrowIfNull(enumerable, nameof(enumerable));
 
             _enumerable = enumerable;
         }
@@ -66,10 +63,7 @@ namespace System.Linq
     {
         public SystemCore_EnumerableDebugView(IEnumerable enumerable)
         {
-            if (enumerable == null)
-            {
-                throw new ArgumentNullException(nameof(enumerable));
-            }
+            EnumerableHelpers.ThrowIfNull(enumerable, nameof(enumerable));
 
             _enumerable = enumerable;
         }

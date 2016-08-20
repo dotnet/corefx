@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static int Sum(this IEnumerable<int> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             int sum = 0;
             checked
@@ -29,10 +26,7 @@ namespace System.Linq
 
         public static int? Sum(this IEnumerable<int?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             int sum = 0;
             checked
@@ -51,10 +45,7 @@ namespace System.Linq
 
         public static long Sum(this IEnumerable<long> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             long sum = 0;
             checked
@@ -70,10 +61,7 @@ namespace System.Linq
 
         public static long? Sum(this IEnumerable<long?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             long sum = 0;
             checked
@@ -92,10 +80,7 @@ namespace System.Linq
 
         public static float Sum(this IEnumerable<float> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             double sum = 0;
             foreach (float v in source)
@@ -108,10 +93,7 @@ namespace System.Linq
 
         public static float? Sum(this IEnumerable<float?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             double sum = 0;
             foreach (float? v in source)
@@ -127,10 +109,7 @@ namespace System.Linq
 
         public static double Sum(this IEnumerable<double> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             double sum = 0;
             foreach (double v in source)
@@ -143,10 +122,7 @@ namespace System.Linq
 
         public static double? Sum(this IEnumerable<double?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             double sum = 0;
             foreach (double? v in source)
@@ -162,10 +138,7 @@ namespace System.Linq
 
         public static decimal Sum(this IEnumerable<decimal> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             decimal sum = 0;
             foreach (decimal v in source)
@@ -178,10 +151,7 @@ namespace System.Linq
 
         public static decimal? Sum(this IEnumerable<decimal?> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             decimal sum = 0;
             foreach (decimal? v in source)
@@ -197,15 +167,8 @@ namespace System.Linq
 
         public static int Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             int sum = 0;
             checked
@@ -221,15 +184,8 @@ namespace System.Linq
 
         public static int? Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, int?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             int sum = 0;
             checked
@@ -249,15 +205,8 @@ namespace System.Linq
 
         public static long Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, long> selector)
         {
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
-
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             long sum = 0;
             checked
@@ -273,15 +222,8 @@ namespace System.Linq
 
         public static long? Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, long?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             long sum = 0;
             checked
@@ -301,15 +243,8 @@ namespace System.Linq
 
         public static float Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, float> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             double sum = 0;
             foreach (TSource item in source)
@@ -322,15 +257,8 @@ namespace System.Linq
 
         public static float? Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, float?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             double sum = 0;
             foreach (TSource item in source)
@@ -347,15 +275,8 @@ namespace System.Linq
 
         public static double Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, double> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             double sum = 0;
             foreach (TSource item in source)
@@ -368,15 +289,8 @@ namespace System.Linq
 
         public static double? Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, double?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             double sum = 0;
             foreach (TSource item in source)
@@ -393,15 +307,8 @@ namespace System.Linq
 
         public static decimal Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             decimal sum = 0;
             foreach (TSource item in source)
@@ -414,15 +321,8 @@ namespace System.Linq
 
         public static decimal? Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             decimal sum = 0;
             foreach (TSource item in source)
