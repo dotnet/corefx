@@ -28,15 +28,7 @@ namespace System.Linq
 
             EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
-            foreach (TSource element in source)
-            {
-                if (comparer.Equals(element, value))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return source.Any(element => comparer.Equals(element, value));
         }
     }
 }

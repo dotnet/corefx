@@ -39,15 +39,7 @@ namespace System.Linq
             EnumerableHelpers.ThrowIfNull(source, nameof(source));
             EnumerableHelpers.ThrowIfNull(predicate, nameof(predicate));
 
-            foreach (TSource element in source)
-            {
-                if (!predicate(element))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return !source.Any(element => !predicate(element));
         }
     }
 }

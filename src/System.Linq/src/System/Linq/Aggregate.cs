@@ -32,23 +32,7 @@ namespace System.Linq
 
         public static TAccumulate Aggregate<TSource, TAccumulate>(this IEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (func == null)
-            {
-                throw Error.ArgumentNull(nameof(func));
-            }
-
-            TAccumulate result = seed;
-            foreach (TSource element in source)
-            {
-                result = func(result, element);
-            }
-
-            return result;
+            return source.Aggregate(seed, func, result => result);
         }
 
         public static TResult Aggregate<TSource, TAccumulate, TResult>(this IEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func, Func<TAccumulate, TResult> resultSelector)
