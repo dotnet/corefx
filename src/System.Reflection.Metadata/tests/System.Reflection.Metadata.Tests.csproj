@@ -91,6 +91,7 @@
     <Compile Include="TestUtilities\LoaderUtilities.cs" />
     <Compile Include="TestUtilities\PinnedBlob.cs" />
     <Compile Include="TestUtilities\SigningUtilities.cs" />
+    <Compile Include="TestUtilities\TestMetadataStringDecoder.cs" />
     <Compile Include="Utilities\AbstractMemoryBlockTests.cs" />
     <Compile Include="PortableExecutable\BadImageFormat.cs" />
     <Compile Include="PortableExecutable\DebugDirectoryTests.cs" />
