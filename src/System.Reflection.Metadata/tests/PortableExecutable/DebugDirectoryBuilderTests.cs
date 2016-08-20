@@ -371,24 +371,17 @@ namespace System.Reflection.PortableExecutable.Tests
             {
                 Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
             }
-        }
 
-        [Fact]
-        public void ValidateEmbeddedPortablePdbVersion()
-        {
-            // major version (Portable PDB format):
-            PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0));
-            PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0101, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0));
-            PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0xffff, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0));
+            var bytes9 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x43, // signature
+                0x08, 0x00, 0x00, 0x00
+            });
 
-            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0000, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
-            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x00ff, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
-
-            // minor version (Embedded blob format):
-            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0101, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
-            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0000, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
-            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x00ff, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
-            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0200, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
+            using (var block = new ByteArrayMemoryProvider(bytes9).GetMemoryBlock(0, 1))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
         }
     }
 }

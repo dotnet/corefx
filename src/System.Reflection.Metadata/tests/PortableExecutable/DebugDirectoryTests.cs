@@ -125,8 +125,63 @@ namespace System.Reflection.PortableExecutable.Tests
             Assert.Equal(0u, detEntry.Stamp);
 
             Assert.Equal(2, entries.Length);
+        }
 
-            Assert.Throws<ArgumentException>("entry", () => reader.ReadCodeViewDebugDirectoryData(detEntry));
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void EmbeddedPortablePdb_Loaded()
+        {
+            LoaderUtilities.LoadPEAndValidate(PortablePdbs.DocumentsEmbeddedDll, ValidateEmbeddedPortablePdb);
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void EmbeddedPortablePdb_Loaded_FromStream()
+        {
+            LoaderUtilities.LoadPEAndValidate(PortablePdbs.DocumentsEmbeddedDll, ValidateEmbeddedPortablePdb, useStream: true);
+        }
+
+        private void ValidateEmbeddedPortablePdb(PEReader reader)
+        {
+            var entries = reader.ReadDebugDirectory();
+            Assert.Equal(DebugDirectoryEntryType.CodeView, entries[0].Type);
+            Assert.Equal(DebugDirectoryEntryType.Reproducible, entries[1].Type);
+            Assert.Equal(DebugDirectoryEntryType.EmbeddedPortablePdb, entries[2].Type);
+
+            var provider = reader.ReadEmbeddedPortablePdbDebugDirectoryData(entries[2]);
+            var pdbReader = provider.GetMetadataReader();
+            var document = pdbReader.GetDocument(pdbReader.Documents.First());
+            Assert.Equal(@"C:\Documents.cs", pdbReader.GetString(document.Name));
+        }
+
+        [Fact]
+        public void DebugDirectoryData_Errors()
+        {
+            var reader = new PEReader(new MemoryStream(Misc.Members));
+
+            Assert.Throws<ArgumentException>("entry", () => reader.ReadCodeViewDebugDirectoryData(new DebugDirectoryEntry(0, 0, 0, DebugDirectoryEntryType.Coff, 0, 0, 0)));
+            Assert.Throws<BadImageFormatException>(() => reader.ReadCodeViewDebugDirectoryData(new DebugDirectoryEntry(0, 0, 0, DebugDirectoryEntryType.CodeView, 0, 0, 0)));
+
+            Assert.Throws<ArgumentException>("entry", () => reader.ReadEmbeddedPortablePdbDebugDirectoryData(new DebugDirectoryEntry(0, 0, 0, DebugDirectoryEntryType.Coff, 0, 0, 0)));
+            Assert.Throws<BadImageFormatException>(() => reader.ReadEmbeddedPortablePdbDebugDirectoryData(new DebugDirectoryEntry(0, 0, 0, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
+        }
+
+        [Fact]
+        public void ValidateEmbeddedPortablePdbVersion()
+        {
+            // major version (Portable PDB format):
+            PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0));
+            PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0101, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0));
+            PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0xffff, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0));
+
+            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0000, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
+            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x00ff, 0x0100, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
+
+            // minor version (Embedded blob format):
+            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0101, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
+            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0000, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
+            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x00ff, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
+            Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0200, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
         }
     }
 }

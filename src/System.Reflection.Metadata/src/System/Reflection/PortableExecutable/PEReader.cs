@@ -518,7 +518,7 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         /// <exception cref="BadImageFormatException">Bad format of the entry.</exception>
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
-        public unsafe ImmutableArray<DebugDirectoryEntry> ReadDebugDirectory()
+        public ImmutableArray<DebugDirectoryEntry> ReadDebugDirectory()
         {
             var debugDirectory = PEHeaders.PEHeader.DebugTableDirectory;
             if (debugDirectory.Size == 0)
@@ -539,8 +539,7 @@ namespace System.Reflection.PortableExecutable
 
             using (AbstractMemoryBlock block = _peImage.GetMemoryBlock(position, debugDirectory.Size))
             {
-                var reader = new BlobReader(block.Pointer, block.Size);
-                return ReadDebugDirectoryEntries(reader);
+                return ReadDebugDirectoryEntries(block.GetReader());
             }
         }
 
@@ -585,16 +584,16 @@ namespace System.Reflection.PortableExecutable
         /// <exception cref="ArgumentException"><paramref name="entry"/> is not a CodeView entry.</exception>
         /// <exception cref="BadImageFormatException">Bad format of the data.</exception>
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
-        public unsafe CodeViewDebugDirectoryData ReadCodeViewDebugDirectoryData(DebugDirectoryEntry entry)
+        public CodeViewDebugDirectoryData ReadCodeViewDebugDirectoryData(DebugDirectoryEntry entry)
         {
             if (entry.Type != DebugDirectoryEntryType.CodeView)
             {
-                throw new ArgumentException(SR.NotCodeViewEntry, nameof(entry));
+                Throw.InvalidArgument(SR.Format(SR.UnexpectedDebugDirectoryType, nameof(DebugDirectoryEntryType.CodeView)), nameof(entry));
             }
 
             using (var block = GetDebugDirectoryEntryDataBlock(entry))
             {
-                var reader = new BlobReader(block.Pointer, block.Size);
+                var reader = block.GetReader();
 
                 if (reader.ReadByte() != (byte)'R' ||
                     reader.ReadByte() != (byte)'S' ||
@@ -629,11 +628,11 @@ namespace System.Reflection.PortableExecutable
         /// </returns>
         /// <exception cref="ArgumentException"><paramref name="entry"/> is not a <see cref="DebugDirectoryEntryType.EmbeddedPortablePdb"/> entry.</exception>
         /// <exception cref="BadImageFormatException">Bad format of the data.</exception>
-        public unsafe MetadataReaderProvider ReadEmbeddedPortablePdbDebugDirectoryData(DebugDirectoryEntry entry)
+        public MetadataReaderProvider ReadEmbeddedPortablePdbDebugDirectoryData(DebugDirectoryEntry entry)
         {
             if (entry.Type != DebugDirectoryEntryType.EmbeddedPortablePdb)
             {
-                throw new ArgumentException(SR.NotCodeViewEntry, nameof(entry));
+                Throw.InvalidArgument(SR.Format(SR.UnexpectedDebugDirectoryType, nameof(DebugDirectoryEntryType.EmbeddedPortablePdb)), nameof(entry));
             }
 
             ValidateEmbeddedPortablePdbVersion(entry);
@@ -671,10 +670,7 @@ namespace System.Reflection.PortableExecutable
         {
             byte[] decompressed;
             
-            const int headerSize = 2 * sizeof(int);
-
-            var headerReader = new BlobReader(block.Pointer, headerSize);
-
+            var headerReader = block.GetReader();
             if (headerReader.ReadUInt32() != PortablePdbVersions.DebugDirectoryEmbeddedSignature)
             {
                 throw new BadImageFormatException(SR.UnexpectedEmbeddedPortablePdbDataSignature);
@@ -691,7 +687,7 @@ namespace System.Reflection.PortableExecutable
                 throw new BadImageFormatException(SR.DataTooBig);
             }
 
-            var compressed = new ReadOnlyUnmanagedMemoryStream(block.Pointer + headerSize, block.Size - headerSize);
+            var compressed = new ReadOnlyUnmanagedMemoryStream(headerReader.CurrentPointer, headerReader.RemainingBytes);
             var deflate = new DeflateStream(compressed, CompressionMode.Decompress, leaveOpen: true);
 
             if (decompressedSize > 0)
