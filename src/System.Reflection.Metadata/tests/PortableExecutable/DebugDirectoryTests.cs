@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection.Internal;
 using System.Reflection.Metadata.Tests;
 using Xunit;
 
@@ -185,6 +187,179 @@ namespace System.Reflection.PortableExecutable.Tests
             Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0000, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
             Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x00ff, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
             Assert.Throws<BadImageFormatException>(() => PEReader.ValidateEmbeddedPortablePdbVersion(new DebugDirectoryEntry(0, 0x0100, 0x0200, DebugDirectoryEntryType.EmbeddedPortablePdb, 0, 0, 0)));
+        }
+
+        [Fact]
+        public void CodeView_PathPadding()
+        {
+            var bytes = ImmutableArray.Create(new byte[]
+            {
+                (byte)'R', (byte)'S', (byte)'D', (byte)'S', // signature
+                0x6E, 0xE6, 0x88, 0x3C, 0xB9, 0xE0, 0x08, 0x45, 0x92, 0x90, 0x11, 0xE0, 0xDB, 0x51, 0xA1, 0xC5, // GUID
+                0x01, 0x00, 0x00, 0x00, // age
+                (byte)'x', 0x00, 0x20, 0xff, // path
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes).GetMemoryBlock(0, bytes.Length))
+            {
+                Assert.Equal("x", PEReader.DecodeCodeViewDebugDirectoryData(block).Path);
+            }
+
+            using (var block = new ByteArrayMemoryProvider(bytes).GetMemoryBlock(0, bytes.Length - 1))
+            {
+                Assert.Equal("x", PEReader.DecodeCodeViewDebugDirectoryData(block).Path);
+            }
+
+            using (var block = new ByteArrayMemoryProvider(bytes).GetMemoryBlock(0, bytes.Length - 2))
+            {
+                Assert.Equal("x", PEReader.DecodeCodeViewDebugDirectoryData(block).Path);
+            }
+
+            using (var block = new ByteArrayMemoryProvider(bytes).GetMemoryBlock(0, bytes.Length - 3))
+            {
+                Assert.Equal("x", PEReader.DecodeCodeViewDebugDirectoryData(block).Path);
+            }
+
+            using (var block = new ByteArrayMemoryProvider(bytes).GetMemoryBlock(0, bytes.Length - 4))
+            {
+                Assert.Equal("", PEReader.DecodeCodeViewDebugDirectoryData(block).Path);
+            }
+        }
+
+        [Fact]
+        public void CodeView_Errors()
+        {
+            var bytes = ImmutableArray.Create(new byte[]
+            {
+                (byte)'R', (byte)'S', (byte)'D', (byte)'S', // signature
+                0x6E, 0xE6, 0x88, 0x3C, 0xB9, 0xE0, 0x08, 0x45, 0x92, 0x90, 0x11, 0xE0, 0xDB, 0x51, 0xA1, 0xC5, // GUID
+                0x01, 0x00, 0x00, 0x00, // age
+                (byte)'x', 0x00, // path
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes).GetMemoryBlock(0, 1))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeCodeViewDebugDirectoryData(block));
+            }
+
+            using (var block = new ByteArrayMemoryProvider(bytes).GetMemoryBlock(0, 4))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeCodeViewDebugDirectoryData(block));
+            }
+
+            using (var block = new ByteArrayMemoryProvider(bytes).GetMemoryBlock(0, bytes.Length - 3))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeCodeViewDebugDirectoryData(block));
+            }
+        }
+
+        [Fact]
+        public void EmbeddedPortablePdb_Errors()
+        {
+            var bytes1 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x42, // signature
+                0xFF, 0xFF, 0xFF, 0xFF, // uncompressed size
+                0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes1).GetMemoryBlock(0, bytes1.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes2 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x42, // signature
+                0x09, 0x00, 0x00, 0x00, // uncompressed size
+                0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes2).GetMemoryBlock(0, bytes2.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes3 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x42, // signature
+                0x00, 0x00, 0x00, 0x00, // uncompressed size
+                0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes3).GetMemoryBlock(0, bytes3.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes4 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x42, // signature
+                0xff, 0xff, 0xff, 0x7f, // uncompressed size
+                0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes4).GetMemoryBlock(0, bytes4.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes5 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x42, // signature
+                0x08, 0x00, 0x00, 0x00, // uncompressed size
+                0xEF, 0xFF, 0x4F, 0xFF, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes4).GetMemoryBlock(0, bytes4.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes6 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x43, // signature
+                0x08, 0x00, 0x00, 0x00, // uncompressed size
+                0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes6).GetMemoryBlock(0, bytes6.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes7 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x43, // signature
+                0x08, 0x00, 0x00,
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes7).GetMemoryBlock(0, bytes7.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes8 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x43, // signature
+                0x08, 0x00, 0x00,
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes8).GetMemoryBlock(0, bytes8.Length))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
+
+            var bytes9 = ImmutableArray.Create(new byte[]
+            {
+                0x4D, 0x50, 0x44, 0x43, // signature
+                0x08, 0x00, 0x00, 0x00
+            });
+
+            using (var block = new ByteArrayMemoryProvider(bytes9).GetMemoryBlock(0, 1))
+            {
+                Assert.Throws<BadImageFormatException>(() => PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block));
+            }
         }
     }
 }

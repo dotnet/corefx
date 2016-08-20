@@ -354,9 +354,6 @@
   <data name="UnexpectedEmbeddedPortablePdbDataSignature" xml:space="preserve">
     <value>Unexpected Embedded Portable PDB data signature value.</value>
   </data>
-  <data name="InvalidPathPadding" xml:space="preserve">
-    <value>The path must be padded with NUL characters.</value>
-  </data>
   <data name="UnexpectedSignatureHeader" xml:space="preserve">
     <value>Expected signature header for '{0}', but found '{1}' (0x{2:x2}).</value>
   </data>

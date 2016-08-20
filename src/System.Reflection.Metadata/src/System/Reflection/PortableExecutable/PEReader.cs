@@ -593,31 +593,28 @@ namespace System.Reflection.PortableExecutable
 
             using (var block = GetDebugDirectoryEntryDataBlock(entry))
             {
-                var reader = block.GetReader();
-
-                if (reader.ReadByte() != (byte)'R' ||
-                    reader.ReadByte() != (byte)'S' ||
-                    reader.ReadByte() != (byte)'D' ||
-                    reader.ReadByte() != (byte)'S')
-                {
-                    throw new BadImageFormatException(SR.UnexpectedCodeViewDataSignature);
-                }
-
-                Guid guid = reader.ReadGuid();
-                int age = reader.ReadInt32();
-                string path = reader.ReadUtf8NullTerminated();
-
-                // path may be padded with NULs
-                while (reader.RemainingBytes > 0)
-                {
-                    if (reader.ReadByte() != 0)
-                    {
-                        throw new BadImageFormatException(SR.InvalidPathPadding);
-                    }
-                }
-
-                return new CodeViewDebugDirectoryData(guid, age, path);
+                return DecodeCodeViewDebugDirectoryData(block);                
             }
+        }
+
+        // internal for testing
+        internal static CodeViewDebugDirectoryData DecodeCodeViewDebugDirectoryData(AbstractMemoryBlock block)
+        {
+            var reader = block.GetReader();
+
+            if (reader.ReadByte() != (byte)'R' ||
+                reader.ReadByte() != (byte)'S' ||
+                reader.ReadByte() != (byte)'D' ||
+                reader.ReadByte() != (byte)'S')
+            {
+                throw new BadImageFormatException(SR.UnexpectedCodeViewDataSignature);
+            }
+
+            Guid guid = reader.ReadGuid();
+            int age = reader.ReadInt32();
+            string path = reader.ReadUtf8NullTerminated();
+
+            return new CodeViewDebugDirectoryData(guid, age, path);
         }
 
         /// <summary>
