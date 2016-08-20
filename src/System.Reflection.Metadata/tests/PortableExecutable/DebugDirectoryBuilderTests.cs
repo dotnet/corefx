@@ -65,6 +65,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(0, actual[0].MajorVersion);
                 Assert.Equal(0, actual[0].MinorVersion);
                 Assert.Equal(DebugDirectoryEntryType.CodeView, actual[0].Type);
+                Assert.False(actual[0].IsPortableCodeView);
                 Assert.Equal(0x00000020, actual[0].DataSize);
                 Assert.Equal(0x0000106c, actual[0].DataRelativeVirtualAddress);
                 Assert.Equal(0x0000206c, actual[0].DataPointer);
@@ -123,6 +124,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(0xABCD, actual[0].MajorVersion);
                 Assert.Equal(0x504d, actual[0].MinorVersion);
                 Assert.Equal(DebugDirectoryEntryType.CodeView, actual[0].Type);
+                Assert.True(actual[0].IsPortableCodeView);
                 Assert.Equal(0x0000011c, actual[0].DataSize);
                 Assert.Equal(0x0000106c, actual[0].DataRelativeVirtualAddress);
                 Assert.Equal(0x0000206c, actual[0].DataPointer);
@@ -158,6 +160,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(0, actual[0].MajorVersion);
                 Assert.Equal(0, actual[0].MinorVersion);
                 Assert.Equal(DebugDirectoryEntryType.Reproducible, actual[0].Type);
+                Assert.False(actual[0].IsPortableCodeView);
                 Assert.Equal(0, actual[0].DataSize);
                 Assert.Equal(0, actual[0].DataRelativeVirtualAddress);
                 Assert.Equal(0, actual[0].DataPointer);
@@ -262,6 +265,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(0x0100, actual[0].MajorVersion);
                 Assert.Equal(0x0100, actual[0].MinorVersion);
                 Assert.Equal(DebugDirectoryEntryType.EmbeddedPortablePdb, actual[0].Type);
+                Assert.False(actual[0].IsPortableCodeView);
                 Assert.Equal(0x00000012, actual[0].DataSize);
                 Assert.Equal(0x0000001c, actual[0].DataRelativeVirtualAddress);
                 Assert.Equal(0x0000001c, actual[0].DataPointer);

@@ -58,6 +58,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var cvEntry = reader.ReadDebugDirectory().Single();
             Assert.Equal(DebugDirectoryEntryType.CodeView, cvEntry.Type);
+            Assert.False(cvEntry.IsPortableCodeView);
             Assert.Equal(0x050c, cvEntry.DataPointer);
             Assert.Equal(0x230c, cvEntry.DataRelativeVirtualAddress);
             Assert.Equal(0x011c, cvEntry.DataSize); // includes NUL padding
@@ -103,6 +104,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var cvEntry = entries[0];
             Assert.Equal(DebugDirectoryEntryType.CodeView, cvEntry.Type);
+            Assert.False(cvEntry.IsPortableCodeView);
             Assert.Equal(0x0538, cvEntry.DataPointer);
             Assert.Equal(0x2338, cvEntry.DataRelativeVirtualAddress);
             Assert.Equal(0x0032, cvEntry.DataSize); // no NUL padding
@@ -117,6 +119,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var detEntry = entries[1];
             Assert.Equal(DebugDirectoryEntryType.Reproducible, detEntry.Type);
+            Assert.False(detEntry.IsPortableCodeView);
             Assert.Equal(0, detEntry.DataPointer);
             Assert.Equal(0, detEntry.DataRelativeVirtualAddress);
             Assert.Equal(0, detEntry.DataSize);
