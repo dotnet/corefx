@@ -17,12 +17,11 @@ if not defined VisualStudioVersion (
 set Platform=
 
 :: Restore the Tools directory
-call %~dp0init-tools.cmd
+call %~dp0init-tools.cmd -quiet
 if NOT [%ERRORLEVEL%]==[0] exit /b 1
 
 set _toolRuntime=%~dp0Tools
 set _dotnet=%_toolRuntime%\dotnetcli\dotnet.exe
 
-echo Running: %_dotnet% %_toolRuntime%\run.exe %*
 call %_dotnet% %_toolRuntime%\run.exe %*
 exit /b %ERRORLEVEL%
