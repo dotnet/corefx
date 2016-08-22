@@ -56,7 +56,7 @@ def osShortName = ['Windows 10': 'win10',
         def isLocal = (localType == 'local')
 
         def newJobName = 'code_coverage_windows'
-        def batchCommand = 'call build.cmd -coverage -outerloop -- /p:WithoutCategories=IgnoreForCI'
+        def batchCommand = 'call build.cmd -release -coverage -outerloop -- /p:WithoutCategories=IgnoreForCI'
         if (isLocal) {
             newJobName = "${newJobName}_local"
             batchCommand = "${batchCommand} /p:TestWithLocalLibraries=true"
