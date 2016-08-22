@@ -270,7 +270,6 @@ namespace System.Runtime.Serialization
 
         public Type OriginalUnderlyingType
         {
-            [SecuritySafeCritical]
             get { return _helper.OriginalUnderlyingType; }
         }
 
@@ -526,7 +525,7 @@ namespace System.Runtime.Serialization
             private static object s_clrTypeStringsLock = new object();
 
             private Type _underlyingType;
-            Type _originalUnderlyingType;
+            private Type _originalUnderlyingType;
             private bool _isReference;
             private bool _isValueType;
             private XmlQualifiedName _stableName;
@@ -1080,11 +1079,11 @@ namespace System.Runtime.Serialization
             {
                 get
                 {
-                    if (this._originalUnderlyingType == null)
+                    if (_originalUnderlyingType == null)
                     {
-                        this._originalUnderlyingType = GetDataContractOriginalType(this._underlyingType);
+                        _originalUnderlyingType = GetDataContractOriginalType(this._underlyingType);
                     }
-                    return this._originalUnderlyingType;
+                    return _originalUnderlyingType;
                 }
             }
             internal virtual bool IsBuiltInDataContract
