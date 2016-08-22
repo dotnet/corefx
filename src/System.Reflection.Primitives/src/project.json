@@ -9,6 +9,15 @@
         "dotnet5.1"
       ]
     },
+    "netstandard1.7": {
+      "dependencies": {
+        "Microsoft.NETCore.Platforms": "1.0.1",
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.1.0-beta-24418-04"
+      },
+      "imports": [
+        "dotnet5.8"
+      ]
+    },
     "netcore50": {
       "dependencies": {
         "Microsoft.NETCore.Platforms": "1.0.1",
@@ -18,6 +27,11 @@
       }
     },
     "net46": {
+      "dependencies": {
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
+      }
+    },
+    "net463": {
       "dependencies": {
         "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
