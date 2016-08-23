@@ -1,7 +1,6 @@
 @if "%_echo%" neq "on" echo off
 setlocal
 
-if /I [%1] equ [-quiet] set VERBOSITY=quiet
 set INIT_TOOLS_LOG=%~dp0init-tools.log
 if [%PACKAGES_DIR%]==[] set PACKAGES_DIR=%~dp0packages\
 if [%TOOLRUNTIME_DIR%]==[] set TOOLRUNTIME_DIR=%~dp0Tools
@@ -23,7 +22,7 @@ if [%1]==[force] (
 
 :: If sempahore exists do nothing
 if exist "%BUILD_TOOLS_SEMAPHORE%" (
-  if [%VERBOSITY%]==[] echo Tools are already initialized.
+  echo Tools are already initialized. >> "%INIT_TOOLS_LOG%"
   goto :EOF
 )
 
@@ -35,7 +34,7 @@ echo Running %0 > "%INIT_TOOLS_LOG%"
 
 if exist "%DOTNET_CMD%" goto :afterdotnetrestore
 
-if [%VERBOSITY%]==[] echo Installing dotnet cli...
+echo Installing dotnet cli... >> "%INIT_TOOLS_LOG%"
 if NOT exist "%DOTNET_PATH%" mkdir "%DOTNET_PATH%"
 set /p DOTNET_VERSION=< "%~dp0DotnetCLIVersion.txt"
 set DOTNET_ZIP_NAME=dotnet-dev-win-x86.%DOTNET_VERSION%.zip
@@ -51,7 +50,7 @@ if NOT exist "%DOTNET_LOCAL_PATH%" (
 :afterdotnetrestore
 
 if exist "%BUILD_TOOLS_PATH%" goto :afterbuildtoolsrestore
-if [%VERBOSITY%]==[] echo Restoring BuildTools version %BUILDTOOLS_VERSION%...
+echo Restoring BuildTools version %BUILDTOOLS_VERSION%... >> "%INIT_TOOLS_LOG%"
 echo Running: "%DOTNET_CMD%" restore "%PROJECT_JSON_FILE%" --no-cache --packages %PACKAGES_DIR% --source "%BUILDTOOLS_SOURCE%" >> "%INIT_TOOLS_LOG%"
 call "%DOTNET_CMD%" restore "%PROJECT_JSON_FILE%" --no-cache --packages %PACKAGES_DIR% --source "%BUILDTOOLS_SOURCE%" >> "%INIT_TOOLS_LOG%"
 if NOT exist "%BUILD_TOOLS_PATH%init-tools.cmd" (
@@ -61,7 +60,7 @@ if NOT exist "%BUILD_TOOLS_PATH%init-tools.cmd" (
 
 :afterbuildtoolsrestore
 
-if [%VERBOSITY%]==[] echo Initializing BuildTools ...
+echo Initializing BuildTools ... >> "%INIT_TOOLS_LOG%"
 echo Running: "%BUILD_TOOLS_PATH%init-tools.cmd" "%~dp0" "%DOTNET_CMD%" "%TOOLRUNTIME_DIR%" >> "%INIT_TOOLS_LOG%"
 call "%BUILD_TOOLS_PATH%init-tools.cmd" "%~dp0" "%DOTNET_CMD%" "%TOOLRUNTIME_DIR%" >> "%INIT_TOOLS_LOG%"
 set INIT_TOOLS_ERRORLEVEL=%ERRORLEVEL%
@@ -71,5 +70,5 @@ if not [%INIT_TOOLS_ERRORLEVEL%]==[0] (
 )
 
 :: Create sempahore file
-if [%VERBOSITY%]==[] echo Done initializing tools.
+echo Done initializing tools. >> "%INIT_TOOLS_LOG%"
 echo Init-Tools.cmd completed for BuildTools Version: %BUILDTOOLS_VERSION% > "%BUILD_TOOLS_SEMAPHORE%"
