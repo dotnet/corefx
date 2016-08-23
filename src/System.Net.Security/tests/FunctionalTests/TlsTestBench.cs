@@ -22,7 +22,7 @@ namespace System.Net.Security.Tests
             _clientCertificate = Configuration.Certificates.GetClientCertificate();
         }
         
-        [Fact]
+        //[Fact]
         public async Task TlsTest_Server()
         {
             IInspectionTest sslAlertFilter = new SslAlertsTest();
