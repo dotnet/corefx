@@ -47,6 +47,8 @@ namespace System
             }
         }
 
+        public static bool IsNotWindowsSubsystemForLinux => !IsWindowsSubsystemForLinux;
+
         public static bool IsDebian8 { get; } = IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1510 { get; } = IsDistroAndVersion("ubuntu", "15.10");
         public static bool IsUbuntu1604 { get; } = IsDistroAndVersion("ubuntu", "16.04");
