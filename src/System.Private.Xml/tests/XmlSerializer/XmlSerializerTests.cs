@@ -1827,7 +1827,147 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.True(SimpleType.AreEqual(simpleType2D[1][1], actual.TwoDArrayOfSimpleType[1][1]));
     }
 
-    static SimpleType[][] GetObjectwith2DArrayOfSimpleType()
+    [Fact]
+    [ActiveIssue(10579)]
+    public static void Xml_TypeWithSoapAttributes()
+    {
+        // Creates an instance of the class that will be serialized.
+        var value = new TypeWithSoapAttributes();
+
+        value.GroupName = ".NET";
+        byte[] hexByte = new byte[2] { Convert.ToByte(100), Convert.ToByte(50) };
+        value.GroupNumber = hexByte;
+        value.Today = new DateTime(2002, 1, 2, 3, 4, 5, 6, DateTimeKind.Utc);
+        value.PostitiveInt = "10000";
+        value.IgnoreThis = true;
+        value.Grouptype = GroupType.small;
+        Car thisCar = (Car)value.myCar("123456");
+
+        var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\"?>\r\n<TypeWithSoapAttributes xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <GroupName>.NET</GroupName>\r\n  <GroupNumber>ZDI=</GroupNumber>\r\n  <Today>2002-01-02T03:04:05.006Z</Today>\r\n  <PostitiveInt>10000</PostitiveInt>\r\n  <IgnoreThis>true</IgnoreThis>\r\n  <Grouptype>small</Grouptype>\r\n</TypeWithSoapAttributes>");
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.GroupName, actual.GroupName);
+        Assert.True(Enumerable.SequenceEqual(value.GroupNumber, actual.GroupNumber));
+        Assert.Equal(value.PostitiveInt, actual.PostitiveInt);
+        Assert.True(actual.IgnoreThis);
+        Assert.Equal(value.Grouptype, actual.Grouptype);
+    }
+
+    [Fact]
+    [ActiveIssue(10579)]
+    public static void Xml_TypeWithSoapAttributes_SoapReflectionImporter()
+    {
+        // Creates an instance of the XmlSerializer class.
+        XmlTypeMapping myMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithSoapAttributes));
+        var mySerializer = new XmlSerializer(myMapping);
+
+        // Creates an instance of the class that will be serialized.
+        var value = new TypeWithSoapAttributes();
+
+        value.GroupName = ".NET";
+        byte[] hexByte = new byte[2] { Convert.ToByte(100), Convert.ToByte(50) };
+        value.GroupNumber = hexByte;
+        value.Today = new DateTime(2002, 1, 2, 3, 4, 5, 6, DateTimeKind.Utc);
+        value.PostitiveInt = "10000";
+        value.IgnoreThis = true;
+        value.Grouptype = GroupType.small;
+        var thisCar = (Car)value.myCar("123456");
+
+        var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\"?>\r\n<TypeWithSoapAttributes xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\" d1p1:GroupName=\".NET\" GroupNumber=\"ZDI=\" CreationDate=\"2002-01-02\" xmlns:d1p1=\"http://www.cpandl.com\">\r\n  <PosInt xsi:type=\"xsd:nonNegativeInteger\">10000</PosInt>\r\n  <Grouptype xsi:type=\"GroupType\">small</Grouptype>\r\n</TypeWithSoapAttributes>", () => mySerializer);
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.GroupName, actual.GroupName);
+        Assert.True(Enumerable.SequenceEqual(value.GroupNumber, actual.GroupNumber));
+        Assert.Equal(value.PostitiveInt, actual.PostitiveInt);
+        Assert.True(!actual.IgnoreThis); // The field is marked with [SoapIgnore].
+        Assert.Equal(value.Grouptype, actual.Grouptype);
+    }
+
+    [Fact]
+    [ActiveIssue(10579)]
+    public static void Xml_TypeWithSoapAttributes_SoapReflectionImporter_WithOverrides()
+    {
+        // Creates an instance of the class that will be serialized.
+        TypeWithSoapAttributes value = new TypeWithSoapAttributes();
+
+        // Sets the object properties.
+        value.GroupName = ".NET";
+
+        byte[] hexByte = new byte[2] { Convert.ToByte(100), Convert.ToByte(50) };
+        value.GroupNumber = hexByte;
+
+        DateTime myDate = new DateTime(2002, 5, 2);
+        value.Today = myDate;
+
+
+        value.PostitiveInt = "10000";
+        value.IgnoreThis = true;
+        value.Grouptype = GroupType.small;
+        Car thisCar = (Car)value.myCar("1234566");
+
+        var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\"?>\r\n<Team xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" id=\"id1\" d1p1:GroupName=\".NET\" GroupNumber=\"ZDI=\" CreationDate=\"2002-05-02\" xmlns:d1p1=\"http://www.cpandl.com\">\r\n  <xxxx xsi:type=\"xsd:string\">10000</xxxx>\r\n  <IgnoreThis xsi:type=\"xsd:boolean\">true</IgnoreThis>\r\n  <Grouptype xsi:type=\"GroupType\">ZeroTo1000</Grouptype>\r\n</Team>", CreateOverrideSerializer);
+
+        Assert.NotNull(actual);
+        Assert.Equal(value.GroupName, actual.GroupName);
+        Assert.True(Enumerable.SequenceEqual(value.GroupNumber, actual.GroupNumber));
+        Assert.Equal(value.PostitiveInt, actual.PostitiveInt);
+        Assert.True(actual.IgnoreThis);
+        Assert.Equal(value.Grouptype, actual.Grouptype);
+    }
+
+    private static XmlSerializer CreateOverrideSerializer()
+    {
+        SoapAttributeOverrides mySoapAttributeOverrides = new SoapAttributeOverrides();
+        SoapAttributes soapAtts = new SoapAttributes();
+
+        SoapElementAttribute mySoapElement = new SoapElementAttribute();
+        mySoapElement.ElementName = "xxxx";
+        soapAtts.SoapElement = mySoapElement;
+        mySoapAttributeOverrides.Add(typeof(TypeWithSoapAttributes), "PostitiveInt",
+        soapAtts);
+
+        // Overrides the IgnoreThis property.
+        SoapIgnoreAttribute myIgnore = new SoapIgnoreAttribute();
+        soapAtts = new SoapAttributes();
+        soapAtts.SoapIgnore = false;
+        mySoapAttributeOverrides.Add(typeof(TypeWithSoapAttributes), "IgnoreThis", soapAtts);
+
+        // Overrides the GroupType enumeration.
+        soapAtts = new SoapAttributes();
+        SoapEnumAttribute xSoapEnum = new SoapEnumAttribute();
+        xSoapEnum.Name = "Over1000";
+        soapAtts.SoapEnum = xSoapEnum;
+
+        // Adds the SoapAttributes to the 
+        // mySoapAttributeOverridesrides.
+        mySoapAttributeOverrides.Add(typeof(GroupType), "large",
+        soapAtts);
+
+        // Creates a second enumeration and adds it.
+        soapAtts = new SoapAttributes();
+        xSoapEnum = new SoapEnumAttribute();
+        xSoapEnum.Name = "ZeroTo1000";
+        soapAtts.SoapEnum = xSoapEnum;
+        mySoapAttributeOverrides.Add(typeof(GroupType), "small",
+        soapAtts);
+
+        // Overrides the Group type.
+        soapAtts = new SoapAttributes();
+        SoapTypeAttribute soapType = new SoapTypeAttribute();
+        soapType.TypeName = "Team";
+        soapAtts.SoapType = soapType;
+        mySoapAttributeOverrides.Add(typeof(TypeWithSoapAttributes), soapAtts);
+
+        // Creates an XmlTypeMapping that is used to create an instance 
+        // of the XmlSerializer class. Then returns the XmlSerializer.
+        XmlTypeMapping myMapping = (new SoapReflectionImporter(
+        mySoapAttributeOverrides)).ImportTypeMapping(typeof(TypeWithSoapAttributes));
+
+        XmlSerializer ser = new XmlSerializer(myMapping);
+        return ser;
+    }
+
+    private static SimpleType[][] GetObjectwith2DArrayOfSimpleType()
     {
         SimpleType[][] simpleType2D = new SimpleType[2][];
         simpleType2D[0] = new SimpleType[2];
@@ -1838,6 +1978,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         simpleType2D[1][1] = new SimpleType() { P1 = "1 1 value", P2 = 4 };
         return simpleType2D;
     }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, Func<XmlSerializer> serializerFactory = null,
         bool skipStringCompare = false, XmlSerializerNamespaces xns = null)
     {

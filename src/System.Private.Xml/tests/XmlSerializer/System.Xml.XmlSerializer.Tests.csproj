@@ -15,15 +15,15 @@
         we need to hard code $(TestTFM) and $(TestNugetTargetMoniker)
         in the project file.
       -->
-      <NugetTargetMoniker>.NETStandard,Version=v1.7</NugetTargetMoniker>
-      <TestTFM>netcoreapp1.1</TestTFM>
-    </PropertyGroup>
+    <NugetTargetMoniker>.NETStandard,Version=v1.7</NugetTargetMoniker>
+    <TestTFM>netcoreapp1.1</TestTFM>
+  </PropertyGroup>
   <ItemGroup>
     <TestNugetTargetMoniker Include="$(NugetTargetMoniker)">
       <Folder>netcoreapp1.1</Folder>
     </TestNugetTargetMoniker>
   </ItemGroup>
-  <PropertyGroup Condition="'$(UseContractReferences)' == 'true'" >
+  <PropertyGroup Condition="'$(UseContractReferences)' == 'true'">
     <ProjectJson>Performance/project.json</ProjectJson>
     <ProjectLockJson>Performance/project.lock.json</ProjectLockJson>
   </PropertyGroup>
@@ -31,6 +31,7 @@
     <Compile Include="..\..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" />
     <Compile Include="..\..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" />
     <Compile Include="..\..\..\System.Runtime.Serialization.Xml\tests\Performance\PerformanceTestsCommon.cs" />
+    <Compile Include="XmlSerializationTypes.cs" />
     <Compile Include="XmlSerializerTests.Internal.cs" Condition="'$(UseContractReferences)' == ''" />
     <Compile Include="XmlSerializerTests.cs" />
     <Compile Include="Performance\XsPerformanceTest.cs" />
