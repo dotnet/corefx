@@ -13,10 +13,32 @@ namespace System.Reflection.PortableExecutable.Tests
     public class DebugDirectoryBuilderTests
     {
         [Fact]
-        public void Errors()
+        public void AddEmbeddedPortablePdbEntry_Args()
         {
-            var b = new DebugDirectoryBuilder();
-            Assert.Throws<ArgumentNullException>(() => b.AddCodeViewEntry(null, default(BlobContentId), 0));
+            var bb = new BlobBuilder();
+
+            var builder = new DebugDirectoryBuilder();
+            Assert.Throws<ArgumentNullException>(() => builder.AddEmbeddedPortablePdbEntry(null, 0x0100));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddEmbeddedPortablePdbEntry(bb, 0x0000));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddEmbeddedPortablePdbEntry(bb, 0x00ff));
+            builder.AddEmbeddedPortablePdbEntry(bb, 0x0100);
+            builder.AddEmbeddedPortablePdbEntry(bb, 0xffff);
+        }
+
+        [Fact]
+        public void AddCodeViewEntry_Args()
+        {
+            var builder = new DebugDirectoryBuilder();
+            Assert.Throws<ArgumentException>(() => builder.AddCodeViewEntry("", default(BlobContentId), 0x0100));
+            Assert.Throws<ArgumentException>(() => builder.AddCodeViewEntry("\0", default(BlobContentId), 0x0100));
+            Assert.Throws<ArgumentException>(() => builder.AddCodeViewEntry("\0xx", default(BlobContentId), 0x0100));
+            builder.AddCodeViewEntry("foo\0", default(BlobContentId), 0x0100);
+            Assert.Throws<ArgumentNullException>(() => builder.AddCodeViewEntry(null, default(BlobContentId), 0x0100));
+            builder.AddCodeViewEntry("foo", default(BlobContentId), 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddCodeViewEntry("foo", default(BlobContentId), 0x0001));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddCodeViewEntry("foo", default(BlobContentId), 0x00ff));
+            builder.AddCodeViewEntry("foo", default(BlobContentId), 0x0100);
+            builder.AddCodeViewEntry("foo", default(BlobContentId), 0xffff);
         }
 
         [Fact]

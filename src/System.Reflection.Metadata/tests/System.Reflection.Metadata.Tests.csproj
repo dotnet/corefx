@@ -87,10 +87,12 @@
     <Compile Include="PortableExecutable\DebugDirectoryBuilderTests.cs" />
     <Compile Include="PortableExecutable\PEHeaderBuilderTests.cs" />
     <Compile Include="PortableExecutable\PEMemoryBlockTests.cs" />
+    <Compile Include="PortableExecutable\TestStream.cs" />
     <Compile Include="TestUtilities\ByteArrayUtilities.cs" />
     <Compile Include="TestUtilities\LoaderUtilities.cs" />
     <Compile Include="TestUtilities\PinnedBlob.cs" />
     <Compile Include="TestUtilities\SigningUtilities.cs" />
+    <Compile Include="TestUtilities\TestBuilders.cs" />
     <Compile Include="TestUtilities\TestMetadataStringDecoder.cs" />
     <Compile Include="Utilities\AbstractMemoryBlockTests.cs" />
     <Compile Include="PortableExecutable\BadImageFormat.cs" />
