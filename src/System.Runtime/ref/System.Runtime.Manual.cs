@@ -42,6 +42,10 @@ namespace System
         // Members promoted from MemberInfo
         public abstract Type DeclaringType { get; }
         public abstract string Name { get; }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static bool operator ==(System.Type left, System.Type right) { return default(bool); }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static bool operator !=(System.Type left, System.Type right) { return default(bool); }
     }
 }
 namespace System.Reflection
@@ -116,10 +120,5 @@ namespace System.Reflection
     public partial struct CustomAttributeNamedArgument
     {
         internal CustomAttributeNamedArgument(Type attributeType, string memberName, bool isField, CustomAttributeTypedArgument typedValue) { }
-    }
-
-    public partial struct CustomAttributeTypedArgument
-    {
-        internal CustomAttributeTypedArgument(Type argumentType, object value) { }
     }
 }

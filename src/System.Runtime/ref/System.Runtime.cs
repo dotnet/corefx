@@ -1363,6 +1363,10 @@ namespace System
         public T Value { get { return default(T); } }
         public override string ToString() { return default(string); }
     }
+    public abstract partial class MarshalByRefObject
+    {
+        internal MarshalByRefObject() { }
+    }
     public partial class Lazy<T, TMetadata> : System.Lazy<T>
     {
         public Lazy(TMetadata metadata) { }
@@ -1416,6 +1420,25 @@ namespace System
         public MissingMethodException(string message, System.Exception inner) { }
         protected MissingMethodException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         public override string Message { get { return default(string); } }
+    }
+    public unsafe struct ModuleHandle
+    {
+        public static readonly System.ModuleHandle EmptyHandle;
+        public int MDStreamVersion { get { return default(int); } }
+        public override int GetHashCode() { return default(int); }
+        public override bool Equals(object obj) { return default(bool); }
+        public unsafe bool Equals(System.ModuleHandle handle) { return default(bool); }
+        public static bool operator ==(System.ModuleHandle left, System.ModuleHandle right) { return default(bool); }
+        public static bool operator !=(System.ModuleHandle left, System.ModuleHandle right) { return default(bool); }
+        public System.RuntimeTypeHandle GetRuntimeTypeHandleFromMetadataToken(int typeToken) { return default(System.RuntimeTypeHandle); }
+        public System.RuntimeTypeHandle ResolveTypeHandle(int typeToken) { return default(System.RuntimeTypeHandle); }
+        public System.RuntimeTypeHandle ResolveTypeHandle(int typeToken, System.RuntimeTypeHandle[] typeInstantiationContext, System.RuntimeTypeHandle[] methodInstantiationContext) { return default(System.RuntimeTypeHandle); }
+        public System.RuntimeMethodHandle GetRuntimeMethodHandleFromMetadataToken(int methodToken) { return default(System.RuntimeMethodHandle); }
+        public System.RuntimeMethodHandle ResolveMethodHandle(int methodToken) { return default(System.RuntimeMethodHandle); }
+        public System.RuntimeMethodHandle ResolveMethodHandle(int methodToken, System.RuntimeTypeHandle[] typeInstantiationContext, System.RuntimeTypeHandle[] methodInstantiationContext) { return default(System.RuntimeMethodHandle); }
+        public System.RuntimeFieldHandle GetRuntimeFieldHandleFromMetadataToken(int fieldToken) { return default(System.RuntimeFieldHandle); }
+        public System.RuntimeFieldHandle ResolveFieldHandle(int fieldToken) { return default(System.RuntimeFieldHandle); }
+        public System.RuntimeFieldHandle ResolveFieldHandle(int fieldToken, System.RuntimeTypeHandle[] typeInstantiationContext, System.RuntimeTypeHandle[] methodInstantiationContext) { return default(System.RuntimeFieldHandle); }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64))]
     public sealed partial class MTAThreadAttribute : System.Attribute
@@ -1542,6 +1565,13 @@ namespace System
         public RankException(string message) { }
         public RankException(string message, System.Exception innerException) { }
         protected RankException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+    public partial class ResolveEventArgs : System.EventArgs
+    {
+        public ResolveEventArgs(string name) { }
+        public ResolveEventArgs(string name, System.Reflection.Assembly requestingAssembly) { }
+        public string Name { get { return default(string); } }
+        public System.Reflection.Assembly RequestingAssembly { get { return default(System.Reflection.Assembly); } }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct RuntimeFieldHandle : System.Runtime.Serialization.ISerializable
@@ -2941,6 +2971,24 @@ namespace System.ComponentModel
         Never = 1,
     }
 }
+namespace System.Configuration.Assemblies
+{
+    public enum AssemblyHashAlgorithm
+    {
+        MD5 = 32771,
+        None = 0,
+        SHA1 = 32772,
+        SHA256 = 32780,
+        SHA384 = 32781,
+        SHA512 = 32782,
+    }
+    public enum AssemblyVersionCompatibility
+    {
+        SameMachine         = 1,
+        SameProcess         = 2,
+        SameDomain          = 3,
+    }
+}
 namespace System.Diagnostics
 {
     [System.AttributeUsageAttribute((System.AttributeTargets)(68), AllowMultiple = true)]
@@ -3867,9 +3915,9 @@ namespace System.Reflection
         public AmbiguousMatchException(string message) { }
         public AmbiguousMatchException(string message, System.Exception inner) { }
     }
-    public abstract partial class Assembly : System.Reflection.ICustomAttributeProvider
+    public abstract partial class Assembly : System.Reflection.ICustomAttributeProvider, System.Runtime.Serialization.ISerializable
     {
-        internal Assembly() { }
+        protected Assembly() { }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
         public abstract System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo> DefinedTypes { get; }
         public virtual System.Collections.Generic.IEnumerable<System.Type> ExportedTypes { get { return default(System.Collections.Generic.IEnumerable<System.Type>); } }
@@ -3877,32 +3925,66 @@ namespace System.Reflection
         public virtual string FullName { get { return default(string); } }
         public virtual bool IsDynamic { get { return default(bool); } }
         public virtual System.Reflection.Module ManifestModule { get { return default(System.Reflection.Module); } }
+        public virtual event ModuleResolveEventHandler ModuleResolve { add { } remove { } }
         public abstract System.Collections.Generic.IEnumerable<System.Reflection.Module> Modules { get; }
+        public virtual bool ReflectionOnly { get { return default(bool); } }
         public override bool Equals(object o) { return default(bool); }
+        public static bool operator ==(System.Reflection.Assembly left, System.Reflection.Assembly right) { return default(bool); }
+        public static bool operator !=(System.Reflection.Assembly left, System.Reflection.Assembly right) { return default(bool); }
+        public static System.Reflection.Assembly GetAssembly(System.Type type) { return default(System.Reflection.Assembly); }
+        public static System.Reflection.Assembly GetCallingAssembly() { return default(System.Reflection.Assembly); }
         public override int GetHashCode() { return default(int); }
         public virtual System.Reflection.ManifestResourceInfo GetManifestResourceInfo(string resourceName) { return default(System.Reflection.ManifestResourceInfo); }
         public virtual string[] GetManifestResourceNames() { return default(string[]); }
         public virtual System.IO.Stream GetManifestResourceStream(string name) { return default(System.IO.Stream); }
+        public virtual System.IO.Stream GetManifestResourceStream(System.Type type, string name) { return default(System.IO.Stream); }
+        public virtual System.Reflection.Module GetModule(string name) { return default(System.Reflection.Module); }
+        public System.Reflection.Module[] GetModules() { return default(System.Reflection.Module[]); }
+        public virtual System.Reflection.Module[] GetModules(bool getResourceModules) { return default(System.Reflection.Module[]); }
+        public virtual System.Reflection.AssemblyName GetName(bool copiedName) { return default(System.Reflection.AssemblyName); }
         public virtual System.Reflection.AssemblyName GetName() { return default(System.Reflection.AssemblyName); }
+        public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public virtual System.Type GetType(string name) { return default(System.Type); }
         public virtual System.Type GetType(string name, bool throwOnError, bool ignoreCase) { return default(System.Type); }
+        public static System.Reflection.Assembly Load(byte[] rawAssembly) { return default(System.Reflection.Assembly); }
+        public static System.Reflection.Assembly Load(byte[] rawAssembly, byte[] rawSymbolStore) { return default(System.Reflection.Assembly); }
         public static System.Reflection.Assembly Load(System.Reflection.AssemblyName assemblyRef) { return default(System.Reflection.Assembly); }
+        public static System.Reflection.Assembly Load(string assemblyString) { return default(System.Reflection.Assembly); }
         public static System.Reflection.Assembly GetEntryAssembly() { return default(System.Reflection.Assembly); }
+        public static System.Reflection.Assembly GetExecutingAssembly() { return default(System.Reflection.Assembly); }
+        public System.Reflection.Module[] GetLoadedModules() { return default(System.Reflection.Module[]); }
+        public virtual System.Reflection.Module[] GetLoadedModules(bool getResourceInfo) { return default(System.Reflection.Module[]); }
         public virtual string Location { get { return default(string); } }
         public override string ToString() { return default(string); }
         public virtual string CodeBase { get { return default(string); } }
         public virtual string ImageRuntimeVersion { get { return default(string); } }
         public object CreateInstance(string typeName) { return default(object); }
         public object CreateInstance(string typeName, bool ignoreCase) { return default(object); }
+        public virtual object CreateInstance(string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, Object[] args, System.Globalization.CultureInfo culture, Object[] activationAttributes) { return default(object); }
         public static string CreateQualifiedName(string assemblyName, string typeName) { return default(string); }
         object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
         object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        public virtual System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributesData() { return default(System.Collections.Generic.IList<CustomAttributeData>); }
         public virtual Type[] GetExportedTypes() { return default(Type[]); }
         public virtual AssemblyName[] GetReferencedAssemblies() { return default(AssemblyName[]); }
+        public virtual System.Reflection.Assembly GetSatelliteAssembly(System.Globalization.CultureInfo culture) { return default(System.Reflection.Assembly); }
+        public virtual System.Reflection.Assembly GetSatelliteAssembly(System.Globalization.CultureInfo culture, System.Version version) { return default(System.Reflection.Assembly); }
         public virtual Type GetType(string name, bool throwOnError) { return default(Type); }
         public virtual Type[] GetTypes() { return default(Type[]); }
+        public static System.Reflection.Assembly ReflectionOnlyLoad(byte[] rawAssembly) { return default(System.Reflection.Assembly); }
+        public static System.Reflection.Assembly ReflectionOnlyLoad(string assemblyString) { return default(System.Reflection.Assembly); }
+        public static System.Reflection.Assembly ReflectionOnlyLoadFrom(string assemblyFile) { return default(System.Reflection.Assembly); }
         bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
 
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited=false)]
+    public sealed partial class AssemblyAlgorithmIdAttribute : System.Attribute
+    {
+        public AssemblyAlgorithmIdAttribute(System.Configuration.Assemblies.AssemblyHashAlgorithm algorithmId) { }
+        [System.CLSCompliantAttribute(false)]
+        public AssemblyAlgorithmIdAttribute(uint algorithmId) { }
+        [System.CLSCompliantAttribute(false)]
+        public uint AlgorithmId { get { return default(uint); } }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited = false)]
     public sealed partial class AssemblyCompanyAttribute : System.Attribute
@@ -3960,8 +4042,13 @@ namespace System.Reflection
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited = false)]
     public sealed partial class AssemblyFlagsAttribute : System.Attribute
     {
+        [System.CLSCompliantAttribute(false)]
+        public AssemblyFlagsAttribute(uint flags) { }
+        public AssemblyFlagsAttribute(int assemblyFlags) { }
         public AssemblyFlagsAttribute(System.Reflection.AssemblyNameFlags assemblyFlags) { }
         public int AssemblyFlags { get { return default(int); } }
+        [System.CLSCompliantAttribute(false)]
+        public uint Flags { get { throw null; } }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited = false)]
     public sealed partial class AssemblyInformationalVersionAttribute : System.Attribute
@@ -3988,29 +4075,44 @@ namespace System.Reflection
         public string Key { get { return default(string); } }
         public string Value { get { return default(string); } }
     }
-    public sealed partial class AssemblyName
+    public sealed partial class AssemblyName : System.Runtime.Serialization.ISerializable, System.Runtime.Serialization.IDeserializationCallback
     {
         public AssemblyName() { }
         public AssemblyName(string assemblyName) { }
+        public string CodeBase { get { return default(string); } }
         public System.Reflection.AssemblyContentType ContentType { get { return default(System.Reflection.AssemblyContentType); } set { } }
+        public System.Globalization.CultureInfo CultureInfo { get { return default(System.Globalization.CultureInfo); } set { } }
         public string CultureName { get { return default(string); } set { } }
         public System.Reflection.AssemblyNameFlags Flags { get { return default(System.Reflection.AssemblyNameFlags); } set { } }
         public string FullName { get { return default(string); } }
+        public System.Configuration.Assemblies.AssemblyHashAlgorithm HashAlgorithm { get { return default(System.Configuration.Assemblies.AssemblyHashAlgorithm); } }
+        public System.Configuration.Assemblies.AssemblyVersionCompatibility VersionCompatibility { get { return default(System.Configuration.Assemblies.AssemblyVersionCompatibility); } }
         public string Name { get { return default(string); } set { } }
         public System.Reflection.ProcessorArchitecture ProcessorArchitecture { get { return default(System.Reflection.ProcessorArchitecture); } set { } }
         public System.Version Version { get { return default(System.Version); } set { } }
+        public object Clone() { return default(object); }
         public byte[] GetPublicKey() { return default(byte[]); }
         public byte[] GetPublicKeyToken() { return default(byte[]); }
         public void SetPublicKey(byte[] publicKey) { }
         public void SetPublicKeyToken(byte[] publicKeyToken) { }
         public override string ToString() { return default(string); }
+        [System.Security.SecurityCriticalAttribute]
+        public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { return; }
+        public void OnDeserialization(Object sender) { return; }
+
     }
     [System.FlagsAttribute]
     public enum AssemblyNameFlags
     {
+        EnableJITcompileOptimizer = 16384,
+        EnableJITcompileTracking = 32768,
         None = 0,
         PublicKey = 1,
         Retargetable = 256,
+    }
+    public class AssemblyNameProxy : System.MarshalByRefObject
+    {
+        internal AssemblyNameProxy() { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited = false)]
     public sealed partial class AssemblyProductAttribute : System.Attribute
@@ -4043,23 +4145,40 @@ namespace System.Reflection
         public AssemblyVersionAttribute(string version) { }
         public string Version { get { return default(string); } }
     }
+    public abstract partial class Binder
+    {
+        protected Binder() { }
+        public abstract System.Reflection.FieldInfo BindToField(System.Reflection.BindingFlags bindingAttr, System.Reflection.FieldInfo[] match, object value, System.Globalization.CultureInfo culture);
+        public abstract System.Reflection.MethodBase BindToMethod(System.Reflection.BindingFlags bindingAttr, System.Reflection.MethodBase[] match, ref object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] names, out object state);
+        public abstract object ChangeType(object value, System.Type type, System.Globalization.CultureInfo culture);
+        public abstract void ReorderArgumentArray(ref object[] args, object state);
+        public abstract System.Reflection.MethodBase SelectMethod(System.Reflection.BindingFlags bindingAttr, System.Reflection.MethodBase[] match, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
+        public abstract System.Reflection.PropertyInfo SelectProperty(System.Reflection.BindingFlags bindingAttr, System.Reflection.PropertyInfo[] match, System.Type returnType, System.Type[] indexes, System.Reflection.ParameterModifier[] modifiers);
+        public virtual bool CanChangeType(System.Object value,System.Type type,System.Globalization.CultureInfo culture) { return default(bool); }
+    }
     [Flags]
     public enum BindingFlags
     {
         CreateInstance = 512,
         DeclaredOnly = 2,
         Default = 0,
+        ExactBinding = 65536,
         FlattenHierarchy = 64,
         GetField = 1024,
         GetProperty = 4096,
         IgnoreCase = 1,
+        IgnoreReturn = 16777216,
         Instance = 4,
         InvokeMethod = 256,
         NonPublic = 32,
+        OptionalParamBinding = 262144,
         Public = 16,
+        PutDispProperty = 16384,
+        PutRefDispProperty = 32768,
         SetField = 2048,
         SetProperty = 8192,
         Static = 8,
+        SuppressChangeType = 131072,
     }
     [System.FlagsAttribute]
     public enum CallingConventions
@@ -4074,28 +4193,83 @@ namespace System.Reflection
     {
         public static readonly string ConstructorName;
         public static readonly string TypeConstructorName;
-        internal ConstructorInfo() { }
+        protected ConstructorInfo() { }
         public override bool Equals(object obj) { return default(bool); }
+        public static bool operator==(System.Reflection.ConstructorInfo left, System.Reflection.ConstructorInfo right) { return default(bool); }
+        public static bool operator!=(System.Reflection.ConstructorInfo left, System.Reflection.ConstructorInfo right) { return default(bool); }
         public override int GetHashCode() { return default(int); }
-        public virtual object Invoke(object[] parameters) { return default(object); }
+        public object Invoke(object[] parameters) { return default(object); }
+        public abstract object Invoke(System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object[] parameters, System.Globalization.CultureInfo culture);
         public override MemberTypes MemberType { get { return default(MemberTypes); } }
     }
     public partial class CustomAttributeData
     {
-        internal CustomAttributeData() { }
-        public virtual System.Type AttributeType { get { return default(System.Type); } }
+        protected CustomAttributeData() { }
+        public System.Type AttributeType { get { return default(System.Type); } }
         public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeTypedArgument> ConstructorArguments { get { return default(System.Collections.Generic.IList<System.Reflection.CustomAttributeTypedArgument>); } }
         public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeNamedArgument> NamedArguments { get { return default(System.Collections.Generic.IList<System.Reflection.CustomAttributeNamedArgument>); } }
         public virtual ConstructorInfo Constructor { get { return default(ConstructorInfo); } }
+        public override bool Equals(object obj) { return default(bool); }
         public static System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributes(Assembly target) { return default(System.Collections.Generic.IList<CustomAttributeData>); }
         public static System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributes(MemberInfo target) { return default(System.Collections.Generic.IList<CustomAttributeData>); }
         public static System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributes(Module target) { return default(System.Collections.Generic.IList<CustomAttributeData>); }
         public static System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributes(ParameterInfo target) { return default(System.Collections.Generic.IList<CustomAttributeData>); }
+        public override int GetHashCode() { return default(int); }
+        public override string ToString() { return default(string); }
+    }
+    public static partial class CustomAttributeExtensions
+    {
+        public static System.Attribute GetCustomAttribute(this System.Reflection.Assembly element, System.Type attributeType) { return default(System.Attribute); }
+        public static System.Attribute GetCustomAttribute(this System.Reflection.MemberInfo element, System.Type attributeType) { return default(System.Attribute); }
+        public static System.Attribute GetCustomAttribute(this System.Reflection.MemberInfo element, System.Type attributeType, bool inherit) { return default(System.Attribute); }
+        public static System.Attribute GetCustomAttribute(this System.Reflection.Module element, System.Type attributeType) { return default(System.Attribute); }
+        public static System.Attribute GetCustomAttribute(this System.Reflection.ParameterInfo element, System.Type attributeType) { return default(System.Attribute); }
+        public static System.Attribute GetCustomAttribute(this System.Reflection.ParameterInfo element, System.Type attributeType, bool inherit) { return default(System.Attribute); }
+        public static T GetCustomAttribute<T>(this System.Reflection.Assembly element) where T : System.Attribute { return default(T); }
+        public static T GetCustomAttribute<T>(this System.Reflection.MemberInfo element) where T : System.Attribute { return default(T); }
+        public static T GetCustomAttribute<T>(this System.Reflection.MemberInfo element, bool inherit) where T : System.Attribute { return default(T); }
+        public static T GetCustomAttribute<T>(this System.Reflection.Module element) where T : System.Attribute { return default(T); }
+        public static T GetCustomAttribute<T>(this System.Reflection.ParameterInfo element) where T : System.Attribute { return default(T); }
+        public static T GetCustomAttribute<T>(this System.Reflection.ParameterInfo element, bool inherit) where T : System.Attribute { return default(T); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.Assembly element) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.Assembly element, System.Type attributeType) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.MemberInfo element) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.MemberInfo element, bool inherit) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.MemberInfo element, System.Type attributeType) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.MemberInfo element, System.Type attributeType, bool inherit) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.Module element) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.Module element, System.Type attributeType) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.ParameterInfo element) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.ParameterInfo element, bool inherit) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.ParameterInfo element, System.Type attributeType) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<System.Attribute> GetCustomAttributes(this System.Reflection.ParameterInfo element, System.Type attributeType, bool inherit) { return default(System.Collections.Generic.IEnumerable<System.Attribute>); }
+        public static System.Collections.Generic.IEnumerable<T> GetCustomAttributes<T>(this System.Reflection.Assembly element) where T : System.Attribute { return default(System.Collections.Generic.IEnumerable<T>); }
+        public static System.Collections.Generic.IEnumerable<T> GetCustomAttributes<T>(this System.Reflection.MemberInfo element) where T : System.Attribute { return default(System.Collections.Generic.IEnumerable<T>); }
+        public static System.Collections.Generic.IEnumerable<T> GetCustomAttributes<T>(this System.Reflection.MemberInfo element, bool inherit) where T : System.Attribute { return default(System.Collections.Generic.IEnumerable<T>); }
+        public static System.Collections.Generic.IEnumerable<T> GetCustomAttributes<T>(this System.Reflection.Module element) where T : System.Attribute { return default(System.Collections.Generic.IEnumerable<T>); }
+        public static System.Collections.Generic.IEnumerable<T> GetCustomAttributes<T>(this System.Reflection.ParameterInfo element) where T : System.Attribute { return default(System.Collections.Generic.IEnumerable<T>);; }
+        public static System.Collections.Generic.IEnumerable<T> GetCustomAttributes<T>(this System.Reflection.ParameterInfo element, bool inherit) where T : System.Attribute { return default(System.Collections.Generic.IEnumerable<T>); }
+        public static bool IsDefined(this System.Reflection.Assembly element, System.Type attributeType) { return default(bool); }
+        public static bool IsDefined(this System.Reflection.MemberInfo element, System.Type attributeType) { return default(bool); }
+        public static bool IsDefined(this System.Reflection.MemberInfo element, System.Type attributeType, bool inherit) { return default(bool); }
+        public static bool IsDefined(this System.Reflection.Module element, System.Type attributeType) { return default(bool); }
+        public static bool IsDefined(this System.Reflection.ParameterInfo element, System.Type attributeType) { return default(bool); }
+        public static bool IsDefined(this System.Reflection.ParameterInfo element, System.Type attributeType, bool inherit) { return default(bool); }
+    }
+    public partial class CustomAttributeFormatException : System.FormatException
+    {
+        public CustomAttributeFormatException() { }
+        public CustomAttributeFormatException(string message) { }
+        public CustomAttributeFormatException(string message, System.Exception inner) { }
+        protected CustomAttributeFormatException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct CustomAttributeNamedArgument
     {
+        public CustomAttributeNamedArgument(System.Reflection.MemberInfo memberInfo, object value) { }
+        public CustomAttributeNamedArgument(System.Reflection.MemberInfo memberInfo, System.Reflection.CustomAttributeTypedArgument typedArgument) { }
         public bool IsField { get { return default(bool); } }
+        public System.Reflection.MemberInfo MemberInfo { get { return default(System.Reflection.MemberInfo); } }
         public string MemberName { get { return default(string); } }
         public System.Reflection.CustomAttributeTypedArgument TypedValue { get { return default(System.Reflection.CustomAttributeTypedArgument); } }
         public static bool operator ==(CustomAttributeNamedArgument left, CustomAttributeNamedArgument right) { return default(bool); }
@@ -4107,6 +4281,8 @@ namespace System.Reflection
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct CustomAttributeTypedArgument
     {
+        public CustomAttributeTypedArgument(object value) { }
+        public CustomAttributeTypedArgument(System.Type argumentType, object value) { }
         public System.Type ArgumentType { get { return default(System.Type); } }
         public object Value { get { return default(object); } }
         public static bool operator ==(CustomAttributeTypedArgument left, CustomAttributeTypedArgument right) { return default(bool); }
@@ -4125,12 +4301,13 @@ namespace System.Reflection
     public enum EventAttributes
     {
         None = 0,
+        ReservedMask = 1024,
         RTSpecialName = 1024,
         SpecialName = 512,
     }
     public abstract partial class EventInfo : System.Reflection.MemberInfo
     {
-        internal EventInfo() { }
+        protected EventInfo() { }
         public virtual System.Reflection.MethodInfo AddMethod { get { return default(System.Reflection.MethodInfo); } }
         public abstract System.Reflection.EventAttributes Attributes { get; }
         public virtual System.Type EventHandlerType { get { return default(System.Type); } }
@@ -4140,16 +4317,40 @@ namespace System.Reflection
         public virtual System.Reflection.MethodInfo RemoveMethod { get { return default(System.Reflection.MethodInfo); } }
         public virtual void AddEventHandler(object target, System.Delegate handler) { }
         public override bool Equals(object obj) { return default(bool); }
+        public static bool operator ==(System.Reflection.EventInfo left, System.Reflection.EventInfo right) { return default(bool); }
+        public static bool operator !=(System.Reflection.EventInfo left, System.Reflection.EventInfo right) { return default(bool); }
         public override int GetHashCode() { return default(int); }
         public virtual void RemoveEventHandler(object target, System.Delegate handler) { }
         public MethodInfo GetAddMethod() { return default(MethodInfo); }
         public abstract MethodInfo GetAddMethod(bool nonPublic);
+        public System.Reflection.MethodInfo[] GetOtherMethods() { return default(System.Reflection.MethodInfo[]); }
+        public virtual System.Reflection.MethodInfo[] GetOtherMethods(bool nonPublic) { return default(System.Reflection.MethodInfo[]); }
         public MethodInfo GetRaiseMethod() { return default(MethodInfo); }
         public abstract MethodInfo GetRaiseMethod(bool nonPublic);
         public MethodInfo GetRemoveMethod() { return default(MethodInfo); }
         public abstract MethodInfo GetRemoveMethod(bool nonPublic);
         public override System.Reflection.MemberTypes MemberType { get { return default(System.Reflection.MemberTypes); } }
 
+    }
+    public class ExceptionHandlingClause
+    {
+        protected ExceptionHandlingClause() { }
+        public virtual System.Reflection.ExceptionHandlingClauseOptions Flags { get { return default(System.Reflection.ExceptionHandlingClauseOptions); } }
+        public virtual int TryOffset { get { return default(int); } }
+        public virtual int TryLength { get { return default(int); } }
+        public virtual int HandlerOffset { get { return default(int); } }
+        public virtual int HandlerLength { get { return default(int); } }
+        public virtual int FilterOffset { get { return default(int); } }
+        public virtual System.Type CatchType { get { return default(System.Type); } }
+        public override string ToString() { return default(string); }
+    }
+    [System.FlagsAttribute]
+    public enum ExceptionHandlingClauseOptions: int
+    {
+        Clause = 0,
+        Filter = 1,
+        Finally = 2,
+        Fault = 4,
     }
     [System.FlagsAttribute]
     public enum FieldAttributes
@@ -4169,14 +4370,16 @@ namespace System.Reflection
         Private = 1,
         PrivateScope = 0,
         Public = 6,
+        ReservedMask = 38144,
         RTSpecialName = 1024,
         SpecialName = 512,
         Static = 16,
     }
     public abstract partial class FieldInfo : System.Reflection.MemberInfo
     {
-        internal FieldInfo() { }
+        protected FieldInfo() { }
         public abstract System.Reflection.FieldAttributes Attributes { get; }
+        public abstract System.RuntimeFieldHandle FieldHandle { get; }
         public abstract System.Type FieldType { get; }
         public bool IsAssembly { get { return default(bool); } }
         public bool IsFamily { get { return default(bool); } }
@@ -4184,11 +4387,18 @@ namespace System.Reflection
         public bool IsFamilyOrAssembly { get { return default(bool); } }
         public bool IsInitOnly { get { return default(bool); } }
         public bool IsLiteral { get { return default(bool); } }
+        public bool IsNotSerialized { get { return default(bool); } }
+        public bool IsPinvokeImpl { get { return default(bool); } }
         public bool IsPrivate { get { return default(bool); } }
         public bool IsPublic { get { return default(bool); } }
         public bool IsSpecialName { get { return default(bool); } }
         public bool IsStatic { get { return default(bool); } }
+        public virtual bool IsSecurityCritical { get { return default(bool); } }
+        public virtual bool IsSecuritySafeCritical { get { return default(bool); } }
+        public virtual bool IsSecurityTransparent { get { return default(bool); } }
         public override bool Equals(object obj) { return default(bool); }
+        public static bool operator ==(System.Reflection.FieldInfo left, System.Reflection.FieldInfo right) { return default(bool); }
+        public static bool operator !=(System.Reflection.FieldInfo left, System.Reflection.FieldInfo right) { return default(bool); }
         public static System.Reflection.FieldInfo GetFieldFromHandle(System.RuntimeFieldHandle handle) { return default(System.Reflection.FieldInfo); }
         public static System.Reflection.FieldInfo GetFieldFromHandle(System.RuntimeFieldHandle handle, System.RuntimeTypeHandle declaringType) { return default(System.Reflection.FieldInfo); }
         public override int GetHashCode() { return default(int); }
@@ -4197,7 +4407,8 @@ namespace System.Reflection
         public virtual Type[] GetRequiredCustomModifiers() { return default(Type[]); }
         public abstract object GetValue(object obj);
         public override MemberTypes MemberType { get { return default(MemberTypes); } }
-        public virtual void SetValue(object obj, object value) { }
+        public void SetValue(object obj, object value) { }
+        public abstract void SetValue(object obj, object value, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Globalization.CultureInfo culture);
 
     }
     [System.FlagsAttribute]
@@ -4218,6 +4429,21 @@ namespace System.Reflection
         object[] GetCustomAttributes(Type attributeType, bool inherit);
         bool IsDefined(Type attributeType, bool inherit);
     }
+    public enum ImageFileMachine
+    {
+        I386 = 332,
+        IA64 = 512,
+        AMD64 = 34404,
+        ARM = 452
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct InterfaceMapping
+    {
+        public System.Reflection.MethodInfo[] InterfaceMethods;
+        public System.Type InterfaceType;
+        public System.Reflection.MethodInfo[] TargetMethods;
+        public System.Type TargetType;
+    }
     public static partial class IntrospectionExtensions
     {
         public static System.Reflection.TypeInfo GetTypeInfo(this System.Type type) { return default(System.Reflection.TypeInfo); }
@@ -4227,6 +4453,22 @@ namespace System.Reflection
         public InvalidFilterCriteriaException() { }
         public InvalidFilterCriteriaException(string message) { }
         public InvalidFilterCriteriaException(string message, Exception inner) { }
+        protected InvalidFilterCriteriaException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+    public partial interface IReflect
+    {
+        System.Type UnderlyingSystemType { get; }
+        System.Reflection.FieldInfo GetField(string name, System.Reflection.BindingFlags bindingAttr);
+        System.Reflection.FieldInfo[] GetFields(System.Reflection.BindingFlags bindingAttr);
+        System.Reflection.MemberInfo[] GetMember(string name, System.Reflection.BindingFlags bindingAttr);
+        System.Reflection.MemberInfo[] GetMembers(System.Reflection.BindingFlags bindingAttr);
+        System.Reflection.MethodInfo GetMethod(string name, System.Reflection.BindingFlags bindingAttr);
+        System.Reflection.MethodInfo GetMethod(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
+        System.Reflection.MethodInfo[] GetMethods(System.Reflection.BindingFlags bindingAttr);
+        System.Reflection.PropertyInfo[] GetProperties(System.Reflection.BindingFlags bindingAttr);
+        System.Reflection.PropertyInfo GetProperty(string name, System.Reflection.BindingFlags bindingAttr);
+        System.Reflection.PropertyInfo GetProperty(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Type returnType, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
+        object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] namedParameters);
     }
     public partial interface IReflectableType
     {
@@ -4250,18 +4492,22 @@ namespace System.Reflection
     public delegate bool MemberFilter(MemberInfo m, object filterCriteria);
     public abstract partial class MemberInfo : System.Reflection.ICustomAttributeProvider
     {
-        internal MemberInfo() { }
+        protected MemberInfo() { }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
         public abstract System.Type DeclaringType { get; }
         public virtual int MetadataToken { get { return default(int); } }
         public virtual System.Reflection.Module Module { get { return default(System.Reflection.Module); } }
         public abstract string Name { get; }
         public override bool Equals(object obj) { return default(bool); }
+        public static bool operator ==(System.Reflection.MemberInfo left, System.Reflection.MemberInfo right) { return default(bool); }
+        public static bool operator !=(System.Reflection.MemberInfo left, System.Reflection.MemberInfo right) { return default(bool); }
         public override int GetHashCode() { return default(int); }
         public abstract MemberTypes MemberType { get; }
-        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
-        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
-        bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+        public abstract System.Type ReflectedType { get; }
+        public abstract object[] GetCustomAttributes(bool inherit);
+        public abstract object[] GetCustomAttributes(Type attributeType, bool inherit);
+        public abstract bool IsDefined(Type attributeType, bool inherit);
+        public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { return default(System.Collections.Generic.IList<System.Reflection.CustomAttributeData>); }
     }
     [Flags]
     public enum MemberTypes
@@ -4295,6 +4541,7 @@ namespace System.Reflection
         PrivateScope = 0,
         Public = 6,
         RequireSecObject = 32768,
+        ReservedMask = 53248,
         ReuseSlot = 0,
         RTSpecialName = 4096,
         SpecialName = 2048,
@@ -4305,7 +4552,7 @@ namespace System.Reflection
     }
     public abstract partial class MethodBase : System.Reflection.MemberInfo
     {
-        internal MethodBase() { }
+        protected MethodBase() { }
         public abstract System.Reflection.MethodAttributes Attributes { get; }
         public virtual System.Reflection.CallingConventions CallingConvention { get { return default(System.Reflection.CallingConventions); } }
         public virtual bool ContainsGenericParameters { get { return default(bool); } }
@@ -4324,15 +4571,32 @@ namespace System.Reflection
         public bool IsSpecialName { get { return default(bool); } }
         public bool IsStatic { get { return default(bool); } }
         public bool IsVirtual { get { return default(bool); } }
+        public abstract System.RuntimeMethodHandle MethodHandle { get; }
         public abstract System.Reflection.MethodImplAttributes MethodImplementationFlags { get; }
         public override bool Equals(object obj) { return default(bool); }
+        public static bool operator ==(System.Reflection.MethodBase left, System.Reflection.MethodBase right) { return default(bool); }
+        public static bool operator !=(System.Reflection.MethodBase left, System.Reflection.MethodBase right) { return default(bool); }
+        public static System.Reflection.MethodBase GetCurrentMethod() { return default(System.Reflection.MethodBase); }
         public virtual System.Type[] GetGenericArguments() { return default(System.Type[]); }
         public override int GetHashCode() { return default(int); }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public virtual System.Reflection.MethodBody GetMethodBody() { return default(System.Reflection.MethodBody); }
         public static System.Reflection.MethodBase GetMethodFromHandle(System.RuntimeMethodHandle handle) { return default(System.Reflection.MethodBase); }
         public static System.Reflection.MethodBase GetMethodFromHandle(System.RuntimeMethodHandle handle, System.RuntimeTypeHandle declaringType) { return default(System.Reflection.MethodBase); }
         public abstract System.Reflection.ParameterInfo[] GetParameters();
-        public virtual object Invoke(object obj, object[] parameters) { return default(object); }
+        public object Invoke(object obj, object[] parameters) { return default(object); }
+        public abstract object Invoke(object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object[] parameters, System.Globalization.CultureInfo culture);
         public abstract MethodImplAttributes GetMethodImplementationFlags();
+    }
+    public class MethodBody
+    {
+        protected MethodBody() { }
+        public virtual int LocalSignatureMetadataToken { get { return default(int); } }
+        public virtual System.Collections.Generic.IList<LocalVariableInfo> LocalVariables { get { return default(System.Collections.Generic.IList<LocalVariableInfo>); } }
+        public virtual int MaxStackSize { get { return default(int); } }
+        public virtual bool InitLocals { get { return default(bool); } }
+        public virtual byte[] GetILAsByteArray() { return default(byte[]); }
+        public virtual System.Collections.Generic.IList<ExceptionHandlingClause> ExceptionHandlingClauses { get { return default(System.Collections.Generic.IList<ExceptionHandlingClause>); } }
     }
     public enum MethodImplAttributes
     {
@@ -4343,6 +4607,7 @@ namespace System.Reflection
         InternalCall = 4096,
         Managed = 0,
         ManagedMask = 4,
+        MaxMethodImplVal = 65535,
         Native = 1,
         NoInlining = 8,
         NoOptimization = 64,
@@ -4354,13 +4619,15 @@ namespace System.Reflection
     }
     public abstract partial class MethodInfo : System.Reflection.MethodBase
     {
-        internal MethodInfo() { }
+        protected MethodInfo() { }
         public abstract MethodInfo GetBaseDefinition();
         public virtual System.Reflection.ParameterInfo ReturnParameter { get { return default(System.Reflection.ParameterInfo); } }
         public virtual System.Type ReturnType { get { return default(System.Type); } }
         public virtual System.Delegate CreateDelegate(System.Type delegateType) { return default(System.Delegate); }
         public virtual System.Delegate CreateDelegate(System.Type delegateType, object target) { return default(System.Delegate); }
         public override bool Equals(object obj) { return default(bool); }
+        public static bool operator ==(System.Reflection.MethodInfo left, System.Reflection.MethodInfo right) { return default(bool); }
+        public static bool operator !=(System.Reflection.MethodInfo left, System.Reflection.MethodInfo right) { return default(bool); }
         public override System.Type[] GetGenericArguments() { return default(System.Type[]); }
         public virtual System.Reflection.MethodInfo GetGenericMethodDefinition() { return default(System.Reflection.MethodInfo); }
         public override int GetHashCode() { return default(int); }
@@ -4368,14 +4635,26 @@ namespace System.Reflection
         public override MemberTypes MemberType { get { return default(MemberTypes); } }
         public abstract System.Reflection.ICustomAttributeProvider ReturnTypeCustomAttributes { get; }
     }
-    public abstract partial class Module : System.Reflection.ICustomAttributeProvider
+    //public sealed partial class Missing : System.Runtime.Serialization.ISerializable
+    //{
+    //    internal Missing() { }
+    //    public static readonly System.Reflection.Missing Value;
+    //    [System.Security.SecurityCriticalAttribute]
+    //    void System.Runtime.Serialization.ISerializable.GetObjectData(Runtime.Serialization.SerializationInfo info, Runtime.Serialization.StreamingContext context) { }
+    //}
+    public abstract partial class Module : System.Reflection.ICustomAttributeProvider, System.Runtime.Serialization.ISerializable
     {
-        internal Module() { }
+        protected Module() { }
         public virtual System.Reflection.Assembly Assembly { get { return default(System.Reflection.Assembly); } }
+        public System.ModuleHandle ModuleHandle { get { return default(System.ModuleHandle); } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
         public virtual string FullyQualifiedName { get { return default(string); } }
+        public virtual int MDStreamVersion { get { return default(int); } }
+        public virtual int MetadataToken { get { return default(int); } }
         public virtual string Name { get { return default(string); } }
         public override bool Equals(object o) { return default(bool); }
+        public static bool operator ==(System.Reflection.Module left, System.Reflection.Module right) { return default(bool); }
+        public static bool operator !=(System.Reflection.Module left, System.Reflection.Module right) { return default(bool); }
         public override int GetHashCode() { return default(int); }
         public virtual System.Type GetType(string className, bool throwOnError, bool ignoreCase) { return default(System.Type); }
         public override string ToString() { return default(string); }
@@ -4388,16 +4667,48 @@ namespace System.Reflection
         public virtual FieldInfo GetField(string name, BindingFlags bindingAttr) { return default(FieldInfo); }
         public FieldInfo[] GetFields() { return default(FieldInfo[]); }
         public virtual FieldInfo[] GetFields(BindingFlags bindingFlags) { return default(FieldInfo[]); }
+        public System.Reflection.MethodInfo GetMethod(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.MethodInfo); }
         public MethodInfo GetMethod(string name) { return default(MethodInfo); }
         public MethodInfo GetMethod(string name, Type[] types) { return default(MethodInfo); }
+        protected virtual System.Reflection.MethodInfo GetMethodImpl(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.MethodInfo); }
         public MethodInfo[] GetMethods() { return default(MethodInfo[]); }
         public virtual MethodInfo[] GetMethods(BindingFlags bindingFlags) { return default(MethodInfo[]); }
+        [System.Security.SecurityCriticalAttribute]
+        public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        public virtual void GetPEKind(out System.Reflection.PortableExecutableKinds peKind, out System.Reflection.ImageFileMachine machine) { peKind = default(System.Reflection.PortableExecutableKinds); machine = default(System.Reflection.ImageFileMachine); }
         public virtual Type GetType(string className) { return default(Type); }
         public virtual Type GetType(string className, bool ignoreCase) { return default(Type); }
         public virtual Type[] GetTypes() { return default(Type[]); }
         object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
         object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
         bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+        public virtual bool IsResource() { return default(bool); }
+        public virtual System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributesData() { return default(System.Collections.Generic.IList<CustomAttributeData>); }
+        public System.Reflection.FieldInfo ResolveField(int metadataToken) { return default(System.Reflection.FieldInfo); }
+        public virtual System.Reflection.FieldInfo ResolveField(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { return default(System.Reflection.FieldInfo); }
+        public System.Reflection.MemberInfo ResolveMember(int metadataToken) { return default(System.Reflection.MemberInfo); }
+        public virtual System.Reflection.MemberInfo ResolveMember(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { return default(System.Reflection.MemberInfo); }
+        public System.Reflection.MethodBase ResolveMethod(int metadataToken) { return default(System.Reflection.MethodBase); }
+        public virtual System.Reflection.MethodBase ResolveMethod(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { return default(System.Reflection.MethodBase); }
+        public virtual byte[] ResolveSignature(int metadataToken) { return default(byte[]); }
+        public virtual string ResolveString(int metadataToken) { return default(string); }
+        public System.Type ResolveType(int metadataToken) { return default(System.Type); }
+        public virtual System.Type ResolveType(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { return default(System.Type); }
+    }
+    public delegate System.Reflection.Module ModuleResolveEventHandler(object sender, System.ResolveEventArgs e);
+    public sealed class ObfuscateAssemblyAttribute : System.Attribute
+    {
+        public ObfuscateAssemblyAttribute(bool assemblyIsPrivate) { }
+        public bool AssemblyIsPrivate { get { return default(bool); } }
+        public bool StripAfterObfuscation { get { return default(bool); } set { } }
+    }
+    public sealed class ObfuscationAttribute : System.Attribute
+    {
+        public ObfuscationAttribute() { }
+        public bool StripAfterObfuscation { get { return default(bool); } set { } }
+        public bool Exclude { get { return default(bool); } set { } }
+        public bool ApplyToMembers { get { return default(bool); } set { } }
+        public string Feature { get { return default(string); } set { } }
     }
     [System.FlagsAttribute]
     public enum ParameterAttributes
@@ -4409,35 +4720,69 @@ namespace System.Reflection
         None = 0,
         Optional = 16,
         Out = 2,
+        Reserved3 = 16384,
+        Reserved4 = 32768,
+        ReservedMask = 61440,
         Retval = 8,
     }
     public partial class ParameterInfo : System.Reflection.ICustomAttributeProvider
     {
-        internal ParameterInfo() { }
+        protected string NameImpl;
+        protected System.Type ClassImpl;
+        protected int PositionImpl;
+        protected System.Reflection.ParameterAttributes AttrsImpl;
+        protected object DefaultValueImpl;
+        protected System.Reflection.MemberInfo MemberImpl;
+        protected ParameterInfo() { }
         public virtual System.Reflection.ParameterAttributes Attributes { get { return default(System.Reflection.ParameterAttributes); } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
         public virtual object DefaultValue { get { return default(object); } }
         public virtual bool HasDefaultValue { get { return default(bool); } }
         public bool IsIn { get { return default(bool); } }
+        public bool IsLcid { get { return default(bool); } }
         public bool IsOptional { get { return default(bool); } }
         public bool IsOut { get { return default(bool); } }
         public bool IsRetval { get { return default(bool); } }
         public virtual System.Reflection.MemberInfo Member { get { return default(System.Reflection.MemberInfo); } }
+        public virtual int MetadataToken { get { return default(int); } }
         public virtual string Name { get { return default(string); } }
         public virtual System.Type ParameterType { get { return default(System.Type); } }
         public virtual int Position { get { return default(int); } }
         public virtual Type[] GetOptionalCustomModifiers() { return default(Type[]); }
+        public object GetRealObject(System.Runtime.Serialization.StreamingContext context) { return default(object); }
         public virtual Type[] GetRequiredCustomModifiers() { return default(Type[]); }
         public virtual object RawDefaultValue { get { return default(object); } }
         object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
         object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { return default(System.Collections.Generic.IList<System.Reflection.CustomAttributeData>); }
         bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+        public override string ToString() { return default(string); }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public struct ParameterModifier
     {
         public ParameterModifier(int parameterCount) { }
         public bool this[int index] { get { return default(bool); } set { } }
+    }
+    [System.CLSCompliantAttribute(false)]
+    public sealed class Pointer : System.Runtime.Serialization.ISerializable
+    {
+        [System.Security.SecurityCriticalAttribute]
+        public static unsafe Object Box(void* ptr, System.Type type) { return default(Object); }
+        [System.Security.SecurityCriticalAttribute]
+        public static unsafe void* Unbox(object ptr) { return default(void*); }
+        [System.Security.SecurityCriticalAttribute]
+        unsafe void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    }
+    [System.FlagsAttribute]
+    public enum PortableExecutableKinds
+    {
+        NotAPortableExecutableImage = 0,
+        ILOnly                      = 1,
+        Required32Bit               = 2,
+        PE32Plus                    = 4,
+        Unmanaged32Bit              = 8,
+        Preferred32Bit              = 16,
     }
     public enum ProcessorArchitecture
     {
@@ -4453,12 +4798,16 @@ namespace System.Reflection
     {
         HasDefault = 4096,
         None = 0,
+        Reserved2 = 8192,
+        Reserved3 = 16384,
+        Reserved4 = 32768,
+        ReservedMask = 62464,
         RTSpecialName = 1024,
         SpecialName = 512,
     }
     public abstract partial class PropertyInfo : System.Reflection.MemberInfo
     {
-        internal PropertyInfo() { }
+        protected PropertyInfo() { }
         public abstract System.Reflection.PropertyAttributes Attributes { get; }
         public abstract bool CanRead { get; }
         public abstract bool CanWrite { get; }
@@ -4467,13 +4816,17 @@ namespace System.Reflection
         public abstract System.Type PropertyType { get; }
         public virtual System.Reflection.MethodInfo SetMethod { get { return default(System.Reflection.MethodInfo); } }
         public override bool Equals(object obj) { return default(bool); }
+        public static bool operator ==(System.Reflection.PropertyInfo left, System.Reflection.PropertyInfo right) { return default(bool); }
+        public static bool operator !=(System.Reflection.PropertyInfo left, System.Reflection.PropertyInfo right) { return default(bool); }
         public virtual object GetConstantValue() { return default(object); }
         public override int GetHashCode() { return default(int); }
         public abstract System.Reflection.ParameterInfo[] GetIndexParameters();
         public object GetValue(object obj) { return default(object); }
         public virtual object GetValue(object obj, object[] index) { return default(object); }
+        public abstract object GetValue(object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object[] index, System.Globalization.CultureInfo culture);
         public void SetValue(object obj, object value) { }
         public virtual void SetValue(object obj, object value, object[] index) { }
+        public abstract void SetValue(object obj, object value, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object[] index, System.Globalization.CultureInfo culture); 
         public override MemberTypes MemberType { get { return default(MemberTypes); } }
         public MethodInfo[] GetAccessors() { return default(MethodInfo[]); }
         public abstract MethodInfo[] GetAccessors(bool nonPublic);
@@ -4498,6 +4851,13 @@ namespace System.Reflection
         public ReflectionTypeLoadException(System.Type[] classes, System.Exception[] exceptions, string message) { }
         public System.Exception[] LoaderExceptions { get { return default(System.Exception[]); } }
         public System.Type[] Types { get { return default(System.Type[]); } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    }
+    [System.FlagsAttribute]
+    public enum ResourceAttributes
+    {
+        Private = 2,
+        Public = 1,
     }
     [System.FlagsAttribute]
     public enum ResourceLocation
@@ -4506,11 +4866,26 @@ namespace System.Reflection
         ContainedInManifestFile = 4,
         Embedded = 1,
     }
+    public static partial class RuntimeReflectionExtensions
+    {
+        public static System.Reflection.MethodInfo GetMethodInfo(this System.Delegate del) { return default(System.Reflection.MethodInfo); }
+        public static System.Reflection.MethodInfo GetRuntimeBaseDefinition(this System.Reflection.MethodInfo method) { return default(System.Reflection.MethodInfo); }
+        public static System.Reflection.EventInfo GetRuntimeEvent(this System.Type type, string name) { return default(System.Reflection.EventInfo); }
+        public static System.Collections.Generic.IEnumerable<System.Reflection.EventInfo> GetRuntimeEvents(this System.Type type) { return default(System.Collections.Generic.IEnumerable<System.Reflection.EventInfo>); }
+        public static System.Reflection.FieldInfo GetRuntimeField(this System.Type type, string name) { return default(System.Reflection.FieldInfo); }
+        public static System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo> GetRuntimeFields(this System.Type type) { return default(System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo>); }
+        public static System.Reflection.InterfaceMapping GetRuntimeInterfaceMap(this System.Reflection.TypeInfo typeInfo, System.Type interfaceType) { return default(System.Reflection.InterfaceMapping); }
+        public static System.Reflection.MethodInfo GetRuntimeMethod(this System.Type type, string name, System.Type[] parameters) { return default(System.Reflection.MethodInfo); }
+        public static System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> GetRuntimeMethods(this System.Type type) { return default(System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo>); }
+        public static System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo> GetRuntimeProperties(this System.Type type) { return default(System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo>); }
+        public static System.Reflection.PropertyInfo GetRuntimeProperty(this System.Type type, string name) { return default(System.Reflection.PropertyInfo); }
+    }
     public partial class TargetException : System.Exception
     {
         public TargetException() { }
         public TargetException(string message) { }
         public TargetException(string message, Exception inner) { }
+        protected TargetException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
     public sealed partial class TargetInvocationException : System.Exception
     {
@@ -4548,6 +4923,7 @@ namespace System.Reflection
         NestedPublic = 2,
         NotPublic = 0,
         Public = 1,
+        ReservedMask = 264192,
         RTSpecialName = 2048,
         Sealed = 256,
         SequentialLayout = 8,
