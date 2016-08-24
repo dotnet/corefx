@@ -386,8 +386,13 @@ namespace System.Collections.Generic
             /// <include file='doc\Queue.uex' path='docs/doc[@for="QueueEnumerator.MoveNext"]/*' />
             public bool MoveNext()
             {
+                // Typically both of these conditions will be true, so save ourselves
+                // a branch and use bitwise AND.
                 bool typicalIteration = (_version == _q._version) & (_index != -2);
 
+                // Instead of return true/false, we assign the result to a variable and
+                // return it at the end. This helps decrease code size, as currently the
+                // jit cannot do this for us and generates code for 3 returns.
                 bool result = true;
                 if (typicalIteration)
                 {
@@ -395,6 +400,7 @@ namespace System.Collections.Generic
 
                     if (_index == _q._size)
                     {
+                        // We've run past the last element
                         _index = -2;
                         _currentElement = default(T);
                         result = false;
@@ -405,9 +411,12 @@ namespace System.Collections.Generic
                         T[] array = _q._array;
                         int capacity = array.Length;
 
-                        int arrayIndex = _q._head + _index;
+                        // _index represents the 0-based index into the queue, however the queue
+                        // doesn't have to start from 0 and it may not even be stored contiguously in memory.
+
+                        int arrayIndex = _q._head + _index; // this is the actual index into the queue's backing array
                         if (arrayIndex >= capacity)
-                            arrayIndex -= capacity;
+                            arrayIndex -= capacity; // wrap around
                         
                         _currentElement = array[arrayIndex];
                     }
@@ -425,6 +434,7 @@ namespace System.Collections.Generic
             {
                 Debug.Assert(_version != _q._version || _index == -2);
 
+                // Note: If both conditions are true, then we have to throw the exception first.
                 if (_version != _q._version)
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 
