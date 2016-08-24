@@ -747,8 +747,7 @@ namespace System.Reflection.PortableExecutable
         /// 
         /// The method looks the PDB up in the following steps in the listed order:
         /// 1) Check for a matching PDB file of the name found in the CodeView entry in the directory containing the PE file (the directory of <paramref name="peImagePath"/>).
-        /// 2) Check for a matching PDB file on the exact path found in the CodeView entry.
-        /// 3) Check for a PDB embedded in the PE image itself.
+        /// 2) Check for a PDB embedded in the PE image itself.
         /// 
         /// The first PDB that matches the information specified in the Debug Directory is returned.
         /// </remarks>
