@@ -18,6 +18,7 @@ namespace System.Linq.Expressions.Compiler
         private readonly AnalyzedTree _tree = new AnalyzedTree();
         private readonly Stack<CompilerScope> _scopes = new Stack<CompilerScope>();
         private readonly Stack<BoundConstants> _constants = new Stack<BoundConstants>();
+        private readonly StackGuard _guard = new StackGuard();
         private bool _inQuote;
 
         internal static AnalyzedTree Bind(LambdaExpression lambda)
@@ -29,6 +30,27 @@ namespace System.Linq.Expressions.Compiler
 
         private VariableBinder()
         {
+        }
+
+        public override Expression Visit(Expression node)
+        {
+            // When compling deep trees, we run the risk of triggering a terminating StackOverflowException,
+            // so we use the StackGuard utility here to probe for sufficient stackand continue the work on
+            // another thread when we run out of stack space.
+            if (!_guard.TryEnterOnCurrentStack())
+            {
+                return _guard.RunOnEmptyStack(s =>
+                {
+                    var t = (Tuple<VariableBinder, Expression>)s;
+                    return t.Item1.Visit(t.Item2);
+                }, Tuple.Create(this, node));
+            }
+
+            var result = base.Visit(node);
+
+            _guard.Exit();
+
+            return result;
         }
 
         protected internal override Expression VisitConstant(ConstantExpression node)
