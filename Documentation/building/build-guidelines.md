@@ -17,7 +17,7 @@ We don't want multiple ways to do the same thing.  There is a support cost and m
 		* Devs will grow accustomed to whatever pattern they first learn and not utilize the other, so why have more than one?
 		* Multiple ways to accomplish the same goal make it difficult to ensure that what a dev is doing is the same thing that an automated system is doing (or close to it)
 	* If the second way to do something is literally an alias to the first way, then that's probably ok, but we should have those things in a discoverable place, not cluttering our root.
-		* The run tool can highlight an alternative command, ie. Build-managed.cmd, build-tests.cmd, etc…
+		* The run tool can highlight an alternative command, ie. Build-managed.cmd, build-tests.cmd, etc…  The alternative commands (or wrapper scripts) would be moved out of the root and into a subdirectory of the builds folder 
 
 ### Keep it clean
 
@@ -34,12 +34,10 @@ It is difficult to understand our build because our build files are interspersed
 		* Those additional props files and targets files should be in a separate directory so that it is clear where the ToC for the folder is
 		* Should dir.props be responsible for all imports, ie, refactor so sub property files don't import anything, anything that's imported occurs in dir.props?
 			* Should we add a depends on section to comments so that we know what other props files this props files depends on (may make navigating simpler).
-				* Can we make these links to ease with navigation on github.com?
+				* Repo rooted paths
 		* If dir.targets has an initial target, leave it in dir.targets, all other targets in separate targets files
 		* Avoid global properties / items in targets, move them to a props file?
 	* Builds files and proj files are intrinsic parts of a project and remain where they are
-		* Should we change builds files to buildproj files so it is clear that they are buildable?
-	* Log files should go to a log folder instead of cluttering the root of the repo
 
 ### Make it maintainable
 
