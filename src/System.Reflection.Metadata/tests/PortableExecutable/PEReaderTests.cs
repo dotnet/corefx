@@ -512,8 +512,6 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var peStream = new MemoryStream(TestBuilders.BuildPEWithDebugDirectory(ddBuilder));
 
-            File.WriteAllBytes(@"c:\temp\a.dll", peStream.ToArray());
-
             using (var reader = new PEReader(peStream))
             {
                 string pathQueried = null;
