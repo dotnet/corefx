@@ -12,6 +12,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
@@ -285,11 +286,6 @@ namespace System.Collections.Generic
             return false;
         }
 
-        private T GetElement(int i)
-        {
-            return _array[(_head + i) % _array.Length];
-        }
-
         // Iterates over the objects in the queue, returning an array of the
         // objects in the Queue, or an empty array if the queue is empty.
         // The order of elements in the array is first in to last in, the same
@@ -390,22 +386,49 @@ namespace System.Collections.Generic
             /// <include file='doc\Queue.uex' path='docs/doc[@for="QueueEnumerator.MoveNext"]/*' />
             public bool MoveNext()
             {
-                if (_version != _q._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+                bool typicalIteration = (_version == _q._version) & (_index != -2);
 
-                if (_index == -2)
-                    return false;
-
-                _index++;
-
-                if (_index == _q._size)
+                bool result = true;
+                if (typicalIteration)
                 {
-                    _index = -2;
-                    _currentElement = default(T);
-                    return false;
+                    _index++;
+
+                    if (_index == _q._size)
+                    {
+                        _index = -2;
+                        _currentElement = default(T);
+                        result = false;
+                    }
+                    else
+                    {
+                        // Cache some fields in locals to decrease code size
+                        T[] array = _q._array;
+                        int capacity = array.Length;
+
+                        int arrayIndex = _q._head + _index;
+                        if (arrayIndex >= capacity)
+                            arrayIndex -= capacity;
+                        
+                        _currentElement = array[arrayIndex];
+                    }
+                }
+                else
+                {
+                    result = MoveNextRare();
                 }
 
-                _currentElement = _q.GetElement(_index);
-                return true;
+                return result;
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            private bool MoveNextRare()
+            {
+                Debug.Assert(_version != _q._version || _index == -2);
+
+                if (_version != _q._version)
+                    throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+                
+                return false;
             }
 
             /// <include file='doc\Queue.uex' path='docs/doc[@for="QueueEnumerator.Current"]/*' />
