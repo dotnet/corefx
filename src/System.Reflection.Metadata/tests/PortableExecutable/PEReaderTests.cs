@@ -339,7 +339,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.True(reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), streamProvider, out pdbProvider, out pdbPath));
                 Assert.Equal(Path.Combine("pedir", "Documents.pdb"), pathQueried);
 
-                Assert.Equal(@"pedir\Documents.pdb", pdbPath);
+                Assert.Equal(Path.Combine("pedir", "Documents.pdb"), pdbPath);
                 var pdbReader = pdbProvider.GetMetadataReader();
                 Assert.Equal(13, pdbReader.Documents.Count);
             }
