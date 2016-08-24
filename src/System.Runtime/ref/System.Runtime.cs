@@ -3821,7 +3821,7 @@ namespace System.IO
         public DirectoryNotFoundException() { }
         public DirectoryNotFoundException(string message) { }
         public DirectoryNotFoundException(string message, System.Exception innerException) { }
-        protected DirectoryNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        //protected DirectoryNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
     public partial class FileLoadException : System.IO.IOException
     {
@@ -3830,7 +3830,7 @@ namespace System.IO
         public FileLoadException(string message, System.Exception inner) { }
         public FileLoadException(string message, string fileName) { }
         public FileLoadException(string message, string fileName, System.Exception inner) { }
-        protected FileLoadException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        //protected FileLoadException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         public string FileName { get { return default(string); } }
         public override string Message { get { return default(string); } }
         public override string ToString() { return default(string); }
@@ -3842,7 +3842,7 @@ namespace System.IO
         public FileNotFoundException(string message, System.Exception innerException) { }
         public FileNotFoundException(string message, string fileName) { }
         public FileNotFoundException(string message, string fileName, System.Exception innerException) { }
-        protected FileNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        //protected FileNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         public string FileName { get { return default(string); } }
         public override string Message { get { return default(string); } }
         public override string ToString() { return default(string); }
@@ -3853,14 +3853,14 @@ namespace System.IO
         public IOException(string message) { }
         public IOException(string message, System.Exception innerException) { }
         public IOException(string message, int hresult) { }
-        protected IOException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        //protected IOException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
     public partial class PathTooLongException : System.IO.IOException
     {
         public PathTooLongException() { }
         public PathTooLongException(string message) { }
         public PathTooLongException(string message, System.Exception innerException) { }
-        protected PathTooLongException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        //protected PathTooLongException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
     public enum SeekOrigin
     {
@@ -4154,7 +4154,7 @@ namespace System.Reflection
         public abstract void ReorderArgumentArray(ref object[] args, object state);
         public abstract System.Reflection.MethodBase SelectMethod(System.Reflection.BindingFlags bindingAttr, System.Reflection.MethodBase[] match, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
         public abstract System.Reflection.PropertyInfo SelectProperty(System.Reflection.BindingFlags bindingAttr, System.Reflection.PropertyInfo[] match, System.Type returnType, System.Type[] indexes, System.Reflection.ParameterModifier[] modifiers);
-        public virtual bool CanChangeType(System.Object value,System.Type type,System.Globalization.CultureInfo culture) { return default(bool); }
+        //public virtual bool CanChangeType(System.Object value,System.Type type,System.Globalization.CultureInfo culture) { return default(bool); }
     }
     [Flags]
     public enum BindingFlags
@@ -4635,13 +4635,6 @@ namespace System.Reflection
         public override MemberTypes MemberType { get { return default(MemberTypes); } }
         public abstract System.Reflection.ICustomAttributeProvider ReturnTypeCustomAttributes { get; }
     }
-    //public sealed partial class Missing : System.Runtime.Serialization.ISerializable
-    //{
-    //    internal Missing() { }
-    //    public static readonly System.Reflection.Missing Value;
-    //    [System.Security.SecurityCriticalAttribute]
-    //    void System.Runtime.Serialization.ISerializable.GetObjectData(Runtime.Serialization.SerializationInfo info, Runtime.Serialization.StreamingContext context) { }
-    //}
     public abstract partial class Module : System.Reflection.ICustomAttributeProvider, System.Runtime.Serialization.ISerializable
     {
         protected Module() { }
@@ -4764,16 +4757,16 @@ namespace System.Reflection
         public ParameterModifier(int parameterCount) { }
         public bool this[int index] { get { return default(bool); } set { } }
     }
-    [System.CLSCompliantAttribute(false)]
-    public sealed class Pointer : System.Runtime.Serialization.ISerializable
-    {
-        [System.Security.SecurityCriticalAttribute]
-        public static unsafe Object Box(void* ptr, System.Type type) { return default(Object); }
-        [System.Security.SecurityCriticalAttribute]
-        public static unsafe void* Unbox(object ptr) { return default(void*); }
-        [System.Security.SecurityCriticalAttribute]
-        unsafe void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-    }
+    //[System.CLSCompliantAttribute(false)]
+    //public sealed class Pointer : System.Runtime.Serialization.ISerializable
+    //{
+    //    [System.Security.SecurityCriticalAttribute]
+    //    public static unsafe Object Box(void* ptr, System.Type type) { return default(Object); }
+    //    [System.Security.SecurityCriticalAttribute]
+    //    public static unsafe void* Unbox(object ptr) { return default(void*); }
+    //    [System.Security.SecurityCriticalAttribute]
+    //    unsafe void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    //}
     [System.FlagsAttribute]
     public enum PortableExecutableKinds
     {
