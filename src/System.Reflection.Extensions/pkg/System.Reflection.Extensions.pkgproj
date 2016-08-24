@@ -5,8 +5,14 @@
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
+    <ProjectReference Include="..\ref\4.0.0\System.Reflection.Extensions.depproj">
+      <SupportedFramework>net45;netcore45;wp8;wpa81</SupportedFramework>
+    </ProjectReference>
     <ProjectReference Include="..\ref\System.Reflection.Extensions.csproj">
-      <SupportedFramework>net45;netcore45;netcoreapp1.0;wp8;wpa81;$(AllXamarinFrameworks)</SupportedFramework>
+      <SupportedFramework>net463;netcoreapp1.1;$(AllXamarinFrameworks)</SupportedFramework>
+    </ProjectReference>
+    <ProjectReference Include="..\src\System.Reflection.Extensions.csproj">
+      <TargetGroup>net463</TargetGroup>
     </ProjectReference>
     <ProjectReference Include="any\System.Reflection.Extensions.pkgproj" />
     <ProjectReference Include="aot\System.Reflection.Extensions.pkgproj" />

@@ -119,6 +119,8 @@
     <ProjectReference Include="..\..\System.Threading.Tasks\pkg\System.Threading.Tasks.pkgproj" />
     <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
     <ProjectReference Include="..\..\System.Reflection\pkg\System.Reflection.pkgproj" />
+    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
+    <ProjectReference Include="..\..\System.Reflection.Extensions\pkg\System.Reflection.Extensions.pkgproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

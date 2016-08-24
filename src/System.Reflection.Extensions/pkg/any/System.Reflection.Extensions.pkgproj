@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Reflection.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\System.Reflection.Extensions.csproj" >
+      <TargetGroup>netstandard1.3</TargetGroup>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\redist\System.Reflection.Extensions.depproj">
       <TargetGroup>netcore50</TargetGroup>
     </ProjectReference>

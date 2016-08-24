@@ -79,6 +79,8 @@
     <ProjectReference Include="../../System.Reflection.Primitives/pkg/System.Reflection.Primitives.pkgproj" />
     <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
     <ProjectReference Include="../../System.Threading.Tasks/pkg/System.Threading.Tasks.pkgproj" />
+    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
+    <ProjectReference Include="..\..\System.Reflection.Extensions\pkg\System.Reflection.Extensions.pkgproj" />
 
     <ProjectReference Include="../../System.Runtime.Serialization.Primitives/pkg/System.Runtime.Serialization.Primitives.pkgproj">
         <Name>System.Runtime.Serialization.Primitives</Name>
