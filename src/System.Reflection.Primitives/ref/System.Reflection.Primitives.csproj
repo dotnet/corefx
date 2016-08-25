@@ -13,7 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System.Reflection.Primitives.cs" />
-    <Compile Include="System.Reflection.Primitives.Forwards.cs" />
     <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
   </ItemGroup>

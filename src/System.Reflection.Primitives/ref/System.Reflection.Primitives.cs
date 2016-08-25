@@ -5,6 +5,16 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+// These types were moved down to System.Runtime
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.CallingConventions))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.EventAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.FieldAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.GenericParameterAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.MethodAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.MethodImplAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.ParameterAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.PropertyAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.TypeAttributes))]
 
 namespace System.Reflection.Emit
 {
