@@ -10,7 +10,7 @@ using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
 
-namespace System.Net
+namespace System.Net.Security
 {
     internal static class SslStreamPal
     {

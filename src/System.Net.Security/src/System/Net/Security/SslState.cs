@@ -1869,7 +1869,7 @@ namespace System.Net.Security
         {
             CheckThrow(authSuccessCheck: true);
 
-            ProtocolToken message = Context.CreateAlertToken(alertType, alertMessage);
+            ProtocolToken message = Context.CreateAlertTokenInternal(alertType, alertMessage);
             InnerStream.Write(message.Payload, 0, message.Payload.Length);
         }
 
@@ -1880,7 +1880,7 @@ namespace System.Net.Security
             // 1. Ensure that no other data is sent after close_notify.
             // 2. Ensure that the channel is invalidated after sending alert_fatal.
 
-            ProtocolToken message = Context.CreateAlertToken(alertType, alertMessage);
+            ProtocolToken message = Context.CreateAlertTokenInternal(alertType, alertMessage);
             return InnerStream.BeginWrite(message.Payload, 0, message.Payload.Length, asyncCallback, asyncState);
         }
 

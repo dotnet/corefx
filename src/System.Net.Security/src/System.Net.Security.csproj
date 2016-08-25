@@ -33,29 +33,30 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
   <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="System\PinnableBufferCache.cs" />
-    <Compile Include="System\Net\SecurityBuffer.cs" />
-    <Compile Include="System\Net\SecurityBufferType.cs" />
-    <Compile Include="System\Net\SecureChannel.cs" />
+    <Compile Include="System\Net\FixedSizeReader.cs" />
+    <Compile Include="System\Net\HelperAsyncResults.cs" />
     <Compile Include="System\Net\SecurityStatusPal.cs" />
-    <Compile Include="System\Net\SslSessionsCache.cs" />
-    <Compile Include="System\Net\SecureProtocols\SslStream.cs" />
-    <Compile Include="System\Net\SecureProtocols\AuthenticatedStream.cs" />
-    <Compile Include="System\Net\SecureProtocols\SslState.cs" />
-    <Compile Include="System\Net\SecureProtocols\SslStreamInternal.cs" />
-    <Compile Include="System\Net\SecureProtocols\HelperAsyncResults.cs" />
-    <Compile Include="System\Net\SecureProtocols\SslStreamContext.cs" />
-    <Compile Include="System\Net\SecureProtocols\AuthenticationException.cs" />
-    <Compile Include="System\Net\SecureProtocols\FixedSizeReader.cs" />
-    <Compile Include="System\Net\SecureProtocols\ProtectionLevel.cs" />
+    <Compile Include="System\Net\SslStreamContext.cs" />
+    <Compile Include="System\Net\Security\AuthenticatedStream.cs" />
+    <Compile Include="System\Net\Security\SecurityBuffer.cs" />
+    <Compile Include="System\Net\Security\SecurityBufferType.cs" />
+    <Compile Include="System\Net\Security\SecureChannel.cs" />
+    <Compile Include="System\Net\Security\SslSessionsCache.cs" />
+    <Compile Include="System\Net\Security\SslStream.cs" />
+    <Compile Include="System\Net\Security\SslState.cs" />
+    <Compile Include="System\Net\Security\SslStreamInternal.cs" />
+    <Compile Include="System\Net\Security\ProtectionLevel.cs" />
+    <Compile Include="System\Security\Authentication\AuthenticationException.cs" />
     <!-- NegotiateStream -->
+    <Compile Include="System\Net\BufferAsyncResult.cs" />
     <Compile Include="System\Net\ContextFlagsPal.cs" />
     <Compile Include="System\Net\NTAuthentication.cs" />
-    <Compile Include="System\Net\SSPIHandleCache.cs" />
     <Compile Include="System\Net\StreamFramer.cs" />
-    <Compile Include="System\Net\SecureProtocols\BufferAsyncResult.cs" />
-    <Compile Include="System\Net\SecureProtocols\NegotiateStream.cs" />
-    <Compile Include="System\Net\SecureProtocols\NegoState.cs" />
-    <Compile Include="System\Net\SecureProtocols\InternalNegotiateStream.cs" />
+    <Compile Include="System\Net\Security\SSPIHandleCache.cs" />
+
+    <Compile Include="System\Net\Security\NegotiateStream.cs" />
+    <Compile Include="System\Net\Security\NegoState.cs" />
+    <Compile Include="System\Net\Security\InternalNegotiateStream.cs" />
     <Compile Include="System\Net\NegotiationInfoClass.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ExtendedProtectionPolicy.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\PolicyEnforcement.cs" />
@@ -143,13 +144,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' ">
-    <Compile Include="System\Net\SslStreamPal.Windows.cs" />
-    <Compile Include="System\Net\SecurityContextTokenHandle.cs" />
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
     <Compile Include="System\Net\SecurityStatusAdapterPal.Windows.cs" />
+    <Compile Include="System\Net\Security\SecurityContextTokenHandle.cs" />
+    <Compile Include="System\Net\Security\SslStreamPal.Windows.cs" />
     <!-- NegotiateStream -->
-    <Compile Include="System\Net\NegotiateStreamPal.Windows.cs" />
     <Compile Include="System\Net\ContextFlagsAdapterPal.Windows.cs" />
+    <Compile Include="System\Net\Security\NegotiateStreamPal.Windows.cs" />
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -234,14 +235,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="System\Net\SslStreamPal.Unix.cs" />
     <Compile Include="System\Net\CertificateValidationPal.Unix.cs" />
+    <Compile Include="System\Net\Security\SslStreamPal.Unix.cs" />
     <Compile Include="$(CommonPath)\System\Net\Security\CertificateValidation.Unix.cs">
       <Link>Common\System\Net\Security\CertificateValidation.Unix.cs</Link>
     </Compile>
     <!-- NegotiateStream -->
-    <Compile Include="System\Net\NegotiateStreamPal.Unix.cs" />
     <Compile Include="System\Net\ContextFlagsAdapterPal.Unix.cs" />
+    <Compile Include="System\Net\Security\NegotiateStreamPal.Unix.cs" />
     <!-- Interop -->
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>

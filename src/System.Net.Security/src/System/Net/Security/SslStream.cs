@@ -201,14 +201,6 @@ namespace System.Net.Security
             return Task.Factory.FromAsync((callback, state) => BeginAuthenticateAsServer(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation, callback, state), EndAuthenticateAsServer, null);
         }
 
-        public virtual Task SendAlertAsync(int alertType, int alertMessage)
-        {
-            return Task.Factory.FromAsync(
-                (callback, state) => BeginSendAlert(alertType, alertMessage, callback, state),
-                EndSendAlert,
-                null);
-        }
-
         public virtual Task ShutdownAsync()
         {
             return Task.Factory.FromAsync(

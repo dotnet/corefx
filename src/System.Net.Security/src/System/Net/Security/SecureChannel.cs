@@ -821,52 +821,6 @@ namespace System.Net.Security
             return token;
         }
 
-        internal ProtocolToken CreateAlertToken(int alertType, int alertMessage)
-        {
-            if (GlobalLog.IsEnabled)
-            {
-                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken(" + alertType + ", " + alertMessage + ")");
-            }
-
-            SecurityStatusPal status;
-
-            if (alertType == Interop.SChannel.TLS1_ALERT_WARNING && 
-                alertMessage == Interop.SChannel.TLS1_ALERT_CLOSE_NOTIFY)
-            {
-                // close_notify is a special case.
-                status = SslStreamPal.ApplyShutdownToken(ref _credentialsHandle, _securityContext);
-            }
-            else
-            {
-                // TODO: protocol validation for alertType, alertMessage.
-                status = SslStreamPal.ApplyAlertToken(ref _credentialsHandle, _securityContext, alertType, alertMessage);
-            }
-
-            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
-            {
-                if (GlobalLog.IsEnabled)
-                {
-                    GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::ApplyAlertToken() returned " + status.ErrorCode);
-                }
-
-                throw status.Exception;
-            }
-
-            byte[] nextmsg = null;
-
-            // TODO: ensure that the other params passed to ISC/ASC are correct for the generation of a new alert.
-            status = GenerateToken(null, 0, 0, ref nextmsg);
-
-            ProtocolToken token = new ProtocolToken(nextmsg, status);
-
-            if (GlobalLog.IsEnabled)
-            {
-                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken", token.ToString());
-            }
-
-            return token;
-        }
-
         /*++
             GenerateToken - Called after each successive state
             in the Client - Server handshake.  This function
@@ -1269,24 +1223,7 @@ namespace System.Net.Security
 
                 if (!success)
                 {
-                    // Prepare Alert Token.
-                    int alertMessage;
-
-                    switch (sslPolicyErrors)
-                    {
-                        case SslPolicyErrors.RemoteCertificateChainErrors:
-                            alertMessage = GetAlertMessageFromChain(chain);
-                            break;
-                        case SslPolicyErrors.RemoteCertificateNameMismatch:
-                            alertMessage = Interop.SChannel.TLS1_ALERT_CERTIFICATE_UNKNOWN;
-                            break;
-                        case SslPolicyErrors.RemoteCertificateNotAvailable:
-                        default:
-                            alertMessage = Interop.SChannel.TLS1_ALERT_HANDSHAKE_FAILURE;
-                            break;
-                    }
-
-                    alertToken = CreateAlertToken(Interop.SChannel.TLS1_ALERT_FATAL, alertMessage);
+                    alertToken = CreateAlertToken(sslPolicyErrors, chain);
                 }
             }
             finally
@@ -1314,6 +1251,76 @@ namespace System.Net.Security
             return success;
         }
 
+        public ProtocolToken CreateAlertToken(SslPolicyErrors sslPolicyErrors, X509Chain chain)
+        {
+            ProtocolToken alertToken;
+            int alertMessage;
+
+            switch (sslPolicyErrors)
+            {
+                case SslPolicyErrors.RemoteCertificateChainErrors:
+                    alertMessage = GetAlertMessageFromChain(chain);
+                    break;
+                case SslPolicyErrors.RemoteCertificateNameMismatch:
+                    alertMessage = Interop.SChannel.TLS1_ALERT_CERTIFICATE_UNKNOWN;
+                    break;
+                case SslPolicyErrors.RemoteCertificateNotAvailable:
+                default:
+                    alertMessage = Interop.SChannel.TLS1_ALERT_HANDSHAKE_FAILURE;
+                    break;
+            }
+
+            alertToken = CreateAlertTokenInternal(Interop.SChannel.TLS1_ALERT_FATAL, alertMessage);
+            return alertToken;
+        }
+
+        public ProtocolToken CreateAlertTokenInternal(int alertType, int alertMessage)
+        {
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken(" + alertType + ", " + alertMessage + ")");
+            }
+
+            SecurityStatusPal status;
+
+            if (alertType == Interop.SChannel.TLS1_ALERT_WARNING &&
+                alertMessage == Interop.SChannel.TLS1_ALERT_CLOSE_NOTIFY)
+            {
+                // close_notify is a special case.
+                status = SslStreamPal.ApplyShutdownToken(ref _credentialsHandle, _securityContext);
+            }
+            else
+            {
+                // TODO: protocol validation for alertType, alertMessage.
+                status = SslStreamPal.ApplyAlertToken(ref _credentialsHandle, _securityContext, alertType, alertMessage);
+            }
+
+            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::ApplyAlertToken() returned " + status.ErrorCode);
+                }
+
+                throw status.Exception;
+            }
+
+            byte[] nextmsg = null;
+
+            // TODO: ensure that the other params passed to ISC/ASC are correct for the generation of a new alert.
+            status = GenerateToken(null, 0, 0, ref nextmsg);
+
+            ProtocolToken token = new ProtocolToken(nextmsg, status);
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::CreateAlertToken", token.ToString());
+            }
+
+            return token;
+        }
+
+
         private static int GetAlertMessageFromChain(X509Chain chain)
         {
             foreach (X509ChainStatus chainStatus in chain.ChainStatus)
@@ -1323,28 +1330,28 @@ namespace System.Net.Security
                     continue;
                 }
 
-                if ((chainStatus.Status & 
-                    (X509ChainStatusFlags.UntrustedRoot | X509ChainStatusFlags.PartialChain | 
+                if ((chainStatus.Status &
+                    (X509ChainStatusFlags.UntrustedRoot | X509ChainStatusFlags.PartialChain |
                      X509ChainStatusFlags.Cyclic)) != 0)
                 {
                     return Interop.SChannel.TLS1_ALERT_UNKNOWN_CA;
                 }
 
-                if ((chainStatus.Status & 
-                    (X509ChainStatusFlags.Revoked | X509ChainStatusFlags.OfflineRevocation | 
+                if ((chainStatus.Status &
+                    (X509ChainStatusFlags.Revoked | X509ChainStatusFlags.OfflineRevocation |
                      X509ChainStatusFlags.RevocationStatusUnknown)) != 0)
                 {
                     return Interop.SChannel.TLS1_ALERT_CERTIFICATE_REVOKED;
                 }
 
                 if ((chainStatus.Status &
-                    (X509ChainStatusFlags.CtlNotTimeValid | X509ChainStatusFlags.NotTimeNested | 
+                    (X509ChainStatusFlags.CtlNotTimeValid | X509ChainStatusFlags.NotTimeNested |
                      X509ChainStatusFlags.NotTimeValid)) != 0)
                 {
                     return Interop.SChannel.TLS1_ALERT_CERTIFICATE_EXPIRED;
                 }
 
-                if ((chainStatus.Status & 
+                if ((chainStatus.Status &
                     (X509ChainStatusFlags.NotValidForUsage | X509ChainStatusFlags.CtlNotValidForUsage)) != 0)
                 {
                     return Interop.SChannel.TLS1_ALERT_UNSUPPORTED_CERT;
@@ -1352,7 +1359,7 @@ namespace System.Net.Security
 
                 if ((chainStatus.Status &
                     (X509ChainStatusFlags.CtlNotSignatureValid | X509ChainStatusFlags.InvalidExtension |
-                     X509ChainStatusFlags.NotSignatureValid | X509ChainStatusFlags.InvalidPolicyConstraints) | 
+                     X509ChainStatusFlags.NotSignatureValid | X509ChainStatusFlags.InvalidPolicyConstraints) |
                      X509ChainStatusFlags.NoIssuanceChainPolicy) != 0)
                 {
                     return Interop.SChannel.TLS1_ALERT_BAD_CERTIFICATE;
