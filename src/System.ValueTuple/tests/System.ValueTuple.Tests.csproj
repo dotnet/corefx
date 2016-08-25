@@ -10,9 +10,9 @@
     <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="TupleElementNamesAttribute\UnitTests.cs" />
-    <Compile Include="ValueTuple\ExtensionsTests.cs" />
-    <Compile Include="ValueTuple\UnitTests.cs" />
+    <Compile Include="TupleElementNamesTests.cs" />
+    <Compile Include="ExtensionsTests.cs" />
+    <Compile Include="ValueTupleTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.ValueTuple.pkgproj">
