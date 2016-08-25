@@ -166,19 +166,19 @@
       "description": "MsBuild logging options.",
       "valueType": "passThrough",
       "values": [],
-      "defaultValue": "/flp:v=normal;logfile=logs/msbuild.log"
+      "defaultValue": "/flp:v=normal;logfile=msbuild.log"
     },
     "MsBuildWarning": {
       "description": "MsBuild warning logging.",
       "valueType": "passThrough",
       "values": [],
-      "defaultValue": "/flp2:warningsonly;logfile=logs/msbuild.wrn"
+      "defaultValue": "/flp2:warningsonly;logfile=msbuild.wrn"
     },
     "MsBuildError": {
       "description": "MsBuild error logging.",
       "valueType": "passThrough",
       "values": [],
-      "defaultValue": "/flp3:errorsonly;logfile=logs/msbuild.err"
+      "defaultValue": "/flp3:errorsonly;logfile=msbuild.err"
     },
     "MsBuildParameters": {
       "description": "MsBuild building options.",
@@ -335,7 +335,7 @@
         "verbose":{
           "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
           "settings":{
-            "MsBuildLogging": "/flp:v=diag;LogFile=logs/sync.log"
+            "MsBuildLogging": "/flp:v=diag;LogFile=sync.log"
           }
         }
       },
@@ -343,7 +343,7 @@
         "toolName": "msbuild",
         "settings": {
           "MsBuildParameters":"default",
-          "MsBuildLogging":"/flp:v=normal;LogFile=logs/sync.log"
+          "MsBuildLogging":"/flp:v=normal;LogFile=sync.log"
         }
       }
     },
@@ -362,14 +362,14 @@
           "settings":{
             "Project": "src/packages.builds",
             "FilterToOSGroup":"default",
-            "MsBuildLogging":"/flp:v=normal;LogFile=logs/build-packages.log"
+            "MsBuildLogging":"/flp:v=normal;LogFile=build-packages.log"
           }
         },
         "tests":{
           "description": "Builds the tests that are in the repository.",
           "settings":{
             "Project": "src/tests.builds",
-            "MsBuildLogging":"/flp:v=normal;LogFile=logs/build-tests.log"
+            "MsBuildLogging":"/flp:v=normal;LogFile=build-tests.log"
           }
         },
         "debug":{
@@ -424,7 +424,7 @@
         "verbose":{
           "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
           "settings":{
-            "MsBuildLogging": "/flp:v=diag;LogFile=logs/build-managed.log"
+            "MsBuildLogging": "/flp:v=diag;LogFile=build-managed.log"
           }
         },
         "nodeReuse":{
@@ -520,7 +520,7 @@
         "verbose":{
           "description": "Passes /flp:v=diag to the msbuild command or the value passed by the user.",
           "settings":{
-            "MsBuildLogging": "/flp:v=diag;LogFile=logs/publish-packages.log"
+            "MsBuildLogging": "/flp:v=diag;LogFile=publish-packages.log"
           }
         }
       },
@@ -529,7 +529,7 @@
         "settings": {
           "Project": "src/publish.proj",
           "MsBuildParameters":"default",
-          "MsBuildLogging":"/flp:v=normal;LogFile=logs/publish-packages.log"
+          "MsBuildLogging":"/flp:v=normal;LogFile=publish-packages.log"
         }
       }
     },
@@ -558,7 +558,7 @@
         "toolName": "msbuild",
         "settings": {
           "MsBuildParameters":"default",
-          "MsBuildLogging":"/flp:v=normal;LogFile=logs/clean.log"
+          "MsBuildLogging":"/flp:v=normal;LogFile=clean.log"
         }
       }
     }
