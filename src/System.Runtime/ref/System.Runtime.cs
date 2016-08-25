@@ -2158,41 +2158,185 @@ namespace System
         int System.IComparable.CompareTo(object obj) { return default(int); }
         public override string ToString() { return default(string); }
     }
-    public abstract partial class Type
+    public abstract partial class Type : System.Reflection.MemberInfo, System.Reflection.IReflect
     {
-        public static readonly System.Type[] EmptyTypes;
-        public static readonly object Missing;
         public static readonly char Delimiter;
-        internal Type() { }
+        public static readonly System.Type[] EmptyTypes;
+        public static readonly System.Reflection.MemberFilter FilterAttribute;
+        public static readonly System.Reflection.MemberFilter FilterName;
+        public static readonly System.Reflection.MemberFilter FilterNameIgnoreCase;
+        public static readonly object Missing;
+        protected Type() { }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static bool operator ==(System.Type left, System.Type right) { return default(bool); }
+        [System.Security.SecuritySafeCriticalAttribute]
+        public static bool operator !=(System.Type left, System.Type right) { return default(bool); }
+        public abstract System.Reflection.Assembly Assembly { get; }
         public abstract string AssemblyQualifiedName { get; }
+        public System.Reflection.TypeAttributes Attributes { get { return default(System.Reflection.TypeAttributes); } }
+        public abstract System.Type BaseType { get; }
+        public virtual bool ContainsGenericParameters { get { return default(bool); } }
+        public virtual System.Reflection.MethodBase DeclaringMethod { get { return default(System.Reflection.MethodBase); } }
+        public override System.Type DeclaringType { get { return default(System.Type); } }
+        public static System.Reflection.Binder DefaultBinder { get { return default(System.Reflection.Binder); } }
         public abstract string FullName { get; }
-        public abstract int GenericParameterPosition { get; }
-        public abstract System.Type[] GenericTypeArguments { get; }
+        public virtual System.Reflection.GenericParameterAttributes GenericParameterAttributes { get { return default(System.Reflection.GenericParameterAttributes); } }
+        public virtual int GenericParameterPosition { get { return default(int); } }
+        public virtual System.Type[] GenericTypeArguments { get { return default(System.Type[]); } }
+        public abstract System.Guid GUID { get; }
         public bool HasElementType { get { return default(bool); } }
-        public virtual bool IsArray { get { return default(bool); } }
-        public virtual bool IsByRef { get { return default(bool); } }
-        public abstract bool IsConstructedGenericType { get; }
-        public abstract bool IsGenericParameter { get; }
+        public bool IsAbstract { get { return default(bool); } }
+        public bool IsAnsiClass { get { return default(bool); } }
+        public bool IsArray { get { return default(bool); } }
+        public bool IsAutoClass { get { return default(bool); } }
+        public bool IsAutoLayout { get { return default(bool); } }
+        public bool IsByRef { get { return default(bool); } }
+        public bool IsClass { get { return default(bool); } }
+        public bool IsCOMObject { get { return default(bool); } }
+        public virtual bool IsConstructedGenericType { get { return default(bool); } }
+        public bool IsContextful { get { return default(bool);} }
+        public bool IsEnum { get { return default(bool); } }
+        public bool IsExplicitLayout { get { return default(bool); } }
+        public virtual bool IsGenericParameter { get { return default(bool); } }
+        public virtual bool IsGenericType { get { return default(bool); } }
+        public virtual bool IsGenericTypeDefinition { get { return default(bool); } }
+        public bool IsImport { get { return default(bool); } }
+        public bool IsInterface { [System.Security.SecuritySafeCriticalAttribute]get { return default(bool); } }
+        public bool IsLayoutSequential { get { return default(bool); } }
+        public bool IsMarshalByRef { get { return default(bool); } }
         public bool IsNested { get { return default(bool); } }
-        public virtual bool IsPointer { get { return default(bool); } }
+        public bool IsNestedAssembly { get { return default(bool); } }
+        public bool IsNestedFamANDAssem { get { return default(bool); } }
+        public bool IsNestedFamily { get { return default(bool); } }
+        public bool IsNestedFamORAssem { get { return default(bool); } }
+        public bool IsNestedPrivate { get { return default(bool); } }
+        public bool IsNestedPublic { get { return default(bool); } }
+        public bool IsNotPublic { get { return default(bool); } }
+        public bool IsPointer { get { return default(bool); } }
+        public bool IsPrimitive { get { return default(bool); } }
+        public bool IsPublic { get { return default(bool); } }
+        public bool IsSealed { get { return default(bool); } }
+        //public virtual bool IsSecurityCritical { get { return default(bool); } }
+        //public virtual bool IsSecuritySafeCritical { get { return default(bool); } }
+        //public virtual bool IsSecurityTransparent { get { return default(bool); } }
+        public virtual bool IsSerializable { get { return default(bool); } }
+        public bool IsSpecialName { get { return default(bool); } }
+        public bool IsUnicodeClass { get { return default(bool); } }
+        public bool IsValueType { get { return default(bool); } }
+        public bool IsVisible { get { return default(bool); } }
+        public override System.Reflection.MemberTypes MemberType { get { return default(System.Reflection.MemberTypes); } }
+        public abstract new System.Reflection.Module Module { get; }
         public abstract string Namespace { get; }
+        public override System.Type ReflectedType { get { return default(System.Type); } }
+        public virtual System.Runtime.InteropServices.StructLayoutAttribute StructLayoutAttribute { get { return default(System.Runtime.InteropServices.StructLayoutAttribute); } }
         public virtual System.RuntimeTypeHandle TypeHandle { get { return default(System.RuntimeTypeHandle); } }
+        public System.Reflection.ConstructorInfo TypeInitializer { get { return default(System.Reflection.ConstructorInfo); } }
+        public abstract System.Type UnderlyingSystemType { get; }
         public override bool Equals(object o) { return default(bool); }
         public bool Equals(System.Type o) { return default(bool); }
-        public abstract int GetArrayRank();
+        public virtual System.Type[] FindInterfaces(System.Reflection.TypeFilter filter, object filterCriteria) { return default(System.Type[]); }
+        public virtual System.Reflection.MemberInfo[] FindMembers(System.Reflection.MemberTypes memberType, System.Reflection.BindingFlags bindingAttr, System.Reflection.MemberFilter filter, object filterCriteria) { return default(System.Reflection.MemberInfo[]); }
+        public virtual int GetArrayRank() { return default(int); }
+        protected abstract System.Reflection.TypeAttributes GetAttributeFlagsImpl();
+        public System.Reflection.ConstructorInfo GetConstructor(System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.ConstructorInfo); }
+        public System.Reflection.ConstructorInfo GetConstructor(System.Type[] types) { return default(System.Reflection.ConstructorInfo); }
+        protected abstract System.Reflection.ConstructorInfo GetConstructorImpl(System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
+        public System.Reflection.ConstructorInfo[] GetConstructors() { return default(System.Reflection.ConstructorInfo[]); }
+        public abstract System.Reflection.ConstructorInfo[] GetConstructors(System.Reflection.BindingFlags bindingAttr);
+        public System.Reflection.ConstructorInfo GetConstructor(System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.ConstructorInfo); }
+        public virtual System.Reflection.MemberInfo[] GetDefaultMembers() { return default(System.Reflection.MemberInfo[]); }
         public abstract System.Type GetElementType();
-        public abstract System.Type GetGenericTypeDefinition();
+        public virtual string GetEnumName(object value) { return default(string); }
+        public virtual string[] GetEnumNames() { return default(string[]); }
+        public virtual System.Type GetEnumUnderlyingType() { return default(System.Type); }
+        public virtual System.Array GetEnumValues() { return default(System.Array); }
+        public System.Reflection.EventInfo GetEvent(string name) { return default(System.Reflection.EventInfo); }
+        public abstract System.Reflection.EventInfo GetEvent(string name, System.Reflection.BindingFlags bindingAttr);
+        public virtual System.Reflection.EventInfo[] GetEvents() { return default(System.Reflection.EventInfo[]); }
+        public abstract System.Reflection.EventInfo[] GetEvents(System.Reflection.BindingFlags bindingAttr);
+        public System.Reflection.FieldInfo GetField(string name) { return default(System.Reflection.FieldInfo); }
+        public abstract System.Reflection.FieldInfo GetField(string name, System.Reflection.BindingFlags bindingAttr);
+        public System.Reflection.FieldInfo[] GetFields() { return default(System.Reflection.FieldInfo[]); }
+        public abstract System.Reflection.FieldInfo[] GetFields(System.Reflection.BindingFlags bindingAttr);
+        public virtual System.Type[] GetGenericArguments() { return default(System.Type[]); }
+        public virtual System.Type[] GetGenericParameterConstraints() { return default(System.Type[]); }
+        public virtual System.Type GetGenericTypeDefinition() { return default(System.Type); }
         public override int GetHashCode() { return default(int); }
+        public System.Type GetInterface(string name) { return default(System.Type); }
+        public abstract System.Type GetInterface(string name, bool ignoreCase);
+        public virtual System.Reflection.InterfaceMapping GetInterfaceMap(System.Type interfaceType) { return default(System.Reflection.InterfaceMapping); }
+        public abstract System.Type[] GetInterfaces();
+        public System.Reflection.MemberInfo[] GetMember(string name) { return default(System.Reflection.MemberInfo[]); }
+        public virtual System.Reflection.MemberInfo[] GetMember(string name, System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.MemberInfo[]); }
+        public virtual System.Reflection.MemberInfo[] GetMember(string name, System.Reflection.MemberTypes type, System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.MemberInfo[]); }
+        public System.Reflection.MemberInfo[] GetMembers() { return default(System.Reflection.MemberInfo[]); }
+        public abstract System.Reflection.MemberInfo[] GetMembers(System.Reflection.BindingFlags bindingAttr);
+        public System.Reflection.MethodInfo GetMethod(string name) { return default(System.Reflection.MethodInfo); }
+        public System.Reflection.MethodInfo GetMethod(string name, System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.MethodInfo); }
+        public System.Reflection.MethodInfo GetMethod(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.MethodInfo); }
+        public System.Reflection.MethodInfo GetMethod(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.MethodInfo); }
+        public System.Reflection.MethodInfo GetMethod(string name, System.Type[] types) { return default(System.Reflection.MethodInfo); }
+        public System.Reflection.MethodInfo GetMethod(string name, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.MethodInfo); }
+        protected abstract System.Reflection.MethodInfo GetMethodImpl(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
+        public System.Reflection.MethodInfo[] GetMethods() { return default(System.Reflection.MethodInfo[]); }
+        public abstract System.Reflection.MethodInfo[] GetMethods(System.Reflection.BindingFlags bindingAttr);
+        public System.Type GetNestedType(string name) { return default(System.Type); }
+        public abstract System.Type GetNestedType(string name, System.Reflection.BindingFlags bindingAttr);
+        public System.Type[] GetNestedTypes() { return default(System.Type[]); }
+        public abstract System.Type[] GetNestedTypes(System.Reflection.BindingFlags bindingAttr);
+        public System.Reflection.PropertyInfo[] GetProperties() { return default(System.Reflection.PropertyInfo[]); }
+        public abstract System.Reflection.PropertyInfo[] GetProperties(System.Reflection.BindingFlags bindingAttr);
+        public System.Reflection.PropertyInfo GetProperty(string name) { return default(System.Reflection.PropertyInfo); }
+        public System.Reflection.PropertyInfo GetProperty(string name, System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.PropertyInfo); }
+        public System.Reflection.PropertyInfo GetProperty(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Type returnType, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.PropertyInfo); }
+        public System.Reflection.PropertyInfo GetProperty(string name, System.Type returnType) { return default(System.Reflection.PropertyInfo); }
+        public System.Reflection.PropertyInfo GetProperty(string name, System.Type returnType, System.Type[] types) { return default(System.Reflection.PropertyInfo); }
+        public System.Reflection.PropertyInfo GetProperty(string name, System.Type returnType, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.PropertyInfo); }
+        public System.Reflection.PropertyInfo GetProperty(string name, System.Type[] types) { return default(System.Reflection.PropertyInfo); }
+        protected abstract System.Reflection.PropertyInfo GetPropertyImpl(string name, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, System.Type returnType, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
+        public new System.Type GetType() { return default(System.Type); }
         public static System.Type GetType(string typeName) { return default(System.Type); }
         public static System.Type GetType(string typeName, bool throwOnError) { return default(System.Type); }
         public static System.Type GetType(string typeName, bool throwOnError, bool ignoreCase) { return default(System.Type); }
-        public static System.TypeCode GetTypeCode(System.Type type) { return default(System.TypeCode);  }
-        public static System.Type GetTypeFromHandle(System.RuntimeTypeHandle handle) { return default(System.Type); }
-        public abstract System.Type MakeArrayType();
-        public abstract System.Type MakeArrayType(int rank);
-        public abstract System.Type MakeByRefType();
-        public abstract System.Type MakeGenericType(params System.Type[] typeArguments);
-        public abstract System.Type MakePointerType();
+        public static System.Type GetType(string typeName, System.Func<System.Reflection.AssemblyName, System.Reflection.Assembly> assemblyResolver, System.Func<System.Reflection.Assembly, string, bool, System.Type> typeResolver) { return default(System.Type); }
+        public static System.Type GetType(string typeName, System.Func<System.Reflection.AssemblyName, System.Reflection.Assembly> assemblyResolver, System.Func<System.Reflection.Assembly, string, bool, System.Type> typeResolver, bool throwOnError) { return default(System.Type); }
+        public static System.Type GetType(string typeName, System.Func<System.Reflection.AssemblyName, System.Reflection.Assembly> assemblyResolver, System.Func<System.Reflection.Assembly, string, bool, System.Type> typeResolver, bool throwOnError, bool ignoreCase) { return default(System.Type); }
+        public static System.Type[] GetTypeArray(System.Object[] args) { return default(System.Type[]); }
+        public static System.TypeCode GetTypeCode(System.Type type) { return default(System.TypeCode); }
+        protected virtual System.TypeCode GetTypeCodeImpl() { return default(System.TypeCode); }
+        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromCLSID(System.Guid clsid) { return default(System.Type); }
+        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromCLSID(System.Guid clsid, bool throwOnError) { return default(System.Type); }
+        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromCLSID(System.Guid clsid, string server) { return default(System.Type); }
+        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromCLSID(System.Guid clsid, string server, bool throwOnError) { return default(System.Type); }
+        [System.Security.SecuritySafeCriticalAttribute]public static System.Type GetTypeFromHandle(System.RuntimeTypeHandle handle) { return default(System.Type); }
+        [System.Security.SecurityCriticalAttribute]public static System.Type GetTypeFromProgID(string progID) { return default(System.Type); }
+        [System.Security.SecurityCriticalAttribute]public static System.Type GetTypeFromProgID(string progID, bool throwOnError) { return default(System.Type); }
+        [System.Security.SecurityCriticalAttribute]public static System.Type GetTypeFromProgID(string progID, string server) { return default(System.Type); }
+        [System.Security.SecurityCriticalAttribute]public static System.Type GetTypeFromProgID(string progID, string server, bool throwOnError) { return default(System.Type); }
+        public static System.RuntimeTypeHandle GetTypeHandle(object o) { return default(System.RuntimeTypeHandle); }
+        protected abstract bool HasElementTypeImpl();
+        public object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args) { return default(object); }
+        public System.Object InvokeMember(System.String name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object target, System.Object[] args, System.Globalization.CultureInfo culture) { return default(System.Object); }
+        public abstract object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] namedParameters);
+        protected abstract bool IsArrayImpl();
+        public virtual bool IsAssignableFrom(System.Type c) { return default(bool); }
+        protected abstract bool IsByRefImpl();
+        protected abstract bool IsCOMObjectImpl();
+        protected virtual bool IsContextfulImpl() { return default(bool); }
+        public virtual bool IsEnumDefined(object value) { return default(bool); }
+        public virtual bool IsEquivalentTo(System.Type other) { return default(bool); }
+        public virtual bool IsInstanceOfType(object o) { return default(bool); }
+        protected virtual bool IsMarshalByRefImpl() { return default(bool); }
+        protected abstract bool IsPointerImpl();
+        protected abstract bool IsPrimitiveImpl();
+        public virtual bool IsSubclassOf(System.Type c) { return default(bool); }
+        protected virtual bool IsValueTypeImpl() { return default(bool); }
+        public virtual System.Type MakeArrayType() { return default(System.Type); }
+        public virtual System.Type MakeArrayType(int rank) { return default(System.Type); }
+        public virtual System.Type MakeByRefType() { return default(System.Type); }
+        public virtual System.Type MakeGenericType(params System.Type[] typeArguments) { return default(System.Type); }
+        public virtual System.Type MakePointerType() { return default(System.Type); }
+        public static System.Type ReflectionOnlyGetType(System.String typeName, bool throwIfNotFound, bool ignoreCase) { return default(System.Type); }
         public override string ToString() { return default(string); }
     }
     public partial class TypeAccessException : System.TypeLoadException
@@ -3909,7 +4053,7 @@ namespace System.IO
 }
 namespace System.Reflection
 {
-    public sealed partial class AmbiguousMatchException : System.Exception
+    public sealed partial class AmbiguousMatchException : System.SystemException
     {
         public AmbiguousMatchException() { }
         public AmbiguousMatchException(string message) { }
@@ -3919,14 +4063,14 @@ namespace System.Reflection
     {
         protected Assembly() { }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData> CustomAttributes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.CustomAttributeData>); } }
-        public abstract System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo> DefinedTypes { get; }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo> DefinedTypes { get; }
         public virtual System.Collections.Generic.IEnumerable<System.Type> ExportedTypes { get { return default(System.Collections.Generic.IEnumerable<System.Type>); } }
         public virtual MethodInfo EntryPoint { get { return default(MethodInfo); } }
         public virtual string FullName { get { return default(string); } }
         public virtual bool IsDynamic { get { return default(bool); } }
         public virtual System.Reflection.Module ManifestModule { get { return default(System.Reflection.Module); } }
         public virtual event ModuleResolveEventHandler ModuleResolve { add { } remove { } }
-        public abstract System.Collections.Generic.IEnumerable<System.Reflection.Module> Modules { get; }
+        public virtual System.Collections.Generic.IEnumerable<System.Reflection.Module> Modules { get; }
         public virtual bool ReflectionOnly { get { return default(bool); } }
         public override bool Equals(object o) { return default(bool); }
         public static bool operator ==(System.Reflection.Assembly left, System.Reflection.Assembly right) { return default(bool); }
@@ -3953,7 +4097,7 @@ namespace System.Reflection
         public static System.Reflection.Assembly GetEntryAssembly() { return default(System.Reflection.Assembly); }
         public static System.Reflection.Assembly GetExecutingAssembly() { return default(System.Reflection.Assembly); }
         public System.Reflection.Module[] GetLoadedModules() { return default(System.Reflection.Module[]); }
-        public virtual System.Reflection.Module[] GetLoadedModules(bool getResourceInfo) { return default(System.Reflection.Module[]); }
+        public virtual System.Reflection.Module[] GetLoadedModules(bool getResourceModules) { return default(System.Reflection.Module[]); }
         public virtual string Location { get { return default(string); } }
         public override string ToString() { return default(string); }
         public virtual string CodeBase { get { return default(string); } }
@@ -3962,8 +4106,8 @@ namespace System.Reflection
         public object CreateInstance(string typeName, bool ignoreCase) { return default(object); }
         public virtual object CreateInstance(string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, Object[] args, System.Globalization.CultureInfo culture, Object[] activationAttributes) { return default(object); }
         public static string CreateQualifiedName(string assemblyName, string typeName) { return default(string); }
-        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
-        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        public virtual object[] GetCustomAttributes(bool inherit) { return default(object[]); }
+        public virtual object[] GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
         public virtual System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributesData() { return default(System.Collections.Generic.IList<CustomAttributeData>); }
         public virtual Type[] GetExportedTypes() { return default(Type[]); }
         public virtual AssemblyName[] GetReferencedAssemblies() { return default(AssemblyName[]); }
@@ -3974,8 +4118,7 @@ namespace System.Reflection
         public static System.Reflection.Assembly ReflectionOnlyLoad(byte[] rawAssembly) { return default(System.Reflection.Assembly); }
         public static System.Reflection.Assembly ReflectionOnlyLoad(string assemblyString) { return default(System.Reflection.Assembly); }
         public static System.Reflection.Assembly ReflectionOnlyLoadFrom(string assemblyFile) { return default(System.Reflection.Assembly); }
-        bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
-
+        public virtual bool IsDefined(Type attributeType, bool inherit) { return default(bool); }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited=false)]
     public sealed partial class AssemblyAlgorithmIdAttribute : System.Attribute
@@ -4075,18 +4218,18 @@ namespace System.Reflection
         public string Key { get { return default(string); } }
         public string Value { get { return default(string); } }
     }
-    public sealed partial class AssemblyName : System.Runtime.Serialization.ISerializable, System.Runtime.Serialization.IDeserializationCallback
+    public sealed partial class AssemblyName : System.ICloneable, System.Runtime.Serialization.ISerializable, System.Runtime.Serialization.IDeserializationCallback
     {
         public AssemblyName() { }
         public AssemblyName(string assemblyName) { }
-        public string CodeBase { get { return default(string); } }
+        public string CodeBase { get { return default(string); } set { } }
         public System.Reflection.AssemblyContentType ContentType { get { return default(System.Reflection.AssemblyContentType); } set { } }
         public System.Globalization.CultureInfo CultureInfo { get { return default(System.Globalization.CultureInfo); } set { } }
         public string CultureName { get { return default(string); } set { } }
         public System.Reflection.AssemblyNameFlags Flags { get { return default(System.Reflection.AssemblyNameFlags); } set { } }
         public string FullName { get { return default(string); } }
-        public System.Configuration.Assemblies.AssemblyHashAlgorithm HashAlgorithm { get { return default(System.Configuration.Assemblies.AssemblyHashAlgorithm); } }
-        public System.Configuration.Assemblies.AssemblyVersionCompatibility VersionCompatibility { get { return default(System.Configuration.Assemblies.AssemblyVersionCompatibility); } }
+        public System.Configuration.Assemblies.AssemblyHashAlgorithm HashAlgorithm { get { return default(System.Configuration.Assemblies.AssemblyHashAlgorithm); } set { } }
+        public System.Configuration.Assemblies.AssemblyVersionCompatibility VersionCompatibility { get { return default(System.Configuration.Assemblies.AssemblyVersionCompatibility); } set { } }
         public string Name { get { return default(string); } set { } }
         public System.Reflection.ProcessorArchitecture ProcessorArchitecture { get { return default(System.Reflection.ProcessorArchitecture); } set { } }
         public System.Version Version { get { return default(System.Version); } set { } }
@@ -4099,7 +4242,6 @@ namespace System.Reflection
         [System.Security.SecurityCriticalAttribute]
         public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { return; }
         public void OnDeserialization(Object sender) { return; }
-
     }
     [System.FlagsAttribute]
     public enum AssemblyNameFlags
@@ -4154,7 +4296,6 @@ namespace System.Reflection
         public abstract void ReorderArgumentArray(ref object[] args, object state);
         public abstract System.Reflection.MethodBase SelectMethod(System.Reflection.BindingFlags bindingAttr, System.Reflection.MethodBase[] match, System.Type[] types, System.Reflection.ParameterModifier[] modifiers);
         public abstract System.Reflection.PropertyInfo SelectProperty(System.Reflection.BindingFlags bindingAttr, System.Reflection.PropertyInfo[] match, System.Type returnType, System.Type[] indexes, System.Reflection.ParameterModifier[] modifiers);
-        //public virtual bool CanChangeType(System.Object value,System.Type type,System.Globalization.CultureInfo culture) { return default(bool); }
     }
     [Flags]
     public enum BindingFlags
@@ -4330,7 +4471,6 @@ namespace System.Reflection
         public MethodInfo GetRemoveMethod() { return default(MethodInfo); }
         public abstract MethodInfo GetRemoveMethod(bool nonPublic);
         public override System.Reflection.MemberTypes MemberType { get { return default(System.Reflection.MemberTypes); } }
-
     }
     public class ExceptionHandlingClause
     {
@@ -4409,7 +4549,6 @@ namespace System.Reflection
         public override MemberTypes MemberType { get { return default(MemberTypes); } }
         public void SetValue(object obj, object value) { }
         public abstract void SetValue(object obj, object value, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Globalization.CultureInfo culture);
-
     }
     [System.FlagsAttribute]
     public enum GenericParameterAttributes
@@ -4572,7 +4711,7 @@ namespace System.Reflection
         public bool IsStatic { get { return default(bool); } }
         public bool IsVirtual { get { return default(bool); } }
         public abstract System.RuntimeMethodHandle MethodHandle { get; }
-        public abstract System.Reflection.MethodImplAttributes MethodImplementationFlags { get; }
+        public virtual System.Reflection.MethodImplAttributes MethodImplementationFlags { get { return default(System.Reflection.MethodImplAttributes); } }
         public override bool Equals(object obj) { return default(bool); }
         public static bool operator ==(System.Reflection.MethodBase left, System.Reflection.MethodBase right) { return default(bool); }
         public static bool operator !=(System.Reflection.MethodBase left, System.Reflection.MethodBase right) { return default(bool); }
@@ -4672,9 +4811,9 @@ namespace System.Reflection
         public virtual Type GetType(string className) { return default(Type); }
         public virtual Type GetType(string className, bool ignoreCase) { return default(Type); }
         public virtual Type[] GetTypes() { return default(Type[]); }
-        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
-        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
-        bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+        public virtual object[] GetCustomAttributes(bool inherit) { return default(object[]); }
+        public virtual object[] GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        public virtual bool IsDefined(Type attributeType, bool inherit) { return default(bool); }
         public virtual bool IsResource() { return default(bool); }
         public virtual System.Collections.Generic.IList<CustomAttributeData> GetCustomAttributesData() { return default(System.Collections.Generic.IList<CustomAttributeData>); }
         public System.Reflection.FieldInfo ResolveField(int metadataToken) { return default(System.Reflection.FieldInfo); }
@@ -4718,7 +4857,7 @@ namespace System.Reflection
         ReservedMask = 61440,
         Retval = 8,
     }
-    public partial class ParameterInfo : System.Reflection.ICustomAttributeProvider
+    public partial class ParameterInfo : System.Reflection.ICustomAttributeProvider, System.Runtime.Serialization.IObjectReference
     {
         protected string NameImpl;
         protected System.Type ClassImpl;
@@ -4745,10 +4884,10 @@ namespace System.Reflection
         public object GetRealObject(System.Runtime.Serialization.StreamingContext context) { return default(object); }
         public virtual Type[] GetRequiredCustomModifiers() { return default(Type[]); }
         public virtual object RawDefaultValue { get { return default(object); } }
-        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(bool inherit) { return default(object[]); }
-        object[] System.Reflection.ICustomAttributeProvider.GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
+        public virtual object[] GetCustomAttributes(bool inherit) { return default(object[]); }
+        public virtual object[] GetCustomAttributes(Type attributeType, bool inherit) { return default(object[]); }
         public virtual System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { return default(System.Collections.Generic.IList<System.Reflection.CustomAttributeData>); }
-        bool System.Reflection.ICustomAttributeProvider.IsDefined(Type attributeType, bool inherit) { return default(bool); }
+        public virtual bool IsDefined(Type attributeType, bool inherit) { return default(bool); }
         public override string ToString() { return default(string); }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -4838,7 +4977,7 @@ namespace System.Reflection
         public abstract System.Reflection.Assembly MapAssembly(System.Reflection.Assembly assembly);
         public abstract System.Reflection.TypeInfo MapType(System.Reflection.TypeInfo type);
     }
-    public sealed partial class ReflectionTypeLoadException : System.Exception
+    public sealed partial class ReflectionTypeLoadException : System.SystemException, System.Runtime.Serialization.ISerializable
     {
         public ReflectionTypeLoadException(System.Type[] classes, System.Exception[] exceptions) { }
         public ReflectionTypeLoadException(System.Type[] classes, System.Exception[] exceptions, string message) { }
@@ -4927,11 +5066,61 @@ namespace System.Reflection
         VisibilityMask = 7,
         WindowsRuntime = 16384,
     }
+    public class TypeDelegator : System.Reflection.TypeInfo
+    {
+        protected System.Type typeImpl;
+        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { return default(bool); }
+        [System.Security.SecuritySafeCriticalAttribute]
+        protected TypeDelegator() { }
+        public TypeDelegator(System.Type delegatingType) { }
+        public override System.Guid GUID { get { return default(System.Guid); } }
+        public override int MetadataToken { get { return default(int); } }
+        public override object InvokeMember(System.String name,System.Reflection.BindingFlags invokeAttr,System.Reflection.Binder binder,System.Object target, System.Object[] args,System.Reflection.ParameterModifier[] modifiers,System.Globalization.CultureInfo culture,System.String[] namedParameters) { return default(object); }
+        public override System.Reflection.Module Module { get { return default(System.Reflection.Module); } }
+        public override System.Reflection.Assembly Assembly { get { return default(System.Reflection.Assembly); } }
+        public override System.RuntimeTypeHandle TypeHandle { get { return default(System.RuntimeTypeHandle); } }
+        public override System.String Name { get { return default(System.String); } }
+        public override System.String FullName { get { return default(System.String); } }
+        public override System.String Namespace { get { return default(System.String); } }
+        public override System.String AssemblyQualifiedName { get { return default(System.String); } }
+        public override System.Type BaseType { get { return default(System.Type); } }
+        protected override System.Reflection.ConstructorInfo GetConstructorImpl(System.Reflection.BindingFlags bindingAttr,System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.ConstructorInfo); }
+        public override System.Reflection.ConstructorInfo[] GetConstructors(System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.ConstructorInfo[]); }
+        protected override System.Reflection.MethodInfo GetMethodImpl(System.String name,System.Reflection.BindingFlags bindingAttr,System.Reflection.Binder binder, System.Reflection.CallingConventions callConvention, System.Type[] types,System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.MethodInfo); }
+        public override System.Reflection.MethodInfo[] GetMethods(System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.MethodInfo[]); }
+        public override System.Reflection.FieldInfo GetField(System.String name, System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.FieldInfo); }
+        public override System.Reflection.FieldInfo[] GetFields(System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.FieldInfo[]); }
+        public override System.Type GetInterface(System.String name, bool ignoreCase) { return default(System.Type); }
+        public override System.Type[] GetInterfaces() { return default(System.Type[]); }
+        public override System.Reflection.EventInfo GetEvent(System.String name,System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.EventInfo); }
+        public override System.Reflection.EventInfo[] GetEvents() { return default(System.Reflection.EventInfo[]); }
+        protected override System.Reflection.PropertyInfo GetPropertyImpl(System.String name,System.Reflection.BindingFlags bindingAttr,System.Reflection.Binder binder, System.Type returnType, System.Type[] types, System.Reflection.ParameterModifier[] modifiers) { return default(System.Reflection.PropertyInfo); }
+        public override System.Reflection.PropertyInfo[] GetProperties(System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.PropertyInfo[]); }
+        public override System.Reflection.EventInfo[] GetEvents(System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.EventInfo[]); }
+        public override System.Type[] GetNestedTypes(System.Reflection.BindingFlags bindingAttr) { return default(System.Type[]); }
+        public override System.Type GetNestedType(System.String name, System.Reflection.BindingFlags bindingAttr) { return default(System.Type); }
+        public override System.Reflection.MemberInfo[] GetMember(System.String name,  System.Reflection.MemberTypes type, System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.MemberInfo[]); }
+        public override System.Reflection.MemberInfo[] GetMembers(System.Reflection.BindingFlags bindingAttr) { return default(System.Reflection.MemberInfo[]); }
+        protected override System.Reflection.TypeAttributes GetAttributeFlagsImpl() { return default(System.Reflection.TypeAttributes); }
+        protected override bool IsArrayImpl() { return default(bool); }
+        protected override bool IsPrimitiveImpl() { return default(bool); }
+        protected override bool IsByRefImpl() { return default(bool); }
+        protected override bool IsPointerImpl() { return default(bool); }
+        protected override bool IsValueTypeImpl() { return default(bool); }
+        protected override bool IsCOMObjectImpl() { return default(bool); }
+        public override bool IsConstructedGenericType { get { return default(bool); } }
+        public override System.Type GetElementType() { return default(System.Type); }
+        protected override bool HasElementTypeImpl() { return default(bool); }
+        public override System.Type UnderlyingSystemType { get { return default(System.Type); } }
+        public override System.Object[] GetCustomAttributes(bool inherit) { return default(System.Object[]); }
+        public override System.Object[] GetCustomAttributes(System.Type attributeType, bool inherit) { return default(System.Object[]); }
+        public override bool IsDefined(System.Type attributeType, bool inherit) { return default(bool); }
+        public override System.Reflection.InterfaceMapping GetInterfaceMap(System.Type interfaceType) { return default(System.Reflection.InterfaceMapping); }
+    }
     public delegate bool TypeFilter(Type m, Object filterCriteria);
-    public abstract partial class TypeInfo : System.Reflection.MemberInfo, System.Reflection.IReflectableType
+    public abstract partial class TypeInfo : System.Type, System.Reflection.IReflectableType
     {
         internal TypeInfo() { }
-        public virtual System.Type AsType() { return default(System.Type); }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo> DeclaredConstructors { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo>); } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.EventInfo> DeclaredEvents { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.EventInfo>); } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo> DeclaredFields { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.FieldInfo>); } }
@@ -4939,68 +5128,17 @@ namespace System.Reflection
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> DeclaredMethods { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo>); } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo> DeclaredNestedTypes { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.TypeInfo>); } }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo> DeclaredProperties { get { return default(System.Collections.Generic.IEnumerable<System.Reflection.PropertyInfo>); } }
-        public virtual Type[] FindInterfaces(TypeFilter filter, object filterCriteria) { return default(Type[]); }
-        public virtual MemberInfo[] FindMembers(MemberTypes memberType, BindingFlags bindingAttr, MemberFilter filter, object filterCriteria) { return default(MemberInfo[]); }
         public virtual System.Type[] GenericTypeParameters { get { return default(System.Type[]); } }
-        public ConstructorInfo GetConstructor(Type[] types) { return default(ConstructorInfo); }
-        public ConstructorInfo[] GetConstructors() { return default(ConstructorInfo[]); }
-        public virtual ConstructorInfo[] GetConstructors(BindingFlags bindingAttr) { return default(ConstructorInfo[]); }
+        public virtual System.Collections.Generic.IEnumerable<System.Type> ImplementedInterfaces { get { return default(System.Collections.Generic.IEnumerable<System.Type>); } }
+        public virtual System.Type AsType() { return default(System.Type); }
         public virtual System.Reflection.EventInfo GetDeclaredEvent(string name) { return default(System.Reflection.EventInfo); }
         public virtual System.Reflection.FieldInfo GetDeclaredField(string name) { return default(System.Reflection.FieldInfo); }
         public virtual System.Reflection.MethodInfo GetDeclaredMethod(string name) { return default(System.Reflection.MethodInfo); }
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> GetDeclaredMethods(string name) { return default(System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo>); }
         public virtual System.Reflection.TypeInfo GetDeclaredNestedType(string name) { return default(System.Reflection.TypeInfo); }
         public virtual System.Reflection.PropertyInfo GetDeclaredProperty(string name) { return default(System.Reflection.PropertyInfo); }
-        public virtual MemberInfo[] GetDefaultMembers() { return default(MemberInfo[]); }
-        public virtual string GetEnumName(object value) { return default(string); }
-        public virtual string[] GetEnumNames() { return default(string[]); }
-        public virtual Type GetEnumUnderlyingType() { return default(Type); }
-        public virtual Array GetEnumValues() { return default(Array); }
-        public EventInfo GetEvent(string name) { return default(EventInfo); }
-        public virtual EventInfo GetEvent(string name, BindingFlags bindingAttr) { return default(EventInfo); }
-        public virtual EventInfo[] GetEvents() { return default(EventInfo[]); }
-        public virtual EventInfo[] GetEvents(BindingFlags bindingAttr) { return default(EventInfo[]); }
-        public FieldInfo GetField(string name) { return default(FieldInfo); }
-        public virtual FieldInfo GetField(string name, BindingFlags bindingAttr) { return default(FieldInfo); }
-        public FieldInfo[] GetFields() { return default(FieldInfo[]); }
-        public virtual FieldInfo[] GetFields(BindingFlags bindingAttr) { return default(FieldInfo[]); }
-        public virtual Type[] GetGenericArguments() { return default(Type[]); }
-        public Type GetInterface(string name) { return default(Type); }
-        public virtual Type GetInterface(string name, bool ignoreCase) { return default(Type); }
-        public virtual Type[] GetInterfaces() { return default(Type[]); }
-        public MemberInfo[] GetMember(string name) { return default(MemberInfo[]); }
-        public virtual MemberInfo[] GetMember(string name, BindingFlags bindingAttr) { return default(MemberInfo[]); }
-        public virtual MemberInfo[] GetMember(string name, MemberTypes type, BindingFlags bindingAttr) { return default(MemberInfo[]); }
-        public MemberInfo[] GetMembers() { return default(MemberInfo[]); }
-        public virtual MemberInfo[] GetMembers(BindingFlags bindingAttr) { return default(MemberInfo[]); }
-        public MethodInfo GetMethod(string name) { return default(MethodInfo); }
-        public MethodInfo GetMethod(string name, BindingFlags bindingAttr) { return default(MethodInfo); }
-        public MethodInfo GetMethod(string name, Type[] types) { return default(MethodInfo); }
-        public MethodInfo GetMethod(string name, Type[] types, ParameterModifier[] modifiers) { return default(MethodInfo); }
-        public MethodInfo[] GetMethods() { return default(MethodInfo[]); }
-        public virtual MethodInfo[] GetMethods(BindingFlags bindingAttr) { return default(MethodInfo[]); }
-        public Type GetNestedType(string name) { return default(Type); }
-        public virtual Type GetNestedType(string name, BindingFlags bindingAttr) { return default(Type); }
-        public Type[] GetNestedTypes() { return default(Type[]); }
-        public virtual Type[] GetNestedTypes(BindingFlags bindingAttr) { return default(Type[]); }
-        public PropertyInfo[] GetProperties() { return default(PropertyInfo[]); }
-        public virtual PropertyInfo[] GetProperties(BindingFlags bindingAttr) { return default(PropertyInfo[]); }
-        public PropertyInfo GetProperty(string name) { return default(PropertyInfo); }
-        public PropertyInfo GetProperty(string name, BindingFlags bindingAttr) { return default(PropertyInfo); }
-        public PropertyInfo GetProperty(string name, Type returnType) { return default(PropertyInfo); }
-        public PropertyInfo GetProperty(string name, Type returnType, Type[] types) { return default(PropertyInfo); }
-        public PropertyInfo GetProperty(string name, Type returnType, Type[] types, ParameterModifier[] modifiers) { return default(PropertyInfo); }
-        public PropertyInfo GetProperty(string name, Type[] types) { return default(PropertyInfo); }
-        System.Reflection.TypeInfo System.Reflection.IReflectableType.GetTypeInfo() { return default(System.Reflection.TypeInfo); }
-        public virtual System.Collections.Generic.IEnumerable<System.Type> ImplementedInterfaces { get { return default(System.Collections.Generic.IEnumerable<System.Type>); } }
-        public virtual bool IsAssignableFrom(Type c) { return default(bool); }
         public virtual bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { return default(bool); }
-        public virtual bool IsEnumDefined(object value) { return default(bool); }
-        public virtual bool IsInstanceOfType(object o) { return default(bool); }
-        public virtual System.Runtime.InteropServices.StructLayoutAttribute StructLayoutAttribute { get { return default(System.Runtime.InteropServices.StructLayoutAttribute); } }
-        public ConstructorInfo TypeInitializer { get { return default(ConstructorInfo); } }
-        public virtual Type UnderlyingSystemType { get { return default(Type); } }
-        public override System.Reflection.MemberTypes MemberType { get { return default(System.Reflection.MemberTypes); } }
+        System.Reflection.TypeInfo System.Reflection.IReflectableType.GetTypeInfo() { return default(System.Reflection.TypeInfo); }
     }
 }
 namespace System.Runtime

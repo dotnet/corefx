@@ -37,84 +37,9 @@ namespace System
         public const double PositiveInfinity = (double)1.0 / (double)(0.0);
         public const double NaN = (double)0.0 / (double)0.0;
     }
-    public partial class Type
-    {
-        // Members promoted from MemberInfo
-        public abstract Type DeclaringType { get; }
-        public abstract string Name { get; }
-        [System.Security.SecuritySafeCriticalAttribute]
-        public static bool operator ==(System.Type left, System.Type right) { return default(bool); }
-        [System.Security.SecuritySafeCriticalAttribute]
-        public static bool operator !=(System.Type left, System.Type right) { return default(bool); }
-    }
 }
 namespace System.Reflection
 {
-    public partial class TypeInfo
-    {
-        // These members are promoted from Type.
-        public abstract System.Reflection.TypeAttributes Attributes { get; }
-        public abstract int GetArrayRank();
-        public abstract System.Type GetElementType();
-        public abstract Type[] GetGenericParameterConstraints();
-        public virtual bool IsSubclassOf(System.Type c) { return default(bool); }
-        public virtual bool IsEquivalentTo(Type other) { return default(bool); }
-        public abstract Type[] GenericTypeArguments { get; }
-        public abstract Type GetGenericTypeDefinition();
-        public abstract Assembly Assembly { get; }
-        public abstract Type BaseType { get; }
-        public abstract bool ContainsGenericParameters { get; }
-
-        public abstract MethodBase DeclaringMethod { get; }
-        public abstract string FullName { get; }
-        public abstract GenericParameterAttributes GenericParameterAttributes { get; }
-        public abstract int GenericParameterPosition { get; }
-        public abstract Guid GUID { get; }
-        public bool HasElementType { get { return default(bool); } }
-        public bool IsAbstract { get { return default(bool); } }
-        public bool IsAnsiClass { get { return default(bool); } }
-        public bool IsArray { get { return default(bool); } }
-        public bool IsAutoClass { get { return default(bool); } }
-        public bool IsAutoLayout { get { return default(bool); } }
-        public bool IsByRef { get { return default(bool); } }
-        public bool IsClass { get { return default(bool); } }
-        public virtual bool IsCOMObject { get { return default(bool); } }
-        public abstract bool IsEnum { get; }
-        public bool IsExplicitLayout { get { return default(bool); } }
-        public abstract bool IsGenericParameter { get; }
-        public abstract bool IsGenericType { get; }
-        public abstract bool IsGenericTypeDefinition { get; }
-        public bool IsImport { get { return default(bool); } }
-        public bool IsInterface { get { return default(bool); } }
-        public bool IsLayoutSequential { get { return default(bool); } }
-        public bool IsMarshalByRef { get { return default(bool); } }
-        public bool IsNested { get { return default(bool); } }
-        public bool IsNestedAssembly { get { return default(bool); } }
-        public bool IsNestedFamANDAssem { get { return default(bool); } }
-        public bool IsNestedFamily { get { return default(bool); } }
-        public bool IsNestedFamORAssem { get { return default(bool); } }
-        public bool IsNestedPrivate { get { return default(bool); } }
-        public bool IsNestedPublic { get { return default(bool); } }
-        public bool IsNotPublic { get { return default(bool); } }
-        public bool IsPointer { get { return default(bool); } }
-        public virtual bool IsPrimitive { get { return default(bool); } }
-        public bool IsPublic { get { return default(bool); } }
-        public bool IsSealed { get { return default(bool); } }
-        public bool IsVisible { get { return default(bool); } }
-        public abstract bool IsSerializable { get; }
-        public bool IsSpecialName { get { return default(bool); } }
-        public bool IsUnicodeClass { get { return default(bool); } }
-        public virtual bool IsValueType { get { return default(bool); } }
-        public abstract string Namespace { get; }
-        public abstract string AssemblyQualifiedName { get; }
-
-        public abstract Type MakeArrayType();
-        public abstract Type MakeArrayType(int rank);
-        public abstract Type MakeByRefType();
-        public abstract Type MakeGenericType(params System.Type[] typeArguments);
-        public abstract Type MakePointerType();
-    }
-
     // These should be made public when reflection extensibility via contracts is supported on all platforms.
     // In the meantime, these will be exposed via wrapper factory methods in System.Private.Reflection.Extensibility.
     public partial struct CustomAttributeNamedArgument
