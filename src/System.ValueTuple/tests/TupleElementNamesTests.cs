@@ -6,38 +6,41 @@ using System;
 using System.Runtime.CompilerServices;
 using Xunit;
 
-public class TupleElementNamesAttributeTests
+namespace System.ValueTuple.Tests
 {
-    [Fact]
-    public static void Constructor()
+    public class TupleElementNamesAttributeTests
     {
-        var attribute = new TupleElementNamesAttribute(new string[] { "name1", "name2" });
-        Assert.NotNull(attribute.TransformNames);
-        Assert.Equal(new string[] { "name1", "name2" }, attribute.TransformNames);
+        [Fact]
+        public static void Constructor()
+        {
+            var attribute = new TupleElementNamesAttribute(new string[] { "name1", "name2" });
+            Assert.NotNull(attribute.TransformNames);
+            Assert.Equal(new string[] { "name1", "name2" }, attribute.TransformNames);
 
-        Assert.Throws<ArgumentNullException>(() => new TupleElementNamesAttribute(null));
+            Assert.Throws<ArgumentNullException>(() => new TupleElementNamesAttribute(null));
+        }
+
+        [TupleElementNames(new string[] { null, "name1", "name2" })]
+        public object appliedToField = null;
+
+        public static void AppliedToParameter([TupleElementNames(new string[] { "name1", null })] object parameter) { }
+
+        [TupleElementNames(new string[] { null, "name1", "name2" })]
+        public static object AppliedToProperty { get; set; }
+
+        [event: TupleElementNames(new[] { null, "name1", "name2" })]
+        public static event Func<int> AppliedToEvent;
+
+        [return: TupleElementNames(new[] { null, "name1", "name2" })]
+        public static void AppliedToReturn()
+        {
+            AppliedToEvent();
+        }
+
+        [TupleElementNames(new string[] { null, "name1", "name2" })]
+        public class AppliedToClass { }
+
+        [TupleElementNames(new string[] { null, "name1", "name2" })]
+        public class AppliedToStruct { }
     }
-
-    [TupleElementNames(new string[] { null, "name1", "name2" })]
-    public object appliedToField = null;
-
-    public static void AppliedToParameter([TupleElementNames(new string[] { "name1", null })] object parameter) { }
-
-    [TupleElementNames(new string[] { null, "name1", "name2" })]
-    public static object AppliedToProperty { get; set; }
-
-    [event: TupleElementNames(new[] { null, "name1", "name2" })]
-    public static event Func<int> AppliedToEvent;
-
-    [return: TupleElementNames(new[] { null, "name1", "name2" })]
-    public static void AppliedToReturn()
-    {
-        AppliedToEvent();
-    }
-    
-    [TupleElementNames(new string[] { null, "name1", "name2" })]
-    public class AppliedToClass { }
-
-    [TupleElementNames(new string[] { null, "name1", "name2" })]
-    public class AppliedToStruct { }
 }
