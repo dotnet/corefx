@@ -6,7 +6,7 @@ using System;
 using System.Text;
 using Xunit;
 
-namespace System.ValueTuple.Tests
+namespace System.Tests
 {
     public class ExtensionsTests
     {
