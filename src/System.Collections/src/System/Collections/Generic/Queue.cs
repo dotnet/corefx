@@ -416,7 +416,15 @@ namespace System.Collections.Generic
 
                         int arrayIndex = _q._head + _index; // this is the actual index into the queue's backing array
                         if (arrayIndex >= capacity)
-                            arrayIndex -= capacity; // wrap around
+                        {
+                            // NOTE: Originally we were using the modulo operator here, however
+                            // on Intel processors it has a very high instruction latency which
+                            // was slowing down the loop quite a bit.
+                            // Replacing it with simple comparison/subtraction operations sped up
+                            // the average foreach loop by 2x.
+
+                            arrayIndex -= capacity; // wrap around if needed
+                        }
                         
                         _currentElement = array[arrayIndex];
                     }
