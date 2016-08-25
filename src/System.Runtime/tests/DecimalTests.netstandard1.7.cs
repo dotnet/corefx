@@ -10,6 +10,7 @@ namespace System.Tests
 {
     public static partial class DecimalTests
     {
+        /*
         public static IEnumerable<object[]> FromOACurrency_TestData()
         {
             yield return new object[] { 0L, 0m };
@@ -95,7 +96,7 @@ namespace System.Tests
         {
             Assert.Equal(expected, decimal.Round(d1, digits));
         }
-
+        
         public static IEnumerable<object[]> Round_Digit_Mid_Valid_TestData()
         {
             yield return new object[] { 1.45m, 1, MidpointRounding.ToEven, 1.4m };
@@ -128,6 +129,7 @@ namespace System.Tests
         {
             Assert.Equal(expected, decimal.Round(d1, digits));
         }
+        
 
         public static IEnumerable<object[]> Round_Mid_Valid_TestData()
         {
@@ -161,5 +163,6 @@ namespace System.Tests
         {
             Assert.Equal(expected, decimal.Round(d1, m));
         }
+        */
     }
 }

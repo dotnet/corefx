@@ -97,10 +97,10 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.7'">
     <Compile Include="ArrayTests.netstandard1.7.cs" />
-    <Compile Include="CompareToTests.netstandard1.7.cs" />
+    <Compile Include="CompareToTests.cs" />
     <Compile Include="DecimalTests.netstandard1.7.cs" />
     <Compile Include="EnumTests.netstandard1.7.cs" />
-    <Compile Include="GetTypeCodeTests.netstandard1.7.cs" />
+    <Compile Include="GetTypeCodeTests.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
     <Compile Include="System\ExternalExceptionTests.cs" />
     <Compile Include="System\ApplicationExceptionTests.cs" />
