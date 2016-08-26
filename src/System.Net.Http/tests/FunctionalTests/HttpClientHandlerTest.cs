@@ -50,6 +50,7 @@ namespace System.Net.Http.Functional.Tests
                 hops:1) },
         };
         public readonly static object[][] Http2Servers = Configuration.Http.Http2Servers;
+        public readonly static object[][] Http2NoPushServers = Configuration.Http.Http2NoPushServers;
 
         public readonly static object[][] RedirectStatusCodes = {
             new object[] { 300 },
@@ -67,7 +68,9 @@ namespace System.Net.Http.Functional.Tests
             GetMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "CUSTOM1");
         public readonly static IEnumerable<object[]> HttpMethodsThatDontAllowContent =
             GetMethods("HEAD", "TRACE");
-        
+
+        private static bool IsWindows10Version1607OrGreater => PlatformDetection.IsWindows10Version1607OrGreater;
+
         private static IEnumerable<object[]> GetMethods(params string[] methods)
         {
             foreach (string method in methods)
@@ -1489,6 +1492,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory, MemberData(nameof(Http2Servers))]
+        [ActiveIssue(10958, PlatformID.Windows)]
         public async Task SendAsync_RequestVersion20_ResponseVersion20IfHttp2Supported(Uri server)
         {
             // We don't currently have a good way to test whether HTTP/2 is supported without
@@ -1528,6 +1532,24 @@ namespace System.Net.Http.Functional.Tests
                         response.Version == new Version(2, 0) ||
                         response.Version == new Version(1, 1),
                         "Response version " + response.Version);
+                }
+            }
+        }
+
+        [ConditionalTheory(nameof(IsWindows10Version1607OrGreater)), MemberData(nameof(Http2NoPushServers))]
+        public async Task SendAsync_RequestVersion20_ResponseVersion20(Uri server)
+        {
+            _output.WriteLine(server.AbsoluteUri.ToString());
+            var request = new HttpRequestMessage(HttpMethod.Get, server);
+            request.Version = new Version(2, 0);
+
+            var handler = new HttpClientHandler();
+            using (var client = new HttpClient(handler))
+            {
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.Equal(new Version(2, 0), response.Version);
                 }
             }
         }
@@ -1673,6 +1695,45 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { new NetworkCredential("user:name", "password"), wrapCredsInCache };
                 yield return new object[] { new NetworkCredential("username", "password", "dom:\\ain"), wrapCredsInCache };
             }
+        }
+        #endregion
+
+        #region Uri wire transmission encoding tests
+        [Fact]
+        public async Task SendRequest_UriPathHasReservedChars_ServerReceivedExpectedPath()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, rootUrl) =>
+            {
+                var uri = new Uri($"http://{rootUrl.Host}:{rootUrl.Port}/test[]");
+                _output.WriteLine(uri.AbsoluteUri.ToString());
+                var request = new HttpRequestMessage(HttpMethod.Get, uri);
+                string statusLine = string.Empty;
+
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.SendAsync(request);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        statusLine = reader.ReadLine();
+                        _output.WriteLine(statusLine);
+                        while (!string.IsNullOrEmpty(reader.ReadLine())) ;
+
+                        await writer.WriteAsync(
+                            $"HTTP/1.1 200 OK\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "Content-Length: 0\r\n" +
+                            "\r\n");
+                        s.Shutdown(SocketShutdown.Send);
+                    });
+
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.True(statusLine.Contains(uri.PathAndQuery), $"statusLine should contain {uri.PathAndQuery}");
+                    }
+                }
+            });
         }
         #endregion
     }

@@ -12,7 +12,6 @@
     <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
     <!-- rev'ed to 1.4.1 so that we can drop pre-release down to beta -->
-    <AssemblyVersion>1.4.1.0</AssemblyVersion>
     <DefineConstants>$(DefineConstants)</DefineConstants>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.0</NuGetTargetMoniker>
   </PropertyGroup>
@@ -38,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Reflection\Internal\Utilities\ExceptionUtilities.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\PathUtilities.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\FunctionPointerAttributes.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\MethodBodyStreamEncoder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\Encoding\MethodBodyAttributes.cs" />

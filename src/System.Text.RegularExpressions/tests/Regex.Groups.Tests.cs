@@ -617,9 +617,9 @@ namespace System.Text.RegularExpressions.Tests
             try
             {
                 // In invariant culture, the unicode char matches differ from expected values provided.
-                if (originalCulture == CultureInfo.InvariantCulture)
+                if (originalCulture.Equals(CultureInfo.InvariantCulture))
                 {
-                    CultureInfo.CurrentCulture = new CultureInfo("en-US");
+                    CultureInfo.CurrentCulture = s_enUSCulture;
                 }
                 if (cultureInfo != null)
                 {
@@ -630,7 +630,7 @@ namespace System.Text.RegularExpressions.Tests
                 Assert.True(match.Success);
 
                 Assert.Equal(expectedGroups.Length, match.Groups.Count);
-                Assert.Equal(expectedGroups[0], match.Value);
+                Assert.True(expectedGroups[0] == match.Value, string.Format("Culture used: {0}", CultureInfo.CurrentCulture));
 
                 int[] groupNumbers = regex.GetGroupNumbers();
                 string[] groupNames = regex.GetGroupNames();
@@ -645,7 +645,7 @@ namespace System.Text.RegularExpressions.Tests
             }
             finally
             {
-                if (cultureInfo != null || originalCulture == CultureInfo.InvariantCulture)
+                if (cultureInfo != null || originalCulture.Equals(CultureInfo.InvariantCulture))
                 {
                     CultureInfo.CurrentCulture = originalCulture;
                 }
