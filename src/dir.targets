@@ -1,22 +1,12 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <ErrorIfBuildToolsRestoredFromIndividualProject Condition="!Exists('$(ToolsDir)')">true</ErrorIfBuildToolsRestoredFromIndividualProject>
-  </PropertyGroup>
 
-  <Import Project="..\build\dir.targets" />
+  <Import Project="$(BuildDir)src\props\dirtargets.props" />
 
-  <!-- Returns the assembly version of the project for consumption
-       by the NuGet package generation -->
-  <Target Name="GetAssemblyVersion"
-          Returns="$(AssemblyVersion)"/>
+  <Import Project="$(BuildDir)dir.targets" />
 
-  <!-- Returns the generated documentation file for consumption
-       by the NuGet package generation -->
-  <Target Name="GetDocumentationFile"
-          Returns="$(DocumentationFile)"/>
+  <Import Project="$(BuildDir)src\targets\getassemblyversion.targets" />
 
-  <Target Name="DumpTargets" BeforeTargets="ResolveProjectReferences">
-    <Message Text="DumpTargets> $(OutputPath), C=[$(Configuration)], CG=[$(ConfigurationGroup)], OG=[$(OSGroup)], TG=[$(TargetGroup)]" Importance="Low" />
-  </Target>
+  <Import Project="$(BuildDir)src\targets\getdocumentationfile.targets" />
 
+  <Import Project="$(BuildDir)src\targets\dumptargets.targets" />
 </Project>

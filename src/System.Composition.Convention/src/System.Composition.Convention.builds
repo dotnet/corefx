@@ -4,6 +4,6 @@
   <ItemGroup>
     <Project Include="System.Composition.Convention.csproj" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.traversal.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dirtraversal\dir.traversal.targets" />
 </Project>
 

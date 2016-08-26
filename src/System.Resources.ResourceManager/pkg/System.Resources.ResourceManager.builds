@@ -6,6 +6,6 @@
     <Project Include="any\System.Resources.ResourceManager.pkgproj" />
     <Project Include="aot\System.Resources.ResourceManager.pkgproj" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.traversal.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dirtraversal\dir.traversal.targets" />
 </Project>
 

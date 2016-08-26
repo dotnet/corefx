@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <Import Project="$(ToolsDir)versioning.targets" Condition="Exists('$(ToolsDir)versioning.targets')" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.traversal.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dirtraversal\dir.traversal.targets" />
   
   <!-- Make Sure that CreateOrUpdateCurrentVersionFile is the first target that runs. -->
   <PropertyGroup>

@@ -6,5 +6,5 @@
     <Project Include="any\System.Collections.pkgproj" />
     <Project Include="aot\System.Collections.pkgproj" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.traversal.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dirtraversal\dir.traversal.targets" />
 </Project>

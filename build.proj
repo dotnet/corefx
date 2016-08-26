@@ -54,7 +54,7 @@
 
   <Import Project="build\dir.targets" />
 
-  <Import Project="build\dir.traversal.targets" />
+  <Import Project="build\dirtraversal\dir.traversal.targets" />
 
   <Import Project="$(ToolsDir)clean.targets" />
 
