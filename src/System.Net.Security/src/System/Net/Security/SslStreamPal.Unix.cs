@@ -160,5 +160,17 @@ namespace System.Net.Security
                 return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, ex);
             }
         }
+
+        public static SecurityStatusPal ApplyAlertToken(ref SafeFreeCredentials credentialsHandle, SafeDeleteContext securityContext, TlsAlertType alertType, TlsAlertMessage alertMessage)
+        {
+            // TODO:  Not implemented.
+            return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+        }
+
+        public static SecurityStatusPal ApplyShutdownToken(ref SafeFreeCredentials credentialsHandle, SafeDeleteContext securityContext)
+        {
+            // TODO: Not implemented.
+            return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+        }
     }
 }

@@ -152,15 +152,14 @@ namespace System.Net.Security
             _sslState.EndProcessAuthentication(asyncResult);
         }
 
-        // TODO: Add proper enums for AlertType and AlertMessage.
-        internal virtual IAsyncResult BeginSendAlert(int alertType, int alertMessage, AsyncCallback asyncCallback, object asyncState)
+        internal virtual IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
         {
-            return _sslState.BeginSendAlert(alertType, alertMessage, asyncCallback, asyncState);
+            return _sslState.BeginShutdown(asyncCallback, asyncState);
         }
 
-        internal virtual void EndSendAlert(IAsyncResult asyncResult)
+        internal virtual void EndShutdown(IAsyncResult asyncResult)
         {
-            _sslState.EndSendAlert(asyncResult);
+            _sslState.EndShutdown(asyncResult);
         }
 
         public TransportContext TransportContext
@@ -204,8 +203,8 @@ namespace System.Net.Security
         public virtual Task ShutdownAsync()
         {
             return Task.Factory.FromAsync(
-                (callback, state) => BeginSendAlert(Interop.SChannel.TLS1_ALERT_WARNING, Interop.SChannel.TLS1_ALERT_CLOSE_NOTIFY, callback, state),
-                EndSendAlert, 
+                (callback, state) => BeginShutdown(callback, state),
+                EndShutdown, 
                 null);
         }
         #endregion

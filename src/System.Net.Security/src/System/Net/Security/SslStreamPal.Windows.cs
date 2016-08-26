@@ -221,7 +221,7 @@ namespace System.Net.Security
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(errorCode);
         }
 
-        public static SecurityStatusPal ApplyAlertToken(ref SafeFreeCredentials credentialsHandle, SafeDeleteContext securityContext, int alertType, int alertMessage)
+        public static SecurityStatusPal ApplyAlertToken(ref SafeFreeCredentials credentialsHandle, SafeDeleteContext securityContext, TlsAlertType alertType, TlsAlertMessage alertMessage)
         {
             Interop.SChannel.SCHANNEL_ALERT_TOKEN alertToken;
             alertToken.dwTokenType = Interop.SChannel.SCHANNEL_ALERT;

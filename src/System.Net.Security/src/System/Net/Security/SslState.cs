@@ -1865,26 +1865,16 @@ namespace System.Net.Security
             }
         }
 
-        internal void SendAlert(int alertType, int alertMessage)
-        {
-            CheckThrow(authSuccessCheck: true);
-
-            ProtocolToken message = Context.CreateAlertTokenInternal(alertType, alertMessage);
-            InnerStream.Write(message.Payload, 0, message.Payload.Length);
-        }
-
-        internal IAsyncResult BeginSendAlert(int alertType, int alertMessage, AsyncCallback asyncCallback, object asyncState)
+        internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
         {
             CheckThrow(authSuccessCheck:true);
-            // TODO:
-            // 1. Ensure that no other data is sent after close_notify.
-            // 2. Ensure that the channel is invalidated after sending alert_fatal.
 
-            ProtocolToken message = Context.CreateAlertTokenInternal(alertType, alertMessage);
+            // TODO: Ensure that no other data is sent after close_notify.
+            ProtocolToken message = Context.CreateShutdownToken();
             return InnerStream.BeginWrite(message.Payload, 0, message.Payload.Length, asyncCallback, asyncState);
         }
 
-        internal void EndSendAlert(IAsyncResult result)
+        internal void EndShutdown(IAsyncResult result)
         {
             CheckThrow(authSuccessCheck: true);
 
