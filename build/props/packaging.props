@@ -25,7 +25,7 @@
     <PackageVersion Condition="'$(PackageVersion)' == ''">4.3.0</PackageVersion>
   </PropertyGroup>
 
-  <Import Condition="Exists('pkg/baseline/baseline.props')" Project="pkg/baseline/baseline.props" />
+  <Import Project="$(ProjectDir)pkg/baseline/baseline.props" />
 
   <PropertyGroup Condition="'$(OsEnvironment)'=='Unix'">
     <!--

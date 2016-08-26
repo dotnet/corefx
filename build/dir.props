@@ -35,7 +35,7 @@
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
   <Import Project="$(MSBuildThisFileDirectory)props\dependencies.props" />
 
-  <Import Project="$(MSBuildThisFileDirectory)pkg/ExternalPackages/versions.props" Condition="Exists('$(MSBuildThisFileDirectory)pkg/ExternalPackages/versions.props')" />
+  <Import Project="$(ProjectDir)pkg/ExternalPackages/versions.props" />
 
   <!-- Import packaging props -->
   <Import Project="$(MSBuildThisFileDirectory)props\packaging.props"/>
