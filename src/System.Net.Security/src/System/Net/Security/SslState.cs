@@ -250,7 +250,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return CipherAlgorithmType.None;
@@ -264,7 +264,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -279,7 +279,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return (HashAlgorithmType)0;
@@ -293,7 +293,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -308,7 +308,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return (ExchangeAlgorithmType)0;
@@ -323,7 +323,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -338,7 +338,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SecPkgContext_ConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = Context.ConnectionInfo;
                 if (info == null)
                 {
                     return SslProtocols.None;

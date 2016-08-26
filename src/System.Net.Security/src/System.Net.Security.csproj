@@ -46,6 +46,8 @@
     <Compile Include="System\Net\Security\SslState.cs" />
     <Compile Include="System\Net\Security\SslStreamInternal.cs" />
     <Compile Include="System\Net\Security\ProtectionLevel.cs" />
+    <Compile Include="System\Net\Security\SslConnectionInfo.cs" />
+    <Compile Include="System\Net\Security\StreamSizes.cs" />
     <Compile Include="System\Security\Authentication\AuthenticationException.cs" />
     <!-- NegotiateStream -->
     <Compile Include="System\Net\BufferAsyncResult.cs" />
@@ -148,6 +150,8 @@
     <Compile Include="System\Net\SecurityStatusAdapterPal.Windows.cs" />
     <Compile Include="System\Net\Security\SecurityContextTokenHandle.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.Windows.cs" />
+    <Compile Include="System\Net\Security\SslConnectionInfo.Windows.cs" />
+    <Compile Include="System\Net\Security\StreamSizes.Windows.cs" />
     <!-- NegotiateStream -->
     <Compile Include="System\Net\ContextFlagsAdapterPal.Windows.cs" />
     <Compile Include="System\Net\Security\NegotiateStreamPal.Windows.cs" />
@@ -237,6 +241,8 @@
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="System\Net\CertificateValidationPal.Unix.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.Unix.cs" />
+    <Compile Include="System\Net\Security\SslConnectionInfo.Unix.cs" />
+    <Compile Include="System\Net\Security\StreamSizes.Unix.cs" />
     <Compile Include="$(CommonPath)\System\Net\Security\CertificateValidation.Unix.cs">
       <Link>Common\System\Net\Security\CertificateValidation.Unix.cs</Link>
     </Compile>
@@ -297,12 +303,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509StoreCtx.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509StoreCtx.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\SslConnectionInfo.cs">
-      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\SslConnectionInfo.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\StreamSizes.cs">
-      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\StreamSizes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.Initialization.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.Initialization.cs</Link>

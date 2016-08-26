@@ -28,7 +28,7 @@ namespace System.Net.Security
         private readonly bool _remoteCertRequired;
         private readonly SslProtocols _sslProtocols;
         private readonly EncryptionPolicy _encryptionPolicy;
-        private SecPkgContext_ConnectionInfo _connectionInfo;
+        private SslConnectionInfo _connectionInfo;
 
         private X509Certificate _serverCertificate;
         private X509Certificate _selectedClientCertificate;
@@ -178,7 +178,7 @@ namespace System.Net.Security
             }
         }
 
-        internal SecPkgContext_ConnectionInfo ConnectionInfo
+        internal SslConnectionInfo ConnectionInfo
         {
             get
             {
@@ -986,16 +986,16 @@ namespace System.Net.Security
                 GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::ProcessHandshakeSuccess");
             }
 
-            SecPkgContext_StreamSizes streamSizes;
+            StreamSizes streamSizes;
             SslStreamPal.QueryContextStreamSizes(_securityContext, out streamSizes);
 
             if (streamSizes != null)
             {
                 try
                 {
-                    _headerSize = streamSizes.cbHeader;
-                    _trailerSize = streamSizes.cbTrailer;
-                    _maxDataSize = checked(streamSizes.cbMaximumMessage - (_headerSize + _trailerSize));
+                    _headerSize = streamSizes.Header;
+                    _trailerSize = streamSizes.Trailer;
+                    _maxDataSize = checked(streamSizes.MaximumMessage - (_headerSize + _trailerSize));
                 }
                 catch (Exception e)
                 {

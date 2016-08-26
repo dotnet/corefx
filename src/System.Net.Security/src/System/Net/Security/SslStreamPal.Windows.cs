@@ -275,20 +275,24 @@ namespace System.Net.Security
             return SSPIWrapper.QueryContextChannelBinding(GlobalSSPI.SSPISecureChannel, securityContext, (Interop.SspiCli.ContextAttribute)attribute);
         }
 
-        public static void QueryContextStreamSizes(SafeDeleteContext securityContext, out SecPkgContext_StreamSizes streamSizes)
+        public static void QueryContextStreamSizes(SafeDeleteContext securityContext, out StreamSizes streamSizes)
         {
-            streamSizes = SSPIWrapper.QueryContextAttributes(
+            var interopStreamSizes = SSPIWrapper.QueryContextAttributes(
                 GlobalSSPI.SSPISecureChannel,
                 securityContext,
                 Interop.SspiCli.ContextAttribute.SECPKG_ATTR_STREAM_SIZES) as SecPkgContext_StreamSizes;
+
+            streamSizes = new StreamSizes(interopStreamSizes);
         }
 
-        public static void QueryContextConnectionInfo(SafeDeleteContext securityContext, out SecPkgContext_ConnectionInfo connectionInfo)
+        public static void QueryContextConnectionInfo(SafeDeleteContext securityContext, out SslConnectionInfo connectionInfo)
         {
-            connectionInfo = SSPIWrapper.QueryContextAttributes(
+            var interopConnectionInfo = SSPIWrapper.QueryContextAttributes(
                 GlobalSSPI.SSPISecureChannel,
                 securityContext,
                 Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CONNECTION_INFO) as SecPkgContext_ConnectionInfo;
+
+            connectionInfo = new SslConnectionInfo(interopConnectionInfo);
         }
 
         private static int GetProtocolFlagsFromSslProtocols(SslProtocols protocols, bool isServer)
