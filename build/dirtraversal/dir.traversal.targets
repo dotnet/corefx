@@ -23,7 +23,7 @@
   <Import Project="$(MSBuildThisFileDirectory)targets\buildallprojects.targets" />
   <Import Project="$(MSBuildThisFileDirectory)targets\testallprojects.targets" />
   <Import Project="$(MSBuildThisFileDirectory)targets\cleanallprojects.targets" />
-  <Import project="$(MSBuildThisFileDirectory)targets\restoreallprojects.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)targets\restoreallprojects.targets" />
   <Import Project="$(MSBuildThisFileDirectory)targets\generatealltestprojectjsons.targets" />
 
   <!-- get files to package target -->

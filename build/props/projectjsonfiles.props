@@ -5,6 +5,6 @@
   <!-- Create a collection of all project.json files for dependency updates. -->
   <ItemGroup>
     <ProjectJsonFiles Include="$(SourceDir)**/project.json" />
-    <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)pkg/**/project.json" />
+    <ProjectJsonFiles Include="$(ProjectDir)pkg/**/project.json" />
   </ItemGroup>
 </Project>

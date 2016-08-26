@@ -4,7 +4,7 @@
 
   <!-- Common repo directories -->
   <PropertyGroup>
-    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <ProjectDir>$(MSBuildThisFileDirectory)..\..\</ProjectDir>
     <SourceDir>$(ProjectDir)src\</SourceDir>
     <BuildDir>$(ProjectDir)build\</BuildDir>
 
