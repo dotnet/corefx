@@ -4,9 +4,6 @@
   <ItemGroup>
     <Project Include="System.Threading.Tasks.csproj" />
     <Project Include="System.Threading.Tasks.csproj">
-        <TargetGroup>netstandard1.3</TargetGroup>
-    </Project>
-    <Project Include="System.Threading.Tasks.csproj">
         <TargetGroup>net463</TargetGroup>
     </Project>
     <!-- Net46 facade is currently inbox for 4.0

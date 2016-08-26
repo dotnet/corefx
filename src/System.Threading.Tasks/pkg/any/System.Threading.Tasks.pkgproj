@@ -8,15 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Threading.Tasks.csproj" />
-    <ProjectReference Include="..\..\src\System.Threading.Tasks.csproj" >
-      <TargetGroup>netstandard1.3</TargetGroup>
-    </ProjectReference>
-
-    <!-- AOT implementation comes from AOT package -->
-    <File Include="$(PlaceholderFile)">
-      <TargetPath>runtimes/aot/lib/netcore50</TargetPath>
-      <TargetFramework>aot</TargetFramework>
-    </File>
 
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
