@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildDir)dir.traversal.targets -->
+
+  <Target Name="DumpTargets" DependsOnTargets="FilterProjects">
+        <MSBuild Targets="$(DefaultBuildAllTarget)"
+             Projects="@(Project)"
+             Properties="DefaultBuildAllTarget=$(DefaultBuildAllTarget);BuildAllProjects=true"
+             ContinueOnError="ErrorAndContinue" />
+  </Target>
+</Project>

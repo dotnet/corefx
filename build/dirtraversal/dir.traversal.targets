@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- dir.traversal.targets properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\dirtraversal.props" />
+
+  <!-- default implementations of targets (empty targets) -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\defaulttargets.targets" />
+
+  <!-- filter projects -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\filterprojects.targets" />
+
+  <!-- filter test projects -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\filterprojectstest.targets" />
+
+  <!-- dump targets -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\dump.targets" />
+
+  <!-- produces repo api related targets -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\produces.targets" />
+
+  <!-- targets related to build, test, clean, restore, etc for the entire tree traversal -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\buildallprojects.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)targets\testallprojects.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)targets\cleanallprojects.targets" />
+  <Import project="$(MSBuildThisFileDirectory)targets\restoreallprojects.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)targets\generatealltestprojectjsons.targets" />
+
+  <!-- get files to package target -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\getfilestopackage.targets" />
+
+  <!-- build against packages -->
+  <Import Condition="'$(_BuildAgainstPackages)' == 'true'" Project="$(ToolsDir)/buildagainstpackages.targets" />
+</Project>
+
