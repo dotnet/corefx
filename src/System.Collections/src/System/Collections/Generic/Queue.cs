@@ -386,15 +386,11 @@ namespace System.Collections.Generic
             /// <include file='doc\Queue.uex' path='docs/doc[@for="QueueEnumerator.MoveNext"]/*' />
             public bool MoveNext()
             {
-                // Typically both of these conditions will be true, so save ourselves
-                // a branch and use bitwise AND.
-                bool typicalIteration = (_version == _q._version) & (_index != -2);
-
                 // Instead of return true/false, we assign the result to a variable and
                 // return it at the end. This helps decrease code size, as currently the
                 // jit cannot do this for us and generates code for 3 returns.
                 bool result = true;
-                if (typicalIteration)
+                if (_version == _q._version && _index != -2)
                 {
                     _index++;
 
