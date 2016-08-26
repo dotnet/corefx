@@ -386,11 +386,14 @@ namespace System.Collections.Generic
             /// <include file='doc\Queue.uex' path='docs/doc[@for="QueueEnumerator.MoveNext"]/*' />
             public bool MoveNext()
             {
+                if (_version != _q._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+
                 // Instead of return true/false, we assign the result to a variable and
                 // return it at the end. This helps decrease code size, as currently the
                 // jit cannot do this for us and generates code for 3 returns.
-                bool result = true;
-                if (_version == _q._version && _index != -2)
+                bool result = false;
+
+                if (_index != -2)
                 {
                     _index++;
 
@@ -399,7 +402,6 @@ namespace System.Collections.Generic
                         // We've run past the last element
                         _index = -2;
                         _currentElement = default(T);
-                        result = false;
                     }
                     else
                     {
@@ -423,26 +425,11 @@ namespace System.Collections.Generic
                         }
                         
                         _currentElement = array[arrayIndex];
+                        result = true;
                     }
-                }
-                else
-                {
-                    result = MoveNextRare();
                 }
 
                 return result;
-            }
-
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            private bool MoveNextRare()
-            {
-                Debug.Assert(_version != _q._version || _index == -2);
-
-                // Note: If both conditions are true, then we have to throw the exception first.
-                if (_version != _q._version)
-                    throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
-                
-                return false;
             }
 
             /// <include file='doc\Queue.uex' path='docs/doc[@for="QueueEnumerator.Current"]/*' />
