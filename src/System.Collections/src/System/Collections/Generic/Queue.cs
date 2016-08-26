@@ -387,49 +387,43 @@ namespace System.Collections.Generic
             public bool MoveNext()
             {
                 if (_version != _q._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+                
+                if (_index == -2)
+                    return false;
 
-                // Instead of return true/false, we assign the result to a variable and
-                // return it at the end. This helps decrease code size, as currently the
-                // jit cannot do this for us and generates code for 3 returns.
-                bool result = false;
+                _index++;
 
-                if (_index != -2)
+                if (_index == _q._size)
                 {
-                    _index++;
-
-                    if (_index == _q._size)
-                    {
-                        // We've run past the last element
-                        _index = -2;
-                        _currentElement = default(T);
-                    }
-                    else
-                    {
-                        // Cache some fields in locals to decrease code size
-                        T[] array = _q._array;
-                        int capacity = array.Length;
-
-                        // _index represents the 0-based index into the queue, however the queue
-                        // doesn't have to start from 0 and it may not even be stored contiguously in memory.
-
-                        int arrayIndex = _q._head + _index; // this is the actual index into the queue's backing array
-                        if (arrayIndex >= capacity)
-                        {
-                            // NOTE: Originally we were using the modulo operator here, however
-                            // on Intel processors it has a very high instruction latency which
-                            // was slowing down the loop quite a bit.
-                            // Replacing it with simple comparison/subtraction operations sped up
-                            // the average foreach loop by 2x.
-
-                            arrayIndex -= capacity; // wrap around if needed
-                        }
-                        
-                        _currentElement = array[arrayIndex];
-                        result = true;
-                    }
+                    // We've run past the last element
+                    _index = -2;
+                    _currentElement = default(T);
+                    return false;
                 }
+                else
+                {
+                    // Cache some fields in locals to decrease code size
+                    T[] array = _q._array;
+                    int capacity = array.Length;
 
-                return result;
+                    // _index represents the 0-based index into the queue, however the queue
+                    // doesn't have to start from 0 and it may not even be stored contiguously in memory.
+
+                    int arrayIndex = _q._head + _index; // this is the actual index into the queue's backing array
+                    if (arrayIndex >= capacity)
+                    {
+                        // NOTE: Originally we were using the modulo operator here, however
+                        // on Intel processors it has a very high instruction latency which
+                        // was slowing down the loop quite a bit.
+                        // Replacing it with simple comparison/subtraction operations sped up
+                        // the average foreach loop by 2x.
+
+                        arrayIndex -= capacity; // wrap around if needed
+                    }
+                    
+                    _currentElement = array[arrayIndex];
+                    return true;
+                }
             }
 
             /// <include file='doc\Queue.uex' path='docs/doc[@for="QueueEnumerator.Current"]/*' />
