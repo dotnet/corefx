@@ -92,7 +92,7 @@ namespace System.Net
 
         public unsafe int DecryptMessage(SafeDeleteContext context, Interop.SspiCli.SecBufferDesc inputOutput, uint sequenceNumber)
         {
-            int status = (int)Interop.SecurityStatus.InvalidHandle;
+            int status = (int)Interop.SECURITY_STATUS.InvalidHandle;
             uint qop = 0;
 
             try

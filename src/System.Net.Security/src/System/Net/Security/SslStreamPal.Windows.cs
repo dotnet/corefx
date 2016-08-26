@@ -198,7 +198,7 @@ namespace System.Net.Security
             decspc[2] = new SecurityBuffer(null, SecurityBufferType.SECBUFFER_EMPTY);
             decspc[3] = new SecurityBuffer(null, SecurityBufferType.SECBUFFER_EMPTY);
 
-            Interop.SecurityStatus errorCode = (Interop.SecurityStatus)SSPIWrapper.DecryptMessage(
+            Interop.SECURITY_STATUS errorCode = (Interop.SECURITY_STATUS)SSPIWrapper.DecryptMessage(
                 GlobalSSPI.SSPISecureChannel,
                 securityContext,
                 decspc,
@@ -208,9 +208,9 @@ namespace System.Net.Security
             for (int i = 0; i < decspc.Length; i++)
             {
                 // Successfully decoded data and placed it at the following position in the buffer,
-                if ((errorCode == Interop.SecurityStatus.OK && decspc[i].type == SecurityBufferType.SECBUFFER_DATA)
+                if ((errorCode == Interop.SECURITY_STATUS.OK && decspc[i].type == SecurityBufferType.SECBUFFER_DATA)
                     // or we failed to decode the data, here is the encoded data.
-                    || (errorCode != Interop.SecurityStatus.OK && decspc[i].type == SecurityBufferType.SECBUFFER_EXTRA))
+                    || (errorCode != Interop.SECURITY_STATUS.OK && decspc[i].type == SecurityBufferType.SECBUFFER_EXTRA))
                 {
                     offset = decspc[i].offset;
                     count = decspc[i].size;
@@ -241,7 +241,7 @@ namespace System.Net.Security
                 Marshal.Copy(p, buffer, 0, alertTokenByteSize);
 
                 bufferDesc[0] = new SecurityBuffer(buffer, SecurityBufferType.SECBUFFER_TOKEN);
-                var errorCode = (Interop.SecurityStatus)SSPIWrapper.ApplyControlToken(
+                var errorCode = (Interop.SECURITY_STATUS)SSPIWrapper.ApplyControlToken(
                     GlobalSSPI.SSPISecureChannel,
                     ref securityContext,
                     bufferDesc);
@@ -262,7 +262,7 @@ namespace System.Net.Security
             var buffer = BitConverter.GetBytes(shutdownToken);
 
             bufferDesc[0] = new SecurityBuffer(buffer, SecurityBufferType.SECBUFFER_TOKEN);
-            var errorCode = (Interop.SecurityStatus)SSPIWrapper.ApplyControlToken(
+            var errorCode = (Interop.SECURITY_STATUS)SSPIWrapper.ApplyControlToken(
                 GlobalSSPI.SSPISecureChannel,
                 ref securityContext,
                 bufferDesc);

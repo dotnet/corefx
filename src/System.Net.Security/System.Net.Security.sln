@@ -16,9 +16,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalTests", "FunctionalTests", "{7665987C-3533-4785-9EBC-C1B76A433CD6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2C9E787E-150A-4C0F-979B-0E28FAC45BAA}"
-	ProjectSection(SolutionItems) = preProject
-		tests\UnitTests\TlsAlertsMatchWindowsInterop.cs = tests\UnitTests\TlsAlertsMatchWindowsInterop.cs
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Net.Security.Tests", "tests\FunctionalTests\System.Net.Security.Tests.csproj", "{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}"
 EndProject

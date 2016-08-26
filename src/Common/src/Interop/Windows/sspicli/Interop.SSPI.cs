@@ -401,11 +401,11 @@ internal static partial class Interop
           );
 
         [DllImport(Interop.Libraries.Sspi, ExactSpelling = true, SetLastError = true)]
-        internal unsafe static extern SecurityStatus SspiFreeAuthIdentity(
+        internal unsafe static extern SECURITY_STATUS SspiFreeAuthIdentity(
             [In] IntPtr authData);
 
         [DllImport(Interop.Libraries.Sspi, ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal unsafe static extern SecurityStatus SspiEncodeStringsAsAuthIdentity(
+        internal unsafe static extern SECURITY_STATUS SspiEncodeStringsAsAuthIdentity(
             [In] string userName,
             [In] string domainName,
             [In] string password,

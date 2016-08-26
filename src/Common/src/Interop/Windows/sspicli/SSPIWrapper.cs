@@ -255,7 +255,7 @@ namespace System.Net
 
             if (SecurityEventSource.Log.IsEnabled())
             {
-                SecurityEventSource.Log.SecurityContextInputBuffer(nameof(InitializeSecurityContext), (inputBuffer == null ? 0 : inputBuffer.size), outputBuffer.size, (Interop.SecurityStatus)errorCode);
+                SecurityEventSource.Log.SecurityContextInputBuffer(nameof(InitializeSecurityContext), (inputBuffer == null ? 0 : inputBuffer.size), outputBuffer.size, (Interop.SECURITY_STATUS)errorCode);
             }
 
             return errorCode;
@@ -275,7 +275,7 @@ namespace System.Net
 
             if (SecurityEventSource.Log.IsEnabled())
             {
-                SecurityEventSource.Log.SecurityContextInputBuffers(nameof(InitializeSecurityContext), (inputBuffers == null ? 0 : inputBuffers.Length), outputBuffer.size, (Interop.SecurityStatus)errorCode);
+                SecurityEventSource.Log.SecurityContextInputBuffers(nameof(InitializeSecurityContext), (inputBuffers == null ? 0 : inputBuffers.Length), outputBuffer.size, (Interop.SECURITY_STATUS)errorCode);
             }
 
             return errorCode;
@@ -292,7 +292,7 @@ namespace System.Net
 
             if (SecurityEventSource.Log.IsEnabled())
             {
-                SecurityEventSource.Log.SecurityContextInputBuffer(nameof(AcceptSecurityContext), (inputBuffer == null ? 0 : inputBuffer.size), outputBuffer.size, (Interop.SecurityStatus)errorCode);
+                SecurityEventSource.Log.SecurityContextInputBuffer(nameof(AcceptSecurityContext), (inputBuffer == null ? 0 : inputBuffer.size), outputBuffer.size, (Interop.SECURITY_STATUS)errorCode);
             }
 
             return errorCode;
@@ -309,7 +309,7 @@ namespace System.Net
 
             if (SecurityEventSource.Log.IsEnabled())
             {
-                SecurityEventSource.Log.SecurityContextInputBuffers(nameof(AcceptSecurityContext), (inputBuffers == null ? 0 : inputBuffers.Length), outputBuffer.size, (Interop.SecurityStatus)errorCode);
+                SecurityEventSource.Log.SecurityContextInputBuffers(nameof(AcceptSecurityContext), (inputBuffers == null ? 0 : inputBuffers.Length), outputBuffer.size, (Interop.SECURITY_STATUS)errorCode);
             }
 
             return errorCode;
@@ -321,7 +321,7 @@ namespace System.Net
 
             if (SecurityEventSource.Log.IsEnabled())
             {
-                SecurityEventSource.Log.OperationReturnedSomething("CompleteAuthToken()", (Interop.SecurityStatus)errorCode);
+                SecurityEventSource.Log.OperationReturnedSomething("CompleteAuthToken()", (Interop.SECURITY_STATUS)errorCode);
             }
 
             return errorCode;
@@ -333,7 +333,7 @@ namespace System.Net
 
             if (SecurityEventSource.Log.IsEnabled())
             {
-                SecurityEventSource.Log.OperationReturnedSomething("ApplyControlToken()", (Interop.SecurityStatus)errorCode);
+                SecurityEventSource.Log.OperationReturnedSomething("ApplyControlToken()", (Interop.SECURITY_STATUS)errorCode);
             }
 
             return errorCode;
@@ -709,27 +709,27 @@ namespace System.Net
                 return "An exception when invoking Win32 API";
             }
 
-            switch ((Interop.SecurityStatus)errorCode)
+            switch ((Interop.SECURITY_STATUS)errorCode)
             {
-                case Interop.SecurityStatus.InvalidHandle:
+                case Interop.SECURITY_STATUS.InvalidHandle:
                     return "Invalid handle";
-                case Interop.SecurityStatus.InvalidToken:
+                case Interop.SECURITY_STATUS.InvalidToken:
                     return "Invalid token";
-                case Interop.SecurityStatus.ContinueNeeded:
+                case Interop.SECURITY_STATUS.ContinueNeeded:
                     return "Continue needed";
-                case Interop.SecurityStatus.IncompleteMessage:
+                case Interop.SECURITY_STATUS.IncompleteMessage:
                     return "Message incomplete";
-                case Interop.SecurityStatus.WrongPrincipal:
+                case Interop.SECURITY_STATUS.WrongPrincipal:
                     return "Wrong principal";
-                case Interop.SecurityStatus.TargetUnknown:
+                case Interop.SECURITY_STATUS.TargetUnknown:
                     return "Target unknown";
-                case Interop.SecurityStatus.PackageNotFound:
+                case Interop.SECURITY_STATUS.PackageNotFound:
                     return "Package not found";
-                case Interop.SecurityStatus.BufferNotEnough:
+                case Interop.SECURITY_STATUS.BufferNotEnough:
                     return "Buffer not enough";
-                case Interop.SecurityStatus.MessageAltered:
+                case Interop.SECURITY_STATUS.MessageAltered:
                     return "Message altered";
-                case Interop.SecurityStatus.UntrustedRoot:
+                case Interop.SECURITY_STATUS.UntrustedRoot:
                     return "Untrusted root";
                 default:
                     return "0x" + errorCode.ToString("x", NumberFormatInfo.InvariantInfo);

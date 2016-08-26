@@ -26,7 +26,7 @@ namespace System.Net.Security
 
         protected override bool ReleaseHandle()
         {
-            return Interop.SspiCli.SspiFreeAuthIdentity(handle) == Interop.SecurityStatus.OK;
+            return Interop.SspiCli.SspiFreeAuthIdentity(handle) == Interop.SECURITY_STATUS.OK;
         }
     }
 
@@ -86,7 +86,7 @@ namespace System.Net.Security
             byte* buffer,
             SafeHandle refHandle)
         {
-            int status = (int)Interop.SecurityStatus.InvalidHandle;
+            int status = (int)Interop.SECURITY_STATUS.InvalidHandle;
 
             try
             {
@@ -755,7 +755,7 @@ namespace System.Net.Security
             ref Interop.SspiCli.ContextFlags attributes,
             SafeFreeContextBuffer handleTemplate)
         {
-            int errorCode = (int)Interop.SecurityStatus.InvalidHandle;
+            int errorCode = (int)Interop.SECURITY_STATUS.InvalidHandle;
 
             try
             {
@@ -1060,7 +1060,7 @@ namespace System.Net.Security
             ref Interop.SspiCli.ContextFlags outFlags,
             SafeFreeContextBuffer handleTemplate)
         {
-            int errorCode = (int)Interop.SecurityStatus.InvalidHandle;
+            int errorCode = (int)Interop.SECURITY_STATUS.InvalidHandle;
 
             // Run the body of this method as a non-interruptible block.
             try
@@ -1153,7 +1153,7 @@ namespace System.Net.Security
 
             var inSecurityBufferDescriptor = new Interop.SspiCli.SecBufferDesc(inSecBuffers.Length);
 
-            int errorCode = (int)Interop.SecurityStatus.InvalidHandle;
+            int errorCode = (int)Interop.SECURITY_STATUS.InvalidHandle;
 
             // These are pinned user byte arrays passed along with SecurityBuffers.
             GCHandle[] pinnedInBytes = null;
@@ -1267,7 +1267,7 @@ namespace System.Net.Security
 
             var inSecurityBufferDescriptor = new Interop.SspiCli.SecBufferDesc(inSecBuffers.Length);
 
-            int errorCode = (int)Interop.SecurityStatus.InvalidHandle;
+            int errorCode = (int)Interop.SECURITY_STATUS.InvalidHandle;
 
             // These are pinned user byte arrays passed along with SecurityBuffers.
             GCHandle[] pinnedInBytes = null;
@@ -1404,7 +1404,7 @@ namespace System.Net.Security
 
         private unsafe static int QueryContextChannelBinding_SECURITY(SafeDeleteContext phContext, Interop.SspiCli.ContextAttribute contextAttribute, SecPkgContext_Bindings* buffer, SafeFreeContextBufferChannelBinding refHandle)
         {
-            int status = (int)Interop.SecurityStatus.InvalidHandle;
+            int status = (int)Interop.SECURITY_STATUS.InvalidHandle;
 
             // SCHANNEL only supports SECPKG_ATTR_ENDPOINT_BINDINGS and SECPKG_ATTR_UNIQUE_BINDINGS which
             // map to our enum ChannelBindingKind.Endpoint and ChannelBindingKind.Unique.

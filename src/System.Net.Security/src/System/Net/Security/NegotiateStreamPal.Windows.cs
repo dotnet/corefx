@@ -42,11 +42,11 @@ namespace System.Net.Security
 
                     // This will return a client token when conducted authentication on server side.
                     // This token can be used for impersonation. We use it to create a WindowsIdentity and hand it out to the server app.
-                    Interop.SecurityStatus winStatus = (Interop.SecurityStatus)SSPIWrapper.QuerySecurityContextToken(
+                    Interop.SECURITY_STATUS winStatus = (Interop.SECURITY_STATUS)SSPIWrapper.QuerySecurityContextToken(
                         GlobalSSPI.SSPIAuth,
                         securityContext,
                         out token);
-                    if (winStatus != Interop.SecurityStatus.OK)
+                    if (winStatus != Interop.SECURITY_STATUS.OK)
                     {
                         throw new Win32Exception((int)winStatus);
                     }
@@ -110,11 +110,11 @@ namespace System.Net.Security
             SafeSspiAuthDataHandle authData = null;
             try
             {
-                Interop.SecurityStatus result = Interop.SspiCli.SspiEncodeStringsAsAuthIdentity(
+                Interop.SECURITY_STATUS result = Interop.SspiCli.SspiEncodeStringsAsAuthIdentity(
                     credential.UserName, credential.Domain,
                     credential.Password, out authData);
 
-                if (result != Interop.SecurityStatus.OK)
+                if (result != Interop.SECURITY_STATUS.OK)
                 {
                     if (NetEventSource.Log.IsEnabled())
                     {
@@ -151,7 +151,7 @@ namespace System.Net.Security
             ref ContextFlagsPal contextFlags)
         {
             Interop.SspiCli.ContextFlags outContextFlags = Interop.SspiCli.ContextFlags.Zero;
-            Interop.SecurityStatus winStatus = (Interop.SecurityStatus)SSPIWrapper.InitializeSecurityContext(
+            Interop.SECURITY_STATUS winStatus = (Interop.SECURITY_STATUS)SSPIWrapper.InitializeSecurityContext(
                 GlobalSSPI.SSPIAuth,
                 credentialsHandle,
                 ref securityContext,
@@ -170,7 +170,7 @@ namespace System.Net.Security
             ref SafeDeleteContext securityContext,
             SecurityBuffer[] inSecurityBufferArray)
         {
-            Interop.SecurityStatus winStatus = (Interop.SecurityStatus)SSPIWrapper.CompleteAuthToken(
+            Interop.SECURITY_STATUS winStatus = (Interop.SECURITY_STATUS)SSPIWrapper.CompleteAuthToken(
                 GlobalSSPI.SSPIAuth,
                 ref securityContext,
                 inSecurityBufferArray);
@@ -186,7 +186,7 @@ namespace System.Net.Security
             ref ContextFlagsPal contextFlags)
         {
             Interop.SspiCli.ContextFlags outContextFlags = Interop.SspiCli.ContextFlags.Zero;
-            Interop.SecurityStatus winStatus = (Interop.SecurityStatus)SSPIWrapper.AcceptSecurityContext(
+            Interop.SECURITY_STATUS winStatus = (Interop.SECURITY_STATUS)SSPIWrapper.AcceptSecurityContext(
                 GlobalSSPI.SSPIAuth,
                 credentialsHandle,
                 ref securityContext,
