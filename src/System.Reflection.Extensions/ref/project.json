@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "System.Runtime": "4.2.0-beta-devapi-24422-01",
+    "System.Runtime": "4.2.0-beta-devapi-24424-01",
     "System.Reflection": "4.0.0",
     "System.Reflection.Primitives": "4.0.0"
   },
