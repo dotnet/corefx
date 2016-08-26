@@ -182,14 +182,14 @@
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SecurityStatus.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SecurityStatus.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SslConnectionInfo.cs">
-      <Link>Common\Interop\Windows\SChannel\SslConnectionInfo.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs">
+      <Link>Common\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\UnmanagedCertificateContext.cs">
       <Link>Common\Interop\Windows\SChannel\UnmanagedCertificateContext.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\Bindings.cs">
-      <Link>Common\Interop\Windows\sspicli\Bindings.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_Bindings.cs">
+      <Link>Common\Interop\Windows\sspicli\SecPkgContext_Bindings.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\GlobalSSPI.cs">
       <Link>Common\Interop\Windows\sspicli\GlobalSSPI.cs</Link>
@@ -203,8 +203,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\NegotiationInfoClass.cs">
       <Link>Common\Interop\Windows\sspicli\NegotiationInfoClass.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecSizes.cs">
-      <Link>Common\Interop\Windows\sspicli\SecSizes.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_Sizes.cs">
+      <Link>Common\Interop\Windows\sspicli\SecPkgContext_Sizes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Collections\Generic\BidirectionalDictionary.cs">
       <Link>Common\System\Collections\Generic\BidirectionalDictionary.cs</Link>
@@ -233,8 +233,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SSPIWrapper.cs">
       <Link>Common\Interop\Windows\sspicli\SSPIWrapper.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\StreamSizes.cs">
-      <Link>Common\Interop\Windows\sspicli\StreamSizes.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_StreamSizes.cs">
+      <Link>Common\Interop\Windows\sspicli\SecPkgContext_StreamSizes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Windows.cs">
       <Link>Common\System\Net\ContextAwareResult.Windows.cs</Link>

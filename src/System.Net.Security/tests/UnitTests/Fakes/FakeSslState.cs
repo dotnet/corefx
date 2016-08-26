@@ -171,6 +171,16 @@ namespace System.Net.Security
         internal void EndProcessAuthentication(IAsyncResult result)
         {
         }
+
+        internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void EndShutdown(IAsyncResult asyncResult)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class _SslStream : Stream
