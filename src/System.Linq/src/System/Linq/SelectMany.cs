@@ -10,15 +10,8 @@ namespace System.Linq
     {
         public static IEnumerable<TResult> SelectMany<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TResult>> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             return SelectManyIterator(source, selector);
         }
@@ -36,15 +29,8 @@ namespace System.Linq
 
         public static IEnumerable<TResult> SelectMany<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TResult>> selector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (selector == null)
-            {
-                throw Error.ArgumentNull(nameof(selector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(selector, nameof(selector));
 
             return SelectManyIterator(source, selector);
         }
@@ -68,22 +54,9 @@ namespace System.Linq
 
         public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (collectionSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(collectionSelector));
-            }
-
-            if (resultSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(resultSelector));
-            }
-
-            return SelectManyIterator(source, collectionSelector, resultSelector);
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(collectionSelector, nameof(collectionSelector));
+            EnumerableHelpers.ThrowIfNull(resultSelector, nameof(resultSelector));
         }
 
         private static IEnumerable<TResult> SelectManyIterator<TSource, TCollection, TResult>(IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
@@ -105,20 +78,9 @@ namespace System.Linq
 
         public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (collectionSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(collectionSelector));
-            }
-
-            if (resultSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(resultSelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(collectionSelector, nameof(collectionSelector));
+            EnumerableHelpers.ThrowIfNull(resultSelector, nameof(resultSelector));
 
             return SelectManyIterator(source, collectionSelector, resultSelector);
         }

@@ -11,15 +11,8 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Concat<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
         {
-            if (first == null)
-            {
-                throw Error.ArgumentNull(nameof(first));
-            }
-
-            if (second == null)
-            {
-                throw Error.ArgumentNull(nameof(second));
-            }
+            EnumerableHelpers.ThrowIfNull(first, nameof(first));
+            EnumerableHelpers.ThrowIfNull(second, nameof(second));
 
             var concatFirst = first as ConcatIterator<TSource>;
             return concatFirst != null ?

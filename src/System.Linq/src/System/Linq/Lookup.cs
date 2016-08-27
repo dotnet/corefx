@@ -17,15 +17,8 @@ namespace System.Linq
 
         public static ILookup<TKey, TSource> ToLookup<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(keySelector, nameof(keySelector));
 
             return Lookup<TKey, TSource>.Create(source, keySelector, comparer);
         }
@@ -37,20 +30,9 @@ namespace System.Linq
 
         public static ILookup<TKey, TElement> ToLookup<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            if (elementSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(elementSelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(keySelector, nameof(keySelector));
+            EnumerableHelpers.ThrowIfNull(elementSelector, nameof(elementSelector));
 
             return Lookup<TKey, TElement>.Create(source, keySelector, elementSelector, comparer);
         }

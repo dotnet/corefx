@@ -15,20 +15,9 @@ namespace System.Linq
 
         public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {
-            if (comparer == null)
-            {
-                comparer = EqualityComparer<TSource>.Default;
-            }
-
-            if (first == null)
-            {
-                throw Error.ArgumentNull(nameof(first));
-            }
-
-            if (second == null)
-            {
-                throw Error.ArgumentNull(nameof(second));
-            }
+            EnumerableHelpers.ThrowIfNull(comparer, nameof(comparer));
+            EnumerableHelpers.ThrowIfNull(first, nameof(first));
+            EnumerableHelpers.ThrowIfNull(second, nameof(second));
 
             ICollection<TSource> firstCol = first as ICollection<TSource>;
             if (firstCol != null)

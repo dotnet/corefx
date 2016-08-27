@@ -10,60 +10,22 @@ namespace System.Linq
     {
         public static IEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
         {
-            if (outer == null)
-            {
-                throw Error.ArgumentNull(nameof(outer));
-            }
-
-            if (inner == null)
-            {
-                throw Error.ArgumentNull(nameof(inner));
-            }
-
-            if (outerKeySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(outerKeySelector));
-            }
-
-            if (innerKeySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(innerKeySelector));
-            }
-
-            if (resultSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(resultSelector));
-            }
+            EnumerableHelpers.ThrowIfNull(outer, nameof(outer));
+            EnumerableHelpers.ThrowIfNull(inner, nameof(inner));
+            EnumerableHelpers.ThrowIfNull(outerKeySelector, nameof(outerKeySelector));
+            EnumerableHelpers.ThrowIfNull(innerKeySelector, nameof(innerKeySelector));
+            EnumerableHelpers.ThrowIfNull(resultSelector, nameof(resultSelector));
 
             return JoinIterator(outer, inner, outerKeySelector, innerKeySelector, resultSelector, null);
         }
 
         public static IEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            if (outer == null)
-            {
-                throw Error.ArgumentNull(nameof(outer));
-            }
-
-            if (inner == null)
-            {
-                throw Error.ArgumentNull(nameof(inner));
-            }
-
-            if (outerKeySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(outerKeySelector));
-            }
-
-            if (innerKeySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(innerKeySelector));
-            }
-
-            if (resultSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(resultSelector));
-            }
+            EnumerableHelpers.ThrowIfNull(outer, nameof(outer));
+            EnumerableHelpers.ThrowIfNull(inner, nameof(inner));
+            EnumerableHelpers.ThrowIfNull(outerKeySelector, nameof(outerKeySelector));
+            EnumerableHelpers.ThrowIfNull(innerKeySelector, nameof(innerKeySelector));
+            EnumerableHelpers.ThrowIfNull(resultSelector, nameof(resultSelector));
 
             return JoinIterator(outer, inner, outerKeySelector, innerKeySelector, resultSelector, comparer);
         }

@@ -192,25 +192,10 @@ namespace System.Linq
 
         public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            if (elementSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(elementSelector));
-            }
-
-            if (resultSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(resultSelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(keySelector, nameof(keySelector));
+            EnumerableHelpers.ThrowIfNull(elementSelector, nameof(elementSelector));
+            EnumerableHelpers.ThrowIfNull(resultSelector, nameof(resultSelector));
 
             _source = source;
             _keySelector = keySelector;
@@ -255,20 +240,9 @@ namespace System.Linq
 
         public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            if (resultSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(resultSelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(keySelector, nameof(keySelector));
+            EnumerableHelpers.ThrowIfNull(resultSelector, nameof(resultSelector));
 
             _source = source;
             _keySelector = keySelector;
@@ -312,20 +286,9 @@ namespace System.Linq
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            if (elementSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(elementSelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(keySelector, nameof(keySelector));
+            EnumerableHelpers.ThrowIfNull(elementSelector, nameof(elementSelector));
 
             _source = source;
             _keySelector = keySelector;
@@ -369,15 +332,8 @@ namespace System.Linq
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(keySelector, nameof(keySelector));
 
             _source = source;
             _keySelector = keySelector;

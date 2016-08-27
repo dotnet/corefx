@@ -10,10 +10,7 @@ namespace System.Linq
     {
         public static TSource[] ToArray<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             IIListProvider<TSource> arrayProvider = source as IIListProvider<TSource>;
             return arrayProvider != null ? arrayProvider.ToArray() : EnumerableHelpers.ToArray(source);
@@ -21,10 +18,7 @@ namespace System.Linq
 
         public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
 
             IIListProvider<TSource> listProvider = source as IIListProvider<TSource>;
             return listProvider != null ? listProvider.ToList() : new List<TSource>(source);
@@ -37,15 +31,8 @@ namespace System.Linq
 
         public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(keySelector, nameof(keySelector));
 
             int capacity = 0;
             ICollection<TSource> collection = source as ICollection<TSource>;
@@ -108,20 +95,9 @@ namespace System.Linq
 
         public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            if (elementSelector == null)
-            {
-                throw Error.ArgumentNull(nameof(elementSelector));
-            }
+            EnumerableHelpers.ThrowIfNull(source, nameof(source));
+            EnumerableHelpers.ThrowIfNull(keySelector, nameof(keySelector));
+            EnumerableHelpers.ThrowIfNull(elementSelector, nameof(elementSelector));
 
             int capacity = 0;
             ICollection<TSource> collection = source as ICollection<TSource>;
