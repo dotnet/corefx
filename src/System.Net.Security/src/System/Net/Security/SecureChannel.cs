@@ -1240,7 +1240,7 @@ namespace System.Net.Security
                     remoteCertificateEx.Dispose();
                 }
             }
-            
+
             if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::VerifyRemoteCertificate", success.ToString());

@@ -197,8 +197,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\Interop.SSPI.cs">
       <Link>Common\Interop\Windows\sspicli\Interop.SSPI.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\NegotiationInfo.cs">
-      <Link>Common\Interop\Windows\sspicli\NegotiationInfo.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_NegotiationInfoW.cs">
+      <Link>Common\Interop\Windows\sspicli\SecPkgContext_NegotiationInfoW.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\NegotiationInfoClass.cs">
       <Link>Common\Interop\Windows\sspicli\NegotiationInfoClass.cs</Link>
