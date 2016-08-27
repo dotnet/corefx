@@ -756,7 +756,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 grp.SetMismatchedStaticBit();
             }
             obj = isExtensionMethod ? grp.GetOptionalObject() : obj;
-            Debug.Assert(mwiWrap.Meth().getKind() == SYMKIND.SK_MethodSymbol);
+            Debug.Assert(mwiWrap.Meth().getKind() == SymbolKind.MethodSymbol);
             if (mwiWrap.TypeArgs.Size > 0)
             {
                 // Check method type variable constraints.

@@ -144,7 +144,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (rval);
         }
 
-        public EXPRMEMGRP CreateMemGroup(EXPRFLAG nFlags, Name pName, TypeArray pTypeArgs, SYMKIND symKind, CType pTypePar, MethodOrPropertySymbol pMPS, EXPR pObject, CMemberLookupResults memberLookupResults)
+        public EXPRMEMGRP CreateMemGroup(EXPRFLAG nFlags, Name pName, TypeArray pTypeArgs, SymbolKind symKind, CType pTypePar, MethodOrPropertySymbol pMPS, EXPR pObject, CMemberLookupResults memberLookupResults)
         {
             Debug.Assert(0 == (nFlags & ~(
                            EXPRFLAG.EXF_CTOR | EXPRFLAG.EXF_INDEXER | EXPRFLAG.EXF_OPERATOR | EXPRFLAG.EXF_NEWOBJCALL |
@@ -183,7 +183,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 pType = GetTypes().GetErrorSym();
             }
 
-            return CreateMemGroup(0, pName, mwi.TypeArgs, methProp != null ? methProp.getKind() : SYMKIND.SK_MethodSymbol, mwi.GetType(), methProp, pObject, new CMemberLookupResults(GetGlobalSymbols().AllocParams(1, new CType[] { pType }), pName));
+            return CreateMemGroup(0, pName, mwi.TypeArgs, methProp != null ? methProp.getKind() : SymbolKind.MethodSymbol, mwi.GetType(), methProp, pObject, new CMemberLookupResults(GetGlobalSymbols().AllocParams(1, new CType[] { pType }), pName));
         }
 
         public EXPRUSERDEFINEDCONVERSION CreateUserDefinedConversion(EXPR arg, EXPR call, MethWithInst mwi)

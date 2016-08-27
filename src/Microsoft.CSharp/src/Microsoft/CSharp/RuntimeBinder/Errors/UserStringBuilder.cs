@@ -52,36 +52,36 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             fHadUndisplayableStringInError = false;
         }
 
-        protected void ErrSK(out string psz, SYMKIND sk)
+        protected void ErrSK(out string psz, SymbolKind sk)
         {
             MessageID id;
             switch (sk)
             {
-                case SYMKIND.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     id = MessageID.SK_METHOD;
                     break;
-                case SYMKIND.SK_AggregateSymbol:
+                case SymbolKind.AggregateSymbol:
                     id = MessageID.SK_CLASS;
                     break;
-                case SYMKIND.SK_NamespaceSymbol:
+                case SymbolKind.NamespaceSymbol:
                     id = MessageID.SK_NAMESPACE;
                     break;
-                case SYMKIND.SK_FieldSymbol:
+                case SymbolKind.FieldSymbol:
                     id = MessageID.SK_FIELD;
                     break;
-                case SYMKIND.SK_LocalVariableSymbol:
+                case SymbolKind.LocalVariableSymbol:
                     id = MessageID.SK_VARIABLE;
                     break;
-                case SYMKIND.SK_PropertySymbol:
+                case SymbolKind.PropertySymbol:
                     id = MessageID.SK_PROPERTY;
                     break;
-                case SYMKIND.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     id = MessageID.SK_EVENT;
                     break;
-                case SYMKIND.SK_TypeParameterSymbol:
+                case SymbolKind.TypeParameterSymbol:
                     id = MessageID.SK_TYVAR;
                     break;
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
+                case SymbolKind.AssemblyQualifiedNamespaceSymbol:
                     Debug.Assert(false, "Illegal sk");
                     id = MessageID.SK_ALIAS;
                     break;
@@ -418,20 +418,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             switch (sym.getKind())
             {
-                case SYMKIND.SK_NamespaceDeclaration:
+                case SymbolKind.NamespaceDeclaration:
                     // for namespace declarations just convert the namespace
                     ErrAppendSym(sym.AsNamespaceDeclaration().NameSpace(), null);
                     break;
 
-                case SYMKIND.SK_GlobalAttributeDeclaration:
+                case SymbolKind.GlobalAttributeDeclaration:
                     ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_AggregateDeclaration:
+                case SymbolKind.AggregateDeclaration:
                     ErrAppendSym(sym.AsAggregateDeclaration().Agg(), pctx);
                     break;
 
-                case SYMKIND.SK_AggregateSymbol:
+                case SymbolKind.AggregateSymbol:
                     {
                         // Check for a predefined class with a special "nice" name for
                         // error reported.
@@ -455,20 +455,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         break;
                     }
 
-                case SYMKIND.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     ErrAppendMethod(sym.AsMethodSymbol(), pctx, fArgs);
                     break;
 
-                case SYMKIND.SK_PropertySymbol:
+                case SymbolKind.PropertySymbol:
                     ErrAppendProperty(sym.AsPropertySymbol(), pctx);
                     break;
 
-                case SYMKIND.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     ErrAppendEvent(sym.AsEventSymbol(), pctx);
                     break;
 
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
-                case SYMKIND.SK_NamespaceSymbol:
+                case SymbolKind.AssemblyQualifiedNamespaceSymbol:
+                case SymbolKind.NamespaceSymbol:
                     if (sym == getBSymmgr().GetRootNS())
                     {
                         ErrAppendId(MessageID.GlobalNamespace);
@@ -480,12 +480,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case SYMKIND.SK_FieldSymbol:
+                case SymbolKind.FieldSymbol:
                     ErrAppendParentSym(sym, pctx);
                     ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_TypeParameterSymbol:
+                case SymbolKind.TypeParameterSymbol:
                     if (null == sym.name)
                     {
                         // It's a standard type variable.
@@ -498,15 +498,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_LocalVariableSymbol:
-                case SYMKIND.SK_LabelSymbol:
-                case SYMKIND.SK_TransparentIdentifierMemberSymbol:
+                case SymbolKind.LocalVariableSymbol:
+                case SymbolKind.LabelSymbol:
+                case SymbolKind.TransparentIdentifierMemberSymbol:
                     // Generate symbol name.
                     ErrAppendName(sym.name);
                     break;
 
-                case SYMKIND.SK_Scope:
-                case SYMKIND.SK_LambdaScope:
+                case SymbolKind.Scope:
+                case SymbolKind.LambdaScope:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, "Bad symbol kind");
@@ -533,7 +533,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
             switch (pType.GetTypeKind())
             {
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     {
                         AggregateType pAggType = pType.AsAggregateType();
 
@@ -568,7 +568,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         break;
                     }
 
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     if (null == pType.GetName())
                     {
                         // It's a standard type variable.
@@ -585,7 +585,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case TypeKind.TK_ErrorType:
+                case TypeKind.ErrorType:
                     if (pType.AsErrorType().HasParent())
                     {
                         Debug.Assert(pType.AsErrorType().nameText != null && pType.AsErrorType().typeArgs != null);
@@ -601,32 +601,32 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case TypeKind.TK_NullType:
+                case TypeKind.NullType:
                     // Load the string "<null>".
                     ErrAppendId(MessageID.NULL);
                     break;
 
-                case TypeKind.TK_OpenTypePlaceholderType:
+                case TypeKind.OpenTypePlaceholderType:
                     // Leave blank.
                     break;
 
-                case TypeKind.TK_BoundLambdaType:
+                case TypeKind.BoundLambdaType:
                     ErrAppendId(MessageID.AnonMethod);
                     break;
 
-                case TypeKind.TK_UnboundLambdaType:
+                case TypeKind.UnboundLambdaType:
                     ErrAppendId(MessageID.Lambda);
                     break;
 
-                case TypeKind.TK_MethodGroupType:
+                case TypeKind.MethodGroupType:
                     ErrAppendId(MessageID.MethodGroup);
                     break;
 
-                case TypeKind.TK_ArgumentListType:
+                case TypeKind.ArgumentListType:
                     ErrAppendString(TokenFacts.GetText(TokenKind.ArgList));
                     break;
 
-                case TypeKind.TK_ArrayType:
+                case TypeKind.ArrayType:
                     {
                         CType elementType = pType.AsArrayType().GetBaseElementType();
                         int rank;
@@ -670,11 +670,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         break;
                     }
 
-                case TypeKind.TK_VoidType:
+                case TypeKind.VoidType:
                     ErrAppendName(GetNameManager().Lookup(TokenFacts.GetText(TokenKind.Void)));
                     break;
 
-                case TypeKind.TK_ParameterModifierType:
+                case TypeKind.ParameterModifierType:
                     // add ref or out
                     ErrAppendString(pType.AsParameterModifierType().isOut ? "out " : "ref ");
 
@@ -682,7 +682,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendType(pType.AsParameterModifierType().GetParameterType(), pctx);
                     break;
 
-                case TypeKind.TK_PointerType:
+                case TypeKind.PointerType:
                     // Generate the base type.
                     ErrAppendType(pType.AsPointerType().GetReferentType(), pctx);
                     {
@@ -691,12 +691,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     ErrAppendType(pType.AsNullableType().GetUnderlyingType(), pctx);
                     ErrAppendChar('?');
                     break;
 
-                case TypeKind.TK_NaturalIntegerType:
+                case TypeKind.NaturalIntegerType:
                 default:
                     // Shouldn't happen.
                     Debug.Assert(false, "Bad type kind");

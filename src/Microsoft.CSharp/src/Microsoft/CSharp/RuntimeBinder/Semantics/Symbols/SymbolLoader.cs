@@ -45,9 +45,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public MethodSymbol LookupInvokeMeth(AggregateSymbol pAggDel)
         {
             Debug.Assert(pAggDel.AggKind() == AggKindEnum.Delegate);
-            for (Symbol pSym = this.LookupAggMember(GetNameManager().GetPredefName(PredefinedName.PN_INVOKE), pAggDel, symbmask_t.MASK_ALL);
+            for (Symbol pSym = this.LookupAggMember(GetNameManager().GetPredefName(PredefinedName.PN_INVOKE), pAggDel, SymbolMask.ALL);
                  pSym != null;
-                 pSym = this.LookupNextSym(pSym, pAggDel, symbmask_t.MASK_ALL))
+                 pSym = this.LookupNextSym(pSym, pAggDel, SymbolMask.ALL))
             {
                 if (pSym.IsMethodSymbol() && pSym.AsMethodSymbol().isInvoke())
                 {
@@ -152,12 +152,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ats;
         }
 
-        public Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask)
+        public Symbol LookupAggMember(Name name, AggregateSymbol agg, SymbolMask mask)
         {
             return getBSymmgr().LookupAggMember(name, agg, mask);
         }
 
-        public Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
+        public Symbol LookupNextSym(Symbol sym, ParentSymbol parent, SymbolMask kindmask)
         {
             return BSYMMGR.LookupNextSym(sym, parent, kindmask);
         }
@@ -178,13 +178,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (typeSym.GetTypeKind())
             {
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     return typeSym.AsAggregateType();
-                case TypeKind.TK_ArrayType:
+                case TypeKind.ArrayType:
                     return GetReqPredefType(PredefinedType.PT_ARRAY);
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     return typeSym.AsTypeParameterType().GetEffectiveBaseClass();
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     return typeSym.AsNullableType().GetAts(ErrorContext);
             }
             Debug.Assert(false, "Bad typeSym!");

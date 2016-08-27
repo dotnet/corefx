@@ -60,7 +60,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(this.isEvent == true);
             EventSymbol evt = symbolLoader.LookupAggMember(this.name,
                                                            this.getClass(),
-                                                           symbmask_t.MASK_EventSymbol).AsEventSymbol();
+                                                           SymbolMask.EventSymbol).AsEventSymbol();
 
             return evt;
         }

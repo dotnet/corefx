@@ -3242,13 +3242,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 switch (type.GetTypeKind())
                 {
-                    case TypeKind.TK_NullableType:
+                    case TypeKind.NullableType:
                         type = type.StripNubs();
                         break;
-                    case TypeKind.TK_TypeParameterType:
+                    case TypeKind.TypeParameterType:
                         type = type.AsTypeParameterType().GetEffectiveBaseClass();
                         break;
-                    case TypeKind.TK_AggregateType:
+                    case TypeKind.AggregateType:
                         if ((type.isClassType() || type.isStructType()) && !type.AsAggregateType().getAggregate().IsSkipUDOps())
                         {
                             return type.AsAggregateType();
@@ -3371,9 +3371,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name name = ekName(ek);
             Debug.Assert(name != null);
             bool foundSome = false;
-            for (MethodSymbol methCur = GetSymbolLoader().LookupAggMember(name, type.getAggregate(), symbmask_t.MASK_MethodSymbol).AsMethodSymbol();
+            for (MethodSymbol methCur = GetSymbolLoader().LookupAggMember(name, type.getAggregate(), SymbolMask.MethodSymbol).AsMethodSymbol();
                 methCur != null;
-                methCur = GetSymbolLoader().LookupNextSym(methCur, type.getAggregate(), symbmask_t.MASK_MethodSymbol).AsMethodSymbol())
+                methCur = GetSymbolLoader().LookupNextSym(methCur, type.getAggregate(), SymbolMask.MethodSymbol).AsMethodSymbol())
             {
                 if (UserDefinedBinaryOperatorIsApplicable(candidateList, ek, methCur, type, arg1, arg2, fDontLift))
                 {

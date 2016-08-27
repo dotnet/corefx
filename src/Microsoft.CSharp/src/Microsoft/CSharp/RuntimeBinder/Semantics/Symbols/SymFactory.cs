@@ -19,7 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Namespace
         public NamespaceSymbol CreateNamespace(Name name, NamespaceSymbol parent)
         {
-            NamespaceSymbol sym = newBasicSym(SYMKIND.SK_NamespaceSymbol, name, parent).AsNamespaceSymbol();
+            NamespaceSymbol sym = newBasicSym(SymbolKind.NamespaceSymbol, name, parent).AsNamespaceSymbol();
             sym.SetAccess(ACCESS.ACC_PUBLIC);
 
             return (sym);
@@ -29,7 +29,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(name != null);
 
-            AssemblyQualifiedNamespaceSymbol sym = newBasicSym(SYMKIND.SK_AssemblyQualifiedNamespaceSymbol, name, parent).AsAssemblyQualifiedNamespaceSymbol();
+            AssemblyQualifiedNamespaceSymbol sym = newBasicSym(SymbolKind.AssemblyQualifiedNamespaceSymbol, name, parent).AsAssemblyQualifiedNamespaceSymbol();
 
             Debug.Assert(sym != null);
             return sym;
@@ -51,7 +51,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                sym = newBasicSym(SYMKIND.SK_AggregateSymbol, name, parent).AsAggregateSymbol();
+                sym = newBasicSym(SymbolKind.AggregateSymbol, name, parent).AsAggregateSymbol();
                 sym.name = name;
                 sym.SetTypeManager(typeManager);
                 sym.SetSealed(false);
@@ -72,7 +72,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //Debug.Assert(declOuter == null || declOuter.Bag() == agg.Parent);
 
             // DECLSYMs are not parented like named symbols.
-            AggregateDeclaration sym = newBasicSym(SYMKIND.SK_AggregateDeclaration, agg.name, null).AsAggregateDeclaration();
+            AggregateDeclaration sym = newBasicSym(SymbolKind.AggregateDeclaration, agg.name, null).AsAggregateDeclaration();
 
             if (declOuter != null)
             {
@@ -88,12 +88,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(name != null);
 
-            Symbol sym = newBasicSym(SYMKIND.SK_UnresolvedAggregateSymbol, name, parent);
+            Symbol sym = newBasicSym(SymbolKind.UnresolvedAggregateSymbol, name, parent);
             AggregateSymbol AggregateSymbol = null;
 
             // Unresolved Aggs need extra storage, but are still considered Aggs.
 
-            sym.setKind(SYMKIND.SK_AggregateSymbol);
+            sym.setKind(SymbolKind.AggregateSymbol);
             AggregateSymbol = sym.AsAggregateSymbol();
             AggregateSymbol.SetTypeManager(typeManager);
 
@@ -106,7 +106,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(name != null);
 
-            FieldSymbol sym = newBasicSym(SYMKIND.SK_FieldSymbol, name, parent).AsFieldSymbol();
+            FieldSymbol sym = newBasicSym(SymbolKind.FieldSymbol, name, parent).AsFieldSymbol();
             sym.declaration = declaration;
 
             Debug.Assert(sym != null);
@@ -115,7 +115,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public LocalVariableSymbol CreateLocalVar(Name name, ParentSymbol parent, CType type)
         {
-            LocalVariableSymbol sym = newBasicSym(SYMKIND.SK_LocalVariableSymbol, name, parent).AsLocalVariableSymbol();
+            LocalVariableSymbol sym = newBasicSym(SymbolKind.LocalVariableSymbol, name, parent).AsLocalVariableSymbol();
             sym.SetType(type);
             sym.SetAccess(ACCESS.ACC_UNKNOWN);    // required for Symbol::hasExternalAccess which is used by refactoring
             sym.wrap = null;
@@ -125,7 +125,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public MethodSymbol CreateMethod(Name name, ParentSymbol parent, AggregateDeclaration declaration)
         {
-            MethodSymbol sym = newBasicSym(SYMKIND.SK_MethodSymbol, name, parent).AsMethodSymbol();
+            MethodSymbol sym = newBasicSym(SymbolKind.MethodSymbol, name, parent).AsMethodSymbol();
             sym.declaration = declaration;
 
             return sym;
@@ -133,7 +133,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public PropertySymbol CreateProperty(Name name, ParentSymbol parent, AggregateDeclaration declaration)
         {
-            PropertySymbol sym = newBasicSym(SYMKIND.SK_PropertySymbol, name, parent).AsPropertySymbol();
+            PropertySymbol sym = newBasicSym(SymbolKind.PropertySymbol, name, parent).AsPropertySymbol();
             sym.declaration = declaration;
             Debug.Assert(sym != null);
             return (sym);
@@ -141,7 +141,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public EventSymbol CreateEvent(Name name, ParentSymbol parent, AggregateDeclaration declaration)
         {
-            EventSymbol sym = newBasicSym(SYMKIND.SK_EventSymbol, name, parent).AsEventSymbol();
+            EventSymbol sym = newBasicSym(SymbolKind.EventSymbol, name, parent).AsEventSymbol();
             sym.declaration = declaration;
 
             Debug.Assert(sym != null);
@@ -150,7 +150,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeParameterSymbol CreateMethodTypeParameter(Name pName, MethodSymbol pParent, int index, int indexTotal)
         {
-            TypeParameterSymbol pResult = newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent).AsTypeParameterSymbol();
+            TypeParameterSymbol pResult = newBasicSym(SymbolKind.TypeParameterSymbol, pName, pParent).AsTypeParameterSymbol();
             pResult.SetIndexInOwnParameters(index);
             pResult.SetIndexInTotalParameters(indexTotal);
 
@@ -162,7 +162,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeParameterSymbol CreateClassTypeParameter(Name pName, AggregateSymbol pParent, int index, int indexTotal)
         {
-            TypeParameterSymbol pResult = newBasicSym(SYMKIND.SK_TypeParameterSymbol, pName, pParent).AsTypeParameterSymbol();
+            TypeParameterSymbol pResult = newBasicSym(SymbolKind.TypeParameterSymbol, pName, pParent).AsTypeParameterSymbol();
             pResult.SetIndexInOwnParameters(index);
             pResult.SetIndexInTotalParameters(indexTotal);
 

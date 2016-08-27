@@ -84,21 +84,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false, "Bad Symbol kind in TypeContainsAnonymousTypes");
                     return false;
 
-                case TypeKind.TK_NullType:
-                case TypeKind.TK_VoidType:
-                case TypeKind.TK_NullableType:
-                case TypeKind.TK_TypeParameterType:
-                case TypeKind.TK_UnboundLambdaType:
-                case TypeKind.TK_MethodGroupType:
+                case TypeKind.NullType:
+                case TypeKind.VoidType:
+                case TypeKind.NullableType:
+                case TypeKind.TypeParameterType:
+                case TypeKind.UnboundLambdaType:
+                case TypeKind.MethodGroupType:
                     return false;
 
-                case TypeKind.TK_ArrayType:
-                case TypeKind.TK_ParameterModifierType:
-                case TypeKind.TK_PointerType:
+                case TypeKind.ArrayType:
+                case TypeKind.ParameterModifierType:
+                case TypeKind.PointerType:
                     ctype = (CType)ctype.GetBaseOrParameterOrElementType();
                     goto LRecurse;
 
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     if (ctype.AsAggregateType().getAggregate().IsAnonymousType())
                     {
                         return true;
@@ -116,7 +116,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return false;
 
-                case TypeKind.TK_ErrorType:
+                case TypeKind.ErrorType:
                     if (ctype.AsErrorType().HasTypeParent())
                     {
                         ctype = ctype.AsErrorType().GetTypeParent();
@@ -553,33 +553,33 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false);
                     return type;
 
-                case TypeKind.TK_NullType:
-                case TypeKind.TK_VoidType:
-                case TypeKind.TK_OpenTypePlaceholderType:
-                case TypeKind.TK_MethodGroupType:
-                case TypeKind.TK_BoundLambdaType:
-                case TypeKind.TK_UnboundLambdaType:
-                case TypeKind.TK_NaturalIntegerType:
-                case TypeKind.TK_ArgumentListType:
+                case TypeKind.NullType:
+                case TypeKind.VoidType:
+                case TypeKind.OpenTypePlaceholderType:
+                case TypeKind.MethodGroupType:
+                case TypeKind.BoundLambdaType:
+                case TypeKind.UnboundLambdaType:
+                case TypeKind.NaturalIntegerType:
+                case TypeKind.ArgumentListType:
                     return type;
 
-                case TypeKind.TK_ParameterModifierType:
+                case TypeKind.ParameterModifierType:
                     typeDst = SubstTypeCore(typeSrc = type.AsParameterModifierType().GetParameterType(), pctx);
                     return (typeDst == typeSrc) ? type : GetParameterModifier(typeDst, type.AsParameterModifierType().isOut);
 
-                case TypeKind.TK_ArrayType:
+                case TypeKind.ArrayType:
                     typeDst = SubstTypeCore(typeSrc = type.AsArrayType().GetElementType(), pctx);
                     return (typeDst == typeSrc) ? type : GetArray(typeDst, type.AsArrayType().rank);
 
-                case TypeKind.TK_PointerType:
+                case TypeKind.PointerType:
                     typeDst = SubstTypeCore(typeSrc = type.AsPointerType().GetReferentType(), pctx);
                     return (typeDst == typeSrc) ? type : GetPointer(typeDst);
 
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     typeDst = SubstTypeCore(typeSrc = type.AsNullableType().GetUnderlyingType(), pctx);
                     return (typeDst == typeSrc) ? type : GetNullable(typeDst);
 
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     if (type.AsAggregateType().GetTypeArgsAll().size > 0)
                     {
                         AggregateType ats = type.AsAggregateType();
@@ -590,7 +590,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return type;
 
-                case TypeKind.TK_ErrorType:
+                case TypeKind.ErrorType:
                     if (type.AsErrorType().HasParent())
                     {
                         ErrorType err = type.AsErrorType();
@@ -610,7 +610,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return type;
 
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     {
                         TypeParameterSymbol tvs = type.AsTypeParameterType().GetTypeParameterSymbol();
                         int index = tvs.GetIndexInTotalParameters();
@@ -697,27 +697,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false, "Bad Symbol kind in SubstEqualTypesCore");
                     return false;
 
-                case TypeKind.TK_NullType:
-                case TypeKind.TK_VoidType:
-                case TypeKind.TK_OpenTypePlaceholderType:
+                case TypeKind.NullType:
+                case TypeKind.VoidType:
+                case TypeKind.OpenTypePlaceholderType:
                     // There should only be a single instance of these.
                     Debug.Assert(typeDst.GetTypeKind() != typeSrc.GetTypeKind());
                     return false;
 
-                case TypeKind.TK_ArrayType:
-                    if (typeDst.GetTypeKind() != TypeKind.TK_ArrayType || typeDst.AsArrayType().rank != typeSrc.AsArrayType().rank)
+                case TypeKind.ArrayType:
+                    if (typeDst.GetTypeKind() != TypeKind.ArrayType || typeDst.AsArrayType().rank != typeSrc.AsArrayType().rank)
                         return false;
                     goto LCheckBases;
 
-                case TypeKind.TK_ParameterModifierType:
-                    if (typeDst.GetTypeKind() != TypeKind.TK_ParameterModifierType ||
+                case TypeKind.ParameterModifierType:
+                    if (typeDst.GetTypeKind() != TypeKind.ParameterModifierType ||
                         ((pctx.grfst & SubstTypeFlags.NoRefOutDifference) == 0 &&
                          typeDst.AsParameterModifierType().isOut != typeSrc.AsParameterModifierType().isOut))
                         return false;
                     goto LCheckBases;
 
-                case TypeKind.TK_PointerType:
-                case TypeKind.TK_NullableType:
+                case TypeKind.PointerType:
+                case TypeKind.NullableType:
                     if (typeDst.GetTypeKind() != typeSrc.GetTypeKind())
                         return false;
                     LCheckBases:
@@ -725,8 +725,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     typeDst = typeDst.GetBaseOrParameterOrElementType();
                     goto LRecurse;
 
-                case TypeKind.TK_AggregateType:
-                    if (typeDst.GetTypeKind() != TypeKind.TK_AggregateType)
+                case TypeKind.AggregateType:
+                    if (typeDst.GetTypeKind() != TypeKind.AggregateType)
                         return false;
                     { // BLOCK
                         AggregateType atsSrc = typeSrc.AsAggregateType();
@@ -746,7 +746,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return true;
 
-                case TypeKind.TK_ErrorType:
+                case TypeKind.ErrorType:
                     if (!typeDst.IsErrorType() || !typeSrc.AsErrorType().HasParent() || !typeDst.AsErrorType().HasParent())
                         return false;
                     {
@@ -790,7 +790,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return true;
 
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     { // BLOCK
                         TypeParameterSymbol tvs = typeSrc.AsTypeParameterType().GetTypeParameterSymbol();
                         int index = tvs.GetIndexInTotalParameters();
@@ -851,21 +851,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false, "Bad Symbol kind in TypeContainsType");
                     return false;
 
-                case TypeKind.TK_NullType:
-                case TypeKind.TK_VoidType:
-                case TypeKind.TK_OpenTypePlaceholderType:
+                case TypeKind.NullType:
+                case TypeKind.VoidType:
+                case TypeKind.OpenTypePlaceholderType:
                     // There should only be a single instance of these.
                     Debug.Assert(typeFind.GetTypeKind() != type.GetTypeKind());
                     return false;
 
-                case TypeKind.TK_ArrayType:
-                case TypeKind.TK_NullableType:
-                case TypeKind.TK_ParameterModifierType:
-                case TypeKind.TK_PointerType:
+                case TypeKind.ArrayType:
+                case TypeKind.NullableType:
+                case TypeKind.ParameterModifierType:
+                case TypeKind.PointerType:
                     type = type.GetBaseOrParameterOrElementType();
                     goto LRecurse;
 
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     { // BLOCK
                         AggregateType ats = type.AsAggregateType();
 
@@ -877,7 +877,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return false;
 
-                case TypeKind.TK_ErrorType:
+                case TypeKind.ErrorType:
                     if (type.AsErrorType().HasParent())
                     {
                         ErrorType err = type.AsErrorType();
@@ -896,7 +896,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return false;
 
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     return false;
             }
         }
@@ -910,22 +910,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false, "Bad Symbol kind in TypeContainsTyVars");
                     return false;
 
-                case TypeKind.TK_UnboundLambdaType:
-                case TypeKind.TK_BoundLambdaType:
-                case TypeKind.TK_NullType:
-                case TypeKind.TK_VoidType:
-                case TypeKind.TK_OpenTypePlaceholderType:
-                case TypeKind.TK_MethodGroupType:
+                case TypeKind.UnboundLambdaType:
+                case TypeKind.BoundLambdaType:
+                case TypeKind.NullType:
+                case TypeKind.VoidType:
+                case TypeKind.OpenTypePlaceholderType:
+                case TypeKind.MethodGroupType:
                     return false;
 
-                case TypeKind.TK_ArrayType:
-                case TypeKind.TK_NullableType:
-                case TypeKind.TK_ParameterModifierType:
-                case TypeKind.TK_PointerType:
+                case TypeKind.ArrayType:
+                case TypeKind.NullableType:
+                case TypeKind.ParameterModifierType:
+                case TypeKind.PointerType:
                     type = type.GetBaseOrParameterOrElementType();
                     goto LRecurse;
 
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     { // BLOCK
                         AggregateType ats = type.AsAggregateType();
 
@@ -939,7 +939,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return false;
 
-                case TypeKind.TK_ErrorType:
+                case TypeKind.ErrorType:
                     if (type.AsErrorType().HasParent())
                     {
                         ErrorType err = type.AsErrorType();
@@ -960,7 +960,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return false;
 
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.TypeParameterType:
                     if (typeVars != null && typeVars.Size > 0)
                     {
                         int ivar = type.AsTypeParameterType().GetIndexInTotalParameters();

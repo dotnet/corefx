@@ -622,9 +622,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private MethodSymbol LookupMethodWhileLoading(AggregateSymbol type, int cMethodTyVars, Name methodName, ACCESS methodAccess, bool isStatic, bool isVirtual, CType returnType, TypeArray argumentTypes)
         {
-            for (Symbol sym = GetSymbolLoader().LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
+            for (Symbol sym = GetSymbolLoader().LookupAggMember(methodName, type, SymbolMask.ALL);
                  sym != null;
-                 sym = GetSymbolLoader().LookupNextSym(sym, type, symbmask_t.MASK_ALL))
+                 sym = GetSymbolLoader().LookupNextSym(sym, type, SymbolMask.ALL))
             {
                 if (sym.IsMethodSymbol())
                 {

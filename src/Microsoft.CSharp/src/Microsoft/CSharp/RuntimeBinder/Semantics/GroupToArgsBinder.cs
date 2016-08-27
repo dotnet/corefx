@@ -100,7 +100,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             public bool Bind(bool bReportErrors)
             {
-                Debug.Assert(_pGroup.sk == SYMKIND.SK_MethodSymbol || _pGroup.sk == SYMKIND.SK_PropertySymbol && 0 != (_pGroup.flags & EXPRFLAG.EXF_INDEXER));
+                Debug.Assert(_pGroup.sk == SymbolKind.MethodSymbol || _pGroup.sk == SymbolKind.PropertySymbol && 0 != (_pGroup.flags & EXPRFLAG.EXF_INDEXER));
 
                 // We need the EXPRs for error reporting for non-delegates
                 Debug.Assert(_pDelegate != null || _pArguments.fHasExprs);
@@ -175,7 +175,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Calculate the mask based on the type of the sym we've found so far.  This
                 // is to ensure that if we found a propsym (or methsym, or whatever) the 
                 // iterator will only return propsyms (or methsyms, or whatever)
-                symbmask_t mask = (symbmask_t)(1 << (int)_pGroup.sk);
+                SymbolMask mask = (SymbolMask)(1 << (int)_pGroup.sk);
 
                 CType pTypeThrough = _pGroup.GetOptionalObject() != null ? _pGroup.GetOptionalObject().type : null;
                 CMemberLookupResults.CMethodIterator iterator = _pGroup.GetMemberLookupResults().GetMethodIterator(GetSemanticChecker(), GetSymbolLoader(), pTypeThrough, GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup(), true, // AllowBogusAndInaccessible
@@ -646,7 +646,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                             AggregateSymbol agg = symbolLoader.GetOptPredefAgg(PredefinedType.PT_MISSING);
                             Name name = symbolLoader.GetNameManager().GetPredefinedName(PredefinedName.PN_CAP_VALUE);
-                            FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol).AsFieldSymbol();
+                            FieldSymbol field = symbolLoader.LookupAggMember(name, agg, SymbolMask.FieldSymbol).AsFieldSymbol();
                             FieldWithType fwt = new FieldWithType(field, agg.getThisType());
                             EXPRFIELD exprField = exprFactory.CreateField(0, agg.getThisType(), null, 0, fwt, null);
 
@@ -735,9 +735,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         pAggregate != null && pAggregate.GetBaseAgg() != null;
                         pAggregate = pAggregate.GetBaseAgg())
                 {
-                    for (MethodOrPropertySymbol meth = symbolLoader.LookupAggMember(method.name, pAggregate, symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol).AsMethodOrPropertySymbol();
+                    for (MethodOrPropertySymbol meth = symbolLoader.LookupAggMember(method.name, pAggregate, SymbolMask.MethodSymbol | SymbolMask.PropertySymbol).AsMethodOrPropertySymbol();
                             meth != null;
-                            meth = symbolLoader.LookupNextSym(meth, pAggregate, symbmask_t.MASK_MethodSymbol | symbmask_t.MASK_PropertySymbol).AsMethodOrPropertySymbol())
+                            meth = symbolLoader.LookupNextSym(meth, pAggregate, SymbolMask.MethodSymbol | SymbolMask.PropertySymbol).AsMethodOrPropertySymbol())
                     {
                         if (!meth.isOverride)
                         {
@@ -1265,8 +1265,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private void ReportErrorsOnSuccess()
             {
                 // used for Methods and Indexers
-                Debug.Assert(_pGroup.sk == SYMKIND.SK_MethodSymbol || _pGroup.sk == SYMKIND.SK_PropertySymbol && 0 != (_pGroup.flags & EXPRFLAG.EXF_INDEXER));
-                Debug.Assert(_pGroup.typeArgs.size == 0 || _pGroup.sk == SYMKIND.SK_MethodSymbol);
+                Debug.Assert(_pGroup.sk == SymbolKind.MethodSymbol || _pGroup.sk == SymbolKind.PropertySymbol && 0 != (_pGroup.flags & EXPRFLAG.EXF_INDEXER));
+                Debug.Assert(_pGroup.typeArgs.size == 0 || _pGroup.sk == SymbolKind.MethodSymbol);
 
                 // if this is a binding to finalize on object, then complain:
                 if (_results.GetBestResult().MethProp().name == GetSymbolLoader().GetNameManager().GetPredefName(PredefinedName.PN_DTOR) &&
@@ -1284,7 +1284,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(0 == (_pGroup.flags & EXPRFLAG.EXF_USERCALLABLE) || _results.GetBestResult().MethProp().isUserCallable());
 
-                if (_pGroup.sk == SYMKIND.SK_MethodSymbol)
+                if (_pGroup.sk == SymbolKind.MethodSymbol)
                 {
                     Debug.Assert(_results.GetBestResult().MethProp().IsMethodSymbol());
 

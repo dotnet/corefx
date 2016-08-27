@@ -10,7 +10,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         public Name name;
         public TypeArray typeArgs;
-        public SYMKIND sk;
+        public SymbolKind sk;
         // The type containing the members. This may be a TypeParameterType or an AggregateType.
         // This may be NULL (if types is not NULL).
 

@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         protected Name m_pMissingNameSym;
 
         protected Symbol newBasicSym(
-            SYMKIND kind,
+            SymbolKind kind,
             Name name,
             ParentSymbol parent)
         {
@@ -33,83 +33,83 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Symbol sym;
             switch (kind)
             {
-                case SYMKIND.SK_NamespaceSymbol:
+                case SymbolKind.NamespaceSymbol:
                     sym = new NamespaceSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_NamespaceDeclaration:
+                case SymbolKind.NamespaceDeclaration:
                     sym = new NamespaceDeclaration();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
+                case SymbolKind.AssemblyQualifiedNamespaceSymbol:
                     sym = new AssemblyQualifiedNamespaceSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_AggregateSymbol:
+                case SymbolKind.AggregateSymbol:
                     sym = new AggregateSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_AggregateDeclaration:
+                case SymbolKind.AggregateDeclaration:
                     sym = new AggregateDeclaration();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_TypeParameterSymbol:
+                case SymbolKind.TypeParameterSymbol:
                     sym = new TypeParameterSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_FieldSymbol:
+                case SymbolKind.FieldSymbol:
                     sym = new FieldSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_LocalVariableSymbol:
+                case SymbolKind.LocalVariableSymbol:
                     sym = new LocalVariableSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_MethodSymbol:
+                case SymbolKind.MethodSymbol:
                     sym = new MethodSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_PropertySymbol:
+                case SymbolKind.PropertySymbol:
                     sym = new PropertySymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_EventSymbol:
+                case SymbolKind.EventSymbol:
                     sym = new EventSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_TransparentIdentifierMemberSymbol:
+                case SymbolKind.TransparentIdentifierMemberSymbol:
                     sym = new TransparentIdentifierMemberSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_Scope:
+                case SymbolKind.Scope:
                     sym = new Scope();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_LabelSymbol:
+                case SymbolKind.LabelSymbol:
                     sym = new LabelSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_GlobalAttributeDeclaration:
+                case SymbolKind.GlobalAttributeDeclaration:
                     sym = new GlobalAttributeDeclaration();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_UnresolvedAggregateSymbol:
+                case SymbolKind.UnresolvedAggregateSymbol:
                     sym = new UnresolvedAggregateSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_InterfaceImplementationMethodSymbol:
+                case SymbolKind.InterfaceImplementationMethodSymbol:
                     sym = new InterfaceImplementationMethodSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_IndexerSymbol:
+                case SymbolKind.IndexerSymbol:
                     sym = new IndexerSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_ParentSymbol:
+                case SymbolKind.ParentSymbol:
                     sym = new ParentSymbol();
                     sym.name = name;
                     break;
-                case SYMKIND.SK_IteratorFinallyMethodSymbol:
+                case SymbolKind.IteratorFinallyMethodSymbol:
                     sym = new IteratorFinallyMethodSymbol();
                     sym.name = name;
                     break;

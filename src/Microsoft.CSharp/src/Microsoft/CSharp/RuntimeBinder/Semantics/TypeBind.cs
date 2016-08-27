@@ -321,7 +321,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // have all the information necessary yet, if it is not fully bound.
                 // by calling LookupAggMember, it will ensure that we will update all the
                 // information necessary at least for the given method.
-                checker.GetSymbolLoader().LookupAggMember(checker.GetNameManager().GetPredefName(PredefinedName.PN_CTOR), agg, symbmask_t.MASK_ALL);
+                checker.GetSymbolLoader().LookupAggMember(checker.GetNameManager().GetPredefName(PredefinedName.PN_CTOR), agg, SymbolMask.ALL);
 
                 if (agg.HasPubNoArgCtor() && !agg.IsAbstract())
                 {
@@ -357,22 +357,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Debug.Assert(false, "Unexpected type.");
                     return false;
 
-                case TypeKind.TK_VoidType:
-                case TypeKind.TK_PointerType:
-                case TypeKind.TK_ErrorType:
+                case TypeKind.VoidType:
+                case TypeKind.PointerType:
+                case TypeKind.ErrorType:
                     return false;
 
-                case TypeKind.TK_ArrayType:
-                case TypeKind.TK_TypeParameterType:
+                case TypeKind.ArrayType:
+                case TypeKind.TypeParameterType:
                     break;
 
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     typeBnd = typeBnd.AsNullableType().GetAts(checker.GetErrorContext());
                     if (null == typeBnd)
                         return true;
                     break;
 
-                case TypeKind.TK_AggregateType:
+                case TypeKind.AggregateType:
                     break;
             }
 
@@ -382,18 +382,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 default:
                     return false;
-                case TypeKind.TK_ErrorType:
-                case TypeKind.TK_PointerType:
+                case TypeKind.ErrorType:
+                case TypeKind.PointerType:
                     return false;
-                case TypeKind.TK_NullableType:
+                case TypeKind.NullableType:
                     arg = arg.AsNullableType().GetAts(checker.GetErrorContext());
                     if (null == arg)
                         return true;
                     // Fall through.
-                    goto case TypeKind.TK_TypeParameterType;
-                case TypeKind.TK_TypeParameterType:
-                case TypeKind.TK_ArrayType:
-                case TypeKind.TK_AggregateType:
+                    goto case TypeKind.TypeParameterType;
+                case TypeKind.TypeParameterType:
+                case TypeKind.ArrayType:
+                case TypeKind.AggregateType:
                     return checker.GetSymbolLoader().HasBaseConversion(arg, typeBnd);
             }
         }

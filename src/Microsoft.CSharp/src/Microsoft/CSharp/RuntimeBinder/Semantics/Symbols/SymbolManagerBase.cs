@@ -175,19 +175,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         default:
                             Debug.Assert(false, "Bad kind in CompareTypes");
                             break;
-                        case TypeKind.TK_TypeParameterType:
-                        case TypeKind.TK_ErrorType:
+                        case TypeKind.TypeParameterType:
+                        case TypeKind.ErrorType:
                             break;
 
-                        case TypeKind.TK_PointerType:
-                        case TypeKind.TK_ParameterModifierType:
-                        case TypeKind.TK_ArrayType:
-                        case TypeKind.TK_NullableType:
+                        case TypeKind.PointerType:
+                        case TypeKind.ParameterModifierType:
+                        case TypeKind.ArrayType:
+                        case TypeKind.NullableType:
                             type1 = type1.GetBaseOrParameterOrElementType();
                             type2 = type2.GetBaseOrParameterOrElementType();
                             goto LAgain;
 
-                        case TypeKind.TK_AggregateType:
+                        case TypeKind.AggregateType:
                             nParam = CompareTypes(type1.AsAggregateType().GetTypeArgsAll(), type2.AsAggregateType().GetTypeArgsAll());
                             break;
                     }
@@ -237,7 +237,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (iDot == -1) break;
                     string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
                     Name nm = this.GetNameManager().Add(sub);
-                    NamespaceSymbol sym = this.LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol).AsNamespaceSymbol();
+                    NamespaceSymbol sym = this.LookupGlobalSymCore(nm, ns, SymbolMask.NamespaceSymbol).AsNamespaceSymbol();
                     if (sym == null)
                     {
                         ns = _symFactory.CreateNamespace(nm, ns);
@@ -251,17 +251,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public Symbol LookupGlobalSymCore(Name name, ParentSymbol parent, symbmask_t kindmask)
+        public Symbol LookupGlobalSymCore(Name name, ParentSymbol parent, SymbolMask kindmask)
         {
             return tableGlobal.LookupSym(name, parent, kindmask);
         }
 
-        public Symbol LookupAggMember(Name name, AggregateSymbol agg, symbmask_t mask)
+        public Symbol LookupAggMember(Name name, AggregateSymbol agg, SymbolMask mask)
         {
             return tableGlobal.LookupSym(name, agg, mask);
         }
 
-        public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
+        public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, SymbolMask kindmask)
         {
             Debug.Assert(sym.parent == parent);
 
@@ -299,7 +299,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name name = GetNameFromPtrs(aid, 0);
             Debug.Assert(name != null);
 
-            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol).AsAssemblyQualifiedNamespaceSymbol();
+            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, SymbolMask.AssemblyQualifiedNamespaceSymbol).AsAssemblyQualifiedNamespaceSymbol();
             if (nsa == null)
             {
                 // Create a new one.

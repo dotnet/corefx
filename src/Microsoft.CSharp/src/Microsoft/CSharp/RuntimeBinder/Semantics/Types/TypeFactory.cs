@@ -28,7 +28,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetTypeArgsThis(typeArgsThis);
             type.SetName(name);
 
-            type.SetTypeKind(TypeKind.TK_AggregateType);
+            type.SetTypeKind(TypeKind.AggregateType);
             return type;
         }
 
@@ -51,7 +51,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pSymbol.GetTypeParameterType() == null);
             pSymbol.SetTypeParameterType(type);
 
-            type.SetTypeKind(TypeKind.TK_TypeParameterType);
+            type.SetTypeKind(TypeKind.TypeParameterType);
             return type;
         }
 
@@ -59,42 +59,42 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public VoidType CreateVoid()
         {
             VoidType type = new VoidType();
-            type.SetTypeKind(TypeKind.TK_VoidType);
+            type.SetTypeKind(TypeKind.VoidType);
             return type;
         }
 
         public NullType CreateNull()
         {
             NullType type = new NullType();
-            type.SetTypeKind(TypeKind.TK_NullType);
+            type.SetTypeKind(TypeKind.NullType);
             return type;
         }
 
         public OpenTypePlaceholderType CreateUnit()
         {
             OpenTypePlaceholderType type = new OpenTypePlaceholderType();
-            type.SetTypeKind(TypeKind.TK_OpenTypePlaceholderType);
+            type.SetTypeKind(TypeKind.OpenTypePlaceholderType);
             return type;
         }
 
         public BoundLambdaType CreateAnonMethod()
         {
             BoundLambdaType type = new BoundLambdaType();
-            type.SetTypeKind(TypeKind.TK_BoundLambdaType);
+            type.SetTypeKind(TypeKind.BoundLambdaType);
             return type;
         }
 
         public MethodGroupType CreateMethodGroup()
         {
             MethodGroupType type = new MethodGroupType();
-            type.SetTypeKind(TypeKind.TK_MethodGroupType);
+            type.SetTypeKind(TypeKind.MethodGroupType);
             return type;
         }
 
         public ArgumentListType CreateArgList()
         {
             ArgumentListType type = new ArgumentListType();
-            type.SetTypeKind(TypeKind.TK_ArgumentListType);
+            type.SetTypeKind(TypeKind.ArgumentListType);
             return type;
         }
 
@@ -112,7 +112,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             e.SetTypeParent(parent);
             e.SetNSParent(pParentNS);
 
-            e.SetTypeKind(TypeKind.TK_ErrorType);
+            e.SetTypeKind(TypeKind.ErrorType);
             return e;
         }
 
@@ -125,7 +125,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.rank = rank;
             type.SetElementType(pElementType);
 
-            type.SetTypeKind(TypeKind.TK_ArrayType);
+            type.SetTypeKind(TypeKind.ArrayType);
             return type;
         }
 
@@ -135,7 +135,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetName(name);
             type.SetReferentType(pReferentType);
 
-            type.SetTypeKind(TypeKind.TK_PointerType);
+            type.SetTypeKind(TypeKind.PointerType);
             return type;
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetName(name);
             type.SetParameterType(pParameterType);
 
-            type.SetTypeKind(TypeKind.TK_ParameterModifierType);
+            type.SetTypeKind(TypeKind.ParameterModifierType);
             return type;
         }
 
@@ -157,7 +157,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.symmgr = symmgr;
             type.typeManager = typeManager;
 
-            type.SetTypeKind(TypeKind.TK_NullableType);
+            type.SetTypeKind(TypeKind.NullableType);
             return type;
         }
     }
