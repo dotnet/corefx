@@ -156,10 +156,10 @@ namespace System.Reflection.Metadata
         private readonly MetadataStreamKind _metadataStreamKind;
         private readonly DebugMetadataHeader _debugMetadataHeader;
 
-        internal StringStreamReader StringStream;
-        internal BlobStreamReader BlobStream;
-        internal GuidStreamReader GuidStream;
-        internal UserStringStreamReader UserStringStream;
+        internal StringHeap StringStream;
+        internal BlobHeap BlobStream;
+        internal GuidHeap GuidStream;
+        internal UserStringHeap UserStringStream;
 
         /// <summary>
         /// True if the metadata stream has minimal delta format. Used for EnC.
@@ -284,7 +284,7 @@ namespace System.Reflection.Metadata
                             throw new BadImageFormatException(SR.NotEnoughSpaceForStringStream);
                         }
 
-                        this.StringStream = new StringStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
+                        this.StringStream = new StringHeap(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
                         break;
 
                     case COR20Constants.BlobStreamName:
@@ -293,7 +293,7 @@ namespace System.Reflection.Metadata
                             throw new BadImageFormatException(SR.NotEnoughSpaceForBlobStream);
                         }
 
-                        this.BlobStream = new BlobStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
+                        this.BlobStream = new BlobHeap(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
                         break;
 
                     case COR20Constants.GUIDStreamName:
@@ -302,7 +302,7 @@ namespace System.Reflection.Metadata
                             throw new BadImageFormatException(SR.NotEnoughSpaceForGUIDStream);
                         }
 
-                        this.GuidStream = new GuidStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
+                        this.GuidStream = new GuidHeap(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
                         break;
 
                     case COR20Constants.UserStringStreamName:
@@ -311,7 +311,7 @@ namespace System.Reflection.Metadata
                             throw new BadImageFormatException(SR.NotEnoughSpaceForBlobStream);
                         }
 
-                        this.UserStringStream = new UserStringStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
+                        this.UserStringStream = new UserStringHeap(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
                         break;
 
                     case COR20Constants.CompressedMetadataTableStreamName:
