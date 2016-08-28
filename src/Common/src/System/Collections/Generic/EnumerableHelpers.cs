@@ -139,8 +139,6 @@ namespace System.Collections.Generic
             // buffers:
             // [0]: [items 32-63]
             // [1]: [items 64-127]
-            // [2]: null
-            // [3]: null
             //
             // current: [items 128-199], [slots 200-255 empty]
 
