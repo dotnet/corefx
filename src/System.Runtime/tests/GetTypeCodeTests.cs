@@ -9,92 +9,48 @@ namespace System.Tests
 {
     public static partial class GetTypeCodeTests
     {
-        [Fact]
-        public static void FromBoolean()
+        [Theory]
+        [InlineData(TypeCode.Boolean, false)]
+        [InlineData(TypeCode.Char, 'x')]
+        [InlineData(TypeCode.Double, 42.0)]
+        [InlineData(TypeCode.Int32, 42)]
+        [InlineData(TypeCode.Int64, 42L)]
+        [InlineData(TypeCode.Single, 42f)]
+        [InlineData(TypeCode.UInt32, 42u)]
+        [InlineData(TypeCode.UInt64, 42ul)]
+        public static void GetTypeCode_Primitives(TypeCode expected, IConvertible convertible)
         {
-            var val = false;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.Boolean, testValue);
+            Assert.Equal(expected, convertible.GetTypeCode());
         }
 
         [Fact]
-        public static void FromChar()
+        public static void FromByte()
         {
-            var val = char.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.Char, testValue);
+            Assert.Equal(TypeCode.Byte, byte.MinValue.GetTypeCode());
         }
 
         [Fact]
-        public static void FromDouble()
+        public static void FromDecimal()
         {
-            var val = double.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.Double, testValue);
+            Assert.Equal(TypeCode.Decimal, decimal.MinValue.GetTypeCode());
         }
 
         [Fact]
-        public static void FromInt16()
+        public static void FromShort()
         {
-            var val = Int16.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.Int16, testValue);
+            Assert.Equal(TypeCode.Int16, short.MinValue.GetTypeCode());
         }
 
         [Fact]
-        public static void FromInt32()
-        {
-            var val = Int32.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.Int32, testValue);
-        }
-
-        [Fact]
-        public static void FromInt64()
-        {
-            var val = Int64.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.Int64, testValue);
-        }
-
         public static void FromSByte()
         {
-            var val = sbyte.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.SByte, testValue);
+            Assert.Equal(TypeCode.SByte, sbyte.MinValue.GetTypeCode());
         }
 
         [Fact]
-        public static void FromSingle()
+        public static void FromUShort()
         {
-            var val = Single.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.Single, testValue);
-        }
-
-        [Fact]
-        public static void FromUInt16()
-        {
-            var val = UInt16.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.UInt16, testValue);
-        }
-
-        [Fact]
-        public static void FromUInt32()
-        {
-            var val = UInt32.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.UInt32, testValue);
-
-        }
-
-        [Fact]
-        public static void FromUInt64()
-        {
-            var val = Int64.MinValue;
-            TypeCode testValue = val.GetTypeCode();
-            Assert.Equal(TypeCode.Int64, testValue);
+            Assert.Equal(TypeCode.UInt16, ushort.MinValue.GetTypeCode());
         }
     }
 }

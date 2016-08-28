@@ -385,8 +385,8 @@ namespace System
         public static byte Parse(string s, System.Globalization.NumberStyles style) { return default(byte); }
         public static byte Parse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider) { return default(byte); }
         public static byte Parse(string s, System.IFormatProvider provider) { return default(byte); }
-        int System.IComparable.CompareTo(object value) { return default(int); }
-        System.TypeCode System.IConvertible.GetTypeCode() { return default(System.TypeCode); }
+        public int CompareTo(object value) { return default(int); }
+        public System.TypeCode GetTypeCode() { return default(System.TypeCode); }
         bool System.IConvertible.ToBoolean(System.IFormatProvider provider) { return default(bool); }
         byte System.IConvertible.ToByte(System.IFormatProvider provider) { return default(byte); }
         char System.IConvertible.ToChar(System.IFormatProvider provider) { return default(char); }

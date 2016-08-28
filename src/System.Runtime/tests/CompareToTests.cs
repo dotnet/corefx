@@ -22,7 +22,23 @@ namespace System.Tests
             Assert.True(0 > false.CompareTo((object)true));
             Assert.True(0 < true.CompareTo((object)false));
 
-            Assert.Throws<ArgumentException>(() => val1.CompareTo("hello"));
+            Assert.Throws<ArgumentException>(() => false.CompareTo("hello"));
+        }
+
+        [Fact]
+        public static void FromByte()
+        {
+            Assert.Equal(0, ((byte)0).CompareTo((byte)0));
+            Assert.True(0 > byte.MinValue.CompareTo((byte)1));
+            Assert.True(0 < byte.MaxValue.CompareTo((byte)0));
+            Assert.True(0 > ((byte)0).CompareTo((byte)1));
+
+            Assert.Equal(0, ((byte)0).CompareTo((object)(byte)0));
+            Assert.True(0 > byte.MinValue.CompareTo((object)(byte)1));
+            Assert.True(0 < byte.MaxValue.CompareTo((object)(byte)0));
+            Assert.True(0 > ((byte)0).CompareTo((object)(byte)1));
+
+            Assert.Throws<ArgumentException>(() => ((byte)0.CompareTo("hello")));
         }
 
         [Fact]
@@ -31,7 +47,25 @@ namespace System.Tests
             Assert.Equal(0, 'c'.CompareTo('c'));
             Assert.True(0 > 'a'.CompareTo('c'));
             Assert.True(0 < 'd'.CompareTo('c'));
-            Assert.Throws<ArgumentException>(() => val1.CompareTo("hello"));
+            Assert.Throws<ArgumentException>(() => 'x'.CompareTo("hello"));
+        }
+
+        [Fact]
+        public static void FromDecimal()
+        {
+            Assert.Equal(0, ((decimal)0).CompareTo((decimal)0));
+            Assert.True(0 > decimal.MinValue.CompareTo((decimal)0));
+            Assert.True(0 < decimal.MaxValue.CompareTo((decimal)0));
+            Assert.True(0 > ((decimal)0).CompareTo((decimal)1));
+            Assert.True(0 < ((decimal)0).CompareTo((decimal)-1));
+
+            Assert.Equal(0, ((decimal)0).CompareTo((object)(decimal)0));
+            Assert.True(0 > decimal.MinValue.CompareTo((object)(decimal)0));
+            Assert.True(0 < decimal.MaxValue.CompareTo((object)(decimal)0));
+            Assert.True(0 > ((decimal)0).CompareTo((object)(decimal)1));
+            Assert.True(0 < ((decimal)0).CompareTo((object)(decimal)-1));
+
+            Assert.Throws<ArgumentException>(() => ((decimal)0.CompareTo("hello")));
         }
 
         [Fact]
@@ -120,7 +154,7 @@ namespace System.Tests
             Assert.True(0 > ((sbyte)0).CompareTo((object)(sbyte)1));
             Assert.True(0 < ((sbyte)0).CompareTo((object)(sbyte)-1));
 
-            Assert.Throws<ArgumentException>(() => ((sbyte)0).CompareTo("hello")));
+            Assert.Throws<ArgumentException>(() => ((sbyte)0.CompareTo("hello")));
         }
 
         [Fact]
@@ -145,16 +179,14 @@ namespace System.Tests
         public static void FromUInt16()
         {
             Assert.Equal(0, ((ushort)0).CompareTo((ushort)0));
-            Assert.True(0 > ushort.MinValue.CompareTo((ushort)0));
+            Assert.True(0 > ushort.MinValue.CompareTo((ushort)1));
             Assert.True(0 < ushort.MaxValue.CompareTo((ushort)0));
             Assert.True(0 > ((ushort)0).CompareTo((ushort)1));
-            Assert.True(0 < ((ushort)0).CompareTo((ushort)-1));
 
             Assert.Equal(0, ((ushort)0).CompareTo((object)(ushort)0));
-            Assert.True(0 > ushort.MinValue.CompareTo((object)(ushort)0));
+            Assert.True(0 > ushort.MinValue.CompareTo((object)(ushort)1));
             Assert.True(0 < ushort.MaxValue.CompareTo((object)(ushort)0));
             Assert.True(0 > ((ushort)0).CompareTo((object)(ushort)1));
-            Assert.True(0 < ((ushort)0).CompareTo((object)(ushort)-1));
 
             Assert.Throws<ArgumentException>(() => ((ushort)0.CompareTo("hello")));
         }
@@ -163,16 +195,14 @@ namespace System.Tests
         public static void FromUInt32()
         {
             Assert.Equal(0, ((uint)0).CompareTo((uint)0));
-            Assert.True(0 > uint.MinValue.CompareTo((uint)0));
+            Assert.True(0 > uint.MinValue.CompareTo((uint)1));
             Assert.True(0 < uint.MaxValue.CompareTo((uint)0));
             Assert.True(0 > ((uint)0).CompareTo((uint)1));
-            Assert.True(0 < ((uint)0).CompareTo((uint)-1));
 
             Assert.Equal(0, ((uint)0).CompareTo((object)(uint)0));
-            Assert.True(0 > uint.MinValue.CompareTo((object)(uint)0));
+            Assert.True(0 > uint.MinValue.CompareTo((object)(uint)1));
             Assert.True(0 < uint.MaxValue.CompareTo((object)(uint)0));
             Assert.True(0 > ((uint)0).CompareTo((object)(uint)1));
-            Assert.True(0 < ((uint)0).CompareTo((object)(uint)-1));
 
             Assert.Throws<ArgumentException>(() => ((uint)0.CompareTo("hello")));
         }
@@ -181,16 +211,14 @@ namespace System.Tests
         public static void FromUInt64()
         {
             Assert.Equal(0, ((ulong)0).CompareTo((ulong)0));
-            Assert.True(0 > ulong.MinValue.CompareTo((ulong)0));
+            Assert.True(0 > ulong.MinValue.CompareTo((ulong)1));
             Assert.True(0 < ulong.MaxValue.CompareTo((ulong)0));
             Assert.True(0 > ((ulong)0).CompareTo((ulong)1));
-            Assert.True(0 < ((ulong)0).CompareTo((ulong)-1));
 
             Assert.Equal(0, ((ulong)0).CompareTo((object)(ulong)0));
-            Assert.True(0 > ulong.MinValue.CompareTo((object)(ulong)0));
+            Assert.True(0 > ulong.MinValue.CompareTo((object)(ulong)1));
             Assert.True(0 < ulong.MaxValue.CompareTo((object)(ulong)0));
             Assert.True(0 > ((ulong)0).CompareTo((object)(ulong)1));
-            Assert.True(0 < ((ulong)0).CompareTo((object)(ulong)-1));
 
             Assert.Throws<ArgumentException>(() => ((ulong)0.CompareTo("hello")));
         }
