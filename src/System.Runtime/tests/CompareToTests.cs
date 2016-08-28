@@ -85,7 +85,7 @@ namespace System.Tests
             Assert.True(0 > ((int)0).CompareTo((object)(int)1));
             Assert.True(0 < ((int)0).CompareTo((object)(int)-1));
 
-            Assert.Throws<ArgumentException>(() => ((short)0).CompareTo("hello"));
+            Assert.Throws<ArgumentException>(() => ((int)0).CompareTo("hello"));
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace System.Tests
             Assert.True(0 > ((long)0).CompareTo((object)(long)1));
             Assert.True(0 < ((long)0).CompareTo((object)(long)-1));
 
-            Assert.Throws<ArgumentException>(() => ((short)0).CompareTo("hello"));
+            Assert.Throws<ArgumentException>(() => ((long)0).CompareTo("hello"));
         }
 
         public static void FromSByte()
