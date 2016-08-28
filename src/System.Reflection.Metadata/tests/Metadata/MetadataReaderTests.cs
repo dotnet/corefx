@@ -221,6 +221,25 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(3, reader.AssemblyReferences.Count);
         }
 
+        [Fact]
+        public void GetBlobReader()
+        {
+            var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
+            var handle = reader.AssemblyReferences.Skip(3).First();
+            Assert.True(handle.IsVirtual);
+
+            var assemblyRef = reader.GetAssemblyReference(handle);
+            Assert.Equal("System.Runtime", reader.GetString(assemblyRef.Name));
+
+            AssertEx.Equal(
+                new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A },
+                reader.GetBlobBytes(assemblyRef.PublicKeyOrToken));
+
+            var blobReader = reader.GetBlobReader(assemblyRef.PublicKeyOrToken);
+            Assert.Equal(new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A }, blobReader.ReadBytes(8));
+            Assert.Equal(0, blobReader.RemainingBytes);
+        }
+
         /// <summary>
         /// Assembly Table Columns:
         ///     Name (offset to #String)
