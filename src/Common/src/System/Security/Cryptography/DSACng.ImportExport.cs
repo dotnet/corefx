@@ -106,10 +106,7 @@ namespace System.Security.Cryptography
                         {
                             // If Seed is not present, back fill both counter and seed with 0xff. Do not use parameters.Counter as CNG is more strict than CAPI and will reject
                             // anything other than 0xffffffff. That could complicate efforts to switch usage of DSACryptoServiceProvider to DSACng.
-                            for (int i = 0; i < Sha1HashOutputSize + sizeof(int); i++)
-                            {
-                                Interop.BCrypt.EmitByte(blob, ref offset, 0xff);
-                            }
+                            Interop.BCrypt.EmitByte(blob, ref offset, 0xff, Sha1HashOutputSize + sizeof(int));
                         }
 
                         // The Q length is hardcoded into BCRYPT_DSA_KEY_BLOB, so check it now we can give a nicer error message.
@@ -210,11 +207,7 @@ namespace System.Security.Cryptography
                             int defaultSeedLength = parameters.Q.Length;
                             pBcryptBlob->cbSeedLength = defaultSeedLength;
                             pBcryptBlob->cbGroupSize = parameters.Q.Length;
-
-                            for (int i = 0; i < defaultSeedLength + sizeof(int); i++)
-                            {
-                                Interop.BCrypt.EmitByte(blob, ref offset, 0xff);
-                            }
+                            Interop.BCrypt.EmitByte(blob, ref offset, 0xff, defaultSeedLength + sizeof(int));
                         }
 
                         Interop.BCrypt.Emit(blob, ref offset, parameters.Q);

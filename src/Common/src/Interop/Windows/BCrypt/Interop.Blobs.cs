@@ -18,6 +18,9 @@ internal partial class Interop
         /// </summary>
         internal static void Emit(byte[] blob, ref int offset, byte[] value)
         {
+            Debug.Assert(blob != null);
+            Debug.Assert(offset >= 0);
+
             Buffer.BlockCopy(value, 0, blob, offset, value.Length);
             offset += value.Length;
         }
@@ -25,10 +28,18 @@ internal partial class Interop
         /// <summary>
         ///     Append "value" to the data already in blob.
         /// </summary>
-        internal static void EmitByte(byte[] blob, ref int offset, byte value)
+        internal static void EmitByte(byte[] blob, ref int offset, byte value, int count = 1)
         {
-            blob[offset] = value;
-            offset += 1;
+            Debug.Assert(blob != null);
+            Debug.Assert(offset >= 0);
+            Debug.Assert(count > 0);
+
+            int finalOffset = offset + count;
+            for (int i = offset; i < finalOffset; i++)
+            {
+                blob[i] = value;
+            }
+            offset = finalOffset;
         }
 
         /// <summary>
@@ -36,11 +47,13 @@ internal partial class Interop
         /// </summary>
         internal static void EmitBigEndian(byte[] blob, ref int offset, int value)
         {
-            blob[offset + 0] = ((byte)(value >> 24));
-            blob[offset + 1] = ((byte)(value >> 16));
-            blob[offset + 2] = ((byte)(value >> 8));
-            blob[offset + 3] = ((byte)(value));
-            offset += 4;
+            Debug.Assert(blob != null);
+            Debug.Assert(offset >= 0);
+
+            blob[offset++] = ((byte)(value >> 24));
+            blob[offset++] = ((byte)(value >> 16));
+            blob[offset++] = ((byte)(value >> 8));
+            blob[offset++] = ((byte)(value));
         }
 
         /// <summary>
