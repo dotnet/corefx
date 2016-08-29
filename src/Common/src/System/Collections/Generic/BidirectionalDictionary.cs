@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
-    internal sealed class BidirectionalDictionary<T1, T2> : IEnumerable<KeyValuePair<T1, T2>>
+    internal struct BidirectionalDictionary<T1, T2>
     {
         private readonly Dictionary<T1, T2> _forward;
         private readonly Dictionary<T2, T1> _backward;
@@ -24,6 +24,12 @@ namespace System.Collections.Generic
                 Debug.Assert(_forward.Count == _backward.Count, "both the dictionaries must have the same number of elements");
                 return _forward.Count;
             }
+        }
+        
+        public T2 this[T1 item1]
+        {
+            get { return _forward[item1]; }
+            set { _forward[item1] = value; }
         }
 
         public void Add(T1 item1, T2 item2)
@@ -46,16 +52,6 @@ namespace System.Collections.Generic
         public Dictionary<T1, T2>.Enumerator GetEnumerator()
         {
             return _forward.GetEnumerator();
-        }
-
-        IEnumerator<KeyValuePair<T1, T2>> IEnumerable<KeyValuePair<T1, T2>>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }
