@@ -9,6 +9,12 @@
       <TestTFMs>netcore50;netcoreapp1.0;net46</TestTFMs>
       <OSGroup>Windows_NT</OSGroup>
     </Project>
+    <Project Include="PerformanceTests\System.Private.Uri.Performance.Tests.csproj">
+      <OSGroup>Unix</OSGroup>
+    </Project>
+    <Project Include="PerformanceTests\System.Private.Uri.Performance.Tests.csproj">
+      <OSGroup>Windows_NT</OSGroup>
+    </Project>
     <Project Include="UnitTests\System.Private.Uri.Unit.Tests.csproj">
       <OSGroup>Unix</OSGroup>
     </Project>
