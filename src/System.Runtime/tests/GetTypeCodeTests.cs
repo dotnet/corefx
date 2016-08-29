@@ -18,39 +18,19 @@ namespace System.Tests
         [InlineData(TypeCode.Single, 42f)]
         [InlineData(TypeCode.UInt32, 42u)]
         [InlineData(TypeCode.UInt64, 42ul)]
+        [InlineData(TypeCode.Byte, (byte)1)]
+        [InlineData(TypeCode.Int16, (short)1)]
+        [InlineData(TypeCode.SByte, (sbyte)1)]
+        [InlineData(TypeCode.UInt16, (ushort)1)]
         public static void GetTypeCode_Primitives(TypeCode expected, IConvertible convertible)
         {
             Assert.Equal(expected, convertible.GetTypeCode());
         }
 
         [Fact]
-        public static void FromByte()
-        {
-            Assert.Equal(TypeCode.Byte, byte.MinValue.GetTypeCode());
-        }
-
-        [Fact]
         public static void FromDecimal()
         {
             Assert.Equal(TypeCode.Decimal, decimal.MinValue.GetTypeCode());
-        }
-
-        [Fact]
-        public static void FromShort()
-        {
-            Assert.Equal(TypeCode.Int16, short.MinValue.GetTypeCode());
-        }
-
-        [Fact]
-        public static void FromSByte()
-        {
-            Assert.Equal(TypeCode.SByte, sbyte.MinValue.GetTypeCode());
-        }
-
-        [Fact]
-        public static void FromUShort()
-        {
-            Assert.Equal(TypeCode.UInt16, ushort.MinValue.GetTypeCode());
         }
     }
 }
