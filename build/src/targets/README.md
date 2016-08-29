@@ -1,0 +1,1 @@
+Properties imported by $(ProjectDir)src/dir.targets

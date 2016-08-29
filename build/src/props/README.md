@@ -1,0 +1,1 @@
+dirtargets.props is imported by $(ProjectDir)src/dir.targets

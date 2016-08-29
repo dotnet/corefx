@@ -1,0 +1,1 @@
+Versions of buildtools and CLI used in the CoreFx repo

@@ -1,0 +1,1 @@
+dir.traversal.targets controls how we traverse our source tree for building.  The properties and targets used by dir.traversal.targets live in the props and targets folders respectively.
