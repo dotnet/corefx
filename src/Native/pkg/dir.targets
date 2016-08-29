@@ -4,5 +4,5 @@
   
   <Import Project="$(BuildDir)src\Native\pkg\targets\getsymbolpackagefiles.targets" />
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory)\.., dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.targets" />
 </Project>
