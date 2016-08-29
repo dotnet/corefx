@@ -13,6 +13,9 @@
 ** (but any portion it does implement should match the real List<T>'s
 ** behavior.)
 **
+** It also exposes some of its implementation details to avoid
+** making copies, e.g. GetOrToArray() and GetArraySegment().
+**
 ** This file is a subset of System.Collections\System\Collections\Generics\List.cs
 ** and should be kept in sync with that file.
 ** 
@@ -214,6 +217,36 @@ namespace System.Collections.Generic
                 Capacity = newCapacity;
             }
         }
+        
+        // Returns the ArraySegment that contains the items of this list.
+        //
+        // Please use this instead of GetOrToArray if you
+        // don't need to return an array from your method
+        // (e.g. refactoring an internal API).
+        public ArraySegment<T> GetArraySegment() =>
+            new ArraySegment<T>(_items, 0, _size);
+        
+        // Returns the underlying array if the count/capacity
+        // are the same, otherwise makes a copy into a new array.
+        // Useful in e.g. public APIs where you have something like
+        // this:
+        //
+        // public T[] CreateFooArray()
+        // {
+        //     var list = new LowLevelList<T>();
+        //     <call list.Add() some number of times...>
+        //     return list.ToArray();
+        // }
+        //
+        // If we replace ToArray() with GetOrToArray(),
+        // we can avoid making an extra copy if the count
+        // and capacity of the list happen to be the same.
+        //
+        // This is invisible to the caller of the CreateFooArray
+        // method, since the array is not modified afterwards
+        // within the callee.
+        public T[] GetOrToArray() =>
+            Count == Capacity ? _items : ToArray();
 
 #if !TYPE_LOADER_IMPLEMENTATION
         // Adds the elements of the given collection to the end of this list. If
