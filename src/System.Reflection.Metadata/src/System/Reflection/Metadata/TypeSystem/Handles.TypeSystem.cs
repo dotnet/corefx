@@ -2341,9 +2341,9 @@ namespace System.Reflection.Metadata
 
         public static implicit operator Handle(StringHandle handle)
         {
-            // VTT... -> V111 10TT
+            // VTTx xxxx xxxx xxxx  xxxx xxxx xxxx xxxx -> V111 10TT
             return new Handle(
-                (byte)((handle._value & HeapHandleType.VirtualBit) >> 24 | HandleType.String | (handle._value & StringHandleType.NonVirtualTypeMask) >> 26),
+                (byte)((handle._value & HeapHandleType.VirtualBit) >> 24 | HandleType.String | (handle._value & StringHandleType.NonVirtualTypeMask) >> HeapHandleType.OffsetBitCount),
                 (int)(handle._value & HeapHandleType.OffsetMask));
         }
 
@@ -2354,7 +2354,7 @@ namespace System.Reflection.Metadata
                 Throw.InvalidCast();
             }
 
-            // V111 10TT -> VTT...
+            // V111 10TT -> VTTx xxxx xxxx xxxx  xxxx xxxx xxxx xxxx
             return new StringHandle(
                 (handle.VType & HandleType.VirtualBit) << 24 | 
                 (handle.VType & HandleType.NonVirtualStringTypeMask) << HeapHandleType.OffsetBitCount | 

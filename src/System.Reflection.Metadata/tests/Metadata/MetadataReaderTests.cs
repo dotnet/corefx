@@ -222,7 +222,7 @@ namespace System.Reflection.Metadata.Tests
         }
 
         [Fact]
-        public void GetBlobReader()
+        public void GetBlobReader_VirtualBlob()
         {
             var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
             var handle = reader.AssemblyReferences.Skip(3).First();
@@ -238,6 +238,58 @@ namespace System.Reflection.Metadata.Tests
             var blobReader = reader.GetBlobReader(assemblyRef.PublicKeyOrToken);
             Assert.Equal(new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A }, blobReader.ReadBytes(8));
             Assert.Equal(0, blobReader.RemainingBytes);
+        }
+
+        [Fact]
+        public void GetString_WinRTPrefixed_Projected()
+        {
+            var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
+
+            // .class /*02000002*/ public auto ansi sealed beforefieldinit Lib.Class1
+            var winrtDefHandle = MetadataTokens.TypeDefinitionHandle(2);
+            var winrtDef = reader.GetTypeDefinition(winrtDefHandle);
+            Assert.Equal(StringKind.Plain, winrtDef.Name.StringKind);
+            Assert.Equal("Class1", reader.GetString(winrtDef.Name));
+            Assert.Equal(
+                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
+                TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit, 
+                winrtDef.Attributes);
+
+            // .class /*02000003*/ private auto ansi import windowsruntime sealed beforefieldinit Lib.'<WinRT>Class1'
+            var clrDefHandle = MetadataTokens.TypeDefinitionHandle(3);
+            var clrDef = reader.GetTypeDefinition(clrDefHandle);
+            Assert.Equal(StringKind.WinRTPrefixed, clrDef.Name.StringKind);
+            Assert.Equal("<WinRT>Class1", reader.GetString(clrDef.Name));
+            Assert.Equal(
+                TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
+                TypeAttributes.Import | TypeAttributes.WindowsRuntime | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
+                clrDef.Attributes);
+        }
+
+        [Fact]
+        public void GetString_WinRTPrefixed_NotProjected()
+        {
+            var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.None);
+
+            // .class /*02000002*/ private auto ansi sealed beforefieldinit specialname Lib.'<CLR>Class1'
+            var winrtDefHandle = MetadataTokens.TypeDefinitionHandle(2);
+            var winrtDef = reader.GetTypeDefinition(winrtDefHandle);
+            Assert.Equal(StringKind.Plain, winrtDef.Name.StringKind);
+            Assert.Equal("<CLR>Class1", reader.GetString(winrtDef.Name));
+            Assert.Equal(
+                TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
+                TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit | TypeAttributes.SpecialName,
+                winrtDef.Attributes);
+
+            // .class /*02000003*/ public auto ansi windowsruntime sealed beforefieldinit Lib.Class1
+            var clrDefHandle = MetadataTokens.TypeDefinitionHandle(3);
+            var clrDef = reader.GetTypeDefinition(clrDefHandle);
+            Assert.Equal(StringKind.Plain, clrDef.Name.StringKind);
+            Assert.Equal("Class1", reader.GetString(clrDef.Name));
+            Assert.Equal(
+                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
+                TypeAttributes.WindowsRuntime | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
+                clrDef.Attributes);
         }
 
         /// <summary>
