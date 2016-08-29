@@ -71,7 +71,7 @@ namespace System.Reflection.Metadata
             }
 
             StringHandle namespaceName = TypeDefTable.GetNamespace(typeDef);
-            if (StringHeap.EqualsRaw(namespaceName, StringHeap.GetVirtualValue(s_projectionInfos[index].ClrNamespace)))
+            if (StringHeap.EqualsRaw(namespaceName, StringHeap.GetVirtualString(s_projectionInfos[index].ClrNamespace)))
             {
                 return s_projectionInfos[index].Treatment;
             }

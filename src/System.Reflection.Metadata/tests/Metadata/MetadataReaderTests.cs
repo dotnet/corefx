@@ -255,6 +255,10 @@ namespace System.Reflection.Metadata.Tests
                 TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit, 
                 winrtDef.Attributes);
 
+            var strReader = reader.GetBlobReader(winrtDef.Name);
+            Assert.Equal(Encoding.UTF8.GetBytes("Class1"), strReader.ReadBytes("Class1".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+
             // .class /*02000003*/ private auto ansi import windowsruntime sealed beforefieldinit Lib.'<WinRT>Class1'
             var clrDefHandle = MetadataTokens.TypeDefinitionHandle(3);
             var clrDef = reader.GetTypeDefinition(clrDefHandle);
@@ -264,6 +268,10 @@ namespace System.Reflection.Metadata.Tests
                 TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
                 TypeAttributes.Import | TypeAttributes.WindowsRuntime | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 clrDef.Attributes);
+
+            strReader = reader.GetBlobReader(clrDef.Name);
+            Assert.Equal(Encoding.UTF8.GetBytes("<WinRT>Class1"), strReader.ReadBytes("<WinRT>Class1".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
         }
 
         [Fact]
@@ -281,6 +289,10 @@ namespace System.Reflection.Metadata.Tests
                 TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit | TypeAttributes.SpecialName,
                 winrtDef.Attributes);
 
+            var strReader = reader.GetBlobReader(winrtDef.Name);
+            Assert.Equal(Encoding.UTF8.GetBytes("<CLR>Class1"), strReader.ReadBytes("<CLR>Class1".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+
             // .class /*02000003*/ public auto ansi windowsruntime sealed beforefieldinit Lib.Class1
             var clrDefHandle = MetadataTokens.TypeDefinitionHandle(3);
             var clrDef = reader.GetTypeDefinition(clrDefHandle);
@@ -290,6 +302,31 @@ namespace System.Reflection.Metadata.Tests
                 TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
                 TypeAttributes.WindowsRuntime | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 clrDef.Attributes);
+
+            strReader = reader.GetBlobReader(clrDef.Name);
+            Assert.Equal(Encoding.UTF8.GetBytes("Class1"), strReader.ReadBytes("Class1".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+        }
+
+        [Fact]
+        public void GetString_DotTerminated()
+        {
+            var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.None);
+
+            //  4: 0x23000001 (AssemblyRef)  'CompilationRelaxationsAttribute' (#1c3)  'System.Runtime.CompilerServices' (#31a)
+            var typeRef = reader.GetTypeReference(MetadataTokens.TypeReferenceHandle(4));
+            Assert.Equal("System.Runtime.CompilerServices", reader.GetString(typeRef.Namespace));
+
+            var strReader = reader.GetBlobReader(typeRef.Namespace);
+            Assert.Equal(Encoding.UTF8.GetBytes("System.Runtime.CompilerServices"), strReader.ReadBytes("System.Runtime.CompilerServices".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+
+            var dotTerminated = typeRef.Namespace.WithDotTermination();
+            Assert.Equal("System", reader.GetString(dotTerminated));
+
+            strReader = reader.GetBlobReader(dotTerminated);
+            Assert.Equal(Encoding.UTF8.GetBytes("System"), strReader.ReadBytes("System".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
         }
 
         /// <summary>

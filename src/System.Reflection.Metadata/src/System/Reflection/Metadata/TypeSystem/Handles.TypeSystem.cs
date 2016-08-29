@@ -2361,6 +2361,8 @@ namespace System.Reflection.Metadata
                 (uint)handle.Offset);
         }
 
+        internal uint RawValue => _value;
+
         internal bool IsVirtual
         {
             get { return (_value & HeapHandleType.VirtualBit) != 0; }
@@ -2618,6 +2620,8 @@ namespace System.Reflection.Metadata
                 (handle.VType & HandleType.VirtualBit) << TokenTypeIds.RowIdBitCount |
                 (uint)handle.Offset);
         }
+
+        internal uint RawValue => _value;
 
         public bool IsNil
         {

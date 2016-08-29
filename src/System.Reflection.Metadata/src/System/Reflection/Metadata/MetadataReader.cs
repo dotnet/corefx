@@ -1087,6 +1087,11 @@ namespace System.Reflection.Metadata
             return BlobHeap.GetBlobReader(handle);
         }
 
+        public BlobReader GetBlobReader(StringHandle handle)
+        {
+            return StringHeap.GetBlobReader(handle);
+        }
+
         public string GetUserString(UserStringHandle handle)
         {
             return UserStringHeap.GetString(handle);

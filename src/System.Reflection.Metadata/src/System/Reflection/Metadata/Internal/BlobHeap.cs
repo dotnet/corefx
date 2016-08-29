@@ -2,73 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Reflection.Internal;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace System.Reflection.Metadata.Ecma335
 {
     internal struct BlobHeap
     {
-        private struct VirtualHeapBlob
-        {
-            private GCHandle _pinned;
-            private readonly byte[] _array;
-
-            public VirtualHeapBlob(byte[] array)
-            {
-                _pinned = GCHandle.Alloc(array, GCHandleType.Pinned);
-                _array = array;
-            }
-
-            public unsafe MemoryBlock GetMemoryBlock()
-            {
-                return new MemoryBlock((byte*)_pinned.AddrOfPinnedObject(), _array.Length);
-            }
-
-            public void Free()
-            {
-                _pinned.Free();
-            }
-        }
-
-        // Container for virtual heap blobs that unpins handles on finalization.
-        // This is not handled via dispose because the only resource is managed memory
-        // and we don't have user visible disposable object that could own this memory.
-        //
-        // Since the number of virtual blobs we need is small (the number of attribute classes in .winmd files)
-        // we can create a pinned handle for each of them.
-        // If we needed many more blobs we could create and pin a single byte[] and allocate blobs there.
-        private sealed class VirtualHeap
-        {
-            public readonly Dictionary<BlobHandle, VirtualHeapBlob> Table;
-
-            public VirtualHeap()
-            {
-                Table = new Dictionary<BlobHandle, VirtualHeapBlob>();
-            }
-
-            ~VirtualHeap()
-            {
-                if (Table != null)
-                {
-                    foreach (var blob in Table.Values)
-                    {
-                        blob.Free();
-                    }
-                }
-            }
-        }
-
-        private VirtualHeap _lazyVirutalHeap;
         private static byte[][] s_virtualValues;
 
         internal readonly MemoryBlock Block;
+        private VirtualHeap _lazyVirtualHeap;
 
         internal BlobHeap(MemoryBlock block, MetadataKind metadataKind)
         {
-            _lazyVirutalHeap = null;
+            _lazyVirtualHeap = null;
             Block = block;
 
             if (s_virtualValues == null && metadataKind != MetadataKind.Ecma335)
@@ -171,18 +119,15 @@ namespace System.Reflection.Metadata.Ecma335
 
         private MemoryBlock GetVirtualHandleMemoryBlock(BlobHandle handle)
         {
-            if (_lazyVirutalHeap == null)
-            {
-                Interlocked.CompareExchange(ref _lazyVirutalHeap, new VirtualHeap(), null);
-            }
+            var heap = VirtualHeap.GetOrCreateVirtualHeap(ref _lazyVirtualHeap);
 
             VirtualHeapBlob virtualBlob;
-            lock (_lazyVirutalHeap)
+            lock (heap)
             {
-                if (!_lazyVirutalHeap.Table.TryGetValue(handle, out virtualBlob))
+                if (!heap.Table.TryGetValue(handle.RawValue, out virtualBlob))
                 {
                     virtualBlob = new VirtualHeapBlob(GetVirtualBlobBytes(handle, unique: false));
-                    _lazyVirutalHeap.Table.Add(handle, virtualBlob);
+                    heap.Table.Add(handle.RawValue, virtualBlob);
                 }
             }
 

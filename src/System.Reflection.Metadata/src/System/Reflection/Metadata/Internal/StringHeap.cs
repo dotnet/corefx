@@ -4,6 +4,9 @@
 
 using System.Diagnostics;
 using System.Reflection.Internal;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
 
 namespace System.Reflection.Metadata.Ecma335
 {
@@ -12,9 +15,12 @@ namespace System.Reflection.Metadata.Ecma335
         private static string[] s_virtualValues;
 
         internal readonly MemoryBlock Block;
+        private VirtualHeap _lazyVirtualHeap;
 
         internal StringHeap(MemoryBlock block, MetadataKind metadataKind)
         {
+            _lazyVirtualHeap = null;
+
             if (s_virtualValues == null && metadataKind != MetadataKind.Ecma335)
             {
                 // Note:
@@ -139,39 +145,105 @@ namespace System.Reflection.Metadata.Ecma335
             return block.GetMemoryBlockAt(0, i + 2);
         }
 
+        internal string GetString(StringHandle handle, MetadataStringDecoder utf8Decoder)
+        {
+            return handle.IsVirtual ? GetVirtualHandleString(handle, utf8Decoder) : GetNonVirtualString(handle, utf8Decoder, prefixOpt: null);
+        }
 
-        internal string GetVirtualValue(StringHandle.VirtualIndex index)
+        internal MemoryBlock GetMemoryBlock(StringHandle handle)
+        {
+            return handle.IsVirtual ? GetVirtualHandleMemoryBlock(handle) : GetNonVirtualStringMemoryBlock(handle);
+        }
+
+        internal static string GetVirtualString(StringHandle.VirtualIndex index)
         {
             return s_virtualValues[(int)index];
         }
 
-        internal string GetString(StringHandle handle, MetadataStringDecoder utf8Decoder)
+        private string GetNonVirtualString(StringHandle handle, MetadataStringDecoder utf8Decoder, byte[] prefixOpt)
         {
-            byte[] prefix;
-
-            if (handle.IsVirtual)
-            {
-                switch (handle.StringKind)
-                {
-                    case StringKind.Virtual:
-                        return s_virtualValues[(int)handle.GetVirtualIndex()];
-
-                    case StringKind.WinRTPrefixed:
-                        prefix = MetadataReader.WinRTPrefix;
-                        break;
-
-                    default:
-                        throw ExceptionUtilities.UnexpectedValue(handle.StringKind);
-                }
-            }
-            else
-            {
-                prefix = null;
-            }
+            Debug.Assert(handle.StringKind != StringKind.Virtual);
 
             int bytesRead;
             char otherTerminator = handle.StringKind == StringKind.DotTerminated ? '.' : '\0';
-            return this.Block.PeekUtf8NullTerminated(handle.GetHeapOffset(), prefix, utf8Decoder, out bytesRead, otherTerminator);
+            return Block.PeekUtf8NullTerminated(handle.GetHeapOffset(), prefixOpt, utf8Decoder, out bytesRead, otherTerminator);
+        }
+
+        private unsafe MemoryBlock GetNonVirtualStringMemoryBlock(StringHandle handle)
+        {
+            Debug.Assert(handle.StringKind != StringKind.Virtual);
+
+            int bytesRead;
+            char otherTerminator = handle.StringKind == StringKind.DotTerminated ? '.' : '\0';
+            int offset = handle.GetHeapOffset();
+            int length = Block.GetUtf8NullTerminatedLength(offset, out bytesRead, otherTerminator);
+
+            return new MemoryBlock(Block.Pointer + offset, length);
+        }
+
+        private unsafe byte[] GetNonVirtualStringBytes(StringHandle handle, byte[] prefix)
+        {
+            Debug.Assert(handle.StringKind != StringKind.Virtual);
+
+            var block = GetNonVirtualStringMemoryBlock(handle);
+            var bytes = new byte[prefix.Length + block.Length];
+            Buffer.BlockCopy(prefix, 0, bytes, 0, prefix.Length);
+            Marshal.Copy((IntPtr)block.Pointer, bytes, prefix.Length, block.Length);
+            return bytes;
+        }
+
+        private string GetVirtualHandleString(StringHandle handle, MetadataStringDecoder utf8Decoder)
+        {
+            Debug.Assert(handle.IsVirtual);
+
+            switch (handle.StringKind)
+            {
+                case StringKind.Virtual:
+                    return GetVirtualString(handle.GetVirtualIndex());
+
+                case StringKind.WinRTPrefixed:
+                    return GetNonVirtualString(handle, utf8Decoder, MetadataReader.WinRTPrefix);
+            }
+
+            throw ExceptionUtilities.UnexpectedValue(handle.StringKind);
+        }
+
+        private MemoryBlock GetVirtualHandleMemoryBlock(StringHandle handle)
+        {
+            Debug.Assert(handle.IsVirtual);
+            var heap = VirtualHeap.GetOrCreateVirtualHeap(ref _lazyVirtualHeap);
+
+            VirtualHeapBlob virtualBlob;
+            lock (heap)
+            {
+                if (!heap.Table.TryGetValue(handle.RawValue, out virtualBlob))
+                {
+                    byte[] bytes;
+                    switch (handle.StringKind)
+                    {
+                        case StringKind.Virtual:
+                            bytes = Encoding.UTF8.GetBytes(GetVirtualString(handle.GetVirtualIndex()));
+                            break;
+
+                        case StringKind.WinRTPrefixed:
+                            bytes = GetNonVirtualStringBytes(handle, MetadataReader.WinRTPrefix);
+                            break;
+
+                        default:
+                            throw ExceptionUtilities.UnexpectedValue(handle.StringKind);
+                    }
+            
+                    virtualBlob = new VirtualHeapBlob(bytes);
+                    heap.Table.Add(handle.RawValue, virtualBlob);
+                }
+            }
+
+            return virtualBlob.GetMemoryBlock();
+        }
+
+        internal BlobReader GetBlobReader(StringHandle handle)
+        {
+            return new BlobReader(GetMemoryBlock(handle));
         }
 
         internal StringHandle GetNextHandle(StringHandle handle)

@@ -45,6 +45,7 @@
     <Compile Include="System\Reflection\Metadata\Ecma335\MetadataRootBuilder.cs" />
     <Compile Include="System\Reflection\Metadata\Ecma335\SerializedMetadataHeaps.cs" />
     <Compile Include="System\Reflection\Metadata\EntityHandle.cs" />
+    <Compile Include="System\Reflection\Metadata\Internal\VirtualHeap.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\GuidHeap.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\BlobHeap.cs" />
     <Compile Include="System\Reflection\Metadata\Internal\StringHeap.cs" />
