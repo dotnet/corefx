@@ -2,30 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Globalization;
-using System.Collections.Generic;
+using static System.UriParser;
 
 namespace System
 {
     public partial class Uri
     {
-        internal static readonly string UriSchemeFile = UriParser.FileUri.SchemeName;
-        internal static readonly string UriSchemeFtp = UriParser.FtpUri.SchemeName;
-        internal static readonly string UriSchemeGopher = UriParser.GopherUri.SchemeName;
-        internal static readonly string UriSchemeHttp = UriParser.HttpUri.SchemeName;
-        internal static readonly string UriSchemeHttps = UriParser.HttpsUri.SchemeName;
-        internal static readonly string UriSchemeWs = UriParser.WsUri.SchemeName;
-        internal static readonly string UriSchemeWss = UriParser.WssUri.SchemeName;
-        internal static readonly string UriSchemeMailto = UriParser.MailToUri.SchemeName;
-        internal static readonly string UriSchemeNews = UriParser.NewsUri.SchemeName;
-        internal static readonly string UriSchemeNntp = UriParser.NntpUri.SchemeName;
-        internal static readonly string UriSchemeNetTcp = UriParser.NetTcpUri.SchemeName;
-        internal static readonly string UriSchemeNetPipe = UriParser.NetPipeUri.SchemeName;
-        internal static readonly string SchemeDelimiter = "://";
-
-
+        internal const string SchemeDelimiter = "://";
+        
         internal const int c_MaxUriBufferSize = 0xFFF0;
         private const int c_MaxUriSchemeName = 1024;
 

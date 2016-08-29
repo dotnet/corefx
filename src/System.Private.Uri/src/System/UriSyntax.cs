@@ -58,6 +58,23 @@ namespace System
     //
     internal abstract partial class UriParser
     {
+        internal const string UriSchemeFile = "file";
+        internal const string UriSchemeFtp = "ftp";
+        internal const string UriSchemeGopher = "gopher";
+        internal const string UriSchemeHttp = "http";
+        internal const string UriSchemeHttps = "https";
+        internal const string UriSchemeWs = "ws";
+        internal const string UriSchemeWss = "wss";
+        internal const string UriSchemeMailto = "mailto";
+        internal const string UriSchemeNews = "news";
+        internal const string UriSchemeNntp = "nntp";
+        internal const string UriSchemeNetTcp = "net.tcp";
+        internal const string UriSchemeNetPipe = "net.pipe";
+        internal const string UriSchemeUuid = "uuid";
+        internal const string UriSchemeTelnet = "telnet";
+        internal const string UriSchemeLdap = "ldap";
+        internal const string UriSchemeVsMacros = "vsmacros";
+
         private static readonly LowLevelDictionary<string, UriParser> s_table;
         private static LowLevelDictionary<string, UriParser> s_tempTable;
 
@@ -81,23 +98,23 @@ namespace System
 
         // These are always available without paying hashtable lookup cost
         // Note: see UpdateStaticSyntaxReference()
-        internal static UriParser HttpUri;
-        internal static UriParser HttpsUri;
-        internal static UriParser WsUri;
-        internal static UriParser WssUri;
-        internal static UriParser FtpUri;
-        internal static UriParser FileUri;
-        internal static UriParser GopherUri;
-        internal static UriParser NntpUri;
-        internal static UriParser NewsUri;
-        internal static UriParser MailToUri;
-        internal static UriParser UuidUri;
-        internal static UriParser TelnetUri;
-        internal static UriParser LdapUri;
-        internal static UriParser NetTcpUri;
-        internal static UriParser NetPipeUri;
-
-        internal static UriParser VsMacrosUri;
+        internal static readonly UriParser HttpUri;
+        internal static readonly UriParser HttpsUri;
+        internal static readonly UriParser WsUri;
+        internal static readonly UriParser WssUri;
+        internal static readonly UriParser FtpUri;
+        internal static readonly UriParser FileUri;
+        internal static readonly UriParser GopherUri;
+        internal static readonly UriParser NntpUri;
+        internal static readonly UriParser NewsUri;
+        internal static readonly UriParser MailToUri;
+        internal static readonly UriParser UuidUri;
+        internal static readonly UriParser TelnetUri;
+        internal static readonly UriParser LdapUri;
+        internal static readonly UriParser NetTcpUri;
+        internal static readonly UriParser NetPipeUri;
+        
+        internal static readonly UriParser VsMacrosUri;
 
 
         static UriParser()
@@ -109,52 +126,52 @@ namespace System
 
             // Below we simulate calls into FetchSyntax() but avoid using lock() and other things redundant for a .cctor
 
-            HttpUri = new BuiltInUriParser("http", 80, HttpSyntaxFlags);
+            HttpUri = new BuiltInUriParser(UriSchemeHttp, 80, HttpSyntaxFlags);
             s_table[HttpUri.SchemeName] = HttpUri;                   //HTTP
 
-            HttpsUri = new BuiltInUriParser("https", 443, HttpUri._flags);
+            HttpsUri = new BuiltInUriParser(UriSchemeHttps, 443, HttpUri._flags);
             s_table[HttpsUri.SchemeName] = HttpsUri;                  //HTTPS cloned from HTTP
 
-            WsUri = new BuiltInUriParser("ws", 80, HttpSyntaxFlags);
+            WsUri = new BuiltInUriParser(UriSchemeWs, 80, HttpSyntaxFlags);
             s_table[WsUri.SchemeName] = WsUri;                   // WebSockets
 
-            WssUri = new BuiltInUriParser("wss", 443, HttpSyntaxFlags);
+            WssUri = new BuiltInUriParser(UriSchemeWss, 443, HttpSyntaxFlags);
             s_table[WssUri.SchemeName] = WssUri;                  // Secure WebSockets
 
-            FtpUri = new BuiltInUriParser("ftp", 21, FtpSyntaxFlags);
+            FtpUri = new BuiltInUriParser(UriSchemeFtp, 21, FtpSyntaxFlags);
             s_table[FtpUri.SchemeName] = FtpUri;                    //FTP
 
-            FileUri = new BuiltInUriParser("file", NoDefaultPort, s_fileSyntaxFlags);
+            FileUri = new BuiltInUriParser(UriSchemeFile, NoDefaultPort, s_fileSyntaxFlags);
             s_table[FileUri.SchemeName] = FileUri;                   //FILE
 
-            GopherUri = new BuiltInUriParser("gopher", 70, GopherSyntaxFlags);
+            GopherUri = new BuiltInUriParser(UriSchemeGopher, 70, GopherSyntaxFlags);
             s_table[GopherUri.SchemeName] = GopherUri;                 //GOPHER
 
-            NntpUri = new BuiltInUriParser("nntp", 119, NntpSyntaxFlags);
+            NntpUri = new BuiltInUriParser(UriSchemeNntp, 119, NntpSyntaxFlags);
             s_table[NntpUri.SchemeName] = NntpUri;                   //NNTP
 
-            NewsUri = new BuiltInUriParser("news", NoDefaultPort, NewsSyntaxFlags);
+            NewsUri = new BuiltInUriParser(UriSchemeNews, NoDefaultPort, NewsSyntaxFlags);
             s_table[NewsUri.SchemeName] = NewsUri;                   //NEWS
 
-            MailToUri = new BuiltInUriParser("mailto", 25, MailtoSyntaxFlags);
+            MailToUri = new BuiltInUriParser(UriSchemeMailto, 25, MailtoSyntaxFlags);
             s_table[MailToUri.SchemeName] = MailToUri;                 //MAILTO
 
-            UuidUri = new BuiltInUriParser("uuid", NoDefaultPort, NewsUri._flags);
+            UuidUri = new BuiltInUriParser(UriSchemeUuid, NoDefaultPort, NewsUri._flags);
             s_table[UuidUri.SchemeName] = UuidUri;                   //UUID cloned from NEWS
 
-            TelnetUri = new BuiltInUriParser("telnet", 23, TelnetSyntaxFlags);
+            TelnetUri = new BuiltInUriParser(UriSchemeTelnet, 23, TelnetSyntaxFlags);
             s_table[TelnetUri.SchemeName] = TelnetUri;                 //TELNET
 
-            LdapUri = new BuiltInUriParser("ldap", 389, LdapSyntaxFlags);
+            LdapUri = new BuiltInUriParser(UriSchemeLdap, 389, LdapSyntaxFlags);
             s_table[LdapUri.SchemeName] = LdapUri;                   //LDAP
 
-            NetTcpUri = new BuiltInUriParser("net.tcp", 808, NetTcpSyntaxFlags);
+            NetTcpUri = new BuiltInUriParser(UriSchemeNetTcp, 808, NetTcpSyntaxFlags);
             s_table[NetTcpUri.SchemeName] = NetTcpUri;
 
-            NetPipeUri = new BuiltInUriParser("net.pipe", NoDefaultPort, NetPipeSyntaxFlags);
+            NetPipeUri = new BuiltInUriParser(UriSchemeNetPipe, NoDefaultPort, NetPipeSyntaxFlags);
             s_table[NetPipeUri.SchemeName] = NetPipeUri;
 
-            VsMacrosUri = new BuiltInUriParser("vsmacros", NoDefaultPort, VsmacrosSyntaxFlags);
+            VsMacrosUri = new BuiltInUriParser(UriSchemeVsMacros, NoDefaultPort, VsmacrosSyntaxFlags);
             s_table[VsMacrosUri.SchemeName] = VsMacrosUri;               //VSMACROS
         }
 
