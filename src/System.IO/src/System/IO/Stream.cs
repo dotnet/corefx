@@ -411,6 +411,12 @@ namespace System.IO
                     Task.CompletedTask;
             }
 
+            public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return Task.CompletedTask;
+            }
+
             protected override void Dispose(bool disposing)
             {
                 // Do nothing - we don't want NullStream singleton (static) to be closable
@@ -419,26 +425,23 @@ namespace System.IO
             public override void Flush()
             {
             }
-
-#pragma warning disable 1998 // async method with no await
-            public override async Task FlushAsync(CancellationToken cancellationToken)
+            
+            public override Task FlushAsync(CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                return Task.CompletedTask;
             }
-#pragma warning restore 1998
 
             public override int Read(byte[] buffer, int offset, int count)
             {
                 return 0;
             }
 
-#pragma warning disable 1998 // async method with no await
             public override async Task<int> ReadAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                return 0;
+                return TaskCache.Zero;
             }
-#pragma warning restore 1998
 
             public override int ReadByte()
             {
@@ -448,13 +451,12 @@ namespace System.IO
             public override void Write(byte[] buffer, int offset, int count)
             {
             }
-
-#pragma warning disable 1998 // async method with no await
-            public override async Task WriteAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            
+            public override Task WriteAsync(Byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                return Task.CompletedTask;
             }
-#pragma warning restore 1998
 
             public override void WriteByte(byte value)
             {

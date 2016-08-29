@@ -255,9 +255,39 @@ namespace System.IO
                 return 0;
             }
 
+            public override Task<int> ReadAsync(char[] buffer, int index, int count)
+            {
+                return TaskCache.Zero;
+            }
+
+            public override int ReadBlock(char[] buffer, int index, int count)
+            {
+                return 0;
+            }
+
+            public override Task<int> ReadBlockAsync(char[] buffer, int index, int count)
+            {
+                return TaskCache.Zero;
+            }
+
             public override string ReadLine()
             {
                 return null;
+            }
+
+            public override Task<string> ReadLineAsync()
+            {
+                return TaskCache.NullString;
+            }
+
+            public override string ReadToEnd()
+            {
+                return string.Empty;
+            }
+
+            public override Task<string> ReadToEndAsync()
+            {
+                return TaskCache.EmptyString;
             }
         }
     }

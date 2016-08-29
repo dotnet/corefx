@@ -36,6 +36,10 @@
   <ItemGroup Condition="'$(TargetGroup)' != 'net462'">
     <Compile Include="System\IO\BufferedStream.cs" />
     <Compile Include="System\IO\InvalidDataException.cs" />
+    <!-- Common -->
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskCache.cs">
+      <Link>Common\System\Threading\Tasks\TaskCache.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcore50aot' or '$(TargetGroup)' == 'netstandard13aot'">
     <Compile Include="System\IO\BinaryReader.cs" />

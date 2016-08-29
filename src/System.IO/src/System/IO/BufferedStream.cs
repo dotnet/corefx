@@ -509,7 +509,9 @@ namespace System.IO
             if (t != null && t.Result == val)
                 return t;
 
-            t = Task.FromResult<int>(val);
+            t = val == 0 ?
+                TaskCache.Zero : // Return a cached Task if EOF has been reached
+                Task.FromResult<int>(val);
             _lastSyncCompletedReadTask = t;
             return t;
         }
