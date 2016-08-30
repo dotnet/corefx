@@ -2559,6 +2559,21 @@ public static partial class DataContractSerializerTests
 
     #endregion
 
+    [Fact]
+    public static void BasicRoundTripResolveDTOTypes()
+    {
+        ObjectContainer instance = new ObjectContainer(new DTOContainer());
+        XmlObjectSerializer serializer = new DataContractSerializer(typeof(ObjectContainer), null, null, null, int.MaxValue, false, false, new DTOResolver());
+        using (MemoryStream ms = new MemoryStream())
+        {
+            serializer.WriteObject(ms, instance);
+            ms.Position = 0;
+            ObjectContainer deserialized = (ObjectContainer)serializer.ReadObject(ms);
+            Assert.Equal(DateTimeOffset.MaxValue, ((DTOContainer)deserialized.Data).nDTO);
+            Assert.Equal(DateTimeOffset.MaxValue, ((DTOContainer)deserialized.Data2).nDTO);
+        }
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractSerializer dcs;
