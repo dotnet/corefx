@@ -493,7 +493,7 @@ namespace System.Runtime.InteropServices
         [System.Security.SecurityCriticalAttribute]
         public static string PtrToStringUTF8(System.IntPtr ptr) { return default(string); }
         [System.Security.SecurityCriticalAttribute]
-        public static string PtrToStringUTF8(System.IntPtr ptr, int byteLen) { return default(string); }        
+        public static string PtrToStringUTF8(System.IntPtr ptr, int byteLen) { return default(string); }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.Security.SecurityCriticalAttribute]
         public static void PtrToStructure(System.IntPtr ptr, object structure) { }
