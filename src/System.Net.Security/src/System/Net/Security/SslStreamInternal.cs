@@ -704,9 +704,6 @@ namespace System.Net.Security
             return readBytes;
         }
 
-        //
-        // Only processing SEC_I_RENEGOTIATE.
-        //
         private int ProcessReadErrorCode(SecurityStatusPal status, byte[] buffer, int offset, int count, AsyncProtocolRequest asyncRequest, byte[] extraBuffer)
         {
             ProtocolToken message = new ProtocolToken(null, status);

@@ -9,6 +9,7 @@ using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
@@ -447,14 +448,14 @@ namespace System.Net.Security
             }
         }
 
-        internal void CheckThrow(bool authSucessCheck)
+        internal void CheckThrow(bool authSuccessCheck)
         {
             if (_exception != null)
             {
                 _exception.Throw();
             }
 
-            if (authSucessCheck && !IsAuthenticated)
+            if (authSuccessCheck && !IsAuthenticated)
             {
                 throw new InvalidOperationException(SR.net_auth_noauth);
             }
@@ -470,6 +471,8 @@ namespace System.Net.Security
         //
         internal void Close()
         {
+            // TODO: Close_Alert sequence (ApplyControlToken(SCHANNEL_SHUTDOWN))
+
             _exception = ExceptionDispatchInfo.Capture(new ObjectDisposedException("SslStream"));
             if (Context != null)
             {
@@ -800,9 +803,11 @@ namespace System.Net.Security
             }
             else if (message.Done && !_pendingReHandshake)
             {
-                if (!CompleteHandshake())
+                ProtocolToken alertToken = null;
+
+                if (!CompleteHandshake(ref alertToken))
                 {
-                    StartSendAuthResetSignal(null, asyncRequest, ExceptionDispatchInfo.Capture(new AuthenticationException(SR.net_ssl_io_cert_validation, null)));
+                    StartSendAuthResetSignal(alertToken, asyncRequest, ExceptionDispatchInfo.Capture(new AuthenticationException(SR.net_ssl_io_cert_validation, null)));
                     return;
                 }
 
@@ -951,6 +956,7 @@ namespace System.Net.Security
                     Buffer.BlockCopy(buffer, offset, buffer, 0, count);
                 }
             }
+
             StartSendBlob(buffer, count, asyncRequest);
         }
 
@@ -994,7 +1000,7 @@ namespace System.Net.Security
         //
         // - Returns false if failed to verify the Remote Cert
         //
-        private bool CompleteHandshake()
+        private bool CompleteHandshake(ref ProtocolToken alertToken)
         {
             if (GlobalLog.IsEnabled)
             {
@@ -1003,23 +1009,29 @@ namespace System.Net.Security
 
             Context.ProcessHandshakeSuccess();
 
-            if (!Context.VerifyRemoteCertificate(_certValidationDelegate))
+            // TODO: May throw CryptographicException.
+            // The stack should reply back with TLS1_ALERT_BAD_CERTIFICATE or TLS1_ALERT_HANDSHAKE_FAILURE.
+            if (!Context.VerifyRemoteCertificate(_certValidationDelegate, ref alertToken))
             {
                 _handshakeCompleted = false;
                 _certValidationFailed = true;
+
                 if (GlobalLog.IsEnabled)
                 {
                     GlobalLog.Leave("CompleteHandshake", false);
                 }
+
                 return false;
             }
 
             _certValidationFailed = false;
             _handshakeCompleted = true;
+
             if (GlobalLog.IsEnabled)
             {
                 GlobalLog.Leave("CompleteHandshake", true);
             }
+
             return true;
         }
 
@@ -1851,6 +1863,22 @@ namespace System.Net.Security
 
                 FinishHandshake(exception, null);
             }
+        }
+
+        internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
+        {
+            CheckThrow(authSuccessCheck:true);
+
+            // TODO: Ensure that no other data is sent after close_notify.
+            ProtocolToken message = Context.CreateShutdownToken();
+            return InnerStream.BeginWrite(message.Payload, 0, message.Payload.Length, asyncCallback, asyncState);
+        }
+
+        internal void EndShutdown(IAsyncResult result)
+        {
+            CheckThrow(authSuccessCheck: true);
+
+            InnerStream.EndWrite(result);
         }
     }
 }

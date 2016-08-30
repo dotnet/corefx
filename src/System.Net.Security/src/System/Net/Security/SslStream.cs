@@ -152,6 +152,16 @@ namespace System.Net.Security
             _sslState.EndProcessAuthentication(asyncResult);
         }
 
+        internal virtual IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
+        {
+            return _sslState.BeginShutdown(asyncCallback, asyncState);
+        }
+
+        internal virtual void EndShutdown(IAsyncResult asyncResult)
+        {
+            _sslState.EndShutdown(asyncResult);
+        }
+
         public TransportContext TransportContext
         {
             get
@@ -188,6 +198,14 @@ namespace System.Net.Security
             SecurityProtocol.ThrowOnNotAllowed(enabledSslProtocols);
 
             return Task.Factory.FromAsync((callback, state) => BeginAuthenticateAsServer(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation, callback, state), EndAuthenticateAsServer, null);
+        }
+
+        public virtual Task ShutdownAsync()
+        {
+            return Task.Factory.FromAsync(
+                (callback, state) => BeginShutdown(callback, state),
+                EndShutdown, 
+                null);
         }
         #endregion
 
