@@ -14,7 +14,7 @@
     <ProjectReference Include="..\ref\4.1\System.Runtime.InteropServices.depproj">
       <SupportedFramework>net462</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\ref\System.Runtime.InteropServices.csproj">
+    <ProjectReference Include="..\ref\System.Runtime.InteropServices.builds">
       <SupportedFramework>net463;netcoreapp1.0;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\redist\System.Runtime.InteropServices.depproj">
