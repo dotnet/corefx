@@ -490,12 +490,10 @@ namespace System.Runtime.InteropServices
         public static string PtrToStringUni(System.IntPtr ptr) { return default(string); }
         [System.Security.SecurityCriticalAttribute]
         public static string PtrToStringUni(System.IntPtr ptr, int len) { return default(string); }
-#if NETCOREAPP11
         [System.Security.SecurityCriticalAttribute]
         public static string PtrToStringUTF8(System.IntPtr ptr) { return default(string); }
         [System.Security.SecurityCriticalAttribute]
         public static string PtrToStringUTF8(System.IntPtr ptr, int byteLen) { return default(string); }
-#endif
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.Security.SecurityCriticalAttribute]
         public static void PtrToStructure(System.IntPtr ptr, object structure) { }
@@ -568,10 +566,8 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr StringToCoTaskMemAnsi(string s) { return default(System.IntPtr); }
         [System.Security.SecurityCriticalAttribute]
         public static System.IntPtr StringToCoTaskMemUni(string s) { return default(System.IntPtr); }
-#if NETCOREAPP11
         [System.Security.SecurityCriticalAttribute]
         public static System.IntPtr StringToCoTaskMemUTF8(string s) { return default(System.IntPtr); }
-#endif
         [System.Security.SecurityCriticalAttribute]
         public static System.IntPtr StringToHGlobalAnsi(string s) { return default(System.IntPtr); }
         [System.Security.SecurityCriticalAttribute]
@@ -648,10 +644,8 @@ namespace System.Runtime.InteropServices
         public static void ZeroFreeGlobalAllocAnsi(System.IntPtr s) { }
         [System.Security.SecurityCriticalAttribute]
         public static void ZeroFreeGlobalAllocUnicode(System.IntPtr s) { }
-#if NETCOREAPP11
         [System.Security.SecurityCriticalAttribute]
         public static void ZeroFreeCoTaskMemUTF8(System.IntPtr s) { }
-#endif
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(10496), Inherited = false)]
     public sealed partial class MarshalAsAttribute : System.Attribute
