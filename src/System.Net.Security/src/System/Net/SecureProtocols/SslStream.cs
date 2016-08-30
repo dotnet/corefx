@@ -189,6 +189,12 @@ namespace System.Net.Security
 
             return Task.Factory.FromAsync((callback, state) => BeginAuthenticateAsServer(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation, callback, state), EndAuthenticateAsServer, null);
         }
+
+        public virtual Task ShutdownAsync() 
+        { 
+            throw new PlatformNotSupportedException(); 
+        }
+
         #endregion
 
         public override bool IsAuthenticated
