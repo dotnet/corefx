@@ -160,7 +160,6 @@ namespace System.Tests
                 return;
             }
 
-
             int i = ptr.ToInt32();
             Assert.Equal(expected32, ptr.ToInt32());
 
