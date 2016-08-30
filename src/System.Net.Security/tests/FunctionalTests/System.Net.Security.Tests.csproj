@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <NugetTargetMoniker>.NETStandard,Version=v1.6</NugetTargetMoniker>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

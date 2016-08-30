@@ -1,8 +1,8 @@
 {
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": [
-        "dotnet5.5"
+        "dotnet5.4"
       ],
       "dependencies": {
         "Microsoft.NETCore.Platforms": "1.0.1",
