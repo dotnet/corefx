@@ -22,19 +22,15 @@ namespace System.Threading.Tasks.Dataflow
     {
         // IMPLEMENT IMPLICITLY
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="LinkTo"]/*' />
         IDisposable LinkTo(ITargetBlock<TOutput> target, DataflowLinkOptions linkOptions);
 
         // IMPLEMENT EXPLICITLY
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ConsumeMessage"]/*' />
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
         TOutput ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out Boolean messageConsumed);
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReserveMessage"]/*' />
         Boolean ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target);
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReleaseReservation"]/*' />
         void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target);
     }
 }
