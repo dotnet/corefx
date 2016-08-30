@@ -160,11 +160,12 @@ namespace System.Tests
                 return;
             }
 
+
             int i = ptr.ToInt32();
             Assert.Equal(expected32, ptr.ToInt32());
 
             Assert.Equal(expected.ToString(), ptr.ToString());
-            Assert.Equal(expected.ToString("x"), ptr.ToString("x"));
+            Assert.Equal(expected.ToString("x"), ptr.ToInt64().ToString("x"));
 
             Assert.Equal(ptr, new IntPtr(expected));
             Assert.True(ptr == new IntPtr(expected));
