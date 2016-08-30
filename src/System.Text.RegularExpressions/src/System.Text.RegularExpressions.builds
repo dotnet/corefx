@@ -7,9 +7,6 @@
     <Project Include="System.Text.RegularExpressions.csproj">
       <TargetGroup>net463</TargetGroup>
     </Project>
-    <Project Include="redist\System.Text.RegularExpressions.depproj">
-      <TargetGroup>netcore50</TargetGroup>
-    </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
