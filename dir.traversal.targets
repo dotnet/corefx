@@ -39,7 +39,7 @@
         <UndefineProperties Condition="'%(Project.OSGroup)'==''">%(Project.UndefineProperties);OSGroup</UndefineProperties>
       </Project>
       <Project>
-        <UndefineProperties Condition="'%(Project.Extension)'!='.builds' and '%(Project.Extension)'!='.proj'">%(Project.UndefineProperties);FilterToOSGroup;FilterToTestTFM;DefaultBuildAllTarget;SerializeProjects;BuildAllOSGroups</UndefineProperties>
+        <UndefineProperties Condition="'%(Project.Extension)'!='.builds' and '%(Project.Extension)'!='.proj'">%(Project.UndefineProperties);TestTFMs;FilterToOSGroup;FilterToTestTFM;DefaultBuildAllTarget;SerializeProjects;BuildAllOSGroups</UndefineProperties>
       </Project>
     </ItemGroup>
 
@@ -142,9 +142,13 @@
 
       <ProjectsToTest>
        <AdditionalProperties Condition="'%(ProjectsToTest.TestTFMs)'!=''">TestTFMs=%(ProjectsToTest.TestTFMs);%(ProjectsToTest.AdditionalProperties)</AdditionalProperties>
-       <!-- When TestTFMs is not set, and FilterToTestTFM is netcoreapp1.1 -->
+      </ProjectsToTest>
+      <ProjectsToTest>
+        <!-- When TestTFMs is not set, and FilterToTestTFM is netcoreapp1.1 -->
        <AdditionalProperties Condition="('%(ProjectsToTest.TestTFMs)'=='' Or $([System.String]::new('%(Project.TestTFMs)').Contains(';netcoreapp1.0;'))) And '$(FilterToTestTFM)'=='netcoreapp1.1'">TestTFM=netcoreapp1.0;%(ProjectsToTest.AdditionalProperties)</AdditionalProperties>
-       <AdditionalProperties Condition="('%(ProjectsToTest.TestTFMs)'=='' Or $([System.String]::new('%(Project.TestTFMs)').Contains(';netcoreapp1.0;'))) And '$(FilterToTestTFM)'!='netcoreapp1.1'">TestTFM=$(FilterToTestTFM);%(ProjectsToTest.AdditionalProperties)</AdditionalProperties>
+      </ProjectsToTest>
+      <ProjectsToTest>
+        <AdditionalProperties Condition="('%(ProjectsToTest.TestTFMs)'=='' Or $([System.String]::new('%(Project.TestTFMs)').Contains(';netcoreapp1.0;'))) And '$(FilterToTestTFM)'!='netcoreapp1.1'">TestTFM=$(FilterToTestTFM);%(ProjectsToTest.AdditionalProperties)</AdditionalProperties>
       </ProjectsToTest>
       <ProjectsToTest>
         <FilterToTestTFM>$(FilterToTestTFM)</FilterToTestTFM>
