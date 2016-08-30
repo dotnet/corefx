@@ -236,19 +236,35 @@ namespace System.Collections.Generic
         }
 
         // Removes the object at the head of the queue and returns it. If the queue
-        // is empty, this method simply returns null.
+        // is empty, this method throws an 
+        // InvalidOperationException.
         /// <include file='doc\Queue.uex' path='docs/doc[@for="Queue.Dequeue"]/*' />
         public T Dequeue()
         {
-            if (_size == 0)
+            T removed;
+            if (!TryDequeue(out removed))
                 throw new InvalidOperationException(SR.InvalidOperation_EmptyQueue);
 
-            T removed = _array[_head];
+            return removed;
+        }
+
+        // Attempts to Remove the object at the head of the queue and returns it if the attempt was successful.
+        // If the queue is empty, this method outputs default value of object and returns false, else returns true.
+        /// <include file='doc\Queue.uex' path='docs/doc[@for="Queue.Dequeue"]/*' />
+        public bool TryDequeue(out T removed)
+        {
+            if (_size == 0)
+            {
+                removed = default(T);
+                return false;
+            }
+
+            removed = _array[_head];
             _array[_head] = default(T);
             MoveNext(ref _head);
             _size--;
             _version++;
-            return removed;
+            return true;
         }
 
         // Returns the object at the head of the queue. The object remains in the
