@@ -19,12 +19,7 @@ namespace System.Linq.Expressions.Compiler
             // another thread when we run out of stack space.
             if (!_guard.TryEnterOnCurrentStack())
             {
-                _guard.RunOnEmptyStack(s =>
-                {
-                    var t = (Tuple<LambdaCompiler, Expression, CompilationFlags>)s;
-                    t.Item1.EmitExpression(t.Item2, t.Item3);
-                }, Tuple.Create(this, node, flags));
-
+                _guard.RunOnEmptyStack((LambdaCompiler @this, Expression n, CompilationFlags f) => @this.EmitExpression(n, f), this, node, flags);
                 return;
             }
 

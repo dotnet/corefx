@@ -31,11 +31,7 @@ namespace System.Linq.Expressions.Compiler
             // another thread when we run out of stack space.
             if (!_guard.TryEnterOnCurrentStack())
             {
-                return _guard.RunOnEmptyStack(s =>
-                {
-                    var t = (Tuple<StackSpiller, Expression, Stack>)s;
-                    return t.Item1.RewriteExpression(t.Item2, t.Item3);
-                }, Tuple.Create(this, node, stack));
+                return _guard.RunOnEmptyStack((StackSpiller @this, Expression n, Stack s) => @this.RewriteExpression(n, s), this, node, stack);
             }
 
             Result result;

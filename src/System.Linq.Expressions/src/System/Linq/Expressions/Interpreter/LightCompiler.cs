@@ -2956,12 +2956,7 @@ namespace System.Linq.Expressions.Interpreter
             // another thread when we run out of stack space.
             if (!_guard.TryEnterOnCurrentStack())
             {
-                _guard.RunOnEmptyStack(s =>
-                {
-                    var t = (Tuple<LightCompiler, Expression>)s;
-                    t.Item1.CompileNoLabelPush(t.Item2);
-                }, Tuple.Create(this, expr));
-
+                _guard.RunOnEmptyStack((LightCompiler @this, Expression e) => @this.CompileNoLabelPush(e), this, expr);
                 return;
             }
 

@@ -39,11 +39,7 @@ namespace System.Linq.Expressions.Compiler
             // another thread when we run out of stack space.
             if (!_guard.TryEnterOnCurrentStack())
             {
-                return _guard.RunOnEmptyStack(s =>
-                {
-                    var t = (Tuple<VariableBinder, Expression>)s;
-                    return t.Item1.Visit(t.Item2);
-                }, Tuple.Create(this, node));
+                return _guard.RunOnEmptyStack((VariableBinder @this, Expression e) => @this.Visit(e), this, node);
             }
 
             var result = base.Visit(node);
