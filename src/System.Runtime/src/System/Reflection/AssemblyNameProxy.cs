@@ -16,9 +16,14 @@
 namespace System.Reflection {
     using System;
     using System.Runtime.Versioning;
+    using System.Runtime.Loader;
 
     [System.Runtime.InteropServices.ComVisible(true)]
     public class AssemblyNameProxy : MarshalByRefObject
     {
+        public AssemblyName GetAssemblyName(String assemblyFile)
+        {
+            return AssemblyLoadContext.GetAssemblyName(assemblyFile);
+        }
     }
 }
