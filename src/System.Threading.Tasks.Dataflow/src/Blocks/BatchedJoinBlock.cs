@@ -127,31 +127,25 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets a target that may be used to offer messages of the second type.</summary>
         public ITargetBlock<T2> Target2 { get { return _target2; } }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="LinkTo"]/*' />
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public IDisposable LinkTo(ITargetBlock<Tuple<IList<T1>, IList<T2>>> target, DataflowLinkOptions linkOptions)
         {
             return _source.LinkTo(target, linkOptions);
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceive"]/*' />
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public Boolean TryReceive(Predicate<Tuple<IList<T1>, IList<T2>>> filter, out Tuple<IList<T1>, IList<T2>> item)
         {
             return _source.TryReceive(filter, out item);
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceiveAll"]/*' />
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public bool TryReceiveAll(out IList<Tuple<IList<T1>, IList<T2>>> items) { return _source.TryReceiveAll(out items); }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="OutputCount"]/*' />
         public int OutputCount { get { return _source.OutputCount; } }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
         public Task Completion { get { return _source.Completion; } }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Complete"]/*' />
         public void Complete()
         {
             Debug.Assert(_target1 != null, "_target1 not initialized");
@@ -161,7 +155,6 @@ namespace System.Threading.Tasks.Dataflow
             _target2.Complete();
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
@@ -178,21 +171,18 @@ namespace System.Threading.Tasks.Dataflow
             Complete();
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ConsumeMessage"]/*' />
         Tuple<IList<T1>, IList<T2>> ISourceBlock<Tuple<IList<T1>, IList<T2>>>.ConsumeMessage(
             DataflowMessageHeader messageHeader, ITargetBlock<Tuple<IList<T1>, IList<T2>>> target, out Boolean messageConsumed)
         {
             return _source.ConsumeMessage(messageHeader, target, out messageConsumed);
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReserveMessage"]/*' />
         bool ISourceBlock<Tuple<IList<T1>, IList<T2>>>.ReserveMessage(
             DataflowMessageHeader messageHeader, ITargetBlock<Tuple<IList<T1>, IList<T2>>> target)
         {
             return _source.ReserveMessage(messageHeader, target);
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReleaseReservation"]/*' />
         void ISourceBlock<Tuple<IList<T1>, IList<T2>>>.ReleaseReservation(
             DataflowMessageHeader messageHeader, ITargetBlock<Tuple<IList<T1>, IList<T2>>> target)
         {
@@ -211,7 +201,6 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets the number of messages waiting to be processed.  This must only be used from the debugger as it avoids taking necessary locks.</summary>
         private int OutputCountForDebugger { get { return _source.GetDebuggingInformation().OutputCount; } }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="ToString"]/*' />
         public override string ToString() { return Common.GetNameForDebugger(this, _source.DataflowBlockOptions); }
 
         /// <summary>The data to display in the debugger display attribute.</summary>
@@ -395,30 +384,24 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets a target that may be used to offer messages of the third type.</summary>
         public ITargetBlock<T3> Target3 { get { return _target3; } }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="LinkTo"]/*' />
         public IDisposable LinkTo(ITargetBlock<Tuple<IList<T1>, IList<T2>, IList<T3>>> target, DataflowLinkOptions linkOptions)
         {
             return _source.LinkTo(target, linkOptions);
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceive"]/*' />
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public Boolean TryReceive(Predicate<Tuple<IList<T1>, IList<T2>, IList<T3>>> filter, out Tuple<IList<T1>, IList<T2>, IList<T3>> item)
         {
             return _source.TryReceive(filter, out item);
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="TryReceiveAll"]/*' />
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public bool TryReceiveAll(out IList<Tuple<IList<T1>, IList<T2>, IList<T3>>> items) { return _source.TryReceiveAll(out items); }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="OutputCount"]/*' />
         public int OutputCount { get { return _source.OutputCount; } }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
         public Task Completion { get { return _source.Completion; } }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Complete"]/*' />
         public void Complete()
         {
             Debug.Assert(_target1 != null, "_target1 not initialized");
@@ -430,7 +413,6 @@ namespace System.Threading.Tasks.Dataflow
             _target3.Complete();
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
@@ -447,21 +429,18 @@ namespace System.Threading.Tasks.Dataflow
             Complete();
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ConsumeMessage"]/*' />
         Tuple<IList<T1>, IList<T2>, IList<T3>> ISourceBlock<Tuple<IList<T1>, IList<T2>, IList<T3>>>.ConsumeMessage(
             DataflowMessageHeader messageHeader, ITargetBlock<Tuple<IList<T1>, IList<T2>, IList<T3>>> target, out Boolean messageConsumed)
         {
             return _source.ConsumeMessage(messageHeader, target, out messageConsumed);
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReserveMessage"]/*' />
         bool ISourceBlock<Tuple<IList<T1>, IList<T2>, IList<T3>>>.ReserveMessage(
             DataflowMessageHeader messageHeader, ITargetBlock<Tuple<IList<T1>, IList<T2>, IList<T3>>> target)
         {
             return _source.ReserveMessage(messageHeader, target);
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Sources/Member[@name="ReleaseReservation"]/*' />
         void ISourceBlock<Tuple<IList<T1>, IList<T2>, IList<T3>>>.ReleaseReservation(
             DataflowMessageHeader messageHeader, ITargetBlock<Tuple<IList<T1>, IList<T2>, IList<T3>>> target)
         {
@@ -481,7 +460,6 @@ namespace System.Threading.Tasks.Dataflow
         /// <summary>Gets the number of messages waiting to be processed.  This must only be used from the debugger as it avoids taking necessary locks.</summary>
         private int OutputCountForDebugger { get { return _source.GetDebuggingInformation().OutputCount; } }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="ToString"]/*' />
         public override string ToString() { return Common.GetNameForDebugger(this, _source.DataflowBlockOptions); }
 
         /// <summary>The data to display in the debugger display attribute.</summary>
@@ -592,7 +570,6 @@ namespace System.Threading.Tasks.Dataflow.Internal
             return toReturn;
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
         public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, T messageValue, ISourceBlock<T> source, Boolean consumeToAccept)
         {
             // Validate arguments
@@ -625,7 +602,6 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Complete"]/*' />
         public void Complete()
         {
             lock (_sharedResources._incomingLock)
@@ -640,7 +616,6 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
@@ -654,7 +629,6 @@ namespace System.Threading.Tasks.Dataflow.Internal
             _sharedResources._completionAction();
         }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
         Task IDataflowBlock.Completion { get { throw new NotSupportedException(SR.NotSupported_MemberNotNeeded); } }
 
         /// <summary>The data to display in the debugger display attribute.</summary>
