@@ -1,0 +1,1 @@
+Properties used by ../dir.traversal.targets

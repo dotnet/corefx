@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildDir)dir.traversal.targets -->
+
+  <PropertyGroup>
+    <TraversalBuildDependsOn>
+      BuildAllProjects;
+      $(TraversalBuildDependsOn);
+    </TraversalBuildDependsOn>
+
+    <TraversalCleanDependsOn>
+      CleanAllProjects;
+      $(TraversalCleanDependsOn);
+    </TraversalCleanDependsOn>
+
+    <TraversalGenerateTestProjectJsonsDependsOn>
+      GenerateAllTestProjectJsons;
+      $(TraversalGenerateTestProjectJsonsDependsOn)
+    </TraversalGenerateTestProjectJsonsDependsOn>
+
+    <TraversalRestorePackagesDependsOn>
+      RestoreAllProjectPackages;
+      $(TraversalRestorePackagesDependsOn)
+    </TraversalRestorePackagesDependsOn>
+
+    <TraversalRestorePackagesDependsOn Condition="'$(_BuildAgainstPackages)' == 'true'">
+      $(TraversalGenerateTestProjectJsonsDependsOn);
+      $(TraversalRestorePackagesDependsOn)
+    </TraversalRestorePackagesDependsOn>
+  </PropertyGroup>
+</Project>

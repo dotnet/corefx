@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildDir)dir.props -->
+
+  <!-- Default Test platform to deploy the netstandard compiled tests to -->
+  <PropertyGroup>
+    <!-- we default TestTFM and FilterToTestTFM to netcoreapp1.0 if they are not explicity defined -->
+    <DefaultTestTFM Condition="'$(DefaultTestTFM)'==''">netcoreapp1.0</DefaultTestTFM>
+    <TestTFM Condition="'$(TestTFM)'==''">$(DefaultTestTFM)</TestTFM>
+    <FilterToTestTFM Condition="'$(FilterToTestTFM)'==''">$(DefaultTestTFM)</FilterToTestTFM>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsRedistAssembly Condition="'$(IsRedistAssembly)'=='' AND ($(MSBuildProjectFullPath.Contains('\redist\')) OR $(MSBuildProjectFullPath.Contains('/redist/')))">true</IsRedistAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsRedistAssembly)'=='true'">
+    <NuGetRuntimeIdentifier Condition="'$(TargetGroup)' == 'netcore50'">win8</NuGetRuntimeIdentifier>
+    <NuGetRuntimeIdentifier Condition="'$(TargetGroup)' == 'netcore50aot'">win8-aot</NuGetRuntimeIdentifier>
+
+    <!-- workaround Dev14 issue with nuget targets -->
+    <RuntimeIndentifier>$(NuGetRuntimeIdentifier)</RuntimeIndentifier>
+  </PropertyGroup>
+</Project>

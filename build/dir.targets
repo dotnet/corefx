@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <!-- Check for build tools -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\checkforbuildtools.targets" />
+
+  <!-- define default implementations (empty) for required targets -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\defaulttargets.targets" />
+
+  <!-- undefinetesttfm target -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\undefinetesttfm.targets" />
+
+  <!-- Common targets from build toosl -->
+  <Import Project="$(ToolsDir)/Build.Common.targets" Condition="Exists('$(ToolsDir)/Build.Common.targets')" />
+
+  <!-- permit a wrapping build system to contribute targets to this build -->
+  <Import Condition="Exists('$(MSBuildThisFileDirectory)..\open.targets')" Project="$(MSBuildThisFileDirectory)..\open.targets" />
+
+  <!-- properties required for dir.targets -->
+  <Import Project="$(MSBuildThisFileDirectory)props\dirtargets.props" />
+
+  <!-- produces api targets -->
+  <Import Project="$(MSBuildThisFileDirectory)targets\producespackageid.targets" />
+</Project>
+

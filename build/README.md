@@ -1,0 +1,1 @@
+Root props and targets files which are imported by $(ProjectDir)build.proj.  Build.proj is our entry point into building the entire repo.

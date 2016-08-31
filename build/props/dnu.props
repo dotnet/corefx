@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildDir)dir.props -->
+
+  <!-- list of nuget package sources passed to dnu -->
+  <ItemGroup Condition="'$(ExcludeInternetFeeds)' != 'true'">
+    <!-- PackagesDrops is passed in via the commandline "/p:PackagesDrops=[drop location]" -->
+    <DnuSourceList Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(PackagesDrops)" />
+    <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
+    <!-- Including buildtools to pull in TestSuite packages and repackaged xunit dependencies-->
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fwww.nuget.org/api/v2/" />
+  </ItemGroup>
+
+
+  <!-- list of directories to perform batch restore -->
+  <ItemGroup>
+    <DnuRestoreDir Include="$(ProjectDir)src" />
+    <DnuRestoreDir Include="$(ProjectDir)pkg" />
+    <DnuRestoreDir Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(GeneratedProjectJsonDir)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DnxPackageDir Condition="'$(DnxPackageDir)'==''">$(PackagesDir)/$(DnxPackageName)/</DnxPackageDir>
+    <DnuToolPath Condition="'$(DnuToolPath)'=='' and '$(OsEnvironment)'!='Unix'">$(DnxPackageDir)/bin/dnu.cmd</DnuToolPath>
+    <DnuToolPath Condition="'$(DnuToolPath)'=='' and '$(OsEnvironment)'=='Unix'">$(DnxPackageDir)/bin/dnu</DnuToolPath>
+    <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'!='Unix'">$(DotnetCliPath)dotnet.exe</DotnetToolCommand>
+    <DotnetToolCommand Condition="'$(DotnetToolCommand)' == '' and '$(OsEnvironment)'=='Unix'">$(DotnetCliPath)dotnet</DotnetToolCommand>
+    <DnuToolPath>$(DotnetToolCommand)</DnuToolPath>
+
+    <DnuRestoreSource>@(DnuSourceList -> '--source %(Identity)', ' ')</DnuRestoreSource>
+
+    <DnuRestoreCommand>"$(DnuToolPath)"</DnuRestoreCommand>
+    <DnuRestoreCommand>$(DnuRestoreCommand) restore</DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(ParallelRestore)'=='true'">$(DnuRestoreCommand) --parallel</DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(UseNuGetHttpCache)'!='true'">$(DnuRestoreCommand) --no-cache</DnuRestoreCommand>
+    <DnuRestoreCommand>$(DnuRestoreCommand) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(LockDependencies)' == 'true'">$(DnuRestoreCommand) --lock</DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(NuGetConfigPath)'!=''">$(DnuRestoreCommand) --configfile $(NuGetConfigPath)</DnuRestoreCommand>
+  </PropertyGroup>
+</Project>

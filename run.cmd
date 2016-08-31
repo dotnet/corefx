@@ -17,7 +17,7 @@ if not defined VisualStudioVersion (
 set Platform=
 
 :: Restore the Tools directory
-call %~dp0init-tools.cmd
+call %~dp0build\wrappers\init-tools.cmd
 if NOT [%ERRORLEVEL%]==[0] exit /b 1
 
 set _toolRuntime=%~dp0Tools

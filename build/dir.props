@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Hook for adding properties outside of the repo -->
+  <Import Condition="Exists('..\..\dir.props')" Project="..\..\dir.props" />
+
+  <!-- Build version properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\buildversion.props" />
+ 
+  <!-- defines os properties like OsEnvironment and InputOSGroup -->
+  <Import Project="$(MSBuildThisFileDirectory)props\os.props" />
+
+  <!-- xunit properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\xunit.props" />
+
+  <!-- apply framework metadata property - IsDotNetFrameworkProductAssembly -->
+  <Import Project="$(MSBuildThisFileDirectory)props\applyframeworkmetadata.props" />
+
+  <!-- defines BuildToolsTargets45 property -->
+  <Import Project="$(MSBuildThisFileDirectory)props\buildtools.props" />
+
+  <!-- define directories used in build -->
+  <Import Project="$(MSBuildThisFileDirectory)props\directories.props" />
+
+  <Import Project="$(ToolRuntimePath)BuildVersion.targets" Condition="Exists('$(ToolRuntimePath)BuildVersion.targets')" />
+
+  <!-- genfacades related properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\genfacades.props" />
+
+  <!-- Import Build tools common props file where repo-independent properties are found -->
+  <Import Project="$(ToolsDir)Build.Common.props" Condition="Exists('$(ToolsDir)Build.Common.props')" />
+
+  <!-- enable dotnet analyzers for this repo -->
+  <Import Project="$(MSBuildThisFileDirectory)props\analyzers.props" />
+
+  <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
+  <Import Project="$(MSBuildThisFileDirectory)props\dependencies.props" />
+
+  <Import Project="$(ProjectDir)pkg/ExternalPackages/versions.props" />
+
+  <!-- Import packaging props -->
+  <Import Project="$(MSBuildThisFileDirectory)props\packaging.props"/>
+
+  <!-- build tests against packages related properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\buildtestsagainstpackages.props" />
+
+  <!-- dnu properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\dnu.props" />
+
+  <!-- define project.jsons for dependency updates -->
+  <Import Project="$(MSBuildThisFileDirectory)props\projectjsonfiles.props" />
+
+  <!-- build defaults -->
+  <Import Project="$(MSBuildThisFileDirectory)props\builddefaults.props" />
+
+  <!-- configuration properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\configuration.props" />
+
+  <!-- define osgroup properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\osgroup.props" />
+
+  <!-- define targetgroup properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\targetgroup.props" />
+
+  <!-- test related properties -->
+  <Import Project="$(MSBuildThisFileDirectory)props\test.props" />
+
+  <!-- setup directories which had other property import requirements -->
+  <Import Project="$(MSBuildThisFileDirectory)props\dependentdirectories.props" />
+
+  <!-- define skiptests property -->
+  <Import Project="$(MSBuildThisFileDirectory)props\skiptests.props" />
+
+  <!-- Use Roslyn Compilers to build -->
+  <Import Project="$(RoslynPropsFile)" Condition="'$(OSEnvironment)'!='Unix' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false'" />
+  <Import Project="$(RoslynPropsFile)" Condition="'$(OSEnvironment)'=='Unix' and Exists('$(RoslynPropsFile)')" />
+</Project>
+

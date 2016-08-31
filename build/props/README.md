@@ -1,0 +1,1 @@
+sThese props files are all imported by ../dir.props, except for dirtargets.props, which is the properties used by ../dir.targets

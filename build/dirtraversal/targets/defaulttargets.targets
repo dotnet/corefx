@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildDir)dir.traversal.targets -->
+
+  <Target Name="Build" DependsOnTargets="$(TraversalBuildDependsOn)" />
+
+  <Target Name="Clean" DependsOnTargets="$(TraversalCleanDependsOn)" />
+
+  <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
+
+  <Target Name="RestorePackages" DependsOnTargets="$(TraversalRestorePackagesDependsOn)" />
+
+  <Target Name="BuildAndTest" DependsOnTargets="Build;Test" />
+
+  <Target Name="RebuildAndTest" DependsOnTargets="Rebuild;Test" />
+
+  <Target Name="Test" />
+
+  <!-- Target will be overridden if buildagainstpackages.targets is imported. -->
+  <Target Name="GenerateTestProjectJson" />
+</Project>

@@ -6,8 +6,8 @@
     <Project Include="src.builds" />
   </ItemGroup>
 
-  <Import Project="..\dir.targets" />
-  <Import Project="..\dir.traversal.targets" />
+  <Import Project="..\build\dir.targets" />
+  <Import Project="..\build\dirtraversal\dir.traversal.targets" />
 
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
   <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />

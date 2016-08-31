@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildTools)dir.targets -->
+
+  <Target Name="UndefineTestTFM" BeforeTargets="AssignProjectConfiguration">
+    <ItemGroup>
+      <ProjectReference>
+        <!-- 
+        Always undefine TestTFM and FilterToTestTFM for all project reference as not needed for compilation and
+        avoid bin clash tool to fail
+        -->
+        <UndefineProperties>%(ProjectReference.UndefineProperties);TestTFM;FilterToTestTFM</UndefineProperties>
+      </ProjectReference>
+    </ItemGroup>
+  </Target>
+</Project>

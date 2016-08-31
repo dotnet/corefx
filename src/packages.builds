@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dir.props" />
 
+  <!-- This will likely cause a multi-import attempt (when building from build.proj instead of packages.builds), look into refactoring to fix this before checkin. -->
+  <Import Project="$(ToolsDir)Packaging.targets" Condition="Exists('$(ToolsDir)Packaging.targets')" />
   <PropertyGroup>
     <PackageReportDir Condition="'$(PackageReportDir)' == ''">$(BinDir)pkg/reports/</PackageReportDir>
     <BuildAllOSGroups Condition="'$(FilterToOSGroup)' != ''">false</BuildAllOSGroups>
@@ -32,5 +34,5 @@
     <GenerateNetStandardSupportTable Reports="@(Reports)" DocFilePath="$(ProjectDir)Documentation\architecture\net-platform-standard.md" InsertIntoFile="True" />
   </Target>
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.proj))\build\dirtraversal\dir.traversal.targets" />
 </Project>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildDir)dir.props -->
+
+  <!--
+  If Configuration is set then someone explicitly passed it in or we building from VS. In either case
+  default $(ConfigurationGroup), $(TargetGroup), or $(OSGroup) from the Configuration if they aren't
+  already explicitly set.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'!=''">
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Windows'))">Windows_NT</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Unix'))">Unix</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Linux'))">Linux</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('OSX'))">OSX</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('FreeBSD'))">FreeBSD</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('NetBSD'))">NetBSD</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'==''">AnyOS</OSGroup>
+  </PropertyGroup>
+
+  <!-- Setup properties per OSGroup -->
+  <Choose>
+    <When Condition="'$(OSGroup)'=='AnyOS'">
+      <PropertyGroup>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Windows_NT'">
+      <PropertyGroup>
+        <TargetsWindows>true</TargetsWindows>
+        <TestNugetRuntimeId>win7-x64</TestNugetRuntimeId>
+        <PackageTargetRuntime>win</PackageTargetRuntime>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Unix'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TestNugetRuntimeId>ubuntu.14.04-x64</TestNugetRuntimeId>
+        <PackageTargetRuntime>unix</PackageTargetRuntime>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='Linux'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsLinux>true</TargetsLinux>
+        <TestNugetRuntimeId>ubuntu.14.04-x64</TestNugetRuntimeId>
+        <PackageTargetRuntime>linux</PackageTargetRuntime>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='OSX'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsOSX>true</TargetsOSX>
+        <TestNugetRuntimeId>osx.10.10-x64</TestNugetRuntimeId>
+        <PackageTargetRuntime>osx</PackageTargetRuntime>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='FreeBSD'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsFreeBSD>true</TargetsFreeBSD>
+        <TestNugetRuntimeId>ubuntu.14.04-x64</TestNugetRuntimeId>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(OSGroup)'=='NetBSD'">
+      <PropertyGroup>
+        <TargetsUnix>true</TargetsUnix>
+        <TargetsNetBSD>true</TargetsNetBSD>
+        <TestNugetRuntimeId>ubuntu.14.04-x64</TestNugetRuntimeId>   <!-- TODO -->
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ConfigurationErrorMsg>$(ConfigurationErrorMsg);Unknown OSGroup [$(OSGroup)] specificed in your project.</ConfigurationErrorMsg>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <PropertyGroup>
+    <TargetsUnknownUnix Condition="'$(TargetsUnix)' == 'true' AND '$(OSGroup)' != 'Unix' AND '$(OSGroup)' != 'FreeBSD' AND '$(OSGroup)' != 'Linux' AND '$(OSGroup)' != 'NetBSD' AND '$(OSGroup)' != 'OSX'">true</TargetsUnknownUnix>
+  </PropertyGroup>
+</Project>

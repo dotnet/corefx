@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildDir)dir.props -->
+
+  <!--
+  Projects that have no OS-specific implementations just use Debug and Release for $(Configuration).
+  Projects that do have OS-specific implementations use OS_Debug and OS_Release, for all OS's we support even
+  if the code is the same between some OS's (so if you have some project that just calls POSIX APIs, we still have
+  OSX_[Debug|Release] and Linux_[Debug|Release] configurations.  We do this so that we place all the output under
+  a single binary folder and can have a similar experience between the command line and Visual Studio.
+  -->
+
+  <!--
+  If Configuration is empty that means we are not being built in VS and so folks need to explicitly pass the different
+  values for $(ConfigurationGroup), $(TargetGroup), or $(OSGroup) or accept the defaults for them.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'==''">
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">Debug</ConfigurationGroup>
+    <Configuration>$(ConfigurationGroup)</Configuration>
+    <Configuration Condition="'$(TargetGroup)'!=''">$(TargetGroup)_$(Configuration)</Configuration>
+    <Configuration Condition="'$(OSGroup)'!='' and '$(OSGroup)'!='AnyOS'">$(OSGroup)_$(Configuration)</Configuration>
+  </PropertyGroup>
+
+  <!--
+  If Configuration is set then someone explicitly passed it in or we building from VS. In either case
+  default $(ConfigurationGroup), $(TargetGroup), or $(OSGroup) from the Configuration if they aren't
+  already explicitly set.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'!=''">
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'=='' and $(Configuration.EndsWith('Debug'))">Debug</ConfigurationGroup>
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'=='' and $(Configuration.EndsWith('Release'))">Release</ConfigurationGroup>
+    <ConfigurationGroup Condition="'$(ConfigurationGroup)'==''">Debug</ConfigurationGroup>
+
+    <BuildAllOSGroups Condition="'$(BuildAllOSGroups)' == ''">true</BuildAllOSGroups>
+  </PropertyGroup>
+
+  <!-- Set up Default symbol and optimization for Configuration -->
+  <Choose>
+    <When Condition="'$(ConfigurationGroup)'=='Debug'">
+      <PropertyGroup>
+        <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+        <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+        <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+        <DefineConstants>$(DefineConstants),DEBUG,TRACE</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(ConfigurationGroup)' == 'Release'">
+      <PropertyGroup>
+        <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+        <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+        <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+        <DefineConstants>$(DefineConstants),TRACE</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ConfigurationErrorMsg>$(ConfigurationErrorMsg);Unknown ConfigurationGroup [$(ConfigurationGroup)] specificed in your project.</ConfigurationErrorMsg>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+</Project>

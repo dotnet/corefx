@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported from $(BuildDir)dir.props -->
+
+  <!-- DependsOn: os.props, osgroup.props -->
+  <PropertyGroup>
+    <!-- Don't run tests if we're building another platform's binaries on Windows -->
+    <SkipTests Condition="'$(SkipTests)'=='' and ('$(OsEnvironment)'=='Windows_NT' and '$(TargetsWindows)'!='true' and '$(OSGroup)'!='AnyOS')">true</SkipTests>
+  </PropertyGroup>
+</Project>
