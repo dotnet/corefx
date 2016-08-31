@@ -4254,7 +4254,7 @@ namespace System.Reflection
     }
     public class AssemblyNameProxy : System.MarshalByRefObject
     {
-        internal AssemblyNameProxy() { }
+        public AssemblyNameProxy() { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), Inherited = false)]
     public sealed partial class AssemblyProductAttribute : System.Attribute
