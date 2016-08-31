@@ -95,6 +95,7 @@
     </Compile>
     <Compile Include="System\Dynamic\Utils\TypeExtensions.cs" />
     <Compile Include="System\Dynamic\Utils\TypeUtils.cs" />
+    <Compile Include="System\Linq\Expressions\Common\ConstantCheck.cs" />
     <Compile Include="System\Linq\Expressions\BinaryExpression.cs" />
     <Compile Include="System\Linq\Expressions\BlockExpression.cs" />
     <Compile Include="System\Linq\Expressions\CatchBlock.cs" />
@@ -141,7 +142,8 @@
     <Compile Include="System\Linq\Expressions\Utils.cs" />
     <Compile Include="System\Linq\IQueryable.cs" />
     <Compile Include="System\Runtime\CompilerServices\IRuntimeVariables.cs" />
-    <Compile Include="System\Linq\Expressions\Common\ConstantCheck.cs" />
+    <Compile Include="System\Runtime\CompilerServices\RuntimeOps.RuntimeVariables.cs" />
+    <Compile Include="System\Runtime\CompilerServices\RuntimeOps.MergedRuntimeVariables.cs" />
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IsInterpreting)' != 'true' And '$(TargetGroup)' != 'net463'">
