@@ -35,18 +35,14 @@ namespace System.Linq.Expressions.Compiler
         public override Expression Visit(Expression node)
         {
             // When compling deep trees, we run the risk of triggering a terminating StackOverflowException,
-            // so we use the StackGuard utility here to probe for sufficient stackand continue the work on
+            // so we use the StackGuard utility here to probe for sufficient stack and continue the work on
             // another thread when we run out of stack space.
             if (!_guard.TryEnterOnCurrentStack())
             {
                 return _guard.RunOnEmptyStack((VariableBinder @this, Expression e) => @this.Visit(e), this, node);
             }
 
-            var result = base.Visit(node);
-
-            _guard.Exit();
-
-            return result;
+            return base.Visit(node);
         }
 
         protected internal override Expression VisitConstant(ConstantExpression node)

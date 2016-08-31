@@ -3034,8 +3034,6 @@ namespace System.Linq.Expressions.Interpreter
             }
             Debug.Assert(_instructions.CurrentStackDepth == startingStackDepth + (expr.Type == typeof(void) ? 0 : 1),
                 String.Format("{0} vs {1} for {2}", _instructions.CurrentStackDepth, startingStackDepth + (expr.Type == typeof(void) ? 0 : 1), expr.NodeType));
-
-            _guard.Exit();
         }
 
         public void Compile(Expression expr)

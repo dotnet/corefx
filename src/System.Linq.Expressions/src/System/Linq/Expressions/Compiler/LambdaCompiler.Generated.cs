@@ -15,7 +15,7 @@ namespace System.Linq.Expressions.Compiler
         private void EmitExpression(Expression node, CompilationFlags flags)
         {
             // When compling deep trees, we run the risk of triggering a terminating StackOverflowException,
-            // so we use the StackGuard utility here to probe for sufficient stackand continue the work on
+            // so we use the StackGuard utility here to probe for sufficient stack and continue the work on
             // another thread when we run out of stack space.
             if (!_guard.TryEnterOnCurrentStack())
             {
@@ -243,8 +243,6 @@ namespace System.Linq.Expressions.Compiler
             {
                 EmitExpressionEnd(startEmitted);
             }
-
-            _guard.Exit();
         }
 
         private static bool IsChecked(ExpressionType op)

@@ -262,8 +262,6 @@ namespace System.Linq.Expressions.Compiler
 
             VerifyRewrite(result, node);
 
-            _guard.Exit();
-
             return result;
         }
     }

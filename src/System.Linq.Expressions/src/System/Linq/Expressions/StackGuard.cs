@@ -10,32 +10,22 @@ namespace System.Linq.Expressions
 {
     internal sealed class StackGuard
     {
-        private const int StackProbingThreshold = 100;
         private const int MaxExecutionStackCount = 1024;
 
-        private int _recursionDepth;
         private int _executionStackCount;
 
         public bool TryEnterOnCurrentStack()
         {
-            if (++_recursionDepth >= StackProbingThreshold)
+            try
             {
-                try
-                {
-                    RuntimeHelpers.EnsureSufficientExecutionStack();
-                }
-                catch (InsufficientExecutionStackException) when (_executionStackCount < MaxExecutionStackCount)
-                {
-                    return false;
-                }
+                RuntimeHelpers.EnsureSufficientExecutionStack();
+            }
+            catch (InsufficientExecutionStackException) when (_executionStackCount < MaxExecutionStackCount)
+            {
+                return false;
             }
 
             return true;
-        }
-
-        public void Exit()
-        {
-            _recursionDepth--;
         }
 
         public void RunOnEmptyStack<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg2)
@@ -80,9 +70,6 @@ namespace System.Linq.Expressions
         {
             _executionStackCount++;
 
-            var recursionDepth = _recursionDepth;
-            _recursionDepth = 0;
-
             try
             {
                 // Using default scheduler rather than picking up the current scheduler.
@@ -103,7 +90,6 @@ namespace System.Linq.Expressions
             finally
             {
                 _executionStackCount--;
-                _recursionDepth = recursionDepth; // also counts as an Exit; caller is assumed to return after calling RunOnEmptyStack
             }
         }
     }
