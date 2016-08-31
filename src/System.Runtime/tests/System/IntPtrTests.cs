@@ -166,8 +166,6 @@ namespace System.Tests
             Assert.Equal(expected.ToString(), ptr.ToString());
             Assert.Equal(IntPtr.Size == 4 ? expected32.ToString("x") : expected.ToString("x"), ptr.ToString("x"));
 
-            Assert.Equal(expected.ToString("x"), ptr.ToInt64().ToString("x"));
-
             Assert.Equal(ptr, new IntPtr(expected));
             Assert.True(ptr == new IntPtr(expected));
             Assert.False(ptr != new IntPtr(expected));
