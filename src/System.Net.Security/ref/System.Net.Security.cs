@@ -59,7 +59,6 @@ namespace System.Net.Security
         public override int Read(byte[] buffer, int offset, int count) { return default(int); }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { return default(long); }
         public override void SetLength(long value) { }
-        public virtual System.Threading.Tasks.Task ShutdownAsync() { return default(System.Threading.Tasks.Task); }
         public override void Write(byte[] buffer, int offset, int count) { }
     }
     public enum ProtectionLevel
@@ -108,6 +107,7 @@ namespace System.Net.Security
         public override int Read(byte[] buffer, int offset, int count) { return default(int); }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { return default(long); }
         public override void SetLength(long value) { }
+        public virtual System.Threading.Tasks.Task ShutdownAsync() { return default(System.Threading.Tasks.Task); }
         public void Write(byte[] buffer) { }
         public override void Write(byte[] buffer, int offset, int count) { }
     }
