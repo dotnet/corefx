@@ -15,15 +15,6 @@
       <TargetFramework>uap10.1</TargetFramework>
     </PackageDestination>
   </ItemGroup>
-
-  <!--ItemGroup Condition="'$(PackageTargetFramework)' == ''">
-    <PackageDestination Include="lib/netstandard1.7">
-      <TargetFramework>netstandard1.7</TargetFramework>
-    </PackageDestination>
-    <PackageDestination Include="lib/uap10.1">
-      <TargetFramework>uap10.1</TargetFramework>
-    </PackageDestination>
-  </ItemGroup-->
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />

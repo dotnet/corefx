@@ -6,7 +6,7 @@
          to its own obsolete API. -->
     <NoWarn>618</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>4.3.0.0</AssemblyVersion>
+    <AssemblyVersion>4.2.0.0</AssemblyVersion>
     <OutputType>Library</OutputType>
     <PackageTargetFramework>netstandard1.7</PackageTargetFramework>
     <NuGetTargetMoniker>.NETStandard,Version=v1.7</NuGetTargetMoniker>
