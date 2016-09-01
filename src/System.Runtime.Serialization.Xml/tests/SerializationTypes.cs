@@ -3435,36 +3435,22 @@ namespace Music
 public class ObjectContainer
 {
     [DataMember]
-    private object data;
-
-    [DataMember]
-    private object data2;
+    private object _data;
 
     public ObjectContainer(object input)
     {
-        data = input;
-        data2 = data;
+        _data = input;
     }
 
     public object Data
     {
-        get { return data; }
-    }
-
-    public object Data2
-    {
-        get { return data2; }
+        get { return _data; }
     }
 }
 
 [DataContract]
 public class DTOContainer
 {
-    public DTOContainer()
-    {
-
-    }
-
     [DataMember]
     public object nDTO = DateTimeOffset.MaxValue;
 }
