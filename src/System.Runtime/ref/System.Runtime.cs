@@ -6142,7 +6142,7 @@ namespace System.Threading
 }
 namespace System.Threading.Tasks
 {
-    public partial class Task : System.IAsyncResult
+    public partial class Task : System.IAsyncResult, System.IDisposable
     {
         public Task(System.Action action) { }
         public Task(System.Action action, System.Threading.CancellationToken cancellationToken) { }
@@ -6190,6 +6190,8 @@ namespace System.Threading.Tasks
         public static System.Threading.Tasks.Task Delay(int millisecondsDelay, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public static System.Threading.Tasks.Task Delay(System.TimeSpan delay) { return default(System.Threading.Tasks.Task); }
         public static System.Threading.Tasks.Task Delay(System.TimeSpan delay, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public void Dispose() { }
+        protected virtual void Dispose(bool disposing) { }
         public static System.Threading.Tasks.Task FromCanceled(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public static System.Threading.Tasks.Task<TResult> FromCanceled<TResult>(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<TResult>); }
         public static System.Threading.Tasks.Task FromException(System.Exception exception) { return default(System.Threading.Tasks.Task); }
