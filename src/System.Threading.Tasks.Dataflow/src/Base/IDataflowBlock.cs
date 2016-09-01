@@ -18,15 +18,12 @@ namespace System.Threading.Tasks.Dataflow
     {
         // IMPLEMENT IMPLICITLY
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Completion"]/*' />
         Task Completion { get; }
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Complete"]/*' />
         void Complete();
 
         // IMPLEMENT EXPLICITLY
 
-        /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void Fault(Exception exception);
     }
 }
