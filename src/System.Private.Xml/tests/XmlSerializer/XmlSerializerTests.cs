@@ -1877,14 +1877,14 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     [Fact]
     public static void XmlSerializerFactoryTest()
     {
-        string baseline = "<?xml version=\"1.0\"?>\r\n<Dog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <age>5</age>\r\n  <name>Bear</name>\r\n  <breed>GermanShepherd</breed>\r\n</Dog>";
+        string baseline = "<?xml version=\"1.0\"?>\r\n<Dog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <Age>5</Age>\r\n  <Name>Bear</Name>\r\n  <Breed>GermanShepherd</Breed>\r\n</Dog>";
         var xsf = new XmlSerializerFactory();
         Func<XmlSerializer> serializerfunc = () => xsf.CreateSerializer(typeof(Dog));
-        var dog1 = new Dog() { name = "Bear", age = 5, breed = DogBreed.GermanShepherd };
-        var dog2 = SerializeAndDeserialize(dog1, baseline, serializerfunc, true);
-        Assert.Equal(dog1.name, dog2.name);
-        Assert.Equal(dog1.age, dog2.age);
-        Assert.Equal(dog1.breed, dog2.breed);
+        var dog1 = new Dog() { Name = "Bear", Age = 5, Breed = DogBreed.GermanShepherd };
+        var dog2 = SerializeAndDeserialize(dog1, baseline, serializerfunc);
+        Assert.Equal(dog1.Name, dog2.Name);
+        Assert.Equal(dog1.Age, dog2.Age);
+        Assert.Equal(dog1.Breed, dog2.Breed);
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, Func<XmlSerializer> serializerFactory = null,
