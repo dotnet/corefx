@@ -95,6 +95,93 @@ namespace System.Collections.Tests
 
         #endregion
 
+        #region TryDequeue
+
+        [Fact]
+        public void Queue_Generic_TryDequeue_OnEmptyQueue_ReturnsFalse()
+        {
+            T value;
+            Assert.False(() => new Queue<T>().TryDequeue(out value));
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void Queue_Generic_TryDequeue_OnNonEmptyQueue_ReturnsTrue(int count)
+        {
+            Queue<T> q = GenericQueueFactory(count);
+            T value;
+            Assert.True(() => q.TryDequeue(out value));
+        }
+
+        [Fact]
+        public void Queue_Generic_TryDequeue_OnEmptyQueue_GivesDefaultValue()
+        {
+            T value;
+            new Queue<T>().TryDequeue(out value);
+            //Out argument has default value of T when queue is empty
+            Assert.Equal(default(T), value);
+        }
+
+        [Theory]
+        [InlineData(0, 5)]
+        [InlineData(1, 1)]
+        [InlineData(3, 100)]
+        public void Queue_Generic_TryDequeue_EnqueueTryDequeue(int capacity, int items)
+        {
+            int seed = 53134;
+            T itemRemovedFromQueue;
+            var q = new Queue<T>(capacity);
+            Assert.Equal(0, q.Count);
+
+            // Enqueue some values and make sure the count is correct
+            List<T> source = (List<T>)CreateEnumerable(EnumerableType.List, null, items, 0, 0);
+            foreach (T val in source)
+            {
+                q.Enqueue(val);
+            }
+            Assert.Equal(source, q);
+
+            // Dequeue to make sure the values are removed in the right order and the count is updated
+            for (int i = 0; i < items; i++)
+            {
+                T itemToRemove = source[0];
+                source.RemoveAt(0);
+                q.TryDequeue(out itemRemovedFromQueue);
+                Assert.Equal(itemToRemove, itemRemovedFromQueue);
+                Assert.Equal(items - i - 1, q.Count);
+            }
+
+            // Can't dequeue when empty
+            Assert.False(() => q.Dequeue(out itemRemovedFromQueue));
+
+            // But can still be used after a failure and after bouncing at empty
+            T itemToAdd = CreateT(seed++);
+            q.Enqueue(itemToAdd);
+            q.TryDequeue(out itemRemovedFromQueue);
+            Assert.Equal(itemToAdd, itemRemovedFromQueue);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void Queue_Generic_TryDequeue_TryDequeueAfterClear(int count)
+        {
+            Queue<T> q = GenericQueueFactory(count);
+            T value;
+            //Can remove an item from non empty queue
+            Assert.True(() => q.TryDequeue(out value));
+
+            //can't dequeue after clearing the queue
+            q.Clear();
+            Assert.False(() => q.TryDequeue(out value));
+
+            // But can still be used after a failure and after bouncing at empty
+            T itemToAdd = CreateT(seed++);
+            q.Enqueue(itemToAdd);
+            Assert.True(() => q.TryDequeue(out value));
+        }
+
+        #endregion
+
         #region Dequeue
 
         [Theory]
