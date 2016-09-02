@@ -3458,7 +3458,7 @@ public class DTOContainer
 [DataContract]
 public class DTOResolver : DataContractResolver
 {
-    public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver KTResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
+    public override bool TryResolveType(Type dcType, Type declaredType, DataContractResolver knownTypeResolver, out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
     {
         string resolvedTypeName = string.Empty;
         string resolvedNamespace = string.Empty;
@@ -3478,7 +3478,7 @@ public class DTOResolver : DataContractResolver
                 break;
             default:
                 {
-                    return KTResolver.TryResolveType(dcType, declaredType, null, out typeName, out typeNamespace);
+                    return knownTypeResolver.TryResolveType(dcType, declaredType, null, out typeName, out typeNamespace);
                 }
         }
         XmlDictionary dic = new XmlDictionary();
@@ -3487,7 +3487,7 @@ public class DTOResolver : DataContractResolver
         return true;
     }
 
-    public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver KTResolver)
+    public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver knownTypeResolver)
     {
         switch (typeNamespace)
         {
@@ -3512,7 +3512,7 @@ public class DTOResolver : DataContractResolver
                 }
                 break;
         }
-        Type result = KTResolver.ResolveName(typeName, typeNamespace, declaredType, null);
+        Type result = knownTypeResolver.ResolveName(typeName, typeNamespace, declaredType, null);
         return result;
     }
 }
