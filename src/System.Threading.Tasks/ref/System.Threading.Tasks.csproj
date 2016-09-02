@@ -4,10 +4,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <NuGetTargetMoniker>.NETStandard,Version=v1.7</NuGetTargetMoniker>
-    <PackageTargetFramework>netstandard1.7;netcore50</PackageTargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <SuppressPackageTargetFrameworkCompatibility Include="netcore50" />
     <Compile Include="System.Threading.Tasks.cs" />
     <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
