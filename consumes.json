@@ -20,6 +20,7 @@
       "1.0.1"
     ],
     "Microsoft.Portable.Targets": "0.1.1-dev",
+    "Microsoft.Private.Intellisense": "1.0.0-beta-24430-00",
     "Microsoft.TargetingPack.Private.NETNative": "1.0.1-beta-24430-00",
     "Microsoft.TargetingPack.Private.WinRT": "1.0.1",
     "Microsoft.Win32.Primitives": "4.0.0",
@@ -42,8 +43,8 @@
     "System.Collections.NonGeneric": "4.0.0",
     "System.ComponentModel": "4.0.0",
     "System.ComponentModel.Annotations": [
-      "4.0.10",
-      "4.0.0"
+      "4.0.0",
+      "4.0.10"
     ],
     "System.ComponentModel.EventBasedAsync": "4.0.0",
     "System.ComponentModel.Primitives": "4.1.0",
@@ -63,18 +64,18 @@
     "System.Diagnostics.DiagnosticSource": "4.0.0",
     "System.Diagnostics.Process": "4.1.0",
     "System.Diagnostics.Tools": [
-      "4.0.1",
-      "4.0.0"
+      "4.0.0",
+      "4.0.1"
     ],
     "System.Diagnostics.TraceSource": "4.0.0",
     "System.Diagnostics.Tracing": [
+      "4.0.0",
       "4.0.10",
-      "4.0.20",
-      "4.0.0"
+      "4.0.20"
     ],
     "System.Dynamic.Runtime": [
-      "4.0.10",
-      "4.0.0"
+      "4.0.0",
+      "4.0.10"
     ],
     "System.Globalization": [
       "4.0.10",
@@ -113,8 +114,8 @@
     ],
     "System.Linq.Parallel": "4.0.0",
     "System.Net.Http": [
-      "4.1.0",
-      "4.0.0"
+      "4.0.0",
+      "4.1.0"
     ],
     "System.Net.NetworkInformation": "4.0.0",
     "System.Net.Primitives": [
@@ -124,16 +125,16 @@
       "4.0.11"
     ],
     "System.Net.Requests": [
-      "4.0.0",
-      "3.9.0"
+      "3.9.0",
+      "4.0.0"
     ],
     "System.Net.Sockets": "4.1.0",
     "System.Net.TestData": "1.0.0-prerelease",
     "System.Net.WebHeaderCollection": "4.0.0",
     "System.Net.WebSockets": "4.0.0",
     "System.Numerics.Vectors": [
-      "4.1.0",
-      "4.0.0"
+      "4.0.0",
+      "4.1.0"
     ],
     "System.ObjectModel": [
       "4.0.10",
@@ -150,8 +151,8 @@
     "System.Reflection.Emit.ILGeneration": "4.0.0",
     "System.Reflection.Emit.Lightweight": "4.0.0",
     "System.Reflection.Extensions": [
-      "4.0.1",
-      "4.0.0"
+      "4.0.0",
+      "4.0.1"
     ],
     "System.Reflection.Primitives": "4.0.0",
     "System.Reflection.TypeExtensions": "4.0.0",
@@ -182,13 +183,13 @@
     ],
     "System.Runtime.Numerics": "4.0.0",
     "System.Runtime.Serialization.Primitives": [
-      "4.0.0",
-      "4.1.1"
+      "4.1.1",
+      "4.0.0"
     ],
     "System.Runtime.Serialization.Xml": "4.0.0",
     "System.Runtime.WindowsRuntime": [
-      "4.0.0",
-      "4.0.10"
+      "4.0.10",
+      "4.0.0"
     ],
     "System.Security.AccessControl": "4.0.0",
     "System.Security.Claims": "4.0.0",
@@ -214,8 +215,8 @@
       "4.0.10"
     ],
     "System.Threading": [
-      "4.0.0",
       "4.0.10",
+      "4.0.0",
       "4.0.11"
     ],
     "System.Threading.Overlapped": "4.0.0",
@@ -245,7 +246,6 @@
     "Microsoft.NETCore.Runtime.CoreCLR": "1.1.0-beta-24430-01",
     "Microsoft.NETCore.Targets": "4.3.0-beta-24430-01",
     "Microsoft.NETCore.TestHost": "1.1.0-beta-24430-01",
-    "Microsoft.Private.Intellisense": "1.0.0-beta-24430-00",
     "Microsoft.TargetingPack.Private.CoreCLR": "1.1.0-beta-24430-01",
     "Microsoft.Win32.Primitives": "4.3.0-beta-24430-01",
     "Microsoft.Win32.Registry": "4.3.0-beta-24430-01",
@@ -345,8 +345,8 @@
     "System.Xml.XPath": "4.3.0-beta-24430-01"
   },
   "toolset": {
-    "Microsoft.DotNet.BuildTools": "1.0.26-prerelease-00726-03",
-    "Microsoft.DotNet.BuildTools.RepoUtils": "1.0.0-prerelease-00726-03",
-    "test-runtime": null
+    "Microsoft.DotNet.BuildTools": "1.0.26-prerelease-00731-0",
+    "Microsoft.DotNet.BuildTools.RepoUtils": "1.0.0-prerelease-00731-0",
+    "test-runtime": "0.0.0.0"
   }
 }
