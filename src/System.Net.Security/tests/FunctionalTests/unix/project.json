@@ -29,13 +29,9 @@
     "Microsoft.DotNet.BuildTools.TestSuite": "1.0.0-prerelease-00731-01"
   },
   "frameworks": {
-    "netstandard1.3": {}
+    "netstandard1.6": {}
   },
   "supports": {
-    "coreFx.Test.netcoreapp1.0": {},
-    "coreFx.Test.net46": {},
-    "coreFx.Test.net461": {},
-    "coreFx.Test.net462": {},
-    "coreFx.Test.net463": {}
+    "coreFx.Test.netcoreapp1.1": {}
   }
 }
