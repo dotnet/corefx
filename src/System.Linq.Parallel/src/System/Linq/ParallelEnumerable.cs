@@ -4390,20 +4390,27 @@ namespace System.Linq
             QuerySettings settings = leftOp.SpecifiedQuerySettings.Merge(rightOp.SpecifiedQuerySettings)
                 .WithDefaults()
                 .WithPerExecutionSettings(new CancellationTokenSource(), new System.Linq.Parallel.Shared<bool>(false));
+            
+            // If an operator is from "data" - ie, Enumerable.AsParallel() - it will usually wrap exceptions (w/ AggregateException)
+            // by the indirection present in QueryExecutionOption.GetEnumerator().
+            bool firstBare = leftOp is ScanQueryOperator<TSource>;
+            bool secondBare = rightOp is ScanQueryOperator<TSource>;
 
             // If first.GetEnumerator throws an exception, we don't want to wrap it with an AggregateException.
-            IEnumerator<TSource> e1 = first.GetEnumerator();
+            IEnumerator<TSource> e1 = new QueryExecutionOption<TSource>(leftOp, rightOp.SpecifiedQuerySettings).GetEnumerator();
             try
             {
+                bool firstThrew = false;
+                bool secondThrew = false;
                 // If second.GetEnumerator throws an exception, we don't want to wrap it with an AggregateException.
-                IEnumerator<TSource> e2 = second.GetEnumerator();
+                IEnumerator<TSource> e2 = new QueryExecutionOption<TSource>(rightOp, leftOp.SpecifiedQuerySettings).GetEnumerator();
                 try
                 {
-                    while (e1.MoveNext())
+                    while (MoveNextOrMark(e1, ref firstThrew))
                     {
-                        if (!(e2.MoveNext() && comparer.Equals(e1.Current, e2.Current))) return false;
+                        if (!(MoveNextOrMark(e2, ref secondThrew) && comparer.Equals(e1.Current, e2.Current))) return false;
                     }
-                    if (e2.MoveNext()) return false;
+                    if (MoveNextOrMark(e2, ref secondThrew)) return false;
                 }
 #if SUPPORT_THREAD_ABORT
                 catch (ThreadAbortException)
@@ -4414,26 +4421,47 @@ namespace System.Linq
 #endif
                 catch (Exception ex)
                 {
+                    if ((firstThrew && firstBare) || (secondThrew && secondBare) && ex is AggregateException)
+                    {
+                        throw ex;
+                    }
                     ExceptionAggregator.ThrowOCEorAggregateException(ex, settings.CancellationState);
                 }
                 finally
                 {
-                    DisposeEnumerator<TSource>(e2, settings.CancellationState);
+                    DisposeEnumerator<TSource>(e2, settings.CancellationState, secondBare);
                 }
             }
             finally
             {
-                DisposeEnumerator<TSource>(e1, settings.CancellationState);
+                DisposeEnumerator<TSource>(e1, settings.CancellationState, firstBare);
             }
 
             return true;
         }
 
         /// <summary>
-        /// A helper method for SequenceEqual to dispose an enumerator. If an exception is thrown by the disposal, 
-        /// it gets wrapped into an AggregateException, unless it is an OCE with the query's CancellationToken.
+        /// Move the enumerator to the next element, setting a flag if it threw an exception.
         /// </summary>
-        private static void DisposeEnumerator<TSource>(IEnumerator<TSource> e, CancellationState cancelState)
+        private static bool MoveNextOrMark<TSource>(IEnumerator<TSource> e, ref bool threw)
+        {
+            try
+            {
+                return e.MoveNext();
+            }
+            catch (Exception)
+            {
+                threw = true;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// A helper method for SequenceEqual to dispose an enumerator. If an exception is thrown by the disposal, 
+        /// it gets wrapped into an AggregateException, unless it is an OCE with the query's CancellationToken,
+        /// or the enumerator is over a "data" element, in which case it will have already been wrapped.
+        /// </summary>
+        private static void DisposeEnumerator<TSource>(IEnumerator<TSource> e, CancellationState cancelState, bool bare)
         {
             try
             {
@@ -4448,6 +4476,10 @@ namespace System.Linq
 #endif
             catch (Exception ex)
             {
+                if (bare && ex is AggregateException)
+                {
+                    throw ex;
+                }
                 ExceptionAggregator.ThrowOCEorAggregateException(ex, cancelState);
             }
         }
