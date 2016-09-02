@@ -1843,28 +1843,28 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     [Fact]
     public static void XmlSchemaTest()
     {
-        XmlSchemas schemas = new XmlSchemas();
-        XmlSchemaExporter exporter = new XmlSchemaExporter(schemas);
+        var schemas = new XmlSchemas();
+        var exporter = new XmlSchemaExporter(schemas);
         //Import the type as an XML mapping
         XmlTypeMapping originalmapping = new XmlReflectionImporter().ImportTypeMapping(typeof(Dog));
         //Export the XML mapping into schemas
         exporter.ExportTypeMapping(originalmapping);
         //Print out the schemas
-        XmlSchemaEnumerator schemaEnumerator = new XmlSchemaEnumerator(schemas);
-        MemoryStream ms = new MemoryStream();
-        string expected = "<?xml version=\"1.0\"?>\r\n<xs:schema elementFormDefault=\"qualified\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\r\n  <xs:element name=\"Dog\" nillable=\"true\" type=\"Dog\" />\r\n  <xs:complexType name=\"Dog\">\r\n    <xs:complexContent mixed=\"false\">\r\n      <xs:extension base=\"Animal\">\r\n        <xs:sequence>\r\n          <xs:element minOccurs=\"1\" maxOccurs=\"1\" name=\"breed\" type=\"DogBreed\" />\r\n        </xs:sequence>\r\n      </xs:extension>\r\n    </xs:complexContent>\r\n  </xs:complexType>\r\n  <xs:complexType name=\"Animal\">\r\n    <xs:sequence>\r\n      <xs:element minOccurs=\"1\" maxOccurs=\"1\" name=\"age\" type=\"xs:int\" />\r\n      <xs:element minOccurs=\"0\" maxOccurs=\"1\" name=\"name\" type=\"xs:string\" />\r\n    </xs:sequence>\r\n  </xs:complexType>\r\n  <xs:simpleType name=\"DogBreed\">\r\n    <xs:restriction base=\"xs:string\">\r\n      <xs:enumeration value=\"GermanShepherd\" />\r\n      <xs:enumeration value=\"LabradorRetriever\" />\r\n    </xs:restriction>\r\n  </xs:simpleType>\r\n</xs:schema>";
-        while (schemaEnumerator.MoveNext())
-        {
-            schemaEnumerator.Current.Write(ms);
-            ms.Position = 0;
-            string actualOutput = new StreamReader(ms).ReadToEnd();
-            Utils.CompareResult result = Utils.Compare(expected, actualOutput);
-            Assert.True(result.Equal, string.Format("{1}{0}Test failed for wrong output from schema: {0}Expected: {2}{0}Actual: {3}",
-                    Environment.NewLine, result.ErrorMessage, expected, actualOutput));
-        }
-
-        schemas.Compile((o, args) => ValidationEventHandle(o, args), true);
-        XmlSchemaImporter importer = new XmlSchemaImporter(schemas);
+        var schemaEnumerator = new XmlSchemaEnumerator(schemas);
+        var ms = new MemoryStream();
+        string baseline = "<?xml version=\"1.0\"?>\r\n<xs:schema elementFormDefault=\"qualified\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\r\n  <xs:element name=\"Dog\" nillable=\"true\" type=\"Dog\" />\r\n  <xs:complexType name=\"Dog\">\r\n    <xs:complexContent mixed=\"false\">\r\n      <xs:extension base=\"Animal\">\r\n        <xs:sequence>\r\n          <xs:element minOccurs=\"1\" maxOccurs=\"1\" name=\"breed\" type=\"DogBreed\" />\r\n        </xs:sequence>\r\n      </xs:extension>\r\n    </xs:complexContent>\r\n  </xs:complexType>\r\n  <xs:complexType name=\"Animal\">\r\n    <xs:sequence>\r\n      <xs:element minOccurs=\"1\" maxOccurs=\"1\" name=\"age\" type=\"xs:int\" />\r\n      <xs:element minOccurs=\"0\" maxOccurs=\"1\" name=\"name\" type=\"xs:string\" />\r\n    </xs:sequence>\r\n  </xs:complexType>\r\n  <xs:simpleType name=\"DogBreed\">\r\n    <xs:restriction base=\"xs:string\">\r\n      <xs:enumeration value=\"GermanShepherd\" />\r\n      <xs:enumeration value=\"LabradorRetriever\" />\r\n    </xs:restriction>\r\n  </xs:simpleType>\r\n</xs:schema>";
+        schemaEnumerator.MoveNext();
+        schemaEnumerator.Current.Write(ms);
+        ms.Position = 0;
+        string actualOutput = new StreamReader(ms).ReadToEnd();
+        Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
+        Assert.True(result.Equal, string.Format("{1}{0}Test failed for wrong output from schema: {0}Expected: {2}{0}Actual: {3}",
+                Environment.NewLine, result.ErrorMessage, baseline, actualOutput));
+        Assert.False(schemaEnumerator.MoveNext());
+        schemas.Compile((o, args) => {
+            throw new InvalidOperationException(string.Format("{1}{0} Test failed because schema compile failed", Environment.NewLine, args.Message));
+        }, true);
+        var importer = new XmlSchemaImporter(schemas);
         ////Import the schema element back into an XML mapping
         XmlTypeMapping newmapping = importer.ImportTypeMapping(new XmlQualifiedName(originalmapping.ElementName, originalmapping.Namespace));
         Assert.NotNull(newmapping);
@@ -1877,31 +1877,16 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     [Fact]
     public static void XmlSerializerFactoryTest()
     {
-        string expected = "<?xml version=\"1.0\"?>\r\n<Dog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <age>5</age>\r\n  <name>Bear</name>\r\n  <breed>GermanShepherd</breed>\r\n</Dog>";
-        XmlSerializerFactory xsf = new XmlSerializerFactory(); ;
-        XmlSerializer xs = xsf.CreateSerializer(typeof(Dog));
-        using (MemoryStream ms = new MemoryStream())
-        {
-            Dog dog1 = new Dog() { name = "Bear", age = 5, breed = DogBreed.GermanShepherd };
-            xs.Serialize(ms, dog1);
-            ms.Position = 0;
-            StreamReader sr = new StreamReader(ms);
-            string actualOutput = sr.ReadToEnd();
-            Utils.CompareResult result = Utils.Compare(expected, actualOutput);
-            Assert.True(result.Equal, string.Format("{1}{0}Test failed: {0}Expected: {2}{0}Actual: {3}",
-                    Environment.NewLine, result.ErrorMessage, expected, actualOutput));
-            ms.Position = 0;
-            Dog dog2 = (Dog)xs.Deserialize(ms);
-            Assert.Equal(dog1.name, dog2.name);
-            Assert.Equal(dog1.age, dog2.age);
-            Assert.Equal(dog1.breed, dog2.breed);
-        }
+        string baseline = "<?xml version=\"1.0\"?>\r\n<Dog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <age>5</age>\r\n  <name>Bear</name>\r\n  <breed>GermanShepherd</breed>\r\n</Dog>";
+        var xsf = new XmlSerializerFactory();
+        Func<XmlSerializer> serializerfunc = () => xsf.CreateSerializer(typeof(Dog));
+        var dog1 = new Dog() { name = "Bear", age = 5, breed = DogBreed.GermanShepherd };
+        var dog2 = SerializeAndDeserialize(dog1, baseline, serializerfunc, true);
+        Assert.Equal(dog1.name, dog2.name);
+        Assert.Equal(dog1.age, dog2.age);
+        Assert.Equal(dog1.breed, dog2.breed);
     }
 
-    private static void ValidationEventHandle(object sender, ValidationEventArgs args)
-    {
-        throw new InvalidOperationException(string.Format("{1}{0} Test failed because schema compile failed", Environment.NewLine, args.Message));
-    }
     private static T SerializeAndDeserialize<T>(T value, string baseline, Func<XmlSerializer> serializerFactory = null,
         bool skipStringCompare = false, XmlSerializerNamespaces xns = null)
     {

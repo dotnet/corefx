@@ -3205,13 +3205,13 @@ public class CollectionOfTypeWithNonDefaultNamcespace : List<TypeWithNonDefaultN
 
 public class Animal
 {
-    public int age = 4;
-    public string name = "Rusky";
+    public int age;
+    public string name;
 }
 
 public class Dog : Animal
 {
-    public DogBreed breed = DogBreed.LabradorRetriever;
+    public DogBreed breed;
 }
 
 public enum DogBreed
