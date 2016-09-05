@@ -519,7 +519,7 @@ namespace System.Tests
         [Fact]
         public static void GetValue_SetValue()
         {
-            var intArray = new int[3] { 7, 8, 9 };
+            var intArray = new int[] { 7, 8, 9 };
             Array array = intArray;
 
             Assert.Equal(7, array.GetValue(0));
@@ -556,6 +556,18 @@ namespace System.Tests
 
             Assert.Throws<IndexOutOfRangeException>(() => new int[10, 8].GetValue(new int[] { 1, -1 })); // Indices[1] < 0
             Assert.Throws<IndexOutOfRangeException>(() => new int[10, 8].GetValue(new int[] { 1, 9 })); // Indices[1] > array.GetLength(1)
+        }
+
+        [Fact]
+        public static unsafe void GetValue_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => new int*[2].GetValue(0));
+        }
+
+        [Fact]
+        public static unsafe void SetValue_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => new int*[2].SetValue(null, 0));
         }
 
         [Theory]
@@ -955,23 +967,59 @@ namespace System.Tests
             Assert.Throws<ArgumentException>("", () => new int[3].CopyTo(new int[10], 10)); // Index > destination.Length
         }
 
-        public static unsafe IEnumerable<object[]> CreateInstance_TestData() => new object[][]
+        public static unsafe IEnumerable<object[]> CreateInstance_TestData()
         {
-            // String
-            new object[] { typeof(string), new int[] { 10 }, new int[1], null },
-            new object[] { typeof(string), new int[] { 0 }, new int[1], null },
-            
-            // Int32
-            new object[] { typeof(int), new int[] { 10 }, new int[1], 0 },
-            new object[] { typeof(int), new int[] { 0 }, new int[1], 0 },
-            new object[] { typeof(int), new int[] { 1, 2 }, new int[2], 0 },
-            new object[] { typeof(int), new int[] { 1, 2, 3 }, new int[3], 0 },
-            new object[] { typeof(int), new int[] { 1, 2, 3, 4 }, new int[4], 0 },
-            new object[] { typeof(int), new int[] { 7, 8, 9 }, new int[] { 1, 2, 3 }, 0 },
-        };
-        
+            return new object[][]
+            {
+                // Primitives
+                new object[] { typeof(string), default(string) },
+                new object[] { typeof(sbyte), default(sbyte) },
+                new object[] { typeof(byte), default(byte) },
+                new object[] { typeof(short), default(short) },
+                new object[] { typeof(ushort), default(ushort) },
+                new object[] { typeof(int), default(int) },
+                new object[] { typeof(uint), default(uint) },
+                new object[] { typeof(long), default(long) },
+                new object[] { typeof(ulong), default(ulong) },
+                new object[] { typeof(char), default(char) },
+                new object[] { typeof(bool), default(bool) },
+                new object[] { typeof(float), default(float) },
+                new object[] { typeof(double), default(double) },
+                new object[] { typeof(IntPtr), default(IntPtr) },
+                new object[] { typeof(UIntPtr), default(UIntPtr) },
+
+                // Array, pointers
+                new object[] { typeof(int[]), default(int[]) },
+                new object[] { typeof(int*), null },
+
+                // Classes, structs, interfaces, enums
+                new object[] { typeof(NonGenericClass), default(NonGenericClass) },
+                new object[] { typeof(GenericClass<int>), default(GenericClass<int>) },
+                new object[] { typeof(NonGenericStruct), default(NonGenericStruct) },
+                new object[] { typeof(GenericStruct<int>), default(GenericStruct<int>) },
+                new object[] { typeof(NonGenericInterface), default(NonGenericInterface) },
+                new object[] { typeof(GenericInterface<int>), default(GenericInterface<int>) },
+                new object[] { typeof(AbstractClass), default(AbstractClass) },
+                new object[] { typeof(StaticClass), default(StaticClass) },
+                new object[] { typeof(SimpleEnum), default(SimpleEnum) }
+            };
+        }
+
         [Theory]
         [MemberData(nameof(CreateInstance_TestData))]
+        public static void CreateInstance(Type elementType, object repeatedValue)
+        {
+            CreateInstance(elementType, new int[] { 10 }, new int[1], repeatedValue);
+            CreateInstance(elementType, new int[] { 0 }, new int[1], repeatedValue);
+            CreateInstance(elementType, new int[] { 1, 2 }, new int[] { 1, 2 }, repeatedValue);
+            CreateInstance(elementType, new int[] { 5, 6 }, new int[] { int.MinValue, 0 }, repeatedValue);
+        }
+        
+        [Theory]
+        [InlineData(typeof(int), new int[] { 1, 2 }, new int[] { 0, 0 }, default(int))]
+        [InlineData(typeof(int), new int[] { 1, 2, 3 }, new int[] { 0, 0, 0 }, default(int))]
+        [InlineData(typeof(int), new int[] { 1, 2, 3, 4 }, new int[] { 0, 0, 0, 0 }, default(int))]
+        [InlineData(typeof(int), new int[] { 7, 8, 9 }, new int[] { 1, 2, 3 }, default(int))]
         public static void CreateInstance(Type elementType, int[] lengths, int[] lowerBounds, object repeatedValue)
         {
             if (lowerBounds.All(lowerBound => lowerBound == 0))
@@ -999,16 +1047,18 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("elementType", () => Array.CreateInstance(null, new int[1], new int[1]));
         }
 
-        public static IEnumerable<object[]> CreateType_NotSupportedType_TestData()
+        public static IEnumerable<object[]> CreateInstance_NotSupportedType_TestData()
         {
             yield return new object[] { typeof(void) };
             yield return new object[] { typeof(int).MakeByRefType() };
             yield return new object[] { typeof(GenericClass<>) };
+            yield return new object[] { typeof(GenericClass<>).MakeGenericType(typeof(GenericClass<>)) };
+            yield return new object[] { typeof(GenericClass<>).GetTypeInfo().GetGenericArguments()[0] };
         }
 
         [Theory]
-        [MemberData(nameof(CreateType_NotSupportedType_TestData))]
-        public static void CreateType_NotSupportedType_ThrowsNotSupportedException(Type elementType)
+        [MemberData(nameof(CreateInstance_NotSupportedType_TestData))]
+        public static void CreateInstance_NotSupportedType_ThrowsNotSupportedException(Type elementType)
         {
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(elementType, 0));
             Assert.Throws<NotSupportedException>(() => Array.CreateInstance(elementType, new int[1]));
@@ -1016,7 +1066,7 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void CreateType_NegativeLength_ThrowsArgumentOutOfRangeException()
+        public static void CreateInstance_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
             Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.CreateInstance(typeof(int), -1));
             Assert.Throws<ArgumentOutOfRangeException>("lengths[0]", () => Array.CreateInstance(typeof(int), new int[] { -1 }));
@@ -1024,7 +1074,7 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void CreateType_TypeNotRuntimeType_ThrowsArgumentException()
+        public static void CreateInstance_TypeNotRuntimeType_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), 0));
             Assert.Throws<ArgumentException>("elementType", () => Array.CreateInstance(Helpers.NonRuntimeType(), new int[1]));
@@ -1052,6 +1102,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData(0)]
         [InlineData(2)]
         public static void CreateInstance_LengthsAndLowerBoundsHaveDifferentLengths_ThrowsArgumentException(int length)
         {
@@ -1262,6 +1313,16 @@ namespace System.Tests
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
         }
 
+        [Fact]
+        public static unsafe void GetEnumerator_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Array nonEmptyArray = new int*[2];
+            Assert.Throws<NotSupportedException>(() => { foreach (object obj in nonEmptyArray) { } });
+
+            Array emptyArray = new int*[0];
+            foreach (object obj in emptyArray) { }
+        }
+
         public static IEnumerable<object[]> IndexOf_NonGeneric_TestData()
         {
             var stringArray = new string[] { null, null, "Hello", "Hello", "Goodbye", "Goodbye", null, null };
@@ -1364,6 +1425,13 @@ namespace System.Tests
             // Start index + count > array.Length
             Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(intArray, "", intArray.Length, 1));
             Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(stringArray, "", stringArray.Length, 1));
+        }
+
+        [Fact]
+        public static unsafe void IndexOf_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => Array.IndexOf((Array)new int*[2], null));
+            Assert.Equal(-1, Array.IndexOf((Array)new int*[0], null));
         }
 
         public static IEnumerable<object[]> LastIndexOf_NonGeneric_TestData()
@@ -1483,6 +1551,13 @@ namespace System.Tests
             // Count > startIndex + 1
             Assert.Throws<ArgumentOutOfRangeException>("endIndex", () => Array.LastIndexOf(intArray, "", 2, 4));
             Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(intArray, 0, 2, 4));
+        }
+
+        [Fact]
+        public static unsafe void LastIndexOf_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => Array.LastIndexOf((Array)new int*[2], null));
+            Assert.Equal(-1, Array.LastIndexOf((Array)new int*[0], null));
         }
 
         public static IEnumerable<object[]> IStructuralComparable_TestData()
@@ -1654,6 +1729,14 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => Array.Reverse(new int[10], 10, 1));
             Assert.Throws<ArgumentException>(() => Array.Reverse(new int[10], 9, 2));
             Assert.Throws<ArgumentException>(() => Array.Reverse(new int[10], 0, 11));
+        }
+
+        [Fact]
+        public static unsafe void Reverse_ArrayOfPointers_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => Array.Reverse(new int*[2]));
+            Array.Reverse(new int*[0]);
+            Array.Reverse(new int*[1]);
         }
 
         public static IEnumerable<object[]> Sort_Array_NonGeneric_TestData()
@@ -2261,6 +2344,7 @@ namespace System.Tests
             Assert.Equal(array.Rank, array.GetType().GetArrayRank());
 
             Assert.Equal(lengths.Length, array.Rank);
+            Assert.Equal(GetLength(lengths), array.Length);
 
             for (int dimension = 0; dimension < array.Rank; dimension++)
             {
@@ -2330,10 +2414,13 @@ namespace System.Tests
             {
                 Assert.Throws<RankException>(() => iList.Contains(null));
                 Assert.Throws<RankException>(() => iList.IndexOf(null));
+                Assert.Throws<ArgumentException>(null, () => iList[0]);
+                Assert.Throws<ArgumentException>(null, () => iList[0] = 1);
             }
         }
 
         private static Array NonZeroLowerBoundArray(Array szArrayContents, int lowerBound)
+
         {
             Assert.Equal(0, szArrayContents.GetLowerBound(0));
 
@@ -2343,6 +2430,16 @@ namespace System.Tests
                 array.SetValue(szArrayContents.GetValue(i), i + lowerBound);
             }
             return array;
+        }
+
+        private static int GetLength(int[] lengths)
+        {
+            int length = 1;
+            for (int i = 0; i < lengths.Length; i++)
+            {
+                length *= lengths[i];
+            }
+            return length;
         }
 
         public enum TestEnum
@@ -2474,6 +2571,17 @@ namespace System.Tests
         private class D2 : B2 { }
         private interface I1 { }
         private interface I2 { }
+
+        public class NonGenericClass { }
+        public class GenericClass<T> { }
+        public struct NonGenericStruct { }
+        public struct GenericStruct<T> { }
+        public interface NonGenericInterface { }
+        public interface GenericInterface<T> { }
+
+        public abstract class AbstractClass { }
+        public static class StaticClass { }
+
+        public enum SimpleEnum { }
     }
-    public class GenericClass<T> { }
 }
