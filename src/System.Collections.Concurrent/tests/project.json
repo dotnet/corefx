@@ -15,6 +15,7 @@
     "System.Text.RegularExpressions": "4.3.0-beta-devapi-24506-01",
     "System.Threading": "4.3.0-beta-devapi-24506-01",
     "System.Threading.Tasks": "4.3.0-beta-devapi-24506-01",
+    "System.IO": "4.3.0-beta-devapi-24506-01",
     "test-runtime": {
       "target": "project",
       "exclude": "compile"
