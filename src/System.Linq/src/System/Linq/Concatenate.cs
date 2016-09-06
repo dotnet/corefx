@@ -24,15 +24,15 @@ namespace System.Linq
             var concatFirst = first as ConcatIterator<TSource>;
             return concatFirst != null ?
                 concatFirst.Concat(second) :
-                new Concat2Iterator<TSource>(first, second);
+                new Concat2EnumerableIterator<TSource>(first, second);
         }
 
-        private sealed class Concat2Iterator<TSource> : ConcatIterator<TSource>
+        private sealed class Concat2EnumerableIterator<TSource> : ConcatIterator<TSource>
         {
             private readonly IEnumerable<TSource> _first;
             private readonly IEnumerable<TSource> _second;
 
-            internal Concat2Iterator(IEnumerable<TSource> first, IEnumerable<TSource> second)
+            internal Concat2EnumerableIterator(IEnumerable<TSource> first, IEnumerable<TSource> second)
             {
                 Debug.Assert(first != null && second != null);
                 _first = first;
@@ -41,12 +41,12 @@ namespace System.Linq
 
             public override Iterator<TSource> Clone()
             {
-                return new Concat2Iterator<TSource>(_first, _second);
+                return new Concat2EnumerableIterator<TSource>(_first, _second);
             }
 
             internal override ConcatIterator<TSource> Concat(IEnumerable<TSource> next)
             {
-                return new ConcatNIterator<TSource>(this, next, 2);
+                return new ConcatNEnumerableIterator<TSource>(this, next, 2);
             }
 
             internal override IEnumerable<TSource> GetEnumerable(int index)
@@ -66,13 +66,13 @@ namespace System.Linq
         // only have to traverse all of the previous sources once per chained enumerable.  An
         // alternative would be to use an array to store all of the enumerables, but this has
         // a much better memory profile and without much additional run-time cost.
-        private sealed class ConcatNIterator<TSource> : ConcatIterator<TSource>
+        private sealed class ConcatNEnumerableIterator<TSource> : ConcatIterator<TSource>
         {
             private readonly ConcatIterator<TSource> _previousConcat;
             private readonly IEnumerable<TSource> _next;
             private readonly int _nextIndex;
 
-            internal ConcatNIterator(ConcatIterator<TSource> previousConcat, IEnumerable<TSource> next, int nextIndex)
+            internal ConcatNEnumerableIterator(ConcatIterator<TSource> previousConcat, IEnumerable<TSource> next, int nextIndex)
             {
                 Debug.Assert(previousConcat != null);
                 Debug.Assert(next != null);
@@ -84,20 +84,20 @@ namespace System.Linq
 
             public override Iterator<TSource> Clone()
             {
-                return new ConcatNIterator<TSource>(_previousConcat, _next, _nextIndex);
+                return new ConcatNEnumerableIterator<TSource>(_previousConcat, _next, _nextIndex);
             }
 
             internal override ConcatIterator<TSource> Concat(IEnumerable<TSource> next)
             {
                 if (_nextIndex == int.MaxValue - 2)
                 {
-                    // In the unlikely case of this many concatenations, if we produced a ConcatNIterator
+                    // In the unlikely case of this many concatenations, if we produced a ConcatNEnumerableIterator
                     // with int.MaxValue then state would overflow before it matched it's index.
                     // So we use the naïve approach of just having a left and right sequence.
-                    return new Concat2Iterator<TSource>(this, next);
+                    return new Concat2EnumerableIterator<TSource>(this, next);
                 }
 
-                return new ConcatNIterator<TSource>(this, next, _nextIndex + 1);
+                return new ConcatNEnumerableIterator<TSource>(this, next, _nextIndex + 1);
             }
 
             internal override IEnumerable<TSource> GetEnumerable(int index)
@@ -107,11 +107,11 @@ namespace System.Linq
                     return null;
                 }
 
-                // Walk back through the chain of ConcatNIterators looking for the one
+                // Walk back through the chain of ConcatNEnumerableIterators looking for the one
                 // that has its _nextIndex equal to index.  If we don't find one, then it
                 // must be prior to any of them, so call GetEnumerable on the previous
-                // Concat2Iterator.  This avoids a deep recursive call chain.
-                ConcatNIterator<TSource> current = this;
+                // Concat2EnumerableIterator.  This avoids a deep recursive call chain.
+                ConcatNEnumerableIterator<TSource> current = this;
                 while (true)
                 {
                     if (index == current._nextIndex)
@@ -119,14 +119,14 @@ namespace System.Linq
                         return current._next;
                     }
 
-                    ConcatNIterator<TSource> prevN = current._previousConcat as ConcatNIterator<TSource>;
+                    var prevN = current._previousConcat as ConcatNEnumerableIterator<TSource>;
                     if (prevN != null)
                     {
                         current = prevN;
                         continue;
                     }
 
-                    Debug.Assert(current._previousConcat is Concat2Iterator<TSource>);
+                    Debug.Assert(current._previousConcat is Concat2EnumerableIterator<TSource>);
                     Debug.Assert(index == 0 || index == 1);
                     return current._previousConcat.GetEnumerable(index);
                 }
