@@ -500,7 +500,6 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(null, () => Array.BinarySearch(new string[count], index, length, "", null));
         }
 
-
         [Theory]
         [InlineData(typeof(object), 0)]
         [InlineData(typeof(object), 2)]
@@ -781,13 +780,32 @@ namespace System.Tests
             yield return new object[] { new IEquatable<int>[] { 0, new NotInt32(), 2, 3, 4, new NotInt32(), 6, 7, 8, 9 }, 2, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, 4, 0xcc, 0xcc } };
 
             yield return new object[] { new object[] { 0, 1, 2, 3, null, 5, 6, 7, 8, 9 }, 2, new int?[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int?[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, null, 0xcc, 0xcc } };
+
+            // Struct[] -> object[]
+            G[] structArray1 = CreateStructArray();
+            yield return new object[] { structArray1.Clone(), 0, new object[5], 0, 5, structArray1.Select(g => (object)g).ToArray() };
+
+            // Struct[] -> Struct[]
+            yield return new object[] { structArray1.Clone(), 0, new G[5], 0, 5, structArray1 };
+
+            // Struct[] overlaps
+            G[] structArray2 = CreateStructArray();
+            G[] overlappingStructArrayExpected = new G[]
+            {
+                new G { x = 1, s = "Hello1", z = 2 },
+                new G { x = 2, s = "Hello2", z = 3 },
+                new G { x = 2, s = "Hello2", z = 3 },
+                new G { x = 3, s = "Hello3", z = 4 },
+                new G { x = 4, s = "Hello4", z = 5 }
+            };
+            yield return new object[] { structArray2, 1, structArray2, 2, 3, overlappingStructArrayExpected };
         }
 
         [Theory]
         [MemberData(nameof(Copy_TestData))]
         public static void Copy(Array sourceArray, int sourceIndex, Array destinationArray, int destinationIndex, int length, Array expected)
         {
-            if (sourceIndex == 0 && destinationIndex == 0)
+            if (sourceIndex == sourceArray.GetLowerBound(0) && destinationIndex == destinationArray.GetLowerBound(0))
             {
                 // Use Copy(Array, Array, int)
                 Array testArray = (Array)sourceArray.Clone();
@@ -799,135 +817,106 @@ namespace System.Tests
             Assert.Equal(expected, destinationArray);
         }
 
-        [Fact]
-        public static void Copy_ValueTypeArray_ToObjectArray()
+        private static G[] CreateStructArray()
         {
-            var src = new G[]
+            return new G[]
             {
-            new G { x = 1, s = "Hello1", z = 2 },
-            new G { x = 2, s = "Hello2", z = 3 },
-            new G { x = 3, s = "Hello3", z = 4 },
-            new G { x = 4, s = "Hello4", z = 5 },
-            new G { x = 5, s = "Hello5", z = 6 }
+                new G { x = 1, s = "Hello1", z = 2 },
+                new G { x = 2, s = "Hello2", z = 3 },
+                new G { x = 3, s = "Hello3", z = 4 },
+                new G { x = 4, s = "Hello4", z = 5 },
+                new G { x = 5, s = "Hello5", z = 6 }
             };
+        }
 
-            var dst = new object[5];
-            Array.Copy(src, 0, dst, 0, 5);
-            for (int i = 0; i < dst.Length; i++)
+        [Fact]
+        public static void Copy_NullSourceArray_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("sourceArray", () => Array.Copy(null, new string[10], 0));
+            Assert.Throws<ArgumentNullException>("source", () => Array.Copy(null, 0, new string[10], 0, 0));
+        }
+
+        [Fact]
+        public static void Copy_NullDestinationArray_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("destinationArray", () => Array.Copy(new string[10], null, 0));
+            Assert.Throws<ArgumentNullException>("dest", () => Array.Copy(new string[10], 0, null, 0, 0));
+        }
+
+        [Fact]
+        public static void Copy_SourceAndDestinationArrayHaveDifferentRanks_ThrowsRankException()
+        {
+            Assert.Throws<RankException>(() => Array.Copy(new string[10, 10], new string[10], 0));
+            Assert.Throws<RankException>(() => Array.Copy(new string[10, 10], 0, new string[10], 0, 0));
+        }
+
+        public static IEnumerable<object[]> Copy_SourceAndDestinationArrayHoldDifferentTypes_TestData()
+        {
+            yield return new object[] { new string[10], new int[10] };
+            yield return new object[] { new int[10], new IEnumerable<int>[10] };
+        }
+
+        [Theory]
+        [MemberData(nameof(Copy_SourceAndDestinationArrayHoldDifferentTypes_TestData))]
+        public static void Copy_SourceAndDestinationArrayHoldDifferentTypes_ThrowsArrayTypeMismatchException(Array sourceArray, Array destinationArray)
+        {
+            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(sourceArray, destinationArray, 0));
+        }
+
+        public static IEnumerable<object[]> Copy_SourceAndDestinationArrayHaveUnconvertibleTypes_TestData()
+        {
+            yield return new object[] { new object[] { "1" }, 0, new int[1], 0, 1 };
+
+            IEquatable<int>[] interfaceArray1 = new IEquatable<int>[10] { 0, 0, 0, 0, new NotInt32(), 0, 0, 0, 0, 0 };
+            yield return new object[] { interfaceArray1, 2, new int[10], 5, 3 };
+
+            IEquatable<int>[] interfaceArray2 = new IEquatable<int>[10] { 0, 0, 0, 0, new NotInt32(), 0, 0, 0, 0, 0 };
+            yield return new object[] { interfaceArray2, 2, new int[10], 5, 3 };
+        }
+
+        [Theory]
+        [MemberData(nameof(Copy_SourceAndDestinationArrayHaveUnconvertibleTypes_TestData))]
+        public static void Copy_SourceAndDestinationArrayHaveUnconvertibleTypes_ThrowsInvalidCastException(Array sourceArray, int sourceIndex, Array destinationArray, int destinationIndex, int length)
+        {
+            if (sourceIndex == 0 && destinationIndex == 0)
             {
-                Assert.True(dst[i] is G);
-                G g = (G)dst[i];
-                Assert.Equal(src[i].x, g.x);
-                Assert.Equal(src[i].s, g.s);
-                Assert.Equal(src[i].z, g.z);
             }
+            Assert.Throws<InvalidCastException>(() => Array.Copy(sourceArray, sourceIndex, destinationArray, destinationIndex, length));
         }
 
         [Fact]
-        public static void Copy_Struct_WithReferenceAndValueTypeFields_Array()
+        public static void Copy_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
-            var src = new G[]
-            {
-            new G { x = 1, s = "Hello1", z = 2 },
-            new G { x = 2, s = "Hello2", z = 3 },
-            new G { x = 3, s = "Hello3", z = 4 },
-            new G { x = 4, s = "Hello4", z = 5 },
-            new G { x = 5, s = "Hello5", z = 6 }
-            };
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Copy(new string[10], new string[10], -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Copy(new string[10], 0, new string[10], 0, -1));
+        }
 
-            var dst = new G[5];
-            Array.Copy(src, 0, dst, 0, 5);
-            for (int i = 0; i < dst.Length; i++)
+        [Theory]
+        [InlineData(8, 0, 10, 0, 9)]
+        [InlineData(8, 8, 10, 0, 1)]
+        [InlineData(8, 9, 10, 0, 0)]
+        [InlineData(10, 0, 8, 0, 9)]
+        [InlineData(10, 0, 8, 8, 1)]
+        [InlineData(10, 0, 8, 9, 0)]
+        public static void Copy_IndexPlusLengthGreaterThanArrayLength_ThrowsArgumentException(int sourceCount, int sourceIndex, int destinationCount, int destinationIndex, int count)
+        {
+            if (sourceIndex == 0 && destinationIndex == 0)
             {
-                Assert.Equal(src[i].x, dst[i].x);
-                Assert.Equal(src[i].s, dst[i].s);
-                Assert.Equal(src[i].z, dst[i].z);
+                Assert.Throws<ArgumentException>("", () => Array.Copy(new string[sourceCount], new string[destinationCount], count));
             }
-
-            // With overlap
-            Array.Copy(src, 1, src, 2, 3);
-            Assert.Equal(1, src[0].x);
-            Assert.Equal("Hello1", src[0].s);
-            Assert.Equal(2, src[0].z);
-
-            Assert.Equal(2, src[1].x);
-            Assert.Equal("Hello2", src[1].s);
-            Assert.Equal(3, src[1].z);
-
-            Assert.Equal(2, src[2].x);
-            Assert.Equal("Hello2", src[2].s);
-            Assert.Equal(3, src[2].z);
-
-            Assert.Equal(3, src[3].x);
-            Assert.Equal("Hello3", src[3].s);
-            Assert.Equal(4, src[3].z);
-
-            Assert.Equal(4, src[4].x);
-            Assert.Equal("Hello4", src[4].s);
-            Assert.Equal(5, src[4].z);
+            Assert.Throws<ArgumentException>("", () => Array.Copy(new string[sourceCount], sourceIndex, new string[destinationCount], destinationIndex, count));
         }
 
         [Fact]
-        public static void Copy_Invalid()
+        public static void Copy_StartIndexNegative_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(new int[10], 0, new IEnumerable<int>[10], 0, 10)); // Different array types
-            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(new string[10], 0, new int[10], 0, 10)); // Different array types
-
-            Assert.Throws<InvalidCastException>(() =>
-            {
-                IEquatable<int>[] sourceArray = new IEquatable<int>[10];
-                sourceArray[4] = new NotInt32();
-                int[] destinationArray = new int[10];
-            // Legacy: Note that the cast checks are done during copying, so some elements in the destination
-            // array may already have been overwritten.
-            Array.Copy(sourceArray, 2, destinationArray, 5, 3);
-            });
-
-            Assert.Throws<InvalidCastException>(() =>
-            {
-                IEquatable<int>[] sourceArray = new IEquatable<int>[10];
-                sourceArray[4] = null;
-                int[] destinationArray = new int[10];
-            // Legacy: Note that the cast checks are done during copying, so some elements in the destination
-            // array may already have been overwritten.
-            Array.Copy(sourceArray, 2, destinationArray, 5, 3);
-            });
+            Assert.Throws<ArgumentOutOfRangeException>("srcIndex", () => Array.Copy(new string[10], -1, new string[10], 0, 0));
         }
 
         [Fact]
-        public static void Copy_Array_Array_Int_Invalid()
+        public static void Copy_DestinationIndexNegative_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentNullException>("sourceArray", () => Array.Copy(null, new string[10], 0)); // Source array is null
-            Assert.Throws<ArgumentNullException>("destinationArray", () => Array.Copy(new string[10], null, 0)); // Destination array is null
-
-            Assert.Throws<RankException>(() => Array.Copy(new string[10, 10], new string[10], 0)); // Source and destination arrays have different ranks
-            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(new string[10], new int[10], 0)); // Source and destination arrays hold different types
-            Assert.Throws<InvalidCastException>(() => Array.Copy(new object[] { "1" }, new int[1], 1)); // Source and destination arrays hold uncovertible types
-
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Copy(new string[10], new string[10], -1)); // Length < 0
-            Assert.Throws<ArgumentException>("", () => Array.Copy(new string[8], new string[10], 9)); // Length > sourceArray.Length
-            Assert.Throws<ArgumentException>("", () => Array.Copy(new string[10], new string[8], 9)); // Length > destinationArray.Length
-        }
-
-        [Fact]
-        public static void Copy_Array_Int_Array_Int_Int_Invalid()
-        {
-            Assert.Throws<ArgumentNullException>("source", () => Array.Copy(null, 0, new string[10], 0, 0)); // Source array is null
-            Assert.Throws<ArgumentNullException>("dest", () => Array.Copy(new string[10], 0, null, 0, 0)); // Destination array is null            
-
-            Assert.Throws<RankException>(() => Array.Copy(new string[10, 10], 0, new string[10], 0, 0)); // Source and destination arrays have different ranks
-            Assert.Throws<ArrayTypeMismatchException>(() => Array.Copy(new string[10], 0, new int[10], 0, 0)); // Source and destination arrays hold different types
-            Assert.Throws<InvalidCastException>(() => Array.Copy(new object[] { "1" }, 0, new int[1], 0, 1)); // Source and destination arrays hold uncovertible types
-
-            Assert.Throws<ArgumentOutOfRangeException>("srcIndex", () => Array.Copy(new string[10], -1, new string[10], 0, 0)); // Start index < 0
-            Assert.Throws<ArgumentException>("", () => Array.Copy(new string[8], 9, new string[10], 0, 0)); // Start index + length > sourceArray.Length
-            Assert.Throws<ArgumentException>("", () => Array.Copy(new string[8], 8, new string[10], 0, 1)); // Start index + length> sourceArray.Length
-
-            Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => Array.Copy(new string[10], 0, new string[10], -1, 0)); // Destination index < 0
-            Assert.Throws<ArgumentException>("", () => Array.Copy(new string[10], 0, new string[8], 9, 0)); // Destination index > destinationArray.Length
-            Assert.Throws<ArgumentException>("", () => Array.Copy(new string[10], 0, new string[8], 8, 1)); // Destination index > destinationArray.Length
-
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => Array.Copy(new string[10], 0, new string[10], 0, -1)); // Length < 0
+            Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => Array.Copy(new string[10], 0, new string[10], -1, 0));
         }
 
         public static IEnumerable<object[]> CopyTo_TestData()
@@ -2454,6 +2443,18 @@ namespace System.Tests
             public int x;
             public string s;
             public int z;
+
+            public override bool Equals(object obj)
+            {
+                if (!(obj is G))
+                {
+                    return false;
+                }
+                G other = (G)obj;
+                return x == other.x && s == other.s && z == other.z; 
+            }
+
+            public override int GetHashCode() => x.GetHashCode() ^ z.GetHashCode();
         }
 
         private class IntegerComparer : IComparer, IComparer<int>, IEqualityComparer
