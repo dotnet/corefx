@@ -15,12 +15,16 @@ __PROJECT_JSON_FILE=$__PROJECT_JSON_PATH/project.json
 __PROJECT_JSON_CONTENTS="{ \"dependencies\": { \"Microsoft.DotNet.BuildTools\": \"$__BUILD_TOOLS_PACKAGE_VERSION\" }, \"frameworks\": { \"netcoreapp1.0\": { } } }"
 __INIT_TOOLS_DONE_MARKER=$__PROJECT_JSON_PATH/done
 
-# Modified platform detection logic from dotnet/cli/scripts/obtain/dotnet-install.sh 16692fc
+# Extended version of platform detection logic from dotnet/cli/scripts/obtain/dotnet-install.sh 16692fc
 get_current_linux_name() {
     # Detect Distro
     if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
         if [ "$(cat /etc/*-release | grep -cim1 16.04)" -eq 1 ]; then
             echo "ubuntu.16.04"
+            return 0
+        fi
+        if [ "$(cat /etc/*-release | grep -cim1 16.10)" -eq 1 ]; then
+            echo "ubuntu.16.10"
             return 0
         fi
 
@@ -40,9 +44,17 @@ get_current_linux_name() {
             echo "fedora.23"
             return 0
         fi
+        if [ "$(cat /etc/*-release | grep -cim1 24)" -eq 1 ]; then
+            echo "fedora.24"
+            return 0
+        fi
     elif [ "$(cat /etc/*-release | grep -cim1 opensuse)" -eq 1 ]; then
         if [ "$(cat /etc/*-release | grep -cim1 13.2)" -eq 1 ]; then
             echo "opensuse.13.2"
+            return 0
+        fi
+        if [ "$(cat /etc/*-release | grep -cim1 42.1)" -eq 1 ]; then
+            echo "opensuse.42.1"
             return 0
         fi
     fi
