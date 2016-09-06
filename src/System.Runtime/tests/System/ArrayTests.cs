@@ -130,235 +130,220 @@ namespace System.Tests
             Assert.Equal(array.GetValue(0, 0, 0, 2), 3);
         }
 
-        public static IEnumerable<object[]> BinarySearch_TestData()
+        public static IEnumerable<object[]> BinarySearch_SZArray_TestData()
         {
             string[] stringArray = new string[] { null, "aa", "bb", "bb", "cc", "dd", "ee" };
-            string stringDummy = "";
 
-            yield return new object[] { stringArray, 0, 7, "bb", null, 3, stringDummy };
-            yield return new object[] { stringArray, 0, 7, "ee", null, 6, stringDummy };
-            yield return new object[] { stringArray, 0, 7, null, null, 0, stringDummy };
+            yield return new object[] { stringArray, 0, 7, "bb", null, 3 };
+            yield return new object[] { stringArray, 0, 7, "ee", null, 6 };
             
-            yield return new object[] { stringArray, 3, 4, "bb", null, 3, stringDummy };
-            yield return new object[] { stringArray, 4, 3, "bb", null, -5, stringDummy };
-            yield return new object[] { stringArray, 4, 0, "bb", null, -5, stringDummy };
+            yield return new object[] { stringArray, 3, 4, "bb", null, 3 };
+            yield return new object[] { stringArray, 4, 3, "bb", null, -5 };
+            yield return new object[] { stringArray, 4, 0, "bb", null, -5 };
 
-            yield return new object[] { stringArray, 0, 7, "bb", new StringComparer(), 3, stringDummy };
-            yield return new object[] { stringArray, 0, 7, "ee", new StringComparer(), 6, stringDummy };
-            yield return new object[] { stringArray, 0, 7, null, new StringComparer(), 0, stringDummy };
-            yield return new object[] { stringArray, 0, 7, "no-such-object", new StringComparer(), -8, stringDummy };
+            yield return new object[] { stringArray, 0, 7, "bb", new StringComparer(), 3 };
+            yield return new object[] { stringArray, 0, 7, "ee", new StringComparer(), 6 };
+            yield return new object[] { stringArray, 0, 7, "no-such-object", new StringComparer(), -8 };
 
-            yield return new object[] { new string[0], 0, 0, "", null, -1, stringDummy };
+            yield return new object[] { new string[0], 0, 0, "", null, -1 };
 
             // SByte
             sbyte[] sbyteArray = new sbyte[] { sbyte.MinValue, 0, 0, sbyte.MaxValue };
-            sbyte sbyteDummy = 0;
 
-            yield return new object[] { sbyteArray, 0, 4, sbyte.MinValue, null, 0, sbyteDummy };
-            yield return new object[] { sbyteArray, 0, 4, (sbyte)0, null, 1, sbyteDummy };
-            yield return new object[] { sbyteArray, 0, 4, sbyte.MaxValue, null, 3, sbyteDummy };
-            yield return new object[] { sbyteArray, 0, 4, (sbyte)1, null, -4, sbyteDummy };
-            yield return new object[] { sbyteArray, 0, 4, null, null, -1, sbyteDummy };
+            yield return new object[] { sbyteArray, 0, 4, sbyte.MinValue, null, 0 };
+            yield return new object[] { sbyteArray, 0, 4, (sbyte)0, null, 1 };
+            yield return new object[] { sbyteArray, 0, 4, sbyte.MaxValue, null, 3 };
+            yield return new object[] { sbyteArray, 0, 4, (sbyte)1, null, -4 };
 
-            yield return new object[] { sbyteArray, 0, 1, sbyte.MinValue, null, 0, sbyteDummy };
-            yield return new object[] { sbyteArray, 1, 3, sbyte.MaxValue, null, 3, sbyteDummy };
-            yield return new object[] { sbyteArray, 1, 3, sbyte.MinValue, null, -2, sbyteDummy };
-            yield return new object[] { sbyteArray, 1, 0, (sbyte)0, null, -2, sbyteDummy };
+            yield return new object[] { sbyteArray, 0, 1, sbyte.MinValue, null, 0 };
+            yield return new object[] { sbyteArray, 1, 3, sbyte.MaxValue, null, 3 };
+            yield return new object[] { sbyteArray, 1, 3, sbyte.MinValue, null, -2 };
+            yield return new object[] { sbyteArray, 1, 0, (sbyte)0, null, -2 };
 
-            yield return new object[] { new sbyte[0], 0, 0, (sbyte)0, null, -1, sbyteDummy };
+            yield return new object[] { new sbyte[0], 0, 0, (sbyte)0, null, -1 };
 
             // Byte
             byte[] byteArray = new byte[] { byte.MinValue, 5, 5, byte.MaxValue };
-            byte byteDummy = 0;
 
-            yield return new object[] { byteArray, 0, 4, byte.MinValue, null, 0, byteDummy };
-            yield return new object[] { byteArray, 0, 4, (byte)5, null, 1, byteDummy };
-            yield return new object[] { byteArray, 0, 4, byte.MaxValue, null, 3, byteDummy };
-            yield return new object[] { byteArray, 0, 4, (byte)1, null, -2, byteDummy };
-            yield return new object[] { byteArray, 0, 4, null, null, -1, byteDummy };
+            yield return new object[] { byteArray, 0, 4, byte.MinValue, null, 0 };
+            yield return new object[] { byteArray, 0, 4, (byte)5, null, 1 };
+            yield return new object[] { byteArray, 0, 4, byte.MaxValue, null, 3 };
+            yield return new object[] { byteArray, 0, 4, (byte)1, null, -2 };
 
-            yield return new object[] { byteArray, 0, 1, byte.MinValue, null, 0, byteDummy };
-            yield return new object[] { byteArray, 1, 3, byte.MaxValue, null, 3, byteDummy };
-            yield return new object[] { byteArray, 1, 3, byte.MinValue, null, -2, byteDummy };
-            yield return new object[] { byteArray, 1, 0, (byte)5, null, -2, byteDummy };
+            yield return new object[] { byteArray, 0, 1, byte.MinValue, null, 0 };
+            yield return new object[] { byteArray, 1, 3, byte.MaxValue, null, 3 };
+            yield return new object[] { byteArray, 1, 3, byte.MinValue, null, -2 };
+            yield return new object[] { byteArray, 1, 0, (byte)5, null, -2 };
 
-            yield return new object[] { new byte[0], 0, 0, (byte)0, null, -1, byteDummy };
+            yield return new object[] { new byte[0], 0, 0, (byte)0, null, -1 };
 
             // Int16
             short[] shortArray = new short[] { short.MinValue, 0, 0, short.MaxValue };
-            short shortDummy = 0;
 
-            yield return new object[] { shortArray, 0, 4, short.MinValue, null, 0, shortDummy };
-            yield return new object[] { shortArray, 0, 4, (short)0, null, 1, shortDummy };
-            yield return new object[] { shortArray, 0, 4, short.MaxValue, null, 3, shortDummy };
-            yield return new object[] { shortArray, 0, 4, (short)1, null, -4, shortDummy };
-            yield return new object[] { shortArray, 0, 4, null, null, -1, shortDummy };
+            yield return new object[] { shortArray, 0, 4, short.MinValue, null, 0 };
+            yield return new object[] { shortArray, 0, 4, (short)0, null, 1 };
+            yield return new object[] { shortArray, 0, 4, short.MaxValue, null, 3 };
+            yield return new object[] { shortArray, 0, 4, (short)1, null, -4 };
 
-            yield return new object[] { shortArray, 0, 1, short.MinValue, null, 0, shortDummy };
-            yield return new object[] { shortArray, 1, 3, short.MaxValue, null, 3, shortDummy };
-            yield return new object[] { shortArray, 1, 3, short.MinValue, null, -2, shortDummy };
-            yield return new object[] { shortArray, 1, 0, (short)0, null, -2, shortDummy };
+            yield return new object[] { shortArray, 0, 1, short.MinValue, null, 0 };
+            yield return new object[] { shortArray, 1, 3, short.MaxValue, null, 3 };
+            yield return new object[] { shortArray, 1, 3, short.MinValue, null, -2 };
+            yield return new object[] { shortArray, 1, 0, (short)0, null, -2 };
 
-            yield return new object[] { new short[0], 0, 0, (short)0, null, -1, shortDummy };
+            yield return new object[] { new short[0], 0, 0, (short)0, null, -1 };
 
             // UInt16
             ushort[] ushortArray = new ushort[] { ushort.MinValue, 5, 5, ushort.MaxValue };
-            ushort ushortDummy = 0;
 
-            yield return new object[] { ushortArray, 0, 4, ushort.MinValue, null, 0, ushortDummy };
-            yield return new object[] { ushortArray, 0, 4, (ushort)5, null, 1, ushortDummy };
-            yield return new object[] { ushortArray, 0, 4, ushort.MaxValue, null, 3, ushortDummy };
-            yield return new object[] { ushortArray, 0, 4, (ushort)1, null, -2, ushortDummy };
-            yield return new object[] { ushortArray, 0, 4, null, null, -1, ushortDummy };
+            yield return new object[] { ushortArray, 0, 4, ushort.MinValue, null, 0 };
+            yield return new object[] { ushortArray, 0, 4, (ushort)5, null, 1 };
+            yield return new object[] { ushortArray, 0, 4, ushort.MaxValue, null, 3 };
+            yield return new object[] { ushortArray, 0, 4, (ushort)1, null, -2 };
 
-            yield return new object[] { ushortArray, 0, 1, ushort.MinValue, null, 0, ushortDummy };
-            yield return new object[] { ushortArray, 1, 3, ushort.MaxValue, null, 3, ushortDummy };
-            yield return new object[] { ushortArray, 1, 3, ushort.MinValue, null, -2, ushortDummy };
-            yield return new object[] { ushortArray, 1, 0, (ushort)5, null, -2, ushortDummy };
+            yield return new object[] { ushortArray, 0, 1, ushort.MinValue, null, 0 };
+            yield return new object[] { ushortArray, 1, 3, ushort.MaxValue, null, 3 };
+            yield return new object[] { ushortArray, 1, 3, ushort.MinValue, null, -2 };
+            yield return new object[] { ushortArray, 1, 0, (ushort)5, null, -2 };
 
-            yield return new object[] { new ushort[0], 0, 0, (ushort)0, null, -1, ushortDummy };
+            yield return new object[] { new ushort[0], 0, 0, (ushort)0, null, -1 };
 
             // Int32
             int[] intArray = new int[] { int.MinValue, 0, 0, int.MaxValue };
-            int intDummy = 0;
 
-            yield return new object[] { intArray, 0, 4, int.MinValue, null, 0, intDummy };
-            yield return new object[] { intArray, 0, 4, 0, null, 1, intDummy };
-            yield return new object[] { intArray, 0, 4, int.MaxValue, null, 3, intDummy };
-            yield return new object[] { intArray, 0, 4, 1, null, -4, intDummy };
-            yield return new object[] { intArray, 0, 4, null, null, -1, intDummy };
+            yield return new object[] { intArray, 0, 4, int.MinValue, null, 0 };
+            yield return new object[] { intArray, 0, 4, 0, null, 1 };
+            yield return new object[] { intArray, 0, 4, int.MaxValue, null, 3 };
+            yield return new object[] { intArray, 0, 4, 1, null, -4 };
 
-            yield return new object[] { intArray, 0, 1, int.MinValue, null, 0, intDummy };
-            yield return new object[] { intArray, 1, 3, int.MaxValue, null, 3, intDummy };
-            yield return new object[] { intArray, 1, 3, int.MinValue, null, -2, intDummy };
-            yield return new object[] { intArray, 1, 0, 0, null, -2, intDummy };
+            yield return new object[] { intArray, 0, 1, int.MinValue, null, 0 };
+            yield return new object[] { intArray, 1, 3, int.MaxValue, null, 3 };
+            yield return new object[] { intArray, 1, 3, int.MinValue, null, -2 };
 
             int[] intArray2 = new int[] { 1, 3, 6, 6, 8, 10, 12, 16 };
-            yield return new object[] { intArray2, 0, 8, 8, new IntegerComparer(), 4, intDummy };
-            yield return new object[] { intArray2, 0, 8, 6, new IntegerComparer(), 3, intDummy };
-            yield return new object[] { intArray2, 0, 8, 0, new IntegerComparer(), -1, intDummy };
+            yield return new object[] { intArray2, 0, 8, 8, new IntegerComparer(), 4 };
+            yield return new object[] { intArray2, 0, 8, 6, new IntegerComparer(), 3 };
+            yield return new object[] { intArray2, 0, 8, 0, new IntegerComparer(), -1 };
 
-            yield return new object[] { new int[0], 0, 0, 0, null, -1, intDummy };
+            yield return new object[] { new int[0], 0, 0, 0, null, -1 };
 
             // UInt32
             uint[] uintArray = new uint[] { uint.MinValue, 5, 5, uint.MaxValue };
-            uint uintDummy = 0;
 
-            yield return new object[] { uintArray, 0, 4, uint.MinValue, null, 0, uintDummy };
-            yield return new object[] { uintArray, 0, 4, (uint)5, null, 1, uintDummy };
-            yield return new object[] { uintArray, 0, 4, uint.MaxValue, null, 3, uintDummy };
-            yield return new object[] { uintArray, 0, 4, (uint)1, null, -2, uintDummy };
-            yield return new object[] { uintArray, 0, 4, null, null, -1, uintDummy };
+            yield return new object[] { uintArray, 0, 4, uint.MinValue, null, 0 };
+            yield return new object[] { uintArray, 0, 4, (uint)5, null, 1 };
+            yield return new object[] { uintArray, 0, 4, uint.MaxValue, null, 3 };
+            yield return new object[] { uintArray, 0, 4, (uint)1, null, -2 };
 
-            yield return new object[] { uintArray, 0, 1, uint.MinValue, null, 0, uintDummy };
-            yield return new object[] { uintArray, 1, 3, uint.MaxValue, null, 3, uintDummy };
-            yield return new object[] { uintArray, 1, 3, uint.MinValue, null, -2, uintDummy };
-            yield return new object[] { uintArray, 1, 0, (uint)5, null, -2, uintDummy };
+            yield return new object[] { uintArray, 0, 1, uint.MinValue, null, 0 };
+            yield return new object[] { uintArray, 1, 3, uint.MaxValue, null, 3 };
+            yield return new object[] { uintArray, 1, 3, uint.MinValue, null, -2 };
+            yield return new object[] { uintArray, 1, 0, (uint)5, null, -2 };
 
-            yield return new object[] { new uint[0], 0, 0, (uint)0, null, -1, uintDummy };
+            yield return new object[] { new uint[0], 0, 0, (uint)0, null, -1 };
 
             // Int64
             long[] longArray = new long[] { long.MinValue, 0, 0, long.MaxValue };
-            long longDummy = 0;
 
-            yield return new object[] { longArray, 0, 4, long.MinValue, null, 0, longDummy };
-            yield return new object[] { longArray, 0, 4, (long)0, null, 1, longDummy };
-            yield return new object[] { longArray, 0, 4, long.MaxValue, null, 3, longDummy };
-            yield return new object[] { longArray, 0, 4, (long)1, null, -4, longDummy };
-            yield return new object[] { longArray, 0, 4, null, null, -1, longDummy };
+            yield return new object[] { longArray, 0, 4, long.MinValue, null, 0 };
+            yield return new object[] { longArray, 0, 4, (long)0, null, 1 };
+            yield return new object[] { longArray, 0, 4, long.MaxValue, null, 3 };
+            yield return new object[] { longArray, 0, 4, (long)1, null, -4 };
 
-            yield return new object[] { longArray, 0, 1, long.MinValue, null, 0, longDummy };
-            yield return new object[] { longArray, 1, 3, long.MaxValue, null, 3, longDummy };
-            yield return new object[] { longArray, 1, 3, long.MinValue, null, -2, longDummy };
-            yield return new object[] { longArray, 1, 0, (long)0, null, -2, longDummy };
+            yield return new object[] { longArray, 0, 1, long.MinValue, null, 0 };
+            yield return new object[] { longArray, 1, 3, long.MaxValue, null, 3 };
+            yield return new object[] { longArray, 1, 3, long.MinValue, null, -2 };
+            yield return new object[] { longArray, 1, 0, (long)0, null, -2 };
 
-            yield return new object[] { new long[0], 0, 0, (long)0, null, -1, longDummy };
+            yield return new object[] { new long[0], 0, 0, (long)0, null, -1 };
 
             // UInt64
             ulong[] ulongArray = new ulong[] { ulong.MinValue, 5, 5, ulong.MaxValue };
-            ulong ulongDummy = 0;
 
-            yield return new object[] { ulongArray, 0, 4, ulong.MinValue, null, 0, ulongDummy };
-            yield return new object[] { ulongArray, 0, 4, (ulong)5, null, 1, ulongDummy };
-            yield return new object[] { ulongArray, 0, 4, ulong.MaxValue, null, 3, ulongDummy };
-            yield return new object[] { ulongArray, 0, 4, (ulong)1, null, -2, ulongDummy };
-            yield return new object[] { ulongArray, 0, 4, null, null, -1, ulongDummy };
+            yield return new object[] { ulongArray, 0, 4, ulong.MinValue, null, 0 };
+            yield return new object[] { ulongArray, 0, 4, (ulong)5, null, 1 };
+            yield return new object[] { ulongArray, 0, 4, ulong.MaxValue, null, 3 };
+            yield return new object[] { ulongArray, 0, 4, (ulong)1, null, -2 };
 
-            yield return new object[] { ulongArray, 0, 1, ulong.MinValue, null, 0, ulongDummy };
-            yield return new object[] { ulongArray, 1, 3, ulong.MaxValue, null, 3, ulongDummy };
-            yield return new object[] { ulongArray, 1, 3, ulong.MinValue, null, -2, ulongDummy };
-            yield return new object[] { ulongArray, 1, 0, (ulong)5, null, -2, ulongDummy };
+            yield return new object[] { ulongArray, 0, 1, ulong.MinValue, null, 0 };
+            yield return new object[] { ulongArray, 1, 3, ulong.MaxValue, null, 3 };
+            yield return new object[] { ulongArray, 1, 3, ulong.MinValue, null, -2 };
+            yield return new object[] { ulongArray, 1, 0, (ulong)5, null, -2 };
 
-            yield return new object[] { new ulong[0], 0, 0, (ulong)0, null, -1, ulongDummy };
+            yield return new object[] { new ulong[0], 0, 0, (ulong)0, null, -1 };
 
             // Char
             char[] charArray = new char[] { char.MinValue, (char)5, (char)5, char.MaxValue };
-            char charDummy = '\0';
 
-            yield return new object[] { charArray, 0, 4, char.MinValue, null, 0, charDummy };
-            yield return new object[] { charArray, 0, 4, (char)5, null, 1, charDummy };
-            yield return new object[] { charArray, 0, 4, char.MaxValue, null, 3, charDummy };
-            yield return new object[] { charArray, 0, 4, (char)1, null, -2, charDummy };
-            yield return new object[] { charArray, 0, 4, null, null, -1, charDummy };
+            yield return new object[] { charArray, 0, 4, char.MinValue, null, 0 };
+            yield return new object[] { charArray, 0, 4, (char)5, null, 1 };
+            yield return new object[] { charArray, 0, 4, char.MaxValue, null, 3 };
+            yield return new object[] { charArray, 0, 4, (char)1, null, -2 };
 
-            yield return new object[] { charArray, 0, 1, char.MinValue, null, 0, charDummy };
-            yield return new object[] { charArray, 1, 3, char.MaxValue, null, 3, charDummy };
-            yield return new object[] { charArray, 1, 3, char.MinValue, null, -2, charDummy };
-            yield return new object[] { charArray, 1, 0, (char)5, null, -2, charDummy };
+            yield return new object[] { charArray, 0, 1, char.MinValue, null, 0 };
+            yield return new object[] { charArray, 1, 3, char.MaxValue, null, 3 };
+            yield return new object[] { charArray, 1, 3, char.MinValue, null, -2 };
+            yield return new object[] { charArray, 1, 0, (char)5, null, -2 };
 
-            yield return new object[] { new char[0], 0, 0, '\0', null, -1, charDummy };
+            yield return new object[] { new char[0], 0, 0, '\0', null, -1 };
 
             // Bool
             bool[] boolArray = new bool[] { false, false, true };
-            bool boolDummy = true;
 
-            yield return new object[] { boolArray, 0, 3, false, null, 1, boolDummy };
-            yield return new object[] { boolArray, 0, 3, true, null, 2, boolDummy };
-            yield return new object[] { new bool[] { false }, 0, 1, true, null, -2, boolDummy };
-            yield return new object[] { boolArray, 0, 3, null, null, -1, boolDummy };
+            yield return new object[] { boolArray, 0, 3, false, null, 1 };
+            yield return new object[] { boolArray, 0, 3, true, null, 2 };
+            yield return new object[] { new bool[] { false }, 0, 1, true, null, -2 };
 
-            yield return new object[] { boolArray, 0, 1, false, null, 0, boolDummy };
-            yield return new object[] { boolArray, 2, 1, true, null, 2, boolDummy };
-            yield return new object[] { boolArray, 2, 1, false, null, -3, boolDummy };
-            yield return new object[] { boolArray, 1, 0, false, null, -2, boolDummy };
+            yield return new object[] { boolArray, 0, 1, false, null, 0 };
+            yield return new object[] { boolArray, 2, 1, true, null, 2 };
+            yield return new object[] { boolArray, 2, 1, false, null, -3 };
+            yield return new object[] { boolArray, 1, 0, false, null, -2 };
 
-            yield return new object[] { new bool[0], 0, 0, false, null, -1, boolDummy };
+            yield return new object[] { new bool[0], 0, 0, false, null, -1 };
 
             // Single
             float[] floatArray = new float[] { float.MinValue, 0, 0, float.MaxValue };
-            float floatDummy = 0;
 
-            yield return new object[] { floatArray, 0, 4, float.MinValue, null, 0, floatDummy };
-            yield return new object[] { floatArray, 0, 4, 0f, null, 1, floatDummy };
-            yield return new object[] { floatArray, 0, 4, float.MaxValue, null, 3, floatDummy };
-            yield return new object[] { floatArray, 0, 4, (float)1, null, -4, floatDummy };
-            yield return new object[] { floatArray, 0, 4, null, null, -1, floatDummy };
+            yield return new object[] { floatArray, 0, 4, float.MinValue, null, 0 };
+            yield return new object[] { floatArray, 0, 4, 0f, null, 1 };
+            yield return new object[] { floatArray, 0, 4, float.MaxValue, null, 3 };
+            yield return new object[] { floatArray, 0, 4, (float)1, null, -4 };
 
-            yield return new object[] { floatArray, 0, 1, float.MinValue, null, 0, floatDummy };
-            yield return new object[] { floatArray, 1, 3, float.MaxValue, null, 3, floatDummy };
-            yield return new object[] { floatArray, 1, 3, float.MinValue, null, -2, floatDummy };
-            yield return new object[] { floatArray, 1, 0, 0f, null, -2, floatDummy };
+            yield return new object[] { floatArray, 0, 1, float.MinValue, null, 0 };
+            yield return new object[] { floatArray, 1, 3, float.MaxValue, null, 3 };
+            yield return new object[] { floatArray, 1, 3, float.MinValue, null, -2 };
+            yield return new object[] { floatArray, 1, 0, 0f, null, -2 };
 
-            yield return new object[] { new float[0], 0, 0, 0f, null, -1, floatDummy };
+            yield return new object[] { new float[0], 0, 0, 0f, null, -1 };
 
             // Double
             double[] doubleArray = new double[] { double.MinValue, 0, 0, double.MaxValue };
-            double doubleDummy = 0;
 
-            yield return new object[] { doubleArray, 0, 4, double.MinValue, null, 0, doubleDummy };
-            yield return new object[] { doubleArray, 0, 4, 0d, null, 1, doubleDummy };
-            yield return new object[] { doubleArray, 0, 4, double.MaxValue, null, 3, doubleDummy };
-            yield return new object[] { doubleArray, 0, 4, (double)1, null, -4, doubleDummy };
-            yield return new object[] { doubleArray, 0, 4, null, null, -1, doubleDummy };
+            yield return new object[] { doubleArray, 0, 4, double.MinValue, null, 0 };
+            yield return new object[] { doubleArray, 0, 4, 0d, null, 1 };
+            yield return new object[] { doubleArray, 0, 4, double.MaxValue, null, 3 };
+            yield return new object[] { doubleArray, 0, 4, (double)1, null, -4 };
 
-            yield return new object[] { doubleArray, 0, 1, double.MinValue, null, 0, doubleDummy };
-            yield return new object[] { doubleArray, 1, 3, double.MaxValue, null, 3, doubleDummy };
-            yield return new object[] { doubleArray, 1, 3, double.MinValue, null, -2, doubleDummy };
-            yield return new object[] { doubleArray, 1, 0, 0d, null, -2, doubleDummy };
+            yield return new object[] { doubleArray, 0, 1, double.MinValue, null, 0 };
+            yield return new object[] { doubleArray, 1, 3, double.MaxValue, null, 3 };
+            yield return new object[] { doubleArray, 1, 3, double.MinValue, null, -2 };
+            yield return new object[] { doubleArray, 1, 0, 0d, null, -2 };
 
-            yield return new object[] { new double[0], 0, 0, 0d, null, -1, doubleDummy };
+            yield return new object[] { new double[0], 0, 0, 0d, null, -1 };
         }
         
+        [Theory]
+        [InlineData(new sbyte[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new byte[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new short[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new ushort[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new int[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new uint[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new long[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new ulong[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new bool[] { false }, 0, 1, null, null, -1)]
+        [InlineData(new char[] { '\0' }, 0, 1, null, null, -1)]
+        [InlineData(new float[] { 0 }, 0, 1, null, null, -1)]
+        [InlineData(new double[] { 0 }, 0, 1, null, null, -1)]
         public static void BinarySearch_NonGeneric(Array array, int index, int length, object value, IComparer comparer, int expected)
         {
             bool isDefaultComparer = comparer == null || comparer == Comparer.Default;
@@ -383,25 +368,22 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(BinarySearch_TestData))]
-        public static void BinarySearch_Generic<T>(T[] array, int index, int length, object value, IComparer<T> comparer, int expected, T dummy)
+        [MemberData(nameof(BinarySearch_SZArray_TestData))]
+        public static void BinarySearch_Generic<T>(T[] array, int index, int length, T value, IComparer<T> comparer, int expected)
         {
             // Forward to the non-generic overload if we can.
             bool isDefaultComparer = comparer == null || comparer == Comparer<T>.Default;
             if (isDefaultComparer || comparer is IComparer)
             {
-                // Zero lower bound
+                // Test with an SZArray
                 BinarySearch_NonGeneric(array, index, length, value, (IComparer)comparer, expected);
 
-                // Non-zero lower bound (adjust the index and the expected value)
-                Array nonZeroLowerBoundArray = NonZeroLowerBoundArray(array);
-                int lowerBound = nonZeroLowerBoundArray.GetLowerBound(0);
+                // Test with an array that has a non-zero lower bound (not an SZArray)
+                const int lowerBound = 5;
+                Array nonZeroLowerBoundArray = NonZeroLowerBoundArray(array, lowerBound);
                 int lowerBoundExpected = expected < 0 ? expected - lowerBound : expected + lowerBound;
                 BinarySearch_NonGeneric(nonZeroLowerBoundArray, index + lowerBound, length, value, (IComparer)comparer, lowerBoundExpected);
             }
-
-            // If T is a value type, then value is not allowed to be null in the generic overload of BinarySearch. 
-            if (typeof(T).GetTypeInfo().IsValueType && value == null) { return; }
             
             if (index == 0 && length == array.Length)
             {
@@ -421,6 +403,13 @@ namespace System.Tests
             }
             // Use BinarySearch<T>(T[], int, int, T, IComparer)
             Assert.Equal(expected, Array.BinarySearch(array, index, length, (T)value, comparer));
+        }
+
+        [Fact]
+        public static void BinarySearch_NullStringExists_ReturnsCorrectIndex()
+        {
+            BinarySearch_Generic(new string[] { null, "a", "b", "c" }, 0, 4, null, null, 0);
+            BinarySearch_Generic(new string[] { null, "a", "b", "c" }, 0, 4, null, new StringComparer(), 0);
         }
 
         [Fact]
@@ -2329,13 +2318,14 @@ namespace System.Tests
             }
         }
 
-        private static Array NonZeroLowerBoundArray(Array original)
+        private static Array NonZeroLowerBoundArray(Array szArrayContents, int lowerBound)
         {
-            int lowerBound = 5;
-            Array array = Array.CreateInstance(original.GetType().GetElementType(), new int[] { original.Length }, new int[] { lowerBound });
-            for (int i = 0; i < original.Length; i++)
+            Assert.Equal(0, szArrayContents.GetLowerBound(0));
+
+            Array array = Array.CreateInstance(szArrayContents.GetType().GetElementType(), new int[] { szArrayContents.Length }, new int[] { lowerBound });
+            for (int i = 0; i < szArrayContents.Length; i++)
             {
-                array.SetValue(original.GetValue(i), i + lowerBound);
+                array.SetValue(szArrayContents.GetValue(i), i + lowerBound);
             }
             return array;
         }
