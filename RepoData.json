@@ -1,5 +1,5 @@
 {
-    "inferStablePackagesAsFixedPackages": "true", 
+    "inferStableVersionsAsFixedPackages": "true", 
     "fixedPackages": {
         "coveralls.io": "1.4",
         "MicroBuild.Core": "0.2.0",  
