@@ -17,7 +17,8 @@ namespace System.Reflection.PortableExecutable
         public bool IsDeterministic { get; }
 
         private readonly Lazy<ImmutableArray<Section>> _lazySections;
-        
+        private Blob _lazyChecksum;
+
         protected struct Section
         {
             public readonly string Name;
@@ -266,7 +267,8 @@ namespace System.Reflection.PortableExecutable
 
             // Checksum:
             // Shall be zero for strong name signing. 
-            builder.WriteUInt32(0);
+            _lazyChecksum = builder.ReserveBytes(sizeof(uint));
+            new BlobWriter(_lazyChecksum).WriteUInt32(0);
 
             builder.WriteUInt16((ushort)Header.Subsystem);
             builder.WriteUInt16((ushort)Header.DllCharacteristics);
@@ -403,6 +405,133 @@ namespace System.Reflection.PortableExecutable
             }
 
             return result;
+        }
+
+        private IEnumerable<Blob> GetContentToSign(BlobBuilder peImage, Blob strongNameSignatureFixup)
+        {
+            // Signed content includes 
+            // - PE header without its alignment padding
+            // - all sections including their alignment padding and excluding strong name signature blob
+
+            // PE specification: 
+            //   To calculate the PE image hash, Authenticode orders the sections that are specified in the section table 
+            //   by address range, then hashes the resulting sequence of bytes, passing over the exclusion ranges.
+            // 
+            // Note that sections are by construction ordered by their address, so there is no need to reorder.
+
+            int remainingHeader = Header.ComputeSizeOfPeHeaders(GetSections().Length);
+            foreach (var blob in peImage.GetBlobs())
+            {
+                if (remainingHeader > 0)
+                {
+                    int length = Math.Min(remainingHeader, blob.Length);
+                    yield return new Blob(blob.Buffer, blob.Start, length);
+                    remainingHeader -= length;
+                }
+                else if (blob.Buffer == strongNameSignatureFixup.Buffer)
+                {
+                    yield return new Blob(blob.Buffer, blob.Start, strongNameSignatureFixup.Start - blob.Start);
+                    yield return new Blob(blob.Buffer, strongNameSignatureFixup.Start + strongNameSignatureFixup.Length, blob.Length - strongNameSignatureFixup.Length);
+                }
+                else
+                {
+                    yield return new Blob(blob.Buffer, blob.Start, blob.Length);
+                }
+            }
+        }
+
+        private IEnumerable<Blob> GetContentToChecksum(BlobBuilder peImage, Blob checksumFixup)
+        {
+            foreach (var blob in peImage.GetBlobs())
+            {
+                if (blob.Buffer == checksumFixup.Buffer)
+                {
+                    yield return new Blob(blob.Buffer, blob.Start, checksumFixup.Start - blob.Start);
+                    yield return new Blob(blob.Buffer, checksumFixup.Start + checksumFixup.Length, blob.Length - checksumFixup.Length);
+                }
+                else
+                {
+                    yield return new Blob(blob.Buffer, blob.Start, blob.Length);
+                }
+            }
+        }
+
+        internal void Sign(BlobBuilder peImage, Blob strongNameSignatureFixup, Func<IEnumerable<Blob>, byte[]> signatureProvider)
+        {
+            Debug.Assert(peImage != null);
+            Debug.Assert(signatureProvider != null);
+
+            byte[] signature = signatureProvider(GetContentToSign(peImage, strongNameSignatureFixup));
+
+            // signature may be shorter (the rest of the reserved space is padding):
+            if (signature == null || signature.Length > strongNameSignatureFixup.Length)
+            {
+                throw new InvalidOperationException(SR.SignatureProviderReturnedInvalidSignature);
+            }
+
+            uint checksum = CalculateChecksum(GetContentToChecksum(peImage, _lazyChecksum));
+            new BlobWriter(_lazyChecksum).WriteUInt32(checksum);
+
+            var writer = new BlobWriter(strongNameSignatureFixup);
+            writer.WriteBytes(signature);
+        }
+
+        // internal for testing
+        internal unsafe static uint CalculateChecksum(IEnumerable<Blob> blobs)
+        {
+            uint checksum = 0;
+            int pendingByte = -1;
+            int totalSize = 0;
+
+            foreach (var blob in blobs)
+            {
+                var segment = blob.GetBytes();
+                fixed (byte* arrayPtr = segment.Array)
+                {
+                    Debug.Assert(segment.Count > 0);
+
+                    byte* ptr = arrayPtr + segment.Offset;
+                    byte* end = ptr + segment.Count;
+
+                    if (pendingByte >= 0)
+                    {
+                        // little-endian encoding:
+                        checksum = AggregateChecksum(checksum, (ushort)(*ptr << 8 | pendingByte));
+                        ptr++;
+                    }
+
+                    if ((end - ptr) % 2 != 0)
+                    {
+                        end--;
+                        pendingByte = *end;
+                    }
+                    else
+                    {
+                        pendingByte = -1;
+                    }
+                    
+                    while (ptr < end)
+                    {
+                        checksum = AggregateChecksum(checksum, *(ushort*)ptr);
+                        ptr += sizeof(ushort);
+                    }
+                }
+
+                totalSize += segment.Count;
+            }
+
+            if (pendingByte >= 0)
+            {
+                checksum = AggregateChecksum(checksum, (ushort)pendingByte);
+            }
+
+            return (uint)totalSize + checksum;
+        }
+
+        private static uint AggregateChecksum(uint checksum, ushort value)
+        {
+            uint sum = checksum + value;
+            return (sum >> 16) + unchecked((ushort)sum);
         }
     }
 }
