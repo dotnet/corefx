@@ -390,19 +390,19 @@ namespace System.Tests
                 if (isDefaultComparer)
                 {
                     // Use BinarySearch<T>(T[], T)
-                    Assert.Equal(expected, Array.BinarySearch(array, (T)value));
-                    Assert.Equal(expected, Array.BinarySearch(array, (T)value, Comparer<T>.Default));
+                    Assert.Equal(expected, Array.BinarySearch(array, value));
+                    Assert.Equal(expected, Array.BinarySearch(array, value, Comparer<T>.Default));
                 }
                 // Use BinarySearch<T>(T[], T, IComparer)
-                Assert.Equal(expected, Array.BinarySearch(array, (T)value, comparer));
+                Assert.Equal(expected, Array.BinarySearch(array, value, comparer));
             }
             if (isDefaultComparer)
             {
                 // Use BinarySearch<T>(T, int, int, T)
-                Assert.Equal(expected, Array.BinarySearch(array, index, length, (T)value));
+                Assert.Equal(expected, Array.BinarySearch(array, index, length, value));
             }
             // Use BinarySearch<T>(T[], int, int, T, IComparer)
-            Assert.Equal(expected, Array.BinarySearch(array, index, length, (T)value, comparer));
+            Assert.Equal(expected, Array.BinarySearch(array, index, length, value, comparer));
         }
 
         [Fact]
