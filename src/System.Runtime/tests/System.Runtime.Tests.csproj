@@ -53,6 +53,7 @@
     <Compile Include="System\IntPtrTests.cs" />
     <Compile Include="System\IO\DirectoryNotFoundExceptionTests.cs" />
     <Compile Include="System\IO\DirectoryNotFoundException.InteropTests.cs" />
+    <Compile Include="System\IO\EndOfStreamExceptionTests.cs" />    
     <Compile Include="System\IO\Exceptions.HResults.cs" />
     <Compile Include="System\IO\Exceptions.Utility.cs" />
     <Compile Include="System\IO\FileLoadExceptionTests.cs" />
