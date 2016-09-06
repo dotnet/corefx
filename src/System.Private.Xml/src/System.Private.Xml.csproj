@@ -7,7 +7,7 @@
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <RootNamespace>System.Xml</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>$(NoWarn),649</NoWarn>
+    <NoWarn>$(NoWarn),649,414</NoWarn>
     <DefineConstants>ASYNC;ASTORIA_LIGHT</DefineConstants><!-- TODO: this should be prepended with $(DefineConstants); - otherwise DEBUG and TRACE are not being passed -->
     <DefineConstants Condition="'$(TargetGroup)' == 'netcore50aot'">$(DefineConstants);NET_NATIVE</DefineConstants>
     <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>

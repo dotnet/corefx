@@ -28,7 +28,7 @@
     <ProjectReference Include="..\..\System.Private.Xml\src\System.Private.Xml.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcore50aot'">
-    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
+    <EmbeddedResource Include="..\..\System.Private.Xml\src\Resources\System.Private.Xml.rd.xml" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
     <TargetingPackReference Include="mscorlib" />
