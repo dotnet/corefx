@@ -30,7 +30,7 @@ internal static partial class Interop
         private static extern int DsaSizeSignature(SafeDsaHandle dsa);
 
         /// <summary>
-        /// Return the size of the DER-encoded key in bytes.
+        /// Return the maximum size of the DER-encoded key in bytes.
         /// </summary>
         internal static int DsaEncodedSignatureSize(SafeDsaHandle dsa)
         {

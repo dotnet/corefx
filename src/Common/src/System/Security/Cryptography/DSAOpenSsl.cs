@@ -197,9 +197,9 @@ namespace System.Security.Cryptography
                 }
 
                 Debug.Assert(
-                    signatureSize == signature.Length,
+                    signatureSize <= signature.Length,
                     "DSA_sign reported an unexpected signature size",
-                    "DSA_sign reported signatureSize was {0}, when {1} was expected",
+                    "DSA_sign reported signatureSize was {0}, when <= {1} was expected",
                     signatureSize,
                     signature.Length);
 

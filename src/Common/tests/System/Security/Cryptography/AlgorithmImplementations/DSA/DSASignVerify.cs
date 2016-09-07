@@ -29,9 +29,7 @@ namespace System.Security.Cryptography.Dsa.Tests
         {
             using (DSA dsa = DSAFactory.Create(1024))
             {
-                //SignAndVerify(DSATestData.HelloBytes, "SHA1", dsa.ExportParameters(true));
                 byte[] signature = dsa.SignData(DSATestData.HelloBytes, new HashAlgorithmName("SHA1"));
-                //Assert.Equal(48, signature.Length);
                 bool signatureMatched = dsa.VerifyData(DSATestData.HelloBytes, signature, new HashAlgorithmName("SHA1"));
                 Assert.True(signatureMatched);
             }
