@@ -75,6 +75,13 @@ namespace System.Reflection.Tests
             Assert.Equal(argumentNames.Length, arguments.Length);
             Assert.Equal(argumentNames, arguments.Select(argumentType => argumentType.Name));
         }
+
+        [Fact]
+        public void Invoke_StringArgument_ReturnsString()
+        {
+            MethodInfo method = typeof(MI_NonGenericClass).GetMethod(nameof(MI_NonGenericClass.MethodA), new Type[] { typeof(string) });
+            Assert.Equal("test string", method.Invoke(new MI_NonGenericClass(), new object[] { "test string" }));
+        }
     }
 
     public class MI_NonGenericClass
@@ -86,7 +93,7 @@ namespace System.Reflection.Tests
         public void TestPartialGenericMethod<T>(T p1, int val) { }
 
         private void MethodA() { }
-        public string MethodA(string str) => "";
+        public string MethodA(string str) => str;
         public void MethodA(int i32) { }
         private void MethodA(uint ui32) { }
         public int MethodA(string str, int i32) => 0;
