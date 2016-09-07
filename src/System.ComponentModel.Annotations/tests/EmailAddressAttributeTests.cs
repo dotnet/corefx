@@ -9,32 +9,32 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class EmailAddressAttributeTests : ValidationAttributeTestBase
     {
-        public override IEnumerable<Test> ValidValues()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            yield return new Test(new EmailAddressAttribute(), null);
-            yield return new Test(new EmailAddressAttribute(), "someName@someDomain.com");
-            yield return new Test(new EmailAddressAttribute(), "1234@someDomain.com");
-            yield return new Test(new EmailAddressAttribute(), "firstName.lastName@someDomain.com");
-            yield return new Test(new EmailAddressAttribute(), "\u00A0@someDomain.com");
-            yield return new Test(new EmailAddressAttribute(), "!#$%&'*+-/=?^_`|~@someDomain.com");
-            yield return new Test(new EmailAddressAttribute(), "\"firstName.lastName\"@someDomain.com");
-            yield return new Test(new EmailAddressAttribute(), "someName@someDomain.com");
-            yield return new Test(new EmailAddressAttribute(), "someName@some~domain.com");
-            yield return new Test(new EmailAddressAttribute(), "someName@some_domain.com");
-            yield return new Test(new EmailAddressAttribute(), "someName@1234.com");
-            yield return new Test(new EmailAddressAttribute(), "someName@someDomain\uFFEF.com");
+            yield return new TestCase(new EmailAddressAttribute(), null);
+            yield return new TestCase(new EmailAddressAttribute(), "someName@someDomain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "1234@someDomain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "firstName.lastName@someDomain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "\u00A0@someDomain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "!#$%&'*+-/=?^_`|~@someDomain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "\"firstName.lastName\"@someDomain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "someName@someDomain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "someName@some~domain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "someName@some_domain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "someName@1234.com");
+            yield return new TestCase(new EmailAddressAttribute(), "someName@someDomain\uFFEF.com");
         }
 
-        public override IEnumerable<Test> InvalidValues()
+        protected override IEnumerable<TestCase> InvalidValues()
         {
-            yield return new Tests.Test(new EmailAddressAttribute(), 0);
-            yield return new Tests.Test(new EmailAddressAttribute(), "");
-            yield return new Tests.Test(new EmailAddressAttribute(), " \r \t \n" );
-            yield return new Tests.Test(new EmailAddressAttribute(), "@someDomain.com");
-            yield return new Tests.Test(new EmailAddressAttribute(), "@someDomain@abc.com");
-            yield return new Tests.Test(new EmailAddressAttribute(), "someName");
-            yield return new Tests.Test(new EmailAddressAttribute(), "someName@");
-            yield return new Tests.Test(new EmailAddressAttribute(), "someName@a@b.com");
+            yield return new TestCase(new EmailAddressAttribute(), 0);
+            yield return new TestCase(new EmailAddressAttribute(), "");
+            yield return new TestCase(new EmailAddressAttribute(), " \r \t \n" );
+            yield return new TestCase(new EmailAddressAttribute(), "@someDomain.com");
+            yield return new TestCase(new EmailAddressAttribute(), "@someDomain@abc.com");
+            yield return new TestCase(new EmailAddressAttribute(), "someName");
+            yield return new TestCase(new EmailAddressAttribute(), "someName@");
+            yield return new TestCase(new EmailAddressAttribute(), "someName@a@b.com");
         }
 
         [Fact]

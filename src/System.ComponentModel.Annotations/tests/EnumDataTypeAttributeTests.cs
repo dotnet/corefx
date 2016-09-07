@@ -9,47 +9,47 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class EnumDataTypeAttributeTests : ValidationAttributeTestBase
     {
-        public override IEnumerable<Test> ValidValues()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), null);
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "");
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), NonFlagsEnumType.A);
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), 10);
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), 100);
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), FlagsEnumType.X);
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), FlagsEnumType.X | FlagsEnumType.Y);
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), 5);
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), 7);
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "A");
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "B");
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "C");
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "0");
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "10");
-            yield return new Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "100");
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "X");
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "X, Y");
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "X, Y, Z");
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "1");
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "5");
-            yield return new Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "7");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), null);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), NonFlagsEnumType.A);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), 10);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), 100);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), FlagsEnumType.X);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), FlagsEnumType.X | FlagsEnumType.Y);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), 5);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), 7);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "A");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "B");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "C");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "0");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "10");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "100");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "X");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "X, Y");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "X, Y, Z");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "1");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "5");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "7");
         }
 
-        public override IEnumerable<Test> InvalidValues()
+        protected override IEnumerable<TestCase> InvalidValues()
         {
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), FlagsEnumType.X);
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), new object());
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), true);
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), 1.1f);
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), 123.456m);
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), '0');
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "NoSuchValue");
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "42");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), FlagsEnumType.X);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), new object());
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), true);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), 1.1f);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), 123.456m);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), '0');
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "NoSuchValue");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(NonFlagsEnumType)), "42");
 
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), 0);
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), 8);
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "NoSuchValue");
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "0");
-            yield return new Tests.Test(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "8");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), 0);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), 8);
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "NoSuchValue");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "0");
+            yield return new TestCase(new EnumDataTypeAttribute(typeof(FlagsEnumType)), "8");
         }
 
         [Theory]

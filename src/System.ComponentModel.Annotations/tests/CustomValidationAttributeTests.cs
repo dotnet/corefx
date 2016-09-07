@@ -11,50 +11,50 @@ namespace System.ComponentModel.DataAnnotations.Tests
     {
         private static readonly ValidationContext s_testValidationContext = new ValidationContext(new object());
 
-        public override IEnumerable<Test> ValidValues()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArg)), "AnyString");
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgs)), new TestClass("AnyString"));
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgStronglyTyped)), "AnyString");
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), new TestClass("AnyString"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArg)), "AnyString");
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgs)), new TestClass("AnyString"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgStronglyTyped)), "AnyString");
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), new TestClass("AnyString"));
 
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), null);
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), new TestStruct() { Value = "Valid Value" });
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), null);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), new TestStruct() { Value = "Valid Value" });
 
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), null);
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), new TestStruct() { Value = "Valid Value" });
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), null);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), new TestStruct() { Value = "Valid Value" });
 
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), new DerivedTestClass("AnyString"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), new DerivedTestClass("AnyString"));
 
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123);
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), false);
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123456L);
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123.456F);
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123.456D);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), false);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123456L);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123.456F);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123.456D);
         }
 
-        public override IEnumerable<Test> InvalidValues()
+        protected override IEnumerable<TestCase> InvalidValues()
         {
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArg)), new TestClass("AnyString"));
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgs)), "AnyString");
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArg)), new TestClass("AnyString"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgs)), "AnyString");
 
             // This Assert produces different results on Core CLR versus .Net Native. In CustomValidationAttribute.TryConvertValue()
             // we call Convert.ChangeType(instanceOfAClass, typeof(string), ...). On K this throws InvalidCastException because
             // the class does not implement IConvertible. On N this just returns the result of ToString() on the class and does not throw.
             // As of 7/9/14 no plans to change this.
             // yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgStronglyTyped)), new TestClass("AnyString"));
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), "AnyString");
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), "AnyString");
 
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), new TestStruct());
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), new TestStruct() { Value = "Invalid Value" });
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), new TestStruct());
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), new TestStruct() { Value = "Invalid Value" });
 
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), null);
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), new TestClass("NotInt"));
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), new DateTime(2014, 3, 19));
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgDateTime)), "abcdef");
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), null);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), new TestClass("NotInt"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), new DateTime(2014, 3, 19));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgDateTime)), "abcdef");
 
             // Implements IConvertible (throws NotSupportedException - is caught)
-            yield return new Test(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgDateTime)), new IConvertibleImplementor());
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgDateTime)), new IConvertibleImplementor());
         }
 
         public override bool RespectsErrorMessage => false;

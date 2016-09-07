@@ -9,25 +9,25 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class CreditCardAttributeTests : ValidationAttributeTestBase
     {
-        public override IEnumerable<Test> ValidValues()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            yield return new Test(new CreditCardAttribute(), null);
-            yield return new Test(new CreditCardAttribute(), "0000000000000000");
-            yield return new Test(new CreditCardAttribute(), "1234567890123452");
-            yield return new Test(new CreditCardAttribute(), "  1 2 3 4 5 6 7 8 9 0  1 2 34 5 2    ");
-            yield return new Test(new CreditCardAttribute(), "--1-2-3-4-5-6-7-8-9-0--1-2-34-5-2----");
-            yield return new Test(new CreditCardAttribute(), " - 1- -  2 3 --4 5 6 7 -8- -9- -0 - -1 -2 -3-4- --5-- 2    ");
-            yield return new Test(new CreditCardAttribute(), "1234-5678-9012-3452");
-            yield return new Test(new CreditCardAttribute(), "1234 5678 9012 3452");
+            yield return new TestCase(new CreditCardAttribute(), null);
+            yield return new TestCase(new CreditCardAttribute(), "0000000000000000");
+            yield return new TestCase(new CreditCardAttribute(), "1234567890123452");
+            yield return new TestCase(new CreditCardAttribute(), "  1 2 3 4 5 6 7 8 9 0  1 2 34 5 2    ");
+            yield return new TestCase(new CreditCardAttribute(), "--1-2-3-4-5-6-7-8-9-0--1-2-34-5-2----");
+            yield return new TestCase(new CreditCardAttribute(), " - 1- -  2 3 --4 5 6 7 -8- -9- -0 - -1 -2 -3-4- --5-- 2    ");
+            yield return new TestCase(new CreditCardAttribute(), "1234-5678-9012-3452");
+            yield return new TestCase(new CreditCardAttribute(), "1234 5678 9012 3452");
         }
         
-        public override IEnumerable<Test> InvalidValues()
+        protected override IEnumerable<TestCase> InvalidValues()
         {
-            yield return new Test(new CreditCardAttribute(), "0000000000000001");
-            yield return new Test(new CreditCardAttribute(), 0);
-            yield return new Test(new CreditCardAttribute(), "000%000000000001");
-            yield return new Test(new CreditCardAttribute(), "1234567890123452a");
-            yield return new Test(new CreditCardAttribute(), "1234567890123452\0");
+            yield return new TestCase(new CreditCardAttribute(), "0000000000000001");
+            yield return new TestCase(new CreditCardAttribute(), 0);
+            yield return new TestCase(new CreditCardAttribute(), "000%000000000001");
+            yield return new TestCase(new CreditCardAttribute(), "1234567890123452a");
+            yield return new TestCase(new CreditCardAttribute(), "1234567890123452\0");
         }
 
         [Fact]

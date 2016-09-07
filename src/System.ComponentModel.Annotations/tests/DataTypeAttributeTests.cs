@@ -10,21 +10,21 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class DataTypeAttributeTests : ValidationAttributeTestBase
     {
-        public override IEnumerable<Test> ValidValues()
+        protected override IEnumerable<TestCase> ValidValues()
         {
             foreach (DataType dataType in s_dataTypes)
             {
                 if (dataType != DataType.Custom)
                 {
-                    yield return new Test(new DataTypeAttribute(dataType), new object());
+                    yield return new TestCase(new DataTypeAttribute(dataType), new object());
                 }
             }
-            yield return new Test(new DataTypeAttribute("CustomDataType"), new object());
-            yield return new Test(new DataTypeAttribute((DataType)(-1)), new object());
-            yield return new Test(new DataTypeAttribute(DataType.Upload + 1), new object());
+            yield return new TestCase(new DataTypeAttribute("CustomDataType"), new object());
+            yield return new TestCase(new DataTypeAttribute((DataType)(-1)), new object());
+            yield return new TestCase(new DataTypeAttribute(DataType.Upload + 1), new object());
         }
 
-        public override IEnumerable<Test> InvalidValues() => new Test[0];
+        protected override IEnumerable<TestCase> InvalidValues() => new TestCase[0];
 
         private static readonly ValidationContext s_testValidationContext = new ValidationContext(new object());
 

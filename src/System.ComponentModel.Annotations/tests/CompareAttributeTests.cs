@@ -10,19 +10,19 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class CompareAttributeTests : ValidationAttributeTestBase
     {
-        public override IEnumerable<Test> ValidValues() => new Test[]
+        protected override IEnumerable<TestCase> ValidValues() => new TestCase[]
         {
-            new Test(new CompareAttribute("CompareProperty"), "test", new ValidationContext(new CompareObject("test"))),
-            new Test(new DerivedCompareAttribute("CompareProperty"), "a", new ValidationContext(new CompareObject("b")))
+            new TestCase(new CompareAttribute("CompareProperty"), "test", new ValidationContext(new CompareObject("test"))),
+            new TestCase(new DerivedCompareAttribute("CompareProperty"), "a", new ValidationContext(new CompareObject("b")))
         };
 
         private static ValidationContext s_context = new ValidationContext(new CompareObject("a")) { DisplayName = "CurrentProperty" };
-        public override IEnumerable<Test> InvalidValues() => new Test[]
+        protected override IEnumerable<TestCase> InvalidValues() => new TestCase[]
         {
-            new Test(new CompareAttribute(nameof(CompareObject.CompareProperty)), "b", s_context),
-            new Test(new CompareAttribute(nameof(CompareObject.ComparePropertyWithDisplayName)), "b", s_context),
-            new Test(new CompareAttribute("NoSuchProperty"), "b", s_context),
-            new Test(new CompareAttribute(nameof(CompareObject.CompareProperty)), "b", new ValidationContext(new CompareObjectSubClass("a")))
+            new TestCase(new CompareAttribute(nameof(CompareObject.CompareProperty)), "b", s_context),
+            new TestCase(new CompareAttribute(nameof(CompareObject.ComparePropertyWithDisplayName)), "b", s_context),
+            new TestCase(new CompareAttribute("NoSuchProperty"), "b", s_context),
+            new TestCase(new CompareAttribute(nameof(CompareObject.CompareProperty)), "b", new ValidationContext(new CompareObjectSubClass("a")))
         };
 
         [Fact]

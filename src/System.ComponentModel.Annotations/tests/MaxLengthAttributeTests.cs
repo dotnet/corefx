@@ -11,34 +11,34 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class MaxLengthAttributeTests : ValidationAttributeTestBase
     {
-        public override IEnumerable<Test> ValidValues()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            yield return new Test(new MaxLengthAttribute(10), null);
-            yield return new Test(new MaxLengthAttribute(15), "UnderMaxLength");
-            yield return new Test(new MaxLengthAttribute(16), "EqualToMaxLength");
-            yield return new Test(new MaxLengthAttribute(-1), "SpecifiedMaximumMaxLength");
-            yield return new Test(new MaxLengthAttribute(-1), new int[20]);
-            yield return new Test(new MaxLengthAttribute(15), new string[14]);
-            yield return new Test(new MaxLengthAttribute(16), new string[16]);
-            yield return new Test(new MaxLengthAttribute(-1), new Collection<int>(new int[20]));
-            yield return new Test(new MaxLengthAttribute(15), new Collection<string>(new string[14]));
-            yield return new Test(new MaxLengthAttribute(16), new Collection<string>(new string[16]));
-            yield return new Test(new MaxLengthAttribute(-1), new List<int>(new int[20]));
-            yield return new Test(new MaxLengthAttribute(15), new List<string>(new string[14]));
-            yield return new Test(new MaxLengthAttribute(16), new List<string>(new string[16]));
+            yield return new TestCase(new MaxLengthAttribute(10), null);
+            yield return new TestCase(new MaxLengthAttribute(15), "UnderMaxLength");
+            yield return new TestCase(new MaxLengthAttribute(16), "EqualToMaxLength");
+            yield return new TestCase(new MaxLengthAttribute(-1), "SpecifiedMaximumMaxLength");
+            yield return new TestCase(new MaxLengthAttribute(-1), new int[20]);
+            yield return new TestCase(new MaxLengthAttribute(15), new string[14]);
+            yield return new TestCase(new MaxLengthAttribute(16), new string[16]);
+            yield return new TestCase(new MaxLengthAttribute(-1), new Collection<int>(new int[20]));
+            yield return new TestCase(new MaxLengthAttribute(15), new Collection<string>(new string[14]));
+            yield return new TestCase(new MaxLengthAttribute(16), new Collection<string>(new string[16]));
+            yield return new TestCase(new MaxLengthAttribute(-1), new List<int>(new int[20]));
+            yield return new TestCase(new MaxLengthAttribute(15), new List<string>(new string[14]));
+            yield return new TestCase(new MaxLengthAttribute(16), new List<string>(new string[16]));
 
-            yield return new Test(new MaxLengthAttribute(16), new int[4, 4]);
-            yield return new Test(new MaxLengthAttribute(16), new string[3, 4]);
+            yield return new TestCase(new MaxLengthAttribute(16), new int[4, 4]);
+            yield return new TestCase(new MaxLengthAttribute(16), new string[3, 4]);
         }
 
-        public override IEnumerable<Test> InvalidValues()
+        protected override IEnumerable<TestCase> InvalidValues()
         {
-            yield return new Test(new MaxLengthAttribute(12), "OverMaxLength");
-            yield return new Test(new MaxLengthAttribute(12), new byte[13]);
-            yield return new Test(new MaxLengthAttribute(12), new Collection<byte>(new byte[13]));
-            yield return new Test(new MaxLengthAttribute(12), new List<byte>(new byte[13]));
+            yield return new TestCase(new MaxLengthAttribute(12), "OverMaxLength");
+            yield return new TestCase(new MaxLengthAttribute(12), new byte[13]);
+            yield return new TestCase(new MaxLengthAttribute(12), new Collection<byte>(new byte[13]));
+            yield return new TestCase(new MaxLengthAttribute(12), new List<byte>(new byte[13]));
 
-            yield return new Test(new MaxLengthAttribute(12), new int[4, 4]);
+            yield return new TestCase(new MaxLengthAttribute(12), new int[4, 4]);
         }
 
         [Fact]

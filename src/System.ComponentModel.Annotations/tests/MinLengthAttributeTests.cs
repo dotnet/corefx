@@ -10,34 +10,34 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class MinLengthAttributeTests : ValidationAttributeTestBase
     {
-        public override IEnumerable<Test> ValidValues()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            yield return new Test(new MinLengthAttribute(10), null);
-            yield return new Test(new MinLengthAttribute(0), "");
-            yield return new Test(new MinLengthAttribute(12), "OverMinLength");
-            yield return new Test(new MinLengthAttribute(16), "EqualToMinLength");
+            yield return new TestCase(new MinLengthAttribute(10), null);
+            yield return new TestCase(new MinLengthAttribute(0), "");
+            yield return new TestCase(new MinLengthAttribute(12), "OverMinLength");
+            yield return new TestCase(new MinLengthAttribute(16), "EqualToMinLength");
 
-            yield return new Test(new MinLengthAttribute(0), new int[0]);
-            yield return new Test(new MinLengthAttribute(12), new int[14]);
-            yield return new Test(new MinLengthAttribute(16), new string[16]);
+            yield return new TestCase(new MinLengthAttribute(0), new int[0]);
+            yield return new TestCase(new MinLengthAttribute(12), new int[14]);
+            yield return new TestCase(new MinLengthAttribute(16), new string[16]);
 
-            yield return new Test(new MinLengthAttribute(0), new Collection<int>(new int[0]));
-            yield return new Test(new MinLengthAttribute(12), new Collection<int>(new int[14]));
-            yield return new Test(new MinLengthAttribute(16), new Collection<string>(new string[16]));
+            yield return new TestCase(new MinLengthAttribute(0), new Collection<int>(new int[0]));
+            yield return new TestCase(new MinLengthAttribute(12), new Collection<int>(new int[14]));
+            yield return new TestCase(new MinLengthAttribute(16), new Collection<string>(new string[16]));
 
-            yield return new Test(new MinLengthAttribute(0), new List<int>(new int[0]));
-            yield return new Test(new MinLengthAttribute(12), new List<int>(new int[14]));
-            yield return new Test(new MinLengthAttribute(16), new List<string>(new string[16]));
+            yield return new TestCase(new MinLengthAttribute(0), new List<int>(new int[0]));
+            yield return new TestCase(new MinLengthAttribute(12), new List<int>(new int[14]));
+            yield return new TestCase(new MinLengthAttribute(16), new List<string>(new string[16]));
         }
 
-        public override IEnumerable<Test> InvalidValues()
+        protected override IEnumerable<TestCase> InvalidValues()
         {
-            yield return new Test(new MinLengthAttribute(15), "UnderMinLength");
-            yield return new Test(new MinLengthAttribute(15), new byte[14]);
-            yield return new Test(new MinLengthAttribute(15), new Collection<byte>(new byte[14]));
-            yield return new Test(new MinLengthAttribute(15), new List<byte>(new byte[14]));
+            yield return new TestCase(new MinLengthAttribute(15), "UnderMinLength");
+            yield return new TestCase(new MinLengthAttribute(15), new byte[14]);
+            yield return new TestCase(new MinLengthAttribute(15), new Collection<byte>(new byte[14]));
+            yield return new TestCase(new MinLengthAttribute(15), new List<byte>(new byte[14]));
 
-            yield return new Test(new MaxLengthAttribute(12), new int[3, 3]);
+            yield return new TestCase(new MinLengthAttribute(12), new int[3, 3]);
         }
         
         [Theory]

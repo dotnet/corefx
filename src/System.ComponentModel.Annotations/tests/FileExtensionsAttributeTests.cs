@@ -10,34 +10,34 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class FileExtensionsAttributeTests : ValidationAttributeTestBase
     {
-        public override IEnumerable<Test> ValidValues()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            yield return new Test(GetAttribute("png,jpg,jpeg,gif"), null);
-            yield return new Test(GetAttribute(" j p. .e ..g "), "file.jpeg");
-            yield return new Test(GetAttribute("jpeg"), "file.jpeg");
-            yield return new Test(GetAttribute("jpeg,.,png,,jpg"), "file.jpeg");
-            yield return new Test(GetAttribute("jpeg,.,png,,jpg"), "file.png");
-            yield return new Test(GetAttribute("myExt, .otherExt, UPPERCASE_extension"), "myfile.myExt");
-            yield return new Test(GetAttribute("myExt, .otherExt, UPPERCASE_extension"), "some.Other.File.otherext");
-            yield return new Test(GetAttribute("myExt, .otherExt, UPPERCASE_extension"), "Case.Does.Not.matter.uppercase_EXTENSION");
+            yield return new TestCase(GetAttribute("png,jpg,jpeg,gif"), null);
+            yield return new TestCase(GetAttribute(" j p. .e ..g "), "file.jpeg");
+            yield return new TestCase(GetAttribute("jpeg"), "file.jpeg");
+            yield return new TestCase(GetAttribute("jpeg,.,png,,jpg"), "file.jpeg");
+            yield return new TestCase(GetAttribute("jpeg,.,png,,jpg"), "file.png");
+            yield return new TestCase(GetAttribute("myExt, .otherExt, UPPERCASE_extension"), "myfile.myExt");
+            yield return new TestCase(GetAttribute("myExt, .otherExt, UPPERCASE_extension"), "some.Other.File.otherext");
+            yield return new TestCase(GetAttribute("myExt, .otherExt, UPPERCASE_extension"), "Case.Does.Not.matter.uppercase_EXTENSION");
         }
 
-        public override IEnumerable<Test> InvalidValues()
+        protected override IEnumerable<TestCase> InvalidValues()
         {
-            yield return new Test(GetAttribute("png,jpg,jpeg,gif"), "");
-            yield return new Test(GetAttribute("png,jpg,jpeg,gif"), "someFile.nonContainedExtension");
-            yield return new Test(GetAttribute("myExt, .otherExt, UPPERCASE_extension"), "someFile.nonContainedExtension");
+            yield return new TestCase(GetAttribute("png,jpg,jpeg,gif"), "");
+            yield return new TestCase(GetAttribute("png,jpg,jpeg,gif"), "someFile.nonContainedExtension");
+            yield return new TestCase(GetAttribute("myExt, .otherExt, UPPERCASE_extension"), "someFile.nonContainedExtension");
 
-            yield return new Test(GetAttribute(" "), "");
-            yield return new Test(GetAttribute(" "), "a");
-            yield return new Test(GetAttribute(" , "), "");
-            yield return new Test(GetAttribute(" , "), "a");
+            yield return new TestCase(GetAttribute(" "), "");
+            yield return new TestCase(GetAttribute(" "), "a");
+            yield return new TestCase(GetAttribute(" , "), "");
+            yield return new TestCase(GetAttribute(" , "), "a");
 
-            yield return new Test(GetAttribute(" . "), "");
-            yield return new Test(GetAttribute(" . "), "a");
-            yield return new Test(GetAttribute("."), "a.");
+            yield return new TestCase(GetAttribute(" . "), "");
+            yield return new TestCase(GetAttribute(" . "), "a");
+            yield return new TestCase(GetAttribute("."), "a.");
 
-            yield return new Test(GetAttribute("png,jpg,jpeg,gif"), Path.GetInvalidPathChars()[0].ToString());
+            yield return new TestCase(GetAttribute("png,jpg,jpeg,gif"), Path.GetInvalidPathChars()[0].ToString());
         }
 
         private static FileExtensionsAttribute GetAttribute(string extensions) => new FileExtensionsAttribute() { Extensions = extensions };

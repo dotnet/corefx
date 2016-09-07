@@ -10,13 +10,13 @@ namespace System.ComponentModel.DataAnnotations.Tests
 {
     public abstract class ValidationAttributeTestBase
     {
-        public abstract IEnumerable<Test> ValidValues();
-        public abstract IEnumerable<Test> InvalidValues();
+        protected abstract IEnumerable<TestCase> ValidValues();
+        protected abstract IEnumerable<TestCase> InvalidValues();
 
         public virtual bool RespectsErrorMessage => true;
         public Type InvalidErrorMessage_Type => RespectsErrorMessage ? typeof(InvalidOperationException) : typeof(ValidationException);
 
-        [Theory]
+        [Fact]
         public void Validate()
         {
             Assert.All(ValidValues(), test => Validate(test.Attribute, test.Value, test.ValidationContext, true));
@@ -36,7 +36,10 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 Assert.Throws<ValidationException>(() => attribute.Validate(value, validationContext));
                 Assert.NotNull(attribute.GetValidationResult(value, validationContext));
             }
-            Assert.Equal(isValid, attribute.IsValid(value));
+            if (!attribute.RequiresValidationContext)
+            {
+                Assert.Equal(isValid, attribute.IsValid(value));
+            }
         }
 
         [Fact]
@@ -64,34 +67,34 @@ namespace System.ComponentModel.DataAnnotations.Tests
             ErrorMessageSetFromResource_ReturnsExpectedValue(InvalidValues().First());
         }
         
-        public void ErrorMessageNotSet(Test test)
+        private void ErrorMessageNotSet(TestCase test)
         {
             test.Attribute.ErrorMessage = null;
             Assert.Throws(InvalidErrorMessage_Type, () => test.Attribute.Validate(test.Value, test.ValidationContext));
         }
         
-        public void ErrorMessageSet_ErrorMessageResourceNameSet(Test test)
+        private void ErrorMessageSet_ErrorMessageResourceNameSet(TestCase test)
         {
             test.Attribute.ErrorMessage = "Some";
             test.Attribute.ErrorMessageResourceName = "Some";
             Assert.Throws(InvalidErrorMessage_Type, () => test.Attribute.Validate(test.Value, test.ValidationContext));
         }
         
-        public void ErrorMessageResourceNameSet_ErrorMessageResourceTypeNotSet(Test test)
+        private void ErrorMessageResourceNameSet_ErrorMessageResourceTypeNotSet(TestCase test)
         {
             test.Attribute.ErrorMessageResourceName = "Some";
             test.Attribute.ErrorMessageResourceType = null;
             Assert.Throws(InvalidErrorMessage_Type, () => test.Attribute.Validate(test.Value, test.ValidationContext));
         }
         
-        public void ErrorMessageResourceNameNotSet_ErrorMessageResourceTypeSet(Test test)
+        private void ErrorMessageResourceNameNotSet_ErrorMessageResourceTypeSet(TestCase test)
         {
             test.Attribute.ErrorMessageResourceName = null;
             test.Attribute.ErrorMessageResourceType = typeof(ErrorMessageResources);
             Assert.Throws(InvalidErrorMessage_Type, () => test.Attribute.Validate(test.Value, test.ValidationContext));
         }
         
-        public void ErrorMessageSet_ReturnsOverridenValue(Test test)
+        private void ErrorMessageSet_ReturnsOverridenValue(TestCase test)
         {
             test.Attribute.ErrorMessage = "SomeErrorMessage";
 
@@ -99,12 +102,12 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.Equal("SomeErrorMessage", validationResult.ErrorMessage);
         }
         
-        public void ErrorMessageNotSet_ReturnsDefaultValue(Test test)
+        private void ErrorMessageNotSet_ReturnsDefaultValue(TestCase test)
         {
             test.Attribute.GetValidationResult(test.Value, test.ValidationContext);
         }
         
-        public void ErrorMessageSetFromResource_ReturnsExpectedValue(Test test)
+        private void ErrorMessageSetFromResource_ReturnsExpectedValue(TestCase test)
         {
             test.Attribute.ErrorMessageResourceName = "InternalErrorMessageTestProperty";
             test.Attribute.ErrorMessageResourceType = typeof(ErrorMessageResources);
@@ -112,19 +115,19 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResult = test.Attribute.GetValidationResult(test.Value, test.ValidationContext);
             Assert.Equal("Error Message from ErrorMessageResources.InternalErrorMessageTestProperty", validationResult.ErrorMessage);
         }
-    }
 
-    public class Test
-    {
-        public ValidationAttribute Attribute { get; }
-        public object Value { get; }
-        public ValidationContext ValidationContext { get; }
-
-        public Test(ValidationAttribute attribute, object value, ValidationContext validationContext = null)
+        protected class TestCase
         {
-            Attribute = attribute;
-            Value = value;
-            ValidationContext = validationContext ?? new ValidationContext(new object());
+            public ValidationAttribute Attribute { get; }
+            public object Value { get; }
+            public ValidationContext ValidationContext { get; }
+
+            public TestCase(ValidationAttribute attribute, object value, ValidationContext validationContext = null)
+            {
+                Attribute = attribute;
+                Value = value;
+                ValidationContext = validationContext ?? new ValidationContext(new object());
+            }
         }
     }
 }
