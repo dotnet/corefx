@@ -24,11 +24,7 @@
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using System.Collections;
-#if CONCURRENT_COLLECTIONS
 using System.Collections.Concurrent;
-#else
-using System.Threading.Tasks.Dataflow.Internal.Collections;
-#endif
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
