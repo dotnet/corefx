@@ -17,11 +17,15 @@ namespace System.ComponentModel.DataAnnotations.Tests
         public Type InvalidErrorMessage_Type => RespectsErrorMessage ? typeof(InvalidOperationException) : typeof(ValidationException);
 
         [Fact]
-        public void Validate()
+        public void Validate_Valid()
         {
-            Assert.All(ValidValues(), test => Validate(test.Attribute, test.Value, test.ValidationContext, true));
+            Assert.All(ValidValues(), test => Validate(test.Attribute, test.Value, test.ValidationContext, isValid: true));
+        }
 
-            Assert.All(InvalidValues(), test => Validate(test.Attribute, test.Value, test.ValidationContext, false));
+        [Fact]
+        public void Validate_Invalid()
+        {
+            Assert.All(InvalidValues(), test => Validate(test.Attribute, test.Value, test.ValidationContext, isValid: false));
         }
 
         public void Validate(ValidationAttribute attribute, object value, ValidationContext validationContext, bool isValid)
