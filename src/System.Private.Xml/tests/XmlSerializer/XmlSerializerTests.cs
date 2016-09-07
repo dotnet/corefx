@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
@@ -1887,6 +1888,155 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(dog1.Breed, dog2.Breed);
     }
 
+    static List<string> grouplists;
+    static AutoResetEvent resetevent = new AutoResetEvent(false);
+    static int count = 0;
+    [Fact]
+    public static void XmlUnknownElementAndEventHandlerTest()
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(Group));
+        serializer.UnknownElement += new XmlElementEventHandler((o, args) =>
+        {
+            Group myGroup = (Group)args.ObjectBeingDeserialized;
+            Assert.NotNull(myGroup);
+            grouplists.Add(args.Element.Name);
+            ++count;
+            if (count >= 3) resetevent.Set();
+        });
+        string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <Group xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd = ""http://www.w3.org/2001/XMLSchema"">
+         <GroupName>MyGroup</GroupName>
+         <GroupSize>Large</GroupSize>
+         <GroupNumber>444</GroupNumber>
+         <GroupBase>West</GroupBase>
+       </Group >";
+        count = 0;
+        grouplists = new List<string>();
+        resetevent.Reset();
+        Group group = (Group)serializer.Deserialize(GetStreamFromString(xmlFileContent));
+        bool wait = resetevent.WaitOne(TimeSpan.FromMilliseconds(3000));
+        Assert.True(wait);
+        Assert.NotNull(group);
+        Assert.NotNull(group.GroupName);
+        Assert.Null(group.GroupVehicle);
+        Assert.Equal(3, count);
+        Assert.Equal(3, grouplists.Count());
+        bool b = grouplists.Contains("GroupSize") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase");
+        Assert.True(b);
+    }
+
+    [Fact]
+    public static void XmlUnknownNodeAndEventHandlerTest()
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(Group));
+        serializer.UnknownNode += new XmlNodeEventHandler((o, args) =>
+        {
+            Group myGroup = (Group)args.ObjectBeingDeserialized;
+            Assert.NotNull(myGroup);
+            grouplists.Add(args.LocalName);
+            ++count;
+            if (count >= 5) resetevent.Set();
+        });
+        string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <Group xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:coho=""http://www.cohowinery.com"" xmlns:cp=""http://www.cpandl.com"">
+              <coho:GroupName>MyGroup</coho:GroupName>
+              <cp:GroupSize>Large</cp:GroupSize>
+              <cp:GroupNumber>444</cp:GroupNumber>
+              <coho:GroupBase>West</coho:GroupBase>
+              <coho:ThingInfo>
+                    <Number>1</Number>
+                    <Name>Thing1</Name>
+                    <Elmo>
+                        <Glue>element</Glue>
+                    </Elmo>
+              </coho:ThingInfo>
+  </Group>";
+        count = 0;
+        grouplists = new List<string>();
+        resetevent.Reset();
+        Group group = (Group)serializer.Deserialize(GetStreamFromString(xmlFileContent));
+        bool wait = resetevent.WaitOne(TimeSpan.FromMilliseconds(3000));
+        Assert.True(wait);
+        Assert.NotNull(group);
+        Assert.Null(group.GroupName);
+        Assert.Equal(5, count);
+        Assert.Equal(5, grouplists.Count());
+        bool b = grouplists.Contains("GroupName") && grouplists.Contains("GroupSize") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase") && grouplists.Contains("ThingInfo");
+        Assert.True(b);
+    }
+
+    [Fact]
+    public static void XmlUnknownAttributeAndEventHandlerTest()
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(Group));
+        serializer.UnknownAttribute += new XmlAttributeEventHandler((o, args) =>
+        {
+            Group myGroup = (Group)args.ObjectBeingDeserialized;
+            Assert.NotNull(myGroup);
+            grouplists.Add(args.Attr.LocalName);
+            ++count;
+            if (count >= 3) resetevent.Set();
+        });
+        string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+   <Group xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" GroupType='Technical' GroupNumber='42' GroupBase='Red'>
+           <GroupName>MyGroup</GroupName>
+         </Group>";
+        count = 0;
+        grouplists = new List<string>();
+        resetevent.Reset();
+        Group group = (Group)serializer.Deserialize(GetStreamFromString(xmlFileContent));
+        bool wait = resetevent.WaitOne(TimeSpan.FromMilliseconds(3000));
+        Assert.True(wait);
+        Assert.NotNull(group);
+        Assert.NotNull(group.GroupName);
+        Assert.Null(group.GroupVehicle);
+        Assert.Equal(3, count);
+        Assert.Equal(3, grouplists.Count());
+        bool b = grouplists.Contains("GroupType") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase");
+        Assert.True(b);
+    }
+
+    [Fact]
+    public static void XmlDeserializationEventsTest()
+    {
+        // Create an instance of the XmlSerializer class.
+        XmlSerializer serializer = new XmlSerializer(typeof(Group));
+        XmlDeserializationEvents events = new XmlDeserializationEvents();
+        events.OnUnknownAttribute += new XmlAttributeEventHandler((o, args) =>
+        {
+            Group myGroup = (Group)args.ObjectBeingDeserialized;
+            Assert.NotNull(myGroup);
+            grouplists.Add(args.Attr.LocalName);
+            ++count;
+            if (count >= 3) resetevent.Set();
+        });
+        string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+   <Group xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" GroupType='Technical' GroupNumber='42' GroupBase='Red'>
+           <GroupName>MyGroup</GroupName>
+         </Group>";
+        count = 0;
+        grouplists = new List<string>();
+        resetevent.Reset();
+        Group group = (Group)serializer.Deserialize(XmlReader.Create(GetStreamFromString(xmlFileContent)), events);
+        bool wait = resetevent.WaitOne(TimeSpan.FromMilliseconds(3000));
+        Assert.True(wait);
+        Assert.NotNull(group);
+        Assert.NotNull(group.GroupName);
+        Assert.Null(group.GroupVehicle);
+        Assert.Equal(3, count);
+        Assert.Equal(3, grouplists.Count());
+        bool b = grouplists.Contains("GroupType") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase");
+        Assert.True(b);
+    }
+    private static Stream GetStreamFromString(string s)
+    {
+        MemoryStream stream = new MemoryStream();
+        StreamWriter writer = new StreamWriter(stream);
+        writer.Write(s);
+        writer.Flush();
+        stream.Position = 0;
+        return stream;
+    }
     private static T SerializeAndDeserialize<T>(T value, string baseline, Func<XmlSerializer> serializerFactory = null,
         bool skipStringCompare = false, XmlSerializerNamespaces xns = null)
     {

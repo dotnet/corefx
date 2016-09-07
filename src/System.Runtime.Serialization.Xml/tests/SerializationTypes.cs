@@ -3219,3 +3219,16 @@ public enum DogBreed
     GermanShepherd,
     LabradorRetriever
 }
+
+[SoapInclude(typeof(Vehicle))]
+public class Group
+{
+    public string GroupName;
+    public Vehicle GroupVehicle;
+}
+
+[SoapInclude(typeof(Vehicle))]
+public class Vehicle
+{
+    public string LicenseNumber;
+}
