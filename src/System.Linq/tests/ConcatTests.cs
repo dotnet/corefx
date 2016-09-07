@@ -11,6 +11,8 @@ namespace System.Linq.Tests
 {
     public class ConcatTests : EnumerableTests
     {
+        private delegate IEnumerable<T> EnumerableTransform<T>(IEnumerable<T> input);
+
         [Theory]
         [InlineData(new int[] { 2, 3, 2, 4, 5 }, new int[] { 1, 9, 4 })]
         public void SameResultsWithQueryAndRepeatCalls(IEnumerable<int> first, IEnumerable<int> second)
@@ -59,6 +61,7 @@ namespace System.Linq.Tests
         public void FirstNull()
         {
             Assert.Throws<ArgumentNullException>("first", () => ((IEnumerable<int>)null).Concat(Enumerable.Range(0, 0)));
+            Assert.Throws<ArgumentNullException>("first", () => ((IEnumerable<int>)null).Concat(null)); // If both inputs are null, throw for "first" first
         }
 
         [Fact]
@@ -75,6 +78,7 @@ namespace System.Linq.Tests
         [MemberData(nameof(ListSourcesData))]
         [MemberData(nameof(ConcatOfConcatsData))]
         [MemberData(nameof(ConcatWithSelfData))]
+        [MemberData(nameof(ChainedCollectionConcatData))]
         public void VerifyEquals(IEnumerable<int> expected, IEnumerable<int> actual)
         {
             // workaround: xUnit type inference doesn't work if the input type is not T (like IEnumerable<T>)
@@ -85,7 +89,7 @@ namespace System.Linq.Tests
         {
             // All of these transforms should take an enumerable and produce
             // another enumerable with the same contents.
-            var transforms = new List<Func<IEnumerable<T>, IEnumerable<T>>>
+            var transforms = new List<EnumerableTransform<T>>
             {
                 e => e,
                 e => e.ToArray(),
@@ -93,8 +97,9 @@ namespace System.Linq.Tests
                 e => e.Select(i => i),
                 e => e.Select(i => i).ToArray(),
                 e => e.Where(i => true),
-                e => e.Concat(Enumerable.Empty<T>()),
-                e => ForceNotCollection(e)
+                e => e.Concat(Array.Empty<T>()),
+                e => ForceNotCollection(e),
+                e => e.Concat(ForceNotCollection(Array.Empty<T>()))
             };
             
             // We run the transforms N^2 times, by testing all transforms
@@ -112,15 +117,15 @@ namespace System.Linq.Tests
             }
         }
 
-        public static IEnumerable<object[]> ArraySourcesData() => GenerateSourcesData(e => e.ToArray());
+        public static IEnumerable<object[]> ArraySourcesData() => GenerateSourcesData(outerTransform: e => e.ToArray());
 
-        public static IEnumerable<object[]> ArraySelectSourcesData() => GenerateSourcesData(e => e.Select(i => i).ToArray());
+        public static IEnumerable<object[]> ArraySelectSourcesData() => GenerateSourcesData(outerTransform: e => e.Select(i => i).ToArray());
 
-        public static IEnumerable<object[]> EnumerableSourcesData() => GenerateSourcesData(e => e);
+        public static IEnumerable<object[]> EnumerableSourcesData() => GenerateSourcesData();
 
-        public static IEnumerable<object[]> NonCollectionSourcesData() => GenerateSourcesData(e => ForceNotCollection(e));
+        public static IEnumerable<object[]> NonCollectionSourcesData() => GenerateSourcesData(outerTransform: e => ForceNotCollection(e));
 
-        public static IEnumerable<object[]> ListSourcesData() => GenerateSourcesData(e => e.ToList());
+        public static IEnumerable<object[]> ListSourcesData() => GenerateSourcesData(outerTransform: e => e.ToList());
 
         public static IEnumerable<object[]> ConcatOfConcatsData()
         {
@@ -145,15 +150,20 @@ namespace System.Linq.Tests
             yield return new object[] { Enumerable.Repeat(1, 18), source };
         }
 
-        private static IEnumerable<object[]> GenerateSourcesData(Func<IEnumerable<int>, IEnumerable<int>> concatTransform)
+        public static IEnumerable<object[]> ChainedCollectionConcatData() => GenerateSourcesData(innerTransform: e => e.ToList());
+
+        private static IEnumerable<object[]> GenerateSourcesData(EnumerableTransform<int> outerTransform = null, EnumerableTransform<int> innerTransform = null)
         {
-            for (int i = 2; i <= 6; i++)
+            outerTransform = outerTransform ?? (e => e);
+            innerTransform = innerTransform ?? (e => e);
+
+            for (int i = 0; i <= 6; i++)
             {
                 var expected = Enumerable.Range(0, i * 3);
                 var actual = Enumerable.Empty<int>();
                 for (int j = 0; j < i; j++)
                 {
-                    actual = concatTransform(actual.Concat(Enumerable.Range(j * 3, 3)));
+                    actual = outerTransform(actual.Concat(innerTransform(Enumerable.Range(j * 3, 3))));
                 }
 
                 yield return new object[] { expected, actual };
@@ -180,6 +190,17 @@ namespace System.Linq.Tests
         {
             yield return new object[] { Enumerable.Empty<int>(), 256, Enumerable.Empty<int>() };
             yield return new object[] { Enumerable.Repeat(6, 1), 256, Enumerable.Repeat(6, 256) };
+        }
+
+        [Fact]
+        public void CountOfConcatIteratorShouldThrowExceptionOnIntegerOverflow()
+        {
+            var supposedlyLargeCollection = new DelegateBasedCollection<int> { CountWorker = () => int.MaxValue };
+            var tinyCollection = new DelegateBasedCollection<int> { CountWorker = () => 1 };
+
+            // We need to use checked arithmetic summing up the collections' counts.
+            Assert.Throws<OverflowException>(() => supposedlyLargeCollection.Concat(tinyCollection).Count());
+            Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(supposedlyLargeCollection).Count());
         }
     }
 }
