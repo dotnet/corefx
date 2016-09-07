@@ -10,7 +10,7 @@ namespace System.Security.Cryptography.Dsa.Tests
 {
     public class DSASignVerify
     {
-        [Fact] //todo: 2048 not always supported
+        [Fact]
         public static void InvalidKeySize_DoesNotInvalidateKey()
         {
             using (DSA dsa = DSAFactory.Create())
@@ -38,13 +38,13 @@ namespace System.Security.Cryptography.Dsa.Tests
         [Fact]
         public static void SignAndVerifyDataExplicit1024()
         {
-            SignAndVerify(DSATestData.HelloBytes, "SHA1", DSATestData.GetDSA1024Params());
+            SignAndVerify(DSATestData.HelloBytes, "SHA1", DSATestData.GetDSA1024Params(), 40);
         }
 
-        [Fact] //todo: 2048 not always supported
+        [Fact]
         public static void SignAndVerifyDataExplicit2048()
         {
-            SignAndVerify(DSATestData.HelloBytes, "SHA256", DSATestData.GetDSA2048Params());
+            SignAndVerify(DSATestData.HelloBytes, "SHA256", DSATestData.GetDSA2048Params(), 64);
         }
 
         [Fact]
@@ -97,12 +97,13 @@ namespace System.Security.Cryptography.Dsa.Tests
             }
         }
 
-        private static void SignAndVerify(byte[] data, string hashAlgorithmName, DSAParameters dsaParameters)
+        private static void SignAndVerify(byte[] data, string hashAlgorithmName, DSAParameters dsaParameters, int expectedSignatureLength)
         {
             using (DSA dsa = DSAFactory.Create())
             {
                 dsa.ImportParameters(dsaParameters);
                 byte[] signature = dsa.SignData(data, new HashAlgorithmName(hashAlgorithmName));
+                Assert.Equal(expectedSignatureLength, signature.Length);
                 bool signatureMatched = dsa.VerifyData(data, signature, new HashAlgorithmName(hashAlgorithmName));
                 Assert.True(signatureMatched);
             }

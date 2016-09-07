@@ -146,11 +146,11 @@
   </ItemGroup>
   <!-- Temporary till we publish Algorithms updated package -->
   <ItemGroup>
-	<ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\pkg\System.Security.Cryptography.Algorithms.pkgproj">
-	  <Project>{81A05E2E-E3AE-4246-B4E6-DD5F31FB71F9}</Project>
-	  <Name>System.Security.Cryptography.Algorithms</Name>
-	</ProjectReference>
-  </ItemGroup>  
+    <ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\pkg\System.Security.Cryptography.Algorithms.pkgproj">
+      <Project>{81A05E2E-E3AE-4246-B4E6-DD5F31FB71F9}</Project>
+      <Name>System.Security.Cryptography.Algorithms</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

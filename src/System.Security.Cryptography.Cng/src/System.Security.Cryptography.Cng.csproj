@@ -13,11 +13,10 @@
     <ContractProject Condition="'$(AssemblyVersion)' == '4.0.0.0'">..\ref\4.0\System.Security.Cryptography.Cng.depproj</ContractProject>
     <AssemblyVersion Condition="'$(TargetGroup)'=='net461'">4.1.0.0</AssemblyVersion>
     <ContractProject Condition="'$(AssemblyVersion)' == '4.1.0.0'">..\ref\4.1\System.Security.Cryptography.Cng.depproj</ContractProject>
-	<AssemblyVersion Condition="'$(TargetGroup)'=='netstandard1.6'">4.2.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)'=='netstandard1.6'">4.2.0.0</AssemblyVersion>
     <ContractProject Condition="'$(AssemblyVersion)' == '4.2.0.0'">..\ref\4.2\System.Security.Cryptography.Cng.depproj</ContractProject>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'net461' OR '$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
     <ResourcesSourceOutputDirectory Condition="'$(IsPartialFacadeAssembly)' == 'true'">None</ResourcesSourceOutputDirectory>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.7</PackageTargetFramework>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
     <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
   </PropertyGroup>
@@ -283,10 +282,10 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='' OR '$(TargetGroup)'=='netstandard1.7'">
     <!-- Temporary till we publish Algorithms updated package -->
-	<ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\pkg\System.Security.Cryptography.Algorithms.pkgproj">
-	  <Project>{81A05E2E-E3AE-4246-B4E6-DD5F31FB71F9}</Project>
-	  <Name>System.Security.Cryptography.Algorithms</Name>
-	</ProjectReference>
+    <ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\pkg\System.Security.Cryptography.Algorithms.pkgproj">
+    <Project>{81A05E2E-E3AE-4246-B4E6-DD5F31FB71F9}</Project>
+    <Name>System.Security.Cryptography.Algorithms</Name>
+  </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

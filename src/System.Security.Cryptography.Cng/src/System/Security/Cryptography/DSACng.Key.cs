@@ -51,7 +51,8 @@ namespace System.Security.Cryptography
         {
             return Key.Handle;
         }
-        private const string BCRYPT_DSA = "DSA"; // BCRYPT_RSA_ALGORITHM
-        private CngAlgorithm _dsnCng = new CngAlgorithm("DSA");
+
+        private const string BCRYPT_DSA_ALGORITHM = "DSA";
+        private CngAlgorithm _dsnCng = new CngAlgorithm(BCRYPT_DSA_ALGORITHM);
     }
 }

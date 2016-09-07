@@ -46,10 +46,10 @@ namespace System.Security.Cryptography
         /// existing OpenSSL <c>DSA*</c>.
         /// </summary>
         /// <remarks>
-        /// This method will increase the reference count of the <c>EC_KEY*</c>, the caller should
+        /// This method will increase the reference count of the <c>DSA*</c>, the caller should
         /// continue to manage the lifetime of their reference.
         /// </remarks>
-        /// <param name="handle">A pointer to an OpenSSL <c>EC_KEY*</c></param>
+        /// <param name="handle">A pointer to an OpenSSL <c>DSA*</c></param>
         /// <exception cref="ArgumentException"><paramref name="handle" /> is invalid</exception>
         public DSAOpenSsl(IntPtr handle)
         {
