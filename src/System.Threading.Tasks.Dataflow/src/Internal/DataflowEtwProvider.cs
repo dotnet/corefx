@@ -14,15 +14,12 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Security;
-#if FEATURE_TRACING
-using System.Diagnostics.Tracing;
-#endif
 
 namespace System.Threading.Tasks.Dataflow.Internal
 {
-#if FEATURE_TRACING
     /// <summary>Provides an event source for tracing Dataflow information.</summary>
     [EventSource(
         Name = "System.Threading.Tasks.Dataflow.DataflowEventSource",
@@ -215,5 +212,4 @@ namespace System.Threading.Tasks.Dataflow.Internal
         }
     #endregion
     }
-#endif
 }
