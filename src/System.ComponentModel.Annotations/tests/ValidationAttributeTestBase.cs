@@ -19,14 +19,9 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Theory]
         public void Validate()
         {
-            foreach (Test testCase in ValidValues())
-            {
-                Validate(testCase.Attribute, testCase.Value, testCase.ValidationContext, true);
-            }
-            foreach (Test testCase in InvalidValues())
-            {
-                Validate(testCase.Attribute, testCase.Value, testCase.ValidationContext, false);
-            }
+            Assert.All(ValidValues(), test => Validate(test.Attribute, test.Value, test.ValidationContext, true));
+
+            Assert.All(InvalidValues(), test => Validate(test.Attribute, test.Value, test.ValidationContext, false));
         }
 
         public void Validate(ValidationAttribute attribute, object value, ValidationContext validationContext, bool isValid)
