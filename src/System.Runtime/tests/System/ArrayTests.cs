@@ -596,13 +596,13 @@ namespace System.Tests
         [Fact]
         public static void Clear_Struct_WithReferenceAndValueTypeFields_Array()
         {
-            var array = new G[]
+            var array = new NonGenericStruct[]
             {
-            new G { x = 1, s = "Hello", z = 2 },
-            new G { x = 2, s = "Hello", z = 3 },
-            new G { x = 3, s = "Hello", z = 4 },
-            new G { x = 4, s = "Hello", z = 5 },
-            new G { x = 5, s = "Hello", z = 6 }
+            new NonGenericStruct { x = 1, s = "Hello", z = 2 },
+            new NonGenericStruct { x = 2, s = "Hello", z = 3 },
+            new NonGenericStruct { x = 3, s = "Hello", z = 4 },
+            new NonGenericStruct { x = 4, s = "Hello", z = 5 },
+            new NonGenericStruct { x = 5, s = "Hello", z = 6 }
             };
 
             Array.Clear(array, 0, 5);
@@ -613,13 +613,13 @@ namespace System.Tests
                 Assert.Equal(0, array[i].z);
             }
 
-            array = new G[]
+            array = new NonGenericStruct[]
             {
-            new G { x = 1, s = "Hello", z = 2 },
-            new G { x = 2, s = "Hello", z = 3 },
-            new G { x = 3, s = "Hello", z = 4 },
-            new G { x = 4, s = "Hello", z = 5 },
-            new G { x = 5, s = "Hello", z = 6 }
+            new NonGenericStruct { x = 1, s = "Hello", z = 2 },
+            new NonGenericStruct { x = 2, s = "Hello", z = 3 },
+            new NonGenericStruct { x = 3, s = "Hello", z = 4 },
+            new NonGenericStruct { x = 4, s = "Hello", z = 5 },
+            new NonGenericStruct { x = 5, s = "Hello", z = 6 }
             };
 
             Array.Clear(array, 2, 3);
@@ -692,16 +692,16 @@ namespace System.Tests
         [Fact]
         public static void ConstrainedCopy_Struct_WithReferenceAndValueTypeFields_Array()
         {
-            var src = new G[]
+            var src = new NonGenericStruct[]
             {
-            new G { x = 1, s = "Hello1", z = 2 },
-            new G { x = 2, s = "Hello2", z = 3 },
-            new G { x = 3, s = "Hello3", z = 4 },
-            new G { x = 4, s = "Hello4", z = 5 },
-            new G { x = 5, s = "Hello5", z = 6 }
+            new NonGenericStruct { x = 1, s = "Hello1", z = 2 },
+            new NonGenericStruct { x = 2, s = "Hello2", z = 3 },
+            new NonGenericStruct { x = 3, s = "Hello3", z = 4 },
+            new NonGenericStruct { x = 4, s = "Hello4", z = 5 },
+            new NonGenericStruct { x = 5, s = "Hello5", z = 6 }
             };
 
-            var dst = new G[5];
+            var dst = new NonGenericStruct[5];
             Array.ConstrainedCopy(src, 0, dst, 0, 5);
             for (int i = 0; i < dst.Length; i++)
             {
@@ -782,21 +782,21 @@ namespace System.Tests
             yield return new object[] { new object[] { 0, 1, 2, 3, null, 5, 6, 7, 8, 9 }, 2, new int?[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc }, 5, 3, new int?[] { 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 2, 3, null, 0xcc, 0xcc } };
 
             // Struct[] -> object[]
-            G[] structArray1 = CreateStructArray();
+            NonGenericStruct[] structArray1 = CreateStructArray();
             yield return new object[] { structArray1, 0, new object[5], 0, 5, structArray1.Select(g => (object)g).ToArray() };
 
             // Struct[] -> Struct[]
-            yield return new object[] { structArray1, 0, new G[5], 0, 5, structArray1 };
+            yield return new object[] { structArray1, 0, new NonGenericStruct[5], 0, 5, structArray1 };
 
             // Struct[] overlaps
-            G[] structArray2 = CreateStructArray();
-            G[] overlappingStructArrayExpected = new G[]
+            NonGenericStruct[] structArray2 = CreateStructArray();
+            NonGenericStruct[] overlappingStructArrayExpected = new NonGenericStruct[]
             {
-                new G { x = 1, s = "Hello1", z = 2 },
-                new G { x = 2, s = "Hello2", z = 3 },
-                new G { x = 2, s = "Hello2", z = 3 },
-                new G { x = 3, s = "Hello3", z = 4 },
-                new G { x = 4, s = "Hello4", z = 5 }
+                new NonGenericStruct { x = 1, s = "Hello1", z = 2 },
+                new NonGenericStruct { x = 2, s = "Hello2", z = 3 },
+                new NonGenericStruct { x = 2, s = "Hello2", z = 3 },
+                new NonGenericStruct { x = 3, s = "Hello3", z = 4 },
+                new NonGenericStruct { x = 4, s = "Hello4", z = 5 }
             };
             yield return new object[] { structArray2, 1, structArray2, 2, 3, overlappingStructArrayExpected };
 
@@ -1324,10 +1324,10 @@ namespace System.Tests
 
         public static IEnumerable<object[]> CopyTo_TestData()
         {
-            yield return new object[] { new B1[10], new D1[10], 0, new D1[10] };
-            yield return new object[] { new D1[10], new B1[10], 0, new B1[10] };
-            yield return new object[] { new B1[10], new I1[10], 0, new I1[10] };
-            yield return new object[] { new I1[10], new B1[10], 0, new B1[10] };
+            yield return new object[] { new NonGenericClass1[10], new NonGenericSubClass1[10], 0, new NonGenericSubClass1[10] };
+            yield return new object[] { new NonGenericSubClass1[10], new NonGenericClass1[10], 0, new NonGenericClass1[10] };
+            yield return new object[] { new NonGenericClass1[10], new NonGenericInterface1[10], 0, new NonGenericInterface1[10] };
+            yield return new object[] { new NonGenericInterface1[10], new NonGenericClass1[10], 0, new NonGenericClass1[10] };
 
             yield return new object[] { new int[] { 0, 1, 2, 3 }, new int[4], 0, new int[] { 0, 1, 2, 3 } };
             yield return new object[] { new int[] { 0, 1, 2, 3 }, new int[7], 2, new int[] { 0, 0, 0, 1, 2, 3, 0 } };
@@ -1350,10 +1350,10 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(null, () => new int[3].CopyTo(new int[10, 10], 0)); // Destination array is multidimensional
 
             Assert.Throws<ArrayTypeMismatchException>(() => new int[3].CopyTo(new string[10], 0)); // Source and destination types are incompatible
-            Assert.Throws<ArrayTypeMismatchException>(() => new B1[10].CopyTo(new B2[10], 0));// Source and destination types hold uncovertible types
+            Assert.Throws<ArrayTypeMismatchException>(() => new NonGenericClass1[10].CopyTo(new NonGenericClass2[10], 0));// Source and destination types hold uncovertible types
 
             Assert.Throws<InvalidCastException>(() => new object[] { "1" }.CopyTo(new int[1], 0)); // Source and destination types hold uncovertible types
-            Assert.Throws<InvalidCastException>(() => new B1[] { new B1() }.CopyTo(new I1[1], 0));// Source and destination types hold uncovertible types
+            Assert.Throws<InvalidCastException>(() => new NonGenericClass1[] { new NonGenericClass1() }.CopyTo(new NonGenericInterface1[1], 0));// Source and destination types hold uncovertible types
 
             Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => new int[3].CopyTo(new int[10], -1)); // Index < 0
             Assert.Throws<ArgumentException>("", () => new int[3].CopyTo(new int[10], 10)); // Index > destination.Length
@@ -1385,7 +1385,7 @@ namespace System.Tests
                 new object[] { typeof(int*), null },
 
                 // Classes, structs, interfaces, enums
-                new object[] { typeof(NonGenericClass), default(NonGenericClass) },
+                new object[] { typeof(NonGenericClass1), default(NonGenericClass1) },
                 new object[] { typeof(GenericClass<int>), default(GenericClass<int>) },
                 new object[] { typeof(NonGenericStruct), default(NonGenericStruct) },
                 new object[] { typeof(GenericStruct<int>), default(GenericStruct<int>) },
@@ -1730,9 +1730,9 @@ namespace System.Tests
             var stringArrayNoNulls = new string[] { "Hello", "Hello", "Goodbye", "Goodbye" };
             yield return new object[] { stringArrayNoNulls, null, 0, 4, -1 };
 
-            var enumArray = new TestEnum[] { TestEnum.Case1, TestEnum.Case2, TestEnum.Case1 };
-            yield return new object[] { enumArray, TestEnum.Case1, 0, 3, 0 };
-            yield return new object[] { enumArray, TestEnum.Case3, 0, 3, -1 };
+            var enumArray = new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case1 };
+            yield return new object[] { enumArray, Int32Enum.Case1, 0, 3, 0 };
+            yield return new object[] { enumArray, Int32Enum.Case3, 0, 3, -1 };
 
             var nullableArray = new int?[] { 0, null, 10 };
             yield return new object[] { nullableArray, null, 0, 3, 1 };
@@ -1841,9 +1841,9 @@ namespace System.Tests
             var stringArrayNoNulls = new string[] { "Hello", "Hello", "Goodbye", "Goodbye" };
             yield return new object[] { stringArrayNoNulls, null, 3, 4, -1 };
 
-            var enumArray = new TestEnum[] { TestEnum.Case1, TestEnum.Case2, TestEnum.Case1 };
-            yield return new object[] { enumArray, TestEnum.Case1, 2, 3, 2 };
-            yield return new object[] { enumArray, TestEnum.Case3, 2, 3, -1 };
+            var enumArray = new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case1 };
+            yield return new object[] { enumArray, Int32Enum.Case1, 2, 3, 2 };
+            yield return new object[] { enumArray, Int32Enum.Case3, 2, 3, -1 };
 
             var nullableArray = new int?[] { 0, null, 10, 10, 0 };
             yield return new object[] { nullableArray, null, 4, 5, 1 };
@@ -2070,9 +2070,9 @@ namespace System.Tests
             yield return new object[] { new string[] { "1", "2", "3", "4", "5" }, 5, 0, new string[] { "1", "2", "3", "4", "5" } };
 
             // TestEnum[] can be cast to int[]
-            var enumArray = new TestEnum[] { TestEnum.Case1, TestEnum.Case2, TestEnum.Case3, TestEnum.Case1 };
-            yield return new object[] { enumArray, 0, 4, new TestEnum[] { TestEnum.Case1, TestEnum.Case3, TestEnum.Case2, TestEnum.Case1 } };
-            yield return new object[] { enumArray, 2, 2, new TestEnum[] { TestEnum.Case1, TestEnum.Case2, TestEnum.Case1, TestEnum.Case3 } };
+            var enumArray = new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case3, Int32Enum.Case1 };
+            yield return new object[] { enumArray, 0, 4, new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case3, Int32Enum.Case2, Int32Enum.Case1 } };
+            yield return new object[] { enumArray, 2, 2, new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case1, Int32Enum.Case3 } };
             yield return new object[] { enumArray, 0, 0, enumArray};
             yield return new object[] { enumArray, 4, 0, enumArray};
 
@@ -2600,10 +2600,10 @@ namespace System.Tests
         public static void SetValue_Casting()
         {
             // Null -> default(null)
-            var arr1 = new S[3];
-            arr1[1].X = 0x22222222;
+            var arr1 = new NonGenericStruct[3];
+            arr1[1].x = 0x22222222;
             arr1.SetValue(null, new int[] { 1 });
-            Assert.Equal(0, arr1[1].X);
+            Assert.Equal(0, arr1[1].x);
 
             // T -> Nullable<T>
             var arr2 = new int?[3];
@@ -2834,42 +2834,23 @@ namespace System.Tests
             return length;
         }
 
-        public enum TestEnum
+        private static NonGenericStruct[] CreateStructArray()
         {
-            Case1,
-            Case2,
-            Case3
-        }
-
-        private static G[] CreateStructArray()
-        {
-            return new G[]
+            return new NonGenericStruct[]
             {
-                new G { x = 1, s = "Hello1", z = 2 },
-                new G { x = 2, s = "Hello2", z = 3 },
-                new G { x = 3, s = "Hello3", z = 4 },
-                new G { x = 4, s = "Hello4", z = 5 },
-                new G { x = 5, s = "Hello5", z = 6 }
+                new NonGenericStruct { x = 1, s = "Hello1", z = 2 },
+                new NonGenericStruct { x = 2, s = "Hello2", z = 3 },
+                new NonGenericStruct { x = 3, s = "Hello3", z = 4 },
+                new NonGenericStruct { x = 4, s = "Hello4", z = 5 },
+                new NonGenericStruct { x = 5, s = "Hello5", z = 6 }
             };
         }
 
-        private struct G
+        private struct NonGenericStruct
         {
             public int x;
             public string s;
             public int z;
-
-            public override bool Equals(object obj)
-            {
-                if (!(obj is G))
-                {
-                    return false;
-                }
-                G other = (G)obj;
-                return x == other.x && s == other.s && z == other.z; 
-            }
-
-            public override int GetHashCode() => x.GetHashCode() ^ z.GetHashCode();
         }
 
         private class IntegerComparer : IComparer, IComparer<int>, IEqualityComparer
@@ -2968,11 +2949,6 @@ namespace System.Tests
             MinusTwo = -2
         }
 
-        private struct S
-        {
-            public int X;
-        }
-
         private class NotInt32 : IEquatable<int>
         {
             public bool Equals(int other)
@@ -2980,22 +2956,19 @@ namespace System.Tests
                 throw new NotImplementedException();
             }
         }
+        
+        public class NonGenericClass1 { }
+        public class NonGenericClass2 { }
 
-        private class B1 { }
-        private class D1 : B1 { }
-        private class B2 { }
-        private class D2 : B2 { }
-        private interface I1 { }
-        private interface I2 { }
+        public class NonGenericSubClass2 : NonGenericClass2 { }
+        public class NonGenericSubClass1 : NonGenericClass1 { }
 
-        public class NonGenericClass { }
         public class GenericClass<T> { }
-        public struct NonGenericStruct { }
         public struct GenericStruct<T> { }
-        public interface GenericInterface<T> { }
 
         public interface NonGenericInterface1 { }
         public interface NonGenericInterface2 { }
+        public interface GenericInterface<T> { }
 
         public struct StructWithNonGenericInterface1 : NonGenericInterface1 { }
         public struct StructWithNonGenericInterface1_2 : NonGenericInterface1, NonGenericInterface2 { }
@@ -3008,8 +2981,14 @@ namespace System.Tests
 
         public abstract class AbstractClass { }
         public static class StaticClass { }
-
-        public enum Int32Enum : int { }
+            
+        public enum Int32Enum
+        {
+            Case1,
+            Case2,
+            Case3
+        }
         public enum Int64Enum : long { }
     }
 }
+
