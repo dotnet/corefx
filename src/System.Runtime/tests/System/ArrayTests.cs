@@ -2626,7 +2626,7 @@ namespace System.Tests
 
             // Widening from enum to primitive
             var arr5 = new int[3];
-            arr5.SetValue(E1.MinusTwo, new int[] { 1 });
+            arr5.SetValue(SByteEnum.MinusTwo, new int[] { 1 });
             Assert.Equal(-2, arr5[1]);
         }
 
@@ -2634,7 +2634,7 @@ namespace System.Tests
         public static void SetValue_Casting_Invalid()
         {
             // Unlike most of the other reflection apis, converting or widening a primitive to an enum is NOT allowed.
-            var arr1 = new E1[3];
+            var arr1 = new SByteEnum[3];
             Assert.Throws<InvalidCastException>(() => arr1.SetValue((sbyte)1, new int[] { 1 }));
 
             // Primitive widening must be value-preserving
@@ -2944,7 +2944,7 @@ namespace System.Tests
             public int Compare(object x, object y) => Compare((ComparableRefType)x, (ComparableRefType)y);
         }
 
-        private enum E1 : sbyte
+        private enum SByteEnum : sbyte
         {
             MinusTwo = -2
         }
