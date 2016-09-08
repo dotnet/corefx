@@ -141,6 +141,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetCurrentDirectory.cs">
       <Link>Common\Interop\Windows\mincore\Interop.SetCurrentDirectory.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SHGetKnownFolderPath.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.SHGetKnownFolderPath.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SYSTEM_INFO.cs">
       <Link>Common\Interop\Windows\mincore\Interop.SYSTEM_INFO.cs</Link>
     </Compile>
