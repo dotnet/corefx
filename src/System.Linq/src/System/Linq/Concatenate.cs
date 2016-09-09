@@ -144,7 +144,7 @@ namespace System.Linq
             }
         }
 
-        private sealed class Concat2CollectionIterator<TSource> : ConcatCollectionIterator<TSource>
+        private sealed class Concat2CollectionIterator<TSource> : ConcatIterator<TSource>
         {
             private readonly ICollection<TSource> _first;
             private readonly ICollection<TSource> _second;
@@ -156,7 +156,7 @@ namespace System.Linq
                 _second = second;
             }
 
-            internal override int Count => checked(_first.Count + _second.Count);
+            internal int Count => checked(_first.Count + _second.Count);
 
             public override Iterator<TSource> Clone()
             {
@@ -173,19 +173,13 @@ namespace System.Linq
                 return new ConcatNEnumerableIterator<TSource>(this, next, 2);
             }
 
-            internal override void CopyToUntil(TSource[] array, int lastIndex)
+            internal void CopyTo(TSource[] array, int arrayIndex)
             {
-                Debug.Assert(array != null && array.Length != 0);
-                Debug.Assert(lastIndex >= 0 && lastIndex < array.Length);
+                Debug.Assert(array != null);
+                Debug.Assert(array.Length - arrayIndex >= Count);
 
-                int totalCount = lastIndex + 1;
-                Debug.Assert(totalCount >= Count);
-
-                int firstCount = _first.Count;
-                int secondCount = _second.Count;
-
-                _second.CopyTo(array, totalCount - secondCount);
-                _first.CopyTo(array, totalCount - secondCount - firstCount);
+                _first.CopyTo(array, 0);
+                _second.CopyTo(array, _first.Count);
             }
 
             internal override IEnumerable<TSource> GetEnumerable(int index)
@@ -200,9 +194,9 @@ namespace System.Linq
 
             public override TSource[] ToArray()
             {
-                int firstCount = _first.Count;
-                int secondCount = _second.Count;
-                int totalCount = firstCount + secondCount;
+                // TODO: Once #11525 is merged, we must add tests ensuring this throws on overflow.
+                int firstCount = _first.Count; // Cache an interface method call
+                int totalCount = checked(firstCount + _second.Count);
 
                 if (totalCount == 0)
                 {
@@ -217,34 +211,19 @@ namespace System.Linq
                 return result;
             }
 
-            public override List<TSource> ToList()
-            {
-                int firstCount = _first.Count;
-                int secondCount = _second.Count;
-                var result = new List<TSource>(firstCount + secondCount);
-                
-                if (firstCount != 0)
-                {
-                    result.AddRange(_first);
-                }
-                if (secondCount != 0)
-                {
-                    result.AddRange(_second);
-                }
-
-                return result;
-            }
+            public override int GetCount(bool onlyIfCheap) => Count; // Getting the count is always cheap.
         }
 
-        private sealed class ConcatNCollectionIterator<TSource> : ConcatCollectionIterator<TSource>
+        private sealed class ConcatNCollectionIterator<TSource> : ConcatIterator<TSource>
         {
-            private readonly ConcatCollectionIterator<TSource> _previous;
+            private readonly ConcatIterator<TSource> _previous;
             private readonly ICollection<TSource> _next;
             private readonly int _nextIndex;
 
-            internal ConcatNCollectionIterator(ConcatCollectionIterator<TSource> previous, ICollection<TSource> next, int nextIndex)
+            internal ConcatNCollectionIterator(ConcatIterator<TSource> previous, ICollection<TSource> next, int nextIndex)
             {
                 Debug.Assert(previous != null);
+                Debug.Assert(previous is Concat2CollectionIterator<TSource> || previous is ConcatNCollectionIterator<TSource>);
                 Debug.Assert(next != null);
                 Debug.Assert(nextIndex >= 2);
 
@@ -253,7 +232,7 @@ namespace System.Linq
                 _nextIndex = nextIndex;
             }
 
-            internal override int Count
+            private int Count
             {
                 get
                 {
@@ -261,28 +240,24 @@ namespace System.Linq
                     // on each of the collections.
                     // Note that we start from the last collection and make our way to the first,
                     // but the cumulative count will be the same either way.
-                    // Though tempting, it is unwise to use recursion here since we could end up
-                    // with a stack overflow.
                     
                     int totalCount = _next.Count;
-                    ConcatCollectionIterator<TSource> previous = _previous;
+                    ConcatIterator<TSource> previous = _previous;
 
-                    while (true)
+                    // TODO: This can be made more readable once we use C# 7 which supports pattern matching.
+                    ConcatNCollectionIterator<TSource> previousN;
+                    while ((previousN = previous as ConcatNCollectionIterator<TSource>) != null)
                     {
-                        var previousN = previous as ConcatNCollectionIterator<TSource>;
-                        if (previousN != null)
+                        checked
                         {
-                            checked
-                            {
-                                totalCount += previousN._next.Count;
-                            }
-                            previous = previousN._previous;
-                            continue;
+                            totalCount += previousN._next.Count;
                         }
-
-                        Debug.Assert(previous is Concat2CollectionIterator<TSource>);
-                        return checked(totalCount + previous.Count);
+                        previous = previousN._previous;
                     }
+
+                    var previous2 = previous as Concat2CollectionIterator<TSource>;
+                    Debug.Assert(previous2 != null);
+                    return checked(totalCount + previous2.Count);
                 }
             }
 
@@ -298,47 +273,53 @@ namespace System.Linq
                 {
                     return new ConcatNCollectionIterator<TSource>(this, nextCol, _nextIndex + 1);
                 }
+                
+                // If we encounter a non-ICollection then getting .Count and performing .ToArray()
+                // will no longer be cheap, due to enumerables' lazy nature. So, fall back to using
+                // enumerable-based iterators for any further chaining.
                 return new ConcatNEnumerableIterator<TSource>(this, next, _nextIndex + 1);
             }
 
-            internal override void CopyToUntil(TSource[] array, int lastIndex)
+            // Copy all of the elements in the iterator, finishing before arrayIndex.
+            // If arrayIndex is array.Length, we'll finish copying at the end of the array.
+            // The reason we take an ending index as opposed to a starting one is because
+            // we only hold a reference to the most recently concat'd collection. So to start
+            // copying at a certain index, we'd have to re-walk the linked list of iterators
+            // all the way back to the least recent one, and repeat that for all of the
+            // collections we hold.
+            private void CopyBefore(TSource[] array, int arrayIndex)
             {
-                Debug.Assert(array != null && array.Length != 0);
-                Debug.Assert(lastIndex >= 0 && lastIndex < array.Length);
-
-                int totalCount = lastIndex + 1;
-                Debug.Assert(totalCount >= Count);
+                Debug.Assert(array != null);
+                Debug.Assert(arrayIndex >= 0 && arrayIndex <= array.Length);
+                Debug.Assert(arrayIndex >= Count);
 
                 // Copy the items from this collection, which is the last
                 // one that was concatenated
                 int copied = _next.Count;
-                _next.CopyTo(array, totalCount - copied);
+                _next.CopyTo(array, arrayIndex - copied);
 
-                ConcatCollectionIterator<TSource> previous = _previous;
+                ConcatIterator<TSource> previous = _previous;
 
-                while (true)
+                // TODO: This can be made more readable once we use C# 7 which supports pattern matching.
+                ConcatNCollectionIterator<TSource> previousN;
+                while ((previousN = previous as ConcatNCollectionIterator<TSource>) != null)
                 {
-                    var previousN = previous as ConcatNCollectionIterator<TSource>;
-                    if (previousN != null)
+                    checked
                     {
-                        checked
-                        {
-                            copied += previousN._next.Count;
-                        }
-                        previousN._next.CopyTo(array, totalCount - copied);
-                        previous = previousN._previous;
-                        continue;
+                        copied += previousN._next.Count;
                     }
-
-                    // We've reached the first 2 collections that were concatenated
-                    Debug.Assert(previous is Concat2CollectionIterator<TSource>);
-                    Debug.Assert(previous.Count == Count - copied);
-
-                    // We just called CopyTo *starting from* totalCount - copied, so this will copy all of
-                    // the previous elements *until* totalCount - copied - 1. 
-                    previous.CopyToUntil(array, totalCount - copied - 1);
-                    break;
+                    previousN._next.CopyTo(array, arrayIndex - copied);
+                    previous = previousN._previous;
                 }
+
+                // We've reached the first 2 collections that were concatenated
+                var previous2 = previous as Concat2CollectionIterator<TSource>;
+                Debug.Assert(previous2 != null);
+
+                copied += previous2.Count;
+                Debug.Assert(copied == Count); // We should have copied all the elements
+
+                previous2.CopyTo(array, arrayIndex - copied);
             }
 
             internal override IEnumerable<TSource> GetEnumerable(int index)
@@ -363,8 +344,8 @@ namespace System.Linq
                         continue;
                     }
 
-                    ConcatCollectionIterator<TSource> previous2 = current._previous;
-                    Debug.Assert(previous2 is Concat2CollectionIterator<TSource>);
+                    var previous2 = current._previous as Concat2CollectionIterator<TSource>;
+                    Debug.Assert(previous2 != null);
                     Debug.Assert(index == 0 || index == 1);
                     return previous2.GetEnumerable(index);
                 }
@@ -379,14 +360,11 @@ namespace System.Linq
                 }
 
                 var result = new TSource[totalCount];
-                CopyToUntil(result, result.Length - 1);
+                CopyBefore(result, result.Length);
                 return result;
             }
 
-            public override List<TSource> ToList()
-            {
-                return PopulateList(new List<TSource>(Count));
-            }
+            public override int GetCount(bool onlyIfCheap) => Count; // Getting the count is always cheap.
         }
 
         private abstract class ConcatIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
@@ -447,9 +425,23 @@ namespace System.Linq
                 return EnumerableHelpers.ToArray(this);
             }
 
-            public virtual List<TSource> ToList()
+            public List<TSource> ToList()
             {
-                return PopulateList(new List<TSource>());
+                int count = GetCount(onlyIfCheap: true);
+                var list = count != -1 ? new List<TSource>(count) : new List<TSource>();
+
+                for (int i = 0; ; i++)
+                {
+                    IEnumerable<TSource> source = GetEnumerable(i);
+                    if (source == null)
+                    {
+                        break;
+                    }
+
+                    list.AddRange(source);
+                }
+
+                return list;
             }
 
             public virtual int GetCount(bool onlyIfCheap)
@@ -476,31 +468,6 @@ namespace System.Linq
 
                 return count;
             }
-
-            protected List<TSource> PopulateList(List<TSource> list)
-            {
-                for (int i = 0; ; i++)
-                {
-                    IEnumerable<TSource> source = GetEnumerable(i);
-                    if (source == null)
-                    {
-                        break;
-                    }
-
-                    list.AddRange(source);
-                }
-
-                return list;
-            }
-        }
-
-        private abstract class ConcatCollectionIterator<TSource> : ConcatIterator<TSource>
-        {
-            internal abstract int Count { get; }
-
-            internal abstract void CopyToUntil(TSource[] array, int lastIndex);
-
-            public override int GetCount(bool onlyIfCheap) => Count; // Should always be cheap
         }
     }
 }
