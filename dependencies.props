@@ -3,14 +3,13 @@
   <PropertyGroup>
     <CoreFxCurrentRef>980912e90011208423360eba83fe37ad46a1cc91</CoreFxCurrentRef>
     <CoreClrCurrentRef>980912e90011208423360eba83fe37ad46a1cc91</CoreClrCurrentRef>
-    <ExternalCurrentRef>980912e90011208423360eba83fe37ad46a1cc91</ExternalCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
     <CoreFxExpectedPrerelease>preview1-24508-08</CoreFxExpectedPrerelease>
     <CoreClrExpectedPrerelease>preview1-24510-01</CoreClrExpectedPrerelease>
-    <ExternalExpectedPrerelease>beta-24509-00</ExternalExpectedPrerelease>
+    <ExternalExpectedPrerelease>rc3-24214-00</ExternalExpectedPrerelease>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
@@ -34,11 +33,6 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)coreclr/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreClrCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Include="External">
-      <!-- ProjectK-TFS dependency remains on master: there aren't release/1.1.0 builds from TFS. -->
-      <BuildInfoPath>$(BaseDotNetBuildInfo)projectk-tfs/master</BuildInfoPath>
-      <CurrentRef>$(ExternalCurrentRef)</CurrentRef>
-    </RemoteDependencyBuildInfo>
 
     <DependencyBuildInfo Include="@(RemoteDependencyBuildInfo)">
       <RawVersionsBaseUrl>https://raw.githubusercontent.com/dotnet/versions</RawVersionsBaseUrl>
@@ -53,11 +47,6 @@
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>CoreClrExpectedPrerelease</ElementName>
       <BuildInfoName>CoreClr</BuildInfoName>
-    </XmlUpdateStep>
-    <XmlUpdateStep Include="External">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>ExternalExpectedPrerelease</ElementName>
-      <BuildInfoName>External</BuildInfoName>
     </XmlUpdateStep>
   </ItemGroup>
 
