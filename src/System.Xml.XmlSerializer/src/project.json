@@ -1,6 +1,6 @@
 {
   "frameworks": {
-    "netstandard1.7": {
+    "netstandard1.3": {
       "dependencies": {
         "System.Collections": "4.3.0-beta-devapi-24513-01",
         "System.Collections.NonGeneric": "4.3.0-beta-devapi-24513-01",
@@ -32,10 +32,10 @@
         "System.Threading.Tasks": "4.3.0-beta-devapi-24513-01"
       },
       "imports": [
-        "dotnet5.8"
+        "dotnet5.4"
       ]
     },
-    "net463": {
+    "net46": {
       "dependencies": {
         "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1",
         "System.Collections.NonGeneric": "4.3.0-beta-devapi-24503-01"
