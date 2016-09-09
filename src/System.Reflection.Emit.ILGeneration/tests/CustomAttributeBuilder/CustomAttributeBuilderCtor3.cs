@@ -18,28 +18,9 @@ namespace System.Reflection.Emit.Tests
         public static IEnumerable<object[]> TestData()
         {
             string stringValue1 = "TestString1";
-            string stringValue2 = "TestString2";
             int intValue1 = 10;
-            int intValue2 = 20;
 
-            yield return new object[]
-            {
-                new Type[] { typeof(string), typeof(int) },
-                new object[] { stringValue1, intValue1 },
-                new string[] { IntProperty, StringProperty },
-                new object[] { intValue2, stringValue2 },
-                new object[] { intValue2, stringValue2, stringValue1, intValue1 }
-            };
-
-            yield return new object[]
-            {
-                new Type[] { typeof(string), typeof(int) },
-                new object[] { stringValue1, intValue1 },
-                new string[] { IntProperty },
-                new object[] { intValue2 },
-                new object[] { intValue2, null, stringValue1, intValue1 }
-            };
-
+            // DUPLICATE: 2 ctor, 0 properties, 0 fields
             yield return new object[]
             {
                 new Type[] { typeof(string), typeof(int) },
@@ -49,6 +30,7 @@ namespace System.Reflection.Emit.Tests
                 new object[] { 0, null, stringValue1, intValue1 }
             };
 
+            // DUPLICATE: 0 ctor, 0 properties, 0 fields
             yield return new object[]
             {
                 new Type[0],
@@ -58,39 +40,13 @@ namespace System.Reflection.Emit.Tests
                 new object[] { 0, null, null, 0 }
             };
 
-            yield return new object[]
-            {
-                new Type[0],
-                new object[0],
-                new string[] { IntProperty },
-                new object[] {intValue1 },
-                new object[] { intValue1, null, null, 0 }
-            };
-
-            yield return new object[]
-            {
-                new Type[0],
-                new object[0],
-                new string[] { IntProperty, StringProperty },
-                new object[] {intValue1, stringValue1 },
-                new object[] { intValue1, stringValue1, null, 0 }
-            };
-
-            yield return new object[]
-            {
-                new Type[] { typeof(string), typeof(int), typeof(string), typeof(int) },
-                new object[] { stringValue1, intValue1, stringValue1, intValue1 },
-                new string[] { IntProperty, StringProperty },
-                new object[] { intValue2, stringValue2 },
-                new object[] { intValue2, stringValue2, stringValue1, intValue1 }
-            };
         }
 
         [Theory]
         [MemberData(nameof(TestData))]
         public void Ctor(Type[] ctorParams, object[] constructorArgs, string[] namedPropertyNames, object[] propertyValues, object[] expected)
         {
-            Type attribute = typeof(CustomAttributeBuilderTest);
+            Type attribute = typeof(TestAttribute);
 
             ConstructorInfo constructor = attribute.GetConstructor(ctorParams);
             PropertyInfo[] namedProperties = Helpers.GetProperties(namedPropertyNames);
@@ -110,7 +66,7 @@ namespace System.Reflection.Emit.Tests
         [InlineData(new string[] { IntProperty }, new object[] { "TestString" }, null)]
         public void NamedPropertyAndPropertyValuesDifferentLengths_ThrowsArgumentException(string[] propertyNames, object[] propertyValues, string paramName)
         {
-            ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
+            ConstructorInfo constructor = typeof(TestAttribute).GetConstructor(new Type[0]);
             PropertyInfo[] namedProperties = Helpers.GetProperties(propertyNames);
 
             Assert.Throws<ArgumentException>(paramName, () => new CustomAttributeBuilder(constructor, new object[0], namedProperties, propertyValues));
@@ -137,7 +93,7 @@ namespace System.Reflection.Emit.Tests
         [InlineData(new Type[] { typeof(string), typeof(int) }, new object[] { 10, "TestString" })]
         public void ConstructorArgsDontMatchConstructor_ThrowsArgumentException(Type[] ctorParams, object[] constructorArgs)
         {
-            ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(ctorParams);
+            ConstructorInfo constructor = typeof(TestAttribute).GetConstructor(ctorParams);
 
             Assert.Throws<ArgumentException>(null, () => new CustomAttributeBuilder(constructor, constructorArgs, new PropertyInfo[0], new object[0]));
         }
@@ -151,35 +107,35 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void NullConstructorArgs_ThrowsArgumentNullException()
         {
-            ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
+            ConstructorInfo constructor = typeof(TestAttribute).GetConstructor(new Type[0]);
             Assert.Throws<ArgumentNullException>("constructorArgs", () => new CustomAttributeBuilder(constructor, null, new PropertyInfo[0], new object[0]));
         }
 
         [Fact]
         public void NullNamedProperties_ThrowsArgumentNullException()
         {
-            ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
+            ConstructorInfo constructor = typeof(TestAttribute).GetConstructor(new Type[0]);
             Assert.Throws<ArgumentNullException>("namedProperties", () => new CustomAttributeBuilder(constructor, new object[0], (PropertyInfo[])null, new object[0]));
         }
 
         [Fact]
         public void NullPropertyValues_ThrowsArgumentNullException()
         {
-            ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
+            ConstructorInfo constructor = typeof(TestAttribute).GetConstructor(new Type[0]);
             Assert.Throws<ArgumentNullException>("propertyValues", () => new CustomAttributeBuilder(constructor, new object[0], new PropertyInfo[0], null));
         }
 
         [Fact]
         public void NullObjectInPropertyValues_ThrowsArgumentNullException()
         {
-            ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
+            ConstructorInfo constructor = typeof(TestAttribute).GetConstructor(new Type[0]);
             Assert.Throws<ArgumentNullException>("propertyValues[0]", () => new CustomAttributeBuilder(constructor, new object[0], Helpers.GetProperties(IntProperty, StringProperty), new object[] { null, 10 }));
         }
 
         [Fact]
         public void NullObjectInNamedProperties_ThrowsArgumentNullException()
         {
-            ConstructorInfo constructor = typeof(CustomAttributeBuilderTest).GetConstructor(new Type[0]);
+            ConstructorInfo constructor = typeof(TestAttribute).GetConstructor(new Type[0]);
             Assert.Throws<ArgumentNullException>("namedProperties[0]", () => new CustomAttributeBuilder(constructor, new object[0], Helpers.GetProperties(null, IntProperty), new object[] { "TestString", 10 }));
         }
 
