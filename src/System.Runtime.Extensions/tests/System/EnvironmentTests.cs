@@ -246,6 +246,65 @@ namespace System.Tests
             }
         }
 
+        [Theory]
+        [InlineData(SpecialFolder.ApplicationData)]
+        [InlineData(SpecialFolder.CommonApplicationData)]
+        [InlineData(SpecialFolder.LocalApplicationData)]
+        [InlineData(SpecialFolder.Cookies)]
+        [InlineData(SpecialFolder.Desktop)]
+        [InlineData(SpecialFolder.Favorites)]
+        [InlineData(SpecialFolder.History)]
+        [InlineData(SpecialFolder.InternetCache)]
+        [InlineData(SpecialFolder.Programs)]
+        [InlineData(SpecialFolder.MyComputer)]
+        [InlineData(SpecialFolder.MyMusic)]
+        [InlineData(SpecialFolder.MyPictures)]
+        [InlineData(SpecialFolder.MyVideos)]
+        [InlineData(SpecialFolder.Recent)]
+        [InlineData(SpecialFolder.SendTo)]
+        [InlineData(SpecialFolder.StartMenu)]
+        [InlineData(SpecialFolder.Startup)]
+        [InlineData(SpecialFolder.System)]
+        [InlineData(SpecialFolder.Templates)]
+        [InlineData(SpecialFolder.DesktopDirectory)]
+        [InlineData(SpecialFolder.Personal)]
+        [InlineData(SpecialFolder.ProgramFiles)]
+        [InlineData(SpecialFolder.CommonProgramFiles)]
+        [InlineData(SpecialFolder.AdminTools)]
+        [InlineData(SpecialFolder.CDBurning)]
+        [InlineData(SpecialFolder.CommonAdminTools)]
+        [InlineData(SpecialFolder.CommonDocuments)]
+        [InlineData(SpecialFolder.CommonMusic)]
+        [InlineData(SpecialFolder.CommonOemLinks)]
+        [InlineData(SpecialFolder.CommonPictures)]
+        [InlineData(SpecialFolder.CommonStartMenu)]
+        [InlineData(SpecialFolder.CommonPrograms)]
+        [InlineData(SpecialFolder.CommonStartup)]
+        [InlineData(SpecialFolder.CommonDesktopDirectory)]
+        [InlineData(SpecialFolder.CommonTemplates)]
+        [InlineData(SpecialFolder.CommonVideos)]
+        [InlineData(SpecialFolder.Fonts)]
+        [InlineData(SpecialFolder.NetworkShortcuts)]
+        [InlineData(SpecialFolder.PrinterShortcuts)]
+        [InlineData(SpecialFolder.UserProfile)]
+        [InlineData(SpecialFolder.CommonProgramFilesX86)]
+        [InlineData(SpecialFolder.ProgramFilesX86)]
+        [InlineData(SpecialFolder.Resources)]
+        [InlineData(SpecialFolder.LocalizedResources)]
+        [InlineData(SpecialFolder.SystemX86)]
+        [InlineData(SpecialFolder.Windows)]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        public unsafe void GetFolderPath_Windows(SpecialFolder folder)
+        {
+            string knownFolder = Environment.GetFolderPath(folder);
+            Assert.NotEmpty(knownFolder);
+
+            char* buffer = stackalloc char[260];
+            SHGetFolderPathW(IntPtr.Zero, (int)folder, IntPtr.Zero, 0, buffer);
+            string folderPath = new string(buffer);
+            Assert.Equal(folderPath, knownFolder);
+        }
+
         [Fact]
         [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
         public void GetLogicalDrives_Unix_AtLeastOneIsRoot()
@@ -278,5 +337,13 @@ namespace System.Tests
 
         [DllImport("api-ms-win-core-file-l1-1-0.dll", SetLastError = true)]
         internal static extern int GetLogicalDrives();
+
+        [DllImport("api-ms-win-shell-shellfolders-l1-1-0.dll", SetLastError = false, BestFitMapping = false, ExactSpelling = true)]
+        internal unsafe static extern int SHGetFolderPathW(
+            IntPtr hwndOwner,
+            int nFolder,
+            IntPtr hToken,
+            uint dwFlags,
+            char* pszPath);
     }
 }
