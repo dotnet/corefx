@@ -6,12 +6,12 @@ namespace System.Numerics.Hashing
 {
     internal static class HashHelpers
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Combine(int h1, int h2)
         {
-            // The jit optimizes this to use the ROL instruction on x86
-            // Related GitHub pull request: dotnet/coreclr#1830
-            uint shift5 = ((uint)h1 << 5) | ((uint)h1 >> 27);
-            return ((int)shift5 + h1) ^ h2;
+            uint mask = (uint)h2 + 0x9e3779b9 + ((uint)h1 << 6) + ((uint)h1 >> 2);
+            h1 ^= (int)mask;
+            return h1;
         }
     }
 }
