@@ -191,6 +191,9 @@ internal static partial class Interop
         internal static bool TryReadStatFile(int pid, int tid, out ParsedStat result, ReusableTextReader reusableReader)
         {
             bool b = TryParseStatFile(GetStatFilePathForThread(pid, tid), out result, reusableReader);
+            //
+            // This assert currently fails in the Windows Subsystem For Linux.  See https://github.com/Microsoft/BashOnWindows/issues/967.
+            //
             //Debug.Assert(!b || result.pid == tid, "Expected thread ID from stat file to match supplied tid");
             return b;
         }
