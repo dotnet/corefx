@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -19,36 +18,6 @@ namespace System.Reflection.Emit.Tests
         private const string StringProperty = "TestString";
         private const string GetStringProperty = "GetOnlyString";
         private const string GetIntProperty = "GetOnlyInt32";
-
-        public static IEnumerable<object[]> TestData()
-        {
-            string stringValue1 = "TestString1";
-            int intValue1 = 10;
-            
-            // DUPLICATE: 2 ctor, 0 properties, 0 fields
-            yield return new object[]
-            {
-                new Type[] { typeof(string), typeof(int) },
-                new object[] { stringValue1, intValue1 },
-                new string[0],
-                new object[0],
-                new string[0],
-                new object[0],
-                new object[] { 0, null, stringValue1, intValue1 }
-            };
-
-            // DUPLICATE: 0 ctor, 0 properties, 0 fields
-            yield return new object[]
-            {
-                new Type[0],
-                new object[0],
-                new string[0],
-                new object[0],
-                new string[0],
-                new object[0],
-                new object[] { 0, null, null, 0 }
-            };
-        }
 
         [Theory]
         [InlineData(new string[] { IntProperty }, new object[0], "namedProperties, propertyValues")]
