@@ -201,6 +201,7 @@ namespace System.Linq.Tests
             // We need to use checked arithmetic summing up the collections' counts.
             Assert.Throws<OverflowException>(() => supposedlyLargeCollection.Concat(tinyCollection).Count());
             Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(supposedlyLargeCollection).Count());
+            Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(tinyCollection).Concat(supposedlyLargeCollection).Count());
         }
     }
 }
