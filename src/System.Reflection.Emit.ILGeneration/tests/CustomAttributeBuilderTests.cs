@@ -10,23 +10,7 @@ namespace System.Reflection.Emit.Tests
 {
     public class CustomAttributeBuilderTests
     {
-        public static IEnumerable<object[]> Ctor_Basic_TestData()
-        {
-            yield return new object[] { new Type[] { typeof(string) }, new object[] { "TestString" } };
-            yield return new object[] { new Type[0], new object[0] };
-            yield return new object[] { new Type[] { typeof(string), typeof(bool) }, new object[] { "TestString", true } };
-        }
-        
-        [Theory]
-        [MemberData(nameof(Ctor_Basic_TestData))]
-        public static void Ctor_Basic(Type[] typeArguments, object[] constructorArguments)
-        {
-            ConstructorInfo constructor = typeof(ObsoleteAttribute).GetConstructor(typeArguments);
-            Action<CustomAttributeBuilder> verify = attr => Assert.NotNull(attr);
-            Ctor(constructor, constructorArguments, new PropertyInfo[0], new object[0], new FieldInfo[0], new object[0], verify);
-        }
-
-        public static IEnumerable<object[]> Ctor_Advanced_TestData()
+        public static IEnumerable<object[]> Ctor_TestData()
         {
             string stringValue1 = "TestString1";
             string stringValue2 = "TestString2";
@@ -186,8 +170,8 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Ctor_Advanced_TestData))]
-        public static void Ctor(Type[] ctorTypes, object[] ctorArgs,
+        [MemberData(nameof(Ctor_TestData))]
+        public static void Ctor(Type[] ctorTypes, object[] constructorArgs,
                                 string[] propertyNames, object[] propertyValues,
                                 object[] expectedPropertyValues,
                                 string[] fieldNames, object[] fieldValues,
@@ -201,15 +185,7 @@ namespace System.Reflection.Emit.Tests
             {
                 VerifyCustomAttributeBuilder(attr, TestAttribute.AllProperties, expectedPropertyValues, TestAttribute.AllFields, expectedFieldValues);
             };
-
-            Ctor(constructor, ctorArgs, namedProperties, propertyValues, namedFields, fieldValues, verify);
-        }
-
-        public static void Ctor(ConstructorInfo constructor, object[] constructorArgs,
-                                PropertyInfo[] namedProperties, object[] propertyValues,
-                                FieldInfo[] namedFields, object[] fieldValues,
-                                Action<CustomAttributeBuilder> verify)
-        {
+            
             if (namedProperties.Length == 0)
             {
                 if (namedFields.Length == 0)
