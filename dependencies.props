@@ -1,14 +1,14 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Source of truth for dependency tooling: the commit hash of the dotnet/versions master branch as of the last auto-upgrade. -->
   <PropertyGroup>
-    <CoreFxCurrentRef>9af3f57a71476e88e53a210111aa7c5217fa7d8e</CoreFxCurrentRef>
-    <CoreClrCurrentRef>6c43ba94713264be37d01321af15505e9229e508</CoreClrCurrentRef>
+    <CoreFxCurrentRef>8e49da409205246338c363c790de9692a9ddd636</CoreFxCurrentRef>
+    <CoreClrCurrentRef>8e49da409205246338c363c790de9692a9ddd636</CoreClrCurrentRef>
     <ExternalCurrentRef>35f9fe6cd087265ea8bf9fcd47608aca2ab62efd</ExternalCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>beta-24506-02</CoreFxExpectedPrerelease>
+    <CoreFxExpectedPrerelease>preview1-24508-03</CoreFxExpectedPrerelease>
     <CoreClrExpectedPrerelease>beta-24506-03</CoreClrExpectedPrerelease>
     <ExternalExpectedPrerelease>beta-24506-00</ExternalExpectedPrerelease>
   </PropertyGroup>
@@ -21,7 +21,7 @@
   <!-- Package dependency verification/auto-upgrade configuration. -->
   <PropertyGroup>
     <BaseDotNetBuildInfo>build-info/dotnet/</BaseDotNetBuildInfo>
-    <DependencyBranch>master</DependencyBranch>
+    <DependencyBranch>release/1.1.0</DependencyBranch>
     <CurrentRefXmlPath>$(MSBuildThisFileFullPath)</CurrentRefXmlPath>
   </PropertyGroup>
 
@@ -35,7 +35,8 @@
       <CurrentRef>$(CoreClrCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="External">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)projectk-tfs/$(DependencyBranch)</BuildInfoPath>
+      <!-- ProjectK-TFS dependency remains on master: there aren't release/1.1.0 builds from TFS. -->
+      <BuildInfoPath>$(BaseDotNetBuildInfo)projectk-tfs/master</BuildInfoPath>
       <CurrentRef>$(ExternalCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
 
