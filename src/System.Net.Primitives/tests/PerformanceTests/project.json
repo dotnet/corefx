@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.0.2-preview1-24508-03",
-    "System.Runtime": "4.3.0-preview1-24508-03",
-    "System.Runtime.Extensions": "4.3.0-preview1-24508-03",
+    "Microsoft.NETCore.Platforms": "1.0.2-preview1-24508-08",
+    "System.Runtime": "4.3.0-preview1-24508-08",
+    "System.Runtime.Extensions": "4.3.0-preview1-24508-08",
     "System.Net.Primitives": {
       "version": "4.0.11",
       "exclude": "compile"
