@@ -25,7 +25,7 @@ namespace System.Security.Cryptography
         private bool _canWrite;
         private bool _finalBlockTransformed;
         private SemaphoreSlim _lazyAsyncActiveSemaphore;
-        private bool _leaveOpen;
+        private readonly bool _leaveOpen;
 
         // Constructors
 
