@@ -50,7 +50,7 @@ namespace System.Net.Http.Headers
 
         private RangeHeaderValue(RangeHeaderValue source)
         {
-            Contract.Requires(source != null);
+            Debug.Assert(source != null);
 
             _unit = source._unit;
             if (source._ranges != null)
@@ -140,7 +140,7 @@ namespace System.Net.Http.Headers
 
         internal static int GetRangeLength(string input, int startIndex, out object parsedValue)
         {
-            Contract.Requires(startIndex >= 0);
+            Debug.Assert(startIndex >= 0);
 
             parsedValue = null;
 

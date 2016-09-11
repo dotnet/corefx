@@ -106,8 +106,8 @@ namespace System.Net.Http.Headers
 
         internal static int GetNameValueWithParametersLength(string input, int startIndex, out object parsedValue)
         {
-            Contract.Requires(input != null);
-            Contract.Requires(startIndex >= 0);
+            Debug.Assert(input != null);
+            Debug.Assert(startIndex >= 0);
 
             parsedValue = null;
 

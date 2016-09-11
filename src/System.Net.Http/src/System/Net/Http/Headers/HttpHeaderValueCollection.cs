@@ -82,8 +82,8 @@ namespace System.Net.Http.Headers
         internal HttpHeaderValueCollection(string headerName, HttpHeaders store, T specialValue,
             Action<HttpHeaderValueCollection<T>, T> validator)
         {
-            Contract.Requires(headerName != null);
-            Contract.Requires(store != null);
+            Debug.Assert(headerName != null);
+            Debug.Assert(store != null);
 
             _store = store;
             _headerName = headerName;

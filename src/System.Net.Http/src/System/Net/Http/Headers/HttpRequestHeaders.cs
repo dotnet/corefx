@@ -393,7 +393,7 @@ namespace System.Net.Http.Headers
 
         internal static void AddKnownHeaders(HashSet<string> headerSet)
         {
-            Contract.Requires(headerSet != null);
+            Debug.Assert(headerSet != null);
 
             headerSet.Add(HttpKnownHeaderNames.Accept);
             headerSet.Add(HttpKnownHeaderNames.AcceptCharset);

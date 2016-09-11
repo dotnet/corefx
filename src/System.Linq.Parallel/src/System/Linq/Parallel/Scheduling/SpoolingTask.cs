@@ -35,8 +35,8 @@ namespace System.Linq.Parallel
             QueryTaskGroupState groupState, PartitionedStream<TInputOutput, TIgnoreKey> partitions,
             SynchronousChannel<TInputOutput>[] channels, TaskScheduler taskScheduler)
         {
-            Contract.Requires(partitions.PartitionCount == channels.Length);
-            Contract.Requires(groupState != null);
+            Debug.Assert(partitions.PartitionCount == channels.Length);
+            Debug.Assert(groupState != null);
 
             // Ensure all tasks in this query are parented under a common root.
             Task rootTask = new Task(
@@ -88,8 +88,8 @@ namespace System.Linq.Parallel
             QueryTaskGroupState groupState, PartitionedStream<TInputOutput, TIgnoreKey> partitions,
             AsynchronousChannel<TInputOutput>[] channels, TaskScheduler taskScheduler)
         {
-            Contract.Requires(partitions.PartitionCount == channels.Length);
-            Contract.Requires(groupState != null);
+            Debug.Assert(partitions.PartitionCount == channels.Length);
+            Debug.Assert(groupState != null);
 
             // Ensure all tasks in this query are parented under a common root. Because this
             // is a pipelined query, we detach it from the parent (to avoid blocking the calling
@@ -132,7 +132,7 @@ namespace System.Linq.Parallel
         internal static void SpoolForAll<TInputOutput, TIgnoreKey>(
             QueryTaskGroupState groupState, PartitionedStream<TInputOutput, TIgnoreKey> partitions, TaskScheduler taskScheduler)
         {
-            Contract.Requires(groupState != null);
+            Debug.Assert(groupState != null);
 
             // Ensure all tasks in this query are parented under a common root.
             Task rootTask = new Task(
@@ -203,7 +203,7 @@ namespace System.Linq.Parallel
             QueryOperatorEnumerator<TInputOutput, TIgnoreKey> source, SynchronousChannel<TInputOutput> destination)
             : base(taskIndex, groupState)
         {
-            Contract.Requires(source != null);
+            Debug.Assert(source != null);
             _source = source;
             _destination = destination;
         }

@@ -1217,7 +1217,7 @@ namespace Internal.NativeCrypto
         /// </summary>
         private static int GetAlgIdFromOid(string oid, OidGroup oidGroup)
         {
-            Contract.Requires(oid != null);
+            Debug.Assert(oid != null);
 
             // CAPI does not have ALGID mappings for all of the hash algorithms - see if we know the mapping
             // first to avoid doing an AD lookup on these values

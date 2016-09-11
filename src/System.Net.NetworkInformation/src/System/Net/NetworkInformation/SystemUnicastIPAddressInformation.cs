@@ -154,8 +154,8 @@ namespace System.Net.NetworkInformation
         // Convert a CIDR prefix length to a subnet mask "255.255.255.0" format.
         private static IPAddress PrefixLengthToSubnetMask(byte prefixLength, AddressFamily family)
         {
-            Contract.Requires((0 <= prefixLength) && (prefixLength <= 126));
-            Contract.Requires((family == AddressFamily.InterNetwork) || (family == AddressFamily.InterNetworkV6));
+            Debug.Assert((0 <= prefixLength) && (prefixLength <= 126));
+            Debug.Assert((family == AddressFamily.InterNetwork) || (family == AddressFamily.InterNetworkV6));
 
             byte[] addressBytes;
             if (family == AddressFamily.InterNetwork)

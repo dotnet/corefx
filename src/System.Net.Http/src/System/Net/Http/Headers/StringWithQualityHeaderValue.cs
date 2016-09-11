@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 
@@ -44,7 +45,7 @@ namespace System.Net.Http.Headers
 
         private StringWithQualityHeaderValue(StringWithQualityHeaderValue source)
         {
-            Contract.Requires(source != null);
+            Debug.Assert(source != null);
 
             _value = source._value;
             _quality = source._quality;
@@ -127,7 +128,7 @@ namespace System.Net.Http.Headers
 
         internal static int GetStringWithQualityLength(string input, int startIndex, out object parsedValue)
         {
-            Contract.Requires(startIndex >= 0);
+            Debug.Assert(startIndex >= 0);
 
             parsedValue = null;
 
