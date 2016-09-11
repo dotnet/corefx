@@ -225,15 +225,30 @@ namespace System.Collections.Generic
         // InvalidOperationException.
         public T Dequeue()
         {
-            if (_size == 0)
+            T removed;
+            if (!TryDequeue(out removed))
                 throw new InvalidOperationException(SR.InvalidOperation_EmptyQueue);
 
-            T removed = _array[_head];
+            return removed;
+        }
+
+        // Removes the object at the head of the queue and assigns to out parameter passed
+        //if queue is not empty and returns true.
+        // If the queue is empty, this method assigns default value to out parameter and returns false.
+        public bool TryDequeue(out T item)
+        {
+            if (_size == 0)
+            {
+                item = default(T);
+                return false;
+            }
+
+            item = _array[_head];
             _array[_head] = default(T);
             MoveNext(ref _head);
             _size--;
             _version++;
-            return removed;
+            return true;
         }
 
         // Returns the object at the head of the queue. The object remains in the
