@@ -247,6 +247,12 @@ namespace System.Net
                 return;
             }
 
+            if (length == 0)
+            {
+                EventSourceLogging.Log.DebugMessage("length of ArraySegment in Dump is 0");
+                return;
+            }
+
             var bufferSegment = new byte[length];
             Buffer.BlockCopy(buffer, offset, bufferSegment, 0, length);
             EventSourceLogging.Log.DebugDumpArray(bufferSegment);
