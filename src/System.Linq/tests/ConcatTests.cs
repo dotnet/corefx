@@ -11,7 +11,21 @@ namespace System.Linq.Tests
 {
     public class ConcatTests : EnumerableTests
     {
-        private delegate IEnumerable<T> EnumerableTransform<T>(IEnumerable<T> input);
+        private static List<Func<IEnumerable<T>, IEnumerable<T>>> IdentityTransforms<T>()
+        {
+            // All of these transforms should take an enumerable and produce
+            // another enumerable with the same contents.
+            return new List<Func<IEnumerable<T>, IEnumerable<T>>>
+            {
+                e => e,
+                e => e.ToArray(),
+                e => e.ToList(),
+                e => e.Select(i => i),
+                e => e.Concat(Array.Empty<T>()),
+                e => ForceNotCollection(e),
+                e => e.Concat(ForceNotCollection(Array.Empty<T>()))
+            };
+        }
 
         [Theory]
         [InlineData(new int[] { 2, 3, 2, 4, 5 }, new int[] { 1, 9, 4 })]
@@ -72,7 +86,7 @@ namespace System.Linq.Tests
 
         [Theory]
         [MemberData(nameof(ArraySourcesData))]
-        [MemberData(nameof(ArraySelectSourcesData))]
+        [MemberData(nameof(SelectArraySourcesData))]
         [MemberData(nameof(EnumerableSourcesData))]
         [MemberData(nameof(NonCollectionSourcesData))]
         [MemberData(nameof(ListSourcesData))]
@@ -87,39 +101,24 @@ namespace System.Linq.Tests
 
         private static void VerifyEqualsWorker<T>(IEnumerable<T> expected, IEnumerable<T> actual)
         {
-            // All of these transforms should take an enumerable and produce
-            // another enumerable with the same contents.
-            var transforms = new List<EnumerableTransform<T>>
-            {
-                e => e,
-                e => e.ToArray(),
-                e => e.ToList(),
-                e => e.Select(i => i),
-                e => e.Select(i => i).ToArray(),
-                e => e.Where(i => true),
-                e => e.Concat(Array.Empty<T>()),
-                e => ForceNotCollection(e),
-                e => e.Concat(ForceNotCollection(Array.Empty<T>()))
-            };
+            // Returns a list of functions that, when applied to enumerable, should return
+            // another one that has equivalent contents.
+            var identityTransforms = IdentityTransforms<T>();
             
             // We run the transforms N^2 times, by testing all transforms
             // of expected against all transforms of actual.
-            foreach (var outTransform in transforms)
+            foreach (var outTransform in identityTransforms)
             {
-                foreach (var inTransform in transforms)
+                foreach (var inTransform in identityTransforms)
                 {
-                    IEnumerable<T> sameExpected = outTransform(expected);
-                    IEnumerable<T> sameActual = inTransform(actual);
-
-                    Assert.Equal(sameExpected, sameActual);
-                    Assert.Equal(sameExpected.Count(), sameActual.Count());
+                    Assert.Equal(outTransform(expected), inTransform(actual));
                 }
             }
         }
 
         public static IEnumerable<object[]> ArraySourcesData() => GenerateSourcesData(outerTransform: e => e.ToArray());
 
-        public static IEnumerable<object[]> ArraySelectSourcesData() => GenerateSourcesData(outerTransform: e => e.Select(i => i).ToArray());
+        public static IEnumerable<object[]> SelectArraySourcesData() => GenerateSourcesData(outerTransform: e => e.Select(i => i).ToArray());
 
         public static IEnumerable<object[]> EnumerableSourcesData() => GenerateSourcesData();
 
@@ -152,7 +151,9 @@ namespace System.Linq.Tests
 
         public static IEnumerable<object[]> ChainedCollectionConcatData() => GenerateSourcesData(innerTransform: e => e.ToList());
 
-        private static IEnumerable<object[]> GenerateSourcesData(EnumerableTransform<int> outerTransform = null, EnumerableTransform<int> innerTransform = null)
+        private static IEnumerable<object[]> GenerateSourcesData(
+            Func<IEnumerable<int>, IEnumerable<int>> outerTransform = null,
+            Func<IEnumerable<int>, IEnumerable<int>> innerTransform = null)
         {
             outerTransform = outerTransform ?? (e => e);
             innerTransform = innerTransform ?? (e => e);
@@ -172,24 +173,27 @@ namespace System.Linq.Tests
 
         [Theory]
         [MemberData(nameof(ManyConcatsData))]
-        public void ManyConcats(IEnumerable<int> toConcat, int times, IEnumerable<int> expected)
+        public void ManyConcats(IEnumerable<IEnumerable<int>> sources, IEnumerable<int> expected)
         {
-            Debug.Assert(times >= 0);
-
-            IEnumerable<int> source = Enumerable.Empty<int>();
-            for (int i = 0; i < times; i++)
+            foreach (var transform in IdentityTransforms<int>())
             {
-                source = source.Concat(toConcat);
-            }
+                IEnumerable<int> concatee = Enumerable.Empty<int>();
+                foreach (var source in sources)
+                {
+                    concatee = concatee.Concat(transform(source));
+                }
 
-            Assert.Equal(toConcat.Count() * times, source.Count());
-            VerifyEqualsWorker(expected, source);
+                Assert.Equal(sources.Sum(s => s.Count()), concatee.Count());
+                VerifyEqualsWorker(sources.SelectMany(s => s), concatee);
+            }
         }
 
         public static IEnumerable<object[]> ManyConcatsData()
         {
-            yield return new object[] { Enumerable.Empty<int>(), 256, Enumerable.Empty<int>() };
-            yield return new object[] { Enumerable.Repeat(6, 1), 256, Enumerable.Repeat(6, 256) };
+            yield return new object[] { Enumerable.Repeat(Enumerable.Empty<int>(), 256), Enumerable.Empty<int>() };
+            yield return new object[] { Enumerable.Repeat(Enumerable.Repeat(6, 1), 256), Enumerable.Repeat(6, 256) };
+            // Make sure Concat doesn't accidentally swap around the sources, e.g. [3, 4], [1, 2] should not become [1..4]
+            yield return new object[] { Enumerable.Range(0, 500).Select(i => Enumerable.Repeat(i, 1)).Reverse(), Enumerable.Range(0, 500).Reverse() };
         }
 
         [Fact]
