@@ -117,10 +117,10 @@ namespace System.Linq
                     return null;
                 }
 
-                // Walk back through the chain of ConcatNEnumerableIterators looking for the one
+                // Walk back through the chain of ConcatNIterators looking for the one
                 // that has its _nextIndex equal to index.  If we don't find one, then it
                 // must be prior to any of them, so call GetEnumerable on the previous
-                // Concat2EnumerableIterator.  This avoids a deep recursive call chain.
+                // Concat2Iterator.  This avoids a deep recursive call chain.
                 ConcatNEnumerableIterator<TSource> current = this;
                 while (true)
                 {
@@ -129,17 +129,28 @@ namespace System.Linq
                         return current._next;
                     }
 
-                    var prevN = current._previousConcat as ConcatNEnumerableIterator<TSource>;
-                    if (prevN != null)
+                    ConcatIterator<TSource> previous = current._previousConcat;
+
+                    var previousEnumerables = previous as ConcatNEnumerableIterator<TSource>;
+                    if (previousEnumerables != null)
                     {
-                        current = prevN;
+                        current = previousEnumerables;
                         continue;
                     }
 
-                    ConcatIterator<TSource> prev2 = current._previousConcat;
-                    Debug.Assert(prev2 is Concat2EnumerableIterator<TSource> || prev2 is Concat2CollectionIterator<TSource>);
+                    var previousCollections = previous as ConcatNCollectionIterator<TSource>;
+                    if (previousCollections != null)
+                    {
+                        // Since ConcatNCollectionIterator.GetEnumerable does not call into this method,
+                        // it is safe to call GetEnumerable on it here. It also makes things faster since
+                        // we know we'll only ever run the above typecast once per call of this method.
+                        return previousCollections.GetEnumerable(index);
+                    }
+
+                    // We've reached the tail of the linked list, which contains the first 2 enumerables.
+                    Debug.Assert(previous is Concat2EnumerableIterator<TSource> || previous is Concat2CollectionIterator<TSource>);
                     Debug.Assert(index == 0 || index == 1);
-                    return prev2.GetEnumerable(index);
+                    return previous.GetEnumerable(index);
                 }
             }
         }
