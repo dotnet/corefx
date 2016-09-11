@@ -21,13 +21,13 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
-            var firstCol = first as ICollection<TSource>;
-            if (firstCol != null)
+            var firstCollection = first as ICollection<TSource>;
+            if (firstCollection != null)
             {
-                var secondCol = second as ICollection<TSource>;
-                if (secondCol != null)
+                var secondCollection = second as ICollection<TSource>;
+                if (secondCollection != null)
                 {
-                    return new Concat2CollectionIterator<TSource>(firstCol, secondCol);
+                    return new Concat2CollectionIterator<TSource>(firstCollection, secondCollection);
                 }
             }
 
@@ -176,10 +176,10 @@ namespace System.Linq
 
             internal override ConcatIterator<TSource> Concat(IEnumerable<TSource> next)
             {
-                var nextCol = next as ICollection<TSource>;
-                if (nextCol != null)
+                var nextCollection = next as ICollection<TSource>;
+                if (nextCollection != null)
                 {
-                    return new ConcatNCollectionIterator<TSource>(this, nextCol, 2);
+                    return new ConcatNCollectionIterator<TSource>(this, nextCollection, 2);
                 }
                 return new ConcatNEnumerableIterator<TSource>(this, next, 2);
             }
@@ -279,10 +279,10 @@ namespace System.Linq
 
             internal override ConcatIterator<TSource> Concat(IEnumerable<TSource> next)
             {
-                var nextCol = next as ICollection<TSource>;
-                if (nextCol != null)
+                var nextCollection = next as ICollection<TSource>;
+                if (nextCollection != null)
                 {
-                    return new ConcatNCollectionIterator<TSource>(this, nextCol, _nextIndex + 1);
+                    return new ConcatNCollectionIterator<TSource>(this, nextCollection, _nextIndex + 1);
                 }
                 
                 // If we encounter a non-ICollection then getting .Count and performing .ToArray()
