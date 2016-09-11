@@ -13,7 +13,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 namespace System.Threading.Tasks.Dataflow.Internal
 {

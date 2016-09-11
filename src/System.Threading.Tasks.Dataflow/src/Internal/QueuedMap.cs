@@ -15,7 +15,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 
 namespace System.Threading.Tasks.Dataflow.Internal
 {
