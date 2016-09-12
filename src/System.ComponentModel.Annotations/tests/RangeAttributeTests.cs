@@ -87,13 +87,15 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.Equal(typeof(double), attribute.OperandType);
         }
 
-        [Fact]
-        public static void Ctor_Type_String_String()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(typeof(object))]
+        public static void Ctor_Type_String_String(Type type)
         {
-            var attribute = new RangeAttribute(null, "SomeMinimum", "SomeMaximum");
+            var attribute = new RangeAttribute(type, "SomeMinimum", "SomeMaximum");
             Assert.Equal("SomeMinimum", attribute.Minimum);
             Assert.Equal("SomeMaximum", attribute.Maximum);
-            Assert.Equal(null, attribute.OperandType);
+            Assert.Equal(type, attribute.OperandType);
         }
 
         [Theory]

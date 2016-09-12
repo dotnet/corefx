@@ -54,5 +54,12 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var attribute = new RegularExpressionAttribute(pattern);
             Assert.Throws<InvalidOperationException>(() => attribute.Validate("Any", new ValidationContext(new object())));
         }
+
+        [Fact]
+        public static void Validate_ZeroMatchTimeoutInMilliseconds_ThrowsArgumentOutOfRangeException()
+        {
+            RegularExpressionAttribute attribute = new RegularExpressionAttribute("[^a]+\\.[^z]+") { MatchTimeoutInMilliseconds = 0 };
+            Assert.Throws<ArgumentOutOfRangeException>(() => attribute.Validate("a", new ValidationContext(new object())));
+        }
     }
 }
