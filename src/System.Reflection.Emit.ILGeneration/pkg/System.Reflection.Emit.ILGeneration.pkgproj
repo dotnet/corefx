@@ -12,6 +12,9 @@
     <!-- MonoTouch, Xamarin.iOS, Xamarin.TVOS, and Xamarain.WatchOS don't actually support this, 
          but do support a PCL profile that contained it so we must treat as inbox -->
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
+    <SupportedFramework Include="$(AllXamarinFrameworks)">
+      <Version>$(AssemblyVersion)</Version>
+    </SupportedFramework>
     <!-- ensure that no lib is in scope for AOT since this isn't supported -->
     <File Include="$(PlaceholderFile)">
       <TargetPath>runtimes/aot/lib/netcore50</TargetPath>

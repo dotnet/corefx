@@ -12,6 +12,9 @@
     <InboxOnTargetFramework Include="wpa81" />
     <InboxOnTargetFramework Include="portable-net45+win8+wp8+wpa81" />
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
+    <SupportedFramework Include="$(AllXamarinFrameworks)">
+      <Version>$(AssemblyVersion)</Version>
+    </SupportedFramework>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
