@@ -3,14 +3,14 @@
   <PropertyGroup>
     <CoreFxCurrentRef>8ef1d08ccf278b0f4adcec19693fd7977035cae3</CoreFxCurrentRef>
     <CoreClrCurrentRef>8ef1d08ccf278b0f4adcec19693fd7977035cae3</CoreClrCurrentRef>
-    <ExternalCurrentRef>cdb8679634e573847e20c1eae0fa3918f5daf1e6</ExternalCurrentRef>
+    <ExternalCurrentRef>3488fcb8ab084cfe67ae3448294b457c7c3354d2</ExternalCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
     <CoreFxExpectedPrerelease>beta-24512-01</CoreFxExpectedPrerelease>
     <CoreClrExpectedPrerelease>beta-24512-03</CoreClrExpectedPrerelease>
-    <ExternalExpectedPrerelease>beta-24509-00</ExternalExpectedPrerelease>
+    <ExternalExpectedPrerelease>beta-24512-00</ExternalExpectedPrerelease>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
