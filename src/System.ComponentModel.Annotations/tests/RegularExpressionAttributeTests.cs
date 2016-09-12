@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace System.ComponentModel.DataAnnotations.Tests
@@ -59,7 +60,14 @@ namespace System.ComponentModel.DataAnnotations.Tests
         public static void Validate_ZeroMatchTimeoutInMilliseconds_ThrowsArgumentOutOfRangeException()
         {
             RegularExpressionAttribute attribute = new RegularExpressionAttribute("[^a]+\\.[^z]+") { MatchTimeoutInMilliseconds = 0 };
-            Assert.Throws<ArgumentOutOfRangeException>(() => attribute.Validate("a", new ValidationContext(new object())));
+            Assert.Throws<ArgumentOutOfRangeException>("matchTimeout", () => attribute.Validate("a", new ValidationContext(new object())));
+        }
+
+        [Fact]
+        public static void Validate_MatchingTimesOut_ThrowsRegexMatchTimeoutException()
+        {
+            RegularExpressionAttribute attribute = new RegularExpressionAttribute("(a+)+$") { MatchTimeoutInMilliseconds = 1 };
+            Assert.Throws<RegexMatchTimeoutException>(() => attribute.Validate("aaaaaaaaaaaaaaaaaaaaaaaaaaaa>", new ValidationContext(new object())));
         }
     }
 }
