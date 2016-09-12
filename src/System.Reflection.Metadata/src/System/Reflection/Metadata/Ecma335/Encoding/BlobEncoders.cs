@@ -23,12 +23,22 @@ namespace System.Reflection.Metadata.Ecma335
             Builder = builder;
         }
 
+        /// <summary>
+        /// Encodes Field Signature blob.
+        /// </summary>
+        /// <returns>Encoder of the field type.</returns>
         public SignatureTypeEncoder FieldSignature()
         {
             Builder.WriteByte((byte)SignatureKind.Field);
             return new SignatureTypeEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes Method Specification Signature blob.
+        /// </summary>
+        /// <param name="genericArgumentCount">Number of generic arguments.</param>
+        /// <returns>Encoder of generic arguments.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="genericArgumentCount"/> is not in range [0, 0xffff].</exception>
         public GenericTypeArgumentsEncoder MethodSpecificationSignature(int genericArgumentCount)
         {
             if (unchecked((uint)genericArgumentCount) > ushort.MaxValue) 
@@ -42,6 +52,14 @@ namespace System.Reflection.Metadata.Ecma335
             return new GenericTypeArgumentsEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes Method Signature blob.
+        /// </summary>
+        /// <param name="convention">Calling convention.</param>
+        /// <param name="genericParameterCount">Number of generic parameters.</param>
+        /// <param name="isInstanceMethod">True to encode an instance method signature, false to encode a static method signature.</param>
+        /// <returns>An Encoder of the rest of the signature including return value and parameters.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="genericParameterCount"/> is not in range [0, 0xffff].</exception>
         public MethodSignatureEncoder MethodSignature(
             SignatureCallingConvention convention = SignatureCallingConvention.Default,
             int genericParameterCount = 0, 
@@ -66,12 +84,23 @@ namespace System.Reflection.Metadata.Ecma335
             return new MethodSignatureEncoder(Builder, hasVarArgs: convention == SignatureCallingConvention.VarArgs);
         }
 
+        /// <summary>
+        /// Encodes Property Signature blob.
+        /// </summary>
+        /// <param name="isInstanceProperty">True to encode an instance property signature, false to encode a static property signature.</param>
+        /// <returns>An Encoder of the rest of the signature including return value and parameters, which has the same structure as Method Signature.</returns>
         public MethodSignatureEncoder PropertySignature(bool isInstanceProperty = false)
         {
             Builder.WriteByte(new SignatureHeader(SignatureKind.Property, SignatureCallingConvention.Default, (isInstanceProperty ? SignatureAttributes.Instance : 0)).RawValue);
             return new MethodSignatureEncoder(Builder, hasVarArgs: false);
         }
 
+        /// <summary>
+        /// Encodes Custom Attribute Signature blob.
+        /// Returns a pair of encoders that must be used in the order they appear in the parameter list.
+        /// </summary>
+        /// <param name="fixedArguments">Use first, to encode fixed arguments.</param>
+        /// <param name="namedArguments">Use second, to encode named arguments.</param>
         public void CustomAttributeSignature(out FixedArgumentsEncoder fixedArguments, out CustomAttributeNamedArgumentsEncoder namedArguments)
         {
             Builder.WriteUInt16(0x0001);
@@ -80,6 +109,12 @@ namespace System.Reflection.Metadata.Ecma335
             namedArguments = new CustomAttributeNamedArgumentsEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes Custom Attribute Signature blob.
+        /// </summary>
+        /// <param name="fixedArguments">Called first, to encode fixed arguments.</param>
+        /// <param name="namedArguments">Called second, to encode named arguments.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="fixedArguments"/> or <paramref name="namedArguments"/> is null.</exception>
         public void CustomAttributeSignature(Action<FixedArgumentsEncoder> fixedArguments, Action<CustomAttributeNamedArgumentsEncoder> namedArguments)
         {
             if (fixedArguments == null) Throw.ArgumentNull(nameof(fixedArguments));
@@ -92,6 +127,12 @@ namespace System.Reflection.Metadata.Ecma335
             namedArguments(namedArgumentsEncoder);
         }
 
+        /// <summary>
+        /// Encodes Local Variable Signature.
+        /// </summary>
+        /// <param name="variableCount">Number of local variables.</param>
+        /// <returns>Encoder of a sequence of local variables.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="variableCount"/> is not in range [0, 0x1fffffff].</exception>
         public LocalVariablesEncoder LocalVariableSignature(int variableCount)
         {
             if (unchecked((uint)variableCount) > BlobWriterImpl.MaxCompressedIntegerValue)
@@ -104,12 +145,23 @@ namespace System.Reflection.Metadata.Ecma335
             return new LocalVariablesEncoder(Builder);
         }
 
-        // TODO: TypeSpec is limited to structured types (doesn't have primitive types)
+        /// <summary>
+        /// Encodes Type Specification Signature.
+        /// </summary>
+        /// <returns>
+        /// Type encoder of the structured type represented by the Type Specification (it shall not encode a primitive type).
+        /// </returns>
         public SignatureTypeEncoder TypeSpecificationSignature()
         {
             return new SignatureTypeEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes a Permission Set blob.
+        /// </summary>
+        /// <param name="attributeCount">Number of attributes in the set.</param>
+        /// <returns>Permission Set encoder.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="attributeCount"/> is not in range [0, 0x1fffffff].</exception>
         public PermissionSetEncoder PermissionSetBlob(int attributeCount)
         {
             if (unchecked((uint)attributeCount) > BlobWriterImpl.MaxCompressedIntegerValue)
@@ -122,6 +174,11 @@ namespace System.Reflection.Metadata.Ecma335
             return new PermissionSetEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes Permission Set arguments.
+        /// </summary>
+        /// <param name="argumentCount">Number of arguments in the set.</param>
+        /// <returns>Encoder of the arguments of the set.</returns>
         public NamedArgumentsEncoder PermissionSetArguments(int argumentCount)
         {
             if (unchecked((uint)argumentCount) > BlobWriterImpl.MaxCompressedIntegerValue)
@@ -145,6 +202,13 @@ namespace System.Reflection.Metadata.Ecma335
             HasVarArgs = hasVarArgs;
         }
 
+        /// <summary>
+        /// Encodes return type and parameters.
+        /// Returns a pair of encoders that must be used in the order they appear in the parameter list.
+        /// </summary>
+        /// <param name="parameterCount">Number of parameters.</param>
+        /// <param name="returnType">Use first, to encode the return types.</param>
+        /// <param name="parameters">Use second, to encode the actual parameters.</param>
         public void Parameters(int parameterCount, out ReturnTypeEncoder returnType, out ParametersEncoder parameters)
         {
             if (unchecked((uint)parameterCount) > BlobWriterImpl.MaxCompressedIntegerValue)
@@ -158,6 +222,13 @@ namespace System.Reflection.Metadata.Ecma335
             parameters = new ParametersEncoder(Builder, hasVarArgs: HasVarArgs);
         }
 
+        /// <summary>
+        /// Encodes return type and parameters.
+        /// </summary>
+        /// <param name="parameterCount">Number of parameters.</param>
+        /// <param name="returnType">Called first, to encode the return type.</param>
+        /// <param name="parameters">Called second, to encode the actual parameters.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="returnType"/> or <paramref name="parameters"/> is null.</exception>
         public void Parameters(int parameterCount, Action<ReturnTypeEncoder> returnType, Action<ParametersEncoder> parameters)
         {
             if (returnType == null) Throw.ArgumentNull(nameof(returnType));
@@ -280,7 +351,7 @@ namespace System.Reflection.Metadata.Ecma335
             Builder.WriteSerializedString(typeName);
             Builder.WriteCompressedInteger(encodedArguments.Length);
             Builder.WriteBytes(encodedArguments);
-            return new PermissionSetEncoder(Builder);
+            return this;
         }
 
         public PermissionSetEncoder AddPermission(string typeName, BlobBuilder encodedArguments)
@@ -303,7 +374,7 @@ namespace System.Reflection.Metadata.Ecma335
             Builder.WriteSerializedString(typeName);
             Builder.WriteCompressedInteger(encodedArguments.Count);
             encodedArguments.WriteContentTo(Builder);
-            return new PermissionSetEncoder(Builder);
+            return this;
         }
     }
 
@@ -351,12 +422,24 @@ namespace System.Reflection.Metadata.Ecma335
             return new VectorEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes the type and the items of a vector literal.
+        /// Returns a pair of encoders that must be used in the order they appear in the parameter list.
+        /// </summary>        
+        /// <param name="arrayType">Use first, to encode the type of the vector.</param>
+        /// <param name="vector">Use second, to encode the items of the vector.</param>
         public void TaggedVector(out CustomAttributeArrayTypeEncoder arrayType, out VectorEncoder vector)
         {
             arrayType = new CustomAttributeArrayTypeEncoder(Builder);
             vector = new VectorEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes the type and the items of a vector literal.
+        /// </summary>
+        /// <param name="arrayType">Called first, to encode the type of the vector.</param>
+        /// <param name="vector">Called second, to encode the items of the vector.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="arrayType"/> or <paramref name="vector"/> is null.</exception>
         public void TaggedVector(Action<CustomAttributeArrayTypeEncoder> arrayType, Action<VectorEncoder> vector)
         {
             if (arrayType == null) Throw.ArgumentNull(nameof(arrayType));
@@ -369,17 +452,33 @@ namespace System.Reflection.Metadata.Ecma335
             vector(vectorEncoder);
         }
 
+        /// <summary>
+        /// Encodes a scalar literal.
+        /// </summary>
+        /// <returns>Encoder of the literal value.</returns>
         public ScalarEncoder Scalar()
         {
             return new ScalarEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes the type and the value of a literal.
+        /// Returns a pair of encoders that must be used in the order they appear in the parameter list.
+        /// </summary>
+        /// <param name="type">Called first, to encode the type of the literal.</param>
+        /// <param name="scalar">Called second, to encode the value of the literal.</param>
         public void TaggedScalar(out CustomAttributeElementTypeEncoder type, out ScalarEncoder scalar)
         {
             type = new CustomAttributeElementTypeEncoder(Builder);
             scalar = new ScalarEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes the type and the value of a literal.
+        /// </summary>
+        /// <param name="type">Called first, to encode the type of the literal.</param>
+        /// <param name="scalar">Called second, to encode the value of the literal.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="scalar"/> is null.</exception>
         public void TaggedScalar(Action<CustomAttributeElementTypeEncoder> type, Action<ScalarEncoder> scalar)
         {
             if (type == null) Throw.ArgumentNull(nameof(type));
@@ -402,11 +501,35 @@ namespace System.Reflection.Metadata.Ecma335
             Builder = builder;
         }
 
+        /// <summary>
+        /// Encodes <c>null</c> literal of type <see cref="Array"/>.
+        /// </summary>
         public void NullArray()
         {
             Builder.WriteInt32(-1);
         }
 
+        /// <summary>
+        /// Encodes constant literal.
+        /// </summary>
+        /// <param name="value">
+        /// Constant of type 
+        /// <see cref="bool"/>,
+        /// <see cref="byte"/>,
+        /// <see cref="sbyte"/>,
+        /// <see cref="short"/>,
+        /// <see cref="ushort"/>,
+        /// <see cref="int"/>,
+        /// <see cref="uint"/>,
+        /// <see cref="long"/>,
+        /// <see cref="ulong"/>,
+        /// <see cref="float"/>,
+        /// <see cref="double"/>,
+        /// <see cref="char"/> (encoded as two-byte Unicode character),
+        /// <see cref="string"/> (encoded as SerString), or
+        /// <see cref="Enum"/> (encoded as the underlying integer value).
+        /// </param>
+        /// <exception cref="ArgumentException">Unexpected constant type.</exception>
         public void Constant(object value)
         {
             string str = value as string;
@@ -420,8 +543,18 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
+        /// <summary>
+        /// Encodes literal of type <see cref="Type"/> (possibly null).
+        /// </summary>
+        /// <param name="serializedTypeName">The name of the type, or null.</param>
+        /// <exception cref="ArgumentException"><paramref name="serializedTypeName"/> is empty.</exception>
         public void SystemType(string serializedTypeName)
         {
+            if (serializedTypeName != null && serializedTypeName.Length == 0)
+            {
+                Throw.ArgumentEmptyString(nameof(serializedTypeName));
+            }
+
             String(serializedTypeName);
         }
 
@@ -457,6 +590,11 @@ namespace System.Reflection.Metadata.Ecma335
 
         public LiteralsEncoder Count(int count)
         {
+            if (count < 0)
+            {
+                Throw.ArgumentOutOfRange(nameof(count));
+            }
+
             Builder.WriteUInt32((uint)count);
             return new LiteralsEncoder(Builder);
         }
@@ -473,6 +611,9 @@ namespace System.Reflection.Metadata.Ecma335
 
         public void Name(string name)
         {
+            if (name == null) Throw.ArgumentNull(nameof(name));
+            if (name.Length == 0) Throw.ArgumentEmptyString(nameof(name));
+
             Builder.WriteSerializedString(name);
         }
     }
@@ -488,7 +629,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         public NamedArgumentsEncoder Count(int count)
         {
-            if (unchecked((ushort)count) > ushort.MaxValue)
+            if (unchecked((uint)count) > ushort.MaxValue)
             {
                 Throw.ArgumentOutOfRange(nameof(count));
             }
@@ -507,6 +648,14 @@ namespace System.Reflection.Metadata.Ecma335
             Builder = builder;
         }
 
+        /// <summary>
+        /// Encodes a named argument (field or property).
+        /// Returns a triplet of encoders that must be used in the order they appear in the parameter list.
+        /// </summary>
+        /// <param name="isField">True to encode a field, false to encode a property.</param>
+        /// <param name="type">Use first, to encode the type of the argument.</param>
+        /// <param name="name">Use second, to encode the name of the field or property.</param>
+        /// <param name="literal">Use third, to encode the literal value of the argument.</param>
         public void AddArgument(bool isField, out NamedArgumentTypeEncoder type, out NameEncoder name, out LiteralEncoder literal)
         {
             Builder.WriteByte(isField ? (byte)CustomAttributeNamedArgumentKind.Field : (byte)CustomAttributeNamedArgumentKind.Property);
@@ -515,6 +664,14 @@ namespace System.Reflection.Metadata.Ecma335
             literal = new LiteralEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes a named argument (field or property).
+        /// </summary>
+        /// <param name="isField">True to encode a field, false to encode a property.</param>
+        /// <param name="type">Called first, to encode the type of the argument.</param>
+        /// <param name="name">Called second, to encode the name of the field or property.</param>
+        /// <param name="literal">Called third, to encode the literal value of the argument.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/>, <paramref name="name"/> or <paramref name="literal"/> is null.</exception>
         public void AddArgument(bool isField, Action<NamedArgumentTypeEncoder> type, Action<NameEncoder> name, Action<LiteralEncoder> literal)
         {
             if (type == null) Throw.ArgumentNull(nameof(type));
@@ -639,16 +796,12 @@ namespace System.Reflection.Metadata.Ecma335
 
         public void Enum(string enumTypeName)
         {
+            if (enumTypeName == null) Throw.ArgumentNull(nameof(enumTypeName));
+            if (enumTypeName.Length == 0) Throw.ArgumentEmptyString(nameof(enumTypeName));
+
             WriteTypeCode(SerializationTypeCode.Enum);
             Builder.WriteSerializedString(enumTypeName);
         }
-    }
-
-    public enum FunctionPointerAttributes
-    {
-        None = SignatureAttributes.None,
-        HasThis = SignatureAttributes.Instance,
-        HasExplicitThis = SignatureAttributes.Instance | SignatureAttributes.ExplicitThis
     }
 
     public struct SignatureTypeEncoder
@@ -672,22 +825,27 @@ namespace System.Reflection.Metadata.Ecma335
 
         public void Boolean() => WriteTypeCode(SignatureTypeCode.Boolean);
         public void Char() => WriteTypeCode(SignatureTypeCode.Char);
-        public void Int8() => WriteTypeCode(SignatureTypeCode.SByte);
-        public void UInt8() => WriteTypeCode(SignatureTypeCode.Byte);
+        public void SByte() => WriteTypeCode(SignatureTypeCode.SByte);
+        public void Byte() => WriteTypeCode(SignatureTypeCode.Byte);
         public void Int16() => WriteTypeCode(SignatureTypeCode.Int16);
         public void UInt16() => WriteTypeCode(SignatureTypeCode.UInt16);
         public void Int32() => WriteTypeCode(SignatureTypeCode.Int32);
         public void UInt32() => WriteTypeCode(SignatureTypeCode.UInt32);
         public void Int64() => WriteTypeCode(SignatureTypeCode.Int64);
         public void UInt64() => WriteTypeCode(SignatureTypeCode.UInt64);
-        public void Float32() => WriteTypeCode(SignatureTypeCode.Single);
-        public void Float64() => WriteTypeCode(SignatureTypeCode.Double);
+        public void Single() => WriteTypeCode(SignatureTypeCode.Single);
+        public void Double() => WriteTypeCode(SignatureTypeCode.Double);
         public void String() => WriteTypeCode(SignatureTypeCode.String);
         public void IntPtr() => WriteTypeCode(SignatureTypeCode.IntPtr);
         public void UIntPtr() => WriteTypeCode(SignatureTypeCode.UIntPtr);
         public void Object() => WriteTypeCode(SignatureTypeCode.Object);
 
-        internal static void WritePrimitiveType(BlobBuilder builder, PrimitiveTypeCode type)
+        /// <summary>
+        /// Writes primitive type code.
+        /// </summary>
+        /// <param name="type">Any primitive type code except for <see cref="PrimitiveTypeCode.TypedReference"/> and <see cref="PrimitiveTypeCode.Void"/>.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="type"/> is not valid in this context.</exception>
+        public void PrimitiveType(PrimitiveTypeCode type)
         {
             switch (type)
             {
@@ -707,10 +865,9 @@ namespace System.Reflection.Metadata.Ecma335
                 case PrimitiveTypeCode.UIntPtr:
                 case PrimitiveTypeCode.String:
                 case PrimitiveTypeCode.Object:
-                    builder.WriteByte((byte)type);
+                    Builder.WriteByte((byte)type);
                     return;
 
-                // TODO: should we allow these?
                 case PrimitiveTypeCode.TypedReference:
                 case PrimitiveTypeCode.Void:
                 default:
@@ -719,6 +876,12 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
+        /// <summary>
+        /// Encodes an array type.
+        /// Returns a pair of encoders that must be used in the order they appear in the parameter list.
+        /// </summary>
+        /// <param name="elementType">Use first, to encode the type of the element.</param>
+        /// <param name="arrayShape">Use second, to encode the shape of the array.</param>
         public void Array(out SignatureTypeEncoder elementType, out ArrayShapeEncoder arrayShape)
         {
             Builder.WriteByte((byte)SignatureTypeCode.Array);
@@ -726,6 +889,12 @@ namespace System.Reflection.Metadata.Ecma335
             arrayShape = new ArrayShapeEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes an array type.
+        /// </summary>
+        /// <param name="elementType">Called first, to encode the type of the element.</param>
+        /// <param name="arrayShape">Called second, to encode the shape of the array.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="elementType"/> or <paramref name="arrayShape"/> is null.</exception>
         public void Array(Action<SignatureTypeEncoder> elementType, Action<ArrayShapeEncoder> arrayShape)
         {
             if (elementType == null) Throw.ArgumentNull(nameof(elementType));
@@ -738,13 +907,34 @@ namespace System.Reflection.Metadata.Ecma335
             arrayShape(arrayShapeEncoder);
         }
 
-        public void TypeDefOrRefOrSpec(bool isValueType, EntityHandle typeRefDefSpec)
+        /// <summary>
+        /// Encodes a reference to a type.
+        /// </summary>
+        /// <param name="type"><see cref="TypeDefinitionHandle"/> or <see cref="TypeReferenceHandle"/>.</param>
+        /// <param name="isValueType">True to mark the type as value type, false to mark it as a reference type in the signature.</param>
+        /// <exception cref="ArgumentException"><paramref name="type"/> doesn't have the expected handle kind.</exception>
+        public void Type(EntityHandle type, bool isValueType)
         {
+            // Get the coded index before we start writing anything (might throw argument exception):
+            // Note: We don't allow TypeSpec as per https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/Ecma-335-Issues.md#proposed-specification-change
+            int codedIndex = CodedIndex.TypeDefOrRef(type);
+
             ClassOrValue(isValueType);
-            Builder.WriteCompressedInteger(CodedIndex.ToTypeDefOrRefOrSpec(typeRefDefSpec));
+            Builder.WriteCompressedInteger(codedIndex);
         }
 
-        public MethodSignatureEncoder FunctionPointer(SignatureCallingConvention convention, FunctionPointerAttributes attributes, int genericParameterCount)
+        /// <summary>
+        /// Starts a function pointer signature.
+        /// </summary>
+        /// <param name="convention">Calling convention.</param>
+        /// <param name="attributes">Function pointer attributes.</param>
+        /// <param name="genericParameterCount">Generic parameter count.</param>
+        /// <exception cref="ArgumentException"><paramref name="attributes"/> is invalid.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="genericParameterCount"/> is not in range [0, 0xffff].</exception>
+        public MethodSignatureEncoder FunctionPointer(
+            SignatureCallingConvention convention = SignatureCallingConvention.Default, 
+            FunctionPointerAttributes attributes = FunctionPointerAttributes.None, 
+            int genericParameterCount = 0)
         {
             // Spec:
             // The EXPLICITTHIS (0x40) bit can be set only in signatures for function pointers.
@@ -755,6 +945,11 @@ namespace System.Reflection.Metadata.Ecma335
                 attributes != FunctionPointerAttributes.HasExplicitThis)
             {
                 throw new ArgumentException(SR.InvalidSignature, nameof(attributes));
+            }
+
+            if (unchecked((uint)genericParameterCount) > ushort.MaxValue)
+            {
+                Throw.ArgumentOutOfRange(nameof(genericParameterCount));
             }
 
             Builder.WriteByte((byte)SignatureTypeCode.FunctionPointer);
@@ -768,45 +963,94 @@ namespace System.Reflection.Metadata.Ecma335
             return new MethodSignatureEncoder(Builder, hasVarArgs: convention == SignatureCallingConvention.VarArgs);
         }
 
-        public GenericTypeArgumentsEncoder GenericInstantiation(bool isValueType, EntityHandle typeRefDefSpec, int genericArgumentCount)
+        /// <summary>
+        /// Starts a generic instantiation signature.
+        /// </summary>
+        /// <param name="genericType"><see cref="TypeDefinitionHandle"/> or <see cref="TypeReferenceHandle"/>.</param>
+        /// <param name="genericArgumentCount">Generic argument count.</param>
+        /// <param name="isValueType">True to mark the type as value type, false to mark it as a reference type in the signature.</param>
+        /// <exception cref="ArgumentException"><paramref name="genericType"/> doesn't have the expected handle kind.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="genericArgumentCount"/> is not in range [1, 0xffff].</exception>
+        public GenericTypeArgumentsEncoder GenericInstantiation(EntityHandle genericType, int genericArgumentCount, bool isValueType)
         {
+            if (unchecked((uint)(genericArgumentCount - 1)) > ushort.MaxValue - 1)
+            {
+                Throw.ArgumentOutOfRange(nameof(genericArgumentCount));
+            }
+
+            // Get the coded index before we start writing anything (might throw argument exception):
+            // Note: We don't allow TypeSpec as per https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/Ecma-335-Issues.md#proposed-specification-change
+            int codedIndex = CodedIndex.TypeDefOrRef(genericType);
+
             Builder.WriteByte((byte)SignatureTypeCode.GenericTypeInstance);
             ClassOrValue(isValueType);
-            Builder.WriteCompressedInteger(CodedIndex.ToTypeDefOrRefOrSpec(typeRefDefSpec));
+            Builder.WriteCompressedInteger(codedIndex);
             Builder.WriteCompressedInteger(genericArgumentCount);
             return new GenericTypeArgumentsEncoder(Builder);
         }
 
+        /// <summary>
+        /// Encodes a reference to type parameter of a containing generic method.
+        /// </summary>
+        /// <param name="parameterIndex">Parameter index.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="parameterIndex"/> is not in range [0, 0xffff].</exception>
         public void GenericMethodTypeParameter(int parameterIndex)
         {
+            if (unchecked((uint)parameterIndex) > ushort.MaxValue)
+            {
+                Throw.ArgumentOutOfRange(nameof(parameterIndex));
+            }
+
             Builder.WriteByte((byte)SignatureTypeCode.GenericMethodParameter);
             Builder.WriteCompressedInteger(parameterIndex);
         }
 
+        /// <summary>
+        /// Encodes a reference to type parameter of a containing generic type.
+        /// </summary>
+        /// <param name="parameterIndex">Parameter index.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="parameterIndex"/> is not in range [0, 0xffff].</exception>
         public void GenericTypeParameter(int parameterIndex)
         {
+            if (unchecked((uint)parameterIndex) > ushort.MaxValue)
+            {
+                Throw.ArgumentOutOfRange(nameof(parameterIndex));
+            }
+
             Builder.WriteByte((byte)SignatureTypeCode.GenericTypeParameter);
             Builder.WriteCompressedInteger(parameterIndex);
         }
 
+        /// <summary>
+        /// Starts pointer signature.
+        /// </summary>
         public SignatureTypeEncoder Pointer()
         {
             Builder.WriteByte((byte)SignatureTypeCode.Pointer);
             return this;
         }
 
+        /// <summary>
+        /// Encodes <code>void*</code>.
+        /// </summary>
         public void VoidPointer()
         {
             Builder.WriteByte((byte)SignatureTypeCode.Pointer);
             Builder.WriteByte((byte)SignatureTypeCode.Void);
         }
 
+        /// <summary>
+        /// Starts SZ array (vector) signature.
+        /// </summary>
         public SignatureTypeEncoder SZArray()
         {
             Builder.WriteByte((byte)SignatureTypeCode.SZArray);
             return this;
         }
 
+        /// <summary>
+        /// Starts a signature of a type with custom modifiers.
+        /// </summary>
         public CustomModifiersEncoder CustomModifiers()
         {
             return new CustomModifiersEncoder(Builder);
@@ -822,8 +1066,20 @@ namespace System.Reflection.Metadata.Ecma335
             Builder = builder;
         }
 
-        public CustomModifiersEncoder AddModifier(bool isOptional, EntityHandle typeDefRefSpec)
+        /// <summary>
+        /// Encodes a custom modifier.
+        /// </summary>
+        /// <param name="type"><see cref="TypeDefinitionHandle"/>, <see cref="TypeReferenceHandle"/> or <see cref="TypeSpecificationHandle"/>.</param>
+        /// <param name="isOptional">Is optional modifier.</param>
+        /// <returns>Encoder of subsequent modifiers.</returns>
+        /// <exception cref="ArgumentException"><paramref name="type"/> is nil or of an unexpected kind.</exception>
+        public CustomModifiersEncoder AddModifier(EntityHandle type, bool isOptional)
         {
+            if (type.IsNil)
+            {
+                Throw.InvalidArgument_Handle(nameof(type));
+            }
+
             if (isOptional)
             {
                 Builder.WriteByte((byte)SignatureTypeCode.OptionalModifier);
@@ -833,7 +1089,7 @@ namespace System.Reflection.Metadata.Ecma335
                 Builder.WriteByte((byte)SignatureTypeCode.RequiredModifier);
             }
 
-            Builder.WriteCompressedInteger(CodedIndex.ToTypeDefOrRefOrSpec(typeDefRefSpec));
+            Builder.WriteCompressedInteger(CodedIndex.TypeDefOrRefOrSpec(type));
             return this;
         }
     }
@@ -847,16 +1103,54 @@ namespace System.Reflection.Metadata.Ecma335
             Builder = builder;
         }
 
+        /// <summary>
+        /// Encodes array shape.
+        /// </summary>
+        /// <param name="rank">The number of dimensions in the array (shall be 1 or more).</param>
+        /// <param name="sizes">
+        /// Dimension sizes. The array may be shorter than <paramref name="rank"/> but not longer.
+        /// </param>
+        /// <param name="lowerBounds">
+        /// Dimension lower bounds, or <c>default(<see cref="ImmutableArray{Int32}"/>)</c> to set all <paramref name="rank"/> lower bounds to 0. 
+        /// The array may be shorter than <paramref name="rank"/> but not longer.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="rank"/> is outside of range [1, 0xffff],
+        /// smaller than <paramref name="sizes"/>.Length, or
+        /// smaller than <paramref name="lowerBounds"/>.Length.
+        /// </exception>
+        /// <exception cref="ArgumentNullException"><paramref name="sizes"/> is null.</exception>
         public void Shape(int rank, ImmutableArray<int> sizes, ImmutableArray<int> lowerBounds)
         {
+            // The specification doesn't impose a limit on the max number of array dimensions. 
+            // The CLR supports <64. More than 0xffff is causing crashes in various tools (ildasm).
+            if (unchecked((uint)(rank - 1)) > ushort.MaxValue - 1)
+            {
+                Throw.ArgumentOutOfRange(nameof(rank));
+            }
+
+            if (sizes.IsDefault)
+            {
+                Throw.ArgumentNull(nameof(sizes));
+            }
+
+            // rank
             Builder.WriteCompressedInteger(rank);
+
+            // sizes
+            if (sizes.Length > rank)
+            {
+                Throw.ArgumentOutOfRange(nameof(rank));
+            }
+
             Builder.WriteCompressedInteger(sizes.Length);
             foreach (int size in sizes)
             {
                 Builder.WriteCompressedInteger(size);
             }
 
-            if (lowerBounds.IsDefault)
+            // lower bounds
+            if (lowerBounds.IsDefault) // TODO: remove -- update Roslyn
             {
                 Builder.WriteCompressedInteger(rank);
                 for (int i = 0; i < rank; i++)
@@ -866,6 +1160,11 @@ namespace System.Reflection.Metadata.Ecma335
             }
             else
             {
+                if (lowerBounds.Length > rank)
+                {
+                    Throw.ArgumentOutOfRange(nameof(rank));
+                }
+
                 Builder.WriteCompressedInteger(lowerBounds.Length);
                 foreach (int lowerBound in lowerBounds)
                 {
@@ -915,7 +1214,7 @@ namespace System.Reflection.Metadata.Ecma335
         public BlobBuilder Builder { get; }
         public bool HasVarArgs { get; }
 
-        public ParametersEncoder(BlobBuilder builder, bool hasVarArgs)
+        public ParametersEncoder(BlobBuilder builder, bool hasVarArgs = false)
         {
             Builder = builder;
             HasVarArgs = hasVarArgs;

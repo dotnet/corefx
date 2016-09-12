@@ -15,20 +15,25 @@ namespace System.Globalization.Tests
             for (int i = 0x20; i < 0x7F; i++)
             {
                 char c = (char)i;
+                
+                // We test '.' separately
+                if (c == '.') 
+                {
+                    continue; 
+                }
                 string ascii = c.ToString();
-                // [ActiveIssue(8242, PlatformId.AnyUnix)]
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // expected platform differences, see https://github.com/dotnet/corefx/issues/8242
                 {
                     if ((c >= 'A' && c <= 'Z'))
                     {
                         yield return new object[] { ascii, 0, 1, ascii.ToLower() };
                     }
-                    else if (c != '-' && (c != '.' || !RuntimeInformation.IsOSPlatform(OSPlatform.OSX)))
+                    else if (c != '-')
                     {
                         yield return new object[] { ascii, 0, 1, ascii };
                     }
                 }
-                else if (c != '.')
+                else
                 {
                     yield return new object[] { ascii, 0, 1, ascii };
                 }
@@ -78,6 +83,25 @@ namespace System.Globalization.Tests
             }
             Assert.Equal(expected, new IdnMapping().GetAscii(unicode, index, count));
         }
+        
+        [Fact]
+        public void TestGetAsciiWithDot()
+        {
+            string result = "";
+            Exception ex = Record.Exception(()=> result = new IdnMapping().GetAscii("."));
+            
+            if (ex == null)
+            {
+                // Windows and OSX always throw exception. some versions of Linux succeed and others throw exception   
+                Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+                Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
+                Assert.Equal(result, ".");
+            }
+            else
+            {
+                Assert.True(ex is ArgumentException);
+            }
+        }
 
         public static IEnumerable<object[]> GetAscii_Invalid_TestData()
         {
@@ -99,8 +123,7 @@ namespace System.Globalization.Tests
             yield return new object[] { "\u0061\u0062\u0063.\u305D\u306E\u30B9\u30D4\u30FC\u30C9\u3067.\u30D1\u30D5\u30A3\u30FC\u0064\u0065\u30EB\u30F3\u30D0", 3, 9, typeof(ArgumentException) };
             yield return new object[] { "\u0061\u0062\u0063.\u305D\u306E\u30B9\u30D4\u30FC\u30C9\u3067.\u30D1\u30D5\u30A3\u30FC\u0064\u0065\u30EB\u30F3\u30D0", 11, 10, typeof(ArgumentException) };
             
-            // [ActiveIssue(8242, PlatformId.AnyUnix)]
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))  // expected platform differences, see https://github.com/dotnet/corefx/issues/8242
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {

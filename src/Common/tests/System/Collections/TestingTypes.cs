@@ -34,27 +34,27 @@ namespace System.Collections.Tests
 
     public class EquatableBackwardsOrder : IEquatable<EquatableBackwardsOrder>, IComparable<EquatableBackwardsOrder>, IComparable
     {
-        int value;
+        private int _value;
 
         public EquatableBackwardsOrder(int value)
         {
-            this.value = value;
+            _value = value;
         }
 
         public int CompareTo(EquatableBackwardsOrder other) //backwards from the usual integer ordering
         {
-            return other.value - value;
+            return other._value - _value;
         }
 
         public bool Equals(EquatableBackwardsOrder other)
         {
-            return value == other.value;
+            return _value == other._value;
         }
 
         int IComparable.CompareTo(object obj)
         {
             if (obj != null && obj.GetType() == typeof(EquatableBackwardsOrder))
-                return ((EquatableBackwardsOrder)obj).value - value;
+                return ((EquatableBackwardsOrder)obj)._value - _value;
             else return -1;
         }
     }
@@ -228,6 +228,85 @@ namespace System.Collections.Tests
         {
             return StructuralComparisons.StructuralEqualityComparer.GetHashCode(obj);
         }
+    }
+    
+    public enum SByteEnum : sbyte { }
+    public enum ByteEnum : byte { }
+    public enum ShortEnum : short { }
+    public enum UShortEnum : ushort { }
+    public enum IntEnum : int { }
+    public enum UIntEnum : uint { }
+    public enum LongEnum : long { }
+    public enum ULongEnum : ulong { }
+
+    public class GenericComparable : IComparable<GenericComparable>
+    {
+        private readonly int _value;
+
+        public GenericComparable(int value)
+        {
+            _value = value;
+        }
+
+        public int CompareTo(GenericComparable other) => _value.CompareTo(other._value);
+    }
+
+    public class NonGenericComparable : IComparable
+    {
+        private readonly GenericComparable _inner;
+
+        public NonGenericComparable(int value)
+        {
+            _inner = new GenericComparable(value);
+        }
+
+        public int CompareTo(object other) =>
+            _inner.CompareTo(((NonGenericComparable)other)._inner);
+    }
+
+    public class BadlyBehavingComparable : IComparable<BadlyBehavingComparable>, IComparable
+    {
+        public int CompareTo(BadlyBehavingComparable other) => 1;
+
+        public int CompareTo(object other) => -1;
+    }
+
+    public class MutatingComparable : IComparable<MutatingComparable>, IComparable
+    {
+        private int _state;
+
+        public MutatingComparable(int initialState)
+        {
+            _state = initialState;
+        }
+
+        public int State => _state;
+
+        public int CompareTo(object other) => _state++;
+
+        public int CompareTo(MutatingComparable other) => _state++;
+    }
+
+    public static class ValueComparable
+    {
+        // Convenience method so the compiler can work its type inference magic.
+        public static ValueComparable<T> Create<T>(T value) where T : IComparable<T>
+        {
+            return new ValueComparable<T>(value);
+        }
+    }
+
+    public struct ValueComparable<T> : IComparable<ValueComparable<T>> where T : IComparable<T>
+    {
+        public ValueComparable(T value)
+        {
+            Value = value;
+        }
+
+        public T Value { get; }
+
+        public int CompareTo(ValueComparable<T> other) =>
+            Value.CompareTo(other.Value);
     }
 
     #endregion

@@ -180,11 +180,9 @@ internal static class IOInputs
             yield return "\0";
             yield return "middle\0path";
             yield return "trailing\0";
-
-            // TODO: #6931 Add these back in some fashion
-            //yield return @"\\?\";
-            //yield return @"\\?\UNC\";
-            //yield return @"\\?\UNC\LOCALHOST";
+            yield return @"\\?\";
+            yield return @"\\?\UNC\";
+            yield return @"\\?\UNC\LOCALHOST";
         }
         else
         {
@@ -231,8 +229,8 @@ internal static class IOInputs
 
     public static IEnumerable<string> GetPathsLongerThanMaxLongPath(string rootPath, bool useExtendedSyntax = false)
     {
-        yield return GetLongPath(rootPath, MaxExtendedPath + 1 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
-        yield return GetLongPath(rootPath, MaxExtendedPath + 2 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxExtendedPath + 1, useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxExtendedPath + 2, useExtendedSyntax);
     }
 
     private static string GetLongPath(string rootPath, int characterCount, bool extended = false)

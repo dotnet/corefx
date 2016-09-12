@@ -18,8 +18,6 @@ namespace System.Net.Http
             internal readonly GCHandle _gcHandle;
             internal readonly Interop.Ssl.ClientCertCallback _callback;
             private readonly X509Certificate2Collection _clientCertificates;
-            private SafeEvpPKeyHandle _privateKeyHandle;
-            private SafeX509Handle _certHandle;
 
             internal ClientCertificateProvider(X509Certificate2Collection clientCertificates)
             {
@@ -71,12 +69,13 @@ namespace System.Net.Http
                         return NoCertificateSet;
                     }
 
+                    SafeEvpPKeyHandle privateKeySafeHandle = null;
                     Interop.Crypto.CheckValidOpenSslHandle(certificate.Handle);
                     using (RSAOpenSsl rsa = certificate.GetRSAPrivateKey() as RSAOpenSsl)
                     {
                         if (rsa != null)
                         {
-                            _privateKeyHandle = rsa.DuplicateKeyHandle();
+                            privateKeySafeHandle = rsa.DuplicateKeyHandle();
                             EventSourceTrace("RSA key");
                         }
                         else
@@ -85,39 +84,38 @@ namespace System.Net.Http
                             {
                                 if (ecdsa != null)
                                 {
-                                    _privateKeyHandle = ecdsa.DuplicateKeyHandle();
+                                    privateKeySafeHandle = ecdsa.DuplicateKeyHandle();
                                     EventSourceTrace("ECDsa key");
                                 }
                             }
                         }
                     }
 
-                    if (_privateKeyHandle == null || _privateKeyHandle.IsInvalid)
+                    if (privateKeySafeHandle == null || privateKeySafeHandle.IsInvalid)
                     {
                         EventSourceTrace("Invalid private key");
                         return NoCertificateSet;
                     }
 
-                    _certHandle = Interop.Crypto.X509Duplicate(certificate.Handle);
-                    Interop.Crypto.CheckValidOpenSslHandle(_certHandle);
+                    SafeX509Handle certSafeHandle = Interop.Crypto.X509UpRef(certificate.Handle);
+                    Interop.Crypto.CheckValidOpenSslHandle(certSafeHandle);
                     if (chain != null)
                     {
-                        for (int i = chain.ChainElements.Count - 2; i > 0; i--)
+                        if (!Interop.Ssl.AddExtraChainCertificates(sslHandle, chain))
                         {
-                            SafeX509Handle dupCertHandle = Interop.Crypto.X509Duplicate(chain.ChainElements[i].Certificate.Handle);
-                            Interop.Crypto.CheckValidOpenSslHandle(dupCertHandle);
-                            if (!Interop.Ssl.SslAddExtraChainCert(sslHandle, dupCertHandle))
-                            {
-                                EventSourceTrace("Failed to add extra chain certificate");
-                                return SuspendHandshake;
-                            }
+                            EventSourceTrace("Failed to add extra chain certificate");
+                            return SuspendHandshake;
                         }
                     }
 
-                    certHandle = _certHandle.DangerousGetHandle();
-                    privateKeyHandle = _privateKeyHandle.DangerousGetHandle();
-
+                    certHandle = certSafeHandle.DangerousGetHandle();
+                    privateKeyHandle = privateKeySafeHandle.DangerousGetHandle();
                     EventSourceTrace("Client certificate set: {0}", certificate);
+
+                    // Ownership has been transferred to OpenSSL; do not free these handles
+                    certSafeHandle.SetHandleAsInvalid();
+                    privateKeySafeHandle.SetHandleAsInvalid();
+
                     return CertificateSet;
                 }
                 finally
@@ -131,8 +129,6 @@ namespace System.Net.Http
             public void Dispose()
             {
                 _gcHandle.Free();
-                _privateKeyHandle?.Dispose();
-                _certHandle?.Dispose();
             }
 
             private static ISet<string> GetRequestCertificateAuthorities(SafeSslHandle sslHandle)

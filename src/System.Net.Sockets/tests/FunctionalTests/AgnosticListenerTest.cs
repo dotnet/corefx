@@ -19,6 +19,7 @@ namespace System.Net.Sockets.Tests
             Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Create_Success()
         {
@@ -30,6 +31,7 @@ namespace System.Net.Sockets.Tests
             listener.Stop();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ConnectWithV4_Success()
         {
@@ -46,6 +48,7 @@ namespace System.Net.Sockets.Tests
             listener.Stop();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ConnectWithV6_Success()
         {
@@ -62,6 +65,7 @@ namespace System.Net.Sockets.Tests
             listener.Stop();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ConnectWithV4AndV6_Success()
         {
@@ -73,6 +77,8 @@ namespace System.Net.Sockets.Tests
             v6Client.ConnectAsync(IPAddress.IPv6Loopback, port).GetAwaiter().GetResult();
 
             TcpClient acceptedV6Client = listener.EndAcceptTcpClient(asyncResult);
+            Assert.Equal(AddressFamily.InterNetworkV6, acceptedV6Client.Client.RemoteEndPoint.AddressFamily);
+            Assert.Equal(AddressFamily.InterNetworkV6, v6Client.Client.RemoteEndPoint.AddressFamily);
 
             asyncResult = listener.BeginAcceptTcpClient(null, null);
 
@@ -80,6 +86,8 @@ namespace System.Net.Sockets.Tests
             v4Client.ConnectAsync(IPAddress.Loopback, port).GetAwaiter().GetResult();
 
             TcpClient acceptedV4Client = listener.EndAcceptTcpClient(asyncResult);
+            Assert.Equal(AddressFamily.InterNetworkV6, acceptedV4Client.Client.RemoteEndPoint.AddressFamily);
+            Assert.Equal(AddressFamily.InterNetwork, v4Client.Client.RemoteEndPoint.AddressFamily);
 
             v6Client.Dispose();
             acceptedV6Client.Dispose();
@@ -92,7 +100,8 @@ namespace System.Net.Sockets.Tests
 
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
-        // that used Sockets. 
+        // that used Sockets.
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void TestFinalizers()
         {

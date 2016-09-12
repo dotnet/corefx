@@ -387,6 +387,7 @@ namespace System.Collections.Specialized
                     throw new ArgumentNullException(nameof(array));
                 if (index < 0)
                     throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
+
                 for (DictionaryNode node = _list._head; node != null; node = node.next)
                 {
                     array.SetValue(_isKeys ? node.key : node.value, index);

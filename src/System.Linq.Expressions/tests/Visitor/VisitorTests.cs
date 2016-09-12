@@ -167,19 +167,19 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void VisitNullCollection()
         {
-            Assert.Throws<ArgumentNullException>(() => new DefaultVisitor().Visit(default(ReadOnlyCollection<Expression>)));
+            Assert.Throws<ArgumentNullException>("nodes", () => new DefaultVisitor().Visit(default(ReadOnlyCollection<Expression>)));
         }
 
         [Fact]
         public void VisitNullCollectionWithVisitorFunction()
         {
-            Assert.Throws<ArgumentNullException>(() => ExpressionVisitor.Visit(null, (Expression i) => i));
+            Assert.Throws<ArgumentNullException>("nodes", () => ExpressionVisitor.Visit(null, (Expression i) => i));
         }
 
         [Fact]
         public void VisitCollectionVisitorWithNullFunction()
         {
-            Assert.Throws<ArgumentNullException>(() => ExpressionVisitor.Visit(new List<Expression> { Expression.Empty() }.AsReadOnly(), null));
+            Assert.Throws<ArgumentNullException>("elementVisitor", () => ExpressionVisitor.Visit(new List<Expression> { Expression.Empty() }.AsReadOnly(), null));
         }
 
         [Fact]
@@ -191,13 +191,13 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void VisitAndConvertNullCollection()
         {
-            Assert.Throws<ArgumentNullException>(() => new DefaultVisitor().VisitAndConvert(default(ReadOnlyCollection<Expression>), ""));
+            Assert.Throws<ArgumentNullException>("nodes", () => new DefaultVisitor().VisitAndConvert(default(ReadOnlyCollection<Expression>), ""));
         }
 
         [Fact]
         public void VisitCollectionReturnSameIfChildrenUnchanged()
         {
-            var collection = new List<Expression> { Expression.Constant(0), Expression.Constant(2) }.AsReadOnly();
+            var collection = new List<Expression> { Expression.Constant(0), Expression.Constant(2), Expression.DebugInfo(Expression.SymbolDocument("fileName"), 1, 1, 1, 1) }.AsReadOnly();
             Assert.Same(collection, new DefaultVisitor().Visit(collection));
         }
 
@@ -338,6 +338,13 @@ namespace System.Linq.Expressions.Tests
             var call = (MethodCallExpression)innerBlock.Expressions.Last();
             var instance = (ConstantExpression)call.Object;
             Assert.Same(list, instance.Value);
+        }
+
+        [Fact]
+        public void Visit_DebugInfoExpression_DoesNothing()
+        {
+            DebugInfoExpression expression = Expression.DebugInfo(Expression.SymbolDocument("fileName"), 1, 1, 1, 1);
+            Assert.Same(expression, new DefaultVisitor().Visit(expression));
         }
     }
 }

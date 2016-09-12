@@ -17,6 +17,7 @@ namespace System.Net.Security.Tests
     {
         private readonly byte[] _sampleMsg = Encoding.UTF8.GetBytes("Sample Test Message");
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Authentication_Success()
         {
@@ -26,8 +27,8 @@ namespace System.Net.Security.Tests
             using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new SslStream(clientStream, false, AllowAnyServerCertificate))
             using (var server = new SslStream(serverStream))
+            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
             {
-                X509Certificate2 certificate = TestConfiguration.GetServerCertificate();
                 Task[] auth = new Task[2];
                 auth[0] = client.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
                 auth[1] = server.AuthenticateAsServerAsync(certificate);
@@ -37,6 +38,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Authentication_IncorrectServerName_Fail()
         {
@@ -46,10 +48,11 @@ namespace System.Net.Security.Tests
             using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var client = new SslStream(clientStream))
             using (var server = new SslStream(serverStream))
+            using (var certificate = Configuration.Certificates.GetServerCertificate())
             {
                 Task[] auth = new Task[2];
                 auth[0] = client.AuthenticateAsClientAsync("incorrectServer");
-                auth[1] = server.AuthenticateAsServerAsync(TestConfiguration.GetServerCertificate());
+                auth[1] = server.AuthenticateAsServerAsync(certificate);
 
                 Assert.Throws<AuthenticationException>(() =>
                 {
@@ -60,6 +63,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
@@ -89,6 +93,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -137,6 +142,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Successive_ClientWrite_Async_Success()
         {
@@ -168,6 +174,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Write_ReadByte_Success()
         {
@@ -224,14 +231,16 @@ namespace System.Net.Security.Tests
 
         private bool DoHandshake(SslStream clientSslStream, SslStream serverSslStream)
         {
-            X509Certificate2 certificate = TestConfiguration.GetServerCertificate();
-            Task[] auth = new Task[2];
+            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+            {
+                Task[] auth = new Task[2];
 
-            auth[0] = clientSslStream.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
-            auth[1] = serverSslStream.AuthenticateAsServerAsync(certificate);
+                auth[0] = clientSslStream.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
+                auth[1] = serverSslStream.AuthenticateAsServerAsync(certificate);
 
-            bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
-            return finished;
+                bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
+                return finished;
+            }
         }
     }
 }

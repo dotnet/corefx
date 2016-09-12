@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.IO.Compression.Tests
 {
-    public partial class ZipTest
+    public partial class ZipFileTestBase : FileCleanupTestBase
     {
         #region filename helpers
 
@@ -24,6 +24,13 @@ namespace System.IO.Compression.Tests
         #endregion
 
         #region helpers
+
+        protected TempFile CreateTempCopyFile(string path, string newPath)
+        {
+            TempFile newfile = new TempFile(newPath);
+            File.Copy(path, newPath, overwrite: true);
+            return newfile;
+        }
 
         public static Int64 LengthOfUnseekableStream(Stream s)
         {
@@ -130,13 +137,13 @@ namespace System.IO.Compression.Tests
             await IsZipSameAsDirAsync(archiveFile, directory, mode, false, false);
         }
 
-        public static async Task IsZipSameAsDirAsync(String archiveFile, String directory, ZipArchiveMode mode, bool dontRequireExplicit, bool dontCheckTimes)
+        public static async Task IsZipSameAsDirAsync(String archiveFile, String directory, ZipArchiveMode mode, bool requireExplicit, bool checkTimes)
         {
             var s = await StreamHelpers.CreateTempCopyStream(archiveFile);
-            IsZipSameAsDir(s, directory, mode, dontRequireExplicit, dontCheckTimes);
+            IsZipSameAsDir(s, directory, mode, requireExplicit, checkTimes);
         }
 
-        public static void IsZipSameAsDir(Stream archiveFile, String directory, ZipArchiveMode mode, Boolean dontRequireExplicit, Boolean dontCheckTimes)
+        public static void IsZipSameAsDir(Stream archiveFile, String directory, ZipArchiveMode mode, bool requireExplicit, bool checkTimes)
         {
             int count = 0;
 
@@ -146,7 +153,8 @@ namespace System.IO.Compression.Tests
                 Assert.All<FileData>(files, (file) => {
                     count++;
                     String entryName = file.FullName;
-                    if (file.IsFolder) entryName += Path.DirectorySeparatorChar;
+                    if (file.IsFolder)
+                        entryName += Path.DirectorySeparatorChar;
                     ZipArchiveEntry entry = archive.GetEntry(entryName);
                     if (entry == null)
                     {
@@ -167,13 +175,13 @@ namespace System.IO.Compression.Tests
                             Assert.Equal(file.CRC, crc);
                         }
 
-                        if (!dontCheckTimes)
+                        if (checkTimes)
                         {
                             const int zipTimestampResolution = 2; // Zip follows the FAT timestamp resolution of two seconds for file records
                             DateTime lower = file.LastModifiedDate.AddSeconds(-zipTimestampResolution);
                             DateTime upper = file.LastModifiedDate.AddSeconds(zipTimestampResolution);
                             Assert.InRange(entry.LastWriteTime.Ticks, lower.Ticks, upper.Ticks);
-}
+                        }
 
                         Assert.Equal(file.Name, entry.Name);
                         Assert.Equal(entryName, entry.FullName);
@@ -189,12 +197,12 @@ namespace System.IO.Compression.Tests
                                 f => f.IsFile &&
                                      (f.FullName.StartsWith(entryName, StringComparison.OrdinalIgnoreCase) ||
                                       f.FullName.StartsWith(entryNameOtherSlash, StringComparison.OrdinalIgnoreCase)));
-                            if (!dontRequireExplicit || isEmtpy)
+                            if (requireExplicit || isEmtpy)
                             {
                                 Assert.Contains("emptydir", entryName);
                             }
 
-                            if ((dontRequireExplicit && !isEmtpy) || entryName.Contains("emptydir"))
+                            if ((!requireExplicit && !isEmtpy) || entryName.Contains("emptydir"))
                                 count--; //discount this entry
                         }
                         else
@@ -246,6 +254,13 @@ namespace System.IO.Compression.Tests
             ItemEqual(actualFolders, expectedList, false);
         }
 
+        public static void DirFileNamesEqual(string actual, string expected)
+        {
+            IEnumerable<string> actualEntries = Directory.EnumerateFileSystemEntries(actual, "*", SearchOption.AllDirectories);
+            IEnumerable<string> expectedEntries = Directory.EnumerateFileSystemEntries(expected, "*", SearchOption.AllDirectories);
+            Assert.True(Enumerable.SequenceEqual(expectedEntries.Select(i => Path.GetFileName(i)), actualEntries.Select(i => Path.GetFileName(i))));
+        }
+
         private static void ItemEqual(String[] actualList, List<FileData> expectedList, Boolean isFile)
         {
             for (int i = 0; i < actualList.Length; i++)
@@ -285,7 +300,8 @@ namespace System.IO.Compression.Tests
                     {
                         String entryName = i.FullName;
 
-                        archive.CreateEntry(entryName.Replace('\\', '/') + "/");
+                        ZipArchiveEntry e = archive.CreateEntry(entryName.Replace('\\', '/') + "/");
+                        e.LastWriteTime = i.LastModifiedDate;
                     }
                 }
 
@@ -300,10 +316,7 @@ namespace System.IO.Compression.Tests
                         if (installStream != null)
                         {
                             ZipArchiveEntry e = archive.CreateEntry(entryName.Replace('\\', '/'));
-                            try
-                            { e.LastWriteTime = i.LastModifiedDate; }
-                            catch (ArgumentOutOfRangeException)
-                            { e.LastWriteTime = DateTimeOffset.Now; }
+                            e.LastWriteTime = i.LastModifiedDate;
                             using (Stream entryStream = e.Open())
                             {
                                 installStream.CopyTo(entryStream);

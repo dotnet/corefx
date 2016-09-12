@@ -945,8 +945,17 @@ namespace System.Net.Sockets
                 throw new NotSupportedException(SR.net_invalidversion);
             }
 
-            IPAddress[] addresses = Dns.GetHostAddressesAsync(host).GetAwaiter().GetResult();
-            Connect(addresses, port);
+            IPAddress parsedAddress;
+            if (IPAddress.TryParse(host, out parsedAddress))
+            {
+                Connect(parsedAddress, port);
+            }
+            else
+            {
+                IPAddress[] addresses = Dns.GetHostAddressesAsync(host).GetAwaiter().GetResult();
+                Connect(addresses, port);
+            }
+
             if (s_loggingEnabled)
             {
                 NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Connect), null);
@@ -2216,7 +2225,7 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if ((checkRead == null || checkRead.Count == 0) && (checkWrite == null || checkWrite.Count == 0) && (checkError == null || checkError.Count == 0))
             {
-                throw new ArgumentNullException(SR.net_sockets_empty_select);
+                throw new ArgumentNullException(null, SR.net_sockets_empty_select);
             }
             const int MaxSelect = 65536;
             if (checkRead != null && checkRead.Count > MaxSelect)
@@ -2293,12 +2302,32 @@ namespace System.Net.Sockets
                 return BeginConnect(dnsEP.Host, dnsEP.Port, callback, state);
             }
 
-            return BeginConnectEx(remoteEP, true, callback, state);
+            return UnsafeBeginConnect(remoteEP, callback, state, flowContext:true);
         }
 
-        internal IAsyncResult UnsafeBeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
+        private bool CanUseConnectEx(EndPoint remoteEP)
         {
-            return BeginConnectEx(remoteEP, false, callback, state);
+            return (_socketType == SocketType.Stream) &&
+                (_rightEndPoint != null || remoteEP.GetType() == typeof(IPEndPoint));
+        }
+
+        internal IAsyncResult UnsafeBeginConnect(EndPoint remoteEP, AsyncCallback callback, object state, bool flowContext = false)
+        {
+            if (CanUseConnectEx(remoteEP))
+            {
+                return BeginConnectEx(remoteEP, flowContext, callback, state);
+            }
+
+            EndPoint endPointSnapshot = remoteEP;
+            var asyncResult = new ConnectAsyncResult(this, endPointSnapshot, state, callback);
+
+            // For connectionless protocols, Connect is not an I/O call.
+            Connect(remoteEP);
+            asyncResult.FinishPostingAsyncOp();
+
+            // Synchronously complete the I/O and call the user's callback.
+            asyncResult.InvokeCallback();
+            return asyncResult;
         }
 
         internal IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state)
@@ -2329,6 +2358,17 @@ namespace System.Net.Sockets
             if (_isListening)
             {
                 throw new InvalidOperationException(SR.net_sockets_mustnotlisten);
+            }
+
+            IPAddress parsedAddress;
+            if (IPAddress.TryParse(host, out parsedAddress))
+            {
+                IAsyncResult r = BeginConnect(parsedAddress, port, requestCallback, state);
+                if (s_loggingEnabled)
+                {
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), r);
+                }
+                return r;
             }
 
             ThrowIfNotSupportsMultipleConnectAttempts();
@@ -2483,12 +2523,22 @@ namespace System.Net.Sockets
             EndPoint remoteEndPoint = null;
             ConnectOverlappedAsyncResult coar;
             MultipleAddressConnectAsyncResult macar;
+            ConnectAsyncResult car;
 
             coar = asyncResult as ConnectOverlappedAsyncResult;
             if (coar == null)
             {
                 macar = asyncResult as MultipleAddressConnectAsyncResult;
-                if (macar != null)
+                if (macar == null)
+                {
+                    car = asyncResult as ConnectAsyncResult;
+                    if (car != null)
+                    {
+                        remoteEndPoint = car.RemoteEndPoint;
+                        castedAsyncResult = car;
+                    }
+                }
+                else
                 {
                     remoteEndPoint = macar.RemoteEndPoint;
                     castedAsyncResult = macar;
@@ -5786,6 +5836,22 @@ namespace System.Net.Sockets
             IPAddress[] addresses = DnsAPMExtensions.EndGetHostAddresses(result);
             context._addresses = addresses;
             return DoMultipleAddressConnectCallback(PostOneBeginConnect(context), context);
+        }
+
+        private sealed class ConnectAsyncResult : ContextAwareResult
+        {
+            private EndPoint _endPoint;
+
+            internal ConnectAsyncResult(object myObject, EndPoint endPoint, object myState, AsyncCallback myCallBack) : 
+                base(myObject, myState, myCallBack)
+            {
+                _endPoint = endPoint;
+            }
+
+            internal EndPoint RemoteEndPoint
+            {
+                get { return _endPoint; }
+            }
         }
 
         private sealed class MultipleAddressConnectAsyncResult : ContextAwareResult

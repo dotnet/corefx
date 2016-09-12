@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -21,9 +20,9 @@ namespace System.IO
         internal static IEnumerable<string> CreateFileNameIterator(string path, string originalUserPath, string searchPattern,
                                                                     bool includeFiles, bool includeDirs, SearchOption searchOption)
         {
-            Contract.Requires(path != null);
-            Contract.Requires(originalUserPath != null);
-            Contract.Requires(searchPattern != null);
+            Debug.Assert(path != null);
+            Debug.Assert(originalUserPath != null);
+            Debug.Assert(searchPattern != null);
 
             SearchResultHandler<string> handler;
 
@@ -46,27 +45,27 @@ namespace System.IO
 
         internal static IEnumerable<FileInfo> CreateFileInfoIterator(string path, string originalUserPath, string searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(path != null);
-            Contract.Requires(originalUserPath != null);
-            Contract.Requires(searchPattern != null);
+            Debug.Assert(path != null);
+            Debug.Assert(originalUserPath != null);
+            Debug.Assert(searchPattern != null);
 
             return new Win32FileSystemEnumerableIterator<FileInfo>(path, originalUserPath, searchPattern, searchOption, SearchResultHandler.FileInfo);
         }
 
         internal static IEnumerable<DirectoryInfo> CreateDirectoryInfoIterator(string path, string originalUserPath, string searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(path != null);
-            Contract.Requires(originalUserPath != null);
-            Contract.Requires(searchPattern != null);
+            Debug.Assert(path != null);
+            Debug.Assert(originalUserPath != null);
+            Debug.Assert(searchPattern != null);
 
             return new Win32FileSystemEnumerableIterator<DirectoryInfo>(path, originalUserPath, searchPattern, searchOption, SearchResultHandler.DirectoryInfo);
         }
 
         internal static IEnumerable<FileSystemInfo> CreateFileSystemInfoIterator(string path, string originalUserPath, string searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(path != null);
-            Contract.Requires(originalUserPath != null);
-            Contract.Requires(searchPattern != null);
+            Debug.Assert(path != null);
+            Debug.Assert(originalUserPath != null);
+            Debug.Assert(searchPattern != null);
 
             return new Win32FileSystemEnumerableIterator<FileSystemInfo>(path, originalUserPath, searchPattern, searchOption, SearchResultHandler.FileSystemInfo);
         }
@@ -117,15 +116,15 @@ namespace System.IO
         [SecuritySafeCritical]
         internal Win32FileSystemEnumerableIterator(string path, string originalUserPath, string searchPattern, SearchOption searchOption, SearchResultHandler<TSource> resultHandler)
         {
-            Contract.Requires(path != null);
-            Contract.Requires(originalUserPath != null);
-            Contract.Requires(searchPattern != null);
-            Contract.Requires(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
-            Contract.Requires(resultHandler != null);
+            Debug.Assert(path != null);
+            Debug.Assert(originalUserPath != null);
+            Debug.Assert(searchPattern != null);
+            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
+            Debug.Assert(resultHandler != null);
 
             _oldMode = Interop.mincore.SetErrorMode(Interop.mincore.SEM_FAILCRITICALERRORS);
 
-            string normalizedSearchPattern = NormalizeSearchPattern(searchPattern);
+            string normalizedSearchPattern = PathHelpers.NormalizeSearchPattern(searchPattern);
 
             if (normalizedSearchPattern.Length == 0)
             {
@@ -137,7 +136,7 @@ namespace System.IO
                 _searchOption = searchOption;
 
                 _fullPath = Path.GetFullPath(path);
-                string fullSearchString = GetFullSearchString(_fullPath, normalizedSearchPattern);
+                string fullSearchString = PathHelpers.GetFullSearchString(_fullPath, normalizedSearchPattern);
                 _normalizedSearchPath = Path.GetDirectoryName(fullSearchString);
 
                 // normalize search criteria
@@ -387,7 +386,7 @@ namespace System.IO
         [SecurityCritical]
         private bool IsResultIncluded(ref Interop.mincore.WIN32_FIND_DATA findData, out TSource result)
         {
-            Contract.Requires(findData.cFileName.Length != 0 && !Path.IsPathRooted(findData.cFileName),
+            Debug.Assert(findData.cFileName.Length != 0 && !Path.IsPathRooted(findData.cFileName),
                 "Expected file system enumeration to not have empty file/directory name and not have rooted name");
 
             return _resultHandler.IsResultIncluded(_searchData.FullPath, _searchData.UserPath, ref findData, out result);
@@ -425,6 +424,7 @@ namespace System.IO
                 }
 
                 // Add subdirs to _searchList. Exempt ReparsePoints as appropriate
+                Debug.Assert(_searchList != null, "_searchList should not be null");
                 int initialCount = _searchList.Count;
                 do
                 {
@@ -439,7 +439,6 @@ namespace System.IO
                         // Setup search data for the sub directory and push it into the list
                         PathPair searchDataSubDir = new PathPair(tempUserPath, tempFullPath);
 
-                        Debug.Assert(_searchList != null, "_searchList should not be null");
                         _searchList.Add(searchDataSubDir);
                     }
                 } while (Interop.mincore.FindNextFile(hnd, ref data));
@@ -459,28 +458,11 @@ namespace System.IO
             }
         }
 
-        private static string NormalizeSearchPattern(string searchPattern)
-        {
-            Contract.Requires(searchPattern != null);
-
-            // Win32 normalization trims only U+0020.
-            string tempSearchPattern = searchPattern.TrimEnd(PathHelpers.TrimEndChars);
-
-            // Make this corner case more useful, like dir
-            if (tempSearchPattern.Equals("."))
-            {
-                tempSearchPattern = "*";
-            }
-
-            PathHelpers.CheckSearchPattern(tempSearchPattern);
-            return tempSearchPattern;
-        }
-
         private static string GetNormalizedSearchCriteria(string fullSearchString, string fullPathMod)
         {
-            Contract.Requires(fullSearchString != null);
-            Contract.Requires(fullPathMod != null);
-            Contract.Requires(fullSearchString.Length >= fullPathMod.Length);
+            Debug.Assert(fullSearchString != null);
+            Debug.Assert(fullPathMod != null);
+            Debug.Assert(fullSearchString.Length >= fullPathMod.Length);
 
             string searchCriteria = null;
             char lastChar = fullPathMod[fullPathMod.Length - 1];
@@ -495,24 +477,6 @@ namespace System.IO
                 searchCriteria = fullSearchString.Substring(fullPathMod.Length + 1);
             }
             return searchCriteria;
-        }
-
-        private static string GetFullSearchString(string fullPath, string searchPattern)
-        {
-            Contract.Requires(fullPath != null);
-            Contract.Requires(searchPattern != null);
-
-            PathHelpers.ThrowIfEmptyOrRootedPath(searchPattern);
-            string tempStr = Path.Combine(fullPath, searchPattern);
-
-            // If path ends in a trailing slash (\), append a * or we'll get a "Cannot find the file specified" exception
-            char lastChar = tempStr[tempStr.Length - 1];
-            if (PathInternal.IsDirectorySeparator(lastChar) || lastChar == Path.VolumeSeparatorChar)
-            {
-                tempStr = tempStr + "*";
-            }
-
-            return tempStr;
         }
     }
 

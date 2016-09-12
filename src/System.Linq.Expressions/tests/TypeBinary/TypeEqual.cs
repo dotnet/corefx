@@ -28,7 +28,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression exp = Expression.Constant(0);
             Type byRef = typeof(int).MakeByRefType();
-            Assert.Throws<ArgumentException>(() => Expression.TypeEqual(exp, byRef));
+            Assert.Throws<ArgumentException>("type", () => Expression.TypeEqual(exp, byRef));
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.TypeIs(Expression.Constant(0), typeof(int));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(() => exp.ReduceAndCheck());
+            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Theory]
@@ -133,6 +133,7 @@ namespace System.Linq.Expressions.Tests
             Expression expression = Expression.Constant(0);
             TypeBinaryExpression typeExp = Expression.TypeEqual(expression, typeof(int));
             Assert.Same(typeExp, typeExp.Update(expression));
+            Assert.Same(typeExp, NoOpVisitor.Instance.Visit(typeExp));
         }
 
         [Fact]
@@ -170,6 +171,28 @@ namespace System.Linq.Expressions.Tests
             Assert.False(isActStr(ao));
             Assert.True(isActStr(a));
             Assert.False(isActStr(b));
+        }
+
+        [Theory, PerCompilationType(nameof(TypeArguments))]
+        public void TypeEqualConstant(Type type, bool useInterpreter)
+        {
+            Func<bool> isNullOfType = Expression.Lambda<Func<bool>>(
+                Expression.TypeEqual(Expression.Constant(null), type)
+                ).Compile(useInterpreter);
+            Assert.False(isNullOfType());
+
+            isNullOfType = Expression.Lambda<Func<bool>>(
+                Expression.TypeEqual(Expression.Constant(null, typeof(string)), type)
+                ).Compile(useInterpreter);
+
+            Assert.False(isNullOfType());
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            var e = Expression.TypeEqual(Expression.Parameter(typeof(string), "s"), typeof(string));
+            Assert.Equal("(s TypeEqual String)", e.ToString());
         }
     }
 }

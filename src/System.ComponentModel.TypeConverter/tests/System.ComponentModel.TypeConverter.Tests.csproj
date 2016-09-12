@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -8,7 +8,8 @@
     <ProjectGuid>{3F0326A1-9E19-4A6C-95CE-63E65C9D2030}</ProjectGuid>
     <RootNamespace>System.ComponentModel.TypeConverter.Tests</RootNamespace>
     <AssemblyName>System.ComponentModel.TypeConverter.Tests</AssemblyName>
-    <IncludePerformanceTests>true</IncludePerformanceTests>
+    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
+    <DefineConstants>$(DefineConstants);FUNCTIONAL_TESTS</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
@@ -20,22 +21,37 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ArrayConverterTests.cs" />
+    <Compile Include="AttributeCollectionTests.cs" />
+    <Compile Include="AttributeProviderAttributeTests.cs" />
     <Compile Include="BooleanConverterTests.cs" />
     <Compile Include="ByteConvertersTests.cs" />
     <Compile Include="CharConverterTests.cs" />
     <Compile Include="CollectionConverterTests.cs" />
     <Compile Include="ConverterTestBase.cs" />
+    <Compile Include="CustomTypeDescriptorTests.cs" />
     <Compile Include="DateTimeConverterTests.cs" />
     <Compile Include="DateTimeOffsetConverterTests.cs" />
     <Compile Include="DecimalConverterTests.cs" />
+    <Compile Include="DefaultEventAttributeTests.cs" />
+    <Compile Include="DefaultPropertyAttributeTests.cs" />
     <Compile Include="DoubleConverterTests.cs" />
     <Compile Include="EnumConverterTest.cs" />
+    <Compile Include="EventDescriptorCollectionTests.cs" />
+    <Compile Include="EventDescriptorTests.cs" />
     <Compile Include="GuidConverterTests.cs" />
     <Compile Include="Int16ConverterTests.cs" />
     <Compile Include="Int32ConverterTests.cs" />
     <Compile Include="Int64ConverterTests.cs" />
+    <Compile Include="MemberDescriptorTests.cs" />
+    <Compile Include="DescriptorTestAttribute.cs" />
+    <Compile Include="DescriptorTestComponent.cs" />
+    <Compile Include="Mocks\MockEventDescriptor.cs" />
+    <Compile Include="Mocks\MockPropertyDescriptor.cs" />
     <Compile Include="MultilineStringConverterTests.cs" />
     <Compile Include="NullableConverterTests.cs" />
+    <Compile Include="PropertyDescriptorCollectionTests.cs" />
+    <Compile Include="PropertyDescriptorTests.cs" />
+    <Compile Include="ProvidePropertyAttributeTests.cs" />
     <Compile Include="SampleClasses.cs" />
     <Compile Include="SByteConverterTests.cs" />
     <Compile Include="SingleConverterTests.cs" />
@@ -43,21 +59,16 @@
     <Compile Include="TimeSpanConverterTests.cs" />
     <Compile Include="TypeConverterAttributeTests.cs" />
     <Compile Include="TypeConverterTests.cs" />
+    <Compile Include="TypeDescriptionProviderAttributeTests.cs" />
     <Compile Include="TypeDescriptorTests.cs" />
     <Compile Include="TypeListConverterTests.cs" />
     <Compile Include="UInt16ConverterTests.cs" />
     <Compile Include="UInt32ConverterTests.cs" />
     <Compile Include="UInt64ConverterTests.cs" />
     <Compile Include="UriTypeConverterTests.cs" />
-    <!-- Performance Tests -->
-    <Compile Include="Performance\Perf.TypeDescriptorTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
-      <Link>Common\System\PerfUtils.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\System.ComponentModel.TypeConverter.csproj">
-      <Name>System.ComponentModel.TypeConverter</Name>
+    <ProjectReference Include="..\pkg\System.ComponentModel.TypeConverter.pkgproj">
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

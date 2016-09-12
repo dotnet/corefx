@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Xunit;
@@ -163,12 +162,15 @@ namespace System.Tests
             yield return new object[] { "0", NumberStyles.None, null, 0 };
             yield return new object[] { "123", NumberStyles.None, null, 123 };
             yield return new object[] { "2147483647", NumberStyles.None, null, 2147483647 };
+            yield return new object[] { "123\0\0", NumberStyles.None, null, 123 };
 
             // HexNumber
             yield return new object[] { "123", NumberStyles.HexNumber, null, 0x123 };
             yield return new object[] { "abc", NumberStyles.HexNumber, null, 0xabc };
             yield return new object[] { "ABC", NumberStyles.HexNumber, null, 0xabc };
             yield return new object[] { "12", NumberStyles.HexNumber, null, 0x12 };
+            yield return new object[] { "80000000", NumberStyles.HexNumber, null, -2147483648 };
+            yield return new object[] { "FFFFFFFF", NumberStyles.HexNumber, null, -1 };
 
             // Currency
             NumberFormatInfo currencyFormat = new NumberFormatInfo()
@@ -271,7 +273,7 @@ namespace System.Tests
         [MemberData(nameof(Parse_Valid_TestData))]
         public static void Parse(string value, NumberStyles style, IFormatProvider provider, int expected)
         {
-            bool isDefaultProvider = provider == null || provider == new NumberFormatInfo();
+            bool isDefaultProvider = provider == null || provider == NumberFormatInfo.CurrentInfo;
             int result;
             if ((style & ~NumberStyles.Integer) == 0 && style != NumberStyles.None)
             {
@@ -296,25 +298,35 @@ namespace System.Tests
             if (isDefaultProvider)
             {
                 // Use Parse(string, NumberStyles) or Parse(string, NumberStyles, IFormatProvider)
-                Assert.True(int.TryParse(value, style, new NumberFormatInfo(), out result));
+                Assert.True(int.TryParse(value, style, NumberFormatInfo.CurrentInfo, out result));
                 Assert.Equal(expected, result);
                 
                 Assert.Equal(expected, int.Parse(value, style));
-                Assert.Equal(expected, int.Parse(value, style, new NumberFormatInfo()));
+                Assert.Equal(expected, int.Parse(value, style, NumberFormatInfo.CurrentInfo));
             }
         }
 
         public static IEnumerable<object[]> Parse_Invalid_TestData()
         {
-            // Garbage strings
+            // String is null, empty or entirely whitespace
             yield return new object[] { null, NumberStyles.Integer, null, typeof(ArgumentNullException) };
             yield return new object[] { null, NumberStyles.Any, null, typeof(ArgumentNullException) };
             yield return new object[] { "", NumberStyles.Integer, null, typeof(FormatException) };
-            yield return new object[] { null, NumberStyles.Any, null, typeof(ArgumentNullException) };
+            yield return new object[] { "", NumberStyles.Any, null, typeof(FormatException) };
             yield return new object[] { " \t \n \r ", NumberStyles.Integer, null, typeof(FormatException) };
-            yield return new object[] { null, NumberStyles.Any, null, typeof(ArgumentNullException) };
+            yield return new object[] { " \t \n \r ", NumberStyles.Any, null, typeof(FormatException) };
+
+            // String is garbage
             yield return new object[] { "Garbage", NumberStyles.Integer, null, typeof(FormatException) };
             yield return new object[] { "Garbage", NumberStyles.Any, null, typeof(FormatException) };
+
+            // String has leading zeros
+            yield return new object[] { "\0\0123", NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { "\0\0123", NumberStyles.Any, null, typeof(FormatException) };
+
+            // String has internal zeros
+            yield return new object[] { "1\023", NumberStyles.Integer, null, typeof(FormatException) };
+            yield return new object[] { "1\023", NumberStyles.Any, null, typeof(FormatException) };
 
             // Integer doesn't allow hex, exponents, paretheses, currency, thousands, decimal
             yield return new object[] { "abc", NumberStyles.Integer, null, typeof(FormatException) };
@@ -390,7 +402,7 @@ namespace System.Tests
 
             // AllowDecimalPoint
             NumberFormatInfo decimalFormat = new NumberFormatInfo() { NumberDecimalSeparator = "." };
-            yield return new object[] { "67.90", NumberStyles.AllowDecimalPoint, null, typeof(OverflowException) };
+            yield return new object[] { (67.9).ToString(), NumberStyles.AllowDecimalPoint, null, typeof(OverflowException) };
 
             // Parsing integers doesn't allow NaN, PositiveInfinity or NegativeInfinity
             NumberFormatInfo doubleFormat = new NumberFormatInfo()
@@ -417,13 +429,19 @@ namespace System.Tests
             yield return new object[] { "-2147483649", NumberStyles.Integer, null, typeof(OverflowException) };
             yield return new object[] { "2147483649-", NumberStyles.AllowTrailingSign, null, typeof(OverflowException) };
             yield return new object[] { "(2147483649)", NumberStyles.AllowParentheses, null, typeof(OverflowException) };
+            yield return new object[] { "2E10", NumberStyles.AllowExponent, null, typeof(OverflowException) };
+            yield return new object[] { "800000000", NumberStyles.AllowHexSpecifier, null, typeof(OverflowException) };
+
+            yield return new object[] { "9223372036854775808", NumberStyles.Integer, null, typeof(OverflowException) };
+            yield return new object[] { "-9223372036854775809", NumberStyles.Integer, null, typeof(OverflowException) };
+            yield return new object[] { "8000000000000000", NumberStyles.AllowHexSpecifier, null, typeof(OverflowException) };
         }
 
         [Theory]
         [MemberData(nameof(Parse_Invalid_TestData))]
         public static void Parse_Invalid(string value, NumberStyles style, IFormatProvider provider, Type exceptionType)
         {
-            bool isDefaultProvider = provider == null || provider == new NumberFormatInfo();
+            bool isDefaultProvider = provider == null || provider == NumberFormatInfo.CurrentInfo;
             int result;
             if ((style & ~NumberStyles.Integer) == 0 && style != NumberStyles.None && (style & NumberStyles.AllowLeadingWhite) == (style & NumberStyles.AllowTrailingWhite))
             {
@@ -448,11 +466,11 @@ namespace System.Tests
             if (isDefaultProvider)
             {
                 // Use Parse(string, NumberStyles) or Parse(string, NumberStyles, IFormatProvider)
-                Assert.False(int.TryParse(value, style, new NumberFormatInfo(), out result));
+                Assert.False(int.TryParse(value, style, NumberFormatInfo.CurrentInfo, out result));
                 Assert.Equal(default(int), result);
 
                 Assert.Throws(exceptionType, () => int.Parse(value, style));
-                Assert.Throws(exceptionType, () => int.Parse(value, style, new NumberFormatInfo()));
+                Assert.Throws(exceptionType, () => int.Parse(value, style, NumberFormatInfo.CurrentInfo));
             }
         }
 

@@ -36,11 +36,18 @@ namespace System.Net.Http
 
             // Get HTTP version, status code, reason phrase from the response headers.
 
-            int versionLength = GetResponseHeader(requestHandle, Interop.WinHttp.WINHTTP_QUERY_VERSION, buffer);
-            response.Version =
-                CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase("HTTP/1.1", buffer, 0, versionLength) ? HttpVersion.Version11 :
-                CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase("HTTP/1.0", buffer, 0, versionLength) ? HttpVersion.Version10 :
-                HttpVersion.Unknown;
+            if (IsResponseHttp2(requestHandle))
+            {
+                response.Version = WinHttpHandler.HttpVersion20;
+            }
+            else
+            {
+                int versionLength = GetResponseHeader(requestHandle, Interop.WinHttp.WINHTTP_QUERY_VERSION, buffer);
+                response.Version =
+                    CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase("HTTP/1.1", buffer, 0, versionLength) ? HttpVersion.Version11 :
+                    CharArrayHelpers.EqualsOrdinalAsciiIgnoreCase("HTTP/1.0", buffer, 0, versionLength) ? HttpVersion.Version10 :
+                    WinHttpHandler.HttpVersionUnknown;
+            }
 
             response.StatusCode = (HttpStatusCode)GetResponseHeaderNumberInfo(
                 requestHandle,
@@ -53,6 +60,7 @@ namespace System.Net.Http
 
             // Create response stream and wrap it in a StreamContent object.
             var responseStream = new WinHttpResponseStream(requestHandle, state);
+            state.RequestHandle = null; // ownership successfully transfered to WinHttpResponseStram.
             Stream decompressedStream = responseStream;
 
             if (doManualDecompressionCheck)
@@ -82,7 +90,15 @@ namespace System.Net.Http
                 }
             }
 
+#if HTTP_DLL
+            var content = new StreamContent(decompressedStream, state.CancellationToken);
+#else
+            // TODO: Issue https://github.com/dotnet/corefx/issues/9071
+            // We'd like to be able to pass state.CancellationToken into the StreamContent so that its
+            // SerializeToStreamAsync method can use it, but that ctor isn't public, nor is there a
+            // SerializeToStreamAsync override that takes a CancellationToken.
             var content = new StreamContent(decompressedStream);
+#endif
 
             response.Content = content;
             response.RequestMessage = request;
@@ -320,6 +336,27 @@ namespace System.Net.Http
                     contentHeaders.TryAddWithoutValidation(headerName, headerValue);
                 }
             }
+        }
+
+        private static bool IsResponseHttp2(SafeWinHttpHandle requestHandle)
+        {
+            uint data = 0;
+            uint dataSize = sizeof(uint);
+
+            if (Interop.WinHttp.WinHttpQueryOption(
+                requestHandle,
+                Interop.WinHttp.WINHTTP_OPTION_HTTP_PROTOCOL_USED,
+                ref data,
+                ref dataSize))
+            {
+                if ((data & Interop.WinHttp.WINHTTP_PROTOCOL_FLAG_HTTP2) != 0)
+                {
+                    WinHttpTraceHelper.Trace("WinHttpHandler.IsResponseHttp2: return true");
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

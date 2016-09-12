@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,6 +15,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     [Collection("X509Filesystem")]
     public static class X509FilesystemTests
     {
+        // #9293: Our Fedora23 CI machines use NTFS for "tmphome", which causes our filesystem permissions checks to fail.
+        private static bool IsReliableInCI { get; } = !PlatformDetection.IsFedora23;
+
         [Fact]
         [OuterLoop]
         public static void VerifyCrlCache()
@@ -29,8 +31,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (var microsoftDotComIssuer = new X509Certificate2(TestData.MicrosoftDotComIssuerBytes))
             using (var microsoftDotComRoot = new X509Certificate2(TestData.MicrosoftDotComRootBytes))
             using (var unrelated = new X509Certificate2(TestData.DssCer))
+            using (var chainHolder = new ChainHolder())
             {
-                X509Chain chain = new X509Chain();
+                X509Chain chain = chainHolder.Chain;
 
                 chain.ChainPolicy.ExtraStore.Add(unrelated);
                 chain.ChainPolicy.ExtraStore.Add(microsoftDotComRoot);
@@ -52,6 +55,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.ChainStatus[0].Status);
                 }
 
+                chainHolder.DisposeChainElements();
+
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.Offline;
 
                 valid = chain.Build(microsoftDotComIssuer);
@@ -61,6 +66,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(X509ChainStatusFlags.RevocationStatusUnknown, chain.ChainStatus[0].Status);
 
                 File.WriteAllText(crlFile, MicrosoftDotComRootCrlPem, Encoding.ASCII);
+
+                chainHolder.DisposeChainElements();
 
                 valid = chain.Build(microsoftDotComIssuer);
                 Assert.True(valid, "Chain should build validly now");
@@ -116,7 +123,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddOne()
         {
@@ -131,20 +138,23 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         Assert.True(Directory.Exists(storeDirectory), "Directory.Exists(storeDirectory)");
                         Assert.Equal(1, Directory.GetFiles(storeDirectory).Length);
 
-                        X509Certificate2Collection storeCerts = store.Certificates;
-
-                        Assert.Equal(1, storeCerts.Count);
-
-                        using (X509Certificate2 storeCert = storeCerts[0])
+                        using (var coll = new ImportedCollection(store.Certificates))
                         {
-                            Assert.Equal(cert, storeCert);
-                            Assert.NotSame(cert, storeCert);
+                            X509Certificate2Collection storeCerts = coll.Collection;
+
+                            Assert.Equal(1, storeCerts.Count);
+
+                            using (X509Certificate2 storeCert = storeCerts[0])
+                            {
+                                Assert.Equal(cert, storeCert);
+                                Assert.NotSame(cert, storeCert);
+                            }
                         }
                     }
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddOneAfterUpgrade()
         {
@@ -168,20 +178,23 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         Assert.True(Directory.Exists(storeDirectory), "Directory.Exists(storeDirectory)");
                         Assert.Equal(1, Directory.GetFiles(storeDirectory).Length);
 
-                        X509Certificate2Collection storeCerts = store.Certificates;
-
-                        Assert.Equal(1, storeCerts.Count);
-
-                        using (X509Certificate2 storeCert = storeCerts[0])
+                        using (var coll = new ImportedCollection(store.Certificates))
                         {
-                            Assert.Equal(cert, storeCert);
-                            Assert.NotSame(cert, storeCert);
+                            X509Certificate2Collection storeCerts = coll.Collection;
+
+                            Assert.Equal(1, storeCerts.Count);
+
+                            using (X509Certificate2 storeCert = storeCerts[0])
+                            {
+                                Assert.Equal(cert, storeCert);
+                                Assert.NotSame(cert, storeCert);
+                            }
                         }
                     }
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_DowngradePermissions()
         {
@@ -204,7 +217,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
+        [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddAfterDispose()
         {
             RunX509StoreTest(
@@ -226,7 +240,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddAndClear()
         {
@@ -250,7 +264,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddDuplicate()
         {
@@ -272,7 +286,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddTwo()
         {
@@ -303,7 +317,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddTwo_UpgradePrivateKey()
         {
@@ -365,7 +379,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddTwo_UpgradePrivateKey_NoDowngrade()
         {
@@ -425,7 +439,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_DistinctCollections()
         {
@@ -466,7 +480,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_Add4_Remove1()
         {
@@ -515,7 +529,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsReliableInCI))]
         [OuterLoop(/* Alters user/machine state */)]
         [InlineData(false)]
         [InlineData(true)]
@@ -546,38 +560,79 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         using (X509Store storeClone = new X509Store(newName, store.Location))
                         {
                             storeClone.Open(OpenFlags.ReadWrite);
-
-                            X509Certificate2Collection storeCerts = store.Certificates;
-                            X509Certificate2Collection storeCloneCerts = storeClone.Certificates;
-
-                            Assert.Equal(
-                                storeCerts.OfType<X509Certificate2>(),
-                                storeCloneCerts.OfType<X509Certificate2>());
+                            AssertEqualContents(store, storeClone);
 
                             store.Add(certC);
 
                             // The object was added to store, but should show up in both objects
                             // after re-reading the Certificates property
-                            storeCerts = store.Certificates;
-                            storeCloneCerts = storeClone.Certificates;
-
-                            Assert.Equal(
-                                storeCerts.OfType<X509Certificate2>(),
-                                storeCloneCerts.OfType<X509Certificate2>());
+                            AssertEqualContents(store, storeClone);
 
                             // Now add one to storeClone to prove bidirectionality.
                             storeClone.Add(certD);
-                            storeCerts = store.Certificates;
-                            storeCloneCerts = storeClone.Certificates;
-
-                            Assert.Equal(
-                                storeCerts.OfType<X509Certificate2>(),
-                                storeCloneCerts.OfType<X509Certificate2>());
+                            AssertEqualContents(store, storeClone);
                         }
                     }
                 });
         }
-        
+
+        [Fact]
+        [OuterLoop( /* Alters user/machine state */)]
+        private static void X509Store_FiltersDuplicateOnLoad()
+        {
+            RunX509StoreTest(
+                (store, storeDirectory) =>
+                {
+                    using (var certA = new X509Certificate2(TestData.MsCertificate))
+                    {
+                        store.Open(OpenFlags.ReadWrite);
+
+                        store.Add(certA);
+
+                        // Emulate a race condition of parallel adds with the following flow
+                        // AdderA: Notice [thumbprint].pfx is available, create it (0 bytes)
+                        // AdderB: Notice [thumbprint].pfx already exists, but can't be read, move to [thumbprint].1.pfx
+                        // AdderA: finish write
+                        // AdderB: finish write
+
+                        string[] files = Directory.GetFiles(storeDirectory, "*.pfx");
+                        Assert.Equal(1, files.Length);
+
+                        string srcFile = files[0];
+                        string baseName = Path.GetFileNameWithoutExtension(srcFile);
+                        string destFile = Path.Combine(storeDirectory, srcFile + ".1.pfx");
+                        File.Copy(srcFile, destFile);
+
+                        using (var coll = new ImportedCollection(store.Certificates))
+                        {
+                            Assert.Equal(1, coll.Collection.Count);
+                            Assert.Equal(certA, coll.Collection[0]);
+                        }
+
+                        // Also check that remove removes both files.
+
+                        store.Remove(certA);
+
+                        string[] filesAfter = Directory.GetFiles(storeDirectory, "*.pfx");
+                        Assert.Equal(0, filesAfter.Length);
+                    }
+                });
+        }
+
+        private static void AssertEqualContents(X509Store storeA, X509Store storeB)
+        {
+            Assert.NotSame(storeA, storeB);
+
+            using (var storeATracker = new ImportedCollection(storeA.Certificates))
+            using (var storeBTracker = new ImportedCollection(storeB.Certificates))
+            {
+                X509Certificate2Collection storeACerts = storeATracker.Collection;
+                X509Certificate2Collection storeBCerts = storeBTracker.Collection;
+
+                Assert.Equal(storeACerts.OfType<X509Certificate2>(), storeBCerts.OfType<X509Certificate2>());
+            }
+        }
+
         private static void RunX509StoreTest(Action<X509Store, string> testAction)
         {
             string certStoresFeaturePath = PersistedFiles.GetUserFeatureDirectory("cryptography", "x509stores");

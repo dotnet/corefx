@@ -11,6 +11,14 @@
       <OSGroup>debian.8</OSGroup>
       <Platform>amd64</Platform>
     </Project>
+    <Project Include="fedora\23\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>fedora.23</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
+    <Project Include="fedora\24\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>fedora.24</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
     <Project Include="ubuntu\14.04\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>ubuntu.14.04</OSGroup>
       <Platform>amd64</Platform>
@@ -19,33 +27,37 @@
       <OSGroup>ubuntu.16.04</OSGroup>
       <Platform>amd64</Platform>
     </Project>
+    <Project Include="ubuntu\16.10\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>ubuntu.16.10</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
     <Project Include="osx\runtime.native.System.IO.Compression.pkgproj">
-      <OSGroup>osx.10.10</OSGroup>
+      <OSGroup>osx.10</OSGroup>
       <Platform>amd64</Platform>
     </Project>
-    <Project Include="win7\runtime.native.System.IO.Compression.pkgproj">
+    <Project Include="opensuse\13.2\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>opensuse.13.2</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
+    <Project Include="opensuse\42.1\runtime.native.System.IO.Compression.pkgproj">
+      <OSGroup>opensuse.42.1</OSGroup>
+      <Platform>amd64</Platform>
+    </Project>
+    <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>x86</Platform>
     </Project>
-    <Project Include="win7\runtime.native.System.IO.Compression.pkgproj">
+    <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>amd64</Platform>
     </Project>
-    <Project Include="win7\runtime.native.System.IO.Compression.pkgproj">
+    <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>arm</Platform>
     </Project>
-    <Project Include="win10\runtime.native.System.IO.Compression.pkgproj">
+    <Project Include="win\runtime.native.System.IO.Compression.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
-      <Platform>x86</Platform>
-    </Project>
-    <Project Include="win10\runtime.native.System.IO.Compression.pkgproj">
-      <OSGroup>Windows_NT</OSGroup>
-      <Platform>amd64</Platform>
-    </Project>
-    <Project Include="win10\runtime.native.System.IO.Compression.pkgproj">
-      <OSGroup>Windows_NT</OSGroup>
-      <Platform>arm</Platform>
+      <Platform>arm64</Platform>
     </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />

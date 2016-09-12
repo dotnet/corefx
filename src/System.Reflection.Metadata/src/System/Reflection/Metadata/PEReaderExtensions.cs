@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.IO;
 using System.Reflection.PortableExecutable;
 using System.Text;
 
@@ -20,7 +21,8 @@ namespace System.Reflection.Metadata
         /// <exception cref="ArgumentNullException"><paramref name="peReader"/> is null.</exception>
         /// <exception cref="BadImageFormatException">The body is not found in the metadata or is invalid.</exception>
         /// <exception cref="InvalidOperationException">Section where the method is stored is not available.</exception>
-        public static unsafe MethodBodyBlock GetMethodBody(this PEReader peReader, int relativeVirtualAddress)
+        /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
+        public static MethodBodyBlock GetMethodBody(this PEReader peReader, int relativeVirtualAddress)
         {
             if (peReader == null)
             {
@@ -34,8 +36,7 @@ namespace System.Reflection.Metadata
             }
 
             // Call to validating public BlobReader constructor is by design -- we need to throw PlatformNotSupported on big-endian architecture.
-            var blobReader = new BlobReader(block.Pointer, block.Length);
-            return MethodBodyBlock.Create(blobReader);
+            return MethodBodyBlock.Create(block.GetReader());
         }
 
         /// <summary>
@@ -46,6 +47,7 @@ namespace System.Reflection.Metadata
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="peReader"/> is null</exception>
         /// <exception cref="PlatformNotSupportedException">The current platform is big-endian.</exception>
+        /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
         public static MetadataReader GetMetadataReader(this PEReader peReader)
         {
             return GetMetadataReader(peReader, MetadataReaderOptions.ApplyWindowsRuntimeProjections, null);
@@ -59,6 +61,7 @@ namespace System.Reflection.Metadata
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="peReader"/> is null</exception>
         /// <exception cref="PlatformNotSupportedException">The current platform is big-endian.</exception>
+        /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
         public static MetadataReader GetMetadataReader(this PEReader peReader, MetadataReaderOptions options)
         {
             return GetMetadataReader(peReader, options, null);
@@ -73,6 +76,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="ArgumentNullException"><paramref name="peReader"/> is null</exception>
         /// <exception cref="ArgumentException">The encoding of <paramref name="utf8Decoder"/> is not <see cref="UTF8Encoding"/>.</exception>
         /// <exception cref="PlatformNotSupportedException">The current platform is big-endian.</exception>
+        /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
         public static unsafe MetadataReader GetMetadataReader(this PEReader peReader, MetadataReaderOptions options, MetadataStringDecoder utf8Decoder)
         {
             if (peReader == null)

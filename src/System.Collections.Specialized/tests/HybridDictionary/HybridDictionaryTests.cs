@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Tests;
+using Xunit;
 
 namespace System.Collections.Specialized.Tests
 {
@@ -18,12 +19,11 @@ namespace System.Collections.Specialized.Tests
 
     public abstract class HybridDictionaryTestBase : IDictionary_NonGeneric_Tests
     {
-        protected override bool ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowsArgumentException => false;
-        protected override bool ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType_ThrowsArgumentException => false;
-        protected override bool ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType_ThrowsArgumentException => false;
+        protected override Type ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowType => typeof(InvalidCastException);
+        protected override Type ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType_ThrowType => typeof(InvalidCastException);
+        protected override Type ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType_ThrowType => typeof(InvalidCastException);
 
-        protected override bool ICollection_NonGeneric_CopyTo_NonZeroLowerBound_ZeroCountThrowsArgumentException => false;
-        protected override bool ICollection_NonGeneric_CopyTo_NonZeroLowerBound_SingleCountThrowsArgumentException => false;
+        protected override Type ICollection_NonGeneric_SyncRootType => typeof(HybridDictionary);
 
         protected override object CreateTKey(int seed)
         {
@@ -35,5 +35,23 @@ namespace System.Collections.Specialized.Tests
         }
 
         protected override object CreateTValue(int seed) => CreateTKey(seed);
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public override void ICollection_NonGeneric_CopyTo_NonZeroLowerBound(int count)
+        {
+            ICollection collection = NonGenericICollectionFactory(count);
+            Array arr = Array.CreateInstance(typeof(object), new int[] { count }, new int[] { 2 });
+            Assert.Equal(1, arr.Rank);
+            Assert.Equal(2, arr.GetLowerBound(0));
+            if (count == 0)
+            {
+                collection.CopyTo(arr, count);
+                Assert.Equal(0, arr.Length);
+                return;
+            }
+
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(arr, 0));
+        }
     }
 }

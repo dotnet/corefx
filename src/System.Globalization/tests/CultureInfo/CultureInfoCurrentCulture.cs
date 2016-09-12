@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Globalization.Tests
@@ -11,6 +12,7 @@ namespace System.Globalization.Tests
     public class CurrentCultureTests : RemoteExecutorTestBase
     {
         [Fact]
+        [ActiveIssue(11381, Xunit.PlatformID.AnyUnix)]
         public void CurrentCulture()
         {
             RemoteInvoke(() =>
@@ -37,6 +39,7 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
+        [ActiveIssue(11381, Xunit.PlatformID.AnyUnix)]
         public void CurrentUICulture()
         {
             RemoteInvoke(() =>
@@ -110,6 +113,9 @@ namespace System.Globalization.Tests
         {
             var psi = new ProcessStartInfo();
             psi.Environment.Clear();
+
+            CopyEssentialTestEnvironment(psi.Environment);
+
             psi.Environment["LANG"] = langEnvVar;
 
             RemoteInvoke(expected =>
@@ -122,6 +128,48 @@ namespace System.Globalization.Tests
 
                 return SuccessExitCode;
             }, expectedCultureName, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+        }
+
+        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void CurrentCulture_DefaultWithNoLang(string langEnvVar)
+        {
+            var psi = new ProcessStartInfo();
+            psi.Environment.Clear();
+
+            CopyEssentialTestEnvironment(psi.Environment);
+
+            if (langEnvVar != null)
+            {
+               psi.Environment["LANG"] = langEnvVar;
+            }
+
+            RemoteInvoke(() =>
+            {
+                Assert.NotNull(CultureInfo.CurrentCulture);
+                Assert.NotNull(CultureInfo.CurrentUICulture);
+
+                Assert.Equal("", CultureInfo.CurrentCulture.Name);
+                Assert.Equal("", CultureInfo.CurrentUICulture.Name);
+
+                return SuccessExitCode;
+            }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+        }
+
+        private static void CopyEssentialTestEnvironment(IDictionary<string, string> environment)
+        {
+            string[] essentialVariables = { "HOME", "LD_LIBRARY_PATH" };
+            foreach(string essentialVariable in essentialVariables)
+            {
+                string varValue = Environment.GetEnvironmentVariable(essentialVariable);
+
+                if (varValue != null)
+                {
+                    environment[essentialVariable] = varValue;
+                }
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// <summary>
         /// Maximum number of tables that can be present in Ecma335 metadata.
         /// </summary>
-        public static readonly int TableCount = TableIndexExtensions.Count;
+        public static readonly int TableCount = 64; // headers use 64bit table masks
 
         /// <summary>
         /// Maximum number of tables that can be present in Ecma335 metadata.
@@ -108,7 +108,8 @@ namespace System.Reflection.Metadata.Ecma335
                     throw new NotSupportedException(SR.CantGetOffsetForVirtualHeapHandle);
 
                 default:
-                    throw new ArgumentException(SR.InvalidHandle, nameof(handle));
+                    Throw.InvalidArgument_UnexpectedHandleKind(handle.Kind);
+                    return 0;
             }
         }
 
@@ -130,7 +131,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// to the specified <paramref name="handle"/>.
         /// </summary>
         /// <returns>
-        /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/>.
+        /// An offset in the corresponding heap, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
         /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
         /// </returns>
         public static int GetHeapOffset(Handle handle)
@@ -147,6 +148,46 @@ namespace System.Reflection.Metadata.Ecma335
 
             return handle.Offset;
         }
+
+        /// <summary>
+        /// Returns the offset of metadata heap data that corresponds 
+        /// to the specified <paramref name="handle"/>.
+        /// </summary>
+        /// <returns>
+        /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
+        /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
+        /// </returns>
+        public static int GetHeapOffset(BlobHandle handle) => handle.IsVirtual ? -1 : handle.GetHeapOffset();
+
+        /// <summary>
+        /// Returns the offset of metadata heap data that corresponds 
+        /// to the specified <paramref name="handle"/>.
+        /// </summary>
+        /// <returns>
+        /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
+        /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
+        /// </returns>
+        public static int GetHeapOffset(GuidHandle handle) => handle.Index;
+
+        /// <summary>
+        /// Returns the offset of metadata heap data that corresponds 
+        /// to the specified <paramref name="handle"/>.
+        /// </summary>
+        /// <returns>
+        /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
+        /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
+        /// </returns>
+        public static int GetHeapOffset(UserStringHandle handle) => handle.GetHeapOffset();
+
+        /// <summary>
+        /// Returns the offset of metadata heap data that corresponds 
+        /// to the specified <paramref name="handle"/>.
+        /// </summary>
+        /// <returns>
+        /// Zero based offset, or -1 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/> or <see cref="MetadataBuilder"/>.
+        /// See <see cref="GetHeapOffset(MetadataReader, Handle)"/>.
+        /// </returns>
+        public static int GetHeapOffset(StringHandle handle) => handle.IsVirtual ? -1 : handle.GetHeapOffset();
 
         /// <summary>
         /// Returns the metadata token of the specified <paramref name="handle"/>.
@@ -191,10 +232,12 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         /// <param name="type">Handle type.</param>
         /// <param name="index">Table index.</param>
-        /// <returns>True if the handle type corresponds to an Ecma335 table, false otherwise.</returns>
+        /// <returns>True if the handle type corresponds to an Ecma335 or Portable PDB table, false otherwise.</returns>
         public static bool TryGetTableIndex(HandleKind type, out TableIndex index)
         {
-            if ((int)type < TableIndexExtensions.Count)
+            // We don't have a HandleKind for PropertyMap, EventMap, MethodSemantics, *Ptr, AssemblyOS, etc. tables, 
+            // but one can get ahold of one by creating a handle from a token and getting its Kind.
+            if ((int)type < TableCount && ((1UL << (int)type) & (ulong)TableMask.AllTables) != 0)
             {
                 index = (TableIndex)type;
                 return true;

@@ -1,7 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Condition="Exists('..\dir.props')" Project="..\dir.props" />
 
+  <!-- We shipped assembly file version 4.6.x up until the end of rc3.  Version assembly as
+        4.6.x to ensure compatability in Visual Studio for an in-place update. -->
+  <PropertyGroup>
+    <MajorVersion>4</MajorVersion>
+    <MinorVersion>6</MinorVersion>
+  </PropertyGroup>
   <!--
     $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
   -->
@@ -12,20 +18,18 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <InputOSGroup Condition="'$(InputOSGroup)'==''">$(OSEnvironment)</InputOSGroup>
+    <XunitPerfAnalysisPackageVersion>1.0.0-alpha-build0040</XunitPerfAnalysisPackageVersion>
   </PropertyGroup>
 
-  <!-- Build Tools Versions -->
   <PropertyGroup>
-    <RoslynVersion>1.0.0-rc3-20150510-01</RoslynVersion>
-    <RoslynPackageName>Microsoft.Net.ToolsetCompilers</RoslynPackageName>
+    <InputOSGroup Condition="'$(InputOSGroup)'==''">$(OSEnvironment)</InputOSGroup>
   </PropertyGroup>
 
   <!-- Informs build tools to apply .NET Framework metadata if not a test project -->
   <PropertyGroup>
     <IsDotNetFrameworkProductAssembly>true</IsDotNetFrameworkProductAssembly>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <BuildToolsTargets45 Condition="'$(OsEnvironment)'=='Windows_NT'">true</BuildToolsTargets45>
   </PropertyGroup>
@@ -33,41 +37,28 @@
   <!-- Common repo directories -->
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
-    <SourceDir>$(ProjectDir)src/</SourceDir>
+    <SourceDir>$(ProjectDir)src\</SourceDir>
 
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
     <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
+    <PackageOutputRoot Condition="'$(PackageOutputRoot)'=='' and '$(NonShippingPackage)' == 'true'">$(BinDir)packages_noship/</PackageOutputRoot>
     <PackageOutputRoot Condition="'$(PackageOutputRoot)'==''">$(BinDir)packages/</PackageOutputRoot>
 
     <!-- Input Directories -->
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
-    <ToolRuntimePath Condition="'$(ToolRuntimePath)'==''">$(ProjectDir)Tools/</ToolRuntimePath>
     <ToolsDir Condition="'$(UseToolRuntimeForToolsDir)'=='true'">$(ToolRuntimePath)</ToolsDir>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
-    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolRuntimePath)dotnetcli/</DotnetCliPath>
-    <BuildToolsTaskDir Condition="'$(BuildToolsTargets45)' == 'true'">$(ToolsDir)net45/</BuildToolsTaskDir>
-    <BuildToolsTaskDir Condition="'$(BuildToolsTaskDir)'==''">$(ToolsDir)</BuildToolsTaskDir>
-    <UseRoslynCompilers Condition="'$(UseRoslynCompilers)'=='' and '$(OSEnvironment)'!='Windows_NT'">false</UseRoslynCompilers>
+    <ToolRuntimePath Condition="'$(ToolRuntimePath)'==''">$(ToolsDir)</ToolRuntimePath>
   </PropertyGroup>
 
   <Import Project="$(ToolRuntimePath)BuildVersion.targets" Condition="Exists('$(ToolRuntimePath)BuildVersion.targets')" />
-  
+
   <PropertyGroup>
-    <!-- temporarily increase assembly version of corefx impl of desktop inbox contracts to allow folks 
-         to move to the latest packages.  Remove once the full stack is on the latest packages
-         https://github.com/dotnet/corefx/issues/7114 -->
-    <AssemblyVersionTransition>true</AssemblyVersionTransition>
     <GenFacadesArgs>-ignoreBuildAndRevisionMismatch</GenFacadesArgs>
   </PropertyGroup>
-
-  <!-- Use Roslyn Compilers to build -->
-  <PropertyGroup Condition="'$(UseRoslynCompilers)'!='false'">
-    <UseSharedCompilation>true</UseSharedCompilation>
-  </PropertyGroup>
-  <Import Project="$(ToolRuntimePath)/net45/roslyn/build/Microsoft.Net.Compilers.props" Condition="'$(UseRoslynCompilers)'!='false' AND Exists('$(ToolRuntimePath)/net45/roslyn/build/Microsoft.Net.Compilers.props')" />
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
   <Import Project="$(ToolsDir)Build.Common.props" Condition="Exists('$(ToolsDir)Build.Common.props')" />
@@ -77,31 +68,8 @@
     <EnableDotnetAnalyzers Condition="'$(EnableDotnetAnalyzers)'==''">true</EnableDotnetAnalyzers>
   </PropertyGroup>
 
-  <!-- Package dependency validation -->
-  <PropertyGroup>
-    <ValidatePackageVersions>true</ValidatePackageVersions>
-    <ProhibitFloatingDependencies>true</ProhibitFloatingDependencies>
-    <CoreFxExpectedPrerelease>rc3-24102-00</CoreFxExpectedPrerelease>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ValidationPattern Include="CoreFxVersions">
-      <IdentityRegex>^(?i)((System\..*)|(NETStandard\.Library)|(Microsoft\.CSharp)|(Microsoft\.NETCore.*)|(Microsoft\.TargetingPack\.Private\.(CoreCLR|NETNative))|(Microsoft\.Win32\..*)|(Microsoft\.VisualBasic))(?&lt;!TestData)$</IdentityRegex>
-      <ExpectedPrerelease>$(CoreFxExpectedPrerelease)</ExpectedPrerelease>
-    </ValidationPattern>
-    <ValidationPattern Include="TargetingPackVersions">
-      <IdentityRegex>^(?i)Microsoft\.TargetingPack\.(NetFramework.*|Private\.WinRT)$</IdentityRegex>
-      <ExpectedVersion>1.0.1</ExpectedVersion>
-    </ValidationPattern>
-    <ValidationPattern Include="xUnitStableVersions">
-      <IdentityRegex>^(?i)xunit$</IdentityRegex>
-      <ExpectedVersion>2.1.0</ExpectedVersion>
-    </ValidationPattern>
-    <ValidationPattern Include="xUnitExtensionsVersions">
-      <IdentityRegex>^(?i)xunit\.netcore\.extensions$</IdentityRegex>
-      <ExpectedVersion>1.0.0-prerelease-00312-04</ExpectedVersion>
-    </ValidationPattern>
-  </ItemGroup>
+  <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
+  <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
   <!-- Import packaging props -->
   <Import Project="$(MSBuildThisFileDirectory)Packaging.props"/>
@@ -111,19 +79,22 @@
     <!-- PackagesDrops is passed in via the commandline "/p:PackagesDrops=[drop location]" -->
     <DnuSourceList Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(PackagesDrops)" />
     <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
+    <!-- Including buildtools to pull in TestSuite packages and repackaged xunit dependencies-->
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools/api/v3/index.json" />
     <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
     <DnuSourceList Include="https:%2F%2Fwww.nuget.org/api/v2/" />
   </ItemGroup>
 
   <!-- This is the directory where we dynamically generate project.json's for our test build package dependencies -->
   <PropertyGroup Condition="'$(BuildTestsAgainstPackages)' == 'true'">
-      <GeneratedProjectJsonDir>$(ObjDir)generated</GeneratedProjectJsonDir>
+    <GeneratedProjectJsonDir>$(ObjDir)generated</GeneratedProjectJsonDir>
+    <BuildTestsAgainstPackagesIdentityRegex>$(CoreFxVersionsIdentityRegex)</BuildTestsAgainstPackagesIdentityRegex>
   </PropertyGroup>
 
   <!-- list of directories to perform batch restore -->
   <ItemGroup>
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/src" />
-    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)/pkg" />
+    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)src" />
+    <DnuRestoreDir Include="$(MSBuildThisFileDirectory)pkg" />
     <DnuRestoreDir Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(GeneratedProjectJsonDir)" />
   </ItemGroup>
 
@@ -140,6 +111,7 @@
     <DnuRestoreCommand>"$(DnuToolPath)"</DnuRestoreCommand>
     <DnuRestoreCommand>$(DnuRestoreCommand) restore</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(ParallelRestore)'=='true'">$(DnuRestoreCommand) --parallel</DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(UseNuGetHttpCache)'!='true'">$(DnuRestoreCommand) --no-cache</DnuRestoreCommand>
     <DnuRestoreCommand>$(DnuRestoreCommand) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(LockDependencies)' == 'true'">$(DnuRestoreCommand) --lock</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(NuGetConfigPath)'!=''">$(DnuRestoreCommand) --configfile $(NuGetConfigPath)</DnuRestoreCommand>
@@ -148,7 +120,7 @@
   <!-- Create a collection of all project.json files for dependency updates. -->
   <ItemGroup>
     <ProjectJsonFiles Include="$(SourceDir)**/project.json" />
-    <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)/pkg/**/project.json" />
+    <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)pkg/**/project.json" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(BuildAllProjects)'=='true'">
@@ -156,41 +128,12 @@
     <RestorePackages>false</RestorePackages>
   </PropertyGroup>
 
-  <!--
-    On Unix we always use a version of Roslyn we restore from NuGet and we have to work around some known issues.
-  -->
-  <PropertyGroup Condition="'$(OsEnvironment)'=='Unix'">
-    <RoslynPackageDir>$(PackagesDir)/$(RoslynPackageName).$(RoslynVersion)/</RoslynPackageDir>
-    <RoslynPropsFile>$(RoslynPackageDir)build/Microsoft.Net.ToolsetCompilers.props</RoslynPropsFile>
-
-    <!--
-      Portable PDBs are now supported in Linux and OSX with .Net Core MSBuild.
-    -->
-    <DebugType>Portable</DebugType>
-
-    <!--
-      Delay signing with the ECMA key currently doesn't work.
-      https://github.com/dotnet/roslyn/issues/2444
-    -->
-    <UseECMAKey>false</UseECMAKey>
-
-    <!--
-      Full signing with Open key doesn't work with Portable Csc.
-      https://github.com/dotnet/roslyn/issues/8210
-    -->
-    <UseOpenKey>false</UseOpenKey>
-
-    <!--
-      Mono currently doesn't include VB targets for portable, notably /lib/mono/xbuild/Microsoft/Portable/v4.5/Microsoft.Portable.VisualBasic.targets.
-      Fixed in https://github.com/mono/mono/pull/1726.
-    -->
-    <IncludeVbProjects>false</IncludeVbProjects>
-  </PropertyGroup>
-
   <PropertyGroup>
     <!-- By default make all libraries to be AnyCPU but individual projects can override it if they need to -->
     <Platform>AnyCPU</Platform>
     <OutputType>Library</OutputType>
+    <!-- dotnet/corefx#8899 tracks fixing this -->
+    <RunApiCompat Condition="'$(OSEnvironment)' == 'Windows_NT'">true</RunApiCompat>
   </PropertyGroup>
 
   <!--
@@ -236,12 +179,17 @@
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netstandard13aot'))">netstandard13aot</TargetGroup>
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netstandard15aot'))">netstandard15aot</TargetGroup>
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netcore50'))">netcore50</TargetGroup>
+    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netcoreapp1.0'))">netcoreapp1.0</TargetGroup>
+    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('netcoreapp1.1'))">netcoreapp1.1</TargetGroup>
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('dnxcore50'))">dnxcore50</TargetGroup>
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net463'))">net463</TargetGroup>
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net462'))">net462</TargetGroup>
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net461'))">net461</TargetGroup>
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net46'))">net46</TargetGroup>
     <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net45'))">net45</TargetGroup>
+    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('net451'))">net451</TargetGroup>
+    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('win8'))">win8</TargetGroup>
+    <TargetGroup Condition="'$(TargetGroup)'=='' and $(Configuration.Contains('wpa81'))">wpa81</TargetGroup>
   </PropertyGroup>
 
   <!-- Set up Default symbol and optimization for Configuration -->
@@ -401,6 +349,18 @@
         <NuGetTargetMoniker>.NETStandard,Version=v1.5</NuGetTargetMoniker>
       </PropertyGroup>
     </When>
+    <When Condition="'$(TargetGroup)'=='netcoreapp1.0'">
+      <PropertyGroup>
+        <PackageTargetFramework>netcoreapp1.0</PackageTargetFramework>
+        <NuGetTargetMoniker>.NETCoreApp,Version=v1.0</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetGroup)'=='netcoreapp1.1'">
+      <PropertyGroup>
+        <PackageTargetFramework>netcoreapp1.1</PackageTargetFramework>
+        <NuGetTargetMoniker>.NETCoreApp,Version=v1.1</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
     <When Condition="'$(TargetGroup)'=='dnxcore50'">
       <PropertyGroup>
         <ConfigurationErrorMsg>$(ConfigurationErrorMsg);DNXCore50 has been deprecated.  Please use NETStandard1.X or NETCoreApp1.0 instead.</ConfigurationErrorMsg>
@@ -434,11 +394,30 @@
         <NuGetTargetMoniker>.NETFramework,Version=v4.6</NuGetTargetMoniker>
       </PropertyGroup>
     </When>
+    <When Condition="'$(TargetGroup)'=='net451'">
+      <PropertyGroup>
+        <PackageTargetFramework>net451</PackageTargetFramework>
+        <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.5.1</TargetingPackNugetPackageId>
+        <NuGetTargetMoniker>.NETFramework,Version=v4.5.1</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
     <When Condition="'$(TargetGroup)'=='net45'">
       <PropertyGroup>
         <PackageTargetFramework>net45</PackageTargetFramework>
         <TargetingPackNugetPackageId>Microsoft.TargetingPack.NETFramework.v4.5</TargetingPackNugetPackageId>
         <NuGetTargetMoniker>.NETFramework,Version=v4.5</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetGroup)'=='win8'">
+      <PropertyGroup>
+        <PackageTargetFramework>win8</PackageTargetFramework>
+        <NuGetTargetMoniker>Windows,Version=v8.0</NuGetTargetMoniker>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetGroup)'=='wpa81'">
+      <PropertyGroup>
+        <PackageTargetFramework>wpa81</PackageTargetFramework>
+        <NuGetTargetMoniker>WindowsPhoneApp,Version=v8.1</NuGetTargetMoniker>
       </PropertyGroup>
     </When>
     <Otherwise>
@@ -447,6 +426,14 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
+
+  <!-- Default Test platform to deploy the netstandard compiled tests to -->
+  <PropertyGroup>
+    <!-- we default TestTFM and FilterToTestTFM to netcoreapp1.0 if they are not explicity defined -->
+    <DefaultTestTFM Condition="'$(DefaultTestTFM)'==''">netcoreapp1.0</DefaultTestTFM>
+    <TestTFM Condition="'$(TestTFM)'==''">$(DefaultTestTFM)</TestTFM>
+    <FilterToTestTFM Condition="'$(FilterToTestTFM)'==''">$(DefaultTestTFM)</FilterToTestTFM>
+  </PropertyGroup>
 
   <PropertyGroup>
     <IsRedistAssembly Condition="'$(IsRedistAssembly)'=='' AND ($(MSBuildProjectFullPath.Contains('\redist\')) OR $(MSBuildProjectFullPath.Contains('/redist/')))">true</IsRedistAssembly>
@@ -482,8 +469,8 @@
 
   <!-- Set up some common paths -->
   <PropertyGroup>
-    <CommonPath>$(SourceDir)Common/src</CommonPath>
-    <CommonTestPath>$(SourceDir)Common/tests</CommonTestPath>
+    <CommonPath>$(SourceDir)Common\src</CommonPath>
+    <CommonTestPath>$(SourceDir)Common\tests</CommonTestPath>
   </PropertyGroup>
 
   <!-- Set up the default output and intermediate paths -->
@@ -501,6 +488,7 @@
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
     <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>
+    <SymbolPackageOutputPath Condition="'$(SymbolPackageOutputPath)'==''">$(PackageOutputPath)symbols/</SymbolPackageOutputPath>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -508,6 +496,7 @@
     <SkipTests Condition="'$(SkipTests)'=='' and ('$(OsEnvironment)'=='Windows_NT' and '$(TargetsWindows)'!='true' and '$(OSGroup)'!='AnyOS')">true</SkipTests>
   </PropertyGroup>
 
-  <Import Project="$(RoslynPropsFile)" Condition="'$(OsEnvironment)'=='Unix' and Exists('$(RoslynPropsFile)')" />
-
+  <!-- Use Roslyn Compilers to build -->
+  <Import Project="$(RoslynPropsFile)" Condition="'$(OSEnvironment)'!='Unix' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false'" />
+  <Import Project="$(RoslynPropsFile)" Condition="'$(OSEnvironment)'=='Unix' and Exists('$(RoslynPropsFile)')" />
 </Project>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
@@ -11,17 +11,25 @@
     <ProjectReference Include="..\ref\4.0.20\System.Runtime.InteropServices.depproj">
       <SupportedFramework>net46;netcore50</SupportedFramework>
     </ProjectReference>
+    <ProjectReference Include="..\ref\4.1\System.Runtime.InteropServices.depproj">
+      <SupportedFramework>net462</SupportedFramework>
+    </ProjectReference>
     <ProjectReference Include="..\ref\System.Runtime.InteropServices.csproj">
-      <SupportedFramework>net462;netcoreapp1.0</SupportedFramework>
+      <SupportedFramework>net463;netcoreapp1.0;$(AllXamarinFrameworks)</SupportedFramework>
+    </ProjectReference>
+    <ProjectReference Include="..\src\redist\System.Runtime.InteropServices.depproj">
+      <TargetGroup>net462</TargetGroup>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Runtime.InteropServices.csproj">
-      <TargetGroup>net462</TargetGroup>
+      <TargetGroup>net463</TargetGroup>
     </ProjectReference>
     <ProjectReference Include="any\System.Runtime.InteropServices.pkgproj" />
     <ProjectReference Include="aot\System.Runtime.InteropServices.pkgproj" />
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
-    <InboxOnTargetFramework Include="net45" />
+    <InboxOnTargetFramework Include="net45">
+      <FrameworkReference>System.Core;System</FrameworkReference>
+    </InboxOnTargetFramework>
     <InboxOnTargetFramework Include="win8" />
     <InboxOnTargetFramework Include="wpa81" />
     <InboxOnTargetFramework Include="portable-net45+win8+wpa81" />

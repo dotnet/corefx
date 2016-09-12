@@ -72,6 +72,14 @@ namespace System.Net.Sockets
 
         public int Available { get { return AvailableCore; } }
 
+        // Used by the class to provide the underlying network socket.
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)] // TODO: Remove once https://github.com/dotnet/corefx/issues/5868 is addressed.
+        public Socket Client
+        {
+            get { return ClientCore; }
+            set { ClientCore = value; }
+        }
+
         public bool Connected { get { return ConnectedCore; } }
 
         public bool ExclusiveAddressUse
@@ -123,7 +131,14 @@ namespace System.Net.Sockets
                 NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "EndConnect", asyncResult);
             }
 
-            Client.EndConnect(asyncResult);
+            Socket s = Client;
+            if (s == null)
+            {
+                // Dispose nulls out the client socket field.
+                throw new ObjectDisposedException(GetType().Name);
+            }
+            s.EndConnect(asyncResult);
+
             _active = true;
             if (NetEventSource.Log.IsEnabled())
             {
@@ -150,7 +165,7 @@ namespace System.Net.Sockets
 
             if (_dataStream == null)
             {
-                _dataStream = new NetworkStream(_clientSocket, true);
+                _dataStream = new NetworkStream(Client, true);
             }
 
             if (NetEventSource.Log.IsEnabled())
@@ -206,6 +221,8 @@ namespace System.Net.Sockets
                         }
                     }
                 }
+
+                DisposeCore(); // platform-specific disposal work
 
                 GC.SuppressFinalize(this);
             }

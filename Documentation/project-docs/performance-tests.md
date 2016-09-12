@@ -1,4 +1,4 @@
-Performance Tests
+﻿Performance Tests
 ======================
 
 This document contains instructions for building, running, and adding Performance tests. 
@@ -22,11 +22,11 @@ Running the tests
 ### Windows
 Performance test files (if present) are stored within a library's ```tests/Performance``` directory and contain test methods that are all marked with a perf-specific *Benchmark* attribute. The performance tests will only be run if the ```performance``` property is set to ```true```.
 
-To build and run the tests using msbuild for a project, run ```msbuild /t:BuildAndTest /p:Performance=true /p:Configuration=Release``` from the tests directory. If the v5.0 assemblies aren't installed on your system, an error will be raised and no tests will be run.
+To build and run the tests using msbuild for a project, run ```msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:OSGroup=Windows_NT``` from the tests directory. If the v5.0 assemblies aren't installed on your system, an error will be raised and no tests will be run.
 
 Note: Because build.cmd runs tests concurrently, it's not recommended that you execute the perf tests using it.
 
-results will be in: corefx/bin/tests/Windows_NT.AnyCPU.Release/TESTNAME/dnxcore50
+results will be in: corefx/bin/tests/Windows_NT.AnyCPU.Release/TESTNAME/netcoreapp1.0
 ### Linux
 From your tests directory, run:
 ```

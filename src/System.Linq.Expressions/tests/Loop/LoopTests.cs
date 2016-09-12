@@ -48,7 +48,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NonVoidContinue()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Loop(Expression.Empty(), null, Expression.Label(typeof(int))));
+            Assert.Throws<ArgumentException>("continue", () => Expression.Loop(Expression.Empty(), null, Expression.Label(typeof(int))));
         }
 
         [Fact]
@@ -284,6 +284,13 @@ namespace System.Linq.Expressions.Tests
         {
             var loop = Expression.Loop(Expression.Empty(), Expression.Label(), Expression.Label());
             Assert.NotSame(loop, loop.Update(loop.BreakLabel, Expression.Label(), loop.Body));
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            var e = Expression.Loop(Expression.Empty());
+            Assert.Equal("loop { ... }", e.ToString());
         }
     }
 }

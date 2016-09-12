@@ -8,6 +8,8 @@ using Xunit.Abstractions;
 using System.Threading.Tasks;
 using System.Net.Test.Common;
 using System.Text;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Net.Sockets.Tests
 {
@@ -20,6 +22,7 @@ namespace System.Net.Sockets.Tests
             _log = output;
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -30,8 +33,8 @@ namespace System.Net.Sockets.Tests
             {
                 Assert.False(client.Connected);
 
-                string host = HttpTestServers.Host;
-                const int port = 80;
+                string host = Configuration.Sockets.SocketServer.IdnHost;
+                int port = Configuration.Sockets.SocketServer.Port;
 
                 if (mode == 0)
                 {
@@ -46,6 +49,8 @@ namespace System.Net.Sockets.Tests
                 }
 
                 Assert.True(client.Connected);
+                Assert.NotNull(client.Client);
+                Assert.Same(client.Client, client.Client);
 
                 using (NetworkStream s = client.GetStream())
                 {
@@ -56,6 +61,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ConnectedAvailable_InitialValues_Default()
         {
@@ -66,7 +72,35 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
+        public void ConnectedAvailable_NullClient()
+        {
+            using (TcpClient client = new TcpClient())
+            {
+                client.Client = null;
+
+                Assert.False(client.Connected);
+                Assert.Equal(0, client.Available);
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void ExclusiveAddressUse_NullClient()
+        {
+            using (TcpClient client = new TcpClient())
+            {
+                client.Client = null;
+
+                Assert.False(client.ExclusiveAddressUse);
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
         public void Roundtrip_ExclusiveAddressUse_GetEqualsSet()
         {
             using (TcpClient client = new TcpClient())
@@ -78,6 +112,22 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void ExclusiveAddressUse_NotSupported()
+        {
+            using (TcpClient client = new TcpClient())
+            {
+                Assert.Throws<SocketException>(() => client.ExclusiveAddressUse);
+                Assert.Throws<SocketException>(() =>
+                {
+                    client.ExclusiveAddressUse = true;
+                });
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Roundtrip_LingerOption_GetEqualsSet()
         {
@@ -92,6 +142,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Roundtrip_NoDelay_GetEqualsSet()
         {
@@ -104,6 +155,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Roundtrip_ReceiveBufferSize_GetEqualsSet()
         {
@@ -116,6 +168,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Roundtrip_SendBufferSize_GetEqualsSet()
         {
@@ -128,6 +181,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Roundtrip_ReceiveTimeout_GetEqualsSet()
         {
@@ -140,6 +194,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Roundtrip_SendTimeout_GetEqualsSet()
         {
@@ -152,6 +207,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task Properties_PersistAfterConnect()
         {
@@ -162,7 +218,7 @@ namespace System.Net.Sockets.Tests
                 client.ReceiveTimeout = 42;
                 client.SendTimeout = 84;
 
-                await client.ConnectAsync(HttpTestServers.Host, 80);
+                await client.ConnectAsync(Configuration.Sockets.SocketServer.IdnHost, Configuration.Sockets.SocketServer.Port);
 
                 // Verify their values remain as were set before connecting
                 Assert.True(client.LingerState.Enabled);
@@ -174,6 +230,43 @@ namespace System.Net.Sockets.Tests
                 // properties are modified by the OS, e.g. Linux will double whatever
                 // buffer size you set and return that double value.  OSes may also enforce
                 // minimums and maximums, silently capping to those amounts.
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task Dispose_CancelsConnectAsync(bool connectByName)
+        {
+            using (var server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                // Set up a server socket to which to connect
+                server.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                server.Listen(1);
+                var endpoint = (IPEndPoint)server.LocalEndPoint;
+
+                // Connect asynchronously...
+                var client = new TcpClient();
+                Task connectTask = connectByName ?
+                    client.ConnectAsync("localhost", endpoint.Port) :
+                    client.ConnectAsync(endpoint.Address, endpoint.Port);
+
+                // ...and hopefully before it's completed connecting, dispose.
+                var sw = Stopwatch.StartNew();
+                client.Dispose();
+
+                // There is a race condition here.  If the connection succeeds before the
+                // disposal, then the task will complete successfully.  Otherwise, it should
+                // fail with an ObjectDisposedException.
+                try
+                {
+                    await connectTask;
+                }
+                catch (ObjectDisposedException) { }
+                sw.Stop();
+
+                Assert.Null(client.Client); // should be nulled out after Dispose
             }
         }
     }

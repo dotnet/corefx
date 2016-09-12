@@ -11,6 +11,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Win32.Registry.Tests</RootNamespace>
     <AssemblyName>Microsoft.Win32.Registry.Tests</AssemblyName>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
@@ -51,6 +52,10 @@
     <Compile Include="RegistryKey\RegistryKey_OpenSubKey_str_rkpc.cs" />
     <Compile Include="RegistryKey\RegistryKey_SetValueKind_str_obj_valueKind.cs" />
     <Compile Include="RegistryKey\RegistryKey_SetValue_str_obj.cs" />
+    <Compile Include="RegistryKey\RegistryKeyCreateSubKeyTestsBase.cs" />
+    <Compile Include="RegistryKey\RegistryKeyDeleteSubKeyTestsBase.cs" />
+    <Compile Include="RegistryKey\RegistryKeyDeleteSubKeyTreeTestsBase.cs" />
+    <Compile Include="RegistryKey\RegistryKeyOpenSubKeyTestsBase.cs" />
     <Compile Include="RegistryKey\SafeRegistryHandle.cs" />
     <Compile Include="RegistryTestsBase.cs" />
     <Compile Include="TestData.cs" />
@@ -60,7 +65,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Microsoft.Win32.Registry.csproj">
+    <ProjectReference Include="..\pkg\Microsoft.Win32.Registry.pkgproj">
       <Project>{d3f18acc-d327-4abb-ba6c-e9c34a041b2f}</Project>
       <Name>Microsoft.Win32.Registry</Name>
     </ProjectReference>

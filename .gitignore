@@ -23,6 +23,8 @@ bld/
 [Bb]in/
 [Oo]bj/
 msbuild.log
+msbuild.err
+msbuild.wrn
 
 # Cross building rootfs
 cross/rootfs/
@@ -258,3 +260,10 @@ Temporary Items
 Session.vim
 .netrwhist
 *~
+
+# Visual Studio Code
+.vscode/
+
+# Private test configuration and binaries.
+config.ps1
+**/IISApplications

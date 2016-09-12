@@ -28,18 +28,20 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             _validationCallbackHistory = new ValidationCallbackHistory();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task NoCallback_ValidCertificate_CallbackNotCalled()
         {
             var handler = new WinHttpHandler();
             using (var client = new HttpClient(handler))
             {
-                HttpResponseMessage response = await client.GetAsync(HttpTestServers.SecureRemoteEchoServer);
+                HttpResponseMessage response = await client.GetAsync(Configuration.Http.SecureRemoteEchoServer);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.False(_validationCallbackHistory.WasCalled);
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task UseCallback_NotSecureConnection_CallbackNotCalled()
         {
@@ -47,12 +49,13 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             handler.ServerCertificateValidationCallback = CustomServerCertificateValidationCallback;
             using (var client = new HttpClient(handler))
             {
-                HttpResponseMessage response = await client.GetAsync(HttpTestServers.RemoteEchoServer);
+                HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.False(_validationCallbackHistory.WasCalled);
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task UseCallback_ValidCertificate_ExpectedValuesDuringCallback()
         {
@@ -60,18 +63,19 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             handler.ServerCertificateValidationCallback = CustomServerCertificateValidationCallback;
             using (var client = new HttpClient(handler))
             {
-                HttpResponseMessage response = await client.GetAsync(HttpTestServers.SecureRemoteEchoServer);
+                HttpResponseMessage response = await client.GetAsync(Configuration.Http.SecureRemoteEchoServer);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.True(_validationCallbackHistory.WasCalled);
                 
-                ConfirmValidCertificate(HttpTestServers.Host);
+                ConfirmValidCertificate(Configuration.Http.Host);
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task UseCallback_RedirectandValidCertificate_ExpectedValuesDuringCallback()
         {
-            Uri uri = HttpTestServers.RedirectUriForDestinationUri(true, 302, HttpTestServers.SecureRemoteEchoServer, 1);
+            Uri uri = Configuration.Http.RedirectUriForDestinationUri(true, 302, Configuration.Http.SecureRemoteEchoServer, 1);
 
             var handler = new WinHttpHandler();
             handler.ServerCertificateValidationCallback = CustomServerCertificateValidationCallback;
@@ -81,10 +85,11 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.True(_validationCallbackHistory.WasCalled);
                 
-                ConfirmValidCertificate(HttpTestServers.Host);
+                ConfirmValidCertificate(Configuration.Http.Host);
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task UseCallback_CallbackReturnsFailure_ThrowsInnerSecurityFailureException()
         {
@@ -94,15 +99,16 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             handler.ServerCertificateValidationCallback = CustomServerCertificateValidationCallback;
             using (var client = new HttpClient(handler))
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, HttpTestServers.SecureRemoteEchoServer);
+                var request = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.SecureRemoteEchoServer);
                 _validationCallbackHistory.ReturnFailure = true;
                 HttpRequestException ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
-                    client.GetAsync(HttpTestServers.SecureRemoteEchoServer));
+                    client.GetAsync(Configuration.Http.SecureRemoteEchoServer));
                 var innerEx = (Win32Exception)ex.InnerException;
                 Assert.Equal(ERROR_WINHTTP_SECURE_FAILURE, innerEx.NativeErrorCode);
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task UseCallback_CallbackThrowsSpecificException_ThrowsInnerSpecificException()
         {
@@ -111,7 +117,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             using (var client = new HttpClient(handler))
             {
                 _validationCallbackHistory.ThrowException = true;
-                await Assert.ThrowsAsync<CustomException>(() => client.GetAsync(HttpTestServers.SecureRemoteEchoServer));
+                await Assert.ThrowsAsync<CustomException>(() => client.GetAsync(Configuration.Http.SecureRemoteEchoServer));
             }
         }
 

@@ -74,6 +74,7 @@ namespace System.Reflection.Internal
             }
         }
 
+        /// <exception cref="IOException">Error reading from the stream.</exception>
         internal static unsafe NativeHeapMemoryBlock ReadMemoryBlockNoLock(Stream stream, bool isFileStream, long start, int size)
         {
             var block = new NativeHeapMemoryBlock(size);
@@ -128,6 +129,7 @@ namespace System.Reflection.Internal
             return _stream;
         }
 
+        /// <exception cref="IOException">IO error while mapping memory or not enough memory to create the mapping.</exception>
         private unsafe bool TryCreateMemoryMappedFileBlock(long start, int size, out MemoryMappedFileBlock block)
         {
             if (_lazyMemoryMap == null)

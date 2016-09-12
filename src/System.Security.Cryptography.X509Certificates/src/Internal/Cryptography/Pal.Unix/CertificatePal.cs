@@ -17,7 +17,7 @@ namespace Internal.Cryptography.Pal
             if (handle == IntPtr.Zero)
                 throw new ArgumentException(SR.Arg_InvalidHandle, nameof(handle));
 
-            return new OpenSslX509CertificateReader(Interop.Crypto.X509Duplicate(handle));
+            return new OpenSslX509CertificateReader(Interop.Crypto.X509UpRef(handle));
         }
 
         public static ICertificatePal FromBlob(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
@@ -128,6 +128,7 @@ namespace Internal.Cryptography.Pal
 
             if (certHandle.IsInvalid)
             {
+                certHandle.Dispose();
                 certPal = null;
                 return false;
             }
@@ -142,6 +143,7 @@ namespace Internal.Cryptography.Pal
 
             if (cert.IsInvalid)
             {
+                cert.Dispose();
                 certPal = null;
                 return false;
             }
@@ -167,6 +169,7 @@ namespace Internal.Cryptography.Pal
 
             if (cert.IsInvalid)
             {
+                cert.Dispose();
                 fromBio = null;
                 return false;
             }

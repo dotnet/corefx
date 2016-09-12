@@ -13,8 +13,6 @@ using X509IssuerSerial = System.Security.Cryptography.Xml.X509IssuerSerial;
 
 using Microsoft.Win32.SafeHandles;
 
-using Internal.NativeCrypto;
-
 using static Interop.Crypt32;
 
 namespace Internal.Cryptography.Pal.Windows
@@ -135,7 +133,7 @@ namespace Internal.Cryptography.Pal.Windows
         /// </summary>
         public static AlgId ToAlgId(this string oidValue)
         {
-            CRYPT_OID_INFO info = OidInfo.FindOidInfo(CryptOidInfoKeyType.CRYPT_OID_INFO_OID_KEY, oidValue, OidGroup.All, false);
+            CRYPT_OID_INFO info = Interop.Crypt32.FindOidInfo(CryptOidInfoKeyType.CRYPT_OID_INFO_OID_KEY, oidValue, OidGroup.All, false);
             return (AlgId)(info.AlgId);
         }
 
@@ -169,25 +167,15 @@ namespace Internal.Cryptography.Pal.Windows
                     {
                         const CertNameStrTypeAndFlags dwStrType = CertNameStrTypeAndFlags.CERT_X500_NAME_STR | CertNameStrTypeAndFlags.CERT_NAME_STR_REVERSE_FLAG;
                         string issuer = Interop.Crypt32.CertNameToStr(ref certId.u.IssuerSerialNumber.Issuer, dwStrType);
-
                         byte[] serial = certId.u.IssuerSerialNumber.SerialNumber.ToByteArray();
-                        StringBuilder serialString = new StringBuilder(serial.Length * 2);
-                        for (int i = serial.Length; i > 0; i--)
-                        {
-                            serialString.Append(serial[i - 1].ToString("X2"));
-                        }
-                        return new SubjectIdentifier(SubjectIdentifierType.IssuerAndSerialNumber, new X509IssuerSerial(issuer, serialString.ToString()));
+                        X509IssuerSerial issuerSerial = new X509IssuerSerial(issuer, serial.ToSerialString());
+                        return new SubjectIdentifier(SubjectIdentifierType.IssuerAndSerialNumber, issuerSerial);
                     }
 
                 case CertIdChoice.CERT_ID_KEY_IDENTIFIER:
                     {
                         byte[] ski = certId.u.KeyId.ToByteArray();
-                        StringBuilder sb = new StringBuilder(ski.Length * 2);
-                        foreach (byte b in ski)
-                        {
-                            sb.Append(b.ToString("X2"));
-                        }
-                        return new SubjectIdentifier(SubjectIdentifierType.SubjectKeyIdentifier, sb.ToString());
+                        return new SubjectIdentifier(SubjectIdentifierType.SubjectKeyIdentifier, ski.ToSkiString());
                     }
 
                 default:

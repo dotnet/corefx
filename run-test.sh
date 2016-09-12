@@ -30,6 +30,8 @@ usage()
     echo "                                      default: <repo_root>/bin/tests"
     echo "    --corefx-native-bins <location>   Location of the FreeBSD, Linux, NetBSD or OSX native corefx binaries"
     echo "                                      default: <repo_root>/bin/<OS>.x64.<ConfigurationGroup>"
+    echo "    --corefx-packages <location>      Location of the packages restored from NuGet."
+    echo "                                      default: <repo_root>/packages"
     echo
     echo "Flavor/OS options:"
     echo "    --configurationGroup <config>     ConfigurationGroup to run (Debug/Release)"
@@ -38,11 +40,14 @@ usage()
     echo "                                      default: detect current OS"
     echo
     echo "Execution options:"
+    echo "    --sequential                      Run tests sequentially (default is to run in parallel)."
     echo "    --restrict-proj <regex>           Run test projects that match regex"
     echo "                                      default: .* (all projects)"
     echo "    --useServerGC                     Enable Server GC for this test run"
-    echo "    --IgnoreForCI                     Passes the IgnoreForCI category trait to the xunit runner to let the tests know they're in CI"
-    echo "    --outerloop                       Includes the OuterLoop tests that are by default excluded."
+    echo "    --test-dir <path>                 Run tests only in the specified directory. Path is relative to the directory"
+    echo "                                      specified by --corefx-tests"
+    echo "    --test-dir-file <path>            Run tests only in the directories specified by the file at <path>. Paths are"
+    echo "                                      listed one line, relative to the directory specified by --corefx-tests"
     echo
     echo "Runtime Code Coverage options:"
     echo "    --coreclr-coverage                Optional argument to get coreclr code coverage reports"
@@ -54,6 +59,18 @@ usage()
     echo
     exit 1
 }
+
+# Handle Ctrl-C.
+function handle_ctrl_c {
+  local errorSource='handle_ctrl_c'
+
+  echo ""
+  echo "Cancelling test execution."
+  exit $TestsFailed
+}
+
+# Register the Ctrl-C handler
+trap handle_ctrl_c INT
 
 ProjectRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Location parameters
@@ -86,15 +103,8 @@ esac
 TestSelection=".*"
 TestsFailed=0
 
-create_test_overlay()
+ensure_binaries_are_present()
 {
-  local mscorlibLocation="$MscorlibBins/mscorlib.dll"
-
-  # Make the overlay
-
-  rm -rf $OverlayDir
-  mkdir -p $OverlayDir
-
   local LowerConfigurationGroup="$(echo $ConfigurationGroup | awk '{print tolower($0)}')"
 
   # Copy the CoreCLR native binaries
@@ -103,16 +113,14 @@ create_test_overlay()
 	echo "error: Coreclr $OS binaries not found at $CoreClrBins"
 	exit 1
   fi
-  cp -r $CoreClrBins/* $OverlayDir
 
   # Then the mscorlib from the upstream build.
   # TODO When the mscorlib flavors get properly changed then
-  if [ ! -f $mscorlibLocation ]
+  if [ ! -f $MscorlibBins/mscorlib.dll ]
   then
-	echo "error: Mscorlib not found at $mscorlibLocation"
+	echo "error: Mscorlib not found at $MscorlibBins"
 	exit 1
   fi
-  cp -r $mscorlibLocation $OverlayDir
 
   # Then the native CoreFX binaries
   if [ ! -d $CoreFxNativeBins ]
@@ -120,21 +128,64 @@ create_test_overlay()
 	echo "error: Corefx native binaries should be built (use build.sh native in root)"
 	exit 1
   fi
-  cp $CoreFxNativeBins/* $OverlayDir
 }
 
 copy_test_overlay()
 {
   testDir=$1
 
-  cp -r $OverlayDir/* $testDir/
+  link_files_in_directory "$CoreClrBins" "$testDir"
+  link_files_in_directory "$CoreFxNativeBins" "$testDir"
+
+  ln -f $MscorlibBins/mscorlib.dll $testDir/mscorlib.dll
+
+  # If we have a native image for mscorlib, copy it as well.
+  if [ -f $MscorlibBins/mscorlib.ni.dll ]
+  then
+      ln -f  $MscorlibBins/mscorlib.ni.dll $testDir/mscorlib.ni.dll
+  fi
 }
 
+# $1 is the source directory
+# $2 is the destination directory
+link_files_in_directory()
+{
+    for path in `find $1 -maxdepth 1 -type f`; do
+      fileName=`basename $path`
+      ln -f $path "$2/$fileName"
+    done
+}
+
+# $1 is the path of list file
+read_array()
+{
+  local theArray=()
+
+  while IFS='' read -r line || [ -n "$line" ]; do
+    theArray[${#theArray[@]}]=$line
+  done < "$1"
+  echo ${theArray[@]}
+}
+
+run_selected_tests()
+{
+  local selectedTests=()
+
+  if [ -n "$TestDirFile" ]; then
+    selectedTests=($(read_array "$TestDirFile"))
+  fi
+
+  if [ -n "$TestDir" ]; then
+    selectedTests[${#selectedTests[@]}]="$TestDir"
+  fi
+
+  run_all_tests ${selectedTests[@]/#/$CoreFxTests/}
+}
 
 # $1 is the name of the platform folder (e.g Unix.AnyCPU.Debug)
 run_all_tests()
 {
-  for testFolder in "$CoreFxTests/$1/"*
+  for testFolder in $@
   do
      run_test $testFolder &
      pids="$pids $!"
@@ -163,31 +214,19 @@ run_test()
     exit 0
   fi
 
-  dirName="$1/dnxcore50"
-
+  dirName="$1/netcoreapp1.0"
   copy_test_overlay $dirName
 
   pushd $dirName > /dev/null
 
-  # Remove the mscorlib native image, since our current test layout build process
-  # uses a windows runtime and so we include the windows native image for mscorlib
-  if [ -e mscorlib.ni.dll ]
-  then
-    rm mscorlib.ni.dll
-  fi
-
+  chmod +x ./RunTests.sh
   chmod +x ./corerun
-
-  # Invoke xunit
-  lowerOS="$(echo $OS | awk '{print tolower($0)}')"
-  xunitOSCategory="non$lowerOS"
-  xunitOSCategory+="tests"
 
   echo
   echo "Running tests in $dirName"
-  echo "./corerun xunit.console.netcore.exe $testProject.dll -xml testResults.xml -notrait category=failing $OuterLoop $IgnoreForCI -notrait category=$xunitOSCategory -notrait Benchmark=true"
+  echo "./RunTests.sh $CoreFxPackages"
   echo
-  ./corerun xunit.console.netcore.exe "$testProject.dll" -xml testResults.xml -notrait category=failing $OuterLoop $IgnoreForCI -notrait category=$xunitOSCategory -notrait Benchmark=true
+  ./RunTests.sh "$CoreFxPackages"
   exitCode=$?
 
   if [ $exitCode -ne 0 ]
@@ -252,9 +291,8 @@ coreclr_code_coverage()
 
 # Parse arguments
 
+RunTestSequential=0
 ((serverGC = 0))
-OuterLoop="-notrait category=outerloop"
-IgnoreForCI=""
 
 while [[ $# > 0 ]]
 do
@@ -275,6 +313,9 @@ do
         --corefx-native-bins)
         CoreFxNativeBins=$2
         ;;
+        --corefx-packages)
+        CoreFxPackages=$2
+        ;;
         --restrict-proj)
         TestSelection=$2
         ;;
@@ -293,8 +334,17 @@ do
         --coreclr-src)
         CoreClrSrc=$2
         ;;
+        --sequential)
+        RunTestSequential=1
+        ;;
         --useServerGC)
         ((serverGC = 1))
+        ;;
+        --test-dir)
+        TestDir=$2
+        ;;
+        --test-dir-file)
+        TestDirFile=$2
         ;;
         --outerloop)
         OuterLoop=""
@@ -307,8 +357,6 @@ do
     esac
     shift
 done
-
-OverlayDir="$ProjectRoot/bin/tests/TestOverlay/"
 
 # Compute paths to the binaries if they haven't already been computed
 
@@ -330,6 +378,11 @@ fi
 if [ "$CoreFxNativeBins" == "" ]
 then
     CoreFxNativeBins="$ProjectRoot/bin/$OS.x64.$ConfigurationGroup/Native"
+fi
+
+if [ "$CoreFxPackages" == "" ]
+then
+    CoreFxPackages="$ProjectRoot/packages"
 fi
 
 # Check parameters up front for valid values:
@@ -373,23 +426,32 @@ then
     export LANG="en_US.UTF-8"
 fi
 
-
-create_test_overlay
+ensure_binaries_are_present
 
 # Walk the directory tree rooted at src bin/tests/$OS.AnyCPU.$ConfigurationGroup/
 
 TestsFailed=0
 numberOfProcesses=0
 
-if [ `uname` = "NetBSD" ]; then
-  maxProcesses=$(($(getconf NPROCESSORS_ONLN)+1))
+if [ $RunTestSequential -eq 1 ]
+then
+    maxProcesses=1;
 else
-  maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
+    if [ `uname` = "NetBSD" ]; then
+      maxProcesses=$(($(getconf NPROCESSORS_ONLN)+1))
+    else
+      maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
+    fi
 fi
 
-run_all_tests "AnyOS.AnyCPU.$ConfigurationGroup"
-run_all_tests "Unix.AnyCPU.$ConfigurationGroup"
-run_all_tests "$OS.AnyCPU.$ConfigurationGroup"
+if [ -n "$TestDirFile" ] || [ -n "$TestDir" ]
+then
+    run_selected_tests
+else
+    run_all_tests "$CoreFxTests/AnyOS.AnyCPU.$ConfigurationGroup/"*
+    run_all_tests "$CoreFxTests/Unix.AnyCPU.$ConfigurationGroup/"*
+    run_all_tests "$CoreFxTests/$OS.AnyCPU.$ConfigurationGroup/"*
+fi
 
 if [ "$CoreClrCoverage" == "ON" ]
 then

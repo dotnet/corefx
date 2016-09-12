@@ -10,6 +10,7 @@
     <ProjectGuid>{C85CF035-7804-41FF-9557-48B7C948B58D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Net.Http.Functional.Tests</AssemblyName>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' and '$(ProjectJson)' == '' ">
@@ -26,8 +27,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
       <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\Tracing\TestEventListener.cs">
+      <Link>Common\System\Diagnostics\Tracing\TestEventListener.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\DelegateStream.cs">
       <Link>Common\System\IO\DelegateStream.cs</Link>
@@ -35,20 +42,51 @@
     <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
       <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\Net\HttpTestServers.cs">
-      <Link>Common\System\Net\HttpTestServers.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Certificates.cs">
+      <Link>Common\System\Net\Configuration.Certificates.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\EventSourceTestLogging.cs">
+      <Link>Common\System\Net\EventSourceTestLogging.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\SchSendAuxRecordTestServer.cs">
+      <Link>Common\System\Net\SchSendAuxRecordTestServer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
+      <Link>Common\System\Net\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Http.cs">
+      <Link>Common\System\Net\Configuration.Http.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Security.cs">
+      <Link>Common\System\Net\Configuration.Security.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\TestWebProxies.cs">
       <Link>Common\System\Net\TestWebProxies.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\VerboseTestLogging.cs">
+      <Link>Common\System\Net\VerboseTestLogging.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
+      <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
+      <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
+    </Compile>
     <Compile Include="ByteArrayContentTest.cs" />
+    <Compile Include="CancellationTest.cs" />
     <Compile Include="ChannelBindingAwareContent.cs" />
     <Compile Include="CustomContent.cs" />
     <Compile Include="DelegatingHandlerTest.cs" />
     <Compile Include="FakeDiagnosticSourceListenerObserver.cs" />
     <Compile Include="FormUrlEncodedContentTest.cs" />
     <Compile Include="HttpClientHandlerTest.cs" />
+    <Compile Include="HttpClientHandlerTest.ClientCertificates.cs" />
+    <Compile Include="HttpClientHandlerTest.DefaultProxyCredentials.cs" />
+    <Compile Include="HttpClientHandlerTest.MaxConnectionsPerServer.cs" />
+    <Compile Include="HttpClientHandlerTest.MaxResponseHeadersLength.cs" />
     <Compile Include="HttpClientHandlerTest.ServerCertificates.cs" />
+    <Compile Include="HttpClientHandlerTest.SslProtocols.cs" />
+    <Compile Include="DiagnosticsTests.cs" />
     <Compile Include="HttpClientTest.cs" />
     <Compile Include="HttpClientMiniStressTest.cs" />
     <Compile Include="HttpContentTest.cs" />
@@ -57,31 +95,23 @@
     <Compile Include="HttpRequestMessageTest.cs" />
     <Compile Include="HttpResponseMessageTest.cs" />
     <Compile Include="LoopbackGetRequestHttpProxy.cs" />
-    <Compile Include="LoopbackServer.cs" />
     <Compile Include="MessageProcessingHandlerTest.cs" />
     <Compile Include="MultipartContentTest.cs" />
     <Compile Include="MultipartFormDataContentTest.cs" />
     <Compile Include="PostScenarioTest.cs" />
     <Compile Include="RepeatedFlushContent.cs" />
     <Compile Include="ResponseStreamTest.cs" />
+    <Compile Include="SchSendAuxRecordHttpTest.cs" />
     <Compile Include="StreamContentTest.cs" />
     <Compile Include="StringContentTest.cs" />
     <Compile Include="SyncBlockingContent.cs" />
     <Compile Include="TestHelper.cs" />
-    <Compile Include="XunitTestAssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="DefaultCredentialsTest.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="HttpClientHandlerTest.DefaultProxyCredentials.cs" />
-    <Compile Include="HttpClientHandlerTest.MaxConnectionsPerServer.cs" />
-    <Compile Include="HttpClientHandlerTest.MaxResponseHeadersLength.cs" />
-    <Compile Include="HttpClientHandlerTest.SslProtocols.cs" />
-    <Compile Include="HttpClientHandlerTest.Timeouts.cs" />
-  </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\System.Net.Http.csproj">
+    <ProjectReference Include="..\..\pkg\System.Net.Http.pkgproj">
       <Project>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</Project>
       <Name>System.Net.Http</Name>
     </ProjectReference>
@@ -90,6 +120,9 @@
       <Name>RemoteExecutorConsoleApp</Name>
       <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <SupplementalTestData Include="$(PackagesDir)System.Net.TestData\1.0.0-prerelease\content\**\*.*" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

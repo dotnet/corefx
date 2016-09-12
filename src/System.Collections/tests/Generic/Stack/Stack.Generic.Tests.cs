@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Xunit;
 
@@ -32,6 +31,8 @@ namespace System.Collections.Tests
             return stack;
         }
 
+        protected override Type IGenericSharedAPI_CopyTo_IndexLargerThanArrayCount_ThrowType => typeof(ArgumentOutOfRangeException);
+
         #endregion
 
         protected override IEnumerable<T> GenericIEnumerableFactory()
@@ -44,17 +45,26 @@ namespace System.Collections.Tests
             return GenericStackFactory(count);
         }
 
-        protected override int Count(IEnumerable<T> enumerable) { return ((Stack<T>)enumerable).Count; }
-        protected override void Add(IEnumerable<T> enumerable, T value) { ((Stack<T>)enumerable).Push(value); }
-        protected override void Clear(IEnumerable<T> enumerable) { ((Stack<T>)enumerable).Clear(); }
-        protected override bool Contains(IEnumerable<T> enumerable, T value) { return ((Stack<T>)enumerable).Contains(value); }
-        protected override void CopyTo(IEnumerable<T> enumerable, T[] array, int index) { ((Stack<T>)enumerable).CopyTo(array, index); }
+        protected override int Count(IEnumerable<T> enumerable) => ((Stack<T>)enumerable).Count;
+        protected override void Add(IEnumerable<T> enumerable, T value) => ((Stack<T>)enumerable).Push(value);
+        protected override void Clear(IEnumerable<T> enumerable) => ((Stack<T>)enumerable).Clear();
+        protected override bool Contains(IEnumerable<T> enumerable, T value) => ((Stack<T>)enumerable).Contains(value);
+        protected override void CopyTo(IEnumerable<T> enumerable, T[] array, int index) => ((Stack<T>)enumerable).CopyTo(array, index);
         protected override bool Remove(IEnumerable<T> enumerable) { ((Stack<T>)enumerable).Pop(); return true; }
-        protected override bool Enumerator_Current_UndefinedOperation_Throws { get { return true; } }
+        protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
 
         #endregion
 
         #region Constructor
+
+        [Fact]
+        public void Stack_Generic_Constructor_InitialValues()
+        {
+            var stack = new Stack<T>();
+            Assert.Equal(0, stack.Count);
+            Assert.Equal(0, stack.ToArray().Length);
+            Assert.NotNull(((ICollection)stack).SyncRoot);
+        }
 
         #endregion
 
@@ -123,7 +133,7 @@ namespace System.Collections.Tests
         public void Stack_Generic_ToArray(int count)
         {
             Stack<T> stack = GenericStackFactory(count);
-            Assert.True(stack.ToArray().SequenceEqual(stack.ToArray<T>()));
+            Assert.Equal(Enumerable.ToArray(stack), stack.ToArray());
         }
 
         #endregion
@@ -165,12 +175,12 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void Stack_Generic_TrimExcess_Repeatedly(int count)
         {
-            Stack<T> stack = GenericStackFactory(count);;
+            Stack<T> stack = GenericStackFactory(count);
             List<T> expected = stack.ToList();
             stack.TrimExcess();
             stack.TrimExcess();
             stack.TrimExcess();
-            Assert.True(stack.SequenceEqual(expected));
+            Assert.Equal(expected, stack);
         }
 
         [Theory]
@@ -179,7 +189,7 @@ namespace System.Collections.Tests
         {
             if (count > 0)
             {
-                Stack<T> stack = GenericStackFactory(count);;
+                Stack<T> stack = GenericStackFactory(count);
                 List<T> expected = stack.ToList();
                 T elementToRemove = stack.ElementAt(0);
 
@@ -188,7 +198,7 @@ namespace System.Collections.Tests
                 expected.RemoveAt(0);
                 stack.TrimExcess();
 
-                Assert.True(stack.SequenceEqual(expected));
+                Assert.Equal(expected, stack);
             }
         }
 
@@ -198,7 +208,7 @@ namespace System.Collections.Tests
         {
             if (count > 0)
             {
-                Stack<T> stack = GenericStackFactory(count);;
+                Stack<T> stack = GenericStackFactory(count);
                 stack.TrimExcess();
                 stack.Clear();
                 stack.TrimExcess();
@@ -216,7 +226,7 @@ namespace System.Collections.Tests
         {
             if (count > 0)
             {
-                Stack<T> stack = GenericStackFactory(count);;
+                Stack<T> stack = GenericStackFactory(count);
                 stack.TrimExcess();
                 stack.Clear();
                 stack.TrimExcess();

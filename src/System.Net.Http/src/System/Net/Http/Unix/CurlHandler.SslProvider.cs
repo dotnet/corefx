@@ -72,7 +72,7 @@ namespace System.Net.Http
                         // with relation to handling of certificates.  But if that's not the case, failing to 
                         // register the callback will result in those options not being factored in, which is
                         // a significant enough error that we need to fail.
-                        EventSourceTrace("CURLOPT_SSL_CTX_FUNCTION not supported: {0}", answer);
+                        EventSourceTrace("CURLOPT_SSL_CTX_FUNCTION not supported: {0}", answer, easy: easy);
                         if (certProvider != null ||
                             easy._handler.ServerCertificateValidationCallback != null ||
                             easy._handler.CheckCertificateRevocationList)
@@ -95,7 +95,7 @@ namespace System.Net.Http
             private static void SetSslVersion(EasyRequest easy, IntPtr sslCtx = default(IntPtr))
             {
                 // Get the requested protocols.
-                System.Security.Authentication.SslProtocols protocols = easy._handler.SslProtocols;
+                System.Security.Authentication.SslProtocols protocols = easy._handler.ActualSslProtocols;
 
                 // We explicitly disallow choosing SSL2/3. Make sure they were filtered out.
                 Debug.Assert((protocols & ~SecurityProtocol.AllowedSecurityProtocols) == 0, 
@@ -143,7 +143,7 @@ namespace System.Net.Http
                 {
                     return CURLcode.CURLE_ABORTED_BY_CALLBACK;
                 }
-                Interop.Ssl.SetProtocolOptions(sslCtx, easy._handler.SslProtocols);
+                Interop.Ssl.SetProtocolOptions(sslCtx, easy._handler.ActualSslProtocols);
 
                 // Configure the SSL server certificate verification callback.
                 Interop.Ssl.SslCtxSetCertVerifyCallback(sslCtx, s_sslVerifyCallback, curl);
@@ -165,7 +165,7 @@ namespace System.Net.Http
 
                         // Register the callback.
                         Interop.Ssl.SslCtxSetClientCertCallback(sslCtx, provider._callback);
-                        EventSourceTrace("Registered client certificate callback.");
+                        EventSourceTrace("Registered client certificate callback.", easy: easy);
                     }
                     catch (Exception e)
                     {
@@ -207,15 +207,12 @@ namespace System.Net.Http
                     IntPtr leafCertPtr = Interop.Crypto.X509StoreCtxGetTargetCert(storeCtx);
                     if (IntPtr.Zero == leafCertPtr)
                     {
-                        EventSourceTrace("Invalid certificate pointer");
+                        EventSourceTrace("Invalid certificate pointer", easy: easy);
                         return 0;
                     }
 
                     using (X509Certificate2 leafCert = new X509Certificate2(leafCertPtr))
                     {
-                        // Set up the CBT with this certificate.
-                        easy._requestContentStream?.SetChannelBindingToken(leafCert);
-
                         // We need to respect the user's server validation callback if there is one.  If there isn't one,
                         // we can start by first trying to use OpenSSL's verification, though only if CRL checking is disabled,
                         // as OpenSSL doesn't do that.
@@ -288,7 +285,7 @@ namespace System.Net.Http
                                 }
                                 catch (Exception exc)
                                 {
-                                    EventSourceTrace("Server validation callback threw exception: {0}", exc);
+                                    EventSourceTrace("Server validation callback threw exception: {0}", exc, easy: easy);
                                     easy.FailRequest(exc);
                                     success = false;
                                 }

@@ -137,8 +137,8 @@ namespace System.Net.WebSockets
             {
                 case WebSocketError.InvalidMessageType:
                     return SR.Format(SR.net_WebSockets_InvalidMessageType_Generic,
-                        typeof(WebSocket).Name + "CloseAsync",
-                        typeof(WebSocket).Name + "CloseOutputAsync");
+                        $"{nameof(WebSocket)}.{nameof(WebSocket.CloseAsync)}",
+                        $"{nameof(WebSocket)}.{nameof(WebSocket.CloseOutputAsync)}");
                 case WebSocketError.Faulted:
                     return SR.net_Websockets_WebSocketBaseFaulted;
                 case WebSocketError.NotAWebSocket:
@@ -162,7 +162,10 @@ namespace System.Net.WebSockets
         // as the Exception..ctor() throws on setting HResult to 0. The default for HResult is -2147467259.
         private void SetErrorCodeOnError(int nativeError)
         {
-            HResult = nativeError;
+            if (!Succeeded(nativeError))
+            {
+                HResult = nativeError;
+            }
         }
 
         private static bool Succeeded(int hr)

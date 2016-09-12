@@ -37,14 +37,19 @@ namespace System.Dynamic.Utils
             return AreEquivalent(type, subType) || subType.GetTypeInfo().IsSubclassOf(type);
         }
 
-        public static void ValidateType(Type type)
+        public static void ValidateType(Type type, string paramName)
+        {
+            ValidateType(type, paramName, -1);
+        }
+
+        public static void ValidateType(Type type, string paramName, int index)
         {
             if (type != typeof(void))
             {
                 // A check to avoid a bunch of reflection (currently not supported) during cctor
                 if (type.GetTypeInfo().ContainsGenericParameters)
                 {
-                    throw type.GetTypeInfo().IsGenericTypeDefinition ? Error.TypeIsGeneric(type) : Error.TypeContainsGenericParameters(type);
+                    throw type.GetTypeInfo().IsGenericTypeDefinition ? Error.TypeIsGeneric(type, paramName, index) : Error.TypeContainsGenericParameters(type, paramName, index);
                 }
             }
         }

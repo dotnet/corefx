@@ -147,19 +147,23 @@ namespace System.Net.Security.Tests
 
 
                     SslStream sslStream = null;
-                    X509Certificate2 certificate = TestConfiguration.GetServerCertificate();
+                    X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate();
 
                     try
                     {
                         sslStream = (SslStream)state.Stream;
 
                         _log.WriteLine("Server: attempting to open SslStream.");
-                        sslStream.AuthenticateAsServerAsync(certificate, false, _sslProtocols, false).ContinueWith(t => OnAuthenticate(t, state), TaskScheduler.Default);
+                        sslStream.AuthenticateAsServerAsync(certificate, false, _sslProtocols, false).ContinueWith(t =>
+                        {
+                            certificate.Dispose();
+                            OnAuthenticate(t, state);
+                        }, TaskScheduler.Default);
                     }
                     catch (Exception ex)
                     {
                         _log.WriteLine("Server: Exception: {0}", ex);
-
+                        certificate.Dispose();
                         state.Dispose(); // close connection to client
                     }
                 }

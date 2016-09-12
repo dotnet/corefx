@@ -15,7 +15,7 @@ namespace System.IO
 
         private const string DirectorySeparatorCharAsString = "\\";
 
-        private static readonly char[] InvalidFileNameChars = 
+        public static char[] GetInvalidFileNameChars() => new char[]
         { 
             '\"', '<', '>', '|', '\0', 
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10, 
@@ -28,11 +28,6 @@ namespace System.IO
         // For example, D:\<256 char file name> isn't legal, even though it's under 260 chars.
         internal static readonly int MaxPath = 260;
         internal static readonly int MaxLongPath = short.MaxValue;
-
-        private static bool IsDirectoryOrVolumeSeparator(char c)
-        {
-            return PathInternal.IsDirectorySeparator(c) || VolumeSeparatorChar == c;
-        }
 
         // Expands the given path to a fully qualified path. 
         public static string GetFullPath(string path)

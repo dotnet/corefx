@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using Xunit;
 
 namespace System.Linq.Expressions.Tests
@@ -11,10 +10,10 @@ namespace System.Linq.Expressions.Tests
     {
         #region Test methods
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public static void CheckNullableByteDivideTest()
         {
-            byte?[] array = new byte?[] { 0, 1, byte.MaxValue };
+            byte?[] array = { 0, 1, byte.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -24,10 +23,10 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public static void CheckNullableSByteDivideTest()
         {
-            sbyte?[] array = new sbyte?[] { 0, 1, -1, sbyte.MinValue, sbyte.MaxValue };
+            sbyte?[] array = { 0, 1, -1, sbyte.MinValue, sbyte.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -37,10 +36,11 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [ClassData(typeof(CompilationTypes))]
         public static void CheckNullableUShortDivideTest(bool useInterpreter)
         {
-            ushort?[] array = new ushort?[] { 0, 1, ushort.MaxValue };
+            ushort?[] array = { 0, 1, ushort.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -50,10 +50,11 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [ClassData(typeof(CompilationTypes))]
         public static void CheckNullableShortDivideTest(bool useInterpreter)
         {
-            short?[] array = new short?[] { 0, 1, -1, short.MinValue, short.MaxValue };
+            short?[] array = { 0, 1, -1, short.MinValue, short.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -63,10 +64,11 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [ClassData(typeof(CompilationTypes))]
         public static void CheckNullableUIntDivideTest(bool useInterpreter)
         {
-            uint?[] array = new uint?[] { 0, 1, uint.MaxValue };
+            uint?[] array = { 0, 1, uint.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -76,10 +78,11 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [ClassData(typeof(CompilationTypes))]
         public static void CheckNullableIntDivideTest(bool useInterpreter)
         {
-            int?[] array = new int?[] { 0, 1, -1, int.MinValue, int.MaxValue };
+            int?[] array = { 0, 1, -1, int.MinValue, int.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -89,10 +92,11 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [ClassData(typeof(CompilationTypes))]
         public static void CheckNullableULongDivideTest(bool useInterpreter)
         {
-            ulong?[] array = new ulong?[] { 0, 1, ulong.MaxValue };
+            ulong?[] array = { 0, 1, ulong.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -102,10 +106,11 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [ClassData(typeof(CompilationTypes))]
         public static void CheckNullableLongDivideTest(bool useInterpreter)
         {
-            long?[] array = new long?[] { 0, 1, -1, long.MinValue, long.MaxValue };
+            long?[] array = { 0, 1, -1, long.MinValue, long.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -118,7 +123,7 @@ namespace System.Linq.Expressions.Tests
         [Theory, ClassData(typeof(CompilationTypes))]
         public static void CheckNullableFloatDivideTest(bool useInterpreter)
         {
-            float?[] array = new float?[] { 0, 1, -1, float.MinValue, float.MaxValue, float.Epsilon, float.NegativeInfinity, float.PositiveInfinity, float.NaN };
+            float?[] array = { 0, 1, -1, float.MinValue, float.MaxValue, float.Epsilon, float.NegativeInfinity, float.PositiveInfinity, float.NaN, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -131,7 +136,7 @@ namespace System.Linq.Expressions.Tests
         [Theory, ClassData(typeof(CompilationTypes))]
         public static void CheckNullableDoubleDivideTest(bool useInterpreter)
         {
-            double?[] array = new double?[] { 0, 1, -1, double.MinValue, double.MaxValue, double.Epsilon, double.NegativeInfinity, double.PositiveInfinity, double.NaN };
+            double?[] array = { 0, 1, -1, double.MinValue, double.MaxValue, double.Epsilon, double.NegativeInfinity, double.PositiveInfinity, double.NaN, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -144,7 +149,7 @@ namespace System.Linq.Expressions.Tests
         [Theory, ClassData(typeof(CompilationTypes))]
         public static void CheckNullableDecimalDivideTest(bool useInterpreter)
         {
-            decimal?[] array = new decimal?[] { decimal.Zero, decimal.One, decimal.MinusOne, decimal.MinValue, decimal.MaxValue };
+            decimal?[] array = { decimal.Zero, decimal.One, decimal.MinusOne, decimal.MinValue, decimal.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -154,10 +159,10 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public static void CheckNullableCharDivideTest()
         {
-            char?[] array = new char?[] { '\0', '\b', 'A', '\uffff' };
+            char?[] array = { '\0', '\b', 'A', '\uffff', null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -195,10 +200,10 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<ushort?> f = e.Compile(useInterpreter);
 
-            if (b == 0)
+            if (a.HasValue && b == 0)
                 Assert.Throws<DivideByZeroException>(() => f());
             else
-                Assert.Equal((ushort)(a / b), f());
+                Assert.Equal((ushort?)(a / b), f());
         }
 
         private static void VerifyNullableShortDivide(short? a, short? b, bool useInterpreter)
@@ -211,10 +216,10 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<short?> f = e.Compile(useInterpreter);
 
-            if (b == 0)
+            if (a.HasValue && b == 0)
                 Assert.Throws<DivideByZeroException>(() => f());
             else
-                Assert.Equal((short)(a / b), f());
+                Assert.Equal((short?)(a / b), f());
         }
 
         private static void VerifyNullableUIntDivide(uint? a, uint? b, bool useInterpreter)
@@ -227,7 +232,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<uint?> f = e.Compile(useInterpreter);
 
-            if (b == 0)
+            if (a.HasValue && b == 0)
                 Assert.Throws<DivideByZeroException>(() => f());
             else
                 Assert.Equal(a / b, f());
@@ -243,7 +248,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<int?> f = e.Compile(useInterpreter);
 
-            if (b == 0)
+            if (a.HasValue && b == 0)
                 Assert.Throws<DivideByZeroException>(() => f());
             else if (b == -1 && a == int.MinValue)
                 Assert.Throws<OverflowException>(() => f());
@@ -261,7 +266,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<ulong?> f = e.Compile(useInterpreter);
 
-            if (b == 0)
+            if (a.HasValue && b == 0)
                 Assert.Throws<DivideByZeroException>(() => f());
             else
                 Assert.Equal(a / b, f());
@@ -277,7 +282,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<long?> f = e.Compile(useInterpreter);
 
-            if (b == 0)
+            if (a.HasValue && b == 0)
                 Assert.Throws<DivideByZeroException>(() => f());
             else if (b == -1 && a == long.MinValue)
                 Assert.Throws<OverflowException>(() => f());
@@ -321,7 +326,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<decimal?> f = e.Compile(useInterpreter);
 
-            if (b == 0)
+            if (a.HasValue && b == 0)
                 Assert.Throws<DivideByZeroException>(() => f());
             else
                 Assert.Equal(a / b, f());

@@ -5,7 +5,6 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
@@ -33,7 +32,7 @@ namespace System.Collections.Generic
         private IEqualityComparer<TKey> comparer;
         private KeyCollection keys;
         private ValueCollection values;
-        private Object _syncRoot;
+        private object _syncRoot;
 
         public Dictionary() : this(0, null) { }
 
@@ -364,7 +363,6 @@ namespace System.Collections.Generic
                 Resize(entries.Length, true);
             }
 #endif
-
         }
 
         private void Resize()
@@ -374,7 +372,7 @@ namespace System.Collections.Generic
 
         private void Resize(int newSize, bool forceNewHashCodes)
         {
-            Contract.Assert(newSize >= entries.Length);
+            Debug.Assert(newSize >= entries.Length);
             int[] newBuckets = new int[newSize];
             for (int i = 0; i < newBuckets.Length; i++) newBuckets[i] = -1;
 
@@ -568,7 +566,7 @@ namespace System.Collections.Generic
             {
                 if (_syncRoot == null)
                 {
-                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
+                    System.Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
                 }
                 return _syncRoot;
             }
@@ -971,7 +969,7 @@ namespace System.Collections.Generic
                 get { return false; }
             }
 
-            Object ICollection.SyncRoot
+            object ICollection.SyncRoot
             {
                 get { return ((ICollection)dictionary).SyncRoot; }
             }
@@ -1026,7 +1024,7 @@ namespace System.Collections.Generic
                     }
                 }
 
-                Object System.Collections.IEnumerator.Current
+                object System.Collections.IEnumerator.Current
                 {
                     get
                     {
@@ -1198,7 +1196,7 @@ namespace System.Collections.Generic
                 get { return false; }
             }
 
-            Object ICollection.SyncRoot
+            object ICollection.SyncRoot
             {
                 get { return ((ICollection)dictionary).SyncRoot; }
             }
@@ -1252,7 +1250,7 @@ namespace System.Collections.Generic
                     }
                 }
 
-                Object System.Collections.IEnumerator.Current
+                object System.Collections.IEnumerator.Current
                 {
                     get
                     {

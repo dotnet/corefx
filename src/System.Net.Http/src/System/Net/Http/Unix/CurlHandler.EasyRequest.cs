@@ -36,15 +36,14 @@ namespace System.Net.Http
             internal readonly HttpRequestMessage _requestMessage;
             internal readonly CurlResponseMessage _responseMessage;
             internal readonly CancellationToken _cancellationToken;
-            internal readonly HttpContentAsyncStream _requestContentStream;
+            internal Stream _requestContentStream;
+            internal long? _requestContentStreamStartingPosition;
 
             internal SafeCurlHandle _easyHandle;
             private SafeCurlSListHandle _requestHeaders;
 
             internal MultiAgent _associatedMultiAgent;
             internal SendTransferState _sendTransferState;
-            internal bool _isRedirect = false;
-            internal Uri _targetUri;
             internal StrongToWeakReference<EasyRequest> _selfStrongToWeakReference;
 
             private SafeCallbackHandle _callbackHandle;
@@ -55,14 +54,7 @@ namespace System.Net.Http
                 _handler = handler;
                 _requestMessage = requestMessage;
                 _cancellationToken = cancellationToken;
-
-                if (requestMessage.Content != null)
-                {
-                    _requestContentStream = new HttpContentAsyncStream(requestMessage.Content);
-                }
-
                 _responseMessage = new CurlResponseMessage(this);
-                _targetUri = requestMessage.RequestUri;
             }
 
             /// <summary>
@@ -102,6 +94,8 @@ namespace System.Net.Http
                 // If the response message hasn't been published yet, do any final processing of it before it is.
                 if (!Task.IsCompleted)
                 {
+                    EventSourceTrace("Publishing response message");
+
                     // On Windows, if the response was automatically decompressed, Content-Encoding and Content-Length
                     // headers are removed from the response. Do the same thing here.
                     DecompressionMethods dm = _handler.AutomaticDecompression;
@@ -141,15 +135,29 @@ namespace System.Net.Http
                 }
             }
 
-            public void FailRequestAndCleanup(Exception error)
+            public void CleanupAndFailRequest(Exception error)
             {
-                FailRequest(error);
-                Cleanup();
+                try
+                {
+                    Cleanup();
+                }
+                catch (Exception exc)
+                {
+                    // This would only happen in an aggregious case, such as a Stream failing to seek when
+                    // it claims to be able to, but in case something goes very wrong, make sure we don't
+                    // lose the exception information.
+                    error = new AggregateException(error, exc);
+                }
+                finally
+                {
+                    FailRequest(error);
+                }
             }
 
             public void FailRequest(Exception error)
             {
                 Debug.Assert(error != null, "Expected non-null exception");
+                EventSourceTrace("Failing request: {0}", error);
 
                 var oce = error as OperationCanceledException;
                 if (oce != null)
@@ -177,12 +185,22 @@ namespace System.Net.Http
 
             public void Cleanup() // not called Dispose because the request may still be in use after it's cleaned up
             {
-                _responseMessage.ResponseStream.SignalComplete(); // No more callbacks so no more data
                 // Don't dispose of the ResponseMessage.ResponseStream as it may still be in use
-                // by code reading data stored in the stream.
+                // by code reading data stored in the stream. Also don't dispose of the request content
+                // stream; that'll be handled by the disposal of the request content by the HttpClient,
+                // and doing it here prevents reuse by an intermediate handler sitting between the client
+                // and this handler.
 
-                // Dispose of the input content stream if there was one.  Nothing should be using it any more.
-                _requestContentStream?.Dispose();
+                // However, if we got an original position for the request stream, we seek back to that position,
+                // for the corner case where the stream does get reused before it's disposed by the HttpClient
+                // (if the same request object is used multiple times from an intermediate handler, we'll be using
+                // ReadAsStreamAsync, which on the same request object will return the same stream object, which
+                // we've already advanced).
+                if (_requestContentStream != null && _requestContentStream.CanSeek)
+                {
+                    Debug.Assert(_requestContentStreamStartingPosition.HasValue, "The stream is seekable, but we don't have a starting position?");
+                    _requestContentStream.Position = _requestContentStreamStartingPosition.GetValueOrDefault();
+                }
 
                 // Dispose of the underlying easy handle.  We're no longer processing it.
                 _easyHandle?.Dispose();
@@ -194,14 +212,39 @@ namespace System.Net.Http
                 // doing any processing that assumes it's valid.
                 _requestHeaders?.Dispose();
 
+                // Dispose native callback resources
                 _callbackHandle?.Dispose();
             }
 
             private void SetUrl()
             {
-                EventSourceTrace("Url: {0}", _requestMessage.RequestUri);
-                SetCurlOption(CURLoption.CURLOPT_URL, _requestMessage.RequestUri.AbsoluteUri);
+                Uri requestUri = _requestMessage.RequestUri;
+
+                long scopeId;
+                if (IsLinkLocal(requestUri, out scopeId))
+                {
+                    // Uri.AbsoluteUri doesn't include the ScopeId/ZoneID, so if it is link-local,
+                    // we separately pass the scope to libcurl.
+                    EventSourceTrace("ScopeId: {0}", scopeId);
+                    SetCurlOption(CURLoption.CURLOPT_ADDRESS_SCOPE, scopeId);
+                }
+
+                EventSourceTrace("Url: {0}", requestUri);
+                SetCurlOption(CURLoption.CURLOPT_URL, requestUri.AbsoluteUri);
                 SetCurlOption(CURLoption.CURLOPT_PROTOCOLS, (long)(CurlProtocols.CURLPROTO_HTTP | CurlProtocols.CURLPROTO_HTTPS));
+            }
+
+            private static bool IsLinkLocal(Uri url, out long scopeId)
+            {
+                IPAddress ip;
+                if (IPAddress.TryParse(url.DnsSafeHost, out ip) && ip.IsIPv6LinkLocal)
+                {
+                    scopeId = ip.ScopeId;
+                    return true;
+                }
+
+                scopeId = 0;
+                return false;
             }
 
             private void SetMultithreading()
@@ -212,9 +255,7 @@ namespace System.Net.Http
             private void SetTimeouts()
             {
                 // Set timeout limit on the connect phase.
-                SetCurlOption(CURLoption.CURLOPT_CONNECTTIMEOUT_MS, _handler.ConnectTimeout == Timeout.InfiniteTimeSpan ? 
-                    int.MaxValue : 
-                    Math.Max(1, (long)_handler.ConnectTimeout.TotalMilliseconds));
+                SetCurlOption(CURLoption.CURLOPT_CONNECTTIMEOUT_MS, int.MaxValue);
 
                 // Override the default DNS cache timeout.  libcurl defaults to a 1 minute
                 // timeout, but we extend that to match the Windows timeout of 10 minutes.
@@ -238,6 +279,49 @@ namespace System.Net.Http
 
                 SetCurlOption(CURLoption.CURLOPT_MAXREDIRS, _handler._maxAutomaticRedirections);
                 EventSourceTrace("Max automatic redirections: {0}", _handler._maxAutomaticRedirections);
+            }
+
+            /// <summary>
+            /// When a Location header is received along with a 3xx status code, it's an indication
+            /// that we're likely to redirect.  Prepare the easy handle in case we do.
+            /// </summary>
+            internal void SetPossibleRedirectForLocationHeader(string location)
+            {
+                // Reset cookies in case we redirect.  Below we'll set new cookies for the
+                // new location if we have any.
+                if (_handler._useCookie)
+                {
+                    SetCurlOption(CURLoption.CURLOPT_COOKIE, IntPtr.Zero);
+                }
+
+                // Parse the location string into a relative or absolute Uri, then combine that
+                // with the current request Uri to get the new location.
+                var updatedCredentials = default(KeyValuePair<NetworkCredential, CURLAUTH>);
+                Uri newUri;
+                if (Uri.TryCreate(_requestMessage.RequestUri, location.Trim(), out newUri))
+                {
+                    // Just as with WinHttpHandler, for security reasons, we drop the server credential if it is 
+                    // anything other than a CredentialCache. We allow credentials in a CredentialCache since they 
+                    // are specifically tied to URIs.
+                    updatedCredentials = GetCredentials(newUri, _handler.Credentials as CredentialCache, s_orderedAuthTypes);
+
+                    // Reset proxy - it is possible that the proxy has different credentials for the new URI
+                    SetProxyOptions(newUri);
+
+                    // Set up new cookies
+                    if (_handler._useCookie)
+                    {
+                        SetCookieOption(newUri);
+                    }
+                }
+
+                // Set up the new credentials, either for the new Uri if we were able to get it, 
+                // or to empty creds if we couldn't.
+                SetCredentialsOptions(updatedCredentials);
+
+                // Set the headers again. This is a workaround for libcurl's limitation in handling 
+                // headers with empty values.
+                SetRequestHeaders();
             }
 
             private void SetContentLength(CURLoption lengthOption)
@@ -420,10 +504,22 @@ namespace System.Net.Http
 
                 // Configure libcurl with the gathered proxy information
 
+                // uri.AbsoluteUri/ToString() omit IPv6 scope IDs.  SerializationInfoString ensures these details 
+                // are included, but does not properly handle international hosts.  As a workaround we check whether 
+                // the host is a link-local IP address, and based on that either return the SerializationInfoString 
+                // or the AbsoluteUri. (When setting the request Uri itself, we instead use CURLOPT_ADDRESS_SCOPE to
+                // set the scope id and the url separately, avoiding these issues and supporting versions of libcurl
+                // prior to v7.37 that don't support parsing scope IDs out of the url's host.  As similar feature
+                // doesn't exist for proxies.)
+                IPAddress ip;
+                string proxyUrl = IPAddress.TryParse(proxyUri.DnsSafeHost, out ip) && ip.IsIPv6LinkLocal ?
+                    proxyUri.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped) :
+                    proxyUri.AbsoluteUri;
+
+                EventSourceTrace<string>("Proxy: {0}", proxyUrl);
                 SetCurlOption(CURLoption.CURLOPT_PROXYTYPE, (long)CURLProxyType.CURLPROXY_HTTP);
-                SetCurlOption(CURLoption.CURLOPT_PROXY, proxyUri.AbsoluteUri);
+                SetCurlOption(CURLoption.CURLOPT_PROXY, proxyUrl);
                 SetCurlOption(CURLoption.CURLOPT_PROXYPORT, proxyUri.Port);
-                EventSourceTrace("Proxy: {0}", proxyUri);
 
                 KeyValuePair<NetworkCredential, CURLAUTH> credentialScheme = GetCredentials(
                     proxyUri, _handler.Proxy.Credentials, s_orderedAuthTypes);
@@ -447,7 +543,7 @@ namespace System.Net.Http
                     // Unlike normal credentials, proxy credentials are URL decoded by libcurl, so we URL encode 
                     // them in order to allow, for example, a colon in the username.
                     string credentialText = string.IsNullOrEmpty(credentials.Domain) ?
-                        string.Format("{0}:{1}", WebUtility.UrlEncode(credentials.UserName), WebUtility.UrlEncode(credentials.Password)) :
+                        WebUtility.UrlEncode(credentials.UserName) + ":" + WebUtility.UrlEncode(credentials.Password) :
                         string.Format("{2}\\{0}:{1}", WebUtility.UrlEncode(credentials.UserName), WebUtility.UrlEncode(credentials.Password), WebUtility.UrlEncode(credentials.Domain));
 
                     EventSourceTrace("Proxy credentials set.");
@@ -459,6 +555,9 @@ namespace System.Net.Http
             {
                 if (credentialSchemePair.Key == null)
                 {
+                    EventSourceTrace("Credentials cleared.");
+                    SetCurlOption(CURLoption.CURLOPT_USERNAME, IntPtr.Zero);
+                    SetCurlOption(CURLoption.CURLOPT_PASSWORD, IntPtr.Zero);
                     return;
                 }
 
@@ -466,7 +565,7 @@ namespace System.Net.Http
                 CURLAUTH authScheme = credentialSchemePair.Value;
                 string userName = string.IsNullOrEmpty(credentials.Domain) ?
                     credentials.UserName :
-                    string.Format("{0}\\{1}", credentials.Domain, credentials.UserName);
+                    credentials.Domain + "\\" + credentials.UserName;
 
                 SetCurlOption(CURLoption.CURLOPT_USERNAME, userName);
                 SetCurlOption(CURLoption.CURLOPT_HTTPAUTH, (long)authScheme);
@@ -502,7 +601,6 @@ namespace System.Net.Http
                 {
                     SetChunkedModeForSend(_requestMessage);
 
-                    _requestMessage.Content.Headers.Remove(HttpKnownHeaderNames.ContentLength); // avoid overriding libcurl's handling via INFILESIZE/POSTFIELDSIZE
                     AddRequestHeaders(_requestMessage.Content.Headers, slist);
 
                     if (_requestMessage.Content.Headers.ContentType == null)
@@ -521,6 +619,14 @@ namespace System.Net.Http
                     !_requestMessage.Headers.TransferEncodingChunked.Value)
                 {
                     ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoTransferEncoding));
+                }
+
+                // Since libcurl adds an Expect header if it sees enough post data, we need to explicitly block
+                // it if caller specifically does not want to set the header
+                if (_requestMessage.Headers.ExpectContinue.HasValue &&
+                    !_requestMessage.Headers.ExpectContinue.Value)
+                {
+                    ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoExpect));
                 }
 
                 if (!slist.IsInvalid)
@@ -626,6 +732,12 @@ namespace System.Net.Http
             {
                 foreach (KeyValuePair<string, IEnumerable<string>> header in headers)
                 {
+                    if (string.Equals(header.Key, HttpKnownHeaderNames.ContentLength, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // avoid overriding libcurl's handling via INFILESIZE/POSTFIELDSIZE
+                        continue;
+                    }
+
                     string headerValue = headers.GetHeaderString(header.Key);
                     string headerKeyAndValue = string.IsNullOrEmpty(headerValue) ?
                         header.Key + ";" : // semicolon used by libcurl to denote empty value that should be sent
@@ -685,10 +797,22 @@ namespace System.Net.Http
                 }
             }
 
-            internal void  SetRedirectUri(Uri redirectUri)
+            internal void StoreLastEffectiveUri()
             {
-                _targetUri = _requestMessage.RequestUri;
-                _requestMessage.RequestUri = redirectUri;
+                IntPtr urlCharPtr; // do not free; will point to libcurl private memory
+                CURLcode urlResult = Interop.Http.EasyGetInfoPointer(_easyHandle, Interop.Http.CURLINFO.CURLINFO_EFFECTIVE_URL, out urlCharPtr);
+                if (urlResult == CURLcode.CURLE_OK && urlCharPtr != IntPtr.Zero)
+                {
+                    string url = Marshal.PtrToStringAnsi(urlCharPtr);
+                    Uri finalUri;
+                    if (Uri.TryCreate(url, UriKind.Absolute, out finalUri))
+                    {
+                        _requestMessage.RequestUri = finalUri;
+                        return;
+                    }
+                }
+
+                Debug.Fail("Expected to be able to get the last effective Uri from libcurl");
             }
 
             private void EventSourceTrace<TArg0>(string formatMessage, TArg0 arg0, [CallerMemberName] string memberName = null)

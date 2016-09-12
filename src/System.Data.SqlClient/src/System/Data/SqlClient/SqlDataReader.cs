@@ -1103,7 +1103,7 @@ namespace System.Data.SqlClient
                 if (_data[i].IsNull)
                 {
                     // A 'null' stream
-                    return SqlXml.CreateSqlXmlReader(new MemoryStream(new byte[0], writable: false), closeInput: true);
+                    return SqlXml.CreateSqlXmlReader(new MemoryStream(Array.Empty<byte>(), writable: false), closeInput: true);
                 }
                 else
                 {
@@ -1141,7 +1141,7 @@ namespace System.Data.SqlClient
                 if (_data[i].IsNull)
                 {
                     // A 'null' stream
-                    data = new byte[0];
+                    data = Array.Empty<byte>();
                 }
                 else
                 {
@@ -3603,7 +3603,7 @@ namespace System.Data.SqlClient
                     source.SetCanceled();
                     return source.Task;
                 }
-                registration = cancellationToken.Register(_command.CancelIgnoreFailure);
+                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), _command);
             }
 
             Task original = Interlocked.CompareExchange(ref _currentTask, source.Task, null);
@@ -3976,7 +3976,7 @@ namespace System.Data.SqlClient
             IDisposable registration = null;
             if (cancellationToken.CanBeCanceled)
             {
-                registration = cancellationToken.Register(_command.CancelIgnoreFailure);
+                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), _command);
             }
 
             PrepareAsyncInvocation(useSnapshot: true);
@@ -4116,7 +4116,7 @@ namespace System.Data.SqlClient
                 IDisposable registration = null;
                 if (cancellationToken.CanBeCanceled)
                 {
-                    registration = cancellationToken.Register(_command.CancelIgnoreFailure);
+                    registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), _command);
                 }
 
                 // Setup async
@@ -4239,7 +4239,7 @@ namespace System.Data.SqlClient
             IDisposable registration = null;
             if (cancellationToken.CanBeCanceled)
             {
-                registration = cancellationToken.Register(_command.CancelIgnoreFailure);
+                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), _command);
             }
 
             // Setup async
@@ -4391,9 +4391,7 @@ namespace System.Data.SqlClient
 
                 if (task.IsCompleted)
                 {
-                    // If we've completed sync, then don't bother handling the TaskCompletionSource - we'll just return the completed task
                     CompleteRetryable(task, source, objectToDispose);
-                    return task;
                 }
                 else
                 {

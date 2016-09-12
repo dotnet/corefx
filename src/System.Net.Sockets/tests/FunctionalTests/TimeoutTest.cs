@@ -8,6 +8,7 @@ namespace System.Net.Sockets.Tests
 {
     public class TimeoutTest
     {
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void GetAndSet_Success()
         {
@@ -17,6 +18,7 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(100, socket.ReceiveTimeout);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SocketSendTimeout_GetAndSet_Success()
         {
@@ -26,6 +28,7 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(100, socket.SendTimeout);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ReceiveTimesOut_Throws()
         {
@@ -40,7 +43,7 @@ namespace System.Net.Sockets.Tests
                     remoteSocket.Connect(IPAddress.IPv6Loopback, port);
 
                     Socket acceptedSocket = localSocket.EndAccept(localAsync);
-                    acceptedSocket.ReceiveTimeout = Configuration.FailingTestTimeout;
+                    acceptedSocket.ReceiveTimeout = TestSettings.FailingTestTimeout;
 
                     SocketException sockEx = Assert.Throws<SocketException>(() =>
                    {
@@ -53,6 +56,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SocketSendTimeout_Send_Success()
         {
@@ -67,7 +71,7 @@ namespace System.Net.Sockets.Tests
                     remoteSocket.Connect(IPAddress.IPv6Loopback, port);
 
                     Socket acceptedSocket = localSocket.EndAccept(localAsync);
-                    acceptedSocket.SendTimeout = Configuration.PassingTestTimeout;
+                    acceptedSocket.SendTimeout = TestSettings.PassingTestTimeout;
 
                     // Note that Send almost never times out because it only has to copy the data to the native buffer.
                     int bytes = acceptedSocket.Send(new byte[100]);

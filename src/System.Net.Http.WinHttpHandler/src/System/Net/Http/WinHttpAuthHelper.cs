@@ -93,7 +93,9 @@ namespace System.Net.Http
                         out firstSchemeIgnored,
                         out authTarget))
                     {
-                        WinHttpException.ThrowExceptionUsingLastError();
+                        // WinHTTP returns an error for schemes it doesn't handle.
+                        // So, we need to ignore the error and just let it stay at 401.
+                        break;
                     }
 
                     // WinHTTP returns the proper authTarget based on the status code (401, 407).
@@ -103,14 +105,15 @@ namespace System.Net.Http
                     serverAuthScheme = ChooseAuthScheme(supportedSchemes);
                     if (serverAuthScheme != 0)
                     {
-                        SetWinHttpCredential(
+                        if (SetWinHttpCredential(
                             state.RequestHandle,
                             state.ServerCredentials,
                             uri,
                             serverAuthScheme,
-                            authTarget);
-
-                        state.RetryRequest = true;
+                            authTarget))
+                        {
+                            state.RetryRequest = true;
+                        }
                     }
                     
                     break;
@@ -143,7 +146,9 @@ namespace System.Net.Http
                         out firstSchemeIgnored,
                         out authTarget))
                     {
-                        WinHttpException.ThrowExceptionUsingLastError();
+                        // WinHTTP returns an error for schemes it doesn't handle.
+                        // So, we need to ignore the error and just let it stay at 401.
+                        break;
                     }
 
                     // WinHTTP returns the proper authTarget based on the status code (401, 407).
@@ -272,13 +277,39 @@ namespace System.Net.Http
             }
         }
 
-        private void SetWinHttpCredential(
+        public void ChangeDefaultCredentialsPolicy(
+            SafeWinHttpHandle requestHandle,
+            uint authTarget,
+            bool allowDefaultCredentials)
+        {
+            Debug.Assert(authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY || 
+                         authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_SERVER);
+
+            uint optionData = allowDefaultCredentials ?
+                (authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY ?
+                    Interop.WinHttp.WINHTTP_AUTOLOGON_SECURITY_LEVEL_MEDIUM :
+                    Interop.WinHttp.WINHTTP_AUTOLOGON_SECURITY_LEVEL_LOW) :
+                Interop.WinHttp.WINHTTP_AUTOLOGON_SECURITY_LEVEL_HIGH;
+
+            if (!Interop.WinHttp.WinHttpSetOption(
+                requestHandle,
+                Interop.WinHttp.WINHTTP_OPTION_AUTOLOGON_POLICY,
+                ref optionData))
+            {
+                WinHttpException.ThrowExceptionUsingLastError();
+            }
+        }
+
+        private bool SetWinHttpCredential(
             SafeWinHttpHandle requestHandle,
             ICredentials credentials,
             Uri uri,
             uint authScheme,
             uint authTarget)
         {
+            string userName;
+            string password;
+
             Debug.Assert(credentials != null);
             Debug.Assert(authScheme != 0);
             Debug.Assert(authTarget == Interop.WinHttp.WINHTTP_AUTH_TARGET_PROXY || 
@@ -286,25 +317,44 @@ namespace System.Net.Http
 
             NetworkCredential networkCredential = credentials.GetCredential(uri, s_authSchemeStringMapping[authScheme]);
 
-            // Skip if no credentials or this is the default credential.
-            if (networkCredential == null || networkCredential == CredentialCache.DefaultNetworkCredentials)
+            if (networkCredential == null)
             {
-                return;
+                return false;
             }
 
-            string userName = networkCredential.UserName;
-            string password = networkCredential.Password;
-            string domain = networkCredential.Domain;
-
-            // WinHTTP does not support a blank username.  So, we will throw an exception.
-            if (string.IsNullOrEmpty(userName))
+            if (networkCredential == CredentialCache.DefaultNetworkCredentials)
             {
-                throw new InvalidOperationException(SR.net_http_username_empty_string);
+                // Only Negotiate and NTLM can use default credentials. Otherwise,
+                // behave as-if there were no credentials.
+                if (authScheme == Interop.WinHttp.WINHTTP_AUTH_SCHEME_NEGOTIATE ||
+                    authScheme == Interop.WinHttp.WINHTTP_AUTH_SCHEME_NTLM)
+                {
+                    // Allow WinHTTP to transmit the default credentials.
+                    ChangeDefaultCredentialsPolicy(requestHandle, authTarget, allowDefaultCredentials:true);
+                    userName = null;
+                    password = null;
+                }
+                else
+                {
+                    return false;
+                }
             }
-
-            if (!string.IsNullOrEmpty(domain))
+            else
             {
-                userName = domain + "\\" + userName;
+                userName = networkCredential.UserName;
+                password = networkCredential.Password;
+                string domain = networkCredential.Domain;
+
+                // WinHTTP does not support a blank username.  So, we will throw an exception.
+                if (string.IsNullOrEmpty(userName))
+                {
+                    throw new InvalidOperationException(SR.net_http_username_empty_string);
+                }
+
+                if (!string.IsNullOrEmpty(domain))
+                {
+                    userName = domain + "\\" + userName;
+                }
             }
 
             if (!Interop.WinHttp.WinHttpSetCredentials(
@@ -317,6 +367,8 @@ namespace System.Net.Http
             {
                 WinHttpException.ThrowExceptionUsingLastError();
             }
+
+            return true;
         }
 
         private static uint ChooseAuthScheme(uint supportedSchemes)

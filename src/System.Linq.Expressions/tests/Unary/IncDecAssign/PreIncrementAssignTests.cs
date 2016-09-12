@@ -179,7 +179,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression variable = Expression.Variable(typeof(string));
             MethodInfo method = typeof(object).GetTypeInfo().GetDeclaredMethod("ReferenceEquals");
-            Assert.Throws<ArgumentException>(() => Expression.PreIncrementAssign(variable, method));
+            Assert.Throws<ArgumentException>("method", () => Expression.PreIncrementAssign(variable, method));
         }
 
         [Fact]
@@ -187,7 +187,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression variable = Expression.Variable(typeof(int));
             MethodInfo method = typeof(IncDecAssignTests).GetTypeInfo().GetDeclaredMethod("GetString");
-            Assert.Throws<ArgumentException>(() => Expression.PreIncrementAssign(variable, method));
+            Assert.Throws<ArgumentException>(null, () => Expression.PreIncrementAssign(variable, method));
         }
 
         [Theory]
@@ -277,6 +277,7 @@ namespace System.Linq.Expressions.Tests
         {
             UnaryExpression op = Expression.PreIncrementAssign(Expression.Variable(typeof(int)));
             Assert.Same(op, op.Update(op.Operand));
+            Assert.Same(op, NoOpVisitor.Instance.Visit(op));
         }
 
         [Fact]
@@ -284,6 +285,13 @@ namespace System.Linq.Expressions.Tests
         {
             UnaryExpression op = Expression.PreIncrementAssign(Expression.Variable(typeof(int)));
             Assert.NotSame(op, op.Update(Expression.Variable(typeof(int))));
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            var e = Expression.PreIncrementAssign(Expression.Parameter(typeof(int), "x"));
+            Assert.Equal("++x", e.ToString());
         }
     }
 }

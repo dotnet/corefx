@@ -2,12 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Linq;
+using System.Reflection.Metadata.Tests;
 using Xunit;
 
 namespace System.Reflection.Metadata.Ecma335.Tests
 {
     public class MetadataTokensTests
     {
+        // MetadataReader handles:
         private static readonly EntityHandle s_assemblyRefHandle = AssemblyReferenceHandle.FromRowId(1);
         private static readonly EntityHandle s_virtualAssemblyRefHandle = AssemblyReferenceHandle.FromVirtualIndex(AssemblyReferenceHandle.VirtualIndex.System_Runtime);
         private static readonly Handle s_virtualBlobHandle = BlobHandle.FromVirtualIndex(BlobHandle.VirtualIndex.AttributeUsage_AllowSingle, 0);
@@ -15,8 +18,14 @@ namespace System.Reflection.Metadata.Ecma335.Tests
         private static readonly Handle s_stringHandle = StringHandle.FromOffset(1);
         private static readonly Handle s_winrtPrefixedStringHandle = StringHandle.FromOffset(1).WithWinRTPrefix();
         private static readonly Handle s_blobHandle = BlobHandle.FromOffset(1);
-        private static readonly Handle s_guidHandle = GuidHandle.FromIndex(16);
+        private static readonly Handle s_guidHandle = GuidHandle.FromIndex(5);
         private static readonly EntityHandle s_exportedTypeHandle = ExportedTypeHandle.FromRowId(42);
+
+        // MetadataBuilder handles:
+        private static readonly Handle s_writerStringHandle = StringHandle.FromWriterVirtualIndex(1);
+        private static readonly Handle s_writerBlobHandle = BlobHandle.FromOffset(1);
+        private static readonly Handle s_writerGuidHandle = GuidHandle.FromIndex(1);
+        private static readonly Handle s_writerUserStringHandle = UserStringHandle.FromOffset(1);
 
         [Fact]
         public void GetRowNumber()
@@ -29,11 +38,26 @@ namespace System.Reflection.Metadata.Ecma335.Tests
         public void GetHeapOffset()
         {
             Assert.Equal(-1, MetadataTokens.GetHeapOffset(s_virtualBlobHandle));
+            Assert.Equal(-1, MetadataTokens.GetHeapOffset((BlobHandle)s_virtualBlobHandle));
             Assert.Equal(1, MetadataTokens.GetHeapOffset(s_userStringHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset((UserStringHandle)s_userStringHandle));
             Assert.Equal(1, MetadataTokens.GetHeapOffset(s_stringHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset((StringHandle)s_stringHandle));
             Assert.Equal(-1, MetadataTokens.GetHeapOffset(s_winrtPrefixedStringHandle));
+            Assert.Equal(-1, MetadataTokens.GetHeapOffset((StringHandle)s_winrtPrefixedStringHandle));
             Assert.Equal(1, MetadataTokens.GetHeapOffset(s_blobHandle));
-            Assert.Equal(16, MetadataTokens.GetHeapOffset(s_guidHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset((BlobHandle)s_blobHandle));
+            Assert.Equal(5, MetadataTokens.GetHeapOffset(s_guidHandle));
+            Assert.Equal(5, MetadataTokens.GetHeapOffset((GuidHandle)s_guidHandle));
+
+            Assert.Equal(1, MetadataTokens.GetHeapOffset(s_writerUserStringHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset((UserStringHandle)s_writerUserStringHandle));
+            Assert.Equal(-1, MetadataTokens.GetHeapOffset(s_writerStringHandle));
+            Assert.Equal(-1, MetadataTokens.GetHeapOffset((StringHandle)s_writerStringHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset(s_writerBlobHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset((BlobHandle)s_writerBlobHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset(s_writerGuidHandle));
+            Assert.Equal(1, MetadataTokens.GetHeapOffset((GuidHandle)s_writerGuidHandle));
 
             Assert.Throws<ArgumentException>(() => MetadataTokens.GetHeapOffset(s_assemblyRefHandle));
             Assert.Throws<ArgumentException>(() => MetadataTokens.GetHeapOffset(s_virtualAssemblyRefHandle));
@@ -54,6 +78,102 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(s_winrtPrefixedStringHandle));
             Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(s_blobHandle));
             Assert.Throws<ArgumentException>(() => MetadataTokens.GetToken(s_guidHandle));
+        }
+
+        [Fact]
+        public void TryGetTableIndex()
+        {
+            var kinds = 
+                from i in Enumerable.Range(0, 255)
+                let index = new Func<HandleKind, TableIndex?>(k => 
+                {
+                    TableIndex ti;
+                    if (MetadataTokens.TryGetTableIndex(k, out ti))
+                    {
+                        Assert.Equal((int)k, (int)ti);
+                        return ti;
+                    }
+
+                    return null;
+                })((HandleKind)i)
+                where index != null
+                select index.Value;
+
+            AssertEx.Equal(new TableIndex[] 
+            {
+                TableIndex.Module,
+                TableIndex.TypeRef,
+                TableIndex.TypeDef,
+                TableIndex.FieldPtr,
+                TableIndex.Field,
+                TableIndex.MethodPtr,
+                TableIndex.MethodDef,
+                TableIndex.ParamPtr,
+                TableIndex.Param,
+                TableIndex.InterfaceImpl,
+                TableIndex.MemberRef,
+                TableIndex.Constant,
+                TableIndex.CustomAttribute,
+                TableIndex.FieldMarshal,
+                TableIndex.DeclSecurity,
+                TableIndex.ClassLayout,
+                TableIndex.FieldLayout,
+                TableIndex.StandAloneSig,
+                TableIndex.EventMap,
+                TableIndex.EventPtr,
+                TableIndex.Event,
+                TableIndex.PropertyMap,
+                TableIndex.PropertyPtr,
+                TableIndex.Property,
+                TableIndex.MethodSemantics,
+                TableIndex.MethodImpl,
+                TableIndex.ModuleRef,
+                TableIndex.TypeSpec,
+                TableIndex.ImplMap,
+                TableIndex.FieldRva,
+                TableIndex.EncLog,
+                TableIndex.EncMap,
+                TableIndex.Assembly,
+                TableIndex.AssemblyRef,
+                TableIndex.File,
+                TableIndex.ExportedType,
+                TableIndex.ManifestResource,
+                TableIndex.NestedClass,
+                TableIndex.GenericParam,
+                TableIndex.MethodSpec,
+                TableIndex.GenericParamConstraint,
+                TableIndex.Document,
+                TableIndex.MethodDebugInformation,
+                TableIndex.LocalScope,
+                TableIndex.LocalVariable,
+                TableIndex.LocalConstant,
+                TableIndex.ImportScope,
+                TableIndex.StateMachineMethod,
+                TableIndex.CustomDebugInformation
+            }, kinds);
+        }
+
+        [Fact]
+        public void TryGetHeapIndex()
+        {
+            HeapIndex index;
+            Assert.True(MetadataTokens.TryGetHeapIndex(HandleKind.Blob, out index));
+            Assert.Equal(HeapIndex.Blob, index);
+
+            Assert.True(MetadataTokens.TryGetHeapIndex(HandleKind.String, out index));
+            Assert.Equal(HeapIndex.String, index);
+
+            Assert.True(MetadataTokens.TryGetHeapIndex(HandleKind.UserString, out index));
+            Assert.Equal(HeapIndex.UserString, index);
+
+            Assert.True(MetadataTokens.TryGetHeapIndex(HandleKind.NamespaceDefinition, out index));
+            Assert.Equal(HeapIndex.String, index);
+
+            Assert.True(MetadataTokens.TryGetHeapIndex(HandleKind.Guid, out index));
+            Assert.Equal(HeapIndex.Guid, index);
+
+            Assert.False(MetadataTokens.TryGetHeapIndex(HandleKind.Constant, out index));
+            Assert.False(MetadataTokens.TryGetHeapIndex((HandleKind)255, out index));
         }
 
         [Fact]

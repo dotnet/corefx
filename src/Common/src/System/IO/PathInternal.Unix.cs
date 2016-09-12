@@ -12,7 +12,7 @@ namespace System.IO
     {
         // There is only one invalid path character in Unix
         private const char InvalidPathChar = '\0';
-        internal static readonly char[] InvalidPathChars = { InvalidPathChar };
+        internal static char[] GetInvalidPathChars() => new char[] { InvalidPathChar };
 
         internal static readonly int MaxComponentLength = Interop.Sys.MaxName;
 
@@ -90,6 +90,19 @@ namespace System.IO
             }
 
             return builder.ToString();
+        }
+        
+        /// <summary>
+        /// Returns true if the character is a directory or volume separator.
+        /// </summary>
+        /// <param name="ch">The character to test.</param>
+        internal static bool IsDirectoryOrVolumeSeparator(char ch)
+        {
+            // The directory separator, volume separator, and the alternate directory
+            // separator should be the same on Unix, so we only need to check one.
+            Debug.Assert(Path.DirectorySeparatorChar == Path.AltDirectorySeparatorChar);
+            Debug.Assert(Path.DirectorySeparatorChar == Path.VolumeSeparatorChar);
+            return ch == Path.DirectorySeparatorChar;
         }
     }
 }

@@ -498,13 +498,25 @@ namespace Internal.Cryptography.Pal
                 X509Certificate2Collection userIntermediateCerts = userIntermediateStore.Certificates;
 
                 // fill the system trusted collection
-                foreach (X509Certificate2 systemRootCert in systemRootCerts)
-                {
-                    systemTrusted.Add(systemRootCert);
-                }
                 foreach (X509Certificate2 userRootCert in userRootCerts)
                 {
-                    systemTrusted.Add(userRootCert);
+                    if (!systemTrusted.Add(userRootCert))
+                    {
+                        // If we have already (effectively) added another instance of this certificate,
+                        // then this one provides no value. A Disposed cert won't harm the matching logic.
+                        userRootCert.Dispose();
+                    }
+                }
+
+                foreach (X509Certificate2 systemRootCert in systemRootCerts)
+                {
+                    if (!systemTrusted.Add(systemRootCert))
+                    {
+                        // If we have already (effectively) added another instance of this certificate,
+                        // (for example, because another copy of it was in the user store)
+                        // then this one provides no value. A Disposed cert won't harm the matching logic.
+                        systemRootCert.Dispose();
+                    }
                 }
 
                 X509Certificate2Collection[] storesToCheck =
@@ -539,9 +551,42 @@ namespace Internal.Cryptography.Pal
                         }
                     }
                 }
+
+                // Avoid sending unused certs into the finalizer queue by doing only a ref check
+
+                var candidatesByReference = new HashSet<X509Certificate2>(
+                    candidates,
+                    ReferenceEqualityComparer<X509Certificate2>.Instance);
+
+                // Certificates come from 5 sources:
+                //  1) extraStore.
+                //     These are cert objects that are provided by the user, we shouldn't dispose them.
+                //  2) the machine root store
+                //     These certs are moving on to the "was I a system trust?" test, and we shouldn't dispose them.
+                //  3) the user root store
+                //     These certs are moving on to the "was I a system trust?" test, and we shouldn't dispose them.
+                //  4) the machine intermediate store
+                //     These certs were either path candidates, or not. If they were, don't dispose them. Otherwise do.
+                //  5) the user intermediate store
+                //     These certs were either path candidates, or not. If they were, don't dispose them. Otherwise do.
+                DisposeUnreferenced(candidatesByReference, systemIntermediateCerts);
+                DisposeUnreferenced(candidatesByReference, userIntermediateCerts);
             }
 
             return candidates;
+        }
+
+        private static void DisposeUnreferenced(
+            ISet<X509Certificate2> referencedSet,
+            X509Certificate2Collection storeCerts)
+        {
+            foreach (X509Certificate2 cert in storeCerts)
+            {
+                if (!referencedSet.Contains(cert))
+                {
+                    cert.Dispose();
+                }
+            }
         }
 
         private static HashSet<X509Certificate2> FindIssuer(
@@ -564,7 +609,14 @@ namespace Internal.Cryptography.Pal
 
                 foreach (X509Certificate2 candidate in store)
                 {
-                    SafeX509Handle candidateHandle = ((OpenSslX509CertificateReader)candidate.Pal).SafeHandle;
+                    var certPal = (OpenSslX509CertificateReader)candidate.Pal;
+
+                    if (certPal == null)
+                    {
+                        continue;
+                    }
+
+                    SafeX509Handle candidateHandle = certPal.SafeHandle;
 
                     int issuerError = Interop.Crypto.X509CheckIssued(candidateHandle, certHandle);
 

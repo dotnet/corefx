@@ -7,12 +7,18 @@
     <ProjectGuid>{CBD5AE8D-8595-48E2-848F-1A3492A28FDB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.ValueTuple.Tests</AssemblyName>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <LangVersion>5</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ValueTuple\UnitTests.cs" />
+    <Compile Include="TupleElementNamesTests.cs" />
+    <Compile Include="ExtensionsTests.cs" />
+    <Compile Include="ValueTupleTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\System.ValueTuple.csproj">
+    <ProjectReference Include="..\pkg\System.ValueTuple.pkgproj">
       <Name>System.ValueTuple</Name>
       <Project>{4C2655DB-BD9E-4C86-83A6-744ECDDBDF29}</Project>
     </ProjectReference>

@@ -200,7 +200,7 @@ namespace System.Linq.Expressions
         public static SwitchExpression Switch(Type type, Expression switchValue, Expression defaultBody, MethodInfo comparison, IEnumerable<SwitchCase> cases)
         {
             RequiresCanRead(switchValue, nameof(switchValue));
-            if (switchValue.Type == typeof(void)) throw Error.ArgumentCannotBeOfTypeVoid();
+            if (switchValue.Type == typeof(void)) throw Error.ArgumentCannotBeOfTypeVoid(nameof(switchValue));
 
             var caseList = cases.ToReadOnly();
             ContractUtils.RequiresNotNullItems(caseList, nameof(cases));
@@ -222,7 +222,7 @@ namespace System.Linq.Expressions
                 var pms = comparison.GetParametersCached();
                 if (pms.Length != 2)
                 {
-                    throw Error.IncorrectNumberOfMethodCallArguments(comparison);
+                    throw Error.IncorrectNumberOfMethodCallArguments(comparison, nameof(comparison));
                 }
                 // Validate that the switch value's type matches the comparison method's 
                 // left hand side parameter type.
@@ -265,7 +265,7 @@ namespace System.Linq.Expressions
                 // if we have a non-boolean user-defined equals, we don't want it.
                 if (comparison.ReturnType != typeof(bool))
                 {
-                    throw Error.EqualityMustReturnBoolean(comparison);
+                    throw Error.EqualityMustReturnBoolean(comparison, nameof(comparison));
                 }
             }
             else if (caseList.Count != 0)
@@ -282,7 +282,7 @@ namespace System.Linq.Expressions
                     {
                         if (!TypeUtils.AreEquivalent(firstTestValue.Type, c.TestValues[i].Type))
                         {
-                            throw new ArgumentException(Strings.AllTestValuesMustHaveSameType, nameof(cases));
+                            throw Error.AllTestValuesMustHaveSameType(nameof(cases));
                         }
                     }
                 }
@@ -298,7 +298,7 @@ namespace System.Linq.Expressions
 
             if (defaultBody == null)
             {
-                if (resultType != typeof(void)) throw Error.DefaultBodyMustBeSupplied();
+                if (resultType != typeof(void)) throw Error.DefaultBodyMustBeSupplied(nameof(defaultBody));
             }
             else
             {
@@ -321,7 +321,7 @@ namespace System.Linq.Expressions
                 {
                     if (!TypeUtils.AreReferenceAssignable(resultType, @case.Type))
                     {
-                        throw new ArgumentException(Strings.ArgumentTypesMustMatch, parameterName);
+                        throw Error.ArgumentTypesMustMatch(parameterName);
                     }
                 }
             }
@@ -329,7 +329,7 @@ namespace System.Linq.Expressions
             {
                 if (!TypeUtils.AreEquivalent(resultType, @case.Type))
                 {
-                    throw new ArgumentException(Strings.AllCaseBodiesMustHaveSameType, parameterName);
+                    throw Error.AllCaseBodiesMustHaveSameType(parameterName);
                 }
             }
         }

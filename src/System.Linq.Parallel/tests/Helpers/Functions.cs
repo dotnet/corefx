@@ -12,12 +12,12 @@ namespace System.Linq.Parallel.Tests
         // Sum a range of integers
         public static int SumRange(int start, int count)
         {
-            return count * (2 * start + (count - 1)) / 2;
+            return (count / 2) * (2 * start + count - 1) + (count % 2 != 0 ? start + count / 2 : 0);
         }
 
         public static long SumRange(long start, long count)
         {
-            return count * (2 * start + (count - 1)) / 2;
+            return (count / 2) * (2 * start + count - 1) + (count % 2 != 0 ? start + count / 2 : 0);
         }
 
         public static long ProductRange(long start, long count)
@@ -28,12 +28,6 @@ namespace System.Linq.Parallel.Tests
                 product *= start;
             }
             return product;
-        }
-
-        public static void AssertThrowsWrapped<T>(Action query)
-        {
-            AggregateException ae = Assert.Throws<AggregateException>(query);
-            Assert.All(ae.InnerExceptions, e => Assert.IsType<T>(e));
         }
 
         public static void Enumerate<T>(this IEnumerable<T> e)

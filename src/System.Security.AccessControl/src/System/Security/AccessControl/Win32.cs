@@ -6,19 +6,17 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Principal;
-using System.Diagnostics.Contracts;
 
 namespace System.Security.AccessControl
 {
     internal static class Win32
     {
-        internal const System.Int32 TRUE = 1;
-
         //
         // Wrapper around advapi32.ConvertSecurityDescriptorToStringSecurityDescriptorW
         //
@@ -33,7 +31,7 @@ namespace System.Security.AccessControl
             IntPtr ByteArray;
             uint ByteArraySize = 0;
 
-            if (TRUE != Interop.mincore.ConvertSdToStringSd(binaryForm, (uint)requestedRevision, (uint)si, out ByteArray, ref ByteArraySize))
+            if (!Interop.mincore.ConvertSdToStringSd(binaryForm, (uint)requestedRevision, (uint)si, out ByteArray, ref ByteArraySize))
             {
                 errorCode = Marshal.GetLastWin32Error();
                 goto Error;
@@ -302,7 +300,7 @@ nameof(handle));
                 else
                 {
                     // both are null, shouldn't happen
-                    Contract.Assert(false, "Internal error: both name and handle are null");
+                    Debug.Assert(false, "Internal error: both name and handle are null");
                     throw new ArgumentException();
                 }
 

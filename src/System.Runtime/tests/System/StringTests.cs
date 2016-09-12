@@ -5,6 +5,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -23,6 +24,8 @@ namespace System.Tests
         [InlineData(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', '\0', 'i', 'j' }, "abcdefgh")]
         [InlineData(new char[] { 'a', '\0' }, "a")]
         [InlineData(new char[] { '\0' }, "")]
+        [InlineData(new char[] { '?', '@', ' ', '\0' }, "?@ ")] // ? and @ don't have overlapping bits
+        [InlineData(new char[] { '\u8001', '\u8002', '\ufffd', '\u1234', '\ud800', '\udfff', '\0' }, "\u8001\u8002\ufffd\u1234\ud800\udfff")] // chars with high bits set
         public static unsafe void Ctor_CharPtr(char[] valueArray, string expected)
         {
             fixed (char* value = valueArray)
@@ -35,6 +38,29 @@ namespace System.Tests
         public static unsafe void Ctor_CharPtr_Empty()
         {
             Assert.Same(string.Empty, new string((char*)null));
+        }
+
+        [Fact]
+        public static unsafe void Ctor_CharPtr_OddAddressShouldStillWork()
+        {
+            // We need to get an odd address, so allocate a byte[] and
+            // take the address of the second element
+            byte[] bytes = { 0xff, 0x12, 0x34, 0x00, 0x00 };
+            fixed (byte* pBytes = bytes)
+            {
+                // The address of a fixed byte[] should always be even
+                Debug.Assert((int)pBytes % 2 == 0);
+                char* pCh = (char*)(pBytes + 1);
+                
+                // This should handle the odd address when trying to get
+                // the length of the string to allocate
+                string actual = new string(pCh);
+
+                // Since we're casting between pointers of types with different sizes,
+                // the result will vary on little/big endian platforms
+                string expected = BitConverter.IsLittleEndian ? "\u3412" : "\u1234";
+                Assert.Equal(expected, actual);
+            }
         }
 
         [Theory]
@@ -238,7 +264,10 @@ namespace System.Tests
             Action<string> validate = result =>
             {
                 Assert.Equal(expected, result);
-                // if (result.Length == 0) Assert.Same(string.Empty, result);
+                if (result.Length == 0)
+                {
+                    Assert.Same(string.Empty, result);
+                }
             };
 
             if (values.Length == 2)
@@ -256,6 +285,7 @@ namespace System.Tests
 
             validate(string.Concat(values));
             validate(string.Concat((IEnumerable<string>)values));
+            validate(string.Concat<string>((IEnumerable<string>)values)); // Call the generic IEnumerable<T>-based overload
         }
 
         [Fact]
@@ -304,8 +334,12 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Concat_Objects_TestData()
         {
+            yield return new object[] { new object[] { }, "" };
+
             yield return new object[] { new object[] { 1 }, "1" };
             yield return new object[] { new object[] { null }, "" };
+            // dotnet/coreclr#6785, this will be null for the Concat(object) overload but "" for the object[]/IEnumerable<object> overload
+            // yield return new object[] { new object[] { new ObjectWithNullToString() }, "" };
 
             yield return new object[] { new object[] { 1, 2 }, "12" };
             yield return new object[] { new object[] { null, 1 }, "1" };
@@ -362,6 +396,7 @@ namespace System.Tests
         public static void Concat_Invalid()
         {
             Assert.Throws<ArgumentNullException>("values", () => string.Concat((IEnumerable<string>)null)); // Values is null
+            Assert.Throws<ArgumentNullException>("values", () => string.Concat<string>((IEnumerable<string>)null)); // Generic overload
             Assert.Throws<ArgumentNullException>("values", () => string.Concat(null)); // Values is null
 
             Assert.Throws<ArgumentNullException>("args", () => string.Concat((object[])null)); // Values is null
@@ -418,8 +453,14 @@ namespace System.Tests
         [InlineData(null, 0, null, 0, 0, StringComparison.CurrentCulture, 0)]
         [InlineData("Hello", 0, null, 0, 0, StringComparison.CurrentCulture, 1)]
         [InlineData(null, 0, "Hello", 0, 0, StringComparison.CurrentCulture, -1)]
+        [InlineData(null, -1, null, -1, -1, StringComparison.CurrentCulture, 0)]
+        [InlineData("foo", -1, null, -1, -1, StringComparison.CurrentCulture, 1)]
+        [InlineData(null, -1, "foo", -1, -1, StringComparison.CurrentCulture, -1)]
         // CurrentCultureIgnoreCase
         [InlineData("HELLO", 0, "hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0)]
+        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, 0)]
+        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0)]
+        [InlineData("Hello", 2, "Yellow", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0)]
         [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.CurrentCultureIgnoreCase, 1)]
         [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.CurrentCultureIgnoreCase, -1)]
         [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.CurrentCultureIgnoreCase, 0)]
@@ -427,6 +468,9 @@ namespace System.Tests
         [InlineData(null, 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 0)]
         [InlineData("Hello", 0, null, 0, 0, StringComparison.CurrentCultureIgnoreCase, 1)]
         [InlineData(null, 0, "Hello", 0, 0, StringComparison.CurrentCultureIgnoreCase, -1)]
+        [InlineData(null, -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 0)]
+        [InlineData("foo", -1, null, -1, -1, StringComparison.CurrentCultureIgnoreCase, 1)]
+        [InlineData(null, -1, "foo", -1, -1, StringComparison.CurrentCultureIgnoreCase, -1)]
         // InvariantCulture (not exposed as enum case, but is valid)
         [InlineData("Hello", 0, "Hello", 0, 5, (StringComparison)2, 0)]
         [InlineData("Hello", 0, "Goodbye", 0, 5, (StringComparison)2, 1)]
@@ -438,6 +482,9 @@ namespace System.Tests
         [InlineData(null, 0, "Hello", 0, 5, (StringComparison)2, -1)]
         // InvariantCultureIgnoreCase (not exposed as enum case, but is valid)
         [InlineData("HELLO", 0, "hello", 0, 5, (StringComparison)3, 0)]
+        [InlineData("Hello", 0, "Hello", 0, 5, (StringComparison)3, 0)]
+        [InlineData("Hello", 2, "Hello", 2, 3, (StringComparison)3, 0)]
+        [InlineData("Hello", 2, "Yellow", 2, 3, (StringComparison)3, 0)]
         [InlineData("Hello", 0, "Goodbye", 0, 5, (StringComparison)3, 1)]
         [InlineData("Goodbye", 0, "Hello", 0, 5, (StringComparison)3, -1)]
         [InlineData("HELLO", 2, "hello", 2, 3, (StringComparison)3, 0)]
@@ -479,11 +526,26 @@ namespace System.Tests
         [InlineData("aaaaaaaaaaaaaa", 1, "aaaxaaaaaaaaaa", 3, 100, StringComparison.Ordinal, -1)]     // Different long alignment, abs of 4, one of them is 2, different at n=1
         [InlineData("-aaaaaaaaaaaaa", 1, "++++aaaaaaaaaa", 4, 10, StringComparison.Ordinal, 0)]       // Different long alignment, equal compare
         [InlineData("aaaaaaaaaaaaaa", 1, "aaaaaaaaaaaaax", 4, 100, StringComparison.Ordinal, -1)]     // Different long alignment
+        [InlineData("\0", 0, "", 0, 1, StringComparison.Ordinal, 1)]                                  // Same memory layout, except for m_stringLength (m_firstChars are both 0)
+        [InlineData("\0\0", 0, "", 0, 2, StringComparison.Ordinal, 1)]                                // Same as above, except m_stringLength for one is 2
+        [InlineData("", 0, "\0b", 0, 2, StringComparison.Ordinal, -1)]                                // strA's second char != strB's second char codepath
+        [InlineData("", 0, "b", 0, 1, StringComparison.Ordinal, -1)]                                  // Should hit strA.m_firstChar != strB.m_firstChar codepath
+        [InlineData("abcxxxxxxxxxxxxxxxxxxxxxx", 0, "abdxxxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 64-bit: first long compare is different
+        [InlineData("abcdefgxxxxxxxxxxxxxxxxxx", 0, "abcdefhxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 64-bit: second long compare is different
+        [InlineData("abcdefghijkxxxxxxxxxxxxxx", 0, "abcdefghijlxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 64-bit: third long compare is different
+        [InlineData("abcdexxxxxxxxxxxxxxxxxxxx", 0, "abcdfxxxxxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 32-bit: second int compare is different
+        [InlineData("abcdefghixxxxxxxxxxxxxxxx", 0, "abcdefghjxxxxxxxxx", 0, int.MaxValue, StringComparison.Ordinal, -1)] // 32-bit: fourth int compare is different
         [InlineData(null, 0, null, 0, 0, StringComparison.Ordinal, 0)]
         [InlineData("Hello", 0, null, 0, 5, StringComparison.Ordinal, 1)]
         [InlineData(null, 0, "Hello", 0, 5, StringComparison.Ordinal, -1)]
+        [InlineData(null, -1, null, -1, -1, StringComparison.Ordinal, 0)]
+        [InlineData("foo", -1, null, -1, -1, StringComparison.Ordinal, 1)]
+        [InlineData(null, -1, "foo", -1, -1, StringComparison.Ordinal, -1)]
         // OrdinalIgnoreCase
         [InlineData("HELLO", 0, "hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0)]
+        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, 0)]
+        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.OrdinalIgnoreCase, 0)]
+        [InlineData("Hello", 2, "Yellow", 2, 3, StringComparison.OrdinalIgnoreCase, 0)]
         [InlineData("Hello", 0, "Goodbye", 0, 5, StringComparison.OrdinalIgnoreCase, 1)]
         [InlineData("Goodbye", 0, "Hello", 0, 5, StringComparison.OrdinalIgnoreCase, -1)]
         [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.OrdinalIgnoreCase, 0)]
@@ -494,14 +556,15 @@ namespace System.Tests
         public static void Compare(string strA, int indexA, string strB, int indexB, int length, StringComparison comparisonType, int expected)
         {
             bool hasNullInputs = (strA == null || strB == null);
-            bool indexesReferToEntireString = (strA != null && strB != null && indexA == 0 && indexB == 0 && (length == strB.Length || length == strA.Length));
-            if (hasNullInputs || indexesReferToEntireString)
+            bool indicesReferToEntireString = (strA != null && strB != null && indexA == 0 && indexB == 0 && (length == strB.Length || length == strA.Length));
+            bool skipNonComparisonOverloads = length != 0 && ((strA == null && indexA != 0) || (strB == null && indexB != 0));
+            if (hasNullInputs || indicesReferToEntireString)
             {
                 if (comparisonType == StringComparison.CurrentCulture)
                 {
                     // Use Compare(string, string) or Compare(string, string, false) or CompareTo(string)
                     Assert.Equal(expected, Math.Sign(string.Compare(strA, strB)));
-                    Assert.Equal(expected, Math.Sign(string.Compare(strA, strB, false)));
+                    Assert.Equal(expected, Math.Sign(string.Compare(strA, strB, ignoreCase: false)));
                     if (strA != null)
                     {
                         Assert.Equal(expected, Math.Sign(strA.CompareTo(strB)));
@@ -509,31 +572,58 @@ namespace System.Tests
                         IComparable iComparable = strA;
                         Assert.Equal(expected, Math.Sign(iComparable.CompareTo(strB)));
                     }
+                    if (strB != null)
+                    {
+                        Assert.Equal(expected, -Math.Sign(strB.CompareTo(strA)));
+
+                        IComparable iComparable = strB;
+                        Assert.Equal(expected, -Math.Sign(iComparable.CompareTo(strA)));
+                    }
                 }
                 else if (comparisonType == StringComparison.CurrentCultureIgnoreCase)
                 {
                     // Use Compare(string, string, true)
-                    Assert.Equal(expected, Math.Sign(string.Compare(strA, strB, true)));
+                    Assert.Equal(expected, Math.Sign(string.Compare(strA, strB, ignoreCase: true)));
                 }
                 else if (comparisonType == StringComparison.Ordinal)
                 {
                     // Use CompareOrdinal(string, string)
                     Assert.Equal(expected, Math.Sign(string.CompareOrdinal(strA, strB)));
                 }
-                // Use CompareOrdinal(string, string, StringComparisonType)
+                // Use CompareOrdinal(string, string, StringComparison)
                 Assert.Equal(expected, Math.Sign(string.Compare(strA, strB, comparisonType)));
             }
             if (comparisonType == StringComparison.CurrentCulture)
             {
-                // Use Compare(string, int, string, int, int)
-                Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length)));
+                // This may have different behavior than the overload accepting a StringComparison
+                // for a combination of null/invalid inputs; see notes in Compare_Invalid for more
+
+                if (!skipNonComparisonOverloads)
+                {
+                    // Use Compare(string, int, string, int, int) or Compare(string, int, string, int, int, false)
+                    Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length)));
+                    // Uncomment when this is exposed in .NET Core (dotnet/corefx#10066)
+                    // Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, ignoreCase: false)));
+                }
+            }
+            else if (comparisonType == StringComparison.CurrentCultureIgnoreCase)
+            {
+                // This may have different behavior than the overload accepting a StringComparison
+                // for a combination of null/invalid inputs; see notes in Compare_Invalid for more
+
+                if (!skipNonComparisonOverloads)
+                {
+                    // Use Compare(string, int, string, int, int, true)
+                    // Uncomment when this is exposed in .NET Core (dotnet/corefx#10066)
+                    // Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, ignoreCase: true)));
+                }
             }
             else if (comparisonType == StringComparison.Ordinal)
             {
                 // Use CompareOrdinal(string, int, string, int, int)
                 Assert.Equal(expected, Math.Sign(string.CompareOrdinal(strA, indexA, strB, indexB, length)));
             }
-            // Use Compare(string, int, string, int, int, StringComparisonType)
+            // Use Compare(string, int, string, int, int, StringComparison)
             Assert.Equal(expected, Math.Sign(string.Compare(strA, indexA, strB, indexB, length, comparisonType)));
         }
 
@@ -572,6 +662,32 @@ namespace System.Tests
             // Length < 0
             Assert.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 0, "bb", 0, -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("a", 0, "bb", 0, -1, StringComparison.CurrentCulture));
+
+            // There is a subtle behavior difference between the string.Compare that accepts a StringComparison parameter,
+            // and the one that does not. The former includes short-circuiting logic for nulls BEFORE the length/
+            // index parameters are validated (but after the StringComparison is), while the latter does not. As a result,
+            // this will not throw:
+            // string.Compare(null, -1, null, -1, -1, StringComparison.CurrentCulture)
+            // but this will:
+            // string.Compare(null, -1, null, -1, -1)
+
+            // These tests ensure that the argument validation stays in order.
+
+            // Compare accepting StringComparison
+            Assert.Throws<ArgumentException>("comparisonType", () => string.Compare(null, 0, null, 0, 0, StringComparison.CurrentCulture - 1)); // comparisonType should be validated before null short-circuiting...
+            // Tests to ensure null is short-circuited before validating the arguments are in the Compare() theory
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => string.Compare("foo", -1, "foo", -1, -1, StringComparison.CurrentCulture)); // length should be validated before indexA/indexB
+            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.Compare("foo", -1, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexA
+            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.Compare("foo", 0, "foo", -1, 3, StringComparison.CurrentCulture)); // then indexB
+            // Then the optimization where we short-circuit if strA == strB && indexA == indexB, or length == 0, is tested in the Compare() theory.
+
+            // Compare not accepting StringComparison
+            Assert.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare(null, -1, null, -1, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare(null, 0, "bar", 4, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare(null, -1, null, -1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare(null, 0, null, -1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("string1", () => string.Compare(null, 1, null, 1, 1));
+            Assert.Throws<ArgumentOutOfRangeException>("string2", () => string.Compare("bar", 1, null, 1, 1));
         }
 
         [Fact]
@@ -586,7 +702,15 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("a", 0, "bb", 3, 0)); // IndexB > strB.Length
 
             // Length < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => string.CompareOrdinal("a", 0, "bb", 0, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => string.CompareOrdinal("a", 0, "bb", 0, -1));
+
+            // We must validate arguments before any short-circuiting is done (besides for nulls)
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => string.CompareOrdinal("foo", -1, "foo", -1, -1)); // length should be validated first
+            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", -1, "foo", -1, 0)); // then indexA
+            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 0, "foo", -1, 0)); // then indexB
+            Assert.Throws<ArgumentOutOfRangeException>("indexA", () => string.CompareOrdinal("foo", 4, "foo", 4, 0)); // indexA > strA.Length first
+            Assert.Throws<ArgumentOutOfRangeException>("indexB", () => string.CompareOrdinal("foo", 3, "foo", 4, 0)); // then indexB > strB.Length
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => string.CompareOrdinal("foo", 0, "foo", 0, -1)); // early return should not kick in if length is invalid
         }
 
         [Theory]
@@ -678,6 +802,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [ActiveIssue("dotnet/coreclr#2051", Xunit.PlatformID.AnyUnix)]
         [InlineData(StringComparison.CurrentCulture)]
         [InlineData(StringComparison.CurrentCultureIgnoreCase)]
         [InlineData(StringComparison.Ordinal)]
@@ -902,7 +1027,7 @@ namespace System.Tests
                 // Use Equals(string, string)
                 Assert.Equal(expected, string.Equals(s1, s2));
             }
-            // Use Equals(string, string, StringComparisonType)
+            // Use Equals(string, string, StringComparison)
             Assert.Equal(expected, string.Equals(s1, s2, comparisonType));
 
             // If two strings are equal ordinally, then they must have the same hash code.
@@ -1020,6 +1145,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [ActiveIssue("dotnet/coreclr#2051", Xunit.PlatformID.AnyUnix)]
         [InlineData("He\0lo", "He\0lo", 0)]
         [InlineData("He\0lo", "He\0", 0)]
         [InlineData("He\0lo", "\0", 2)]
@@ -1065,7 +1191,7 @@ namespace System.Tests
         public static void IndexOf_TurkishI()
         {
             string s = "Turkish I \u0131s TROUBL\u0130NG!";
-            PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
             {
                 string value = "\u0130";
                 Assert.Equal(19, s.IndexOf(value));
@@ -1080,7 +1206,7 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
             });
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 string value = "\u0130";
                 Assert.Equal(19, s.IndexOf(value));
@@ -1091,7 +1217,7 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
             });
-            PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
             {
                 string value = "\u0130";
                 Assert.Equal(19, s.IndexOf(value));
@@ -1109,7 +1235,7 @@ namespace System.Tests
         {
             string source = "dzsdzs";
             string target = "ddzs";
-            PerformActionWithCulture(new CultureInfo("hu-HU"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("hu-HU"), () =>
             {
             /* 
              There are differences between Windows and ICU regarding contractions.
@@ -1125,7 +1251,7 @@ namespace System.Tests
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.Ordinal));
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.OrdinalIgnoreCase));
             });
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 Assert.Equal(-1, source.IndexOf(target));
                 Assert.Equal(-1, source.IndexOf(target, StringComparison.CurrentCulture));
@@ -1138,7 +1264,7 @@ namespace System.Tests
         {
             string s = "Exhibit a\u0300\u00C0";
             string value = "\u00C0";
-            PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
             {
                 Assert.Equal(10, s.IndexOf(value));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1146,7 +1272,7 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
             });
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 Assert.Equal(10, s.IndexOf(value));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1154,7 +1280,7 @@ namespace System.Tests
             });
 
             value = "a\u0300"; // this diacritic combines with preceding character
-            PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
             {
                 Assert.Equal(8, s.IndexOf(value));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1162,7 +1288,7 @@ namespace System.Tests
                 Assert.Equal(8, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
             });
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 Assert.Equal(8, s.IndexOf(value));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1175,7 +1301,7 @@ namespace System.Tests
         {
             string s = "Foo\u0400Bar";
             string value = "\u0400";
-            PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
             {
                 Assert.Equal(3, s.IndexOf(value));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1183,7 +1309,7 @@ namespace System.Tests
                 Assert.Equal(3, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
             });
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 Assert.Equal(3, s.IndexOf(value));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1191,7 +1317,7 @@ namespace System.Tests
             });
 
             value = "bar";
-            PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
             {
                 Assert.Equal(-1, s.IndexOf(value));
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1199,7 +1325,7 @@ namespace System.Tests
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(4, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
             });
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 Assert.Equal(-1, s.IndexOf(value));
                 Assert.Equal(-1, s.IndexOf(value, StringComparison.CurrentCulture));
@@ -1364,22 +1490,31 @@ namespace System.Tests
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 0, 3, "Foo$$Bar$$Baz")]
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 3, 0, "")]
         [InlineData("$$", new string[] { "Foo", "Bar", "Baz" }, 1, 1, "Bar")]
-        public static void Join_StringArray(string seperator, string[] values, int startIndex, int count, string expected)
+        public static void Join_StringArray(string separator, string[] values, int startIndex, int count, string expected)
         {
             if (startIndex + count == values.Length && count != 0)
             {
-                Assert.Equal(expected, string.Join(seperator, values));
+                Assert.Equal(expected, string.Join(separator, values));
 
                 var iEnumerableStringOptimized = new List<string>(values);
-                Assert.Equal(expected, string.Join(seperator, iEnumerableStringOptimized));
+                Assert.Equal(expected, string.Join(separator, iEnumerableStringOptimized));
+                Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringOptimized)); // Call the generic IEnumerable<T>-based overload
 
                 var iEnumerableStringNotOptimized = new Queue<string>(values);
-                Assert.Equal(expected, string.Join(seperator, iEnumerableStringNotOptimized));
+                Assert.Equal(expected, string.Join(separator, iEnumerableStringNotOptimized));
+                Assert.Equal(expected, string.Join<string>(separator, iEnumerableStringNotOptimized));
 
                 var iEnumerableObject = new List<object>(values);
-                Assert.Equal(expected, string.Join(seperator, iEnumerableObject));
+                Assert.Equal(expected, string.Join(separator, iEnumerableObject));
+
+                // Bug/Documented behavior: Join(string, object[]) returns "" when the first item in the array is null
+                if (values.Length == 0 || values[0] != null)
+                {
+                    var arrayOfObjects = (object[])values;
+                    Assert.Equal(expected, string.Join(separator, arrayOfObjects));
+                }
             }
-            Assert.Equal(expected, string.Join(seperator, values, startIndex, count));
+            Assert.Equal(expected, string.Join(separator, values, startIndex, count));
         }
 
         [Fact]
@@ -1389,11 +1524,12 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>("value", () => string.Join("$$", null));
             Assert.Throws<ArgumentNullException>("value", () => string.Join("$$", null, 0, 0));
             Assert.Throws<ArgumentNullException>("values", () => string.Join("|", (IEnumerable<string>)null));
+            Assert.Throws<ArgumentNullException>("values", () => string.Join<string>("|", (IEnumerable<string>)null)); // Generic overload
 
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, -1, 0)); // Start index < 0
             Assert.Throws<ArgumentOutOfRangeException>("count", () => string.Join("$$", new string[] { "Foo" }, 0, -1)); // Count < 0
 
-            // Start index > seperators.Length
+            // Start index > separators.Length
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 2, 1));
             Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => string.Join("$$", new string[] { "Foo" }, 0, 2));
         }
@@ -1401,6 +1537,7 @@ namespace System.Tests
         public static IEnumerable<object[]> Join_ObjectArray_TestData()
         {
             yield return new object[] { "$$", new object[] { }, "" };
+            yield return new object[] { "$$", new object[] { new ObjectWithNullToString() }, "" };
             yield return new object[] { "$$", new object[] { "Foo" }, "Foo" };
             yield return new object[] { "$$", new object[] { "Foo", "Bar", "Baz" }, "Foo$$Bar$$Baz" };
             yield return new object[] { null, new object[] { "Foo", "Bar", "Baz" }, "FooBarBaz" };
@@ -1415,12 +1552,12 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Join_ObjectArray_TestData))]
-        public static void Join_ObjectArray(string seperator, object[] values, string expected)
+        public static void Join_ObjectArray(string separator, object[] values, string expected)
         {
-            Assert.Equal(expected, string.Join(seperator, values));
+            Assert.Equal(expected, string.Join(separator, values));
             if (!(values.Length > 0 && values[0] == null))
             {
-                Assert.Equal(expected, string.Join(seperator, (IEnumerable<object>)values));
+                Assert.Equal(expected, string.Join(separator, (IEnumerable<object>)values));
             }
         }
 
@@ -1467,6 +1604,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [ActiveIssue("dotnet/coreclr#2051", Xunit.PlatformID.AnyUnix)]
         [InlineData("He\0lo", "He\0lo", 0)]
         [InlineData("He\0lo", "He\0", 0)]
         [InlineData("He\0lo", "\0", 2)]
@@ -1563,7 +1701,7 @@ namespace System.Tests
         public static void LastIndexOf_TurkishI()
         {
             string s = "Turkish I \u0131s TROUBL\u0130NG!";
-            PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
             {
                 string value = "\u0130";
                 Assert.Equal(19, s.LastIndexOf(value));
@@ -1578,7 +1716,7 @@ namespace System.Tests
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.OrdinalIgnoreCase));
             });
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 string value = "\u0130";
                 Assert.Equal(19, s.LastIndexOf(value));
@@ -1589,7 +1727,7 @@ namespace System.Tests
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.LastIndexOf(value, StringComparison.CurrentCultureIgnoreCase));
             });
-            PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
             {
                 string value = "\u0130";
                 Assert.Equal(19, s.LastIndexOf(value));
@@ -1860,6 +1998,7 @@ namespace System.Tests
         }
 
         [Theory]
+        [ActiveIssue("dotnet/coreclr#2051", Xunit.PlatformID.AnyUnix)]
         [InlineData(StringComparison.CurrentCulture)]
         [InlineData(StringComparison.CurrentCultureIgnoreCase)]
         [InlineData(StringComparison.Ordinal)]
@@ -1966,21 +2105,21 @@ namespace System.Tests
         [Fact]
         public static void ToLower_TurkishI()
         {
-            PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
             {
                 Assert.True("H\u0049 World".ToLower().Equals("h\u0131 world", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToLower().Equals("h\u0069 world", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToLower().Equals("h\u0131 world", StringComparison.Ordinal));
             });
 
-            PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
             {
                 Assert.True("H\u0049 World".ToLower().Equals("h\u0069 world", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToLower().Equals("h\u0069 world", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToLower().Equals("h\u0131 world", StringComparison.Ordinal));
             });
 
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 Assert.True("H\u0049 World".ToLower().Equals("h\u0069 world", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToLower().Equals("h\u0130 world", StringComparison.Ordinal));
@@ -2017,21 +2156,21 @@ namespace System.Tests
         [Fact]
         public static void ToUpper_TurkishI()
         {
-            PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("tr-TR"), () =>
             {
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
             });
 
-            PerformActionWithCulture(new CultureInfo("en-US"), () =>
+            Helpers.PerformActionWithCulture(new CultureInfo("en-US"), () =>
             {
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0131 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
             });
 
-            PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
+            Helpers.PerformActionWithCulture(CultureInfo.InvariantCulture, () =>
             {
                 Assert.True("H\u0069 World".ToUpper().Equals("H\u0049 WORLD", StringComparison.Ordinal));
                 Assert.True("H\u0130 World".ToUpper().Equals("H\u0130 WORLD", StringComparison.Ordinal));
@@ -2160,20 +2299,6 @@ namespace System.Tests
                         yield return new object[] { source, source.Substring(i, subLen), i, comparison };
                     }
                 }
-            }
-        }
-
-        private static void PerformActionWithCulture(CultureInfo culture, Action test)
-        {
-            CultureInfo originalCulture = CultureInfo.CurrentCulture;
-            try
-            {
-                CultureInfo.CurrentCulture = culture;
-                test();
-            }
-            finally
-            {
-                CultureInfo.CurrentCulture = originalCulture;
             }
         }
 

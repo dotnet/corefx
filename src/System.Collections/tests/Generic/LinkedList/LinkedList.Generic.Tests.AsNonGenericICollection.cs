@@ -9,7 +9,8 @@ namespace System.Collections.Tests
 {
     public class LinkedList_ICollection_NonGeneric_Tests : ICollection_NonGeneric_Tests
     {
-        protected override bool ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowsArgumentException { get { return true; } }
+        protected override Type ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowType => typeof(ArgumentException);
+
         protected override void AddToCollection(ICollection collection, int numberOfItemsToAdd)
         {
             int seed = numberOfItemsToAdd * 34;
@@ -22,7 +23,7 @@ namespace System.Collections.Tests
             return new LinkedList<string>();
         }
 
-        protected override bool Enumerator_Current_UndefinedOperation_Throws { get { return true; } }
+        protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
 
         /// <summary>
         /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
@@ -31,17 +32,20 @@ namespace System.Collections.Tests
         {
             get
             {
-                yield return (IEnumerable enumerable) => {
+                yield return (IEnumerable enumerable) =>
+                {
                     LinkedList<string> casted = ((LinkedList<string>)enumerable);
                     casted.AddFirst(CreateT(4531));
                     return true;
                 };
-                yield return (IEnumerable enumerable) => {
+                yield return (IEnumerable enumerable) =>
+                {
                     LinkedList<string> casted = ((LinkedList<string>)enumerable);
                     casted.AddLast(CreateT(4531));
                     return true;
                 };
-                yield return (IEnumerable enumerable) => {
+                yield return (IEnumerable enumerable) =>
+                {
                     LinkedList<string> casted = ((LinkedList<string>)enumerable);
                     if (casted.Count > 0)
                     {
@@ -50,7 +54,8 @@ namespace System.Collections.Tests
                     }
                     return false;
                 };
-                yield return (IEnumerable enumerable) => {
+                yield return (IEnumerable enumerable) =>
+                {
                     LinkedList<string> casted = ((LinkedList<string>)enumerable);
                     if (casted.Count > 0)
                     {
@@ -59,7 +64,8 @@ namespace System.Collections.Tests
                     }
                     return false;
                 };
-                yield return (IEnumerable enumerable) => {
+                yield return (IEnumerable enumerable) =>
+                {
                     LinkedList<string> casted = ((LinkedList<string>)enumerable);
                     if (casted.Count > 0)
                     {

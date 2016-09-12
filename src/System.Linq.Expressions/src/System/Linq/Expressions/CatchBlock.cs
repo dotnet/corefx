@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 
@@ -158,15 +157,28 @@ namespace System.Linq.Expressions
         {
             ContractUtils.RequiresNotNull(type, nameof(type));
             ContractUtils.Requires(variable == null || TypeUtils.AreEquivalent(variable.Type, type), nameof(variable));
-            if (variable != null && variable.IsByRef)
+            if (variable == null)
             {
-                throw Error.VariableMustNotBeByRef(variable, variable.Type);
+                TypeUtils.ValidateType(type, nameof(type));
+                if (type.IsByRef)
+                {
+                    throw Error.TypeMustNotBeByRef(nameof(type));
+                }
+
+                if (type.IsPointer)
+                {
+                    throw Error.TypeMustNotBePointer(nameof(type));
+                }
+            }
+            else if (variable.IsByRef)
+            {
+                throw Error.VariableMustNotBeByRef(variable, variable.Type, nameof(variable));
             }
             RequiresCanRead(body, nameof(body));
             if (filter != null)
             {
                 RequiresCanRead(filter, nameof(filter));
-                if (filter.Type != typeof(bool)) throw Error.ArgumentMustBeBoolean();
+                if (filter.Type != typeof(bool)) throw Error.ArgumentMustBeBoolean(nameof(filter));
             }
 
             return new CatchBlock(type, variable, body, filter);

@@ -17,6 +17,18 @@
   <Target Name="GenerateTestProjectJson" />
   <Target Name="GenerateAllTestProjectJsons" />
 
+  <Target Name="UndefineTestTFM" BeforeTargets="AssignProjectConfiguration">
+    <ItemGroup>
+      <ProjectReference>
+        <!-- 
+        Always undefine TestTFM and FilterToTestTFM for all project reference as not needed for compilation and
+        avoid bin clash tool to fail
+        -->
+        <UndefineProperties>%(ProjectReference.UndefineProperties);TestTFM;FilterToTestTFM</UndefineProperties>
+      </ProjectReference>
+    </ItemGroup>
+  </Target>
+
   <Import Project="$(ToolsDir)/Build.Common.targets" Condition="Exists('$(ToolsDir)/Build.Common.targets')" />
 
   <!-- permit a wrapping build system to contribute targets to this build -->
@@ -33,4 +45,22 @@
     <!-- We set this property to avoid MSBuild errors regarding not setting TargetFrameworkProfile (see above line) -->
     <PortableNuGetMode>true</PortableNuGetMode>
   </PropertyGroup>
+
+  <!--
+    add the test-runtime project.json to the list of supplemental test data so it will get included
+    in the test archive; the stress test build system depends on it when building test mixes.
+  -->
+  <ItemGroup Condition="'$(IsTestProject)'=='true'">
+    <SupplementalTestData Include="$(SourceDir)Common/test-runtime/project.json">
+      <DestinationDir>test-runtime/</DestinationDir>
+    </SupplementalTestData>
+  </ItemGroup>
+
+  <Target Name="ProducesPackageId" 
+          Returns="@(PackageIds)">
+    <ItemGroup>
+      <PackageIds Include="$(Id)" />
+    </ItemGroup>
+  </Target>
+
 </Project>

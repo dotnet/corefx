@@ -2,24 +2,225 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using Xunit;
 
 namespace System.Security.Cryptography.EcDsa.Tests
 {
-    public partial class ECDsaTests
+    public class ECDsaTests : ECDsaTestsBase
     {
-        public static IEnumerable<object[]> AllImplementations()
+        [Fact]
+        public void KeySizeProp()
         {
-            return new[] { 
-                new ECDsa[] { ECDsaFactory.Create() },
-                new ECDsa[] { new ECDsaStub() },
-            };
+            using (ECDsa e = ECDsaFactory.Create())
+            {
+                e.KeySize = 384;
+                Assert.Equal(384, e.KeySize);
+                ECParameters p384 = e.ExportParameters(false);
+                Assert.True(p384.Curve.IsNamed);
+                p384.Validate();
+
+                e.KeySize = 521;
+                Assert.Equal(521, e.KeySize);
+                ECParameters p521 = e.ExportParameters(false);
+                Assert.True(p521.Curve.IsNamed);
+                p521.Validate();
+
+                // Ensure the key was regenerated
+                Assert.NotEqual(p384.Curve.Oid.FriendlyName, p521.Curve.Oid.FriendlyName);
+            }
+        }
+
+        [ActiveIssue(10206, Xunit.PlatformID.AnyUnix)]
+        [Theory, MemberData(nameof(TestNewCurves))]
+        public void TestRegenKeyExplicit(CurveDef curveDef)
+        {
+            ECParameters param, param2;
+            ECDsa ec, newEc;
+
+            using (ec = ECDsaFactory.Create(curveDef.Curve))
+            {
+                param = ec.ExportExplicitParameters(true);
+                Assert.NotEqual(null, param.D);
+                using (newEc = ECDsaFactory.Create())
+                {
+                    newEc.ImportParameters(param);
+
+                    // The curve name is not flowed on explicit export\import (by design) so this excercises logic
+                    // that regenerates based on current curve values
+                    newEc.GenerateKey(param.Curve);
+                    param2 = newEc.ExportExplicitParameters(true);
+
+                    // Only curve should match
+                    ComparePrivateKey(param, param2, false);
+                    ComparePublicKey(param.Q, param2.Q, false);
+                    CompareCurve(param.Curve, param2.Curve);
+
+                    // Specify same curve name
+                    newEc.GenerateKey(curveDef.Curve);
+                    Assert.Equal(curveDef.KeySize, newEc.KeySize);
+                    param2 = newEc.ExportExplicitParameters(true);
+
+                    // Only curve should match
+                    ComparePrivateKey(param, param2, false);
+                    ComparePublicKey(param.Q, param2.Q, false);
+                    CompareCurve(param.Curve, param2.Curve);
+
+                    // Specify different curve than current
+                    if (param.Curve.IsPrime)
+                    {
+                        if (curveDef.Curve.Oid.FriendlyName != ECCurve.NamedCurves.nistP256.Oid.FriendlyName)
+                        {
+                            // Specify different curve (nistP256) by explicit value
+                            newEc.GenerateKey(ECCurve.NamedCurves.nistP256);
+                            Assert.Equal(256, newEc.KeySize);
+                            param2 = newEc.ExportExplicitParameters(true);
+                            // Keys should should not match
+                            ComparePrivateKey(param, param2, false);
+                            ComparePublicKey(param.Q, param2.Q, false);
+                            // P,X,Y (and others) should not match
+                            Assert.True(param2.Curve.IsPrime);
+                            Assert.NotEqual(param.Curve.Prime, param2.Curve.Prime);
+                            Assert.NotEqual(param.Curve.G.X, param2.Curve.G.X);
+                            Assert.NotEqual(param.Curve.G.Y, param2.Curve.G.Y);
+
+                            // Reset back to original
+                            newEc.GenerateKey(param.Curve);
+                            Assert.Equal(curveDef.KeySize, newEc.KeySize);
+                            ECParameters copyOfParam1 = newEc.ExportExplicitParameters(true);
+                            // Only curve should match
+                            ComparePrivateKey(param, copyOfParam1, false);
+                            ComparePublicKey(param.Q, copyOfParam1.Q, false);
+                            CompareCurve(param.Curve, copyOfParam1.Curve);
+
+                            // Set back to nistP256
+                            newEc.GenerateKey(param2.Curve);
+                            Assert.Equal(256, newEc.KeySize);
+                            param2 = newEc.ExportExplicitParameters(true);
+                            // Keys should should not match
+                            ComparePrivateKey(param, param2, false);
+                            ComparePublicKey(param.Q, param2.Q, false);
+                            // P,X,Y (and others) should not match
+                            Assert.True(param2.Curve.IsPrime);
+                            Assert.NotEqual(param.Curve.Prime, param2.Curve.Prime);
+                            Assert.NotEqual(param.Curve.G.X, param2.Curve.G.X);
+                            Assert.NotEqual(param.Curve.G.Y, param2.Curve.G.Y);
+                        }
+                    }
+                    else if (param.Curve.IsCharacteristic2)
+                    {
+                        if (curveDef.Curve.Oid.Value != ECDSA_Sect193r1_OID_VALUE)
+                        {
+                            if (ECDsaFactory.IsCurveValid(new Oid(ECDSA_Sect193r1_OID_VALUE)))
+                            {
+                                // Specify different curve by name
+                                newEc.GenerateKey(ECCurve.CreateFromValue(ECDSA_Sect193r1_OID_VALUE));
+                                Assert.Equal(193, newEc.KeySize);
+                                param2 = newEc.ExportExplicitParameters(true);
+                                // Keys should should not match
+                                ComparePrivateKey(param, param2, false);
+                                ComparePublicKey(param.Q, param2.Q, false);
+                                // Polynomial,X,Y (and others) should not match
+                                Assert.True(param2.Curve.IsCharacteristic2);
+                                Assert.NotEqual(param.Curve.Polynomial, param2.Curve.Polynomial);
+                                Assert.NotEqual(param.Curve.G.X, param2.Curve.G.X);
+                                Assert.NotEqual(param.Curve.G.Y, param2.Curve.G.Y);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        [ActiveIssue(10206, Xunit.PlatformID.AnyUnix)]
+        [Theory, MemberData(nameof(TestCurves))]
+        public void TestRegenKeyNamed(CurveDef curveDef)
+        {
+            ECParameters param, param2;
+            ECDsa ec;
+
+            using (ec = ECDsaFactory.Create(curveDef.Curve))
+            {
+                param = ec.ExportParameters(true);
+                Assert.NotEqual(param.D, null);
+                param.Validate();
+
+                ec.GenerateKey(param.Curve);
+                param2 = ec.ExportParameters(true);
+                param2.Validate();
+
+                // Only curve should match
+                ComparePrivateKey(param, param2, false);
+                ComparePublicKey(param.Q, param2.Q, false);
+                CompareCurve(param.Curve, param2.Curve);
+            }
+        }
+
+        [ActiveIssue(10206, Xunit.PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(ECExplicitCurvesSupported))]
+        public void TestRegenKeyNistP256()
+        {
+            ECParameters param, param2;
+            ECDsa ec;
+
+            using (ec = ECDsaFactory.Create(256))
+            {
+                param = ec.ExportExplicitParameters(true);
+                Assert.NotEqual(param.D, null);
+
+                ec.GenerateKey(param.Curve);
+                param2 = ec.ExportExplicitParameters(true);
+
+                // Only curve should match
+                ComparePrivateKey(param, param2, false);
+                ComparePublicKey(param.Q, param2.Q, false);
+                CompareCurve(param.Curve, param2.Curve);
+            }
+        }
+
+        [Theory, MemberData(nameof(TestCurves))]
+        public void TestChangeFromNamedCurveToKeySize(CurveDef curveDef)
+        {
+            using (ECDsa ec = ECDsaFactory.Create(curveDef.Curve))
+            {
+                ECParameters param = ec.ExportParameters(false);
+
+                // Avoid comparing against same key as in curveDef
+                if (ec.KeySize != 384 && ec.KeySize != 521)
+                {
+                    ec.KeySize = 384;
+                    ECParameters param384 = ec.ExportParameters(false);
+                    Assert.NotEqual(param.Curve.Oid.FriendlyName, param384.Curve.Oid.FriendlyName);
+                    Assert.Equal(384, ec.KeySize);
+
+                    ec.KeySize = 521;
+                    ECParameters param521 = ec.ExportParameters(false);
+                    Assert.NotEqual(param384.Curve.Oid.FriendlyName, param521.Curve.Oid.FriendlyName);
+                    Assert.Equal(521, ec.KeySize);
+                }
+            }
+        }
+
+        [ConditionalFact(nameof(ECExplicitCurvesSupported))]
+        public void TestPositive256WithExplicitParameters()
+        {
+            using (ECDsa ecdsa = ECDsaFactory.Create())
+            {
+                ecdsa.ImportParameters(ECDsaTestData.GetNistP256ExplicitTestData());
+                Verify256(ecdsa, true);
+            }
+        }
+
+        [Fact]
+        public void TestNegative256WithRandomKey()
+        {
+            using (ECDsa ecdsa = ECDsaFactory.Create(ECCurve.NamedCurves.nistP256))
+            {
+                Verify256(ecdsa, false); // will not match because of randomness
+            }
         }
 
         [Theory, MemberData(nameof(AllImplementations))]
@@ -192,7 +393,15 @@ namespace System.Security.Cryptography.EcDsa.Tests
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
+        public static IEnumerable<object[]> AllImplementations()
+        {
+            return new[] {
+                new ECDsa[] { ECDsaFactory.Create() },
+                new ECDsa[] { new ECDsaStub() },
+            };
+        }
+
         public static IEnumerable<object[]> RealImplementations()
         {
             return new[] { 

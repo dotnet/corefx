@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Xunit;
 
 namespace System.Collections.Tests
@@ -27,18 +27,12 @@ namespace System.Collections.Tests
         /// The EqualityComparer that can be used in the overriding class when creating test enumerables
         /// or test collections. Default if not overridden is the default comparator.
         /// </summary>
-        protected virtual IEqualityComparer<T> GetIEqualityComparer()
-        {
-            return EqualityComparer<T>.Default;
-        }
+        protected virtual IEqualityComparer<T> GetIEqualityComparer() => EqualityComparer<T>.Default;
 
         /// <summary>
         /// The Comparer that can be used in the overriding class when creating test enumerables
         /// or test collections. Default if not overridden is the default comparator.
-        protected virtual IComparer<T> GetIComparer()
-        {
-            return Comparer<T>.Default;
-        }
+        protected virtual IComparer<T> GetIComparer() => Comparer<T>.Default;
 
         /// <summary>
         /// MemberData to be passed to tests that take an IEnumerable{T}. This method returns every permutation of
@@ -230,7 +224,7 @@ namespace System.Collections.Tests
                 for (int i = 0; i < numberOfMatchingElements; i++)
                     set.Add(match[i]);
             }
-            
+
             // Add elements to reach the desired count
             while (set.Count < count)
             {

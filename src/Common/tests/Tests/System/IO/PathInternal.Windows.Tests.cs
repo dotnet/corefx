@@ -10,6 +10,22 @@ using Xunit;
 public class PathInternal_Windows_Tests
 {
     [Theory
+        InlineData(@"\\?\", false)
+        InlineData(@"\\?\?", true)
+        InlineData(@"//?/", false)
+        InlineData(@"//?/*", true)
+        InlineData(@"\\.\>", true)
+        InlineData(@"C:\", false)
+        InlineData(@"C:\<", true)
+        InlineData("\"MyFile\"", true)
+        ]
+    [PlatformSpecific(PlatformID.Windows)]
+    public void HasWildcardCharacters(string path, bool expected)
+    {
+        Assert.Equal(expected, PathInternal.HasWildCardCharacters(path));
+    }
+
+    [Theory
         InlineData(PathInternal.ExtendedPathPrefix, PathInternal.ExtendedPathPrefix)
         InlineData(@"Foo", @"Foo")
         InlineData(@"C:\Foo", @"\\?\C:\Foo")
@@ -160,5 +176,20 @@ public class PathInternal_Windows_Tests
         Assert.Equal(expected, result);
         if (string.Equals(path, expected, StringComparison.Ordinal))
             Assert.Same(path, result);
+    }
+    
+    [Theory]
+    [InlineData(@"\", 1)]
+    [InlineData("", 0)]
+    [InlineData(":", 1)]
+    [InlineData(";", 0)]
+    [InlineData("/", 1)]
+    [InlineData(@"Foo\/\/\", 8)]
+    [InlineData("Foo:Bar", 4)]
+    [InlineData(@"C:\Users\Foobar\", 16)]
+    [PlatformSpecific(PlatformID.Windows)]
+    public void FindFileNameIndexTests(string path, int expected)
+    {
+        Assert.Equal(expected, PathInternal.FindFileNameIndex(path));
     }
 }

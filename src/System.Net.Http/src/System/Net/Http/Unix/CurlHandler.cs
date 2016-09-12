@@ -101,6 +101,7 @@ namespace System.Net.Http
         private const int MaxRequestBufferSize = 16384; // Default used by libcurl
         private const string NoTransferEncoding = HttpKnownHeaderNames.TransferEncoding + ":";
         private const string NoContentType = HttpKnownHeaderNames.ContentType + ":";
+        private const string NoExpect = HttpKnownHeaderNames.Expect + ":";
         private const int CurlAge = 5;
         private const int MinCurlAge = 3;
 
@@ -135,7 +136,7 @@ namespace System.Net.Http
         private IWebProxy _proxy = null;
         private ICredentials _serverCredentials = null;
         private bool _useProxy = HttpHandlerDefaults.DefaultUseProxy;
-        private ICredentials _defaultProxyCredentials = CredentialCache.DefaultCredentials;
+        private ICredentials _defaultProxyCredentials = null;
         private DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
         private bool _preAuthenticate = HttpHandlerDefaults.DefaultPreAuthenticate;
         private CredentialCache _credentialCache = null; // protected by LockObject
@@ -150,7 +151,8 @@ namespace System.Net.Http
         private X509Certificate2Collection _clientCertificates;
         private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> _serverCertificateValidationCallback;
         private bool _checkCertificateRevocationList;
-        private SslProtocols _sslProtocols = SecurityProtocol.DefaultSecurityProtocols;
+        private SslProtocols _sslProtocols = SslProtocols.None; // use default
+        private IDictionary<String, Object> _properties; // Only create dictionary when required.
 
         private object LockObject { get { return _agent; } }
 
@@ -236,6 +238,12 @@ namespace System.Net.Http
             get { return _clientCertificateOption; }
             set
             {
+                if (value != ClientCertificateOption.Manual &&
+                    value != ClientCertificateOption.Automatic)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+
                 CheckDisposedOrStarted();
                 _clientCertificateOption = value;
             }
@@ -268,11 +276,13 @@ namespace System.Net.Http
             get { return _sslProtocols; }
             set
             {
-                SecurityProtocol.ThrowOnNotAllowed(value, allowNone: false);
+                SecurityProtocol.ThrowOnNotAllowed(value, allowNone: true);
                 CheckDisposedOrStarted();
                 _sslProtocols = value;
             }
         }
+
+        private SslProtocols ActualSslProtocols => this.SslProtocols != SslProtocols.None ? this.SslProtocols : SecurityProtocol.DefaultSecurityProtocols;
 
         internal bool SupportsAutomaticDecompression => s_supportsAutomaticDecompression;
 
@@ -317,21 +327,6 @@ namespace System.Net.Http
             {
                 CheckDisposedOrStarted();
                 _cookieContainer = value;
-            }
-        }
-
-        public TimeSpan ConnectTimeout
-        {
-            get { return _connectTimeout; }
-            set
-            {
-                if (value != Timeout.InfiniteTimeSpan && (value <= TimeSpan.Zero || value > s_maxTimeout))
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-
-                CheckDisposedOrStarted();
-                _connectTimeout = value;
             }
         }
 
@@ -401,6 +396,19 @@ namespace System.Net.Http
             get { return false; }
             set { }
         }
+
+        public IDictionary<string, object> Properties
+        {
+            get
+            {
+                if (_properties == null)
+                {
+                    _properties = new Dictionary<String, object>();
+                }
+
+                return _properties;
+            }
+        }
         #endregion
 
         protected override void Dispose(bool disposing)
@@ -454,7 +462,6 @@ namespace System.Net.Http
                 return Task.FromCanceled<HttpResponseMessage>(cancellationToken);
             }
 
-            EventSourceTrace("{0}", request);
             Guid loggingRequestId = s_diagnosticListener.LogHttpRequest(request);
 
             // Create the easy request.  This associates the easy request with this handler and configures
@@ -462,11 +469,12 @@ namespace System.Net.Http
             var easy = new EasyRequest(this, request, cancellationToken);
             try
             {
+                EventSourceTrace("{0}", request, easy: easy, agent: _agent);
                 _agent.Queue(new MultiAgent.IncomingRequest { Easy = easy, Type = MultiAgent.IncomingRequestType.New });
             }
             catch (Exception exc)
             {
-                easy.FailRequestAndCleanup(exc);
+                easy.CleanupAndFailRequest(exc);
             }
 
             s_diagnosticListener.LogHttpResponse(easy.Task, loggingRequestId);
@@ -554,14 +562,15 @@ namespace System.Net.Http
 
             try
             {
-                _cookieContainer.SetCookies(state._targetUri, cookieHeader);
+                _cookieContainer.SetCookies(state._requestMessage.RequestUri, cookieHeader);
                 state.SetCookieOption(state._requestMessage.RequestUri);
             }
             catch (CookieException e)
             {
                 EventSourceTrace(
                     "Malformed cookie parsing failed: {0}, server: {1}, cookie: {2}", 
-                    e.Message, state._requestMessage.RequestUri, cookieHeader);
+                    e.Message, state._requestMessage.RequestUri, cookieHeader,
+                    easy: state);
             }
         }
 
@@ -628,6 +637,9 @@ namespace System.Net.Http
 
                     case CURLcode.CURLE_OUT_OF_MEMORY:
                         throw new OutOfMemoryException(msg);
+
+                    case CURLcode.CURLE_SEND_FAIL_REWIND:
+                        throw new InvalidOperationException(msg);
 
                     default:
                         throw new CurlException((int)error, msg);
@@ -730,50 +742,6 @@ namespace System.Net.Http
             return new IOException(
                 isRead ? SR.net_http_io_read : SR.net_http_io_write,
                 error is HttpRequestException && error.InnerException != null ? error.InnerException : error);
-        }
-
-        private static void HandleRedirectLocationHeader(EasyRequest state, string locationValue)
-        {
-            Debug.Assert(state._isRedirect);
-            Debug.Assert(state._handler.AutomaticRedirection);
-
-            string location = locationValue.Trim();
-            //only for absolute redirects
-            Uri forwardUri;
-            if (Uri.TryCreate(location, UriKind.RelativeOrAbsolute, out forwardUri) && forwardUri.IsAbsoluteUri)
-            {
-                // Just as with WinHttpHandler, for security reasons, we drop the server credential if it is 
-                // anything other than a CredentialCache. We allow credentials in a CredentialCache since they 
-                // are specifically tied to URIs.
-                var creds = state._handler.Credentials as CredentialCache;
-                KeyValuePair<NetworkCredential, CURLAUTH> ncAndScheme = GetCredentials(forwardUri, creds, s_orderedAuthTypes);
-                if (ncAndScheme.Key != null)
-                {
-                    state.SetCredentialsOptions(ncAndScheme);
-                }
-                else
-                {
-                    state.SetCurlOption(CURLoption.CURLOPT_USERNAME, IntPtr.Zero);
-                    state.SetCurlOption(CURLoption.CURLOPT_PASSWORD, IntPtr.Zero);
-                }
-
-                // reset proxy - it is possible that the proxy has different credentials for the new URI
-                state.SetProxyOptions(forwardUri);
-
-                if (state._handler._useCookie)
-                {
-                    // reset cookies.
-                    state.SetCurlOption(CURLoption.CURLOPT_COOKIE, IntPtr.Zero);
-
-                    // set cookies again
-                    state.SetCookieOption(forwardUri);
-                }
-
-                state.SetRedirectUri(forwardUri);
-            }
-
-            // set the headers again. This is a workaround for libcurl's limitation in handling headers with empty values
-            state.SetRequestHeaders();
         }
 
         private static void SetChunkedModeForSend(HttpRequestMessage request)

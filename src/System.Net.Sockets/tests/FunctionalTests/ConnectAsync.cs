@@ -26,6 +26,7 @@ namespace System.Net.Sockets.Tests
             handle.Set();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
@@ -47,12 +48,13 @@ namespace System.Net.Sockets.Tests
                 using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                 {
                     Assert.True(client.ConnectAsync(args));
-                    Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "IPv4: Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(TestSettings.PassingTestTimeout), "IPv4: Timed out while waiting for connection");
                     Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
                 }
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
@@ -74,7 +76,7 @@ namespace System.Net.Sockets.Tests
                 using (Socket client = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
                     Assert.True(client.ConnectAsync(args));
-                    Assert.True(completed.WaitOne(Configuration.PassingTestTimeout), "IPv6: Timed out while waiting for connection");
+                    Assert.True(completed.WaitOne(TestSettings.PassingTestTimeout), "IPv6: Timed out while waiting for connection");
                     Assert.Equal<SocketError>(SocketError.Success, args.SocketError);
                 }
             }

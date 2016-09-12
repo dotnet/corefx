@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection.Metadata;
+
 namespace System.Reflection.PortableExecutable
 {
     /// <summary>
@@ -9,6 +11,15 @@ namespace System.Reflection.PortableExecutable
     /// </summary>
     public struct DebugDirectoryEntry
     {
+        internal const int Size =
+            sizeof(uint) +   // Characteristics
+            sizeof(uint) +   // TimeDataStamp
+            sizeof(uint) +   // Version
+            sizeof(uint) +   // Type
+            sizeof(uint) +   // SizeOfData
+            sizeof(uint) +   // AddressOfRawData
+            sizeof(uint);    // PointerToRawData
+
         /// <summary>
         /// The time and date that the debug data was created if the PE/COFF file is not deterministic,
         /// otherwise a value based on the hash of the content. 
@@ -48,6 +59,11 @@ namespace System.Reflection.PortableExecutable
         /// The file pointer to the debug data.
         /// </summary>
         public int DataPointer { get; }
+
+        /// <summary>
+        /// True if the the entry is a <see cref="DebugDirectoryEntryType.CodeView"/> entry pointing to a Portable PDB.
+        /// </summary>
+        public bool IsPortableCodeView => MinorVersion == PortablePdbVersions.PortableCodeViewVersionMagic;
 
         public DebugDirectoryEntry(
             uint stamp,

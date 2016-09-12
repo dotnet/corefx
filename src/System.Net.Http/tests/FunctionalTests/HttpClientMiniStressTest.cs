@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -13,7 +14,7 @@ namespace System.Net.Http.Functional.Tests
 {
     public class HttpClientMiniStress
     {
-        private static bool HttpStressEnabled => Environment.GetEnvironmentVariable("HTTP_STRESS") == "1";
+        private static bool HttpStressEnabled => Configuration.Http.StressEnabled;
 
         [ConditionalTheory(nameof(HttpStressEnabled))]
         [MemberData(nameof(GetStressOptions))]
@@ -81,25 +82,28 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(5000)]
         public async Task MakeAndFaultManyRequests(int numRequests)
         {
-            await LoopbackServer.CreateClientAndServerAsync(async (handler, client, server, url) =>
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
-                client.Timeout = Timeout.InfiniteTimeSpan;
-
-                var ep = (IPEndPoint)server.LocalEndPoint;
-                Task<string>[] tasks =
-                    (from i in Enumerable.Range(0, numRequests)
-                     select client.GetStringAsync($"http://{ep.Address}:{ep.Port}"))
-                     .ToArray();
-
-                Assert.All(tasks, t => Assert.Equal(TaskStatus.WaitingForActivation, t.Status));
-
-                server.Dispose();
-
-                foreach (Task<string> task in tasks)
+                using (var client = new HttpClient())
                 {
-                    await Assert.ThrowsAnyAsync<HttpRequestException>(() => task);
+                    client.Timeout = Timeout.InfiniteTimeSpan;
+
+                    var ep = (IPEndPoint)server.LocalEndPoint;
+                    Task<string>[] tasks =
+                        (from i in Enumerable.Range(0, numRequests)
+                         select client.GetStringAsync($"http://{ep.Address}:{ep.Port}"))
+                         .ToArray();
+
+                    Assert.All(tasks, t => Assert.Equal(TaskStatus.WaitingForActivation, t.Status));
+
+                    server.Dispose();
+
+                    foreach (Task<string> task in tasks)
+                    {
+                        await Assert.ThrowsAnyAsync<HttpRequestException>(() => task);
+                    }
                 }
-            }, backlog: numRequests);
+            }, new LoopbackServer.Options { ListenBacklog = numRequests });
         }
 
         public static IEnumerable<object[]> GetStressOptions()
@@ -121,10 +125,9 @@ namespace System.Net.Http.Functional.Tests
                     while (!string.IsNullOrEmpty(reader.ReadLine())) ;
 
                     writer.Write(responseText);
-                    writer.Flush();
                     s.Shutdown(SocketShutdown.Send);
 
-                    return Task.CompletedTask;
+                    return Task.FromResult<List<string>>(null);
                 }).GetAwaiter().GetResult();
 
                 getAsync.GetAwaiter().GetResult().Dispose();
@@ -143,8 +146,9 @@ namespace System.Net.Http.Functional.Tests
                     while (!string.IsNullOrEmpty(await reader.ReadLineAsync().ConfigureAwait(false))) ;
 
                     await writer.WriteAsync(responseText).ConfigureAwait(false);
-                    await writer.FlushAsync().ConfigureAwait(false);
                     s.Shutdown(SocketShutdown.Send);
+                    
+                    return null;
                 });
 
                 (await getAsync.ConfigureAwait(false)).Dispose();
@@ -172,8 +176,9 @@ namespace System.Net.Http.Functional.Tests
                     for (int i = 0; i < numBytes; i++) Assert.NotEqual(-1, reader.Read());
 
                     await writer.WriteAsync(responseText).ConfigureAwait(false);
-                    await writer.FlushAsync().ConfigureAwait(false);
                     s.Shutdown(SocketShutdown.Send);
+                    
+                    return null;
                 });
 
                 (await postAsync.ConfigureAwait(false)).Dispose();
@@ -183,27 +188,30 @@ namespace System.Net.Http.Functional.Tests
         [ConditionalFact(nameof(HttpStressEnabled))]
         public async Task UnreadResponseMessage_Collectible()
         {
-            await LoopbackServer.CreateClientAndServerAsync(async (handler, client, server, url) =>
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
-                Func<Task<WeakReference>> getAsync = async () =>
-                    new WeakReference(await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead));
-                Task<WeakReference> wrt = getAsync();
-
-                await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                using (var client = new HttpClient())
                 {
-                    while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) ;
-                    await writer.WriteAsync(CreateResponse(new string('a', 32 * 1024)));
-                    await writer.FlushAsync();
+                    Func<Task<WeakReference>> getAsync = async () => new WeakReference(await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead));
+                    Task<WeakReference> wrt = getAsync();
 
-                    WeakReference wr = wrt.GetAwaiter().GetResult();
-                    Assert.True(SpinWait.SpinUntil(() =>
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                     {
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
-                        return !wr.IsAlive;
-                    }, 10 * 1000), "Response object should have been collected");
-                });
+                        while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) ;
+                        await writer.WriteAsync(CreateResponse(new string('a', 32 * 1024)));
+
+                        WeakReference wr = wrt.GetAwaiter().GetResult();
+                        Assert.True(SpinWait.SpinUntil(() =>
+                        {
+                            GC.Collect();
+                            GC.WaitForPendingFinalizers();
+                            GC.Collect();
+                            return !wr.IsAlive;
+                        }, 10 * 1000), "Response object should have been collected");
+                        
+                        return null;
+                    });
+                }
             });
         }
 
@@ -211,9 +219,9 @@ namespace System.Net.Http.Functional.Tests
             $"HTTP/1.1 200 OK\r\n" +
             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
             "Content-Type: text/plain\r\n" +
-            "Content-Length: {asciiBody.Length}\r\n" +
+            $"Content-Length: {asciiBody.Length}\r\n" +
             "\r\n" +
-            "{asciiBody}\r\n";
+            $"{asciiBody}\r\n";
 
         private static Task ForCountAsync(int count, int dop, Func<int, Task> bodyAsync)
         {

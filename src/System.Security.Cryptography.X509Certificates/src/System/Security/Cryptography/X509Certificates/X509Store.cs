@@ -17,7 +17,7 @@ namespace System.Security.Cryptography.X509Certificates
     public sealed class X509Store : IDisposable
     {
         public X509Store()
-            : this("MY", StoreLocation.CurrentUser)
+            : this(StoreName.My, StoreLocation.CurrentUser)
         {
         }
 
@@ -86,7 +86,7 @@ namespace System.Security.Cryptography.X509Certificates
                 X509Certificate2Collection certificates = new X509Certificate2Collection();
                 if (_storePal != null)
                 {
-                    _storePal.CopyTo(certificates);
+                    _storePal.CloneTo(certificates);
                 }
                 return certificates;
             }

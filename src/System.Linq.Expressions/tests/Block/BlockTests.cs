@@ -179,7 +179,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void EmptyBlockWrongExplicitType()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Block(typeof(int)));
+            Assert.Throws<ArgumentException>(null, () => Expression.Block(typeof(int)));
         }
 
         [Theory]
@@ -205,10 +205,23 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void EmptyScopeExplicitWrongType()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Block(
+            Assert.Throws<ArgumentException>(null, () => Expression.Block(
                 typeof(int),
                 new[] { Expression.Parameter(typeof(int), "x") },
                 new Expression[0]));
+        }
+
+        [Fact]
+        public static void ToStringTest()
+        {
+            var e1 = Expression.Block(Expression.Empty());
+            Assert.Equal("{ ... }", e1.ToString());
+
+            var e2 = Expression.Block(new[] { Expression.Parameter(typeof(int), "x") }, Expression.Empty());
+            Assert.Equal("{var x; ... }", e2.ToString());
+
+            var e3 = Expression.Block(new[] { Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y") }, Expression.Empty());
+            Assert.Equal("{var x;var y; ... }", e3.ToString());
         }
     }
 }

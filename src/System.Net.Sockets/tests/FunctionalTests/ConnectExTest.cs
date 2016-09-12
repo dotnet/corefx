@@ -25,6 +25,7 @@ namespace System.Net.Sockets.Tests
             complete.Set();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
@@ -52,7 +53,7 @@ namespace System.Net.Sockets.Tests
                 args.UserToken = complete;
 
                 Assert.True(sock.ConnectAsync(args));
-                Assert.True(complete.WaitOne(Configuration.PassingTestTimeout), "IPv4: Timed out while waiting for connection");
+                Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "IPv4: Timed out while waiting for connection");
                 Assert.True(args.SocketError == SocketError.Success);
 
                 sock.Dispose();
@@ -62,7 +63,7 @@ namespace System.Net.Sockets.Tests
                 complete.Reset();
 
                 Assert.True(sock.ConnectAsync(args));
-                Assert.True(complete.WaitOne(Configuration.PassingTestTimeout), "IPv6: Timed out while waiting for connection");
+                Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "IPv6: Timed out while waiting for connection");
                 Assert.True(args.SocketError == SocketError.Success);
             }
             finally
@@ -76,7 +77,8 @@ namespace System.Net.Sockets.Tests
 
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
-        // that used Sockets. 
+        // that used Sockets.
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void TestFinalizers()
         {

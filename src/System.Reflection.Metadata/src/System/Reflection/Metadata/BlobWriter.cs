@@ -89,7 +89,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="ArgumentOutOfRangeException">Range specified by <paramref name="start"/> and <paramref name="byteCount"/> falls outside of the bounds of the buffer content.</exception>
         public byte[] ToArray(int start, int byteCount)
         {
-            BlobUtilities.ValidateRange(Length, start, byteCount);
+            BlobUtilities.ValidateRange(Length, start, byteCount, nameof(byteCount));
 
             var result = new byte[byteCount];
             Array.Copy(_buffer, _start + start, result, 0, byteCount);
@@ -223,7 +223,7 @@ namespace System.Reflection.Metadata
                 Throw.ArgumentNull(nameof(buffer));
             }
 
-            BlobUtilities.ValidateRange(buffer.Length, start, byteCount);
+            BlobUtilities.ValidateRange(buffer.Length, start, byteCount, nameof(byteCount));
 
             // an empty array has no element pointer:
             if (buffer.Length == 0)
@@ -337,29 +337,34 @@ namespace System.Reflection.Metadata
             _buffer.WriteDecimal(start, value);
         }
 
+        public void WriteGuid(Guid value)
+        {
+            int start = Advance(BlobUtilities.SizeOfGuid);
+            _buffer.WriteGuid(start, value);
+        }
+
         public void WriteDateTime(DateTime value)
         {
             WriteInt64(value.Ticks);
         }
 
         /// <summary>
-        /// Writes a reference to a heap (heap index) or a table (row id).
+        /// Writes a reference to a heap (heap offset) or a table (row number).
         /// </summary>
-        /// <remarks>
-        /// References may be small (2B) or large (4B).
-        /// </remarks>
-        public void WriteReference(uint reference, int size)
+        /// <param name="reference">Heap offset or table row number.</param>
+        /// <param name="isSmall">True to encode the reference as 16-bit integer, false to encode as 32-bit integer.</param>
+        public void WriteReference(int reference, bool isSmall)
         {
-            Debug.Assert(size == 2 || size == 4);
+            // This code is a very hot path, hence we don't check if the reference actually fits 2B.
 
-            if (size == 2)
+            if (isSmall)
             {
-                Debug.Assert((ushort)reference == reference);
+                Debug.Assert(unchecked((ushort)reference) == reference);
                 WriteUInt16((ushort)reference);
             }
             else
             {
-                WriteUInt32(reference);
+                WriteInt32(reference);
             }
         }
 
@@ -403,10 +408,13 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
-        /// Writes string in SerString format (see ECMA-335-II 23.3 Custom attributes): 
+        /// Writes string in SerString format (see ECMA-335-II 23.3 Custom attributes).
+        /// </summary>
+        /// <remarks>
         /// The string is UTF8 encoded and prefixed by the its size in bytes. 
         /// Null string is represented as a single byte 0xFF.
-        /// </summary>
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
         public void WriteSerializedString(string str)
         {
             if (str == null)
@@ -416,6 +424,29 @@ namespace System.Reflection.Metadata
             }
 
             WriteUTF8(str, 0, str.Length, allowUnpairedSurrogates: true, prependSize: true);
+        }
+
+        /// <summary>
+        /// Writes string in User String (#US) heap format (see ECMA-335-II 24.2.4 #US and #Blob heaps):
+        /// </summary>
+        /// <remarks>
+        /// The string is UTF16 encoded and prefixed by the its size in bytes.
+        /// 
+        /// This final byte holds the value 1 if and only if any UTF16 character within the string has any bit set in its top byte,
+        /// or its low byte is any of the following: 0x01–0x08, 0x0E–0x1F, 0x27, 0x2D, 0x7F. Otherwise, it holds 0. 
+        /// The 1 signifies Unicode characters that require handling beyond that normally provided for 8-bit encoding sets. 
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
+        public void WriteUserString(string value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            WriteCompressedInteger(BlobUtilities.GetUserStringByteLength(value.Length));
+            WriteUTF16(value);
+            WriteByte(BlobUtilities.GetUserStringTrailingByte(value));
         }
 
         /// <summary>
@@ -480,10 +511,10 @@ namespace System.Reflection.Metadata
         /// 
         /// Otherwise, encode as a 4-byte integer, with bit 31 set, bit 30 set, bit 29 clear (value held in bits 28 through 0).
         /// </remarks>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> can't be represented as a compressed signed integer.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> can't be represented as a compressed unsigned integer.</exception>
         public void WriteCompressedInteger(int value)
         {
-            BlobWriterImpl.WriteCompressedInteger(ref this, value);
+            BlobWriterImpl.WriteCompressedInteger(ref this, unchecked((uint)value));
         }
 
         /// <summary>

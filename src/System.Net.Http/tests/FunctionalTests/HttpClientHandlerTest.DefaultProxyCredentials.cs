@@ -13,11 +13,11 @@ namespace System.Net.Http.Functional.Tests
     public class HttpClientHandler_DefaultProxyCredentials_Test : RemoteExecutorTestBase
     {
         [Fact]
-        public void Default_CredentialCacheDefaultCredentials_Same()
+        public void Default_Get_Null()
         {
             using (var handler = new HttpClientHandler())
             {
-                Assert.Same(CredentialCache.DefaultCredentials, handler.DefaultProxyCredentials);
+                Assert.Null(handler.DefaultProxyCredentials);
             }
         }
 
@@ -35,6 +35,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ProxyExplicitlyProvided_DefaultCredentials_Ignored()
         {
@@ -51,7 +52,7 @@ namespace System.Net.Http.Functional.Tests
                 handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, rightCreds);
                 handler.DefaultProxyCredentials = wrongCreds;
 
-                Task<HttpResponseMessage> responseTask = client.GetAsync(HttpTestServers.RemoteEchoServer);
+                Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
                 Task<string> responseStringTask = responseTask.ContinueWith(t => t.Result.Content.ReadAsStringAsync(), TaskScheduler.Default).Unwrap();
                 Task.WaitAll(proxyTask, responseTask, responseStringTask);
 
@@ -63,9 +64,10 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [PlatformSpecific(PlatformID.AnyUnix)] // proxies set via the http_proxy environment variable are specific to Unix
-        public void ProxySetViaEnvironmentVariable_DefaultCredentialsUsed()
+        public void ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed()
         {
             int port;
             Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(out port, requireAuth: true, expectCreds: true);
@@ -86,7 +88,7 @@ namespace System.Net.Http.Functional.Tests
                     var creds = new NetworkCredential(ExpectedUsername, ExpectedPassword);
                     handler.DefaultProxyCredentials = creds;
 
-                    Task<HttpResponseMessage> responseTask = client.GetAsync(HttpTestServers.RemoteEchoServer);
+                    Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
                     Task<string> responseStringTask = responseTask.ContinueWith(t => t.Result.Content.ReadAsStringAsync(), TaskScheduler.Default).Unwrap();
                     Task.WaitAll(responseTask, responseStringTask);
 

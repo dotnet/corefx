@@ -265,16 +265,18 @@ namespace System.Linq.Expressions
 
             var index = (IndexExpression)_left;
 
-            var vars = new List<ParameterExpression>(index.Arguments.Count + 2);
-            var exprs = new List<Expression>(index.Arguments.Count + 3);
+            var vars = new List<ParameterExpression>(index.ArgumentCount + 2);
+            var exprs = new List<Expression>(index.ArgumentCount + 3);
 
             var tempObj = Expression.Variable(index.Object.Type, "tempObj");
             vars.Add(tempObj);
             exprs.Add(Expression.Assign(tempObj, index.Object));
 
-            var tempArgs = new List<Expression>(index.Arguments.Count);
-            foreach (var arg in index.Arguments)
+            var n = index.ArgumentCount;
+            var tempArgs = new List<Expression>(n);
+            for (var i = 0; i < n; i++)
             {
+                var arg = index.GetArgument(i);
                 var tempArg = Expression.Variable(arg.Type, "tempArg" + tempArgs.Count);
                 vars.Add(tempArg);
                 tempArgs.Add(tempArg);
@@ -353,7 +355,7 @@ namespace System.Linq.Expressions
             return visitor.VisitBinary(this);
         }
 
-        internal static Expression Create(ExpressionType nodeType, Expression left, Expression right, Type type, MethodInfo method, LambdaExpression conversion)
+        internal static BinaryExpression Create(ExpressionType nodeType, Expression left, Expression right, Type type, MethodInfo method, LambdaExpression conversion)
         {
             Debug.Assert(nodeType != ExpressionType.Assign);
             if (conversion != null)
@@ -623,8 +625,8 @@ namespace System.Linq.Expressions
         {
             RequiresCanWrite(left, nameof(left));
             RequiresCanRead(right, nameof(right));
-            TypeUtils.ValidateType(left.Type);
-            TypeUtils.ValidateType(right.Type);
+            TypeUtils.ValidateType(left.Type, nameof(left));
+            TypeUtils.ValidateType(right.Type, nameof(right));
             if (!TypeUtils.AreReferenceAssignable(left.Type, right.Type))
             {
                 throw Error.ExpressionTypeDoesNotMatchAssignment(right.Type, left.Type);
@@ -668,10 +670,10 @@ namespace System.Linq.Expressions
         private static BinaryExpression GetMethodBasedBinaryOperator(ExpressionType binaryType, Expression left, Expression right, MethodInfo method, bool liftToNull)
         {
             System.Diagnostics.Debug.Assert(method != null);
-            ValidateOperator(method);
+            ValidateOperator(method, nameof(method));
             ParameterInfo[] pms = method.GetParametersCached();
             if (pms.Length != 2)
-                throw Error.IncorrectNumberOfMethodCallArguments(method);
+                throw Error.IncorrectNumberOfMethodCallArguments(method, nameof(method));
             if (ParameterIsAssignable(pms[0], left.Type) && ParameterIsAssignable(pms[1], right.Type))
             {
                 ValidateParamswithOperandsOrThrow(pms[0].ParameterType, left.Type, binaryType, method.Name);
@@ -799,21 +801,21 @@ namespace System.Linq.Expressions
         }
 
 
-        private static void ValidateOperator(MethodInfo method)
+        private static void ValidateOperator(MethodInfo method, string paramName)
         {
             System.Diagnostics.Debug.Assert(method != null);
-            ValidateMethodInfo(method);
+            ValidateMethodInfo(method, nameof(method));
             if (!method.IsStatic)
-                throw Error.UserDefinedOperatorMustBeStatic(method);
+                throw Error.UserDefinedOperatorMustBeStatic(method, nameof(method));
             if (method.ReturnType == typeof(void))
-                throw Error.UserDefinedOperatorMustNotBeVoid(method);
+                throw Error.UserDefinedOperatorMustNotBeVoid(method, nameof(method));
         }
 
 
-        private static void ValidateMethodInfo(MethodInfo method)
+        private static void ValidateMethodInfo(MethodInfo method, string paramName)
         {
             if (method.ContainsGenericParameters)
-                throw method.IsGenericMethodDefinition ? Error.MethodIsGeneric(method) : Error.MethodContainsGenericParameters(method);
+                throw method.IsGenericMethodDefinition ? Error.MethodIsGeneric(method, paramName) : Error.MethodContainsGenericParameters(method, paramName);
         }
 
 
@@ -849,10 +851,10 @@ namespace System.Linq.Expressions
 
         private static void ValidateUserDefinedConditionalLogicOperator(ExpressionType nodeType, Type left, Type right, MethodInfo method)
         {
-            ValidateOperator(method);
+            ValidateOperator(method, nameof(method));
             ParameterInfo[] pms = method.GetParametersCached();
             if (pms.Length != 2)
-                throw Error.IncorrectNumberOfMethodCallArguments(method);
+                throw Error.IncorrectNumberOfMethodCallArguments(method, nameof(method));
             if (!ParameterIsAssignable(pms[0], left))
             {
                 if (!(TypeUtils.IsNullableType(left) && ParameterIsAssignable(pms[0], TypeUtils.GetNonNullableType(left))))
@@ -883,15 +885,15 @@ namespace System.Linq.Expressions
             {
                 throw Error.LogicalOperatorMustHaveBooleanOperators(nodeType, method.Name);
             }
-            VerifyOpTrueFalse(nodeType, left, opFalse);
-            VerifyOpTrueFalse(nodeType, left, opTrue);
+            VerifyOpTrueFalse(nodeType, left, opFalse, nameof(method));
+            VerifyOpTrueFalse(nodeType, left, opTrue, nameof(method));
         }
 
-        private static void VerifyOpTrueFalse(ExpressionType nodeType, Type left, MethodInfo opTrue)
+        private static void VerifyOpTrueFalse(ExpressionType nodeType, Type left, MethodInfo opTrue, string paramName)
         {
             ParameterInfo[] pmsOpTrue = opTrue.GetParametersCached();
             if (pmsOpTrue.Length != 1)
-                throw Error.IncorrectNumberOfMethodCallArguments(opTrue);
+                throw Error.IncorrectNumberOfMethodCallArguments(opTrue, paramName);
 
             if (!ParameterIsAssignable(pmsOpTrue[0], left))
             {
@@ -1029,7 +1031,7 @@ namespace System.Linq.Expressions
                 case ExpressionType.MultiplyAssignChecked:
                     return MultiplyAssignChecked(left, right, method, conversion);
                 default:
-                    throw Error.UnhandledBinary(binaryType);
+                    throw Error.UnhandledBinary(binaryType, nameof(binaryType));
             }
         }
 
@@ -1492,13 +1494,13 @@ namespace System.Linq.Expressions
             MethodInfo method = delegateType.GetMethod("Invoke");
             if (method.ReturnType == typeof(void))
             {
-                throw Error.UserDefinedOperatorMustNotBeVoid(conversion);
+                throw Error.UserDefinedOperatorMustNotBeVoid(conversion, nameof(conversion));
             }
             ParameterInfo[] pms = method.GetParametersCached();
             Debug.Assert(pms.Length == conversion.Parameters.Count);
             if (pms.Length != 1)
             {
-                throw Error.IncorrectNumberOfMethodCallArguments(conversion);
+                throw Error.IncorrectNumberOfMethodCallArguments(conversion, nameof(conversion));
             }
             // The return type must match exactly.
             // We could weaken this restriction and
@@ -1656,7 +1658,7 @@ namespace System.Linq.Expressions
             Debug.Assert(pms.Length == conversion.Parameters.Count);
             if (pms.Length != 1)
             {
-                throw Error.IncorrectNumberOfMethodCallArguments(conversion);
+                throw Error.IncorrectNumberOfMethodCallArguments(conversion, nameof(conversion));
             }
             if (!TypeUtils.AreEquivalent(mi.ReturnType, left.Type))
             {
@@ -2954,13 +2956,13 @@ namespace System.Linq.Expressions
             RequiresCanRead(index, nameof(index));
             if (index.Type != typeof(int))
             {
-                throw Error.ArgumentMustBeArrayIndexType();
+                throw Error.ArgumentMustBeArrayIndexType(nameof(index));
             }
 
             Type arrayType = array.Type;
             if (!arrayType.IsArray)
             {
-                throw Error.ArgumentMustBeArray();
+                throw Error.ArgumentMustBeArray(nameof(array));
             }
             if (arrayType.GetArrayRank() != 1)
             {

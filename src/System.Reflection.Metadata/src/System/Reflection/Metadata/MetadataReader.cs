@@ -7,8 +7,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection.Internal;
 using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Reflection.Metadata
@@ -18,15 +16,15 @@ namespace System.Reflection.Metadata
     /// </summary>
     public sealed partial class MetadataReader
     {
-        private readonly MetadataReaderOptions _options;
-        internal readonly MetadataStringDecoder utf8Decoder;
-        internal readonly NamespaceCache namespaceCache;
-        private Dictionary<TypeDefinitionHandle, ImmutableArray<TypeDefinitionHandle>> _lazyNestedTypesMap;
+        internal readonly NamespaceCache NamespaceCache;
         internal readonly MemoryBlock Block;
 
         // A row id of "mscorlib" AssemblyRef in a WinMD file (each WinMD file must have such a reference).
         internal readonly int WinMDMscorlibRef;
 
+        private readonly MetadataReaderOptions _options;
+        private Dictionary<TypeDefinitionHandle, ImmutableArray<TypeDefinitionHandle>> _lazyNestedTypesMap;
+        
         #region Constructors
 
         /// <summary>
@@ -97,7 +95,7 @@ namespace System.Reflection.Metadata
             this.Block = new MemoryBlock(metadata, length);
 
             _options = options;
-            this.utf8Decoder = utf8Decoder;
+            this.UTF8Decoder = utf8Decoder;
 
             var headerReader = new BlobReader(this.Block);
             this.ReadMetadataHeader(ref headerReader, out _versionString);
@@ -140,7 +138,7 @@ namespace System.Reflection.Metadata
             }
 
             //  read 
-            this.namespaceCache = new NamespaceCache(this);
+            this.NamespaceCache = new NamespaceCache(this);
 
             if (_metadataKind != MetadataKind.Ecma335)
             {
@@ -157,10 +155,10 @@ namespace System.Reflection.Metadata
         private readonly MetadataStreamKind _metadataStreamKind;
         private readonly DebugMetadataHeader _debugMetadataHeader;
 
-        internal StringStreamReader StringStream;
-        internal BlobStreamReader BlobStream;
-        internal GuidStreamReader GuidStream;
-        internal UserStringStreamReader UserStringStream;
+        internal StringHeap StringHeap;
+        internal BlobHeap BlobHeap;
+        internal GuidHeap GuidHeap;
+        internal UserStringHeap UserStringHeap;
 
         /// <summary>
         /// True if the metadata stream has minimal delta format. Used for EnC.
@@ -207,7 +205,7 @@ namespace System.Reflection.Metadata
             }
 
             int numberOfBytesRead;
-            versionString = memReader.GetMemoryBlockAt(0, versionStringSize).PeekUtf8NullTerminated(0, null, utf8Decoder, out numberOfBytesRead, '\0');
+            versionString = memReader.GetMemoryBlockAt(0, versionStringSize).PeekUtf8NullTerminated(0, null, UTF8Decoder, out numberOfBytesRead, '\0');
             memReader.SkipBytes(versionStringSize);
         }
 
@@ -285,7 +283,7 @@ namespace System.Reflection.Metadata
                             throw new BadImageFormatException(SR.NotEnoughSpaceForStringStream);
                         }
 
-                        this.StringStream = new StringStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
+                        this.StringHeap = new StringHeap(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
                         break;
 
                     case COR20Constants.BlobStreamName:
@@ -294,7 +292,7 @@ namespace System.Reflection.Metadata
                             throw new BadImageFormatException(SR.NotEnoughSpaceForBlobStream);
                         }
 
-                        this.BlobStream = new BlobStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
+                        this.BlobHeap = new BlobHeap(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size), _metadataKind);
                         break;
 
                     case COR20Constants.GUIDStreamName:
@@ -303,7 +301,7 @@ namespace System.Reflection.Metadata
                             throw new BadImageFormatException(SR.NotEnoughSpaceForGUIDStream);
                         }
 
-                        this.GuidStream = new GuidStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
+                        this.GuidHeap = new GuidHeap(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
                         break;
 
                     case COR20Constants.UserStringStreamName:
@@ -312,7 +310,7 @@ namespace System.Reflection.Metadata
                             throw new BadImageFormatException(SR.NotEnoughSpaceForBlobStream);
                         }
 
-                        this.UserStringStream = new UserStringStreamReader(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
+                        this.UserStringHeap = new UserStringHeap(metadataRoot.GetMemoryBlockAt((int)streamHeader.Offset, streamHeader.Size));
                         break;
 
                     case COR20Constants.CompressedMetadataTableStreamName:
@@ -464,7 +462,7 @@ namespace System.Reflection.Metadata
             // We will not be checking version values. We will continue checking that the set of 
             // present tables is within the set we understand.
 
-            ulong validTables = (ulong)TableMask.V3_0_TablesMask;
+            ulong validTables = (ulong)(TableMask.TypeSystemTables | TableMask.DebugTables);
 
             if ((presentTables & ~validTables) != 0)
             {
@@ -497,7 +495,7 @@ namespace System.Reflection.Metadata
         {
             ulong currentTableBit = 1;
 
-            var rowCounts = new int[TableIndexExtensions.Count];
+            var rowCounts = new int[MetadataTokens.TableCount];
             for (int i = 0; i < rowCounts.Length; i++)
             {
                 if ((presentTableMask & currentTableBit) != 0)
@@ -546,7 +544,7 @@ namespace System.Reflection.Metadata
             ulong externalTableMask = reader.ReadUInt64();
 
             // EnC & Ptr tables can't be referenced from standalone PDB metadata:
-            const ulong validTables = (ulong)(TableMask.V2_0_TablesMask & ~TableMask.PtrTables & ~TableMask.EnCLog & ~TableMask.EnCMap);
+            const ulong validTables = (ulong)TableMask.ValidPortablePdbExternalTables;
 
             if ((externalTableMask & ~validTables) != 0)
             {
@@ -812,7 +810,7 @@ namespace System.Reflection.Metadata
 
             bool isAllReferencedTablesSmall = true;
             ulong tablesReferencedMask = (ulong)tablesReferenced;
-            for (int tableIndex = 0; tableIndex < TableIndexExtensions.Count; tableIndex++)
+            for (int tableIndex = 0; tableIndex < MetadataTokens.TableCount; tableIndex++)
             {
                 if ((tablesReferencedMask & 1) != 0)
                 {
@@ -834,36 +832,11 @@ namespace System.Reflection.Metadata
 
         #region Helpers
 
-        // internal for testing
-        internal NamespaceCache NamespaceCache
-        {
-            get { return namespaceCache; }
-        }
-
-        internal bool UseFieldPtrTable
-        {
-            get { return this.FieldPtrTable.NumberOfRows > 0; }
-        }
-
-        internal bool UseMethodPtrTable
-        {
-            get { return this.MethodPtrTable.NumberOfRows > 0; }
-        }
-
-        internal bool UseParamPtrTable
-        {
-            get { return this.ParamPtrTable.NumberOfRows > 0; }
-        }
-
-        internal bool UseEventPtrTable
-        {
-            get { return this.EventPtrTable.NumberOfRows > 0; }
-        }
-
-        internal bool UsePropertyPtrTable
-        {
-            get { return this.PropertyPtrTable.NumberOfRows > 0; }
-        }
+        internal bool UseFieldPtrTable => FieldPtrTable.NumberOfRows > 0;
+        internal bool UseMethodPtrTable => MethodPtrTable.NumberOfRows > 0;
+        internal bool UseParamPtrTable => ParamPtrTable.NumberOfRows > 0;
+        internal bool UseEventPtrTable => EventPtrTable.NumberOfRows > 0;
+        internal bool UsePropertyPtrTable => PropertyPtrTable.NumberOfRows > 0;
 
         internal void GetFieldRange(TypeDefinitionHandle typeDef, out int firstFieldRowId, out int lastFieldRowId)
         {
@@ -1010,138 +983,71 @@ namespace System.Reflection.Metadata
 
         #region Public APIs
 
-        public MetadataReaderOptions Options
-        {
-            get { return _options; }
-        }
+        /// <summary>
+        /// Pointer to the underlying data.
+        /// </summary>
+        public unsafe byte* MetadataPointer => Block.Pointer;
 
-        public string MetadataVersion
-        {
-            get { return _versionString; }
-        }
+        /// <summary>
+        /// Length of the underlying data.
+        /// </summary>
+        public int MetadataLength => Block.Length;
+
+        /// <summary>
+        /// Options passed to the constructor.
+        /// </summary>
+        public MetadataReaderOptions Options => _options;
+
+        /// <summary>
+        /// Version string read from metadata header.
+        /// </summary>
+        public string MetadataVersion => _versionString;
 
         /// <summary>
         /// Information decoded from #Pdb stream, or null if the stream is not present.
         /// </summary>
-        public DebugMetadataHeader DebugMetadataHeader
-        {
-            get { return _debugMetadataHeader; }
-        }
+        public DebugMetadataHeader DebugMetadataHeader => _debugMetadataHeader;
 
-        public MetadataKind MetadataKind
-        {
-            get { return _metadataKind; }
-        }
+        /// <summary>
+        /// The kind of the metadata (plain ECMA335, WinMD, etc.).
+        /// </summary>
+        public MetadataKind MetadataKind => _metadataKind;
 
-        public MetadataStringComparer StringComparer
-        {
-            get { return new MetadataStringComparer(this); }
-        }
+        /// <summary>
+        /// Comparer used to compare strings stored in metadata.
+        /// </summary>
+        public MetadataStringComparer StringComparer => new MetadataStringComparer(this);
 
-        public bool IsAssembly
-        {
-            get { return this.AssemblyTable.NumberOfRows == 1; }
-        }
+        /// <summary>
+        /// The decoder used by the reader to produce <see cref="string"/> instances from UTF8 encoded byte sequences.
+        /// </summary>
+        public MetadataStringDecoder UTF8Decoder { get; }
 
-        public AssemblyReferenceHandleCollection AssemblyReferences
-        {
-            get { return new AssemblyReferenceHandleCollection(this); }
-        }
+        /// <summary>
+        /// Returns true if the metadata represent an assembly.
+        /// </summary>
+        public bool IsAssembly => AssemblyTable.NumberOfRows == 1;
 
-        public TypeDefinitionHandleCollection TypeDefinitions
-        {
-            get { return new TypeDefinitionHandleCollection(TypeDefTable.NumberOfRows); }
-        }
-
-        public TypeReferenceHandleCollection TypeReferences
-        {
-            get { return new TypeReferenceHandleCollection(TypeRefTable.NumberOfRows); }
-        }
-
-        public CustomAttributeHandleCollection CustomAttributes
-        {
-            get { return new CustomAttributeHandleCollection(this); }
-        }
-
-        public DeclarativeSecurityAttributeHandleCollection DeclarativeSecurityAttributes
-        {
-            get { return new DeclarativeSecurityAttributeHandleCollection(this); }
-        }
-
-        public MemberReferenceHandleCollection MemberReferences
-        {
-            get { return new MemberReferenceHandleCollection(MemberRefTable.NumberOfRows); }
-        }
-
-        public ManifestResourceHandleCollection ManifestResources
-        {
-            get { return new ManifestResourceHandleCollection(ManifestResourceTable.NumberOfRows); }
-        }
-
-        public AssemblyFileHandleCollection AssemblyFiles
-        {
-            get { return new AssemblyFileHandleCollection(FileTable.NumberOfRows); }
-        }
-
-        public ExportedTypeHandleCollection ExportedTypes
-        {
-            get { return new ExportedTypeHandleCollection(ExportedTypeTable.NumberOfRows); }
-        }
-
-        public MethodDefinitionHandleCollection MethodDefinitions
-        {
-            get { return new MethodDefinitionHandleCollection(this); }
-        }
-
-        public FieldDefinitionHandleCollection FieldDefinitions
-        {
-            get { return new FieldDefinitionHandleCollection(this); }
-        }
-
-        public EventDefinitionHandleCollection EventDefinitions
-        {
-            get { return new EventDefinitionHandleCollection(this); }
-        }
-
-        public PropertyDefinitionHandleCollection PropertyDefinitions
-        {
-            get { return new PropertyDefinitionHandleCollection(this); }
-        }
-
-        public DocumentHandleCollection Documents
-        {
-            get { return new DocumentHandleCollection(this); }
-        }
-
-        public MethodDebugInformationHandleCollection MethodDebugInformation
-        {
-            get { return new MethodDebugInformationHandleCollection(this); }
-        }
-
-        public LocalScopeHandleCollection LocalScopes
-        {
-            get { return new LocalScopeHandleCollection(this, 0); }
-        }
-
-        public LocalVariableHandleCollection LocalVariables
-        {
-            get { return new LocalVariableHandleCollection(this, default(LocalScopeHandle)); }
-        }
-
-        public LocalConstantHandleCollection LocalConstants
-        {
-            get { return new LocalConstantHandleCollection(this, default(LocalScopeHandle)); }
-        }
-
-        public ImportScopeCollection ImportScopes
-        {
-            get { return new ImportScopeCollection(this); }
-        }
-
-        public CustomDebugInformationHandleCollection CustomDebugInformation
-        {
-            get { return new CustomDebugInformationHandleCollection(this); }
-        }
+        public AssemblyReferenceHandleCollection AssemblyReferences => new AssemblyReferenceHandleCollection(this);
+        public TypeDefinitionHandleCollection TypeDefinitions => new TypeDefinitionHandleCollection(TypeDefTable.NumberOfRows);
+        public TypeReferenceHandleCollection TypeReferences => new TypeReferenceHandleCollection(TypeRefTable.NumberOfRows);
+        public CustomAttributeHandleCollection CustomAttributes => new CustomAttributeHandleCollection(this);
+        public DeclarativeSecurityAttributeHandleCollection DeclarativeSecurityAttributes => new DeclarativeSecurityAttributeHandleCollection(this);
+        public MemberReferenceHandleCollection MemberReferences => new MemberReferenceHandleCollection(MemberRefTable.NumberOfRows);
+        public ManifestResourceHandleCollection ManifestResources => new ManifestResourceHandleCollection(ManifestResourceTable.NumberOfRows);
+        public AssemblyFileHandleCollection AssemblyFiles => new AssemblyFileHandleCollection(FileTable.NumberOfRows);
+        public ExportedTypeHandleCollection ExportedTypes => new ExportedTypeHandleCollection(ExportedTypeTable.NumberOfRows);
+        public MethodDefinitionHandleCollection MethodDefinitions => new MethodDefinitionHandleCollection(this);
+        public FieldDefinitionHandleCollection FieldDefinitions => new FieldDefinitionHandleCollection(this);
+        public EventDefinitionHandleCollection EventDefinitions => new EventDefinitionHandleCollection(this);
+        public PropertyDefinitionHandleCollection PropertyDefinitions => new PropertyDefinitionHandleCollection(this);
+        public DocumentHandleCollection Documents => new DocumentHandleCollection(this);
+        public MethodDebugInformationHandleCollection MethodDebugInformation => new MethodDebugInformationHandleCollection(this);
+        public LocalScopeHandleCollection LocalScopes => new LocalScopeHandleCollection(this, 0);
+        public LocalVariableHandleCollection LocalVariables => new LocalVariableHandleCollection(this, default(LocalScopeHandle));
+        public LocalConstantHandleCollection LocalConstants => new LocalConstantHandleCollection(this, default(LocalScopeHandle));
+        public ImportScopeCollection ImportScopes => new ImportScopeCollection(this);
+        public CustomDebugInformationHandleCollection CustomDebugInformation => new CustomDebugInformationHandleCollection(this);
 
         public AssemblyDefinition GetAssemblyDefinition()
         {
@@ -1155,22 +1061,22 @@ namespace System.Reflection.Metadata
 
         public string GetString(StringHandle handle)
         {
-            return StringStream.GetString(handle, utf8Decoder);
+            return StringHeap.GetString(handle, UTF8Decoder);
         }
 
         public string GetString(NamespaceDefinitionHandle handle)
         {
             if (handle.HasFullName)
             {
-                return StringStream.GetString(handle.GetFullName(), utf8Decoder);
+                return StringHeap.GetString(handle.GetFullName(), UTF8Decoder);
             }
 
-            return namespaceCache.GetFullName(handle);
+            return NamespaceCache.GetFullName(handle);
         }
 
         public byte[] GetBlobBytes(BlobHandle handle)
         {
-            return BlobStream.GetBytes(handle);
+            return BlobHeap.GetBytes(handle);
         }
 
         public ImmutableArray<byte> GetBlobContent(BlobHandle handle)
@@ -1182,17 +1088,22 @@ namespace System.Reflection.Metadata
 
         public BlobReader GetBlobReader(BlobHandle handle)
         {
-            return BlobStream.GetBlobReader(handle);
+            return BlobHeap.GetBlobReader(handle);
+        }
+
+        public BlobReader GetBlobReader(StringHandle handle)
+        {
+            return StringHeap.GetBlobReader(handle);
         }
 
         public string GetUserString(UserStringHandle handle)
         {
-            return UserStringStream.GetString(handle);
+            return UserStringHeap.GetString(handle);
         }
 
         public Guid GetGuid(GuidHandle handle)
         {
-            return GuidStream.GetGuid(handle);
+            return GuidHeap.GetGuid(handle);
         }
 
         public ModuleDefinition GetModuleDefinition()
@@ -1218,13 +1129,13 @@ namespace System.Reflection.Metadata
 
         public NamespaceDefinition GetNamespaceDefinitionRoot()
         {
-            NamespaceData data = namespaceCache.GetRootNamespace();
+            NamespaceData data = NamespaceCache.GetRootNamespace();
             return new NamespaceDefinition(data);
         }
 
         public NamespaceDefinition GetNamespaceDefinition(NamespaceDefinitionHandle handle)
         {
-            NamespaceData data = namespaceCache.GetNamespaceData(handle);
+            NamespaceData data = NamespaceCache.GetNamespaceData(handle);
             return new NamespaceDefinition(data);
         }
 
@@ -1263,7 +1174,6 @@ namespace System.Reflection.Metadata
 
         public CustomAttributeHandleCollection GetCustomAttributes(EntityHandle handle)
         {
-            Debug.Assert(!handle.IsNil);
             return new CustomAttributeHandleCollection(this, handle);
         }
 
@@ -1445,7 +1355,7 @@ namespace System.Reflection.Metadata
 
         public string GetString(DocumentNameBlobHandle handle)
         {
-            return BlobStream.GetDocumentName(handle);
+            return BlobHeap.GetDocumentName(handle);
         }
 
         public Document GetDocument(DocumentHandle handle)
@@ -1490,7 +1400,6 @@ namespace System.Reflection.Metadata
 
         public CustomDebugInformationHandleCollection GetCustomDebugInformation(EntityHandle handle)
         {
-            Debug.Assert(!handle.IsNil);
             return new CustomDebugInformationHandleCollection(this, handle);
         }
 

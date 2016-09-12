@@ -10,11 +10,11 @@ namespace System.Collections.Tests
 {
     public class SortedList_Generic_Tests_Keys : IList_Generic_Tests<string>
     {
-        protected override bool DefaultValueAllowed { get { return false; } }
-        protected override bool DuplicateValuesAllowed { get { return false; } }
-        protected override bool IsReadOnly { get { return true; } }
-        protected override bool DefaultValueWhenNotAllowed_Throws { get { return true; } }
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables { get { return new List<ModifyEnumerable>(); } }
+        protected override bool DefaultValueAllowed => false;
+        protected override bool DuplicateValuesAllowed => false;
+        protected override bool IsReadOnly => true;
+        protected override bool DefaultValueWhenNotAllowed_Throws => true;
+        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
 
         protected override IList<string> GenericIListFactory()
         {
@@ -55,11 +55,13 @@ namespace System.Collections.Tests
 
     public class SortedList_Generic_Tests_Keys_AsICollection : ICollection_NonGeneric_Tests
     {
-        protected override bool NullAllowed { get { return false; } }
-        protected override bool DuplicateValuesAllowed { get { return false; } }
-        protected override bool IsReadOnly { get { return true; } }
-        protected override bool Enumerator_Current_UndefinedOperation_Throws { get { return true; } }
-        protected override bool ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowsArgumentException { get { return true; } }
+        protected override bool NullAllowed => false;
+        protected override bool DuplicateValuesAllowed => false;
+        protected override bool IsReadOnly => true;
+        protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
+
+        protected override Type ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowType => typeof(ArgumentException);
+        protected override Type ICollection_NonGeneric_CopyTo_NonZeroLowerBound_ThrowType => typeof(ArgumentOutOfRangeException);
 
         protected override ICollection NonGenericICollectionFactory()
         {
@@ -89,6 +91,6 @@ namespace System.Collections.Tests
             Debug.Assert(false);
         }
 
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables { get { return new List<ModifyEnumerable>(); } }
+        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
     }
 }

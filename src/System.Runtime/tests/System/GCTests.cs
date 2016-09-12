@@ -19,7 +19,7 @@ namespace System.Tests
 
             if (s_is32Bits)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("bytesAllocated", () => GC.AddMemoryPressure((long)int.MaxValue + 1)); // Bytes allocated > int.MaxValue on 32 bit platforms
+                Assert.Throws<ArgumentOutOfRangeException>("pressure", () => GC.AddMemoryPressure((long)int.MaxValue + 1)); // Bytes allocated > int.MaxValue on 32 bit platforms
             }
         }
 
@@ -263,7 +263,7 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void ReRegisterFoFinalize()
+        public static void ReRegisterFoFinalize_NullObject_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>("obj", () => GC.ReRegisterForFinalize(null)); // Obj is null
         }

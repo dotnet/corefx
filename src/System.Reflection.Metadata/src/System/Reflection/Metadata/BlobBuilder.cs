@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Metadata
 {
     [DebuggerDisplay("{GetDebuggerDisplay(),nq}")]
-    public unsafe partial class BlobBuilder
+    public partial class BlobBuilder
     {
         // The implementation is akin to StringBuilder. 
         // The differences:
@@ -22,7 +22,7 @@ namespace System.Reflection.Metadata
 
         internal const int DefaultChunkSize = 256;
 
-        // Must be at least the size of the largest primitive type we write atomically (decimal).
+        // Must be at least the size of the largest primitive type we write atomically (Guid).
         internal const int MinChunkSize = 16;
 
         // Builders are linked like so:
@@ -36,8 +36,10 @@ namespace System.Reflection.Metadata
         private BlobBuilder _nextOrPrevious;
         private BlobBuilder FirstChunk => _nextOrPrevious._nextOrPrevious;
 
-        // The sum of lengths of all preceding chunks (not including the current chunk).
-        private int _previousLength;
+        // The sum of lengths of all preceding chunks (not including the current chunk),
+        // or a difference between original buffer length of a builder that was linked as a suffix to another builder,
+        // and the current length of the buffer (not that the buffers are swapped when suffix linking).
+        private int _previousLengthOrFrozenSuffixLengthDelta;
 
         private byte[] _buffer;
 
@@ -51,11 +53,11 @@ namespace System.Reflection.Metadata
         private int Length => (int)(_length & ~IsFrozenMask);
         private uint FrozenLength => _length | IsFrozenMask;
 
-        public BlobBuilder(int size = DefaultChunkSize)
+        public BlobBuilder(int capacity = DefaultChunkSize)
         {
-            if (size < 0)
+            if (capacity < 0)
             {
-                Throw.ArgumentOutOfRange(nameof(size));
+                Throw.ArgumentOutOfRange(nameof(capacity));
             }
 
             // the writer assumes little-endian architecture:
@@ -65,7 +67,7 @@ namespace System.Reflection.Metadata
             }
 
             _nextOrPrevious = this;
-            _buffer = new byte[Math.Max(MinChunkSize, size)];
+            _buffer = new byte[Math.Max(MinChunkSize, capacity)];
         }
 
         protected virtual BlobBuilder AllocateChunk(int minimalSize)
@@ -120,7 +122,7 @@ namespace System.Reflection.Metadata
         internal void ClearChunk()
         {
             _length = 0;
-            _previousLength = 0;
+            _previousLengthOrFrozenSuffixLengthDelta = 0;
             _nextOrPrevious = this;
         }
 
@@ -129,11 +131,12 @@ namespace System.Reflection.Metadata
 #if DEBUG
             Debug.Assert(_buffer != null);
             Debug.Assert(Length >= 0 && Length <= _buffer.Length);
-            Debug.Assert(_previousLength >= 0);
             Debug.Assert(_nextOrPrevious != null);
 
             if (IsHead)
             {
+                Debug.Assert(_previousLengthOrFrozenSuffixLengthDelta >= 0);
+
                 // last chunk:
                 int totalLength = 0;
                 foreach (var chunk in GetChunks())
@@ -147,12 +150,26 @@ namespace System.Reflection.Metadata
 #endif
         }
 
-        public int Count => _previousLength + Length;
+        public int Count => _previousLengthOrFrozenSuffixLengthDelta + Length;
 
-        private int FreeBytes => _buffer.Length - Length;
+        private int PreviousLength
+        {
+            get
+            {
+                Debug.Assert(IsHead);
+                return _previousLengthOrFrozenSuffixLengthDelta;
+            }
+            set
+            {
+                Debug.Assert(IsHead);
+                _previousLengthOrFrozenSuffixLengthDelta = value;
+            }
+        }
+
+        protected int FreeBytes => _buffer.Length - Length;
 
         // internal for testing
-        internal int BufferSize => _buffer.Length;
+        internal protected int ChunkCapacity => _buffer.Length;
 
         // internal for testing
         internal Chunks GetChunks()
@@ -262,33 +279,37 @@ namespace System.Reflection.Metadata
         /// <exception cref="InvalidOperationException">Content is not available, the builder has been linked with another one.</exception>
         public byte[] ToArray(int start, int byteCount)
         {
-            BlobUtilities.ValidateRange(Count, start, byteCount);
+            BlobUtilities.ValidateRange(Count, start, byteCount, nameof(byteCount));
 
             var result = new byte[byteCount];
 
-            int chunkStartPosition = 0;
-            int resultOffset = 0;
+            int chunkStart = 0;
+            int bufferStart = start;
+            int bufferEnd = start + byteCount;
             foreach (var chunk in GetChunks())
             {
-                int chunkEndPosition = chunkStartPosition + chunk.Length;
+                int chunkEnd = chunkStart + chunk.Length;
+                Debug.Assert(bufferStart >= chunkStart);
 
-                if (chunkEndPosition > start)
+                if (chunkEnd > bufferStart)
                 {
-                    int bytesToCopy = Math.Min(chunk.Length, result.Length - resultOffset);
-                    if (bytesToCopy == 0)
+                    int bytesToCopy = Math.Min(bufferEnd, chunkEnd) - bufferStart;
+                    Debug.Assert(bytesToCopy >= 0);
+
+                    Array.Copy(chunk._buffer, bufferStart - chunkStart, result, bufferStart - start, bytesToCopy);
+                    bufferStart += bytesToCopy;
+
+                    if (bufferStart == bufferEnd)
                     {
                         break;
                     }
-
-                    Array.Copy(chunk._buffer, Math.Max(start - chunkStartPosition, 0), result, resultOffset, bytesToCopy);
-
-                    resultOffset += bytesToCopy;
                 }
 
-                chunkStartPosition = chunkEndPosition;
+                chunkStart = chunkEnd;
             }
 
-            Debug.Assert(resultOffset == result.Length);
+            Debug.Assert(bufferStart == bufferEnd);
+
             return result;
         }
 
@@ -373,7 +394,7 @@ namespace System.Reflection.Metadata
                 return;
             }
 
-            _previousLength += prefix.Count;
+            PreviousLength += prefix.Count;
 
             // prefix is not a head anymore:
             prefix._length = prefix.FrozenLength;
@@ -433,44 +454,54 @@ namespace System.Reflection.Metadata
                 return;
             }
 
+            bool isEmpty = Count == 0;
+
             // swap buffers of the heads:
             var suffixBuffer = suffix._buffer;
             uint suffixLength = suffix._length;
+            int suffixPreviousLength = suffix.PreviousLength;
+            int oldSuffixLength = suffix.Length;
             suffix._buffer = _buffer;
             suffix._length = FrozenLength; // suffix is not a head anymore
             _buffer = suffixBuffer;
             _length = suffixLength;
 
-            int suffixPreviousLength = suffix._previousLength;
-            suffix._previousLength = _previousLength;
-            _previousLength = _previousLength + suffix.Length + suffixPreviousLength;
+            PreviousLength += suffix.Length + suffixPreviousLength;
 
-            // First and last chunks:
-            //
-            // [First]->[]->[Last] <- [this]    [SuffixFirst]->[]->[SuffixLast]  <- [suffix]
-            //    ^___________|                       ^_________________|
-            //
-            // Degenerate cases:
-            // this == First == Last and/or suffix == SuffixFirst == SuffixLast.
-            var first = FirstChunk;
-            var suffixFirst = suffix.FirstChunk;
-            var last = _nextOrPrevious;
-            var suffixLast = suffix._nextOrPrevious;
+            // Update the _previousLength of the suffix so that suffix.Count = suffix._previousLength + suffix.Length doesn't change.
+            // Note that the resulting previous length might be negative.
+            // The value is not used, other than for calculating the value of Count property.
+            suffix._previousLengthOrFrozenSuffixLengthDelta = suffixPreviousLength + oldSuffixLength - suffix.Length;
 
-            // Relink like so:
-            // [First]->[]->[Last] -> [suffix] -> [SuffixFirst]->[]->[SuffixLast]  <- [this]
-            //    ^_______________________________________________________|
-            _nextOrPrevious = suffixLast;
-            suffix._nextOrPrevious = (suffixFirst != suffix) ? suffixFirst : (first != this) ? first : suffix;
-
-            if (last != this)
+            if (!isEmpty)
             {
-                last._nextOrPrevious = suffix;
-            }
+                // First and last chunks:
+                //
+                // [First]->[]->[Last] <- [this]    [SuffixFirst]->[]->[SuffixLast]  <- [suffix]
+                //    ^___________|                       ^_________________|
+                //
+                // Degenerate cases:
+                // this == First == Last and/or suffix == SuffixFirst == SuffixLast.
+                var first = FirstChunk;
+                var suffixFirst = suffix.FirstChunk;
+                var last = _nextOrPrevious;
+                var suffixLast = suffix._nextOrPrevious;
 
-            if (suffixLast != suffix)
-            {
-                suffixLast._nextOrPrevious = (first != this) ? first : suffix;
+                // Relink like so:
+                // [First]->[]->[Last] -> [suffix] -> [SuffixFirst]->[]->[SuffixLast]  <- [this]
+                //    ^_______________________________________________________|
+                _nextOrPrevious = suffixLast;
+                suffix._nextOrPrevious = (suffixFirst != suffix) ? suffixFirst : (first != this) ? first : suffix;
+
+                if (last != this)
+                {
+                    last._nextOrPrevious = suffix;
+                }
+
+                if (suffixLast != suffix)
+                {
+                    suffixLast._nextOrPrevious = (first != this) ? first : suffix;
+                }
             }
 
             CheckInvariants();
@@ -495,7 +526,7 @@ namespace System.Reflection.Metadata
             }
 
             var newChunk = AllocateChunk(Math.Max(newLength, MinChunkSize));
-            if (newChunk.BufferSize < newLength)
+            if (newChunk.ChunkCapacity < newLength)
             {
                 // The overridden allocator didn't provide large enough buffer:
                 throw new InvalidOperationException(SR.Format(SR.ReturnedBuilderSizeTooSmall, GetType(), nameof(AllocateChunk)));
@@ -529,10 +560,10 @@ namespace System.Reflection.Metadata
 
                 newChunk._buffer = _buffer;
                 newChunk._length = FrozenLength;
-                newChunk._previousLength = _previousLength;
+                newChunk._previousLengthOrFrozenSuffixLengthDelta = PreviousLength;
 
                 _buffer = newBuffer;
-                _previousLength += Length;
+                PreviousLength += Length;
                 _length = 0;
             }
 
@@ -574,7 +605,9 @@ namespace System.Reflection.Metadata
 
         private int ReserveBytesPrimitive(int byteCount)
         {
-            Debug.Assert(byteCount < MinChunkSize);
+            // If the primitive doesn't fit to the current chuck we'll allocate a new chunk that is at least MinChunkSize.
+            // That chunk has to fit the primitive otherwise we might keep allocating new chunks and never never end up with one that fits.
+            Debug.Assert(byteCount <= MinChunkSize);
             return ReserveBytesImpl(byteCount);
         }
 
@@ -584,7 +617,7 @@ namespace System.Reflection.Metadata
         {
             if (byteCount < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(byteCount));
+                Throw.ArgumentOutOfRange(nameof(byteCount));
             }
 
             if (!IsHead)
@@ -713,7 +746,7 @@ namespace System.Reflection.Metadata
 
         /// <exception cref="ArgumentNullException"><paramref name="buffer"/> is null.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
-        public unsafe void WriteBytes(byte[] buffer)
+        public void WriteBytes(byte[] buffer)
         {
             WriteBytes(buffer, 0, buffer?.Length ?? 0);
         }
@@ -728,7 +761,7 @@ namespace System.Reflection.Metadata
                 Throw.ArgumentNull(nameof(buffer));
             }
 
-            BlobUtilities.ValidateRange(buffer.Length, start, byteCount);
+            BlobUtilities.ValidateRange(buffer.Length, start, byteCount, nameof(byteCount));
 
             if (!IsHead)
             {
@@ -866,30 +899,36 @@ namespace System.Reflection.Metadata
         }
 
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
+        public void WriteGuid(Guid value)
+        {
+            int start = ReserveBytesPrimitive(BlobUtilities.SizeOfGuid);
+            _buffer.WriteGuid(start, value);
+        }
+
+        /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
         public void WriteDateTime(DateTime value)
         {
             WriteInt64(value.Ticks);
         }
 
         /// <summary>
-        /// Writes a reference to a heap (heap index) or a table (row id).
+        /// Writes a reference to a heap (heap offset) or a table (row number).
         /// </summary>
-        /// <remarks>
-        /// References may be small (2B) or large (4B).
-        /// </remarks>
+        /// <param name="reference">Heap offset or table row number.</param>
+        /// <param name="isSmall">True to encode the reference as 16-bit integer, false to encode as 32-bit integer.</param>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
-        internal void WriteReference(uint reference, int size)
+        public void WriteReference(int reference, bool isSmall)
         {
-            Debug.Assert(size == 2 || size == 4);
+            // This code is a very hot path, hence we don't check if the reference actually fits 2B.
 
-            if (size == 2)
+            if (isSmall)
             {
-                Debug.Assert((ushort)reference == reference);
+                Debug.Assert(unchecked((ushort)reference) == reference);
                 WriteUInt16((ushort)reference);
             }
             else
             {
-                WriteUInt32(reference);
+                WriteInt32(reference);
             }
         }
 
@@ -898,7 +937,7 @@ namespace System.Reflection.Metadata
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
-        public void WriteUTF16(char[] value)
+        public unsafe void WriteUTF16(char[] value)
         {
             if (value == null)
             {
@@ -926,7 +965,7 @@ namespace System.Reflection.Metadata
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
-        public void WriteUTF16(string value)
+        public unsafe void WriteUTF16(string value)
         {
             if (value == null)
             {
@@ -945,10 +984,12 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
-        /// Writes string in SerString format (see ECMA-335-II 23.3 Custom attributes): 
+        /// Writes string in SerString format (see ECMA-335-II 23.3 Custom attributes).
+        /// </summary>
+        /// <remarks>
         /// The string is UTF8 encoded and prefixed by the its size in bytes. 
         /// Null string is represented as a single byte 0xFF.
-        /// </summary>
+        /// </remarks>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
         public void WriteSerializedString(string value)
         {
@@ -962,11 +1003,38 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
+        /// Writes string in User String (#US) heap format (see ECMA-335-II 24.2.4 #US and #Blob heaps):
+        /// </summary>
+        /// <remarks>
+        /// The string is UTF16 encoded and prefixed by the its size in bytes.
+        /// 
+        /// This final byte holds the value 1 if and only if any UTF16 character within the string has any bit set in its top byte,
+        /// or its low byte is any of the following: 0x01–0x08, 0x0E–0x1F, 0x27, 0x2D, 0x7F. Otherwise, it holds 0. 
+        /// The 1 signifies Unicode characters that require handling beyond that normally provided for 8-bit encoding sets. 
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
+        public void WriteUserString(string value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            WriteCompressedInteger(BlobUtilities.GetUserStringByteLength(value.Length));
+            WriteUTF16(value);
+            WriteByte(BlobUtilities.GetUserStringTrailingByte(value));
+        }
+
+        /// <summary>
         /// Writes UTF8 encoded string at the current position.
         /// </summary>
+        /// <param name="value">Constant value.</param>
+        /// <param name="allowUnpairedSurrogates">
+        /// True to encode unpaired surrogates as specified, otherwise replace them with U+FFFD character.
+        /// </param>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
-        public void WriteUTF8(string value, bool allowUnpairedSurrogates)
+        public void WriteUTF8(string value, bool allowUnpairedSurrogates = true)
         {
             if (value == null)
             {
@@ -976,8 +1044,12 @@ namespace System.Reflection.Metadata
             WriteUTF8(value, 0, value.Length, allowUnpairedSurrogates, prependSize: false);
         }
 
-        private void WriteUTF8(string str, int start, int length, bool allowUnpairedSurrogates, bool prependSize)
+        internal unsafe void WriteUTF8(string str, int start, int length, bool allowUnpairedSurrogates, bool prependSize)
         {
+            Debug.Assert(start >= 0);
+            Debug.Assert(length >= 0);
+            Debug.Assert(start + length <= str.Length);
+
             if (!IsHead)
             {
                 Throw.InvalidOperationBuilderAlreadyLinked();
@@ -993,7 +1065,7 @@ namespace System.Reflection.Metadata
 
                 int bytesToCurrent = BlobUtilities.GetUTF8ByteCount(currentPtr, length, byteLimit, out nextPtr);
                 int charsToCurrent = (int)(nextPtr - currentPtr);
-                int charsToNext = str.Length - charsToCurrent;
+                int charsToNext = length - charsToCurrent;
                 int bytesToNext = BlobUtilities.GetUTF8ByteCount(nextPtr, charsToNext);
 
                 if (prependSize)
@@ -1046,11 +1118,11 @@ namespace System.Reflection.Metadata
         /// 
         /// Otherwise, encode as a 4-byte integer, with bit 31 set, bit 30 set, bit 29 clear (value held in bits 28 through 0).
         /// </remarks>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> can't be represented as a compressed integer.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> can't be represented as a compressed unsigned integer.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
         public void WriteCompressedInteger(int value)
         {
-            BlobWriterImpl.WriteCompressedInteger(this, value);
+            BlobWriterImpl.WriteCompressedInteger(this, unchecked((uint)value));
         }
 
         /// <summary>

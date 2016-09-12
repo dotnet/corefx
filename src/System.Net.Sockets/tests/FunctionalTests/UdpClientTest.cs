@@ -4,7 +4,7 @@
 
 using System.Net.Test.Common;
 using System.Threading;
-
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Net.Sockets.Tests
@@ -16,6 +16,7 @@ namespace System.Net.Sockets.Tests
 
         private ManualResetEvent _waitHandle = new ManualResetEvent(false);
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void BeginSend_NegativeBytes_Throws()
         {
@@ -29,6 +30,7 @@ namespace System.Net.Sockets.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void BeginSend_BytesMoreThanArrayLength_Throws()
         {
@@ -42,7 +44,7 @@ namespace System.Net.Sockets.Tests
             });
         }
 
-        [ActiveIssue(4071)]
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void BeginSend_AsyncOperationCompletes_Success()
         {
@@ -52,7 +54,61 @@ namespace System.Net.Sockets.Tests
             _waitHandle.Reset();
             udpClient.BeginSend(sendBytes, sendBytes.Length, remoteServer, new AsyncCallback(AsyncCompleted), udpClient);
 
-            Assert.True(_waitHandle.WaitOne(Configuration.PassingTestTimeout), "Timed out while waiting for connection");
+            Assert.True(_waitHandle.WaitOne(TestSettings.PassingTestTimeout), "Timed out while waiting for connection");
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void Client_Idempotent()
+        {
+            using (var c = new UdpClient())
+            {
+                Socket client = c.Client;
+                Assert.NotNull(client);
+                Assert.Same(client, c.Client);
+            }
+        }
+        
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        [ActiveIssue(9189, PlatformID.AnyUnix)]
+        public async Task ConnectAsync_StringHost_Success()
+        {
+            using (var c = new UdpClient())
+            {
+                await c.Client.ConnectAsync("114.114.114.114", 53);
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task ConnectAsync_IPAddressHost_Success()
+        {
+            using (var c = new UdpClient())
+            {
+                await c.Client.ConnectAsync(IPAddress.Parse("114.114.114.114"), 53);
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        [ActiveIssue(9189, PlatformID.AnyUnix)]
+        public void Connect_StringHost_Success()
+        {
+            using (var c = new UdpClient())
+            {
+                c.Client.Connect("114.114.114.114", 53);
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void Connect_IPAddressHost_Success()
+        {
+            using (var c = new UdpClient())
+            {
+                c.Client.Connect(IPAddress.Parse("114.114.114.114"), 53);
+            }
         }
 
         private void AsyncCompleted(IAsyncResult ar)

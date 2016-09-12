@@ -8,6 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.ComponentModel.Annotations.Tests</RootNamespace>
     <AssemblyName>System.ComponentModel.Annotations.Tests</AssemblyName>
+    <NugetTargetMoniker>.NETStandard,Version=v1.4</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -15,6 +16,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ValidationAttributeTestBase.cs" />
     <Compile Include="AssertEx.cs" />
     <Compile Include="AssociationAttributeTests.cs" />
     <Compile Include="CompareAttributeTests.cs" />
@@ -45,7 +47,7 @@
     <Compile Include="ValidatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\System.ComponentModel.Annotations.csproj">
+    <ProjectReference Include="..\pkg\System.ComponentModel.Annotations.pkgproj">
       <Name>System.ComponentModel.Annotations</Name>
     </ProjectReference>
   </ItemGroup>

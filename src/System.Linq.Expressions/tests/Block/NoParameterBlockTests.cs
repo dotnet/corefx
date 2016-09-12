@@ -213,12 +213,12 @@ namespace System.Linq.Expressions.Tests
             {
                 Expression[] expressions = expressionList.ToArray();
                 expressions[i] = null;
-                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(expressions));
-                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(expressions.Skip(0)));
-                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), expressions));
-                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), expressions.Skip(0)));
-                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), null, expressions));
-                Assert.Throws<ArgumentNullException>("expressions", () => Expression.Block(typeof(int), null, expressions.Skip(0)));
+                Assert.Throws<ArgumentNullException>($"expressions[{i}]", () => Expression.Block(expressions));
+                Assert.Throws<ArgumentNullException>($"expressions[{i}]", () => Expression.Block(expressions.Skip(0)));
+                Assert.Throws<ArgumentNullException>($"expressions[{i}]", () => Expression.Block(typeof(int), expressions));
+                Assert.Throws<ArgumentNullException>($"expressions[{i}]", () => Expression.Block(typeof(int), expressions.Skip(0)));
+                Assert.Throws<ArgumentNullException>($"expressions[{i}]", () => Expression.Block(typeof(int), null, expressions));
+                Assert.Throws<ArgumentNullException>($"expressions[{i}]", () => Expression.Block(typeof(int), null, expressions.Skip(0)));
             }
         }
 
@@ -231,12 +231,12 @@ namespace System.Linq.Expressions.Tests
             {
                 Expression[] expressions = expressionList.ToArray();
                 expressions[i] = UnreadableExpression;
-                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(expressions));
-                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(expressions.Skip(0)));
-                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), expressions));
-                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), expressions.Skip(0)));
-                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), null, expressions));
-                Assert.Throws<ArgumentException>("expressions", () => Expression.Block(typeof(int), null, expressions.Skip(0)));
+                Assert.Throws<ArgumentException>($"expressions[{i}]", () => Expression.Block(expressions));
+                Assert.Throws<ArgumentException>($"expressions[{i}]", () => Expression.Block(expressions.Skip(0)));
+                Assert.Throws<ArgumentException>($"expressions[{i}]", () => Expression.Block(typeof(int), expressions));
+                Assert.Throws<ArgumentException>($"expressions[{i}]", () => Expression.Block(typeof(int), expressions.Skip(0)));
+                Assert.Throws<ArgumentException>($"expressions[{i}]", () => Expression.Block(typeof(int), null, expressions));
+                Assert.Throws<ArgumentException>($"expressions[{i}]", () => Expression.Block(typeof(int), null, expressions.Skip(0)));
             }
         }
 
@@ -259,8 +259,8 @@ namespace System.Linq.Expressions.Tests
         {
             ConstantExpression constant = Expression.Constant(0);
             IEnumerable<Expression> expressions = PadBlock(blockSize - 1, Expression.Constant(0));
-            Assert.Throws<ArgumentException>(() => Expression.Block(typeof(string), expressions));
-            Assert.Throws<ArgumentException>(() => Expression.Block(typeof(string), expressions.ToArray()));
+            Assert.Throws<ArgumentException>(null, () => Expression.Block(typeof(string), expressions));
+            Assert.Throws<ArgumentException>(null, (() => Expression.Block(typeof(string), expressions.ToArray())));
         }
 
         [Theory]
@@ -275,8 +275,8 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void EmptyBlockWithNonVoidTypeNotAllowed()
         {
-            Assert.Throws<ArgumentException>(() => Expression.Block(typeof(int)));
-            Assert.Throws<ArgumentException>(() => Expression.Block(typeof(int), Enumerable.Empty<Expression>()));
+            Assert.Throws<ArgumentException>(null, () => Expression.Block(typeof(int)));
+            Assert.Throws<ArgumentException>(null, () => Expression.Block(typeof(int), Enumerable.Empty<Expression>()));
         }
 
         [Theory]
@@ -383,6 +383,7 @@ namespace System.Linq.Expressions.Tests
             BlockExpression block = Expression.Block(expressions);
 
             Assert.Same(block, block.Update(block.Variables, block.Expressions));
+            Assert.Same(block, NoOpVisitor.Instance.Visit(block));
         }
 
         [Theory]

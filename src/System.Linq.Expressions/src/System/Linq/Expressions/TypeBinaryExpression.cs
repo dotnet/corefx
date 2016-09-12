@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions
 {
@@ -119,7 +120,7 @@ namespace System.Linq.Expressions
         // Helper that is used when re-eval of LHS is safe.
         private Expression ByValParameterTypeEqual(ParameterExpression value)
         {
-            Expression getType = Expression.Call(value, typeof(object).GetMethod("GetType"));
+            Expression getType = Expression.Call(value, Object_GetType);
 
             // In remoting scenarios, obj.GetType() can return an interface.
             // But JIT32's optimized "obj.GetType() == typeof(ISomething)" codegen,
@@ -201,7 +202,7 @@ namespace System.Linq.Expressions
         {
             RequiresCanRead(expression, nameof(expression));
             ContractUtils.RequiresNotNull(type, nameof(type));
-            if (type.IsByRef) throw Error.TypeMustNotBeByRef();
+            if (type.IsByRef) throw Error.TypeMustNotBeByRef(nameof(type));
 
             return new TypeBinaryExpression(expression, type, ExpressionType.TypeIs);
         }
@@ -216,7 +217,7 @@ namespace System.Linq.Expressions
         {
             RequiresCanRead(expression, nameof(expression));
             ContractUtils.RequiresNotNull(type, nameof(type));
-            if (type.IsByRef) throw Error.TypeMustNotBeByRef();
+            if (type.IsByRef) throw Error.TypeMustNotBeByRef(nameof(type));
 
             return new TypeBinaryExpression(expression, type, ExpressionType.TypeEqual);
         }

@@ -43,7 +43,6 @@ namespace System.ComponentModel
             }
         }
 
-        /// <include file='doc\AsyncOperation.uex' path='docs/doc[@for="AsyncOperation.SynchronizationContext"]/*' />
         public SynchronizationContext SynchronizationContext
         {
             get
@@ -109,7 +108,7 @@ namespace System.ComponentModel
         {
             if (d == null)
             {
-                throw new ArgumentNullException(SR.Async_NullDelegate, nameof(d));
+                throw new ArgumentNullException(nameof(d), SR.Async_NullDelegate);
             }
         }
 

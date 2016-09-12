@@ -7,14 +7,10 @@
       <SupportedFramework>net46;netcore50;netcoreapp1.0</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Security.Cryptography.Pkcs.builds" />
-  </ItemGroup>
-  <ItemGroup>
-    <InboxOnTargetFramework Include="MonoAndroid10" />
-    <InboxOnTargetFramework Include="MonoTouch10" />
-    <InboxOnTargetFramework Include="xamarinios10" />
-    <InboxOnTargetFramework Include="xamarinmac20" />
-    <InboxOnTargetFramework Include="xamarintvos10" />
-    <InboxOnTargetFramework Include="xamarinwatchos10" />
+
+    <_xamarinFrameworks Include="$(AllXamarinFrameworks)" />
+    <HarvestSuppressPaths Include="@(_xamarinFrameworks->'ref/%(Identity)')" />
+    <HarvestSuppressPaths Include="@(_xamarinFrameworks->'lib/%(Identity)')" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

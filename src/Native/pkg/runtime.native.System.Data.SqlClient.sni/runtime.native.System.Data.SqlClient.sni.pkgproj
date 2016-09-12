@@ -1,24 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
   <PropertyGroup>
-    <!-- TODO: Get this from the file version -->
-    <Version>4.0.0</Version>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
     <SkipValidatePackage>true</SkipValidatePackage>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="win\runtime.native.System.Data.SqlClient.sni.pkgproj">
-      <TargetFramework>any</TargetFramework>
-      <Platform>amd64</Platform>
-    </ProjectReference>
-    <ProjectReference Include="win\runtime.native.System.Data.SqlClient.sni.pkgproj">
-      <TargetFramework>any</TargetFramework>
-      <Platform>x86</Platform>
-    </ProjectReference>
+    <Dependency Include="runtime.win7-x64.runtime.native.System.Data.SqlClient.sni">
+      <Version>$(PackageVersion)-$(ExternalExpectedPrerelease)</Version>
+    </Dependency>
+    <Dependency Include="runtime.win7-x86.runtime.native.System.Data.SqlClient.sni">
+      <Version>$(PackageVersion)-$(ExternalExpectedPrerelease)</Version>
+    </Dependency>
+    <Dependency Include="runtime.win10-arm64.runtime.native.System.Data.SqlClient.sni">
+      <Version>$(PackageVersion)-$(ExternalExpectedPrerelease)</Version>
+    </Dependency>
   </ItemGroup>
-  
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

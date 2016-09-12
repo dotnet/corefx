@@ -472,7 +472,8 @@ namespace System.Numerics.Tests
             int expected = 0;
             for (int g = 0; g < Vector<T>.Count; g++)
             {
-                expected = (((expected << 5) + expected) ^ v1[g].GetHashCode());
+                uint shift5 = ((uint)expected << 5) | ((uint)expected >> 27);
+                expected = ((int)shift5 + expected) ^ v1[g].GetHashCode();
             }
 
             Assert.Equal(expected, hash);
@@ -803,17 +804,17 @@ namespace System.Numerics.Tests
                 });
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public void DivisionByZeroExceptionByte() { TestDivisionByZeroException<Byte>(); }
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public void DivisionByZeroExceptionSByte() { TestDivisionByZeroException<SByte>(); }
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public void DivisionByZeroExceptionUInt16() { TestDivisionByZeroException<UInt16>(); }
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public void DivisionByZeroExceptionInt16() { TestDivisionByZeroException<Int16>(); }
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public void DivisionByZeroExceptionInt32() { TestDivisionByZeroException<Int32>(); }
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
         public void DivisionByZeroExceptionInt64() { TestDivisionByZeroException<Int64>(); }
         private void TestDivisionByZeroException<T>() where T : struct
         {

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -44,9 +43,9 @@ namespace System.Linq.Expressions.Tests
         [MemberData(nameof(NonBinaryTypesIncludingInvalidData))]
         public void MakeBinaryInvalidType(ExpressionType type)
         {
-            Assert.Throws<ArgumentException>(() => Expression.MakeBinary(type, Expression.Constant(0), Expression.Constant(0)));
-            Assert.Throws<ArgumentException>(() => Expression.MakeBinary(type, Expression.Constant(0), Expression.Constant(0), false, null));
-            Assert.Throws<ArgumentException>(() => Expression.MakeBinary(type, Expression.Constant(0), Expression.Constant(0), false, null, null));
+            Assert.Throws<ArgumentException>("binaryType", () => Expression.MakeBinary(type, Expression.Constant(0), Expression.Constant(0)));
+            Assert.Throws<ArgumentException>("binaryType", () => Expression.MakeBinary(type, Expression.Constant(0), Expression.Constant(0), false, null));
+            Assert.Throws<ArgumentException>("binaryType", () => Expression.MakeBinary(type, Expression.Constant(0), Expression.Constant(0), false, null, null));
         }
 
         [Theory]
@@ -65,6 +64,14 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentNullException>(() => Expression.MakeBinary(type, Expression.Variable(typeof(object)), null));
             Assert.Throws<ArgumentNullException>(() => Expression.MakeBinary(type, Expression.Variable(typeof(object)), null, false, null));
             Assert.Throws<ArgumentNullException>(() => Expression.MakeBinary(type, Expression.Variable(typeof(object)), null, false, null, null));
+        }
+
+        public static void CompileBinaryExpression(BinaryExpression expression, bool useInterpreter, bool expected)
+        {
+            Expression<Func<bool>> e = Expression.Lambda<Func<bool>>(expression, Enumerable.Empty<ParameterExpression>());
+            Func<bool> f = e.Compile(useInterpreter);
+
+            Assert.Equal(expected, f());
         }
     }
 }

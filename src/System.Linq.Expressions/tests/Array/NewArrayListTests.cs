@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
@@ -861,6 +860,19 @@ namespace System.Linq.Expressions.Tests
             Assert.ThrowsAny<Exception>(() => Expression.NewArrayInit(typeof(int), new BogusReadOnlyCollection<Expression>()));
         }
 
+        [Fact]
+        public static void ToStringTest()
+        {
+            var e1 = Expression.NewArrayInit(typeof(int));
+            Assert.Equal("new [] {}", e1.ToString());
+
+            var e2 = Expression.NewArrayInit(typeof(int), Expression.Parameter(typeof(int), "x"));
+            Assert.Equal("new [] {x}", e2.ToString());
+
+            var e3 = Expression.NewArrayInit(typeof(int), Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y"));
+            Assert.Equal("new [] {x, y}", e3.ToString());
+        }
+
         #endregion
 
         #region Helper methods
@@ -1623,5 +1635,103 @@ namespace System.Linq.Expressions.Tests
         }
 
         #endregion
+
+        [Fact]
+        public static void NullType()
+        {
+            Assert.Throws<ArgumentNullException>("type", () => Expression.NewArrayInit(null));
+        }
+
+        [Fact]
+        public static void VoidType()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(void)));
+        }
+
+        [Fact]
+        public static void NullInitializers()
+        {
+            Assert.Throws<ArgumentNullException>("initializers", () => Expression.NewArrayInit(typeof(int), default(Expression[])));
+            Assert.Throws<ArgumentNullException>("initializers", () => Expression.NewArrayInit(typeof(int), default(IEnumerable<Expression>)));
+        }
+
+        [Fact]
+        public static void NullInitializer()
+        {
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.NewArrayInit(typeof(int), new Expression[] { null, null }));
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.NewArrayInit(typeof(int), new List<Expression> { null, null }));
+        }
+
+        [Fact]
+        public static void ByRefType()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(int).MakeByRefType()));
+        }
+
+        [Fact]
+        public static void PointerType()
+        {
+            Assert.Throws<ArgumentException>("type", () => Expression.NewArrayInit(typeof(int).MakePointerType()));
+        }
+
+        [Fact]
+        public static void GenericType()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(List<>)));
+        }
+
+        [Fact]
+        public static void TypeContainsGenericParameters()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(List<>.Enumerator)));
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(List<>).MakeGenericType(typeof(List<>))));
+        }
+
+        [Fact]
+        public static void NotAssignable()
+        {
+            Assert.Throws<InvalidOperationException>(() => Expression.NewArrayInit(typeof(string), Expression.Constant(2)));
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void AutoQuote(bool useInterpreter)
+        {
+            Expression<Func<int, int>> doubleIt = x => x * 2;
+            var quoted = Expression.Lambda<Func<Expression<Func<int, int>>[]>>(
+                Expression.NewArrayInit(
+                    typeof(Expression<Func<int, int>>),
+                    doubleIt
+                    )
+                );
+            var del = quoted.Compile(useInterpreter);
+            Assert.Equal(new [] {doubleIt}, del());
+
+            quoted = Expression.Lambda<Func<Expression<Func<int, int>>[]>>(
+                Expression.NewArrayInit(
+                    typeof(Expression<Func<int, int>>),
+                    Expression.Constant(doubleIt),
+                    doubleIt,
+                    Expression.Constant(doubleIt)
+                    )
+                );
+            del = quoted.Compile(useInterpreter);
+            Assert.Equal(new [] {doubleIt, doubleIt, doubleIt}, del());
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void NestedCompile(bool useInterpreter)
+        {
+            Expression<Func<int, int>> doubleIt = x => x * 2;
+            var unquoted = Expression.Lambda<Func<Func<int, int>[]>>(
+                Expression.NewArrayInit(
+                    typeof(Func<int, int>),
+                    doubleIt
+                    )
+                );
+            var del = unquoted.Compile(useInterpreter);
+            var arr = del();
+            Assert.Equal(1, arr.Length);
+            Assert.Equal(26, arr[0](13));
+        }
     }
 }

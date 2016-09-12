@@ -4,7 +4,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 
 namespace System.Collections.Generic
 {
@@ -39,7 +38,7 @@ namespace System.Collections.Generic
         public DictionaryDebugView(IDictionary<K, V> dictionary)
         {
             if (dictionary == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(dictionary));
 
             _dict = dictionary;
         }

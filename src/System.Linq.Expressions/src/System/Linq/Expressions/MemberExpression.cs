@@ -156,11 +156,11 @@ namespace System.Linq.Expressions
 
             if (field.IsStatic)
             {
-                if (expression != null) throw new ArgumentException(Strings.OnlyStaticFieldsHaveNullInstance, nameof(expression));
+                if (expression != null) throw Error.OnlyStaticFieldsHaveNullInstance(nameof(expression));
             }
             else
             {
-                if (expression == null) throw new ArgumentException(Strings.OnlyStaticFieldsHaveNullInstance, nameof(field));
+                if (expression == null) throw Error.OnlyStaticFieldsHaveNullInstance(nameof(field));
                 RequiresCanRead(expression, nameof(expression));
                 if (!TypeUtils.AreReferenceAssignable(field.DeclaringType, expression.Type))
                 {
@@ -179,6 +179,7 @@ namespace System.Linq.Expressions
         public static MemberExpression Field(Expression expression, string fieldName)
         {
             RequiresCanRead(expression, nameof(expression));
+            ContractUtils.RequiresNotNull(fieldName, nameof(fieldName));
 
             // bind to public names first
             FieldInfo fi = expression.Type.GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.FlattenHierarchy);
@@ -241,7 +242,7 @@ namespace System.Linq.Expressions
             }
             if (pi == null)
             {
-                throw Error.InstancePropertyNotDefinedForType(propertyName, expression.Type);
+                throw Error.InstancePropertyNotDefinedForType(propertyName, expression.Type, nameof(propertyName));
             }
             return Property(expression, pi);
         }
@@ -265,7 +266,7 @@ namespace System.Linq.Expressions
             }
             if (pi == null)
             {
-                throw Error.PropertyNotDefinedForType(propertyName, type);
+                throw Error.PropertyNotDefinedForType(propertyName, type, nameof(propertyName));
             }
             return Property(expression, pi);
         }
@@ -289,29 +290,29 @@ namespace System.Linq.Expressions
 
                 if (mi == null)
                 {
-                    throw Error.PropertyDoesNotHaveAccessor(property);
+                    throw Error.PropertyDoesNotHaveAccessor(property, nameof(property));
                 }
                 else if (mi.GetParametersCached().Length != 1)
                 {
-                    throw Error.IncorrectNumberOfMethodCallArguments(mi);
+                    throw Error.IncorrectNumberOfMethodCallArguments(mi, nameof(property));
                 }
             }
             else if (mi.GetParametersCached().Length != 0)
             {
-                throw Error.IncorrectNumberOfMethodCallArguments(mi);
+                throw Error.IncorrectNumberOfMethodCallArguments(mi, nameof(property));
             }
 
             if (mi.IsStatic)
             {
-                if (expression != null) throw new ArgumentException(Strings.OnlyStaticPropertiesHaveNullInstance, nameof(expression));
+                if (expression != null) throw Error.OnlyStaticPropertiesHaveNullInstance(nameof(expression));
             }
             else
             {
-                if (expression == null) throw new ArgumentException(Strings.OnlyStaticPropertiesHaveNullInstance, nameof(property));
+                if (expression == null) throw Error.OnlyStaticPropertiesHaveNullInstance(nameof(property));
                 RequiresCanRead(expression, nameof(expression));
                 if (!TypeUtils.IsValidInstanceType(property, expression.Type))
                 {
-                    throw Error.PropertyNotDefinedForType(property, expression.Type);
+                    throw Error.PropertyNotDefinedForType(property, expression.Type, nameof(property));
                 }
             }
 
@@ -327,11 +328,11 @@ namespace System.Linq.Expressions
         public static MemberExpression Property(Expression expression, MethodInfo propertyAccessor)
         {
             ContractUtils.RequiresNotNull(propertyAccessor, nameof(propertyAccessor));
-            ValidateMethodInfo(propertyAccessor);
-            return Property(expression, GetProperty(propertyAccessor));
+            ValidateMethodInfo(propertyAccessor, nameof(propertyAccessor));
+            return Property(expression, GetProperty(propertyAccessor, nameof(propertyAccessor)));
         }
 
-        private static PropertyInfo GetProperty(MethodInfo mi)
+        private static PropertyInfo GetProperty(MethodInfo mi, string paramName, int index = -1)
         {
             Type type = mi.DeclaringType;
             BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic;
@@ -348,7 +349,7 @@ namespace System.Linq.Expressions
                     return pi;
                 }
             }
-            throw Error.MethodNotPropertyAccessor(mi.DeclaringType, mi.Name);
+            throw Error.MethodNotPropertyAccessor(mi.DeclaringType, mi.Name, paramName, index);
         }
 
         private static bool CheckMethod(MethodInfo method, MethodInfo propertyMethod)
@@ -393,7 +394,7 @@ namespace System.Linq.Expressions
             if (fi != null)
                 return Field(expression, fi);
 
-            throw Error.NotAMemberOfType(propertyOrFieldName, expression.Type);
+            throw Error.NotAMemberOfType(propertyOrFieldName, expression.Type, nameof(propertyOrFieldName));
         }
 
         /// <summary>
@@ -416,7 +417,7 @@ namespace System.Linq.Expressions
             {
                 return Expression.Property(expression, pi);
             }
-            throw Error.MemberNotFieldOrProperty(member);
+            throw Error.MemberNotFieldOrProperty(member, nameof(member));
         }
     }
 }

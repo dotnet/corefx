@@ -9,11 +9,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}</ProjectGuid>
     <OutputType>Library</OutputType>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  
   <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' and '$(ProjectJson)' == '' ">
     <ProjectJson>win/project.json</ProjectJson>
     <ProjectLockJson>win/project.lock.json</ProjectLockJson>
@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="DummyTcpServer.cs" />
     <Compile Include="TestConfiguration.cs" />
+  
     <!-- SslStream Tests -->
     <Compile Include="CertificateChainValidation.cs" />
     <Compile Include="CertificateValidationClientServer.cs" />
@@ -43,21 +44,35 @@
     <Compile Include="ServerAsyncAuthenticateTest.cs" />
     <Compile Include="ServerNoEncryptionTest.cs" />
     <Compile Include="ServerRequireEncryptionTest.cs" />
+    <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
     <Compile Include="SslStreamStreamToStreamTest.cs" />
     <Compile Include="SslStreamNetworkStreamTest.cs" />
     <Compile Include="StreamAPMExtensions.cs" />
     <Compile Include="TransportContextTest.cs" />
+    
     <!-- NegotiateStream Tests -->
     <Compile Include="NegotiateStreamStreamToStreamTest.cs" />
-
     <Compile Include="ServiceNameCollectionTest.cs" />
+    <Compile Include="NegotiateStreamKerberosTest.cs" />
 
     <!-- Common test files -->
-    <Compile Include="$(CommonTestPath)\System\Net\HttpTestServers.cs">
-      <Link>Common\System\Net\HttpTestServers.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.cs">
       <Link>Common\System\Net\Capability.Security.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
+      <Link>Common\System\Net\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Security.cs">
+      <Link>Common\System\Net\Configuration.Security.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Certificates.cs">
+      <Link>Common\System\Net\Configuration.Certificates.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\SchSendAuxRecordTestServer.cs">
+      <Link>Common\System\Net\SchSendAuxRecordTestServer.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\SslProtocolSupport.cs">
       <Link>Common\System\Net\SslProtocolSupport.cs</Link>
@@ -83,7 +98,6 @@
     <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
       <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
     </Compile>
-
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="IdentityValidator.Windows.cs" />
@@ -91,21 +105,20 @@
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="IdentityValidator.Unix.cs" />
   </ItemGroup>
-  
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <None Include="..\Scripts\setup-kdc.sh">
+    <None Include="..\Scripts\Unix\setup-kdc.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\Scripts\krb5.conf">
+    <None Include="..\Scripts\Unix\krb5.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\Scripts\kdc.conf.ubuntu">
+    <None Include="..\Scripts\Unix\kdc.conf.ubuntu">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\Scripts\kdc.conf.centos">
+    <None Include="..\Scripts\Unix\kdc.conf.centos">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="..\Scripts\kdc.conf.opensuse">
+    <None Include="..\Scripts\Unix\kdc.conf.opensuse">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Compile Include="NegotiateStreamTestForUnix.cs" />
@@ -121,23 +134,20 @@
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.GssBuffer.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\GssSafeHandles.cs">
-       <Link>Common\Microsoft\Win32\SafeHandles\GssSafeHandles.cs</Link>
+      <Link>Common\Microsoft\Win32\SafeHandles\GssSafeHandles.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.cs</Link>
     </Compile>
   </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\System.Net.Security.csproj">
-      <Project>{89F37791-6254-4D60-AB96-ACD3CCA0E771}</Project>
-      <Name>System.Net.Security</Name>
-      <!-- tests build as linux/osx but product binary is unix -->
-      <OSGroup Condition="'$(TargetsUnix)' == 'true'">Unix</OSGroup>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup>
     <SupplementalTestData Include="$(PackagesDir)System.Net.TestData\1.0.0-prerelease\content\**\*.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\pkg\System.Net.Security.pkgproj">
+      <Project>{89f37791-6254-4d60-ab96-acd3cca0e771}</Project>
+      <Name>System.Net.Security</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

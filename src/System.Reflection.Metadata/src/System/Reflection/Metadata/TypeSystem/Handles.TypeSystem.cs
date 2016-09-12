@@ -2315,6 +2315,11 @@ namespace System.Reflection.Metadata
             return new StringHandle(StringHandleType.VirtualString | (uint)virtualIndex);
         }
 
+        internal static StringHandle FromWriterVirtualIndex(int virtualIndex)
+        {
+            return new StringHandle(StringHandleType.VirtualString | (uint)virtualIndex);
+        }
+
         internal StringHandle WithWinRTPrefix()
         {
             Debug.Assert(StringKind == StringKind.Plain);
@@ -2336,9 +2341,9 @@ namespace System.Reflection.Metadata
 
         public static implicit operator Handle(StringHandle handle)
         {
-            // VTT... -> V111 10TT
+            // VTTx xxxx xxxx xxxx  xxxx xxxx xxxx xxxx -> V111 10TT
             return new Handle(
-                (byte)((handle._value & HeapHandleType.VirtualBit) >> 24 | HandleType.String | (handle._value & StringHandleType.NonVirtualTypeMask) >> 26),
+                (byte)((handle._value & HeapHandleType.VirtualBit) >> 24 | HandleType.String | (handle._value & StringHandleType.NonVirtualTypeMask) >> HeapHandleType.OffsetBitCount),
                 (int)(handle._value & HeapHandleType.OffsetMask));
         }
 
@@ -2349,12 +2354,14 @@ namespace System.Reflection.Metadata
                 Throw.InvalidCast();
             }
 
-            // V111 10TT -> VTT...
+            // V111 10TT -> VTTx xxxx xxxx xxxx  xxxx xxxx xxxx xxxx
             return new StringHandle(
                 (handle.VType & HandleType.VirtualBit) << 24 | 
                 (handle.VType & HandleType.NonVirtualStringTypeMask) << HeapHandleType.OffsetBitCount | 
                 (uint)handle.Offset);
         }
+
+        internal uint RawValue => _value;
 
         internal bool IsVirtual
         {
@@ -2381,6 +2388,12 @@ namespace System.Reflection.Metadata
         {
             Debug.Assert(IsVirtual && StringKind != StringKind.WinRTPrefixed);
             return (VirtualIndex)(_value & HeapHandleType.OffsetMask);
+        }
+
+        internal int GetWriterVirtualIndex()
+        {
+            Debug.Assert(IsNil || IsVirtual && StringKind == StringKind.Virtual);
+            return (int)(_value & HeapHandleType.OffsetMask);
         }
 
         internal StringKind StringKind
@@ -2607,6 +2620,8 @@ namespace System.Reflection.Metadata
                 (handle.VType & HandleType.VirtualBit) << TokenTypeIds.RowIdBitCount |
                 (uint)handle.Offset);
         }
+
+        internal uint RawValue => _value;
 
         public bool IsNil
         {

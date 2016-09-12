@@ -133,10 +133,10 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Reduces the node and then calls the visitor delegate on the reduced expression.
+        /// Reduces the node and then calls the <see cref="ExpressionVisitor.Visit(Expression)"/> method passing the reduced expression.
         /// Throws an exception if the node isn't reducible.
         /// </summary>
-        /// <param name="visitor">An instance of <see cref="Func{Expression, Expression}"/>.</param>
+        /// <param name="visitor">An instance of <see cref="ExpressionVisitor"/>.</param>
         /// <returns>The expression being visited, or an expression which should replace it in the tree.</returns>
         /// <remarks>
         /// Override this method to provide logic to walk the node's children. 
@@ -284,7 +284,12 @@ namespace System.Linq.Expressions
 
         private static void RequiresCanRead(Expression expression, string paramName)
         {
-            ExpressionUtils.RequiresCanRead(expression, paramName);
+            ExpressionUtils.RequiresCanRead(expression, paramName, -1);
+        }
+
+        private static void RequiresCanRead(Expression expression, string paramName, int index)
+        {
+            ExpressionUtils.RequiresCanRead(expression, paramName, index);
         }
 
         private static void RequiresCanRead(IReadOnlyList<Expression> items, string paramName)
@@ -293,7 +298,7 @@ namespace System.Linq.Expressions
             // this is called a lot, avoid allocating an enumerator if we can...
             for (int i = 0; i < items.Count; i++)
             {
-                RequiresCanRead(items[i], paramName);
+                RequiresCanRead(items[i], paramName, i);
             }
         }
 
@@ -337,7 +342,7 @@ namespace System.Linq.Expressions
                     return;
             }
 
-            throw new ArgumentException(Strings.ExpressionMustBeWriteable, paramName);
+            throw Error.ExpressionMustBeWriteable(paramName);
         }
     }
 }

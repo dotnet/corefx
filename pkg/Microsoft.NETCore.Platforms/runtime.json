@@ -65,7 +65,9 @@
         "win10-arm": {
             "#import": [ "win10", "win81-arm" ]
         },
-
+        "win10-arm64": {
+            "#import": [ "win10" ]
+        },
 
         "aot": {
             "#import": [ "any" ]
@@ -129,6 +131,9 @@
         "win10-arm-aot": {
             "#import": [ "win10-aot", "win10-arm", "win81-arm-aot" ]
         },
+        "win10-arm64-aot": {
+            "#import": [ "win10-aot", "win10-arm64" ]
+        },
 
         "unix": {
             "#import": [ "any" ]
@@ -156,6 +161,13 @@
         },
         "osx.10.11-x64": {
             "#import": [ "osx.10.11", "osx.10.10-x64" ]
+        },
+
+        "osx.10.12": {
+            "#import": [ "osx.10.11" ]
+        },
+        "osx.10.12-x64": {
+            "#import": [ "osx.10.12", "osx.10.11-x64" ]
         },
         
         "linux": {
@@ -215,7 +227,7 @@
         },
 
         "ol.7.0": {
-            "#import": [ "ol.7", "rhel.7.0-x64" ]
+            "#import": [ "ol.7", "rhel.7.0" ]
         },
         "ol.7.0-x64": {
             "#import": [ "ol.7", "ol.7-x64", "rhel.7.0-x64" ]
@@ -249,13 +261,6 @@
             "#import": [ "centos.7", "centos-x64", "rhel.7-x64" ]
         },
 
-        "centos.7.1": {
-            "#import": [ "centos.7" ]
-        },
-        "centos.7.1-x64": {
-            "#import": [ "centos.7", "centos.7-x64" ]
-        },
-
         "debian": {
             "#import": [ "linux" ]
         },
@@ -268,13 +273,6 @@
         },
         "debian.8-x64": {
             "#import": [ "debian.8", "debian-x64" ]
-        },
-
-        "debian.8.2": {
-            "#import": [ "debian" ]
-        },
-        "debian.8.2-x64": {
-            "#import": [ "debian.8.2", "debian.8-x64" ]
         },
 
         "ubuntu": {
@@ -293,33 +291,40 @@
         },
 
         "ubuntu.14.10": {
-            "#import": [ "ubuntu.14.04" ]
+            "#import": [ "ubuntu" ]
         },
         "ubuntu.14.10-x64": {
-            "#import": [ "ubuntu.14.10", "ubuntu.14.04-x64" ]
+            "#import": [ "ubuntu.14.10", "ubuntu-x64" ]
         },
 
         "ubuntu.15.04": {
-            "#import": [ "ubuntu.14.10" ]
+            "#import": [ "ubuntu" ]
         },
         "ubuntu.15.04-x64": {
-            "#import": [ "ubuntu.15.04", "ubuntu.14.10-x64" ]
+            "#import": [ "ubuntu.15.04", "ubuntu-x64" ]
         },
 
         "ubuntu.15.10": {
-            "#import": [ "ubuntu.15.04" ]
+            "#import": [ "ubuntu" ]
         },
         "ubuntu.15.10-x64": {
-            "#import": [ "ubuntu.15.10", "ubuntu.15.04-x64" ]
+            "#import": [ "ubuntu.15.10", "ubuntu-x64" ]
         },
 
         "ubuntu.16.04": {
-            "#import": [ "ubuntu.15.10" ]
+            "#import": [ "ubuntu" ]
         },
         "ubuntu.16.04-x64": {
-            "#import": [ "ubuntu.16.04", "ubuntu.15.10-x64" ]
+            "#import": [ "ubuntu.16.04", "ubuntu-x64" ]
         },
-        
+
+        "ubuntu.16.10": {
+            "#import": [ "ubuntu" ]
+        },
+        "ubuntu.16.10-x64": {
+            "#import": [ "ubuntu.16.10", "ubuntu-x64" ]
+        },
+
         "linuxmint.17": {
             "#import": [ "ubuntu.14.04" ]
         },
@@ -346,6 +351,55 @@
         },
         "linuxmint.17.3-x64": {
             "#import": [ "linuxmint.17.3", "linuxmint.17.2-x64" ]
+        },
+
+        "linuxmint.18": {
+            "#import": [ "ubuntu.16.04" ]
+        },
+        "linuxmint.18-x64": {
+            "#import": [ "linuxmint.18", "ubuntu.16.04-x64" ]
+        },
+
+        "fedora": {
+            "#import": [ "linux" ]
+        },
+        "fedora-x64": {
+            "#import": [ "fedora", "linux-x64" ]
+        },
+
+        "fedora.23": {
+            "#import": [ "fedora" ]
+        },
+        "fedora.23-x64": {
+            "#import": [ "fedora.23", "fedora-x64" ]
+        },
+
+        "fedora.24": {
+            "#import": [ "fedora" ]
+        },
+        "fedora.24-x64": {
+            "#import": [ "fedora.24", "fedora-x64" ]
+        },
+
+        "opensuse": {
+            "#import": [ "linux" ]
+        },
+        "opensuse-x64": {
+            "#import": [ "opensuse", "linux-x64" ]
+        },
+
+        "opensuse.13.2": {
+            "#import": [ "opensuse" ]
+        },
+        "opensuse.13.2-x64": {
+            "#import": [ "opensuse.13.2", "opensuse-x64" ]
+        },
+
+        "opensuse.42.1": {
+            "#import": [ "opensuse" ]
+        },
+        "opensuse.42.1-x64": {
+            "#import": [ "opensuse.42.1", "opensuse-x64" ]
         }
     }
  }
