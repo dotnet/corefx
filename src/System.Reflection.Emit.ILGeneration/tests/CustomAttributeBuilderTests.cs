@@ -279,6 +279,7 @@ namespace System.Reflection.Emit.Tests
         [Theory]
         [InlineData(new Type[] { typeof(int) }, new object[] { 123, false })]
         [InlineData(new Type[] { typeof(int), typeof(bool) }, new object[] { false, 123 })]
+        [InlineData(new Type[] { typeof(string), typeof(int), typeof(string), typeof(int) }, new object[] { "TestString", 10 })]
         public void ConstructorInfo_ObjectArray_NonMatching_ThrowsArgumentException(Type[] paramTypes, object[] paramValues)
         {
             ConstructorInfo constructor = typeof(TestClass).GetConstructor(paramTypes);
@@ -402,6 +403,7 @@ namespace System.Reflection.Emit.Tests
             public TestClass() { }
             public TestClass(int i) { }
             public TestClass(int i, bool b) { }
+            public TestClass(string s1, int i1, string s2, int i2) { }
 
             private TestClass(int i, int j, int k) { }
 
