@@ -56,7 +56,7 @@ namespace System
 
         public Random(int Seed)
         {
-            int ii;
+            int ii = 0;
             int mj, mk;
 
             //Initialize our Seed array.
@@ -66,7 +66,7 @@ namespace System
             mk = 1;
             for (int i = 1; i < 55; i++)
             {  //Apparently the range [1..55] is special (Knuth) and so we're wasting the 0'th position.
-                ii = (21 * i) % 55;
+                if ((ii += 21) >= 55) ii -= 55;
                 SeedArray[ii] = mk;
                 mk = mj - mk;
                 if (mk < 0) mk += MBIG;
