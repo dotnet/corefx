@@ -274,8 +274,16 @@ namespace System.Xml.Serialization
 
                 if (text.Mapping is SpecialMapping)
                 {
-                    // #10592: To Support text.Mapping being SpecialMapping
-                    throw new NotImplementedException("text.Mapping is SpecialMapping");
+                    SpecialMapping special = (SpecialMapping)text.Mapping;
+                    switch(special.TypeDesc.Kind)
+                    {
+                        case TypeKind.Node:
+                            o = Document.CreateTextNode(ReadString());
+                            break;
+                        default:
+                            throw new InvalidOperationException(SR.Format(SR.XmlInternalError));
+                    }
+
                 }
                 else
                 {
@@ -309,7 +317,6 @@ namespace System.Xml.Serialization
             o = null;
             return false;
         }
-
         bool IsSequence(Member[] members)
         {
             // #10586: Currently the reflection based method treat this kind of type as normal types. 
