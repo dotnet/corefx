@@ -10,6 +10,8 @@ namespace System.Reflection.Tests
 {
     public class TypeTests
     {
+        private const BindingFlags DefaultBindingFlags = BindingFlags.Public | BindingFlags.Instance;
+
         [Theory]
         [InlineData(typeof(TI_Class), nameof(TI_Class), MemberTypes.TypeInfo)]
         [InlineData(typeof(TI_Class.PublicNestedType), nameof(TI_Class.PublicNestedType), MemberTypes.NestedType)]
@@ -36,7 +38,7 @@ namespace System.Reflection.Tests
         public static IEnumerable<object[]> GetEvents_TestData()
         {
             string[] expectedPublic = new string[] { "WeightChanged" };
-            yield return new object[] { BindingFlags.Default, expectedPublic };
+            yield return new object[] { DefaultBindingFlags, expectedPublic };
 
             yield return new object[] { BindingFlags.IgnoreCase, new string[0] };
             yield return new object[] { BindingFlags.DeclaredOnly, new string[0] };
@@ -126,16 +128,13 @@ namespace System.Reflection.Tests
         [MemberData(nameof(GetEvents_TestData))]
         public void GetEvents(BindingFlags bindingAttributes, string[] expectedNames)
         {
-            if (bindingAttributes == BindingFlags.Default)
+            if (bindingAttributes == DefaultBindingFlags)
             {
-                string[] eventNames = typeof(Cat<int>).GetEvents().Select(eventInfo => eventInfo.Name).ToArray();
-                Assert.All(expectedNames, name => eventNames.Contains(name));
+                string[] eventNames1 = typeof(Cat<int>).GetEvents().Select(eventInfo => eventInfo.Name).ToArray();
+                Assert.All(expectedNames, name => eventNames1.Contains(name));
             }
-            else
-            {
-                string[] eventNames = typeof(Cat<int>).GetEvents(bindingAttributes).Select(eventInfo => eventInfo.Name).ToArray();
-                Assert.All(expectedNames, name => eventNames.Contains(name));
-            }
+            string[] eventNames2 = typeof(Cat<int>).GetEvents(bindingAttributes).Select(eventInfo => eventInfo.Name).ToArray();
+            Assert.All(expectedNames, name => eventNames2.Contains(name));
         }
 
         public static IEnumerable<object[]> GetFields_TestData()
@@ -179,14 +178,14 @@ namespace System.Reflection.Tests
 
         public static IEnumerable<object[]> GetMember_TestData()
         {
-            yield return new object[] { typeof(GenericClassUsingNestedInterfaces<string, int>), "Field*", BindingFlags.Default, new string[] { "FieldZero", "FieldOne", "FieldTwo", "FieldThree" } };
-            yield return new object[] { typeof(GenericClassUsingNestedInterfaces<string, int>), "Return*", BindingFlags.Default, new string[] { "ReturnAndSetFieldZero", "ReturnAndSetFieldThree" } };
-            yield return new object[] { typeof(GenericClassWithInterface<int>), "*", BindingFlags.Default, new string[] { "ReturnAndSetFieldZero", "GenericMethod", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "field" } };
-            yield return new object[] { typeof(IGenericInterface<>), "ReturnAndSetFieldZero", BindingFlags.Default, new string[] { "ReturnAndSetFieldZero" } };
+            yield return new object[] { typeof(GenericClassUsingNestedInterfaces<string, int>), "Field*", DefaultBindingFlags, new string[] { "FieldZero", "FieldOne", "FieldTwo", "FieldThree" } };
+            yield return new object[] { typeof(GenericClassUsingNestedInterfaces<string, int>), "Return*", DefaultBindingFlags, new string[] { "ReturnAndSetFieldZero", "ReturnAndSetFieldThree" } };
+            yield return new object[] { typeof(GenericClassWithInterface<int>), "*", DefaultBindingFlags, new string[] { "ReturnAndSetFieldZero", "GenericMethod", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "field" } };
+            yield return new object[] { typeof(IGenericInterface<>), "ReturnAndSetFieldZero", DefaultBindingFlags, new string[] { "ReturnAndSetFieldZero" } };
 
-            yield return new object[] { typeof(GenericArrayWrapperClass<>), "*", BindingFlags.Default, new string[] { "get_myProperty", "set_myProperty", "get_Item", "set_Item", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "myProperty", "Item" } };
+            yield return new object[] { typeof(GenericArrayWrapperClass<>), "*", DefaultBindingFlags, new string[] { "get_myProperty", "set_myProperty", "get_Item", "set_Item", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "myProperty", "Item" } };
 
-            yield return new object[] { typeof(Cat<int>), "*", BindingFlags.Default, new string[] { "add_WeightChanged", "remove_WeightChanged", "get_StuffConsumed", "Eat", "Puke", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "StuffConsumed", "WeightChanged" } };
+            yield return new object[] { typeof(Cat<int>), "*", DefaultBindingFlags, new string[] { "add_WeightChanged", "remove_WeightChanged", "get_StuffConsumed", "Eat", "Puke", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "StuffConsumed", "WeightChanged" } };
 
             yield return new object[] { typeof(GenericArrayWrapperClass<int>), "*", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, new string[] { "get_myProperty", "set_myProperty", "get_Item", "set_Item", ".ctor", "myProperty", "Item", "_field", "_field1" } };
         }
@@ -195,23 +194,20 @@ namespace System.Reflection.Tests
         [MemberData(nameof(GetMember_TestData))]
         public void GetMember(Type type, string name, BindingFlags bindingAttributes, string[] expectedNames)
         {
-            if (bindingAttributes == BindingFlags.Default)
+            if (bindingAttributes == DefaultBindingFlags)
             {
-                string[] memberNames = type.GetMember(name).Select(member => member.Name).ToArray();
-                Assert.All(expectedNames, expectedName => memberNames.Contains(expectedName));
+                string[] memberNames1 = type.GetMember(name).Select(member => member.Name).ToArray();
+                Assert.All(expectedNames, expectedName => memberNames1.Contains(expectedName));
                 if (name == "*")
                 {
                     Assert.Equal(type.GetMembers(), type.GetMember(name));
                 }
             }
-            else
+            string[] memberNames2 = type.GetMember(name, bindingAttributes).Select(member => member.Name).ToArray();
+            Assert.All(expectedNames, expectedName => memberNames2.Contains(expectedName));
+            if (name == "*")
             {
-                string[] memberNames = type.GetMember(name, bindingAttributes).Select(member => member.Name).ToArray();
-                Assert.All(expectedNames, expectedName => memberNames.Contains(expectedName));
-                if (name == "*")
-                {
-                    Assert.Equal(type.GetMembers(bindingAttributes), type.GetMember(name, bindingAttributes));
-                }
+                Assert.Equal(type.GetMembers(bindingAttributes), type.GetMember(name, bindingAttributes));
             }
         }
         public static IEnumerable<object[]> GetMethods_TestData()
@@ -308,25 +304,22 @@ namespace System.Reflection.Tests
         [MemberData(nameof(GetMethods_TestData))]
         public void GetMethods(Type type, BindingFlags bindingAttributes, string[] expectedNames)
         {
-            if (bindingAttributes == BindingFlags.Default)
+            if (bindingAttributes == DefaultBindingFlags)
             {
-                string[] methodNames = type.GetMethods().Select(method => method.Name).ToArray();
-                Assert.All(expectedNames, name => methodNames.Contains(name));
+                string[] methodNames1 = type.GetMethods().Select(method => method.Name).ToArray();
+                Assert.All(expectedNames, name => methodNames1.Contains(name));
             }
-            else
-            {
-                string[] methodNames = type.GetMethods(bindingAttributes).Select(method => method.Name).ToArray();
-                Assert.All(expectedNames, name => methodNames.Contains(name));
-            }
+            string[] methodNames2 = type.GetMethods(bindingAttributes).Select(method => method.Name).ToArray();
+            Assert.All(expectedNames, name => methodNames2.Contains(name));
         }
 
         public static IEnumerable<object[]> GetProperties_TestData()
         {
-            yield return new object[] { typeof(GenericClassWithVarArgMethod<string>), BindingFlags.Default, new string[] { "publicField" } };
-            yield return new object[] { typeof(Cat<int>), BindingFlags.Default, new string[] { "StuffConsumed" } };
-            yield return new object[] { typeof(GenericClassWithVarArgMethod<int>), BindingFlags.Default, new string[] { "publicField" } };
-            yield return new object[] { typeof(GenericClassWithVarArgMethod<>), BindingFlags.Default, new string[] { "publicField" } };
-            yield return new object[] { typeof(ClassWithVarArgMethod), BindingFlags.Default, new string[] { "publicField" } };
+            yield return new object[] { typeof(GenericClassWithVarArgMethod<string>), DefaultBindingFlags, new string[] { "publicField" } };
+            yield return new object[] { typeof(Cat<int>), DefaultBindingFlags, new string[] { "StuffConsumed" } };
+            yield return new object[] { typeof(GenericClassWithVarArgMethod<int>), DefaultBindingFlags, new string[] { "publicField" } };
+            yield return new object[] { typeof(GenericClassWithVarArgMethod<>), DefaultBindingFlags, new string[] { "publicField" } };
+            yield return new object[] { typeof(ClassWithVarArgMethod), DefaultBindingFlags, new string[] { "publicField" } };
 
             yield return new object[] { typeof(string), BindingFlags.IgnoreCase, new string[0] };
             yield return new object[] { typeof(string), BindingFlags.DeclaredOnly, new string[0] };
@@ -394,26 +387,23 @@ namespace System.Reflection.Tests
         [MemberData(nameof(GetProperties_TestData))]
         public void GetProperties(Type type, BindingFlags bindingAttributes, string[] expectedNames)
         {
-            if (bindingAttributes == BindingFlags.Default)
+            if (bindingAttributes == DefaultBindingFlags)
             {
-                string[] propertyNames = type.GetProperties().Select(method => method.Name).ToArray();
-                Assert.All(expectedNames, name => propertyNames.Contains(name));
+                string[] propertyNames1 = type.GetProperties().Select(method => method.Name).ToArray();
+                Assert.All(expectedNames, name => propertyNames1.Contains(name));
             }
-            else
-            {
-                string[] propertyNames = type.GetProperties(bindingAttributes).Select(method => method.Name).ToArray();
-                Assert.All(expectedNames, name => propertyNames.Contains(name));
-            }
+            string[] propertyNames2 = type.GetProperties(bindingAttributes).Select(method => method.Name).ToArray();
+            Assert.All(expectedNames, name => propertyNames2.Contains(name));
         }
 
         public static IEnumerable<object[]> GetProperty_TestData()
         {
-            yield return new object[] { typeof(GenericClassWithVarArgMethod<string>), "publicField", BindingFlags.Default, typeof(string), new Type[0] };
-            yield return new object[] { typeof(Cat<int>), "StuffConsumed", BindingFlags.Default, null, new Type[0] };
-            yield return new object[] { typeof(GenericClassWithVarArgMethod<int>), "publicField", BindingFlags.Default, typeof(int), new Type[0] };
+            yield return new object[] { typeof(GenericClassWithVarArgMethod<string>), "publicField", DefaultBindingFlags, typeof(string), new Type[0] };
+            yield return new object[] { typeof(Cat<int>), "StuffConsumed", DefaultBindingFlags, null, new Type[0] };
+            yield return new object[] { typeof(GenericClassWithVarArgMethod<int>), "publicField", DefaultBindingFlags, typeof(int), new Type[0] };
             yield return new object[] { typeof(GenericClassWithVarArgMethod<>), "publicField", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, new Type[0] };
-            yield return new object[] { typeof(GenericClassWithVarArgMethod<>), "publicField", BindingFlags.Default, null, new Type[0] };
-            yield return new object[] { typeof(ClassWithVarArgMethod), "publicField", BindingFlags.Default, null, new Type[0] };
+            yield return new object[] { typeof(GenericClassWithVarArgMethod<>), "publicField", DefaultBindingFlags, null, new Type[0] };
+            yield return new object[] { typeof(ClassWithVarArgMethod), "publicField", DefaultBindingFlags, null, new Type[0] };
         }
 
         [Theory]
@@ -422,14 +412,11 @@ namespace System.Reflection.Tests
         {
             if (returnType == null)
             {
-                if (bindingAttributes == BindingFlags.Default)
+                if (bindingAttributes == DefaultBindingFlags)
                 {
                     Assert.Equal(name, type.GetProperty(name).Name);
                 }
-                else
-                {
-                    Assert.Equal(name, type.GetProperty(name, bindingAttributes).Name);
-                }
+                Assert.Equal(name, type.GetProperty(name, bindingAttributes).Name);
             }
             else
             {
