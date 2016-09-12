@@ -281,6 +281,14 @@ namespace System.Linq
                 var nextCollection = next as ICollection<TSource>;
                 if (nextCollection != null)
                 {
+                    if (_nextIndex == int.MaxValue - 2)
+                    {
+                        // In the unlikely case of this many concatenations, if we produced a ConcatNCollectionIterator
+                        // with int.MaxValue then state would overflow before it matched it's index.
+                        // So we use the naïve approach of just having a left and right sequence.
+                        return new Concat2EnumerableIterator<TSource>(this, next);
+                    }
+
                     return new ConcatNCollectionIterator<TSource>(this, nextCollection, _nextIndex + 1);
                 }
                 
