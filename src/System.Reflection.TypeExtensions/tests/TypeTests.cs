@@ -10,7 +10,7 @@ namespace System.Reflection.Tests
 {
     public class TypeTests
     {
-        private const BindingFlags DefaultBindingFlags = BindingFlags.Public | BindingFlags.Instance;
+        private const BindingFlags DefaultBindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
         [Theory]
         [InlineData(typeof(TI_Class), nameof(TI_Class), MemberTypes.TypeInfo)]
@@ -29,10 +29,11 @@ namespace System.Reflection.Tests
         [InlineData(typeof(GenericArrayWrapperClass<>), new string[] { "T Item [Int32]" })]
         [InlineData(typeof(GenericClass<>), new string[] { "T ReturnAndSetField(T)" })]
         [InlineData(typeof(GenericClass<int>), new string[] { "Int32 ReturnAndSetField(Int32)" })]
-        public void GetDefaultMembers(Type type, string[] expectedToString)
+        public void GetDefaultMembers(Type type, string[] expectedNames)
         {
             string[] memberNames = type.GetDefaultMembers().Select(member => member.Name).ToArray();
-            Assert.All(expectedToString, toString => memberNames.Contains(toString));
+            Assert.Equal(expectedNames.Length, memberNames.Length);
+            Assert.All(expectedNames, toString => memberNames.Contains(toString));
         }
 
         public static IEnumerable<object[]> GetEvents_TestData()
@@ -131,9 +132,11 @@ namespace System.Reflection.Tests
             if (bindingAttributes == DefaultBindingFlags)
             {
                 string[] eventNames1 = typeof(Cat<int>).GetEvents().Select(eventInfo => eventInfo.Name).ToArray();
+                Assert.Equal(expectedNames.Length, eventNames1.Length);
                 Assert.All(expectedNames, name => eventNames1.Contains(name));
             }
             string[] eventNames2 = typeof(Cat<int>).GetEvents(bindingAttributes).Select(eventInfo => eventInfo.Name).ToArray();
+            Assert.Equal(expectedNames.Length, eventNames2.Length);
             Assert.All(expectedNames, name => eventNames2.Contains(name));
         }
 
@@ -151,6 +154,7 @@ namespace System.Reflection.Tests
         public void GetFields(Type type, string[] expectedNames)
         {
             string[] fieldNames = type.GetFields().Select(field => field.Name).ToArray();
+            Assert.Equal(expectedNames.Length, fieldNames.Length);
             Assert.All(expectedNames, name => fieldNames.Contains(name));
         }
 
@@ -165,7 +169,9 @@ namespace System.Reflection.Tests
         [InlineData(typeof(NonGenericClassWithGenericInterface), new Type[] { typeof(IGenericInterface<int>) })]
         public void GetInterfaces(Type type, Type[] expected)
         {
-            Assert.Equal(expected, type.GetInterfaces());
+            Type[] interfaces = type.GetInterfaces();
+            Assert.Equal(expected.Length, interfaces.Length);
+            Assert.All(expected, interfaceType => interfaces.Equals(interfaceType));
         }
 
         [Fact]
@@ -185,9 +191,16 @@ namespace System.Reflection.Tests
 
             yield return new object[] { typeof(GenericArrayWrapperClass<>), "*", DefaultBindingFlags, new string[] { "get_myProperty", "set_myProperty", "get_Item", "set_Item", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "myProperty", "Item" } };
 
-            yield return new object[] { typeof(Cat<int>), "*", DefaultBindingFlags, new string[] { "add_WeightChanged", "remove_WeightChanged", "get_StuffConsumed", "Eat", "Puke", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "StuffConsumed", "WeightChanged" } };
+            yield return new object[] { typeof(Cat<int>), "*", DefaultBindingFlags, new string[] { "add_WeightChanged", "remove_WeightChanged", "get_StuffConsumed", "Eat", "Puke", "ToString", "Equals", "GetHashCode", "GetType", ".ctor", "StuffConsumed", "PStuffConsumed", "get_PStuffConsumed", "set_PStuffConsumed", "WeightChanged" } };
 
             yield return new object[] { typeof(GenericArrayWrapperClass<int>), "*", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, new string[] { "get_myProperty", "set_myProperty", "get_Item", "set_Item", ".ctor", "myProperty", "Item", "_field", "_field1" } };
+
+            yield return new object[] { typeof(GenericClassUsingNestedInterfaces<string, int>), "*", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, new string[] { "ReturnAndSetFieldZero", "SetFieldOne", "SetFieldTwo", "ReturnAndSetFieldThree", ".ctor", "FieldZero", "FieldOne", "FieldTwo", "FieldThree" } };
+            yield return new object[] { typeof(GenericClassWithInterface<int>), "*", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, new string[] { "GenericMethod", "ReturnAndSetFieldThree", ".ctor", "field" } };
+            yield return new object[] { typeof(IGenericInterface<>), "*", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, new string[] { "ReturnAndSetFieldZero" } };
+            yield return new object[] { typeof(GenericArrayWrapperClass<>), "*", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, new string[] { "get_myProperty", "set_myProperty", "get_Item", "set_Item", ".ctor", "myProperty", "Item", "_field", "_field1" } };
+
+            yield return new object[] { typeof(GenericArrayWrapperClass<int>), "*", DefaultBindingFlags, new string[] { "get_myProperty", "set_myProperty", "get_Item", "set_Item", ".ctor", "myProperty", "Item", "ToString", "Equals", "GetHashCode", "GetType" } };
         }
 
         [Theory]
@@ -197,17 +210,27 @@ namespace System.Reflection.Tests
             if (bindingAttributes == DefaultBindingFlags)
             {
                 string[] memberNames1 = type.GetMember(name).Select(member => member.Name).ToArray();
+                Assert.Equal(expectedNames.Length, memberNames1.Length);
                 Assert.All(expectedNames, expectedName => memberNames1.Contains(expectedName));
                 if (name == "*")
                 {
-                    Assert.Equal(type.GetMembers(), type.GetMember(name));
+                    MemberInfo[] memberNamesFromAsterix1 = type.GetMember(name);
+                    MemberInfo[] memberNamesFromMethod1 = type.GetMembers();
+
+                    Assert.Equal(memberNamesFromAsterix1.Length, memberNamesFromMethod1.Length);
+                    Assert.All(memberNamesFromAsterix1, memberInfo => memberNamesFromMethod1.Contains(memberInfo));
                 }
             }
             string[] memberNames2 = type.GetMember(name, bindingAttributes).Select(member => member.Name).ToArray();
+            Assert.Equal(expectedNames.Length, memberNames2.Length);
             Assert.All(expectedNames, expectedName => memberNames2.Contains(expectedName));
             if (name == "*")
             {
-                Assert.Equal(type.GetMembers(bindingAttributes), type.GetMember(name, bindingAttributes));
+                MemberInfo[] memberNamesFromAsterix2 = type.GetMember(name, bindingAttributes);
+                MemberInfo[] memberNamesFromMethod2 = type.GetMembers(bindingAttributes);
+
+                Assert.Equal(memberNamesFromAsterix2.Length, memberNamesFromMethod2.Length);
+                Assert.All(memberNamesFromAsterix2, memberInfo => memberNamesFromMethod2.Contains(memberInfo));
             }
         }
         public static IEnumerable<object[]> GetMethods_TestData()
@@ -285,7 +308,7 @@ namespace System.Reflection.Tests
             yield return new object[] { typeof(int), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "GetTypeCode", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType", "GetType", "Finalize", "MemberwiseClone" } };
             yield return new object[] { typeof(int), BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "GetTypeCode", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType", "GetType", "Finalize", "MemberwiseClone" } };
             yield return new object[] { typeof(int), BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "GetTypeCode", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType" } };
-            yield return new object[] { typeof(int), BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType" } };
+            yield return new object[] { typeof(int), BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "GetTypeCode", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType" } };
 
             yield return new object[] { typeof(int), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "Parse", "Parse", "Parse", "Parse", "TryParse", "TryParse" } };
             yield return new object[] { typeof(int), BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "Parse", "Parse", "Parse", "Parse", "TryParse", "TryParse" } };
@@ -295,7 +318,7 @@ namespace System.Reflection.Tests
             yield return new object[] { typeof(int), BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "Parse", "Parse", "Parse", "Parse", "TryParse", "TryParse", "GetTypeCode", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType", "GetType", "Finalize", "MemberwiseClone" } };
             yield return new object[] { typeof(int), BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "Parse", "Parse", "Parse", "Parse", "TryParse", "TryParse", "GetTypeCode", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType", "GetType", "Finalize", "MemberwiseClone" } };
             yield return new object[] { typeof(int), BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "Parse", "Parse", "Parse", "Parse", "TryParse", "TryParse", "GetTypeCode", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType" } };
-            yield return new object[] { typeof(int), BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "Parse", "Parse", "Parse", "Parse", "TryParse", "TryParse", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType" } };
+            yield return new object[] { typeof(int), BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, new string[] { "CompareTo", "CompareTo", "Equals", "Equals", "GetHashCode", "ToString", "ToString", "ToString", "ToString", "Parse", "Parse", "Parse", "Parse", "TryParse", "TryParse", "GetTypeCode", "System.IConvertible.ToBoolean", "System.IConvertible.ToChar", "System.IConvertible.ToSByte", "System.IConvertible.ToByte", "System.IConvertible.ToInt16", "System.IConvertible.ToUInt16", "System.IConvertible.ToInt32", "System.IConvertible.ToUInt32", "System.IConvertible.ToInt64", "System.IConvertible.ToUInt64", "System.IConvertible.ToSingle", "System.IConvertible.ToDouble", "System.IConvertible.ToDecimal", "System.IConvertible.ToDateTime", "System.IConvertible.ToType" } };
 
             yield return new object[] { typeof(int), BindingFlags.FlattenHierarchy, new string[0] };
         }
@@ -307,16 +330,18 @@ namespace System.Reflection.Tests
             if (bindingAttributes == DefaultBindingFlags)
             {
                 string[] methodNames1 = type.GetMethods().Select(method => method.Name).ToArray();
+                Assert.Equal(expectedNames.Length, methodNames1.Length);
                 Assert.All(expectedNames, name => methodNames1.Contains(name));
             }
             string[] methodNames2 = type.GetMethods(bindingAttributes).Select(method => method.Name).ToArray();
+            Assert.Equal(expectedNames.Length, methodNames2.Length);
             Assert.All(expectedNames, name => methodNames2.Contains(name));
         }
 
         public static IEnumerable<object[]> GetProperties_TestData()
         {
             yield return new object[] { typeof(GenericClassWithVarArgMethod<string>), DefaultBindingFlags, new string[] { "publicField" } };
-            yield return new object[] { typeof(Cat<int>), DefaultBindingFlags, new string[] { "StuffConsumed" } };
+            yield return new object[] { typeof(Cat<int>), DefaultBindingFlags, new string[] { "StuffConsumed", "PStuffConsumed" } };
             yield return new object[] { typeof(GenericClassWithVarArgMethod<int>), DefaultBindingFlags, new string[] { "publicField" } };
             yield return new object[] { typeof(GenericClassWithVarArgMethod<>), DefaultBindingFlags, new string[] { "publicField" } };
             yield return new object[] { typeof(ClassWithVarArgMethod), DefaultBindingFlags, new string[] { "publicField" } };
@@ -390,9 +415,11 @@ namespace System.Reflection.Tests
             if (bindingAttributes == DefaultBindingFlags)
             {
                 string[] propertyNames1 = type.GetProperties().Select(method => method.Name).ToArray();
+                Assert.Equal(expectedNames.Length, propertyNames1.Length);
                 Assert.All(expectedNames, name => propertyNames1.Contains(name));
             }
             string[] propertyNames2 = type.GetProperties(bindingAttributes).Select(method => method.Name).ToArray();
+            Assert.Equal(expectedNames.Length, propertyNames2.Length);
             Assert.All(expectedNames, name => propertyNames2.Contains(name));
         }
 
@@ -514,20 +541,28 @@ namespace System.Reflection.Tests
 
             Assert.All(type.GetFields(declaredFlags), field => typeInfo.DeclaredFields.Contains(field));
             Assert.All(type.GetMethods(declaredFlags), method => typeInfo.DeclaredMethods.Contains(method));
-            Assert.Equal(type.GetNestedTypes(declaredFlags), typeInfo.DeclaredNestedTypes.Select(aTypeInfo => aTypeInfo.AsType()));
-            Assert.All(type.GetProperties(declaredFlags), method => typeInfo.DeclaredProperties.Contains(method));
-            Assert.All(type.GetEvents(declaredFlags), method => typeInfo.DeclaredEvents.Contains(method));
-            Assert.All(type.GetConstructors(declaredFlags), method => typeInfo.DeclaredConstructors.Contains(method));
+            Assert.All(type.GetNestedTypes(declaredFlags), nestedType => typeInfo.DeclaredNestedTypes.Contains(nestedType.GetTypeInfo()));
+            Assert.All(type.GetProperties(declaredFlags), property => typeInfo.DeclaredProperties.Contains(property));
+            Assert.All(type.GetEvents(declaredFlags), eventInfo => typeInfo.DeclaredEvents.Contains(eventInfo));
+            Assert.All(type.GetConstructors(declaredFlags), constructor => typeInfo.DeclaredConstructors.Contains(constructor));
 
-            Assert.Equal(type.GetEvents(), typeInfo.AsType().GetEvents());
-            Assert.Equal(type.GetFields(), typeInfo.AsType().GetFields());
-            Assert.Equal(type.GetMethods(), typeInfo.AsType().GetMethods());
-            Assert.Equal(type.GetProperties(), typeInfo.AsType().GetProperties());
+            Assert.All(type.GetEvents(), eventInfo => typeInfo.AsType().GetEvents().Contains(eventInfo));
+            Assert.All(type.GetFields(), fieldInfo => typeInfo.AsType().GetFields().Contains(fieldInfo));
+            Assert.All(type.GetMethods(), methodInfo => typeInfo.AsType().GetMethods().Contains(methodInfo));
+            Assert.All(type.GetProperties(), propertyInfo => typeInfo.AsType().GetProperties().Contains(propertyInfo));
+
             Assert.Equal(type.GetType(), typeInfo.GetType());
             Assert.True(type.Equals(typeInfo));
 
             BindingFlags allFlags = BindingFlags.DeclaredOnly | BindingFlags.FlattenHierarchy | BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
-            Assert.Equal(type.GetNestedTypes(allFlags), typeInfo.AsType().GetNestedTypes(allFlags));
+            Assert.All(type.GetNestedTypes(allFlags), nestedType => typeInfo.AsType().GetNestedTypes(allFlags).Contains(nestedType));
+
+            Assert.Equal(type.GetTypeInfo().IsClass, typeInfo.IsClass);
+            Assert.Equal(type.GetTypeInfo().IsPublic, typeInfo.IsPublic);
+            Assert.Equal(type.GetTypeInfo().IsGenericType, typeInfo.IsGenericType);
+            Assert.Equal(type.GetTypeInfo().IsImport, typeInfo.IsImport);
+            Assert.Equal(type.GetTypeInfo().IsEnum, typeInfo.IsEnum);
+            Assert.Equal(type.GetTypeInfo().IsGenericTypeDefinition, typeInfo.IsGenericTypeDefinition);
         }
     }
 
