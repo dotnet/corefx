@@ -142,8 +142,8 @@ namespace System.Linq
                     if (previousCollections != null)
                     {
                         // Since ConcatNCollectionIterator.GetEnumerable does not call into this method,
-                        // it is safe to call GetEnumerable on it here. It also makes things faster since
-                        // we know we'll only ever run the above typecast once per call of this method.
+                        // it is safe to call GetEnumerable on it here. It also makes things faster, since
+                        // the above type-cast will only ever be run once per call of this method.
                         return previousCollections.GetEnumerable(index);
                     }
 
@@ -205,7 +205,6 @@ namespace System.Linq
 
             public override TSource[] ToArray()
             {
-                // TODO: Once #11525 is merged, we must add tests ensuring this throws on overflow.
                 int firstCount = _first.Count; // Cache an interface method call
                 int totalCount = checked(firstCount + _second.Count);
 
