@@ -34,6 +34,7 @@
   </PropertyGroup>
   <!-- Shared CoreCLR and .NET Native -->
   <ItemGroup Condition="'$(TargetGroup)' != 'net462'">
+    <Compile Include="System\Random.cs" />
     <Compile Include="System\BitConverter.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
     <Compile Include="System\IO\Path.cs" />
@@ -153,7 +154,6 @@
   </ItemGroup>
   <!-- WINDOWS: .NET Native -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcore50aot' Or '$(TargetGroup)' == 'netstandard15aot'">
-    <Compile Include="System\Random.cs" />
     <Compile Include="System\Net\Configuration\UnicodeDecodingConformance.cs" />
     <Compile Include="System\Net\Configuration\UnicodeEncodingConformance.cs" />
     <Compile Include="System\IO\Path.WinRT.cs" Condition="'$(TargetGroup)' == 'netcore50aot' And '$(TargetsWindows)'=='true'" />
