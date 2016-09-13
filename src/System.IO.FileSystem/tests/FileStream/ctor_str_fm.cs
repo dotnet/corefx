@@ -47,6 +47,20 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void FileModeCreateDosDevicePath()
+        {
+            using (CreateFileStream(@"\\.\" + GetTestFilePath(), FileMode.Create))
+            { }
+        }
+
+        [Fact]
+        public void FileModeCreateExtendedDosDevicePath()
+        {
+            using (CreateFileStream(@"\\?\" + GetTestFilePath(), FileMode.Create))
+            { }
+        }
+
+        [Fact]
         public void FileModeCreateExisting()
         {
             string fileName = GetTestFilePath();
@@ -200,9 +214,21 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(PlatformID.Windows)]
-        public void RawLongPathAccess_ThrowsArgumentException()
+        public void RawLongPathAccess_DoesNotThrowArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => CreateFileStream("\\\\.\\disk\\access\\", FileMode.Open));
+            // We already allow \\?\ and 4.6.2 allows \\.\ when in full trust
+            try
+            {
+                CreateFileStream("\\\\.\\disk\\access\\", FileMode.Open);
+            }
+            catch (ArgumentException)
+            {
+                Assert.True(false, "should not throw Argument Exception");
+            }
+            catch (Exception)
+            {
+                // Probably a directory not found, doesn't matter
+            }
         }
     }
 }

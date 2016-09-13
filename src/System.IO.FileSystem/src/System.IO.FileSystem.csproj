@@ -197,6 +197,7 @@
   </ItemGroup>
   <!-- Windows : Win32 only -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' != 'true' And '$(TargetGroup)' != 'net46'">
+    <Compile Include="System\IO\Win32FileStream.Win32.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.UnsafeCreateFile.cs">
       <Link>Common\Interop\Windows\Interop.UnsafeCreateFile.cs</Link>
     </Compile>
@@ -217,6 +218,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetErrorMode.cs">
       <Link>Common\Interop\Windows\Interop.SetErrorMode.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Ntdll\Interop.NtQueryInformationFile.cs">
+      <Link>Common\Interop\Windows\Interop.NtQueryInformationFile.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Windows : Win32 + WinRT -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">
@@ -234,6 +238,7 @@
     </Compile>
     <Compile Include="System\IO\FileSystem.Current.MuxWin32WinRT.cs" />
     <Compile Include="System\IO\FileSystemInfo.WinRT.cs" />
+    <Compile Include="System\IO\Win32FileStream.WinRT.cs" />
     <Compile Include="System\IO\MultiplexingWin32WinRTFileSystem.cs" />
     <Compile Include="System\IO\WinRTIOExtensions.cs" />
     <Compile Include="System\IO\WinRTFileStream.cs" />
