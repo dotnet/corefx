@@ -1690,33 +1690,9 @@ namespace System.Tests
             foreach (object obj in emptyArray) { }
         }
 
-        public static IEnumerable<object[]> IndexOf_NonGeneric_TestData()
+        public static IEnumerable<object[]> IndexOf_NoDummy_SZArray_TestData()
         {
-            var stringArray = new string[] { null, null, "Hello", "Hello", "Goodbye", "Goodbye", null, null };
-            yield return new object[] { stringArray, null, 0, 8, 0 };
-            yield return new object[] { stringArray, "Hello", 0, 8, 2 };
-            yield return new object[] { stringArray, "Goodbye", 0, 8, 4 };
-            yield return new object[] { stringArray, "Nowhere", 0, 8, -1 };
-            yield return new object[] { stringArray, "Hello", 3, 5, 3 };
-            yield return new object[] { stringArray, "Hello", 4, 4, -1 };
-            yield return new object[] { stringArray, "Goodbye", 2, 3, 4 };
-            yield return new object[] { stringArray, "Goodbye", 2, 2, -1 };
-
-            var stringArrayNoNulls = new string[] { "Hello", "Hello", "Goodbye", "Goodbye" };
-            yield return new object[] { stringArrayNoNulls, null, 0, 4, -1 };
-
-            var enumArray = new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case1 };
-            yield return new object[] { enumArray, Int32Enum.Case1, 0, 3, 0 };
-            yield return new object[] { enumArray, Int32Enum.Case3, 0, 3, -1 };
-
-            var nullableArray = new int?[] { 0, null, 10 };
-            yield return new object[] { nullableArray, null, 0, 3, 1 };
-            yield return new object[] { nullableArray, 10, 0, 3, 2 };
-            yield return new object[] { nullableArray, 100, 0, 3, -1 };
-        }
-
-        public static IEnumerable<object[]> IndexOf_Generic_TestData()
-        {
+            // Int32
             var intArray = new int[] { 7, 7, 8, 8, 9, 9 };
             yield return new object[] { intArray, 8, 0, 6, 2 };
             yield return new object[] { intArray, 8, 3, 3, 3 };
@@ -1724,74 +1700,125 @@ namespace System.Tests
             yield return new object[] { intArray, 9, 2, 2, -1 };
             yield return new object[] { intArray, 9, 2, 3, 4 };
             yield return new object[] { intArray, 10, 0, 6, -1 };
+
+            // String
+            var stringArray = new string[] { null, null, "Hello", "Hello", "Goodbye", "Goodbye", null, null };
+            yield return new object[] { stringArray, "Hello", 0, 8, 2 };
+            yield return new object[] { stringArray, "Goodbye", 0, 8, 4 };
+            yield return new object[] { stringArray, "Nowhere", 0, 8, -1 };
+            yield return new object[] { stringArray, "Hello", 3, 5, 3 };
+            yield return new object[] { stringArray, "Hello", 4, 4, -1 };
+            yield return new object[] { stringArray, "Goodbye", 2, 3, 4 };
+            yield return new object[] { stringArray, "Goodbye", 2, 2, -1 };
+            
+            // Enum
+            var enumArray = new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case1 };
+            yield return new object[] { enumArray, Int32Enum.Case1, 0, 3, 0 };
+            yield return new object[] { enumArray, Int32Enum.Case3, 0, 3, -1 };
+        }
+
+        public static IEnumerable<object[]> IndexOf_Dummy_SZArray_TestData()
+        {
+            yield return new object[] { new string[] { "Hello", "Hello", "Goodbye", "Goodbye" }, null, 0, 4, -1, "dummyString" };
+        }
+
+        public static IEnumerable<object[]> IndexOf_Array_TestData()
+        {
+            // Nullable
+            var nullableArray = new int?[] { 0, null, 10 };
+            yield return new object[] { nullableArray, null, 0, 3, 1 };
+            yield return new object[] { nullableArray, 10, 0, 3, 2 };
+            yield return new object[] { nullableArray, 100, 0, 3, -1 };
         }
 
         [Theory]
-        [MemberData(nameof(IndexOf_NonGeneric_TestData))]
-        [MemberData(nameof(IndexOf_Generic_TestData))]
-        public static void IndexOf_NonGeneric(Array array, object value, int startIndex, int count, int expected)
+        [MemberData(nameof(IndexOf_NoDummy_SZArray_TestData))]
+        public static void IndexOf_SZArray<T>(T[] array, T value, int startIndex, int count, int expected)
+        {
+            IndexOf_SZArray(array, value, startIndex, count, expected, value);
+        }
+
+        [Theory]
+        [MemberData(nameof(IndexOf_Dummy_SZArray_TestData))]
+        public static void IndexOf_SZArray<T>(T[] array, T value, int startIndex, int count, int expected, T dummy)
         {
             if (startIndex + count == array.Length)
             {
-                // Use IndexOf(Array, object) or IndexOf(Array, object, int)
                 if (startIndex == 0)
                 {
-                    // Use IndexOf(Array, object)
+                    // Use IndexOf<T>(T[])
                     Assert.Equal(expected, Array.IndexOf(array, value));
                 }
-                // Use IndexOf(Array, object, int)
+                // Use IndexOf<T>(T[], int)
                 Assert.Equal(expected, Array.IndexOf(array, value, startIndex));
             }
-            // Use IndexOf(Array, object, int, int)
+            // Use IndexOf<T>(T[], int, int)
             Assert.Equal(expected, Array.IndexOf(array, value, startIndex, count));
+
+            // Basic: forward SZArray
+            IndexOf_Array(array, value, startIndex, count, expected);
+
+            // Advanced: convert SZArray to an array with non-zero lower bound
+            const int LowerBound = 5;
+            Array nonZeroLowerBoundArray = NonZeroLowerBoundArray(array, LowerBound);
+            IndexOf_Array(nonZeroLowerBoundArray, value, startIndex + LowerBound, count, expected + LowerBound);
         }
 
         [Theory]
-        [MemberData(nameof(IndexOf_Generic_TestData))]
-        public static void IndexOf_Generic(int[] array, int value, int startIndex, int count, int expected)
+        [MemberData(nameof(IndexOf_Array_TestData))]
+        public static void IndexOf_Array(Array array, object value, int startIndex, int count, int expected)
         {
-            if (startIndex + count == array.Length)
+            if (startIndex + count == array.GetUpperBound(0))
             {
-                // Use IndexOf<T>(T[], T) or IndexOf(T[], T, int)
-                if (startIndex == 0)
+                if (startIndex == array.GetLowerBound(0))
                 {
-                    // Use IndexOf<T>(T[], T)
+                    // Use IndexOf(Array)
                     Assert.Equal(expected, Array.IndexOf(array, value));
                 }
-                // Use IndexOf<T>(T[], T, int)
+                // Use IndexOf(Array, int)
                 Assert.Equal(expected, Array.IndexOf(array, value, startIndex));
             }
-            // Use IndexOf<T>(T[], T, int, int)
+            // Use IndexOf(Array, int, int)
             Assert.Equal(expected, Array.IndexOf(array, value, startIndex, count));
         }
 
         [Fact]
-        public static void IndexOf_Invalid()
+        public static void IndexOf_NullArray_ThrowsArgumentNullException()
         {
-            var intArray = new int[] { 1, 2, 3 };
-            var stringArray = new string[] { "a", "b", "c" };
-
-            // Array is null
             Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, ""));
             Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, "", 0));
             Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf((int[])null, "", 0, 0));
             Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, ""));
             Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, "", 0));
             Assert.Throws<ArgumentNullException>("array", () => Array.IndexOf(null, "", 0, 0));
+        }
 
-            // Start index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(intArray, "", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(intArray, "", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(stringArray, "", -1));
-            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(stringArray, "", -1, 0));
+        [Fact]
+        public static void IndexOf_MultimensionalArray_ThrowsRankException()
+        {
+            Assert.Throws<RankException>(() => Array.IndexOf(new string[0, 0], ""));
+            Assert.Throws<RankException>(() => Array.IndexOf(new string[0, 0], "", 0));
+            Assert.Throws<RankException>(() => Array.IndexOf(new string[0, 0], "", 0, 0));
+        }
 
-            // Count < 0
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(intArray, "", 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(stringArray, "", 0, -1));
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(1)]
+        public static void IndexOf_InvalidStartIndex_ThrowsArgumentOutOfRangeException(int startIndex)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new int[0], "", startIndex));
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new int[0], "", startIndex, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new string[0], "", startIndex));
+            Assert.Throws<ArgumentOutOfRangeException>("startIndex", () => Array.IndexOf(new string[0], "", startIndex, 0));
+        }
 
-            // Start index + count > array.Length
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(intArray, "", intArray.Length, 1));
-            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(stringArray, "", stringArray.Length, 1));
+        [Theory]
+        [InlineData(0, -1)]
+        [InlineData(0, 1)]
+        public static void IndexOf_InvalidCount_ThrowsArgumentOutOfRangeException(int startIndex, int count)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(new int[0], "", startIndex, count));
+            Assert.Throws<ArgumentOutOfRangeException>("count", () => Array.IndexOf(new string[0], "", startIndex, count));
         }
 
         [Fact]
