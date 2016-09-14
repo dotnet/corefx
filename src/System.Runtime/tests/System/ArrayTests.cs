@@ -2177,15 +2177,16 @@ namespace System.Tests
 
         public static void Reverse(Array array, int index, int length, Array expected)
         {
-            if (index == 0 && length == array.Length)
+            if (index == array.GetLowerBound(0) && length == array.Length)
             {
                 // Use Reverse(Array)
-                Array testArray = (Array)array.Clone();
-                Array.Reverse(testArray);
-                Assert.Equal(expected, testArray);
+                Array arrayClone1 = (Array)array.Clone();
+                Array.Reverse(arrayClone1);
+                Assert.Equal(expected, arrayClone1);
             }
             // Use Reverse(Array, int, int)
-            Array.Reverse(array, index, length);
+            Array arrayClone2 = (Array)array.Clone();
+            Array.Reverse(arrayClone2, index, length);
             Assert.Equal(expected, expected);
         }
 
