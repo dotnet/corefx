@@ -639,6 +639,11 @@ namespace System.IO.Compression
                 }
             }
         }
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            return StreamHelpers.ArrayPoolCopyToAsync(this, destination, bufferSize, cancellationToken: cancellationToken);
+        }
     }
 }
 

@@ -62,6 +62,9 @@
     <Compile Include="System\IO\Compression\DeflateZLib\Inflater.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\ZLibException.cs" />
     <Compile Include="System\IO\Compression\DeflateZLib\ZLibNative.cs" />
+    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.cs">
+      <Link>Common\System\IO\StreamHelpers.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Windows specific files common to both net46 and Core -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
