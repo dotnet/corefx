@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
 
+#if !NET_NATIVE
 namespace System.Xml.Serialization
 {
     using System;
@@ -1670,3 +1671,4 @@ namespace System.Xml.Serialization
         }
     }
 }
+#endif

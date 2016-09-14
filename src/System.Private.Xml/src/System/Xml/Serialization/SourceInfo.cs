@@ -10,6 +10,7 @@ using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Xml.Extensions;
 
+#if !NET_NATIVE
 namespace System.Xml.Serialization
 {
     internal class SourceInfo
@@ -262,3 +263,4 @@ namespace System.Xml.Serialization
         }
     }
 }
+#endif
