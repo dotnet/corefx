@@ -146,7 +146,7 @@ namespace System.Linq.Expressions.Tests
             yield return new object[] { Expression.Property(obj, simpleIndexer, new Expression[] { Expression.Constant(1) }), 5 };
 
             PropertyInfo advancedIndexer = typeof(PropertyAndFields).GetProperties().First(prop => prop.GetIndexParameters().Length == 2);
-            yield return new object[] { Expression.Property(obj, simpleIndexer, new Expression[] { Expression.Constant(1), Expression.Constant(2) }), 5 };
+            yield return new object[] { Expression.Property(obj, advancedIndexer, new Expression[] { Expression.Constant(1), Expression.Constant(2) }), 5 };
 
             // IndexExpression for non-indexed property
             yield return new object[] { Expression.Property(null, typeof(PropertyAndFields).GetProperty(nameof(PropertyAndFields.StaticInt32Property2)), new Expression[0]), 6 };
@@ -322,7 +322,8 @@ namespace System.Linq.Expressions.Tests
                 Expression.Constant(1),
                 Expression.Empty()
             );
-            Expression index = Expression.Property(Expression.Constant(new PropertyAndFields()), typeof(PropertyAndFields).GetProperty("Item"), new Expression[] { tryExpression });
+            PropertyInfo simpleIndexer = typeof(PropertyAndFields).GetProperties().First(prop => prop.GetIndexParameters().Length == 1);
+            Expression index = Expression.Property(Expression.Constant(new PropertyAndFields()), simpleIndexer, new Expression[] { tryExpression });
 
             Func<bool> func = Expression.Lambda<Func<bool>>(
                 Expression.Block(
