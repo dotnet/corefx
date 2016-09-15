@@ -6,8 +6,7 @@
     <ProjectReference Include="..\ref\System.Web.HttpUtility.csproj">
       <SupportedFramework>net46;netcore50;netcoreapp1.0;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Web.HttpUtility.builds">
-    </ProjectReference>
+    <ProjectReference Include="..\src\System.Web.HttpUtility.builds"/>
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
