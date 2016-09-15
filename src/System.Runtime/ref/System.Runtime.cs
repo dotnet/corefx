@@ -1944,6 +1944,7 @@ namespace System
         public double TotalSeconds { get { return default(double); } }
         public System.TimeSpan Add(System.TimeSpan ts) { return default(System.TimeSpan); }
         public static int Compare(System.TimeSpan t1, System.TimeSpan t2) { return default(int); }
+        public int CompareTo(object value) { return default(int); }
         public int CompareTo(System.TimeSpan value) { return default(int); }
         public System.TimeSpan Duration() { return default(System.TimeSpan); }
         public override bool Equals(object value) { return default(bool); }
@@ -1974,7 +1975,6 @@ namespace System
         public static System.TimeSpan ParseExact(string input, string[] formats, System.IFormatProvider formatProvider) { return default(System.TimeSpan); }
         public static System.TimeSpan ParseExact(string input, string[] formats, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles) { return default(System.TimeSpan); }
         public System.TimeSpan Subtract(System.TimeSpan ts) { return default(System.TimeSpan); }
-        int System.IComparable.CompareTo(object value) { return default(int); }
         public override string ToString() { return default(string); }
         public string ToString(string format) { return default(string); }
         public string ToString(string format, System.IFormatProvider formatProvider) { return default(string); }
