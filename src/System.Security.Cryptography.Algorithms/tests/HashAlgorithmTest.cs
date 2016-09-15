@@ -17,7 +17,7 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             Verify(ByteUtils.AsciiBytes(input), output);
         }
 
-        protected void Verify(Stream input, string output)
+        private void VerifyComputeHashStream(Stream input, string output)
         {
             byte[] expected = ByteUtils.HexToByteArray(output);
             byte[] actual;
@@ -31,6 +31,29 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             Assert.Equal(expected, actual);
         }
 
+#if netstandard17
+        private void VerifyICryptoTransformStream(Stream input, string output)
+        {
+            byte[] expected = ByteUtils.HexToByteArray(output);
+            byte[] actual;
+
+            using (HashAlgorithm hash = Create())
+            using (CryptoStream cryptoStream = new CryptoStream(input, hash, CryptoStreamMode.Read))
+            {
+                byte[] buffer = new byte[1024]; // A different default than HashAlgorithm which uses 4K
+                int bytesRead;
+                while ((bytesRead = cryptoStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    // CryptoStream will build up the hash
+                }
+
+                actual = hash.Hash;
+            }
+
+            Assert.Equal(expected, actual);
+        }
+#endif
+
         protected void Verify(byte[] input, string output)
         {
             byte[] expected = ByteUtils.HexToByteArray(output);
@@ -40,17 +63,29 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             {
                 Assert.True(hash.HashSize > 0);
                 actual = hash.ComputeHash(input, 0, input.Length);
-            }
 
-            Assert.Equal(expected, actual);
+                Assert.Equal(expected, actual);
+
+#if netstandard17
+                actual = hash.Hash;
+                Assert.Equal(expected, actual);
+#endif
+            }
         }
 
         protected void VerifyRepeating(string input, int repeatCount, string output)
         {
             using (Stream stream = new DataRepeatingStream(input, repeatCount))
             {
-                Verify(stream, output);
+                VerifyComputeHashStream(stream, output);
             }
+
+#if netstandard17
+            using (Stream stream = new DataRepeatingStream(input, repeatCount))
+            {
+                VerifyICryptoTransformStream(stream, output);
+            }
+#endif
         }
 
         [Fact]
@@ -166,14 +201,14 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
                     throw new NotSupportedException();
                 }
 
-                if (count < _data.Length)
-                {
-                    throw new InvalidOperationException();
-                }
-
                 if (_remaining == 0)
                 {
                     return 0;
+                }
+
+                if (count < _data.Length)
+                {
+                    throw new InvalidOperationException();
                 }
 
                 int multiple = count / _data.Length;
