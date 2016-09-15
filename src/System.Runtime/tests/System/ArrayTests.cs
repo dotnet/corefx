@@ -1690,7 +1690,7 @@ namespace System.Tests
             foreach (object obj in emptyArray) { }
         }
 
-        public static IEnumerable<object[]> IndexOf_NoDummy_SZArray_TestData()
+        public static IEnumerable<object[]> IndexOf_SZArray_TestData()
         {
             // SByte
             yield return new object[] { new sbyte[] { 1, 2, 3, 3 }, (sbyte)1, 0, 4, 0 };
@@ -1865,12 +1865,6 @@ namespace System.Tests
             yield return new object[] { new object[2], null, 0, 0, -1 };
         }
 
-        public static IEnumerable<object[]> IndexOf_Dummy_SZArray_TestData()
-        {
-            yield return new object[] { new string[] { "Hello", "Hello", "Goodbye", "Goodbye" }, new object(), 0, 4, -1, "dummyString" };
-            yield return new object[] { new string[] { "Hello", "Hello", "Goodbye", "Goodbye" }, null, 0, 4, -1, "dummyString" };
-        }
-
         public static IEnumerable<object[]> IndexOf_Array_TestData()
         {
             // SByte
@@ -1943,6 +1937,9 @@ namespace System.Tests
             yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2 }, new object(), 0, 2, -1 };
             yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2 }, null, 0, 2, -1 };
 
+            // String
+            yield return new object[] { new string[] { "Hello", "Hello", "Goodbyte", "Goodbye" }, new object(), 0, 4, -1 };
+
             // Nullable
             var nullableArray = new int?[] { 0, null, 10 };
             yield return new object[] { nullableArray, null, 0, 3, 1 };
@@ -1951,15 +1948,8 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(IndexOf_NoDummy_SZArray_TestData))]
+        [MemberData(nameof(IndexOf_SZArray_TestData))]
         public static void IndexOf_SZArray<T>(T[] array, T value, int startIndex, int count, int expected)
-        {
-            IndexOf_SZArray(array, value, startIndex, count, expected, value);
-        }
-
-        [Theory]
-        [MemberData(nameof(IndexOf_Dummy_SZArray_TestData))]
-        public static void IndexOf_SZArray<T>(T[] array, T value, int startIndex, int count, int expected, T dummy)
         {
             if (startIndex + count == array.Length)
             {
@@ -2005,6 +1995,13 @@ namespace System.Tests
             }
             // Use IndexOf(Array, int, int)
             Assert.Equal(expected, Array.IndexOf(array, value, startIndex, count));
+        }
+
+        [Fact]
+        public static void IndexOf_SZArray_NonInferrableEntries()
+        {
+            // Workaround: Move these values to IndexOf_SZArray_TestData if/ when https://github.com/xunit/xunit/pull/965 is available
+            IndexOf_SZArray(new string[] { "Hello", "Hello", "Goodbyte", "Goodbye" }, null, 0, 4, -1);
         }
 
         [Fact]
