@@ -1098,6 +1098,7 @@ namespace System
         public Guid(string g) { throw new System.NotImplementedException(); }
         [System.CLSCompliantAttribute(false)]
         public Guid(uint a, ushort b, ushort c, byte d, byte e, byte f, byte g, byte h, byte i, byte j, byte k) { throw new System.NotImplementedException(); }
+        public int CompareTo(object value) { return default(int); }
         public int CompareTo(System.Guid value) { return default(int); }
         public bool Equals(System.Guid g) { return default(bool); }
         public override bool Equals(object o) { return default(bool); }
@@ -1107,11 +1108,10 @@ namespace System
         public static bool operator !=(System.Guid a, System.Guid b) { return default(bool); }
         public static System.Guid Parse(string input) { return default(System.Guid); }
         public static System.Guid ParseExact(string input, string format) { return default(System.Guid); }
-        int System.IComparable.CompareTo(object value) { return default(int); }
-        string System.IFormattable.ToString(string format, System.IFormatProvider provider) { return default(string); }
         public byte[] ToByteArray() { return default(byte[]); }
         public override string ToString() { return default(string); }
         public string ToString(string format) { return default(string); }
+        public string ToString(string format, System.IFormatProvider provider) { return default(string); }
         public static bool TryParse(string input, out System.Guid result) { result = default(System.Guid); return default(bool); }
         public static bool TryParseExact(string input, string format, out System.Guid result) { result = default(System.Guid); return default(bool); }
     }
