@@ -23,7 +23,7 @@ namespace System.Tests
         public static void GetTypeCode(Enum e, TypeCode expected)
         {
             Assert.Equal(expected, e.GetTypeCode());
-        } 
+        }
 
 #pragma warning disable 618
         [Fact]
