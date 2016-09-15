@@ -963,14 +963,10 @@ namespace System
         long System.IConvertible.ToInt64(System.IFormatProvider provider) { return default(long); }
         sbyte System.IConvertible.ToSByte(System.IFormatProvider provider) { return default(sbyte); }
         float System.IConvertible.ToSingle(System.IFormatProvider provider) { return default(float); }
-        [System.ObsoleteAttribute("The provider argument is not used. Please use ToString().")]
-        string System.IConvertible.ToString(System.IFormatProvider provider) { return default(string); }
         object System.IConvertible.ToType(System.Type type, System.IFormatProvider provider) { return default(object); }
         ushort System.IConvertible.ToUInt16(System.IFormatProvider provider) { return default(ushort); }
         uint System.IConvertible.ToUInt32(System.IFormatProvider provider) { return default(uint); }
         ulong System.IConvertible.ToUInt64(System.IFormatProvider provider) { return default(ulong); }
-        [System.ObsoleteAttribute("The provider argument is not used. Please use ToString(String).")]
-        string System.IFormattable.ToString(string format, System.IFormatProvider provider) { return default(string); }
         public static object ToObject(System.Type enumType, object value) { return default(object); }
         public static object ToObject(System.Type enumType, int value) { return default(object); }
         public static object ToObject(System.Type enumType, long value) { return default(object); }
@@ -986,6 +982,10 @@ namespace System
         public static object ToObject(System.Type enumType, ushort value) { return default(object); }
         public override string ToString() { return default(string); }
         public string ToString(string format) { return default(string); }
+        [System.ObsoleteAttribute("The provider argument is not used. Please use ToString().")]
+        public string ToString(System.IFormatProvider provider) { return default(string); }        
+        [System.ObsoleteAttribute("The provider argument is not used. Please use ToString(String).")]
+        public string ToString(string format, System.IFormatProvider provider) { return default(string); }
         public static bool TryParse<TEnum>(string value, out TEnum result) where TEnum : struct { result = default(TEnum); return default(bool); }
         public static bool TryParse<TEnum>(string value, bool ignoreCase, out TEnum result) where TEnum : struct { result = default(TEnum); return default(bool); }
     }
