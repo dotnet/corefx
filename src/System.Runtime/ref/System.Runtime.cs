@@ -2763,6 +2763,7 @@ namespace System
         public int Minor { get { return default(int); } }
         public short MinorRevision { get { return default(short); } }
         public int Revision { get { return default(int); } }
+        public int CompareTo(object version) { return default(int); }
         public int CompareTo(System.Version value) { return default(int); }
         public override bool Equals(object obj) { return default(bool); }
         public bool Equals(System.Version obj) { return default(bool); }
@@ -2774,7 +2775,6 @@ namespace System
         public static bool operator <(System.Version v1, System.Version v2) { return default(bool); }
         public static bool operator <=(System.Version v1, System.Version v2) { return default(bool); }
         public static System.Version Parse(string input) { return default(System.Version); }
-        int System.IComparable.CompareTo(object version) { return default(int); }
         public override string ToString() { return default(string); }
         public string ToString(int fieldCount) { return default(string); }
         public static bool TryParse(string input, out System.Version result) { result = default(System.Version); return default(bool); }
