@@ -45,10 +45,8 @@ namespace System.Linq.Expressions.Tests
                 get { return _underlyingIndexerField1; }
                 set
                 {
-                    if (i == 1)
-                    {
-                        _underlyingIndexerField1 = value;
-                    }
+                    Assert.Equal(1, i);
+                    _underlyingIndexerField1 = value;
                 }
             }
 
@@ -58,10 +56,9 @@ namespace System.Linq.Expressions.Tests
                 get { return _underlyingIndexerField2; }
                 set
                 {
-                    if (i == 1 && j == 2)
-                    {
-                        _underlyingIndexerField2 = value;
-                    }
+                    Assert.Equal(1, i);
+                    Assert.Equal(2, j);
+                    _underlyingIndexerField2 = value;
                 }
             }
 
@@ -88,10 +85,8 @@ namespace System.Linq.Expressions.Tests
                 get { return _underlyingIndexerField; }
                 set
                 {
-                    if (i == 1)
-                    {
-                        _underlyingIndexerField = value;
-                    }
+                    Assert.Equal(1, i);
+                    _underlyingIndexerField = value;
                 }
             }
         }
