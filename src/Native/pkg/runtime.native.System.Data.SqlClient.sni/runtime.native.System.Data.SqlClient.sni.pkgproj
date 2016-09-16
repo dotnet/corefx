@@ -13,7 +13,7 @@
       <Version>$(PackageVersion)-$(ExternalExpectedPrerelease)</Version>
     </Dependency>
     <Dependency Include="runtime.win10-arm64.runtime.native.System.Data.SqlClient.sni">
-      <Version>$(PackageVersion)-$(ExternalExpectedPrerelease)</Version>
+      <Version>$(RuntimeWin10Arm64RuntimeNativeSystemDataSqlClientSniVersion)</Version>
     </Dependency>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
