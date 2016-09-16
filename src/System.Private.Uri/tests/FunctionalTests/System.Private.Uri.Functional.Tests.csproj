@@ -29,7 +29,6 @@
     <Compile Include="UriRelativeResolutionTest.cs" />
     <Compile Include="UriTests.cs" />
     <Compile Include="WebSocketsUriParserTest.cs" />
-    
     <!-- Test common -->
     <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
       <Link>Common\System\ThreadCultureChange.cs</Link>
@@ -42,6 +41,8 @@
       <OutputItemType>Content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+      <Project>{4AC5343E-6E31-4BA5-A795-0493AE7E9008}</Project>
+      <Name>System.Private.Uri</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

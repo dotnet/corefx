@@ -27,7 +27,14 @@ namespace System
             {
                 byte* numbers = stackalloc byte[NumberOfLabels];
                 isLoopback = Parse(str, numbers, start, end);
-                return numbers[0] + "." + numbers[1] + "." + numbers[2] + "." + numbers[3];
+                
+                // Call ToString explicitly to avoid boxing
+                string first = numbers[0].ToString();
+                string second = numbers[1].ToString();
+                string third = numbers[2].ToString();
+                string fourth = numbers[3].ToString();
+                
+                return first + "." + second + "." + third + "." + fourth;
             }
         }
 
