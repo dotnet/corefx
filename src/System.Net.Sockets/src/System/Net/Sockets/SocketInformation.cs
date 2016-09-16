@@ -120,11 +120,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                return remoteEndPoint;
+                return _remoteEndPoint;
             }
             set
             {
-                remoteEndPoint = value;
+                _remoteEndPoint = value;
             }
         }
     }
