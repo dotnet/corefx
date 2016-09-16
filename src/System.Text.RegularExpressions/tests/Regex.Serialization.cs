@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters.Tests;
 using Xunit;
 
 namespace RegexTests
@@ -25,12 +26,7 @@ namespace RegexTests
         [MemberData(nameof(RoundTripRegexes))]
         public void RegexRoundTripSerialization(Regex regex, string input, string expectedFirstGroup)
         {
-            var formatter = new BinaryFormatter();
-            var ms = new MemoryStream();
-            formatter.Serialize(ms, regex);
-
-            ms.Position = 0;
-            var newRegex = (Regex) formatter.Deserialize(ms);
+            var newRegex = BinaryFormatterHelpers.Clone(regex);
             var match = newRegex.Match(input);
             Assert.Equal(regex.ToString(), newRegex.ToString());
             Assert.Equal(regex.Options, newRegex.Options);
@@ -50,15 +46,7 @@ namespace RegexTests
         [MemberData(nameof(RegexMatchTimeoutExceptions))]
         public void RegexMatchTimeoutExceptionSerialization(RegexMatchTimeoutException ex)
         {
-            var formatter = new BinaryFormatter();
-            var ms = new MemoryStream();
-            formatter.Serialize(ms, ex);
-
-            ms.Position = 0;
-            var newEx = (RegexMatchTimeoutException) formatter.Deserialize(ms);
-            Assert.Equal(ex.Input, newEx.Input);
-            Assert.Equal(ex.Pattern, newEx.Pattern);
-            Assert.Equal(ex.MatchTimeout, newEx.MatchTimeout);
+            BinaryFormatterHelpers.AssertRoundtrips(ex, e => e.Input, e => e.Pattern, e => e.MatchTimeout);
         }
     }
 }

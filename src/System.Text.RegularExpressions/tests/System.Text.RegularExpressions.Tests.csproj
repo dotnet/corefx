@@ -36,6 +36,9 @@
     <Compile Include="PrecompiledRegexScenarioTest.cs" />
     <Compile Include="RegexGroupNameTests.cs" />
     <Compile Include="Regex.Serialization.cs" />
+    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
+      <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.Text.RegularExpressions.pkgproj">
