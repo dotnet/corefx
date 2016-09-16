@@ -2,9 +2,6 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
-    <ProjectReference Include="..\ref\System.Reflection.Emit.Lightweight.csproj">
-      <SupportedFramework>net45;netcoreapp1.0;wp8;$(AllXamarinFrameworks)</SupportedFramework>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Reflection.Emit.Lightweight.builds" />
     <InboxOnTargetFramework Include="net45" />
     <InboxOnTargetFramework Include="wp80" />
@@ -12,6 +9,9 @@
     <!-- MonoTouch, Xamarin.iOS, Xamarin.TVOS, and Xamarain.WatchOS don't actually support this, 
          but do support a PCL profile that contained it so we must treat as inbox -->
     <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
+    <SupportedFramework Include="$(AllXamarinFrameworks)">
+      <Version>$(AssemblyVersion)</Version>
+    </SupportedFramework>
     <!-- This dependency is not suported on AOT, but that is OK since this package is
          restricted from AOT via runtime.json -->
     <SuppressDependencyError Include="System.Reflection.Emit.ILGeneration">
