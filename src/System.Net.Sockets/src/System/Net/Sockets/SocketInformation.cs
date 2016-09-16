@@ -13,7 +13,7 @@ namespace System.Net.Sockets
         private SocketInformationOptions _options;
 
         //[OptionalField]
-        EndPoint remoteEndPoint;
+        private EndPoint _remoteEndPoint;
 
         public byte[] ProtocolInformation
         {
