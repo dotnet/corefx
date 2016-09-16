@@ -159,6 +159,8 @@ namespace System.Collections.Specialized.Tests
         }
 
         [Theory]
+        [MemberData(nameof(HtmlEncodeDecodeData))]
+        [MemberData(nameof(HtmlDecodingData))]
         public void HtmlDecode_TextWriter(string decoded, string encoded)
         {
             var sw = new StringWriter();
