@@ -9,8 +9,8 @@ namespace System.Net.Sockets
     //[Serializable]
     public struct SocketInformation
     {
-        byte[] protocolInformation;
-        SocketInformationOptions options;
+        private byte[] _protocolInformation;
+        private SocketInformationOptions _options;
 
         //[OptionalField]
         EndPoint remoteEndPoint;
@@ -19,11 +19,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                return protocolInformation;
+                return _protocolInformation;
             }
             set
             {
-                protocolInformation = value;
+                _protocolInformation = value;
             }
         }
 
@@ -32,11 +32,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                return options;
+                return _options;
             }
             set
             {
-                options = value;
+                _options = value;
             }
         }
 
@@ -44,17 +44,17 @@ namespace System.Net.Sockets
         {
             get
             {
-                return ((options & SocketInformationOptions.NonBlocking) != 0);
+                return ((_options & SocketInformationOptions.NonBlocking) != 0);
             }
             set
             {
                 if (value)
                 {
-                    options |= SocketInformationOptions.NonBlocking;
+                    _options |= SocketInformationOptions.NonBlocking;
                 }
                 else
                 {
-                    options &= ~SocketInformationOptions.NonBlocking;
+                    _options &= ~SocketInformationOptions.NonBlocking;
                 }
             }
         }
@@ -63,17 +63,17 @@ namespace System.Net.Sockets
         {
             get
             {
-                return ((options & SocketInformationOptions.Connected) != 0);
+                return ((_options & SocketInformationOptions.Connected) != 0);
             }
             set
             {
                 if (value)
                 {
-                    options |= SocketInformationOptions.Connected;
+                    _options |= SocketInformationOptions.Connected;
                 }
                 else
                 {
-                    options &= ~SocketInformationOptions.Connected;
+                    _options &= ~SocketInformationOptions.Connected;
                 }
             }
         }
@@ -82,17 +82,17 @@ namespace System.Net.Sockets
         {
             get
             {
-                return ((options & SocketInformationOptions.Listening) != 0);
+                return ((_options & SocketInformationOptions.Listening) != 0);
             }
             set
             {
                 if (value)
                 {
-                    options |= SocketInformationOptions.Listening;
+                    _options |= SocketInformationOptions.Listening;
                 }
                 else
                 {
-                    options &= ~SocketInformationOptions.Listening;
+                    _options &= ~SocketInformationOptions.Listening;
                 }
             }
         }
@@ -101,17 +101,17 @@ namespace System.Net.Sockets
         {
             get
             {
-                return ((options & SocketInformationOptions.UseOnlyOverlappedIO) != 0);
+                return ((_options & SocketInformationOptions.UseOnlyOverlappedIO) != 0);
             }
             set
             {
                 if (value)
                 {
-                    options |= SocketInformationOptions.UseOnlyOverlappedIO;
+                    _options |= SocketInformationOptions.UseOnlyOverlappedIO;
                 }
                 else
                 {
-                    options &= ~SocketInformationOptions.UseOnlyOverlappedIO;
+                    _options &= ~SocketInformationOptions.UseOnlyOverlappedIO;
                 }
             }
         }
