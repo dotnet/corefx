@@ -77,6 +77,8 @@ namespace System.Text.RegularExpressions
         protected internal System.Text.RegularExpressions.RegexRunnerFactory factory;
         public static readonly System.TimeSpan InfiniteMatchTimeout;
         protected internal System.TimeSpan internalMatchTimeout;
+        protected System.Collections.IDictionary Caps { get { throw null; } set { } }
+        protected System.Collections.IDictionary CapNames { get { throw null; } set { } }
         protected internal string pattern;
         protected internal System.Text.RegularExpressions.RegexOptions roptions;
         protected Regex() { }
@@ -142,9 +144,9 @@ namespace System.Text.RegularExpressions
         public RegexMatchTimeoutException(string message) { }
         public RegexMatchTimeoutException(string message, System.Exception inner) { }
         public RegexMatchTimeoutException(string regexInput, string regexPattern, System.TimeSpan matchTimeout) { }
-        public string Input { [System.Security.SecurityCriticalAttribute]get { throw null; } }
-        public System.TimeSpan MatchTimeout { [System.Security.SecurityCriticalAttribute]get { throw null; } }
-        public string Pattern { [System.Security.SecurityCriticalAttribute]get { throw null; } }
+        public string Input { get { throw null; } }
+        public System.TimeSpan MatchTimeout { get { throw null; } }
+        public string Pattern { get { throw null; } }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo si, System.Runtime.Serialization.StreamingContext context) { }
     }
     [System.FlagsAttribute]

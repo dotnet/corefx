@@ -57,6 +57,55 @@ namespace System.Text.RegularExpressions
         protected internal string[] capslist;              // if captures are sparse or named captures are used, this is the sorted list of names
         protected internal int capsize;                    // the size of the capture array
 
+        [CLSCompliant(false)]
+        protected IDictionary Caps
+        {
+            get
+            {
+                return caps;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
+                
+                caps = value as Hashtable;
+                if (caps == null)
+                {
+                    caps = new Hashtable();
+                    foreach (DictionaryEntry entry in value)
+                    {
+                        caps.Add(entry.Key, entry.Value);
+                    }
+                }
+            }
+        }
+
+        [CLSCompliant(false)]
+        protected IDictionary CapNames
+        {
+            get
+            {
+                return capnames;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
+                
+                capnames = value as Hashtable;
+                if (capnames == null)
+                {
+                    capnames = new Hashtable();
+                    foreach (DictionaryEntry entry in value)
+                    {
+                        capnames.Add(entry.Key, entry.Value);
+                    }
+                }
+            }
+        }
+
+
         internal ExclusiveReference _runnerref;             // cached runner
         internal SharedReference _replref;                  // cached parsed replacement pattern
         internal RegexCode _code;                           // if interpreted, this is the code for RegexInterpreter
@@ -107,7 +156,7 @@ namespace System.Text.RegularExpressions
             }
             catch (SerializationException)
             {
-                // If this occurs, then assume that this object was serialised using a version
+                // If this occurs, then assume that this object was serialized using a version
                 // before timeout was added. In that case just do not set a timeout
                 // (keep default value)
             }

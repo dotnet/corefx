@@ -38,8 +38,8 @@ namespace RegexTestNamespace
             roptions = RegexOptions.IgnoreCase;
             internalMatchTimeout = TimeSpan.FromTicks(-10000L);
             factory = new RegexFactoryTestClass();
-            caps = new Hashtable {{0, 0}, {1, 1}, {2, 2}};
-            capnames = new Hashtable {{"0", 0}, {"1", 1}, {"output", 2}};
+            Caps = new Hashtable {{0, 0}, {1, 1}, {2, 2}};
+            CapNames = new Hashtable {{"0", 0}, {"1", 1}, {"output", 2}};
             capslist = new string[3];
             capslist[0] = "0";
             capslist[1] = "1";
