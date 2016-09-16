@@ -77,7 +77,9 @@ namespace System.Text.RegularExpressions
         protected internal System.Text.RegularExpressions.RegexRunnerFactory factory;
         public static readonly System.TimeSpan InfiniteMatchTimeout;
         protected internal System.TimeSpan internalMatchTimeout;
+        [System.CLSCompliant(false)]
         protected System.Collections.IDictionary Caps { get { throw null; } set { } }
+        [System.CLSCompliant(false)]
         protected System.Collections.IDictionary CapNames { get { throw null; } set { } }
         protected internal string pattern;
         protected internal System.Text.RegularExpressions.RegexOptions roptions;
