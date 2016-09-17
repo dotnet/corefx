@@ -482,22 +482,70 @@ namespace System.Tests
         [Fact]
         public static void HasFlag_Invalid()
         {
-            Int32Enum e = (Int32Enum)0x3f06;
+            Assert.Throws<ArgumentNullException>("flag", () => Int32Enum.One.HasFlag(null)); // Flag is null
+            Assert.Throws<ArgumentException>(null, () => Int32Enum.One.HasFlag((SimpleEnum)0x3000)); // Enum is not the same type as the instance
+        }
 
-            Assert.Throws<ArgumentNullException>("flag", () => e.HasFlag(null)); // Flag is null
-            Assert.Throws<ArgumentException>(null, () => e.HasFlag((SimpleEnum)0x3000)); // Enum is not the same type as the instance
+        public static IEnumerable<object[]> ToObject_TestData()
+        {
+            // SByte
+            yield return new object[] { typeof(SByteEnum), (SByteEnum)0x42, (SByteEnum)0x42 };
+            yield return new object[] { typeof(SByteEnum), sbyte.MinValue, SByteEnum.Min };
+            yield return new object[] { typeof(SByteEnum), (sbyte)2, SByteEnum.Two };
+            yield return new object[] { typeof(SByteEnum), (sbyte)22, (SByteEnum)22 };
+
+            // Byte
+            yield return new object[] { typeof(ByteEnum), byte.MaxValue, ByteEnum.Max };
+            yield return new object[] { typeof(ByteEnum), (byte)1, ByteEnum.One };
+            yield return new object[] { typeof(ByteEnum), (byte)11, (ByteEnum)11 };
+            yield return new object[] { typeof(ByteEnum), (ulong)0x0ccccccccccccc2aL, (ByteEnum)0x2a };
+
+            // Int16
+            yield return new object[] { typeof(Int16Enum), short.MinValue, Int16Enum.Min };
+            yield return new object[] { typeof(Int16Enum), (short)2, Int16Enum.Two };
+            yield return new object[] { typeof(Int16Enum), (short)44, (Int16Enum)44 };
+
+            // UInt16
+            yield return new object[] { typeof(UInt16Enum), ushort.MaxValue, UInt16Enum.Max };
+            yield return new object[] { typeof(UInt16Enum), (ushort)1, UInt16Enum.One };
+            yield return new object[] { typeof(UInt16Enum), (ushort)33, (UInt16Enum)33 };
+
+            // Int32
+            yield return new object[] { typeof(Int32Enum), int.MinValue, Int32Enum.Min };
+            yield return new object[] { typeof(Int32Enum), 2, Int32Enum.Two };
+            yield return new object[] { typeof(Int32Enum), 66, (Int32Enum)66 };
+            yield return new object[] { typeof(Int32Enum), 'a', (Int32Enum)97 };
+            yield return new object[] { typeof(Int32Enum), 'b', (Int32Enum)98 };
+            yield return new object[] { typeof(Int32Enum), true, (Int32Enum)1 };
+
+            // UInt32
+            yield return new object[] { typeof(UInt32Enum), uint.MaxValue, UInt32Enum.Max };
+            yield return new object[] { typeof(UInt32Enum), (uint)1, UInt32Enum.One };
+            yield return new object[] { typeof(UInt32Enum), (uint)55, (UInt32Enum)55 };
+
+            // Int64
+            yield return new object[] { typeof(Int64Enum), long.MinValue, Int64Enum.Min };
+            yield return new object[] { typeof(Int64Enum), (long)2, Int64Enum.Two };
+            yield return new object[] { typeof(Int64Enum), (long)88, (Int64Enum)88 };
+
+            // UInt64
+            yield return new object[] { typeof(UInt64Enum), ulong.MaxValue, UInt64Enum.Max };
+            yield return new object[] { typeof(UInt64Enum), (ulong)1, UInt64Enum.One };
+            yield return new object[] { typeof(UInt64Enum), (ulong)77, (UInt64Enum)77 };
+            yield return new object[] { typeof(UInt64Enum), (ulong)0x0123456789abcdefL, (UInt64Enum)0x0123456789abcdefL };
+
+            // Char
+            yield return new object[] { s_charEnumType, (char)1, Enum.Parse(s_charEnumType, "Value1") };
+            yield return new object[] { s_charEnumType, (char)2, Enum.Parse(s_charEnumType, "Value2") };
+
+            // Bool
+            yield return new object[] { s_boolEnumType, true, Enum.Parse(s_boolEnumType, "Value1") };
+            yield return new object[] { s_boolEnumType, false, Enum.Parse(s_boolEnumType, "Value2") };
         }
 
         [Theory]
-        [InlineData(typeof(SByteEnum), (sbyte)42, (SByteEnum)42)]
-        [InlineData(typeof(SByteEnum), (SByteEnum)0x42, (SByteEnum)0x42)]
-        [InlineData(typeof(UInt64Enum), (ulong)0x0123456789abcdefL, (UInt64Enum)0x0123456789abcdefL)]
-        [InlineData(typeof(ByteEnum), (ulong)0x0ccccccccccccc2aL, (ByteEnum)0x2a)] // Value overflows
-        [InlineData(typeof(Int32Enum), false, (Int32Enum)0)] // Value is a bool
-        [InlineData(typeof(Int32Enum), true, (Int32Enum)1)] // Value is a bool
-        [InlineData(typeof(Int32Enum), 'a', (Int32Enum)97)] // Value is a char
-        [InlineData(typeof(Int32Enum), 'b', (Int32Enum)98)] // Value is a char
-        public static void ToObject(Type enumType, object value, object expected)
+        [MemberData(nameof(ToObject_TestData))]
+        public static void ToObject(Type enumType, object value, Enum expected)
         {
             Assert.Equal(expected, Enum.ToObject(enumType, value));
         }
@@ -823,58 +871,6 @@ namespace System.Tests
         {
             Assert.Throws<ArgumentNullException>("enumType", () => Enum.GetValues(null)); // Enum type is null
             Assert.Throws<ArgumentException>("enumType", () => Enum.GetValues(typeof(object))); // Enum type is not an enum
-        }
-
-        public static IEnumerable<object[]> ToObject_TestData()
-        {
-            // SByte
-            yield return new object[] { typeof(SByteEnum), sbyte.MinValue, SByteEnum.Min };
-            yield return new object[] { typeof(SByteEnum), (sbyte)2, SByteEnum.Two };
-            yield return new object[] { typeof(SByteEnum), (sbyte)22, (SByteEnum)22 };
-
-            // Byte
-            yield return new object[] { typeof(ByteEnum), byte.MaxValue, ByteEnum.Max };
-            yield return new object[] { typeof(ByteEnum), (byte)1, ByteEnum.One };
-            yield return new object[] { typeof(ByteEnum), (byte)11, (ByteEnum)11 };
-
-            // Int16
-            yield return new object[] { typeof(Int16Enum), short.MinValue, Int16Enum.Min };
-            yield return new object[] { typeof(Int16Enum), (short)2, Int16Enum.Two };
-            yield return new object[] { typeof(Int16Enum), (short)44, (Int16Enum)44 };
-
-            // UInt16
-            yield return new object[] { typeof(UInt16Enum), ushort.MaxValue, UInt16Enum.Max };
-            yield return new object[] { typeof(UInt16Enum), (ushort)1, UInt16Enum.One };
-            yield return new object[] { typeof(UInt16Enum), (ushort)33, (UInt16Enum)33 };
-
-            // Int32
-            yield return new object[] { typeof(Int32Enum), int.MinValue, Int32Enum.Min };
-            yield return new object[] { typeof(Int32Enum), 2, Int32Enum.Two };
-            yield return new object[] { typeof(Int32Enum), 66, (Int32Enum)66 };
-
-            // UInt32
-            yield return new object[] { typeof(UInt32Enum), uint.MaxValue, UInt32Enum.Max };
-            yield return new object[] { typeof(UInt32Enum), (uint)1, UInt32Enum.One };
-            yield return new object[] { typeof(UInt32Enum), (uint)55, (UInt32Enum)55 };
-
-            // Int64
-            yield return new object[] { typeof(Int64Enum), long.MinValue, Int64Enum.Min };
-            yield return new object[] { typeof(Int64Enum), (long)2, Int64Enum.Two };
-            yield return new object[] { typeof(Int64Enum), (long)88, (Int64Enum)88 };
-
-            // UInt64
-            yield return new object[] { typeof(UInt64Enum), ulong.MaxValue, UInt64Enum.Max };
-            yield return new object[] { typeof(UInt64Enum), (ulong)1, UInt64Enum.One };
-            yield return new object[] { typeof(UInt64Enum), (ulong)77, (UInt64Enum)77 };
-        }
-
-        [Theory]
-        [MemberData(nameof(ToObject_TestData))]
-        public static void ToObject(Type type, object value, Enum expected)
-        {
-            var typedValue = Convert.ChangeType(value, value.GetType());
-            var enumObject = Enum.ToObject(type, typedValue);
-            Assert.Equal(expected, enumObject);
         }
 
         public static IEnumerable<object[]> ToString_Format_TestData()
