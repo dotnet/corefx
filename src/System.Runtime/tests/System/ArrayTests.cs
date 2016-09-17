@@ -569,12 +569,13 @@ namespace System.Tests
             if (index == 0 && length == array.Length)
             {
                 // Use IList.Clear()
-                Array testArray = (Array)array.Clone();
-                ((IList)testArray).Clear();
-                Assert.Equal(expected, testArray);
+                Array arrayClone1 = (Array)array.Clone();
+                ((IList)arrayClone1).Clear();
+                Assert.Equal(expected, arrayClone1);
             }
-            Array.Clear(array, index, length);
-            Assert.Equal(expected, array);
+            Array arrayClone2 = (Array)array.Clone();
+            Array.Clear(arrayClone2, index, length);
+            Assert.Equal(expected, arrayClone2);
         }
 
         [Fact]
