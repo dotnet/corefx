@@ -15,6 +15,8 @@
   <!-- Full package version strings that are used in other parts of the build. -->
   <PropertyGroup>
     <AppXRunnerVersion>1.0.3-prerelease-00614-01</AppXRunnerVersion>
+    <RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion>4.0.1</RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion>
+    <RuntimeWin10RuntimeNativeSystemIOCompressionVersion>4.0.1</RuntimeWin10RuntimeNativeSystemIOCompressionVersion>
 
     <!-- Depend on win10-arm64 version from master to provide support, although this will not be shipped. -->
     <RuntimeWin10Arm64RuntimeNativeSystemDataSqlClientSniVersion>4.3.0-beta-24514-00</RuntimeWin10Arm64RuntimeNativeSystemDataSqlClientSniVersion>
