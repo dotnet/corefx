@@ -473,6 +473,7 @@ namespace System.Tests
         [MemberData(nameof(UnsupportedEnumType_TestData))]
         public static void IsDefined_UnsupportedEnumType_ThrowsInvalidOperationException(Type enumType, object value)
         {
+            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
             Exception ex = Assert.ThrowsAny<Exception>(() => Enum.IsDefined(enumType, value));
             string exName = ex.GetType().Name;
             Assert.True(exName == nameof(InvalidOperationException) || exName == "ContractException");
@@ -1481,6 +1482,7 @@ namespace System.Tests
         [MemberData(nameof(UnsupportedEnum_TestData))]
         public static void ToString_UnsupportedEnumType_ThrowsArgumentException(Enum e)
         {
+            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
             Exception formatXException = Assert.ThrowsAny<Exception>(() => e.ToString("X"));
             string formatXExceptionName = formatXException.GetType().Name;
             Assert.True(formatXExceptionName == nameof(InvalidOperationException) || formatXExceptionName == "ContractException");
@@ -1521,6 +1523,7 @@ namespace System.Tests
         [MemberData(nameof(UnsupportedEnumType_TestData))]
         public static void Format_UnsupportedEnumType_ThrowsArgumentException(Type enumType, object value)
         {
+            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
             Exception formatGException = Assert.ThrowsAny<Exception>(() => Enum.Format(enumType, value, "G"));
             string formatGExceptionName = formatGException.GetType().Name;
             Assert.True(formatGExceptionName == nameof(InvalidOperationException) || formatGExceptionName == "ContractException");
