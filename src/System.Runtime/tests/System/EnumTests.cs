@@ -879,158 +879,187 @@ namespace System.Tests
 
         public static IEnumerable<object[]> ToString_Format_TestData()
         {
-            // Format: "D"
-            yield return new object[] { ByteEnum.Min, "D", "0" };
-            yield return new object[] { ByteEnum.One, "D", "1" };
-            yield return new object[] { ByteEnum.Two, "D", "2" };
-            yield return new object[] { (ByteEnum)99, "D", "99" };
-            yield return new object[] { ByteEnum.Max, "D", "255" };
+            // Format "D": the decimal equivilent of the value is returned.
+            // Format "X": value in hex form without a leading "0x"
+            // Format "F": value is treated as a bit field that contains one or more flags that consist of one or more bits.
+            // If value is equal to a combination of named enumerated constants, a delimiter-separated list of the names
+            // of those constants is returned. value is searched for flags, going from the flag with the largest value
+            // to the smallest value. For each flag that corresponds to a bit field in value, the name of the constant
+            // is concatenated to the delimiter-separated list. The value of that flag is then excluded from further
+            // consideration, and the search continues for the next flag.
+            // If value is not equal to a combination of named enumerated constants, the decimal equivalent of value is returned.
+            // Format "G": if value is equal to a named enumerated constant, the name of that constant is returned.
+            // Otherwise, if "[Flags]" present, do as Format "F" - else return the decimal value of "value".
 
+            // "D": SByte
             yield return new object[] { SByteEnum.Min, "D", "-128" };
             yield return new object[] { SByteEnum.One, "D", "1" };
             yield return new object[] { SByteEnum.Two, "D", "2" };
             yield return new object[] { (SByteEnum)99, "D", "99" };
             yield return new object[] { SByteEnum.Max, "D", "127" };
 
-            yield return new object[] { UInt16Enum.Min, "D", "0" };
-            yield return new object[] { UInt16Enum.One, "D", "1" };
-            yield return new object[] { UInt16Enum.Two, "D", "2" };
-            yield return new object[] { (UInt16Enum)99, "D", "99" };
-            yield return new object[] { UInt16Enum.Max, "D", "65535" };
+            // "D": Byte
+            yield return new object[] { ByteEnum.Min, "D", "0" };
+            yield return new object[] { ByteEnum.One, "D", "1" };
+            yield return new object[] { ByteEnum.Two, "D", "2" };
+            yield return new object[] { (ByteEnum)99, "D", "99" };
+            yield return new object[] { ByteEnum.Max, "D", "255" };
 
+            // "D": Int16
             yield return new object[] { Int16Enum.Min, "D", "-32768" };
             yield return new object[] { Int16Enum.One, "D", "1" };
             yield return new object[] { Int16Enum.Two, "D", "2" };
             yield return new object[] { (Int16Enum)99, "D", "99" };
             yield return new object[] { Int16Enum.Max, "D", "32767" };
 
-            yield return new object[] { UInt32Enum.Min, "D", "0" };
-            yield return new object[] { UInt32Enum.One, "D", "1" };
-            yield return new object[] { UInt32Enum.Two, "D", "2" };
-            yield return new object[] { (UInt32Enum)99, "D", "99" };
-            yield return new object[] { UInt32Enum.Max, "D", "4294967295" };
+            // "D": UInt16
+            yield return new object[] { UInt16Enum.Min, "D", "0" };
+            yield return new object[] { UInt16Enum.One, "D", "1" };
+            yield return new object[] { UInt16Enum.Two, "D", "2" };
+            yield return new object[] { (UInt16Enum)99, "D", "99" };
+            yield return new object[] { UInt16Enum.Max, "D", "65535" };
 
+            // "D": Int32
             yield return new object[] { Int32Enum.Min, "D", "-2147483648" };
             yield return new object[] { Int32Enum.One, "D", "1" };
             yield return new object[] { Int32Enum.Two, "D", "2" };
             yield return new object[] { (Int32Enum)99, "D", "99" };
             yield return new object[] { Int32Enum.Max, "D", "2147483647" };
 
-            yield return new object[] { UInt64Enum.Min, "D", "0" };
-            yield return new object[] { UInt64Enum.One, "D", "1" };
-            yield return new object[] { UInt64Enum.Two, "D", "2" };
-            yield return new object[] { (UInt64Enum)99, "D", "99" };
-            yield return new object[] { UInt64Enum.Max, "D", "18446744073709551615" };
+            // "D": UInt32
+            yield return new object[] { UInt32Enum.Min, "D", "0" };
+            yield return new object[] { UInt32Enum.One, "D", "1" };
+            yield return new object[] { UInt32Enum.Two, "D", "2" };
+            yield return new object[] { (UInt32Enum)99, "D", "99" };
+            yield return new object[] { UInt32Enum.Max, "D", "4294967295" };
 
+            // "D": Int64
             yield return new object[] { Int64Enum.Min, "D", "-9223372036854775808" };
             yield return new object[] { Int64Enum.One, "D", "1" };
             yield return new object[] { Int64Enum.Two, "D", "2" };
             yield return new object[] { (Int64Enum)99, "D", "99" };
             yield return new object[] { Int64Enum.Max, "D", "9223372036854775807" };
 
+            // "D": UInt64
+            yield return new object[] { UInt64Enum.Min, "D", "0" };
+            yield return new object[] { UInt64Enum.One, "D", "1" };
+            yield return new object[] { UInt64Enum.Two, "D", "2" };
+            yield return new object[] { (UInt64Enum)99, "D", "99" };
+            yield return new object[] { UInt64Enum.Max, "D", "18446744073709551615" };
+
+            // "D": SimpleEnum
             yield return new object[] { SimpleEnum.Red, "D", "1" };
 
-            // Format "X": value in hex form without a leading "0x"
-            yield return new object[] { ByteEnum.Min, "X", "00" };
-            yield return new object[] { ByteEnum.One, "X", "01" };
-            yield return new object[] { ByteEnum.Two, "X", "02" };
-            yield return new object[] { (ByteEnum)99, "X", "63" };
-            yield return new object[] { ByteEnum.Max, "X", "FF" };
-
+            // "X": SByte
             yield return new object[] { SByteEnum.Min, "X", "80" };
             yield return new object[] { SByteEnum.One, "X", "01" };
             yield return new object[] { SByteEnum.Two, "X", "02" };
             yield return new object[] { (SByteEnum)99, "X", "63" };
             yield return new object[] { SByteEnum.Max, "X", "7F" };
 
-            yield return new object[] { UInt16Enum.Min, "X", "0000" };
-            yield return new object[] { UInt16Enum.One, "X", "0001" };
-            yield return new object[] { UInt16Enum.Two, "X", "0002" };
-            yield return new object[] { (UInt16Enum)99, "X", "0063" };
-            yield return new object[] { UInt16Enum.Max, "X", "FFFF" };
+            // "X": Byte
+            yield return new object[] { ByteEnum.Min, "X", "00" };
+            yield return new object[] { ByteEnum.One, "X", "01" };
+            yield return new object[] { ByteEnum.Two, "X", "02" };
+            yield return new object[] { (ByteEnum)99, "X", "63" };
+            yield return new object[] { ByteEnum.Max, "X", "FF" };
 
+            // "X": Int16
             yield return new object[] { Int16Enum.Min, "X", "8000" };
             yield return new object[] { Int16Enum.One, "X", "0001" };
             yield return new object[] { Int16Enum.Two, "X", "0002" };
             yield return new object[] { (Int16Enum)99, "X", "0063" };
             yield return new object[] { Int16Enum.Max, "X", "7FFF" };
 
+            // "X": UInt16
+            yield return new object[] { UInt16Enum.Min, "X", "0000" };
+            yield return new object[] { UInt16Enum.One, "X", "0001" };
+            yield return new object[] { UInt16Enum.Two, "X", "0002" };
+            yield return new object[] { (UInt16Enum)99, "X", "0063" };
+            yield return new object[] { UInt16Enum.Max, "X", "FFFF" };
+
+            // "X": UInt32
             yield return new object[] { UInt32Enum.Min, "X", "00000000" };
             yield return new object[] { UInt32Enum.One, "X", "00000001" };
             yield return new object[] { UInt32Enum.Two, "X", "00000002" };
             yield return new object[] { (UInt32Enum)99, "X", "00000063" };
             yield return new object[] { UInt32Enum.Max, "X", "FFFFFFFF" };
 
+            // "X": Int32
             yield return new object[] { Int32Enum.Min, "X", "80000000" };
             yield return new object[] { Int32Enum.One, "X", "00000001" };
             yield return new object[] { Int32Enum.Two, "X", "00000002" };
             yield return new object[] { (Int32Enum)99, "X", "00000063" };
             yield return new object[] { Int32Enum.Max, "X", "7FFFFFFF" };
 
-            yield return new object[] { UInt64Enum.Min, "X", "0000000000000000" };
-            yield return new object[] { UInt64Enum.One, "X", "0000000000000001" };
-            yield return new object[] { UInt64Enum.Two, "X", "0000000000000002" };
-            yield return new object[] { (UInt64Enum)99, "X", "0000000000000063" };
-            yield return new object[] { UInt64Enum.Max, "X", "FFFFFFFFFFFFFFFF" };
-
+            // "X:" Int64
             yield return new object[] { Int64Enum.Min, "X", "8000000000000000" };
             yield return new object[] { Int64Enum.One, "X", "0000000000000001" };
             yield return new object[] { Int64Enum.Two, "X", "0000000000000002" };
             yield return new object[] { (Int64Enum)99, "X", "0000000000000063" };
             yield return new object[] { Int64Enum.Max, "X", "7FFFFFFFFFFFFFFF" };
 
-            yield return new object[] { SimpleEnum.Red, "X", "00000001" };
+            // "X": UInt64
+            yield return new object[] { UInt64Enum.Min, "X", "0000000000000000" };
+            yield return new object[] { UInt64Enum.One, "X", "0000000000000001" };
+            yield return new object[] { UInt64Enum.Two, "X", "0000000000000002" };
+            yield return new object[] { (UInt64Enum)99, "X", "0000000000000063" };
+            yield return new object[] { UInt64Enum.Max, "X", "FFFFFFFFFFFFFFFF" };
 
-            // Format "F". value is treated as a bit field that contains one or more flags that consist of one or more bits.
-            // If value is equal to a combination of named enumerated constants, a delimiter-separated list of the names 
-            // of those constants is returned. value is searched for flags, going from the flag with the largest value 
-            // to the smallest value. For each flag that corresponds to a bit field in value, the name of the constant 
-            // is concatenated to the delimiter-separated list. The value of that flag is then excluded from further 
-            // consideration, and the search continues for the next flag.
-            //
-            // If value is not equal to a combination of named enumerated constants, the decimal equivalent of value is returned. 
+            // "X": SimpleEnum
+            yield return new object[] { SimpleEnum.Red, "X", "00000001" };
+            
+            // "F": Byte
+            yield return new object[] { (ByteEnum)0, "F", "Min" };
+            yield return new object[] { (ByteEnum)3, "F", "One, Two" };
+            yield return new object[] { (ByteEnum)0xff, "F", "Max" }; // Larger values take precedence (and remove the bits from consideration.)
+
+            // "F": SimpleEnum
             yield return new object[] { SimpleEnum.Red, "F", "Red" };
             yield return new object[] { SimpleEnum.Blue, "F", "Blue" };
             yield return new object[] { (SimpleEnum)99, "F", "99" };
             yield return new object[] { (SimpleEnum)0, "F", "0" }; // Not found
 
-            yield return new object[] { (ByteEnum)0, "F", "Min" };
-            yield return new object[] { (ByteEnum)3, "F", "One, Two" };
-            yield return new object[] { (ByteEnum)0xff, "F", "Max" }; // Larger values take precedence (and remove the bits from consideration.)
+            // "F:" Flags
+            yield return new object[] { AttributeTargets.Class | AttributeTargets.Delegate, "F", "Class, Delegate" }; // [Flags] attribute
 
-            // Format "G": If value is equal to a named enumerated constant, the name of that constant is returned.
-            // Otherwise, if "[Flags]" present, do as Format "F" - else return the decimal value of "value".
-            yield return new object[] { (SimpleEnum)99, "G", "99" };
-            yield return new object[] { (SimpleEnum)0, "G", "0" }; // Not found
-
-            yield return new object[] { (ByteEnum)(byte)0, "G", "Min" };
-            yield return new object[] { (ByteEnum)0xff, "G", "Max" };
-                    
-            yield return new object[] { (ByteEnum)(byte)3, "G", "3" }; // No [Flags] attribute
-            yield return new object[] { ByteEnum.Max, "G", "Max" };
-                    
-            yield return new object[] { (SByteEnum)(sbyte)3, "G", "3" }; // No [Flags] attribute
+            // "G": SByte
+            yield return new object[] { (SByteEnum)3, "G", "3" }; // No [Flags] attribute
             yield return new object[] { SByteEnum.Max, "G", "Max" };
-                    
-            yield return new object[] { (UInt16Enum)(ushort)3, "G", "3" }; // No [Flags] attribute
-            yield return new object[] { UInt16Enum.Max, "G", "Max" };
-                    
+
+            // "G:" Byte
+            yield return new object[] { (ByteEnum)0, "G", "Min" };
+            yield return new object[] { (ByteEnum)0xff, "G", "Max" };
+            yield return new object[] { (ByteEnum)3, "G", "3" }; // No [Flags] attribute
+            yield return new object[] { ByteEnum.Max, "G", "Max" };
+
+            // "G": Int16
             yield return new object[] { (Int16Enum)(short)3, "G", "3" }; // No [Flags] attribute
             yield return new object[] { Int16Enum.Max, "G", "Max" };
+
+            // "G": UInt16
+            yield return new object[] { (UInt16Enum)3, "G", "3" }; // No [Flags] attribute
+            yield return new object[] { UInt16Enum.Max, "G", "Max" };
                     
+            // "G": Int32
+            yield return new object[] { (Int32Enum)(Int32)3, "G", "3" }; // No [Flags] attribute
+            yield return new object[] { Int32Enum.Max, "G", "Max" };
+
+            // "G": UInt32
             yield return new object[] { (UInt32Enum)(UInt32)3, "G", "3" }; // No [Flags] attribute
             yield return new object[] { UInt32Enum.Max, "G", "Max" };
                     
-            yield return new object[] { (Int32Enum)(Int32)3, "G", "3" }; // No [Flags] attribute
-            yield return new object[] { Int32Enum.Max, "G", "Max" };
-                    
-            yield return new object[] { (UInt64Enum)(UInt64)3, "G", "3" }; // No [Flags] attribute
-            yield return new object[] { UInt64Enum.Max, "G", "Max" };
-                    
+            // "G": Int64
             yield return new object[] { (Int64Enum)(Int64)3, "G", "3" }; // No [Flags] attribute
             yield return new object[] { Int64Enum.Max, "G", "Max" };
 
-            yield return new object[] { AttributeTargets.Class | AttributeTargets.Delegate, "F", "Class, Delegate" }; // [Flags] attribute
+            // "G": UInt64
+            yield return new object[] { (UInt64Enum)(UInt64)3, "G", "3" }; // No [Flags] attribute
+            yield return new object[] { UInt64Enum.Max, "G", "Max" };
+
+            // "G": SimpleEnum
+            yield return new object[] { (SimpleEnum)99, "G", "99" };
+            yield return new object[] { (SimpleEnum)0, "G", "0" }; // Not found
         }
 
         [Theory]
