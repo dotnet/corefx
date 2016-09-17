@@ -306,6 +306,7 @@ namespace System.Tests
         }
         
         [Theory]
+        // Workaround: Move these tests to BinarySearch_SZArray_TestData if/ when https://github.com/xunit/xunit/pull/965 is available
         [InlineData(new sbyte[] { 0 }, 0, 1, null, null, -1)]
         [InlineData(new byte[] { 0 }, 0, 1, null, null, -1)]
         [InlineData(new short[] { 0 }, 0, 1, null, null, -1)]
@@ -1857,6 +1858,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> IndexOf_Array_TestData()
         {
+            // Workaround: Move these tests to IndexOf_SZArray_TestData if/ when https://github.com/xunit/xunit/pull/965 is available
             // SByte
             yield return new object[] { new sbyte[] { 1, 2 }, (byte)1, 0, 2, -1 };
             yield return new object[] { new sbyte[] { 1, 2 }, new object(), 0, 2, -1 };
@@ -2044,6 +2046,42 @@ namespace System.Tests
 
         public static IEnumerable<object[]> LastIndexOf_SZArray_TestData()
         {
+            // SByte
+            yield return new object[] { new sbyte[] { 1, 2, 3, 3, 4 }, (sbyte)1, 4, 5, 0 };
+            yield return new object[] { new sbyte[] { 1, 2, 3, 3, 4 }, (sbyte)3, 4, 5, 3 };
+            yield return new object[] { new sbyte[] { 1, 2, 3, 3, 4 }, (sbyte)2, 2, 3, 1 };
+            yield return new object[] { new sbyte[] { 1, 2, 3, 3, 4 }, (sbyte)4, 2, 3, -1 };
+            yield return new object[] { new sbyte[] { 1, 2, 3, 3, 4 }, (sbyte)5, 4, 5, -1 };
+            yield return new object[] { new sbyte[] { 1, 2, 3, 3, 4 }, (sbyte)3, 0, 0, -1 };
+            yield return new object[] { new sbyte[] { 1, 2, 3, 3, 4 }, (sbyte)3, 3, 0, -1 };
+
+            // Byte
+            yield return new object[] { new byte[] { 1, 2, 3, 3, 4 }, (byte)1, 4, 5, 0 };
+            yield return new object[] { new byte[] { 1, 2, 3, 3, 4 }, (byte)3, 4, 5, 3 };
+            yield return new object[] { new byte[] { 1, 2, 3, 3, 4 }, (byte)2, 2, 3, 1 };
+            yield return new object[] { new byte[] { 1, 2, 3, 3, 4 }, (byte)4, 2, 3, -1 };
+            yield return new object[] { new byte[] { 1, 2, 3, 3, 4 }, (byte)5, 4, 5, -1 };
+            yield return new object[] { new byte[] { 1, 2, 3, 3, 4 }, (byte)3, 0, 0, -1 };
+            yield return new object[] { new byte[] { 1, 2, 3, 3, 4 }, (byte)3, 3, 0, -1 };
+
+            // Int16
+            yield return new object[] { new short[] { 1, 2, 3, 3, 4 }, (short)1, 4, 5, 0 };
+            yield return new object[] { new short[] { 1, 2, 3, 3, 4 }, (short)3, 4, 5, 3 };
+            yield return new object[] { new short[] { 1, 2, 3, 3, 4 }, (short)2, 2, 3, 1 };
+            yield return new object[] { new short[] { 1, 2, 3, 3, 4 }, (short)4, 2, 3, -1 };
+            yield return new object[] { new short[] { 1, 2, 3, 3, 4 }, (short)5, 4, 5, -1 };
+            yield return new object[] { new short[] { 1, 2, 3, 3, 4 }, (short)3, 0, 0, -1 };
+            yield return new object[] { new short[] { 1, 2, 3, 3, 4 }, (short)3, 3, 0, -1 };
+
+            // UInt16
+            yield return new object[] { new ushort[] { 1, 2, 3, 3, 4 }, (ushort)1, 4, 5, 0 };
+            yield return new object[] { new ushort[] { 1, 2, 3, 3, 4 }, (ushort)3, 4, 5, 3 };
+            yield return new object[] { new ushort[] { 1, 2, 3, 3, 4 }, (ushort)2, 2, 3, 1 };
+            yield return new object[] { new ushort[] { 1, 2, 3, 3, 4 }, (ushort)4, 2, 3, -1 };
+            yield return new object[] { new ushort[] { 1, 2, 3, 3, 4 }, (ushort)5, 4, 5, -1 };
+            yield return new object[] { new ushort[] { 1, 2, 3, 3, 4 }, (ushort)3, 0, 0, -1 };
+            yield return new object[] { new ushort[] { 1, 2, 3, 3, 4 }, (ushort)3, 3, 0, -1 };
+
             // Int32
             var intArray = new int[] { 7, 7, 8, 8, 9, 9 };
             yield return new object[] { intArray, 8, 5, 6, 3 };
@@ -2053,6 +2091,87 @@ namespace System.Tests
             yield return new object[] { intArray, 7, 3, 3, 1 };
             yield return new object[] { new int[0], 0, 0, 0, -1 };
             yield return new object[] { new int[0], 0, -1, 0, -1 };
+
+            // UInt32
+            yield return new object[] { new uint[] { 1, 2, 3, 3, 4 }, (uint)1, 4, 5, 0 };
+            yield return new object[] { new uint[] { 1, 2, 3, 3, 4 }, (uint)3, 4, 5, 3 };
+            yield return new object[] { new uint[] { 1, 2, 3, 3, 4 }, (uint)2, 2, 3, 1 };
+            yield return new object[] { new uint[] { 1, 2, 3, 3, 4 }, (uint)4, 2, 3, -1 };
+            yield return new object[] { new uint[] { 1, 2, 3, 3, 4 }, (uint)5, 4, 5, -1 };
+            yield return new object[] { new uint[] { 1, 2, 3, 3, 4 }, (uint)3, 0, 0, -1 };
+            yield return new object[] { new uint[] { 1, 2, 3, 3, 4 }, (uint)3, 3, 0, -1 };
+
+            // UInt64
+            yield return new object[] { new long[] { 1, 2, 3, 3, 4 }, (long)1, 4, 5, 0 };
+            yield return new object[] { new long[] { 1, 2, 3, 3, 4 }, (long)3, 4, 5, 3 };
+            yield return new object[] { new long[] { 1, 2, 3, 3, 4 }, (long)2, 2, 3, 1 };
+            yield return new object[] { new long[] { 1, 2, 3, 3, 4 }, (long)4, 2, 3, -1 };
+            yield return new object[] { new long[] { 1, 2, 3, 3, 4 }, (long)5, 4, 5, -1 };
+            yield return new object[] { new long[] { 1, 2, 3, 3, 4 }, (long)3, 0, 0, -1 };
+            yield return new object[] { new long[] { 1, 2, 3, 3, 4 }, (long)3, 3, 0, -1 };
+
+            // UInt64
+            yield return new object[] { new ulong[] { 1, 2, 3, 3, 4 }, (ulong)1, 4, 5, 0 };
+            yield return new object[] { new ulong[] { 1, 2, 3, 3, 4 }, (ulong)3, 4, 5, 3 };
+            yield return new object[] { new ulong[] { 1, 2, 3, 3, 4 }, (ulong)2, 2, 3, 1 };
+            yield return new object[] { new ulong[] { 1, 2, 3, 3, 4 }, (ulong)4, 2, 3, -1 };
+            yield return new object[] { new ulong[] { 1, 2, 3, 3, 4 }, (ulong)5, 4, 5, -1 };
+            yield return new object[] { new ulong[] { 1, 2, 3, 3, 4 }, (ulong)3, 0, 0, -1 };
+            yield return new object[] { new ulong[] { 1, 2, 3, 3, 4 }, (ulong)3, 3, 0, -1 };
+
+            // Char
+            yield return new object[] { new char[] { (char)1, (char)2, (char)3, (char)3, (char)4 }, (char)1, 4, 5, 0 };
+            yield return new object[] { new char[] { (char)1, (char)2, (char)3, (char)3, (char)4 }, (char)3, 4, 5, 3 };
+            yield return new object[] { new char[] { (char)1, (char)2, (char)3, (char)3, (char)4 }, (char)2, 2, 3, 1 };
+            yield return new object[] { new char[] { (char)1, (char)2, (char)3, (char)3, (char)4 }, (char)4, 2, 3, -1 };
+            yield return new object[] { new char[] { (char)1, (char)2, (char)3, (char)3, (char)4 }, (char)5, 4, 5, -1 };
+            yield return new object[] { new char[] { (char)1, (char)2, (char)3, (char)3, (char)4 }, (char)3, 0, 0, -1 };
+            yield return new object[] { new char[] { (char)1, (char)2, (char)3, (char)3, (char)4 }, (char)3, 4, 0, -1 };
+
+            // Bool
+            yield return new object[] { new bool[] { false, true, true }, false, 2, 3, 0 };
+            yield return new object[] { new bool[] { false, true, true }, true, 2, 3, 2 };
+            yield return new object[] { new bool[] { false, true, true }, false, 1, 2, 0 };
+            yield return new object[] { new bool[] { false, true, true }, false, 1, 1, -1 };
+            yield return new object[] { new bool[] { false }, true, 0, 1, -1 };
+            yield return new object[] { new bool[] { false, true, true }, false, 0, 0, -1 };
+            yield return new object[] { new bool[] { false, true, true }, false, 2, 0, -1 };
+
+            // Single
+            yield return new object[] { new float[] { 1, 2, 3, 3, 4 }, (float)1, 4, 5, 0 };
+            yield return new object[] { new float[] { 1, 2, 3, 3, 4 }, (float)3, 4, 5, 3 };
+            yield return new object[] { new float[] { 1, 2, 3, 3, 4 }, (float)2, 2, 3, 1 };
+            yield return new object[] { new float[] { 1, 2, 3, 3, 4 }, (float)4, 2, 3, -1 };
+            yield return new object[] { new float[] { 1, 2, 3, 3, 4 }, (float)5, 4, 5, -1 };
+            yield return new object[] { new float[] { 1, 2, 3, 3, 4 }, (float)3, 0, 0, -1 };
+            yield return new object[] { new float[] { 1, 2, 3, 3, 4 }, (float)3, 3, 0, -1 };
+
+            // Double
+            yield return new object[] { new double[] { 1, 2, 3, 3, 4 }, (double)1, 4, 5, 0 };
+            yield return new object[] { new double[] { 1, 2, 3, 3, 4 }, (double)3, 4, 5, 3 };
+            yield return new object[] { new double[] { 1, 2, 3, 3, 4 }, (double)2, 2, 3, 1 };
+            yield return new object[] { new double[] { 1, 2, 3, 3, 4 }, (double)4, 2, 3, -1 };
+            yield return new object[] { new double[] { 1, 2, 3, 3, 4 }, (double)5, 4, 5, -1 };
+            yield return new object[] { new double[] { 1, 2, 3, 3, 4 }, (double)3, 0, 0, -1 };
+            yield return new object[] { new double[] { 1, 2, 3, 3, 4 }, (double)3, 3, 0, -1 };
+
+            // IntPtr
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2, (IntPtr)3, (IntPtr)3, (IntPtr)4 }, (IntPtr)1, 4, 5, 0 };
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2, (IntPtr)3, (IntPtr)3, (IntPtr)4 }, (IntPtr)3, 4, 5, 3 };
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2, (IntPtr)3, (IntPtr)3, (IntPtr)4 }, (IntPtr)2, 2, 3, 1 };
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2, (IntPtr)3, (IntPtr)3, (IntPtr)4 }, (IntPtr)4, 2, 3, -1 };
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2, (IntPtr)3, (IntPtr)3, (IntPtr)4 }, (IntPtr)5, 4, 5, -1 };
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2, (IntPtr)3, (IntPtr)3, (IntPtr)4 }, (IntPtr)3, 0, 0, -1 };
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2, (IntPtr)3, (IntPtr)3, (IntPtr)4 }, (IntPtr)3, 3, 0, -1 };
+
+            // UIntPtr
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2, (UIntPtr)3, (UIntPtr)3, (UIntPtr)4 }, (UIntPtr)1, 4, 5, 0 };
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2, (UIntPtr)3, (UIntPtr)3, (UIntPtr)4 }, (UIntPtr)3, 4, 5, 3 };
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2, (UIntPtr)3, (UIntPtr)3, (UIntPtr)4 }, (UIntPtr)2, 2, 3, 1 };
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2, (UIntPtr)3, (UIntPtr)3, (UIntPtr)4 }, (UIntPtr)4, 2, 3, -1 };
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2, (UIntPtr)3, (UIntPtr)3, (UIntPtr)4 }, (UIntPtr)5, 4, 5, -1 };
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2, (UIntPtr)3, (UIntPtr)3, (UIntPtr)4 }, (UIntPtr)3, 0, 0, -1 };
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2, (UIntPtr)3, (UIntPtr)3, (UIntPtr)4 }, (UIntPtr)3, 3, 0, -1 };
 
             // String
             var stringArray = new string[] { null, null, "Hello", "Hello", "Goodbye", "Goodbye", null, null };
@@ -2064,14 +2183,120 @@ namespace System.Tests
             yield return new object[] { stringArray, "Goodbye", 7, 2, -1 };
             yield return new object[] { stringArray, "Goodbye", 7, 3, 5 };
 
-            // Enum
-            var enumArray = new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case1 };
-            yield return new object[] { enumArray, Int32Enum.Case1, 2, 3, 2 };
-            yield return new object[] { enumArray, Int32Enum.Case3, 2, 3, -1 };
+            // Int32Enum
+            yield return new object[] { new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case1 }, Int32Enum.Case1, 2, 3, 2 };
+            yield return new object[] { new Int32Enum[] { Int32Enum.Case1, Int32Enum.Case2, Int32Enum.Case1 }, Int32Enum.Case3, 2, 3, -1 };
+
+            // Int64Enum
+            yield return new object[] { new Int64Enum[] { (Int64Enum)1, (Int64Enum)2, (Int64Enum)1 }, (Int64Enum)1, 2, 3, 2 };
+            yield return new object[] { new Int64Enum[] { (Int64Enum)1, (Int64Enum)2, (Int64Enum)1 }, (Int64Enum)3, 2, 3, -1 };
+
+            // Class
+            NonGenericClass1 classObject = new NonGenericClass1();
+            yield return new object[] { new NonGenericClass1[] { classObject, new NonGenericClass1() }, classObject, 1, 2, 0 };
+            yield return new object[] { new NonGenericClass1[] { classObject, new NonGenericClass1() }, new NonGenericClass1(), 1, 2, -1 };
+            yield return new object[] { new NonGenericClass1[] { classObject, new NonGenericClass1() }, classObject, 1, 0, -1 };
+            yield return new object[] { new NonGenericClass1[] { classObject, new NonGenericClass1() }, classObject, 0, 0, -1 };
+
+            // Struct
+            NonGenericStruct structObject = new NonGenericStruct();
+            yield return new object[] { new NonGenericStruct[] { structObject, new NonGenericStruct() }, structObject, 1, 2, 1 };
+            yield return new object[] { new NonGenericStruct[] { structObject, new NonGenericStruct() }, new NonGenericStruct(), 1, 2, 1 };
+            yield return new object[] { new NonGenericStruct[] { structObject, new NonGenericStruct() }, structObject, 1, 0, -1 };
+            yield return new object[] { new NonGenericStruct[] { structObject, new NonGenericStruct() }, structObject, 0, 0, -1 };
+
+            // Interface
+            ClassWithNonGenericInterface1 interfaceObject = new ClassWithNonGenericInterface1();
+            yield return new object[] { new NonGenericInterface1[] { interfaceObject, new ClassWithNonGenericInterface1() }, interfaceObject, 1, 2, 0 };
+            yield return new object[] { new NonGenericInterface1[] { interfaceObject, new ClassWithNonGenericInterface1() }, new ClassWithNonGenericInterface1(), 1, 2, -1 };
+            yield return new object[] { new NonGenericInterface1[] { interfaceObject, new ClassWithNonGenericInterface1() }, interfaceObject, 1, 0, -1 };
+            yield return new object[] { new NonGenericInterface1[] { interfaceObject, new ClassWithNonGenericInterface1() }, interfaceObject, 0, 0, -1 };
+
+            // Object
+            yield return new object[] { new object[] { new EqualsOverrider { Value = 1 } }, null, 0, 1, -1 };
+            yield return new object[] { new object[] { new EqualsOverrider { Value = 1 } }, new EqualsOverrider { Value = 1 }, 0, 1, 0 };
+            yield return new object[] { new object[] { new EqualsOverrider { Value = 1 } }, new EqualsOverrider { Value = 2 }, 0, 1, -1 };
+            yield return new object[] { new object[1], null, 0, 1, 0 };
+            yield return new object[] { new object[2], null, 1, 0, -1 };
+            yield return new object[] { new object[2], null, 0, 0, -1 };
         }
 
         public static IEnumerable<object[]> LastIndexOf_Array_TestData()
         {
+            // Workaround: Move these values to LastIndexOf_SZArray_TestData if/ when https://github.com/xunit/xunit/pull/965 is available
+            // SByte
+            yield return new object[] { new sbyte[] { 1, 2 }, (byte)1, 1, 2, -1 };
+            yield return new object[] { new sbyte[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new sbyte[] { 1, 2 }, null, 1, 2, -1 };
+
+            // Byte
+            yield return new object[] { new byte[] { 1, 2 }, (sbyte)1, 1, 2, -1 };
+            yield return new object[] { new byte[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new byte[] { 1, 2 }, null, 1, 2, -1 };
+
+            // Int16
+            yield return new object[] { new short[] { 1, 2 }, (ushort)1, 1, 2, -1 };
+            yield return new object[] { new short[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new short[] { 1, 2 }, null, 1, 2, -1 };
+
+            // UInt16
+            yield return new object[] { new ushort[] { 1, 2 }, (short)1, 1, 2, -1 };
+            yield return new object[] { new ushort[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new ushort[] { 1, 2 }, null, 1, 2, -1 };
+
+            // Int32
+            yield return new object[] { new int[] { 1, 2 }, (uint)1, 1, 2, -1 };
+            yield return new object[] { new int[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new int[] { 1, 2 }, null, 1, 2, -1 };
+
+            // UInt32
+            yield return new object[] { new uint[] { 1, 2 }, 1, 1, 2, -1 };
+            yield return new object[] { new uint[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new uint[] { 1, 2 }, null, 1, 2, -1 };
+
+            // Int64
+            yield return new object[] { new long[] { 1, 2 }, (ulong)1, 1, 2, -1 };
+            yield return new object[] { new long[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new long[] { 1, 2 }, null, 1, 2, -1 };
+
+            // UInt64
+            yield return new object[] { new ulong[] { 1, 2 }, (long)1, 1, 2, -1 };
+            yield return new object[] { new ulong[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new ulong[] { 1, 2 }, null, 1, 2, -1 };
+
+            // Char
+            yield return new object[] { new char[] { (char)1, (char)2 }, (ushort)1, 1, 2, -1 };
+            yield return new object[] { new char[] { (char)1, (char)2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new char[] { (char)1, (char)2 }, null, 1, 2, -1 };
+
+            // Bool
+            yield return new object[] { new bool[] { true, false }, (char)0, 1, 2, -1 };
+            yield return new object[] { new bool[] { true, false }, new object(), 1, 2, -1 };
+            yield return new object[] { new bool[] { true, false }, null, 1, 2, -1 };
+
+            // Single
+            yield return new object[] { new float[] { 1, 2 }, (double)1, 1, 2, -1 };
+            yield return new object[] { new float[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new float[] { 1, 2 }, null, 1, 2, -1 };
+
+            // Double
+            yield return new object[] { new double[] { 1, 2 }, (float)1, 1, 2, -1 };
+            yield return new object[] { new double[] { 1, 2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new double[] { 1, 2 }, null, 1, 2, -1 };
+
+            // IntPtr
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2 }, (UIntPtr)1, 1, 2, -1 };
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new IntPtr[] { (IntPtr)1, (IntPtr)2 }, null, 1, 2, -1 };
+
+            // UIntPtr
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2 }, (IntPtr)1, 1, 2, -1 };
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2 }, new object(), 1, 2, -1 };
+            yield return new object[] { new UIntPtr[] { (UIntPtr)1, (UIntPtr)2 }, null, 1, 2, -1 };
+
+            // String
+            yield return new object[] { new string[] { "Hello", "Hello", "Goodbyte", "Goodbye" }, new object(), 3, 4, -1 };
+
             // Nullable
             var nullableArray = new int?[] { 0, null, 10, 10, 0 };
             yield return new object[] { nullableArray, null, 4, 5, 1 };
@@ -2178,6 +2403,8 @@ namespace System.Tests
 
         [Theory]
         [InlineData(3, 2, 4)]
+        [InlineData(3, 0, 3)]
+        [InlineData(3, 1, 3)]
         public static void LastIndexOf_InvalidStartIndexCount_ThrowsArgumentOutOfRangeExeption(int length, int startIndex, int count)
         {
             Assert.Throws<ArgumentOutOfRangeException>("endIndex", () => Array.LastIndexOf(new int[length], "", startIndex, count));
