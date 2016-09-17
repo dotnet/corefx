@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Xunit;
@@ -11,27 +12,32 @@ namespace System.Tests
 {
     public static partial class EnumTests
     {
-        [Theory]
-        [InlineData("Red", false, SimpleEnum.Red)]
-        [InlineData(" Red", false, SimpleEnum.Red)]
-        [InlineData("Red ", false, SimpleEnum.Red)]
-        [InlineData(" red ", true, SimpleEnum.Red)]
-        [InlineData("B", false, SimpleEnum.B)]
-        [InlineData("B,B", false, SimpleEnum.B)]
-        [InlineData(" Red , Blue ", false, SimpleEnum.Red | SimpleEnum.Blue)]
-        [InlineData("Blue,Red,Green", false, SimpleEnum.Red | SimpleEnum.Blue | SimpleEnum.Green)]
-        [InlineData("Blue,Red,Red,Red,Green", false, SimpleEnum.Red | SimpleEnum.Blue | SimpleEnum.Green)]
-        [InlineData("Red,Blue,   Green", false, SimpleEnum.Red | SimpleEnum.Blue | SimpleEnum.Green)]
-        [InlineData("1", false, SimpleEnum.Red)]
-        [InlineData(" 1 ", false, SimpleEnum.Red)]
-        [InlineData("2", false, SimpleEnum.Blue)]
-        [InlineData("99", false, (SimpleEnum)99)]
-        [InlineData("-42", false, (SimpleEnum)(-42))]
-        [InlineData("   -42", false, (SimpleEnum)(-42))]
-        [InlineData("   -42 ", false, (SimpleEnum)(-42))]
-        public static void Parse(string value, bool ignoreCase, Enum expected)
+        public static IEnumerable<object[]> Parse_TestData()
         {
-            SimpleEnum result;
+            yield return new object[] { "Red", false, SimpleEnum.Red };
+            yield return new object[] { " Red", false, SimpleEnum.Red };
+            yield return new object[] { "Red ", false, SimpleEnum.Red };
+            yield return new object[] { " red ", true, SimpleEnum.Red };
+            yield return new object[] { "B", false, SimpleEnum.B };
+            yield return new object[] { "B,B", false, SimpleEnum.B };
+            yield return new object[] { " Red , Blue ", false, SimpleEnum.Red | SimpleEnum.Blue };
+            yield return new object[] { "Blue,Red,Green", false, SimpleEnum.Red | SimpleEnum.Blue | SimpleEnum.Green };
+            yield return new object[] { "Blue,Red,Red,Red,Green", false, SimpleEnum.Red | SimpleEnum.Blue | SimpleEnum.Green };
+            yield return new object[] { "Red,Blue,   Green", false, SimpleEnum.Red | SimpleEnum.Blue | SimpleEnum.Green };
+            yield return new object[] { "1", false, SimpleEnum.Red };
+            yield return new object[] { " 1 ", false, SimpleEnum.Red };
+            yield return new object[] { "2", false, SimpleEnum.Blue };
+            yield return new object[] { "99", false, (SimpleEnum)99 };
+            yield return new object[] { "-42", false, (SimpleEnum)(-42) };
+            yield return new object[] { "   -42", false, (SimpleEnum)(-42) };
+            yield return new object[] { "   -42 ", false, (SimpleEnum)(-42) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Parse_TestData))]
+        public static void Parse<T>(string value, bool ignoreCase, T expected) where T : struct
+        {
+            T result;
             if (!ignoreCase)
             {
                 Assert.True(Enum.TryParse(value, out result));
@@ -46,40 +52,53 @@ namespace System.Tests
             Assert.Equal(expected, Enum.Parse(expected.GetType(), value, ignoreCase));
         }
 
+        public static IEnumerable<object[]> Parse_Invalid_TestData()
+        {
+            // SimpleEnum
+            yield return new object[] { null, "", false, typeof(ArgumentNullException) };
+            yield return new object[] { typeof(SimpleEnum), null, false, typeof(ArgumentNullException) };
+            yield return new object[] { typeof(object), "", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "    \t", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), " red ", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "Purple", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), ",Red", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "Red,", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "B,", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), " , , ,", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "Red,Blue,", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "Red,,Blue", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "Red,Blue, ", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "Red Blue", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "1,Blue", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "Blue,1", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "Blue, 1", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "2147483649", false, typeof(ArgumentException) };
+            yield return new object[] { typeof(SimpleEnum), "2147483648", false, typeof(OverflowException) };
+        }
+
         [Theory]
-        [InlineData(null, "", false, typeof(ArgumentNullException))]
-        [InlineData(typeof(SimpleEnum), null, false, typeof(ArgumentNullException))]
-        [InlineData(typeof(object), "", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "    \t", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), " red ", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "Purple", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), ",Red", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "Red,", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "B,", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), " , , ,", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "Red,Blue,", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "Red,,Blue", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "Red,Blue, ", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "Red Blue", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "1,Blue", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "Blue,1", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "Blue, 1", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "2147483649", false, typeof(ArgumentException))]
-        [InlineData(typeof(SimpleEnum), "2147483648", false, typeof(OverflowException))]
+        [MemberData(nameof(Parse_Invalid_TestData))]
         public static void Parse_Invalid(Type enumType, string value, bool ignoreCase, Type exceptionType)
         {
-            SimpleEnum result;
+            Type typeArgument = enumType == null || !enumType.GetTypeInfo().IsEnum ? typeof(SimpleEnum) : enumType;
+            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid)).MakeGenericMethod(typeArgument);
+            parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
+        }
+
+        public static void Parse_Generic_Invalid<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
+        {
+            T result;
             if (!ignoreCase)
             {
                 Assert.False(Enum.TryParse(value, out result));
-                Assert.Equal(default(SimpleEnum), result);
+                Assert.Equal(default(T), result);
 
                 Assert.Throws(exceptionType, () => Enum.Parse(enumType, value));
             }
 
             Assert.False(Enum.TryParse(value, ignoreCase, out result));
-            Assert.Equal(default(SimpleEnum), result);
+            Assert.Equal(default(T), result);
 
             Assert.Throws(exceptionType, () => Enum.Parse(enumType, value, ignoreCase));
         }
@@ -173,10 +192,10 @@ namespace System.Tests
             yield return new object[] { typeof(UInt64Enum), UInt64Enum.Two, "Two" };
             yield return new object[] { typeof(UInt64Enum), UInt64Enum.Max, "Max" };
             yield return new object[] { typeof(UInt64Enum), ulong.MinValue, "Min" };
-            yield return new object[] { typeof(UInt64Enum), (ulong)1UL, "One" };
-            yield return new object[] { typeof(UInt64Enum), (ulong)2UL, "Two" };
+            yield return new object[] { typeof(UInt64Enum), 1UL, "One" };
+            yield return new object[] { typeof(UInt64Enum), 2UL, "Two" };
             yield return new object[] { typeof(UInt64Enum), ulong.MaxValue, "Max" };
-            yield return new object[] { typeof(UInt64Enum), (ulong)3UL, null };
+            yield return new object[] { typeof(UInt64Enum), 3UL, null };
 
             // Char
             yield return new object[] { s_charEnumType, Enum.Parse(s_charEnumType, "Value1"), "Value1" };
@@ -507,11 +526,18 @@ namespace System.Tests
             Assert.Throws(exceptionType, () => Enum.ToObject(enumType, true));
         }
 
-        [Fact]
-        public static void ToObject_InvalidValue_ThrowsException()
+        public static IEnumerable<object[]> ToObject_InvalidValue_TestData()
         {
-            Assert.Throws<ArgumentNullException>("value", () => Enum.ToObject(typeof(SimpleEnum), null)); // Value is null
-            Assert.Throws<ArgumentException>("value", () => Enum.ToObject(typeof(SimpleEnum), "Hello")); // Value is not a supported enum type
+            yield return new object[] { typeof(SimpleEnum), null, typeof(ArgumentNullException) };
+            yield return new object[] { typeof(SimpleEnum), "Hello", typeof(ArgumentException) };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToObject_InvalidValue_TestData))]
+        public static void ToObject_InvalidValue_ThrowsException(Type enumType, object value, Type exceptionType)
+        {
+            ArgumentException ex = (ArgumentException)Assert.Throws(exceptionType, () => Enum.ToObject(enumType, value));
+            Assert.Equal("value", ex.ParamName);
         }
 
         public static IEnumerable<object[]> Equals_TestData()
@@ -670,7 +696,7 @@ namespace System.Tests
         public static void CompareTo_ObjectNotEnum_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo((sbyte)1)); // Target is not an enum type
-            Assert.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo(Int32Enum.One)); //Target is a different enum type
+            Assert.Throws<ArgumentException>(null, () => SimpleEnum.Red.CompareTo(Int32Enum.One)); // Target is a different enum type
         }
 
         public static IEnumerable<object[]> GetUnderlyingType_TestData()
@@ -701,46 +727,88 @@ namespace System.Tests
             Assert.Throws<ArgumentException>("enumType", () => Enum.GetUnderlyingType(typeof(Enum))); // Enum type is simply an enum
         }
 
-        [Theory]
-        [InlineData(typeof(SimpleEnum),
+        public static IEnumerable<object[]> GetNames_GetValues_TestData()
+        {
+            // SimpleEnum
+            yield return new object[]
+            {
+                typeof(SimpleEnum),
                 new string[] { "Red", "Blue", "Green", "Green_a", "Green_b", "B" },
-                new SimpleEnum[] { SimpleEnum.Red, SimpleEnum.Blue, SimpleEnum.Green, SimpleEnum.Green_a, SimpleEnum.Green_b, SimpleEnum.B })]
+                new object[] { SimpleEnum.Red, SimpleEnum.Blue, SimpleEnum.Green, SimpleEnum.Green_a, SimpleEnum.Green_b, SimpleEnum.B }
+            };
 
-        [InlineData(typeof(ByteEnum),
-                new string[] { "Min", "One", "Two", "Max" },
-                new ByteEnum[] { ByteEnum.Min, ByteEnum.One, ByteEnum.Two, ByteEnum.Max })]
-
-        [InlineData(typeof(SByteEnum),
+            // SByte
+            yield return new object[]
+            {
+                typeof(SByteEnum),
                 new string[] { "One", "Two", "Max", "Min" },
-                new SByteEnum[] { SByteEnum.One, SByteEnum.Two, SByteEnum.Max, SByteEnum.Min })]
+                new object[] { SByteEnum.One, SByteEnum.Two, SByteEnum.Max, SByteEnum.Min }
+            };
 
-        [InlineData(typeof(UInt16Enum),
+            // Byte
+            yield return new object[]
+            {
+                typeof(ByteEnum),
                 new string[] { "Min", "One", "Two", "Max" },
-                new UInt16Enum[] { UInt16Enum.Min, UInt16Enum.One, UInt16Enum.Two, UInt16Enum.Max })]
+                new object[] { ByteEnum.Min, ByteEnum.One, ByteEnum.Two, ByteEnum.Max }
+            };
 
-        [InlineData(typeof(Int16Enum),
+            // Int16
+            yield return new object[]
+            {
+                typeof(Int16Enum),
                 new string[] { "One", "Two", "Max", "Min" },
-                new Int16Enum[] { Int16Enum.One, Int16Enum.Two, Int16Enum.Max, Int16Enum.Min })]
+                new object[] { Int16Enum.One, Int16Enum.Two, Int16Enum.Max, Int16Enum.Min }
+            };
 
-        [InlineData(typeof(UInt32Enum),
+            // UInt16
+            yield return new object[]
+            {
+                typeof(UInt16Enum),
                 new string[] { "Min", "One", "Two", "Max" },
-                new UInt32Enum[] { UInt32Enum.Min, UInt32Enum.One, UInt32Enum.Two, UInt32Enum.Max })]
+                new object[] { UInt16Enum.Min, UInt16Enum.One, UInt16Enum.Two, UInt16Enum.Max }
+            };
 
-        [InlineData(typeof(Int32Enum),
+            // Int32
+            yield return new object[]
+            {
+                typeof(Int32Enum),
                 new string[] { "One", "Two", "Max", "Min" },
-                new Int32Enum[] { Int32Enum.One, Int32Enum.Two, Int32Enum.Max, Int32Enum.Min })]
+                new object[] { Int32Enum.One, Int32Enum.Two, Int32Enum.Max, Int32Enum.Min }
+            };
 
-        [InlineData(typeof(UInt64Enum),
+            // UInt32
+            yield return new object[]
+            {
+                typeof(UInt32Enum),
                 new string[] { "Min", "One", "Two", "Max" },
-                new UInt64Enum[] { UInt64Enum.Min, UInt64Enum.One, UInt64Enum.Two, UInt64Enum.Max })]
+                new object[] { UInt32Enum.Min, UInt32Enum.One, UInt32Enum.Two, UInt32Enum.Max }
+            };
 
-        [InlineData(typeof(Int64Enum),
+            // Int64
+            yield return new object[]
+            {
+                typeof(Int64Enum),
                 new string[] { "One", "Two", "Max", "Min" },
-                new Int64Enum[] { Int64Enum.One, Int64Enum.Two, Int64Enum.Max, Int64Enum.Min })]
-        public static void GetNames_GetValues(Type enumType, string[] expectedNames, Array expectedValues)
+                new object[] { Int64Enum.One, Int64Enum.Two, Int64Enum.Max, Int64Enum.Min }
+            };
+
+            // UInt64
+            yield return new object[]
+            {
+                typeof(UInt64Enum),
+                new string[] { "Min", "One", "Two", "Max" },
+                new object[] { UInt64Enum.Min, UInt64Enum.One, UInt64Enum.Two, UInt64Enum.Max }
+            };
+
+        }
+
+        [Theory]
+        [MemberData(nameof(GetNames_GetValues_TestData))]
+        public static void GetNames_GetValues(Type enumType, string[] expectedNames, object[] expectedValues)
         {
             Assert.Equal(expectedNames, Enum.GetNames(enumType));
-            Assert.Equal(expectedValues, Enum.GetValues(enumType));
+            Assert.Equal(expectedValues, Enum.GetValues(enumType).Cast<object>().ToArray());
         }
 
         [Fact]
@@ -757,45 +825,51 @@ namespace System.Tests
             Assert.Throws<ArgumentException>("enumType", () => Enum.GetValues(typeof(object))); // Enum type is not an enum
         }
 
-        // Byte
-        [InlineData(typeof(ByteEnum), byte.MaxValue, ByteEnum.Max)]
-        [InlineData(typeof(ByteEnum), (byte)1, ByteEnum.One)]
-        [InlineData(typeof(ByteEnum), (byte)11, (ByteEnum)11)]
+        public static IEnumerable<object[]> ToObject_TestData()
+        {
+            // SByte
+            yield return new object[] { typeof(SByteEnum), sbyte.MinValue, SByteEnum.Min };
+            yield return new object[] { typeof(SByteEnum), (sbyte)2, SByteEnum.Two };
+            yield return new object[] { typeof(SByteEnum), (sbyte)22, (SByteEnum)22 };
 
-        // SByte
-        [InlineData(typeof(SByteEnum), sbyte.MinValue, SByteEnum.Min)]
-        [InlineData(typeof(SByteEnum), (sbyte)2, SByteEnum.Two)]
-        [InlineData(typeof(SByteEnum), (sbyte)22, (SByteEnum)22)]
+            // Byte
+            yield return new object[] { typeof(ByteEnum), byte.MaxValue, ByteEnum.Max };
+            yield return new object[] { typeof(ByteEnum), (byte)1, ByteEnum.One };
+            yield return new object[] { typeof(ByteEnum), (byte)11, (ByteEnum)11 };
 
-        // UInt16
-        [InlineData(typeof(UInt16Enum), ushort.MaxValue, UInt16Enum.Max)]
-        [InlineData(typeof(UInt16Enum), (ushort)1, UInt16Enum.One)]
-        [InlineData(typeof(UInt16Enum), (ushort)33, (UInt16Enum)33)]
+            // Int16
+            yield return new object[] { typeof(Int16Enum), short.MinValue, Int16Enum.Min };
+            yield return new object[] { typeof(Int16Enum), (short)2, Int16Enum.Two };
+            yield return new object[] { typeof(Int16Enum), (short)44, (Int16Enum)44 };
 
-        // Int16
-        [InlineData(typeof(Int16Enum), short.MinValue, Int16Enum.Min)]
-        [InlineData(typeof(Int16Enum), (short)2, Int16Enum.Two)]
-        [InlineData(typeof(Int16Enum), (short)44, (Int16Enum)44)]
+            // UInt16
+            yield return new object[] { typeof(UInt16Enum), ushort.MaxValue, UInt16Enum.Max };
+            yield return new object[] { typeof(UInt16Enum), (ushort)1, UInt16Enum.One };
+            yield return new object[] { typeof(UInt16Enum), (ushort)33, (UInt16Enum)33 };
 
-        // UInt32
-        [InlineData(typeof(UInt32Enum), uint.MaxValue, UInt32Enum.Max)]
-        [InlineData(typeof(UInt32Enum), (uint)1, UInt32Enum.One)]
-        [InlineData(typeof(UInt32Enum), (uint)55, (UInt32Enum)55)]
+            // Int32
+            yield return new object[] { typeof(Int32Enum), int.MinValue, Int32Enum.Min };
+            yield return new object[] { typeof(Int32Enum), 2, Int32Enum.Two };
+            yield return new object[] { typeof(Int32Enum), 66, (Int32Enum)66 };
 
-        // Int32
-        [InlineData(typeof(Int32Enum), int.MinValue, Int32Enum.Min)]
-        [InlineData(typeof(Int32Enum), 2, Int32Enum.Two)]
-        [InlineData(typeof(Int32Enum), 66, (Int32Enum)66)]
+            // UInt32
+            yield return new object[] { typeof(UInt32Enum), uint.MaxValue, UInt32Enum.Max };
+            yield return new object[] { typeof(UInt32Enum), (uint)1, UInt32Enum.One };
+            yield return new object[] { typeof(UInt32Enum), (uint)55, (UInt32Enum)55 };
 
-        // UInt64
-        [InlineData(typeof(UInt64Enum), ulong.MaxValue, UInt64Enum.Max)]
-        [InlineData(typeof(UInt64Enum), (ulong)1, UInt64Enum.One)]
-        [InlineData(typeof(UInt64Enum), (ulong)77, (UInt64Enum)77)]
+            // Int64
+            yield return new object[] { typeof(Int64Enum), long.MinValue, Int64Enum.Min };
+            yield return new object[] { typeof(Int64Enum), (long)2, Int64Enum.Two };
+            yield return new object[] { typeof(Int64Enum), (long)88, (Int64Enum)88 };
 
-        // Int64
-        [InlineData(typeof(Int64Enum), long.MinValue, Int64Enum.Min)]
-        [InlineData(typeof(Int64Enum), (long)2, Int64Enum.Two)]
-        [InlineData(typeof(Int64Enum), (long)88, (Int64Enum)88)]
+            // UInt64
+            yield return new object[] { typeof(UInt64Enum), ulong.MaxValue, UInt64Enum.Max };
+            yield return new object[] { typeof(UInt64Enum), (ulong)1, UInt64Enum.One };
+            yield return new object[] { typeof(UInt64Enum), (ulong)77, (UInt64Enum)77 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToObject_TestData))]
         public static void ToObject(Type type, object value, Enum expected)
         {
             var typedValue = Convert.ChangeType(value, value.GetType());
@@ -854,6 +928,8 @@ namespace System.Tests
             yield return new object[] { (Int64Enum)99, "D", "99" };
             yield return new object[] { Int64Enum.Max, "D", "9223372036854775807" };
 
+            yield return new object[] { SimpleEnum.Red, "D", "1" };
+
             // Format "X": value in hex form without a leading "0x"
             yield return new object[] { ByteEnum.Min, "X", "00" };
             yield return new object[] { ByteEnum.One, "X", "01" };
@@ -902,6 +978,8 @@ namespace System.Tests
             yield return new object[] { Int64Enum.Two, "X", "0000000000000002" };
             yield return new object[] { (Int64Enum)99, "X", "0000000000000063" };
             yield return new object[] { Int64Enum.Max, "X", "7FFFFFFFFFFFFFFF" };
+
+            yield return new object[] { SimpleEnum.Red, "X", "00000001" };
 
             // Format "F". value is treated as a bit field that contains one or more flags that consist of one or more bits.
             // If value is equal to a combination of named enumerated constants, a delimiter-separated list of the names 
@@ -994,16 +1072,21 @@ namespace System.Tests
             Assert.Throws<FormatException>(() => e.ToString("y")); // No such format
         }
 
+        public static IEnumerable<object[]> Format_TestData()
+        {
+            // Format: D
+            yield return new object[] { typeof(SimpleEnum), 1, "D", "1" };
+
+            // Format: X
+            yield return new object[] { typeof(SimpleEnum), SimpleEnum.Red, "X", "00000001" };
+            yield return new object[] { typeof(SimpleEnum), 1, "X", "00000001" };
+
+            // Format: F
+            yield return new object[] { typeof(SimpleEnum), 1, "F", "Red" };
+        }
+
         [Theory]
-        // Format: D
-        [InlineData(typeof(SimpleEnum), SimpleEnum.Red, "D", "1")]
-        [InlineData(typeof(SimpleEnum), 1, "D", "1")]
-        // Format: X
-        [InlineData(typeof(SimpleEnum), SimpleEnum.Red, "X", "00000001")]
-        [InlineData(typeof(SimpleEnum), 1, "X", "00000001")]
-        // Format: F
-        [InlineData(typeof(SimpleEnum), SimpleEnum.Red, "F", "Red")]
-        [InlineData(typeof(SimpleEnum), 1, "F", "Red")]
+        [MemberData(nameof(Format_TestData))]
         public static void Format(Type enumType, object value, string format, string expected)
         {
             // Format string is case insensitive
@@ -1035,7 +1118,7 @@ namespace System.Tests
             AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.Run);
             ModuleBuilder module = assembly.DefineDynamicModule("Name");
 
-            return module.DefineEnum("TestName", TypeAttributes.Public, underlyingType);
+            return module.DefineEnum("TestName_" + underlyingType.Name, TypeAttributes.Public, underlyingType);
         }
 
         private static Type s_boolEnumType = GetBoolEnumType();
