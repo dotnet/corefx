@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// TODO: make sure everything's OuterLoop and Windows-only!
-
 using System.Net.Test.Common;
 using System.Threading;
 
@@ -28,7 +26,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [OuterLoop]
+        [OuterLoop("Issue #11345")]
         [PlatformSpecific(PlatformID.Windows)]
         public void Disconnect_Success()
         {
@@ -62,7 +60,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [OuterLoop]
+        [OuterLoop("Issue #11345")]
         [PlatformSpecific(PlatformID.Windows)]
         public void DisconnectAsync_Success()
         {
@@ -98,7 +96,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [OuterLoop]
+        [OuterLoop("Issue #11345")]
         [PlatformSpecific(PlatformID.Windows)]
         public void BeginDisconnect_Success()
         {
