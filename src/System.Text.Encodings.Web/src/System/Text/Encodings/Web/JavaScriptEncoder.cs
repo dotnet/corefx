@@ -49,7 +49,8 @@ namespace System.Text.Encodings.Web
     {
         private AllowedCharactersBitmap _allowedCharacters;
 
-        internal readonly static DefaultJavaScriptEncoder Singleton = new DefaultJavaScriptEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
+        //fix the issue: https://github.com/dotnet/corefx/issues/11844
+        internal readonly static DefaultJavaScriptEncoder Singleton = new DefaultJavaScriptEncoder(new TextEncoderSettings(UnicodeRanges.All));
 
         public DefaultJavaScriptEncoder(TextEncoderSettings filter)
         {
