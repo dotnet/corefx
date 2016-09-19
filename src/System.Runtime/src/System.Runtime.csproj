@@ -34,6 +34,8 @@
     <Compile Include="System\Collections\Generic\ISet.cs" />
     <Compile Include="System\ComponentModel\EditorBrowsableAttribute.cs" />
     <Compile Include="System\Runtime\CompilerServices\StrongBox.cs" />
+    <Compile Include="System\Security\Attributes.cs" />
+    <Compile Include="System\Security\SecurityException.cs" />
     <Compile Condition="'$(TargetGroup)'!='uap101aot'" Include="System\Reflection\AssemblyNameProxy.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='netcore50aot' And '$(TargetGroup)'!='uap101aot' And '$(TargetGroup)'!='net462' AND '$(TargetGroup)'!='net463'">
