@@ -4,6 +4,10 @@
   <ItemGroup>
     <Project Include="System.Text.RegularExpressions.Tests.csproj"/>
     <Project Include="System.Text.RegularExpressions.Tests.csproj">
+      <TestTFMs>netcoreapp1.1</TestTFMs>
+      <TargetGroup>netcoreapp1.1</TargetGroup>
+    </Project>
+    <Project Include="System.Text.RegularExpressions.Tests.csproj">
       <TestTFMs>net463</TestTFMs>
       <OSGroup>Windows_NT</OSGroup>
     </Project>
