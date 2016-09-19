@@ -13,6 +13,7 @@ namespace System.Net.WebSockets
     public sealed class ClientWebSocketOptions
     {
         private bool _isReadOnly; // After ConnectAsync is called the options cannot be modified.
+        private readonly List<string> _requestedExtensions;
         private readonly List<string> _requestedSubProtocols;
         private readonly WebHeaderCollection _requestHeaders;
         private TimeSpan _keepAliveInterval = TimeSpan.FromSeconds(30); // Same as WebSocket.DefaultKeepAliveInterval.  TODO #11735: Switch to that when it's available.
@@ -27,6 +28,7 @@ namespace System.Net.WebSockets
 
         internal ClientWebSocketOptions()
         {
+            _requestedExtensions = new List<string>();
             _requestedSubProtocols = new List<string>();
             _requestHeaders = new WebHeaderCollection();
         }
@@ -43,6 +45,8 @@ namespace System.Net.WebSockets
         }
 
         internal WebHeaderCollection RequestHeaders { get { return _requestHeaders; } }
+        
+        internal List<string> RequestedExtensions {  get { return _requestedExtensions;} }
 
         internal List<string> RequestedSubProtocols {  get { return _requestedSubProtocols;} }
 
