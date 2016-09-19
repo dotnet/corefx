@@ -5689,16 +5689,6 @@ namespace System.Security
     public partial class SecurityException : System.Exception
     {
         public SecurityException() { }
-        public SecurityException(string message) { }
-        public SecurityException(string message, System.Exception inner) { }
-        protected SecurityException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public override string ToString() { return default(string); }
-    }
-    /*
-    public partial class SecurityException : System.SystemException
-    {
-        public SecurityException() { }
         protected SecurityException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public SecurityException(string message) { }
         public SecurityException(string message, System.Exception inner) { }
@@ -5716,7 +5706,7 @@ namespace System.Security
         public string Url { get { throw null; } set { } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
-    }*/
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), AllowMultiple=false)]
     public sealed partial class SecurityRulesAttribute : System.Attribute
     {
