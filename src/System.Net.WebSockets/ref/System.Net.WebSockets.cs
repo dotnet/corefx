@@ -15,6 +15,7 @@ namespace System.Net.WebSockets
         public abstract System.Nullable<System.Net.WebSockets.WebSocketCloseStatus> CloseStatus { get; }
         public abstract string CloseStatusDescription { get; }
         public abstract System.Net.WebSockets.WebSocketState State { get; }
+        public abstract string Extensions { get; }
         public abstract string SubProtocol { get; }
         public abstract void Abort();
         public abstract System.Threading.Tasks.Task CloseAsync(System.Net.WebSockets.WebSocketCloseStatus closeStatus, string statusDescription, System.Threading.CancellationToken cancellationToken);
