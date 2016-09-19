@@ -47,6 +47,14 @@ namespace System.Net.WebSockets
                 return _webSocket.State;
             }
         }
+        
+        public string Extensions
+        {
+            get
+            {
+                return _webSocket.Extensions;
+            }
+        }
 
         public string SubProtocol
         {
