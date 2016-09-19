@@ -25,6 +25,7 @@ namespace System.Net.WebSockets
 
         private WebSocketCloseStatus? _closeStatus = null;
         private string _closeStatusDescription = null;
+        private string _extensions = null;
         private string _subProtocol = null;
         private bool _disposed = false;
 
@@ -67,6 +68,14 @@ namespace System.Net.WebSockets
                 return _state;
             }
         }
+        
+        public override string Extensions
+        {
+            get
+            {
+                return _extensions;
+            }
+        }
 
         public override string SubProtocol
         {
@@ -98,6 +107,10 @@ namespace System.Net.WebSockets
             }
 
             var websocketControl = _messageWebSocket.Control;
+            foreach (var extension in options.RequestedExtensions)
+            {
+                websocketControl.SupportedExtensions.Add(extension);
+            }
             foreach (var subProtocol in options.RequestedSubProtocols)
             {
                 websocketControl.SupportedProtocols.Add(subProtocol);
@@ -110,6 +123,7 @@ namespace System.Net.WebSockets
                 _messageWebSocket.MessageReceived += OnMessageReceived;
                 _messageWebSocket.Closed += OnCloseReceived;
                 await _messageWebSocket.ConnectAsync(uri).AsTask(cancellationToken);
+                _extensions = _messageWebSocket.Information.Extensions;
                 _subProtocol = _messageWebSocket.Information.Protocol;
                 _messageWriter = new DataWriter(_messageWebSocket.OutputStream);
             }
