@@ -10,8 +10,8 @@ namespace System.Reflection.Emit.Tests
     {
         [Theory]
         [InlineData(typeof(string))]
-        [InlineData(typeof(SetParentNonGenericClass))]
-        [InlineData(typeof(SetParentGenericClass<>))]
+        [InlineData(typeof(EmptyNonGenericClass))]
+        [InlineData(typeof(EmptyGenericClass<>))]
         [InlineData(typeof(int?))]
         [InlineData(typeof(object))]
         [InlineData(null)]
@@ -29,8 +29,12 @@ namespace System.Reflection.Emit.Tests
             type.CreateTypeInfo().AsType();
             Assert.Throws<InvalidOperationException>(() => type.SetParent(typeof(string)));
         }
-    }
 
-    public class SetParentNonGenericClass { }
-    public class SetParentGenericClass<T> { }
+        [Fact]
+        public void SetParent_InterfaceType_ThrowsArgumentException()
+        {
+            TypeBuilder type = Helpers.DynamicType(TypeAttributes.NotPublic);
+            Assert.Throws<ArgumentException>(null, () => type.SetParent(typeof(EmptyNonGenericInterface1)));
+        }
+    }
 }

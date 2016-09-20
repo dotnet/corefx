@@ -2,12 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Reflection.Emit.Tests
 {
+    public class EmptyNonGenericClass { }
+    public class EmptyGenericClass<T> { }
+
+    public struct EmptyNonGenericStruct { }
+    public struct EmptyGenericStruct<T> { }
+
+    public enum EmptyEnum { }
+
+    public interface EmptyNonGenericInterface1 { }
+    public interface EmptyNonGenericInterface2 { }
+
+    public interface EmptyGenericInterface<T> { }
+
     public class EmptyAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]

@@ -114,7 +114,6 @@
     <Compile Include="PropertyBuilder\PropertyBuilderSetValue.cs" />
     <Compile Include="TypeBuilder\TypeBuilderAddInterfaceImplementaion.cs" />
     <Compile Include="TypeBuilder\TypeBuilderAssemblyQualifiedName.cs" />
-    <Compile Include="TypeBuilder\TypeBuilderBaseType.cs" />
     <Compile Include="TypeBuilder\TypeBuilderCreateType.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDeclaringMethod.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineConstructor.cs" />

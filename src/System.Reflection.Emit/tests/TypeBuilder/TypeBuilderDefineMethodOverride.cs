@@ -91,13 +91,12 @@ namespace System.Reflection.Emit.Tests
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
             MethodBuilder method = type.DefineMethod("M", MethodAttributes.Public | MethodAttributes.Virtual, typeof(int), null);
-            ILGenerator ilGenerator = method.GetILGenerator();
-            ilGenerator.Emit(OpCodes.Ret);
+            method.GetILGenerator().Emit(OpCodes.Ret);
             type.AddInterfaceImplementation(typeof(DefineMethodOverrideInterface));
 
             Type createdType = type.CreateTypeInfo().AsType();
-            MethodInfo body = createdType.GetMethod("M");
-            MethodInfo declaration = typeof(DefineMethodOverrideInterface).GetMethod("M");
+            MethodInfo body = createdType.GetMethod(method.Name);
+            MethodInfo declaration = typeof(DefineMethodOverrideInterface).GetMethod(method.Name);
 
             Assert.Throws<InvalidOperationException>(() => type.DefineMethodOverride(body, declaration));
         }
