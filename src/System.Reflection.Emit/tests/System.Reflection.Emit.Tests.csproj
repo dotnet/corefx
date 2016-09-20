@@ -37,11 +37,7 @@
     <Compile Include="EventBuilder\EventBuilderSetCustomAttribute.cs" />
     <Compile Include="EventBuilder\EventBuilderSetRaiseMethod.cs" />
     <Compile Include="EventBuilder\EventBuilderSetRemoveOnMethod.cs" />
-    <Compile Include="FieldBuilder\FieldBuilderAttributes.cs" />
-    <Compile Include="FieldBuilder\FieldBuilderDeclaringType.cs" />
-    <Compile Include="FieldBuilder\FieldBuilderFieldType.cs" />
     <Compile Include="FieldBuilder\FieldBuilderGetValue.cs" />
-    <Compile Include="FieldBuilder\FieldBuilderName.cs" />
     <Compile Include="FieldBuilder\FieldBuilderSetConstant.cs" />
     <Compile Include="FieldBuilder\FieldBuilderSetCustomAttribute.cs" />
     <Compile Include="FieldBuilder\FieldBuilderSetOffset.cs" />
@@ -103,6 +99,7 @@
     <Compile Include="TypeBuilder\TypeBuilderDeclaringMethod.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineConstructor.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineDefaultConstructor.cs" />
+    <Compile Include="TypeBuilder\TypeBuilderDefineField.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineGenericParameters.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineEvent.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineMethodOverride.cs" />
