@@ -474,6 +474,15 @@ namespace System.Linq.Expressions.Tests
 
         #endregion
 
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public static void Subtract_MultipleOverloads_CorrectlyResolvesOperator(bool useInterpreter)
+        {
+            BinaryExpression subtract = Expression.Subtract(Expression.Constant(new DateTime(100)), Expression.Constant(new DateTime(10)));
+            Func<TimeSpan> lambda = Expression.Lambda<Func<TimeSpan>>(subtract).Compile(useInterpreter);
+            Assert.Equal(new TimeSpan(90), lambda());
+        }
+
         [Fact]
         public static void CannotReduce()
         {
