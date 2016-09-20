@@ -23,12 +23,12 @@ This scenario skips the product build step, and instead downloads packages from 
 1. Sync product from Azure
  - ```sync.cmd -ab -AzureAccount=dotnetbuildoutput -AzureToken=******** -Container=[Azure container name] -- /p:"DownloadDirectory=[ProjectDir]Packages\AzureTransfer" /p:"SkipCleanPackages=true"```
 2. Generate Test project.json files
- - ```msbuild /p:BuildTestsAgainstPackages=true /p:SkipCleanPackages=true /p:PackagesDrops=[ProjectDir]bin/packages/[Relase|Debug]/ /t:BatchGenerateTestProjectJsons /t:BatchRestorePackages```
+ - ```msbuild /p:BuildTestsAgainstPackages=true /p:SkipCleanPackages=true /p:PackagesDrops=[ProjectDir]Packages/AzureTransfer/[Relase|Debug]/ /t:BatchGenerateTestProjectJsons /t:BatchRestorePackages```
   - /p:SkipCleanPackages=true is required for release branches where the packages folder is cleaned during every build.
 3. Build Tests against packages
- - ```build-tests.cmd -BuildTestsAgainstPackages -- /p:"PackagesDrops=[ProjectDir]bin/packages/[Relase|Debug]/"```
+ - ```build-tests.cmd -BuildTestsAgainstPackages -- /p:"PackagesDrops=[ProjectDir]Packages/AzureTransfer/[Relase|Debug]/"```
   - -BuildTestsAgainstPackages tells the build to use the project.json files you generated in the "Generate Test project.json files" step
-  - /p:"PackagesDrops=[ProjectDir]bin/packages/[Release|Debug]/" tells the build to use the packages from your local build drop.
+  - /p:"PackagesDrops=[ProjectDir]Packages/AzureTransfer/[Release|Debug]/" tells the build to use the packages from the Azure download (DownloadDirectory).
 
 ### Use a versions file for specifying package versions
 
