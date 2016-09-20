@@ -41,7 +41,8 @@ namespace Microsoft.Win32.RegistryTests
             });
         }
 
-        [Fact(Skip = "This test fails on Win10 Anniversary Update Issue #10546")]
+        [ActiveIssue(10546)]
+        [Fact]
         public void NegativeTest_DeeplyNestedKey()
         {
             // Max number of parts to the registry key path is 509 (failing once it hits 510). 

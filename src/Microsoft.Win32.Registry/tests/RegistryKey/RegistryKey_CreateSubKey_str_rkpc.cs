@@ -69,7 +69,8 @@ namespace Microsoft.Win32.RegistryTests
             });
         }
 
-        [Fact(Skip = "This test fails on Win10 Anniversary Update Issue #10546")]
+        [ActiveIssue(10546)]
+        [Fact]
         public void NegativeTest_DeeplyNestedKey()
         {
             //According to msdn documentation max nesting level exceeds is 510 but actual is 508
