@@ -12,12 +12,12 @@ namespace System.Net.Sockets
     // is used to create a Client connection to a remote host.
     public partial class TcpClient : IDisposable
     {
-        private readonly AddressFamily _family;
+        private AddressFamily _family;
         private Socket _clientSocket;
         private NetworkStream _dataStream;
         private bool _cleanedUp = false;
         private bool _active;
-
+        
         // Initializes a new instance of the System.Net.Sockets.TcpClient class.
         public TcpClient() : this(AddressFamily.InterNetwork)
         {
@@ -108,7 +108,7 @@ namespace System.Net.Sockets
             return ConnectAsyncCore(addresses, port);
         }
 
-        private IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
+        public IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
         {
             if (NetEventSource.Log.IsEnabled())
             {
@@ -124,7 +124,39 @@ namespace System.Net.Sockets
             return result;
         }
 
-        private void EndConnect(IAsyncResult asyncResult)
+        public IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state)
+        {
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "BeginConnect", host);
+            }
+
+            IAsyncResult result = Client.BeginConnect(host, port, requestCallback, state);
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "BeginConnect", null);
+            }
+
+            return result;
+        }
+
+        public IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state)
+        {
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "BeginConnect", addresses);
+            }
+
+            IAsyncResult result = Client.BeginConnect(addresses, port, requestCallback, state);
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "BeginConnect", null);
+            }
+
+            return result;
+        }
+
+        public void EndConnect(IAsyncResult asyncResult)
         {
             if (NetEventSource.Log.IsEnabled())
             {
