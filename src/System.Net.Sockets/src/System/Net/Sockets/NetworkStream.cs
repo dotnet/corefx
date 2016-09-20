@@ -31,64 +31,20 @@ namespace System.Net.Sockets
 
         // Creates a new instance of the System.Net.Sockets.NetworkStream class for the specified System.Net.Sockets.Socket.
         public NetworkStream(Socket socket)
+            : this(socket, FileAccess.ReadWrite, ownsSocket: false)
         {
-#if DEBUG
-            using (GlobalLog.SetThreadKind(ThreadKinds.User))
-            {
-#endif
-                if (socket == null)
-                {
-                    throw new ArgumentNullException(nameof(socket));
-                }
-                InitNetworkStream(socket, FileAccess.ReadWrite);
-#if DEBUG
-            }
-#endif
         }
 
         public NetworkStream(Socket socket, bool ownsSocket)
+            : this(socket, FileAccess.ReadWrite, ownsSocket)
         {
-#if DEBUG
-            using (GlobalLog.SetThreadKind(ThreadKinds.User))
-            {
-#endif
-                if (socket == null)
-                {
-                    throw new ArgumentNullException(nameof(socket));
-                }
-                InitNetworkStream(socket, FileAccess.ReadWrite);
-                _ownsSocket = ownsSocket;
-#if DEBUG
-            }
-#endif
-        }
-
-        internal NetworkStream(NetworkStream networkStream, bool ownsSocket)
-        {
-            Socket socket = networkStream.Socket;
-            if (socket == null)
-            {
-                throw new ArgumentNullException(nameof(networkStream));
-            }
-            InitNetworkStream(socket, FileAccess.ReadWrite);
-            _ownsSocket = ownsSocket;
         }
 
         public NetworkStream(Socket socket, FileAccess access)
+            : this(socket, access, ownsSocket: false)
         {
-#if DEBUG
-            using (GlobalLog.SetThreadKind(ThreadKinds.User))
-            {
-#endif
-                if (socket == null)
-                {
-                    throw new ArgumentNullException(nameof(socket));
-                }
-                InitNetworkStream(socket, access);
-#if DEBUG
-            }
-#endif
         }
+
         public NetworkStream(Socket socket, FileAccess access, bool ownsSocket)
         {
 #if DEBUG
@@ -99,8 +55,36 @@ namespace System.Net.Sockets
                 {
                     throw new ArgumentNullException(nameof(socket));
                 }
-                InitNetworkStream(socket, access);
+                if (!socket.Blocking)
+                {
+                    throw new IOException(SR.net_sockets_blocking);
+                }
+                if (!socket.Connected)
+                {
+                    throw new IOException(SR.net_notconnected);
+                }
+                if (socket.SocketType != SocketType.Stream)
+                {
+                    throw new IOException(SR.net_notstream);
+                }
+
+                _streamSocket = socket;
                 _ownsSocket = ownsSocket;
+
+                switch (access)
+                {
+                    case FileAccess.Read:
+                        _readable = true;
+                        break;
+                    case FileAccess.Write:
+                        _writeable = true;
+                        break;
+                    case FileAccess.ReadWrite:
+                    default: // assume FileAccess.ReadWrite
+                        _readable = true;
+                        _writeable = true;
+                        break;
+                }
 #if DEBUG
             }
 #endif
@@ -354,39 +338,6 @@ namespace System.Net.Sockets
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException(SR.net_noseek);
-        }
-
-        internal void InitNetworkStream(Socket socket, FileAccess access)
-        {
-            if (!socket.Blocking)
-            {
-                throw new IOException(SR.net_sockets_blocking);
-            }
-            if (!socket.Connected)
-            {
-                throw new IOException(SR.net_notconnected);
-            }
-            if (socket.SocketType != SocketType.Stream)
-            {
-                throw new IOException(SR.net_notstream);
-            }
-
-            _streamSocket = socket;
-
-            switch (access)
-            {
-                case FileAccess.Read:
-                    _readable = true;
-                    break;
-                case FileAccess.Write:
-                    _writeable = true;
-                    break;
-                case FileAccess.ReadWrite:
-                default: // assume FileAccess.ReadWrite
-                    _readable = true;
-                    _writeable = true;
-                    break;
-            }
         }
 
         internal bool PollRead()
