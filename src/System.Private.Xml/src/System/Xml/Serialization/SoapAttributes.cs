@@ -43,38 +43,31 @@ namespace System.Xml.Serialization
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
-        public SoapAttributes(MemberInfo memberInfo)
+        public SoapAttributes(ICustomAttributeProvider provider)
         {
-            foreach (Attribute attr in memberInfo.GetCustomAttributes(false))
-            {
-                if (attr is SoapIgnoreAttribute || attr is ObsoleteAttribute)
-                {
+            object[] attrs = provider.GetCustomAttributes(false);
+            for (int i = 0; i < attrs.Length; i++) {
+                if (attrs[i] is SoapIgnoreAttribute || attrs[i] is ObsoleteAttribute) {
                     _soapIgnore = true;
                     break;
                 }
-                else if (attr is SoapElementAttribute)
-                {
-                    _soapElement = (SoapElementAttribute)attr;
+                else if (attrs[i] is SoapElementAttribute) {
+                    _soapElement = (SoapElementAttribute)attrs[i];
                 }
-                else if (attr is SoapAttributeAttribute)
-                {
-                    _soapAttribute = (SoapAttributeAttribute)attr;
+                else if (attrs[i] is SoapAttributeAttribute) {
+                    _soapAttribute = (SoapAttributeAttribute)attrs[i];
                 }
-                else if (attr is SoapTypeAttribute)
-                {
-                    _soapType = (SoapTypeAttribute)attr;
+                else if (attrs[i] is SoapTypeAttribute) {
+                    _soapType = (SoapTypeAttribute)attrs[i];
                 }
-                else if (attr is SoapEnumAttribute)
-                {
-                    _soapEnum = (SoapEnumAttribute)attr;
+                else if (attrs[i] is SoapEnumAttribute) {
+                    _soapEnum = (SoapEnumAttribute)attrs[i];
                 }
-                else if (attr is DefaultValueAttribute)
-                {
-                    _soapDefaultValue = ((DefaultValueAttribute)attr).Value;
+                else if (attrs[i] is DefaultValueAttribute) {
+                    _soapDefaultValue = ((DefaultValueAttribute)attrs[i]).Value;
                 }
             }
-            if (_soapIgnore)
-            {
+            if (_soapIgnore) {
                 _soapElement = null;
                 _soapAttribute = null;
                 _soapType = null;
