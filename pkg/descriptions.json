@@ -862,6 +862,16 @@
         ]
     },
     {
+        "Name": "System.Net.Mime",
+        "Description": "Provides types that are used to represent Multipurpose Internet Mail Exchange (MIME) headers.",
+        "CommonTypes": [
+            "System.Net.Mime.ContentDisposition",
+            "System.Net.Mime.ContentType",
+            "System.Net.Mime.DispositionTypeNames",
+            "System.Net.Mime.MediaTypeNames"
+        ]
+    },
+    {
         "Name": "System.Net.NameResolution",
         "Description": "Provides the System.Net.Dns class, which enables developers to perform simple domain name resolution.",
         "CommonTypes": [
@@ -1761,6 +1771,13 @@
             "System.ValueTuple<T1, T2, T3, T4, T5, T6>",
             "System.ValueTuple<T1, T2, T3, T4, T5, T6, T7>",
             "System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>"
+        ]
+    },
+    {
+        "Name": "System.Web.HttpUtility",
+        "Description": "Provides the System.Web.HttpUtility class for encoding and decoding various web formats.",
+        "CommonTypes": [
+            "System.Web.HttpUtility"
         ]
     },
     {
