@@ -18,10 +18,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <XunitPerfAnalysisPackageVersion>1.0.0-alpha-build0040</XunitPerfAnalysisPackageVersion>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <InputOSGroup Condition="'$(InputOSGroup)'==''">$(OSEnvironment)</InputOSGroup>
   </PropertyGroup>
 
@@ -71,8 +67,8 @@
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
   <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
-  <!-- Explicitly setting 
-       - SupportsUWP to true when TargetGroup is uap101*. This will enable the correct pinvoke checker to be picked 
+  <!-- Explicitly setting
+       - SupportsUWP to true when TargetGroup is uap101*. This will enable the correct pinvoke checker to be picked
        - BlockReflectionAttribute to true. This will enable injecting BlockReflectionAttribute.cs into the compile target.
        TODO: Both of these properties are being set in buildtools targets, however they need to be updated to reflect uap101 changes.
   -->
@@ -99,6 +95,7 @@
   <PropertyGroup Condition="'$(BuildTestsAgainstPackages)' == 'true'">
     <GeneratedProjectJsonDir>$(ObjDir)generated</GeneratedProjectJsonDir>
     <BuildTestsAgainstPackagesIdentityRegex>$(CoreFxVersionsIdentityRegex)</BuildTestsAgainstPackagesIdentityRegex>
+    <SkipVerifyPackageVersions>true</SkipVerifyPackageVersions>
   </PropertyGroup>
 
   <!-- list of directories to perform batch restore -->
@@ -131,6 +128,7 @@
   <ItemGroup>
     <ProjectJsonFiles Include="$(SourceDir)**/project.json" />
     <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)pkg/**/project.json" />
+    <ProjectJsonFiles Condition="'$(BuildTestsAgainstPackages)' == 'true'" Include="$(GeneratedProjectJsonDir)/**/project.json" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(BuildAllProjects)'=='true'">
@@ -467,10 +465,10 @@
 
   <!-- Default Test platform to deploy the netstandard compiled tests to -->
   <PropertyGroup>
-    <TestTFM Condition="'$(TestTFM)'=='' AND '$(TargetGroup)'=='netstandard1.7'">netcoreapp1.1</TestTFM>
+    <TestTFM Condition="'$(TestTFM)'=='' and ('$(TargetGroup)'=='netstandard1.7' or '$(TargetGroup)'=='netcoreapp1.1')">netcoreapp1.1</TestTFM>
     <TestTFM Condition="'$(TestTFM)'==''">netcoreapp1.0</TestTFM>
     <!-- we default FilterToTestTFM to netcoreapp1.1 if it is not explicity defined -->
-    <FilterToTestTFM Condition="'$(FilterToTestTFM)'==''">netcoreapp1.1</FilterToTestTFM>        
+    <FilterToTestTFM Condition="'$(FilterToTestTFM)'==''">netcoreapp1.1</FilterToTestTFM>
   </PropertyGroup>
 
   <ItemGroup>

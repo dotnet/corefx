@@ -44,6 +44,9 @@
     <ExcludeAssemblyInfoPartialFile>true</ExcludeAssemblyInfoPartialFile>
   </PropertyGroup>
   <!-- Shared CoreCLR and .NET Native -->
+  <ItemGroup Condition="'$(TargetGroup)' == ''">
+    <Compile Include="System\AppDomain.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net462' And '$(TargetGroup)' != 'net463'">
     <Compile Include="System\BitConverter.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
@@ -186,7 +189,8 @@
       <Link>Common\Interop\Windows\mincore\Interop.LookupAccountNameW.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(CoreClrOrCorRt)' == 'true'"> <!-- Microsoft.Win32.Registry, needed for some Environment env var support -->
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(CoreClrOrCorRt)' == 'true'">
+    <!-- Microsoft.Win32.Registry, needed for some Environment env var support -->
     <Compile Include="..\..\Microsoft.Win32.Registry\src\Microsoft\Win32\Registry.cs">
       <Link>Microsoft.Win32.Registry\src\Microsoft\Win32\Registry.cs</Link>
     </Compile>
@@ -274,6 +278,12 @@
     <Compile Include="System\Environment.Unix.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.Unix.cs" />
     <Compile Include="System\IO\Path.Unix.cs" />
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
+      <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\OSX\Interop.CommonCrypto.cs">
+      <Link>Common\Interop\OSX\Interop.CommonCrypto.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
@@ -371,7 +381,8 @@
     <TargetingPackReference Include="System.Private.CoreLib" />
     <TargetingPackReference Include="System.Private.CoreLib.InteropServices" />
     <TargetingPackReference Include="System.Private.Interop" />
-    <TargetingPackReference Include="System.Private.Reflection" /> <!-- can remove once we remove the Environment reflection workaround -->
+    <!-- can remove once we remove the Environment reflection workaround -->
+    <TargetingPackReference Include="System.Private.Reflection" />
     <TargetingPackReference Include="System.Private.Threading" />
     <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" Condition="'$(TargetGroup)' == 'netcore50aot'" />
     <ProjectReference Include="..\..\System.Runtime\src\redist\System.Runtime.depproj">
