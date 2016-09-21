@@ -2,17 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Linq;
 using Xunit;
 
 namespace System.Reflection.Emit.Tests
 {
     public class EmptyNonGenericClass { }
     public class EmptyGenericClass<T> { }
+    public sealed class SealedClass { }
+    public static class StaticClass { }
 
     public struct EmptyNonGenericStruct { }
     public struct EmptyGenericStruct<T> { }
 
     public enum EmptyEnum { }
+    public delegate EventHandler BasicDelegate();
 
     public interface EmptyNonGenericInterface1 { }
     public interface EmptyNonGenericInterface2 { }
@@ -30,6 +34,8 @@ namespace System.Reflection.Emit.Tests
 
     public static class Helpers
     {
+        public const BindingFlags AllFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
         public static AssemblyBuilder DynamicAssembly(string name = "TestAssembly", AssemblyBuilderAccess access = AssemblyBuilderAccess.Run)
         {
             AssemblyName assemblyName = new AssemblyName(name);
@@ -81,12 +87,51 @@ namespace System.Reflection.Emit.Tests
                 Type createdType = type.CreateTypeInfo().AsType();
                 Assert.Equal(createdType, module.GetType(name, false, false));
                 Assert.Equal(createdType, module.GetType(name, true, false));
+                
+                Assert.Equal(type.AsType().GetNestedTypes(AllFlags), createdType.GetNestedTypes(AllFlags));
+                Assert.Equal(type.AsType().GetNestedType(name, AllFlags), createdType.GetNestedType(name, AllFlags));
 
                 // [ActiveIssue(10989, TestPlatforms.AnyUnix)]
                 // Assert.Equal(createdType, module.GetType(name, true, true));
                 // Assert.Equal(createdType, module.GetType(name.ToLowerInvariant(), true, true));
                 // Assert.Equal(createdType, module.GetType(name.ToUpperInvariant(), true, true));
             }
+        }
+
+        public static void VerifyConstructor(ConstructorBuilder constructor, TypeBuilder type, MethodAttributes attributes, Type[] parameterTypes)
+        {
+            string expectedName = (attributes & MethodAttributes.Static) != 0 ? ConstructorInfo.TypeConstructorName : ConstructorInfo.ConstructorName;
+
+            Assert.Equal(expectedName, constructor.Name);
+            Assert.Equal(attributes | MethodAttributes.SpecialName, constructor.Attributes);
+            Assert.Equal(CallingConventions.Standard, constructor.CallingConvention);
+            Assert.Same(type, constructor.DeclaringType);
+            Assert.Same(type.Module, constructor.Module);
+            Assert.Equal(MethodImplAttributes.IL, constructor.MethodImplementationFlags);
+
+            Assert.Throws<NotSupportedException>(() => constructor.Invoke(null));
+            Assert.Throws<NotSupportedException>(() => constructor.Invoke(null, null));
+
+            Type createdType = type.CreateTypeInfo().AsType();
+            Assert.Equal(type.AsType().GetConstructors(AllFlags), createdType.GetConstructors(AllFlags));
+            Assert.Equal(type.AsType().GetConstructor(parameterTypes), createdType.GetConstructor(parameterTypes));
+
+            ConstructorInfo createdConstructor = createdType.GetConstructors(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Single(ctor => ctor.IsStatic == constructor.IsStatic);
+
+            CallingConventions expectedCallingConvention = CallingConventions.Standard;
+            if ((attributes & MethodAttributes.Static) == 0)
+            {
+                expectedCallingConvention |= CallingConventions.HasThis;
+            }
+            MethodAttributes expectedAttributes = attributes | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
+            expectedAttributes &= ~MethodAttributes.RequireSecObject;
+
+            Assert.Equal(expectedName, constructor.Name);
+            Assert.Equal(expectedAttributes, createdConstructor.Attributes);
+            Assert.Equal(expectedCallingConvention, createdConstructor.CallingConvention);
+            Assert.Same(createdType, createdConstructor.DeclaringType);
+            Assert.Equal(MethodImplAttributes.IL, constructor.MethodImplementationFlags);
         }
 
         public static string GetFullName(string name)
