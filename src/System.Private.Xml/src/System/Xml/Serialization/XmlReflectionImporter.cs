@@ -499,12 +499,12 @@ namespace System.Xml.Serialization
                 SerializableMapping serializableMapping = null;
 
                 // get the schema method info
-                IEnumerable<Attribute> attrs = type.GetTypeInfo().GetCustomAttributes(typeof(XmlSchemaProviderAttribute), false);
+                object[] attrs = type.GetCustomAttributes(typeof(XmlSchemaProviderAttribute), false);
 
-                if (attrs.Count() > 0)
+                if (attrs.Length > 0)
                 {
                     // new IXmlSerializable
-                    XmlSchemaProviderAttribute provider = (XmlSchemaProviderAttribute)attrs.First();
+                    XmlSchemaProviderAttribute provider = (XmlSchemaProviderAttribute)attrs[0];
                     MethodInfo method = GetMethodFromSchemaProvider(provider, type);
                     serializableMapping = new SerializableMapping(method, provider.IsAny, ns);
                     XmlQualifiedName qname = serializableMapping.XsiType;

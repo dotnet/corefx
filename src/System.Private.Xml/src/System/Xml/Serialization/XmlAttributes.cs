@@ -195,9 +195,9 @@ namespace System.Xml.Serialization
 
         internal static object GetAttr(MemberInfo memberInfo, Type attrType)
         {
-            IEnumerable<Attribute> attrs = memberInfo.GetCustomAttributes(attrType, false);
-            if (attrs.Count() == 0) return null;
-            return attrs.First();
+            object[] attrs = memberInfo.GetCustomAttributes(attrType, false);
+            if (attrs.Length == 0) return null;
+            return attrs[0];
         }
 
         /// <devdoc>

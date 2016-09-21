@@ -10,12 +10,6 @@ using System.Runtime.InteropServices;
 namespace System
 {
     [ComVisible(true)]
-    internal class ResolveEventArgs : EventArgs
-    {
-    }
-
-
-    [ComVisible(true)]
     internal delegate Assembly ResolveEventHandler(Object sender, ResolveEventArgs args);
 
     internal class AppDomain
