@@ -72,11 +72,7 @@ namespace System.Text.RegularExpressions
                 caps = value as Hashtable;
                 if (caps == null)
                 {
-                    caps = new Hashtable();
-                    foreach (DictionaryEntry entry in value)
-                    {
-                        caps.Add(entry.Key, entry.Value);
-                    }
+                    caps = new Hashtable(value);
                 }
             }
         }
@@ -96,11 +92,7 @@ namespace System.Text.RegularExpressions
                 capnames = value as Hashtable;
                 if (capnames == null)
                 {
-                    capnames = new Hashtable();
-                    foreach (DictionaryEntry entry in value)
-                    {
-                        capnames.Add(entry.Key, entry.Value);
-                    }
+                    capnames = new Hashtable(value);
                 }
             }
         }
