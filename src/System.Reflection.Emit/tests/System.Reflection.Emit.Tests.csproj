@@ -86,8 +86,6 @@
     <Compile Include="PropertyBuilder\PropertyBuilderDeclaringType.cs" />
     <Compile Include="PropertyBuilder\PropertyBuilderGetIndexParameters.cs" />
     <Compile Include="PropertyBuilder\PropertyBuilderGetValue.cs" />
-    <Compile Include="PropertyBuilder\PropertyBuilderName.cs" />
-    <Compile Include="PropertyBuilder\PropertyBuilderPropertyType.cs" />
     <Compile Include="PropertyBuilder\PropertyBuilderSetConstant.cs" />
     <Compile Include="PropertyBuilder\PropertyBuilderSetCustomAttribute.cs" />
     <Compile Include="PropertyBuilder\PropertyBuilderSetGetMethod.cs" />
