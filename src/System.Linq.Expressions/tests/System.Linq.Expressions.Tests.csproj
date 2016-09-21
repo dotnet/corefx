@@ -226,6 +226,8 @@
       <Project>{aef718e9-d4fc-418f-a7ae-ed6b2c7b3787}</Project>
       <Name>System.Linq.Expressions</Name>
     </ProjectReference>
+    <!-- temporarily compile against the live build of RegularExpressions to handle assembly-version change -->
+    <ProjectReference Include="..\..\System.Text.RegularExpressions\pkg\System.Text.RegularExpressions.pkgproj"/>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
