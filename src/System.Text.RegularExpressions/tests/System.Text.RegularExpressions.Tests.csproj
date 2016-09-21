@@ -44,7 +44,6 @@
     <ProjectReference Include="..\pkg\System.Text.RegularExpressions.pkgproj">
       <Project>{be28323e-327a-4e0f-b7f9-16ab7eab59dd}</Project>
       <Name>System.Text.RegularExpressions</Name>
-      <!--<UndefineProperties>%(UndefineProperties);Configuration</UndefineProperties>-->
     </ProjectReference>
   </ItemGroup>
   <!-- Automatically added by VS -->
