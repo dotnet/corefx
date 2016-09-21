@@ -476,11 +476,20 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
-        public static void Subtract_MultipleOverloads_CorrectlyResolvesOperator(bool useInterpreter)
+        public static void Subtract_MultipleOverloads_CorrectlyResolvesOperator1(bool useInterpreter)
         {
             BinaryExpression subtract = Expression.Subtract(Expression.Constant(new DateTime(100)), Expression.Constant(new DateTime(10)));
             Func<TimeSpan> lambda = Expression.Lambda<Func<TimeSpan>>(subtract).Compile(useInterpreter);
             Assert.Equal(new TimeSpan(90), lambda());
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public static void Subtract_MultipleOverloads_CorrectlyResolvesOperator2(bool useInterpreter)
+        {
+            BinaryExpression subtract = Expression.Subtract(Expression.Constant(new DateTime(100)), Expression.Constant(new TimeSpan(10)));
+            Func<DateTime> lambda = Expression.Lambda<Func<DateTime>>(subtract).Compile(useInterpreter);
+            Assert.Equal(new DateTime(90), lambda());
         }
 
         [Fact]
