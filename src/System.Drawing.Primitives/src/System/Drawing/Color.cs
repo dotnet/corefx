@@ -598,7 +598,7 @@ namespace System.Drawing
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder(32);
-            sb.Append(GetType().Name);
+            sb.Append(nameof(Color));
             sb.Append(" [");
 
             if ((state & s_stateNameValid) != 0)
@@ -626,7 +626,7 @@ namespace System.Drawing
             }
 
 
-            sb.Append("]");
+            sb.Append(']');
 
             return sb.ToString();
         }
