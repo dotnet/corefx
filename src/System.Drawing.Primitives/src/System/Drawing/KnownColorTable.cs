@@ -4,7 +4,7 @@
 
 namespace System.Drawing
 {
-    static internal class KnownColorTable
+    internal static class KnownColorTable
     {
         private static int[] s_colorTable;
         private static string[] s_colorNameTable;

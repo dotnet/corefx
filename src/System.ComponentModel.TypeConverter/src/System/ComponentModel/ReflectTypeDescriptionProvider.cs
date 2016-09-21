@@ -7,10 +7,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-
-#if NETSTANDARD17
 using System.Drawing;
-#endif
 
 namespace System.ComponentModel
 {
@@ -139,13 +136,11 @@ namespace System.ComponentModel
                         [typeof(TimeSpan)] = typeof(TimeSpanConverter),
                         [typeof(Guid)] = typeof(GuidConverter),
                         [typeof(Uri)] = typeof(UriTypeConverter),
-#if NETSTANDARD17
                         [typeof(Color)] = typeof(ColorConverter),
                         [typeof(Point)] = typeof(PointConverter),
                         [typeof(Rectangle)] = typeof(RectangleConverter),
                         [typeof(Size)] = typeof(SizeConverter),
                         [typeof(SizeF)] = typeof(SizeFConverter),
-#endif
                         // Special cases for things that are not bound to a specific type
                         //
                         [typeof(Array)] = typeof(ArrayConverter),
