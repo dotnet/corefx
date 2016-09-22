@@ -26,7 +26,7 @@ namespace System.Net
         {
             if (hostName == null)
             {
-                throw new ArgumentNullException("hostName");
+                throw new ArgumentNullException(nameof(hostName));
             }
 
             NameResolutionPal.EnsureSocketsAreInitialized();
@@ -54,7 +54,7 @@ namespace System.Net
                 || hostName.Length == MaxHostName && hostName[MaxHostName - 1] != '.')
             {
                 throw new ArgumentOutOfRangeException(nameof(hostName), SR.Format(SR.net_toolong,
-                    "hostName", MaxHostName.ToString(NumberFormatInfo.CurrentInfo)));
+                    nameof(hostName), MaxHostName.ToString(NumberFormatInfo.CurrentInfo)));
             }
 
             //
@@ -101,10 +101,13 @@ namespace System.Net
 
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
 
-            GlobalLog.Print("Dns.GetHostByAddress: " + address);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Dns.GetHostByAddress: " + address);
+            }
 
             IPHostEntry ipHostEntry = InternalGetHostByAddress(IPAddress.Parse(address), false);
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Exit(NetEventSource.ComponentType.Socket, "DNS", "GetHostByAddress", ipHostEntry);
@@ -118,7 +121,7 @@ namespace System.Net
 
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
 
             IPHostEntry ipHostEntry = InternalGetHostByAddress(address, false);
@@ -337,7 +340,7 @@ namespace System.Net
             {
                 if (throwOnIIPAny && (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any)))
                 {
-                    throw new ArgumentException(SR.net_invalid_ip_addr, "hostNameOrAddress");
+                    throw new ArgumentException(SR.net_invalid_ip_addr, nameof(hostName));
                 }
 
                 asyncResult = new ResolveAsyncResult(address, null, includeIPv6, state, requestCallback);
@@ -425,7 +428,7 @@ namespace System.Net
             }
             if (castedResult.EndCalled)
             {
-                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, "EndResolve"));
+                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndResolve)));
             }
 
             if (GlobalLog.IsEnabled)
@@ -473,7 +476,7 @@ namespace System.Net
 
             if (hostNameOrAddress == null)
             {
-                throw new ArgumentNullException("hostNameOrAddress");
+                throw new ArgumentNullException(nameof(hostNameOrAddress));
             }
 
             // See if it's an IP Address.
@@ -483,7 +486,7 @@ namespace System.Net
             {
                 if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
                 {
-                    throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, "hostNameOrAddress"));
+                    throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(hostNameOrAddress)));
                 }
 
                 ipHostEntry = InternalGetHostByAddress(address, true);
@@ -504,12 +507,12 @@ namespace System.Net
 
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
 
             if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
             {
-                throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, "address"));
+                throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(address)));
             }
 
             IPHostEntry ipHostEntry = InternalGetHostByAddress(address, true);
