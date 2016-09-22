@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 
+#pragma warning disable 0436  //TODO: Remove this class when AppDomain.GetAssemblies() becomes available
 namespace System
 {
     [ComVisible(true)]

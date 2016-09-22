@@ -2593,7 +2593,7 @@ namespace System.Xml.XPath
         ExcludeXml = 1,
         Local = 2,
     }
-    public abstract partial class XPathNavigator : System.Xml.XPath.XPathItem, System.Xml.IXmlNamespaceResolver, System.Xml.XPath.IXPathNavigable
+    public abstract partial class XPathNavigator : System.Xml.XPath.XPathItem, System.ICloneable, System.Xml.IXmlNamespaceResolver, System.Xml.XPath.IXPathNavigable
     {
         protected XPathNavigator() { }
         public abstract string BaseURI { get; }
@@ -2611,6 +2611,7 @@ namespace System.Xml.XPath
         public abstract System.Xml.XPath.XPathNodeType NodeType { get; }
         public virtual string OuterXml { get { return default(string); } set { } }
         public abstract string Prefix { get; }
+        public virtual System.Xml.Schema.IXmlSchemaInfo SchemaInfo { get { throw null; } }
         public override object TypedValue { get { return default(object); } }
         public virtual object UnderlyingObject { get { return default(object); } }
         public override bool ValueAsBoolean { get { return default(bool); } }
@@ -2620,11 +2621,13 @@ namespace System.Xml.XPath
         public override long ValueAsLong { get { return default(long); } }
         public override System.Type ValueType { get { return default(System.Type); } }
         public virtual string XmlLang { get { return default(string); } }
+        public override System.Xml.Schema.XmlSchemaType XmlType { get { throw null; } }
         public virtual System.Xml.XmlWriter AppendChild() { return default(System.Xml.XmlWriter); }
         public virtual void AppendChild(string newChild) { }
         public virtual void AppendChild(System.Xml.XmlReader newChild) { }
         public virtual void AppendChild(System.Xml.XPath.XPathNavigator newChild) { }
         public virtual void AppendChildElement(string prefix, string localName, string namespaceURI, string value) { }
+        public virtual bool CheckValidity(System.Xml.Schema.XmlSchemaSet schemas, System.Xml.Schema.ValidationEventHandler validationEventHandler) { throw null; }
         public abstract System.Xml.XPath.XPathNavigator Clone();
         public virtual System.Xml.XmlNodeOrder ComparePosition(System.Xml.XPath.XPathNavigator nav) { return default(System.Xml.XmlNodeOrder); }
         public virtual System.Xml.XPath.XPathExpression Compile(string xpath) { return default(System.Xml.XPath.XPathExpression); }
@@ -2704,6 +2707,7 @@ namespace System.Xml.XPath
         public virtual System.Xml.XPath.XPathNavigator SelectSingleNode(System.Xml.XPath.XPathExpression expression) { return default(System.Xml.XPath.XPathNavigator); }
         public virtual void SetTypedValue(object typedValue) { }
         public virtual void SetValue(string value) { }
+        object System.ICloneable.Clone() { throw null; }
         public override string ToString() { return default(string); }
         public override object ValueAs(System.Type returnType, System.Xml.IXmlNamespaceResolver nsResolver) { return default(object); }
         public virtual void WriteSubtree(System.Xml.XmlWriter writer) { }
@@ -2766,8 +2770,12 @@ namespace System.Xml.Xsl
         public XslCompiledTransform() { }
         public XslCompiledTransform(bool enableDebug) { }
         public System.Xml.XmlWriterSettings OutputSettings { get { return default(System.Xml.XmlWriterSettings); } }
+//CODEDOM        public System.CodeDom.Compiler.TempFileCollection TemporaryFiles { get { throw null; } }
+//REFEMIT        public static System.CodeDom.Compiler.CompilerErrorCollection CompileToType(System.Xml.XmlReader stylesheet, System.Xml.Xsl.XsltSettings settings, System.Xml.XmlResolver stylesheetResolver, bool debug, System.Reflection.Emit.TypeBuilder typeBuilder, string scriptAssemblyPath) { throw null; }
+        public void Load(System.Reflection.MethodInfo executeMethod, byte[] queryData, System.Type[] earlyBoundTypes) { }
         public void Load(string stylesheetUri) { }
         public void Load(string stylesheetUri, System.Xml.Xsl.XsltSettings settings, System.Xml.XmlResolver stylesheetResolver) { }
+        public void Load(System.Type compiledStylesheet) { }
         public void Load(System.Xml.XmlReader stylesheet) { }
         public void Load(System.Xml.XmlReader stylesheet, System.Xml.Xsl.XsltSettings settings, System.Xml.XmlResolver stylesheetResolver) { }
         public void Load(System.Xml.XPath.IXPathNavigable stylesheet) { }
@@ -2786,6 +2794,7 @@ namespace System.Xml.Xsl
         public void Transform(System.Xml.XPath.IXPathNavigable input, System.Xml.Xsl.XsltArgumentList arguments, System.IO.Stream results) { }
         public void Transform(System.Xml.XPath.IXPathNavigable input, System.Xml.Xsl.XsltArgumentList arguments, System.IO.TextWriter results) { }
         public void Transform(System.Xml.XPath.IXPathNavigable input, System.Xml.Xsl.XsltArgumentList arguments, System.Xml.XmlWriter results) { }
+        public void Transform(System.Xml.XPath.IXPathNavigable input, System.Xml.Xsl.XsltArgumentList arguments, System.Xml.XmlWriter results, System.Xml.XmlResolver documentResolver) { }
     }
     public partial class XsltArgumentList
     {
