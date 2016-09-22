@@ -30,6 +30,18 @@ namespace System.Xml
         Indented = 1,
         None = 0,
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.ObsoleteAttribute("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+    public partial interface IApplicationResourceStreamResolver
+    {
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+        System.IO.Stream GetApplicationResourceStream(System.Uri relativeUri);
+    }
+    public partial interface IHasXmlNode
+    {
+        System.Xml.XmlNode GetNode();
+    }
     public partial interface IXmlLineInfo
     {
         int LineNumber { get; }
@@ -415,18 +427,23 @@ namespace System.Xml
         public override void WriteContentTo(System.Xml.XmlWriter w) { }
         public override void WriteTo(System.Xml.XmlWriter w) { }
     }
-    public partial class XmlException : System.SystemException
+    public partial class XmlEntity : System.Xml.XmlNode
     {
-        public XmlException() { }
-        protected XmlException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public XmlException(string message) { }
-        public XmlException(string message, System.Exception innerException) { }
-        public XmlException(string message, System.Exception innerException, int lineNumber, int linePosition) { }
-        public int LineNumber { get { return default(int); } }
-        public int LinePosition { get { return default(int); } }
-        public override string Message { get { return default(string); } }
-        public string SourceUri { get { return default(string); } }
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        internal XmlEntity() { }
+        public override string BaseURI { get { throw null; } }
+        public override string InnerText { get { throw null; } set { } }
+        public override string InnerXml { get { throw null; } set { } }
+        public override bool IsReadOnly { get { throw null; } }
+        public override string LocalName { get { throw null; } }
+        public override string Name { get { throw null; } }
+        public override System.Xml.XmlNodeType NodeType { get { throw null; } }
+        public string NotationName { get { throw null; } }
+        public override string OuterXml { get { throw null; } }
+        public string PublicId { get { throw null; } }
+        public string SystemId { get { throw null; } }
+        public override System.Xml.XmlNode CloneNode(bool deep) { throw null; }
+        public override void WriteContentTo(System.Xml.XmlWriter w) { }
+        public override void WriteTo(System.Xml.XmlWriter w) { }
     }
     public partial class XmlEntityReference : System.Xml.XmlLinkedNode
     {
@@ -440,6 +457,19 @@ namespace System.Xml
         public override System.Xml.XmlNode CloneNode(bool deep) { return default(System.Xml.XmlNode); }
         public override void WriteContentTo(System.Xml.XmlWriter w) { }
         public override void WriteTo(System.Xml.XmlWriter w) { }
+    }
+    public partial class XmlException : System.SystemException
+    {
+        public XmlException() { }
+        protected XmlException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        public XmlException(string message) { }
+        public XmlException(string message, System.Exception innerException) { }
+        public XmlException(string message, System.Exception innerException, int lineNumber, int linePosition) { }
+        public int LineNumber { get { return default(int); } }
+        public int LinePosition { get { return default(int); } }
+        public override string Message { get { return default(string); } }
+        public string SourceUri { get { return default(string); } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class XmlImplementation
     {
@@ -582,6 +612,54 @@ namespace System.Xml
         Same = 2,
         Unknown = 3,
     }
+    public partial class XmlNodeReader : System.Xml.XmlReader, System.Xml.IXmlNamespaceResolver
+    {
+        public XmlNodeReader(System.Xml.XmlNode node) { }
+        public override int AttributeCount { get { throw null; } }
+        public override string BaseURI { get { throw null; } }
+        public override bool CanReadBinaryContent { get { throw null; } }
+        public override bool CanResolveEntity { get { throw null; } }
+        public override int Depth { get { throw null; } }
+        public override bool EOF { get { throw null; } }
+        public override bool HasAttributes { get { throw null; } }
+        public override bool HasValue { get { throw null; } }
+        public override bool IsDefault { get { throw null; } }
+        public override bool IsEmptyElement { get { throw null; } }
+        public override string LocalName { get { throw null; } }
+        public override string Name { get { throw null; } }
+        public override string NamespaceURI { get { throw null; } }
+        public override System.Xml.XmlNameTable NameTable { get { throw null; } }
+        public override System.Xml.XmlNodeType NodeType { get { throw null; } }
+        public override string Prefix { get { throw null; } }
+        public override System.Xml.ReadState ReadState { get { throw null; } }
+        public override System.Xml.Schema.IXmlSchemaInfo SchemaInfo { get { throw null; } }
+        public override string Value { get { throw null; } }
+        public override string XmlLang { get { throw null; } }
+        public override System.Xml.XmlSpace XmlSpace { get { throw null; } }
+        public override void Close() { }
+        public override string GetAttribute(int attributeIndex) { throw null; }
+        public override string GetAttribute(string name) { throw null; }
+        public override string GetAttribute(string name, string namespaceURI) { throw null; }
+        public override string LookupNamespace(string prefix) { throw null; }
+        public override void MoveToAttribute(int attributeIndex) { }
+        public override bool MoveToAttribute(string name) { throw null; }
+        public override bool MoveToAttribute(string name, string namespaceURI) { throw null; }
+        public override bool MoveToElement() { throw null; }
+        public override bool MoveToFirstAttribute() { throw null; }
+        public override bool MoveToNextAttribute() { throw null; }
+        public override bool Read() { throw null; }
+        public override bool ReadAttributeValue() { throw null; }
+        public override int ReadContentAsBase64(byte[] buffer, int index, int count) { throw null; }
+        public override int ReadContentAsBinHex(byte[] buffer, int index, int count) { throw null; }
+        public override int ReadElementContentAsBase64(byte[] buffer, int index, int count) { throw null; }
+        public override int ReadElementContentAsBinHex(byte[] buffer, int index, int count) { throw null; }
+        public override string ReadString() { throw null; }
+        public override void ResolveEntity() { }
+        public override void Skip() { }
+        System.Collections.Generic.IDictionary<string, string> System.Xml.IXmlNamespaceResolver.GetNamespacesInScope(System.Xml.XmlNamespaceScope scope) { throw null; }
+        string System.Xml.IXmlNamespaceResolver.LookupNamespace(string prefix) { throw null; }
+        string System.Xml.IXmlNamespaceResolver.LookupPrefix(string namespaceName) { throw null; }
+    }
     public enum XmlNodeType
     {
         Attribute = 2,
@@ -602,6 +680,21 @@ namespace System.Xml
         Text = 3,
         Whitespace = 13,
         XmlDeclaration = 17,
+    }
+    public partial class XmlNotation : System.Xml.XmlNode
+    {
+        internal XmlNotation() { }
+        public override string InnerXml { get { throw null; } set { } }
+        public override bool IsReadOnly { get { throw null; } }
+        public override string LocalName { get { throw null; } }
+        public override string Name { get { throw null; } }
+        public override System.Xml.XmlNodeType NodeType { get { throw null; } }
+        public override string OuterXml { get { throw null; } }
+        public string PublicId { get { throw null; } }
+        public string SystemId { get { throw null; } }
+        public override System.Xml.XmlNode CloneNode(bool deep) { throw null; }
+        public override void WriteContentTo(System.Xml.XmlWriter w) { }
+        public override void WriteTo(System.Xml.XmlWriter w) { }
     }
     public enum XmlOutputMethod
     {
@@ -846,6 +939,17 @@ namespace System.Xml
         public virtual System.Uri ResolveUri(System.Uri baseUri, string relativeUri) { return default(System.Uri); }
         public virtual bool SupportsType(System.Uri absoluteUri, System.Type type) { return default(bool); }
     }
+    public partial class XmlSecureResolver : System.Xml.XmlResolver
+    {
+//CAS        public XmlSecureResolver(System.Xml.XmlResolver resolver, System.Security.PermissionSet permissionSet) { }
+//CAS        public XmlSecureResolver(System.Xml.XmlResolver resolver, System.Security.Policy.Evidence evidence) { }
+        public XmlSecureResolver(System.Xml.XmlResolver resolver, string securityUrl) { }
+        public override System.Net.ICredentials Credentials { set { } }
+//CAS        public static System.Security.Policy.Evidence CreateEvidenceForUrl(string securityUrl) { throw null; }
+        public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) { throw null; }
+        public override System.Threading.Tasks.Task<object> GetEntityAsync(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) { throw null; }
+        public override System.Uri ResolveUri(System.Uri baseUri, string relativeUri) { throw null; }
+    }
     public partial class XmlSignificantWhitespace : System.Xml.XmlCharacterData
     {
         protected internal XmlSignificantWhitespace(string strData, System.Xml.XmlDocument doc) : base (default(string), default(System.Xml.XmlDocument)) { }
@@ -1018,6 +1122,16 @@ namespace System.Xml
         None = 12,
         NOTATION = 8,
         QName = 10,
+    }
+    public partial class XmlUrlResolver : System.Xml.XmlResolver
+    {
+        public XmlUrlResolver() { }
+//NetCache        public System.Net.Cache.RequestCachePolicy CachePolicy { set { } }
+        public override System.Net.ICredentials Credentials { set { } }
+        public System.Net.IWebProxy Proxy { set { } }
+        public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) { throw null; }
+        public override System.Threading.Tasks.Task<object> GetEntityAsync(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) { throw null; }
+        public override System.Uri ResolveUri(System.Uri baseUri, string relativeUri) { throw null; }
     }
     [System.ObsoleteAttribute("Use XmlReader created by XmlReader.Create() method using appropriate XmlReaderSettings instead. http://go.microsoft.com/fwlink/?linkid=14202")]
     public partial class XmlValidatingReader : System.Xml.XmlReader, System.Xml.IXmlLineInfo, System.Xml.IXmlNamespaceResolver
@@ -1220,6 +1334,49 @@ namespace System.Xml
         public bool WriteEndDocumentOnClose { get { return default(bool); } set { } }
         public System.Xml.XmlWriterSettings Clone() { return default(System.Xml.XmlWriterSettings); }
         public void Reset() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.ObsoleteAttribute("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+    public partial class XmlXapResolver : System.Xml.XmlResolver
+    {
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+        public XmlXapResolver() { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+        public static void RegisterApplicationResourceStreamResolver(System.Xml.IApplicationResourceStreamResolver appStreamResolver) { }
+    }
+}
+namespace System.Xml.Resolvers
+{
+    [System.FlagsAttribute]
+    public enum XmlKnownDtds
+    {
+        All = 65535,
+        None = 0,
+        Rss091 = 2,
+        Xhtml10 = 1,
+    }
+    public partial class XmlPreloadedResolver : System.Xml.XmlResolver
+    {
+        public XmlPreloadedResolver() { }
+        public XmlPreloadedResolver(System.Xml.Resolvers.XmlKnownDtds preloadedDtds) { }
+        public XmlPreloadedResolver(System.Xml.XmlResolver fallbackResolver) { }
+        public XmlPreloadedResolver(System.Xml.XmlResolver fallbackResolver, System.Xml.Resolvers.XmlKnownDtds preloadedDtds) { }
+        public XmlPreloadedResolver(System.Xml.XmlResolver fallbackResolver, System.Xml.Resolvers.XmlKnownDtds preloadedDtds, System.Collections.Generic.IEqualityComparer<System.Uri> uriComparer) { }
+        public override System.Net.ICredentials Credentials { set { } }
+        public System.Collections.Generic.IEnumerable<System.Uri> PreloadedUris { get { throw null; } }
+        public void Add(System.Uri uri, byte[] value) { }
+        public void Add(System.Uri uri, byte[] value, int offset, int count) { }
+        public void Add(System.Uri uri, System.IO.Stream value) { }
+        public void Add(System.Uri uri, string value) { }
+        public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) { throw null; }
+        public override System.Threading.Tasks.Task<object> GetEntityAsync(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) { throw null; }
+        public void Remove(System.Uri uri) { }
+        public override System.Uri ResolveUri(System.Uri baseUri, string relativeUri) { throw null; }
+        public override bool SupportsType(System.Uri absoluteUri, System.Type type) { throw null; }
     }
 }
 namespace System.Xml.Schema
@@ -2722,17 +2879,5 @@ namespace System.Xml.Xsl
         public bool EnableDocumentFunction { get { return default(bool); } set { } }
         public bool EnableScript { get { return default(bool); } set { } }
         public static System.Xml.Xsl.XsltSettings TrustedXslt { get { return default(System.Xml.Xsl.XsltSettings); } }
-    }
-}
-namespace System.Xml.Xsl.Runtime
-{
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct StringConcat
-    {
-        public string Delimiter { get { return default(string); } set { } }
-        public void Clear() { }
-        public void Concat(string value) { }
-        public string GetResult() { return default(string); }
     }
 }
