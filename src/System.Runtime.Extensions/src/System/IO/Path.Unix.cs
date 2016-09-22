@@ -206,6 +206,29 @@ namespace System.IO
 
         private static unsafe void GetCryptoRandomBytes(byte* bytes, int byteCount)
         {
+            if (IsMac)
+            {
+                GetCryptoRandomBytesApple(bytes, byteCount);
+            }
+            else
+            {
+                GetCryptoRandomBytesOpenSsl(bytes, byteCount);
+            }
+        }
+
+        private static unsafe void GetCryptoRandomBytesApple(byte* bytes, int byteCount)
+        {
+            Debug.Assert(bytes != null);
+            Debug.Assert(byteCount >= 0);
+
+            if (Interop.CommonCrypto.CCRandomGenerateBytes(bytes, byteCount) != 0)
+            {
+                throw new InvalidOperationException(SR.InvalidOperation_Cryptography);
+            }
+        }
+
+        private static unsafe void GetCryptoRandomBytesOpenSsl(byte* bytes, int byteCount)
+        {
             Debug.Assert(bytes != null);
             Debug.Assert(byteCount >= 0);
 
@@ -214,5 +237,9 @@ namespace System.IO
                 throw new InvalidOperationException(SR.InvalidOperation_Cryptography);
             }
         }
+
+        // This lives as an internal property on Environment in master after forking for release/1.1.0
+        // It is copied here only for the backport and release branch fix.
+        private static readonly bool IsMac = Interop.Sys.GetUnixName() == "OSX";
     }
 }
