@@ -57,7 +57,6 @@
     },
     "uap10.1": {
       "dependencies": {
-        "<<<<<<<" "1a38ab8a75c1f2e10f3091ec1e9847da69f011ae",
         "Microsoft.CSharp": "4.3.0-beta-24522-03",
         "Microsoft.NETCore.Platforms": "1.0.2-beta-24522-03",
         "Microsoft.NETCore.Runtime.CoreCLR": "1.2.0-beta-24522-04",
