@@ -821,13 +821,8 @@
     <Compile Include="Workarounds\DummyTypes\PermissionSet.cs" />
     <Compile Include="Workarounds\DummyTypes\RequestCachePolicy.cs" />
     <Compile Include="Workarounds\DummyTypes\SecurityManger.cs" />
-    <None Include="Workarounds\SerializationEntry.cs" />
-    <None Include="Workarounds\ICloneable.cs" />
     <Compile Include="Workarounds\LocalAppContextSwitches.cs" />
     <Compile Include="Workarounds\SecurityElement.cs" />
-    <None Include="Workarounds\SerializationInfo.cs" />
-    <None Include="Workarounds\StreamingContext.cs" />
-    <None Include="Workarounds\DummyTypes\SystemException.cs" />
     <Compile Include="Workarounds\ThisAssembly.cs" />
     <Compile Include="Workarounds\VBCodeProvider.cs" />
     <Compile Include="Workarounds\__HResults.cs" />

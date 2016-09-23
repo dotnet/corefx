@@ -22,6 +22,7 @@
         "System.Reflection": "4.3.0-beta-24522-03",
         "System.Runtime.Extensions": "4.3.0-beta-24522-03",
         "System.Threading": "4.3.0-beta-24522-03",
+        "System.Threading.Tasks": "4.3.0-beta-24522-03",
         "System.Threading.Tasks.Extensions": "4.3.0-beta-24522-03",
         "System.Text.Encoding": "4.3.0-beta-24522-03"
       },
