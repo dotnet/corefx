@@ -187,7 +187,7 @@ namespace System.Diagnostics
                 {
                     EnsureState(State.Associated);
                     UpdateHasExited();
-                    if (_exited)
+                    if (_exited && _watchForExit)
                     {
                         RaiseOnExited();
                     }

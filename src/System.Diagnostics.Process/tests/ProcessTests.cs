@@ -104,7 +104,7 @@ namespace System.Diagnostics.Tests
         [InlineData(true)]
         [InlineData(false)]
         [InlineData(null)]
-        public void TestEnableRaiseEvents(bool? enable)
+        public void TestEnableRaiseEventsWaitForExit(bool? enable)
         {
             bool exitedInvoked = false;
 
@@ -125,6 +125,37 @@ namespace System.Diagnostics.Tests
                 // at which point it returns to the caller even if the callback hasn't
                 // entirely completed. As such, we spin until the value is set.
                 Assert.True(SpinWait.SpinUntil(() => exitedInvoked, WaitInMS));
+            }
+            else
+            {
+                Assert.False(exitedInvoked);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(null)]
+        public void TestEnableRaiseEventsHasExited(bool? enable)
+        {
+            bool exitedInvoked = false;
+
+            Process p = CreateProcess();
+            if (enable.HasValue)
+            {
+                p.EnableRaisingEvents = enable.Value;
+            }
+            p.Exited += delegate { exitedInvoked = true; };
+
+            p.Start();
+            p.Kill();
+
+            // HasExited can raise Exited events too
+            Assert.True(p.HasExited);
+
+            if (enable.GetValueOrDefault())
+            {
+                Assert.True(exitedInvoked);
             }
             else
             {
