@@ -1092,5 +1092,31 @@ namespace System.IO
             Flush();
             _stream.SetLength(value);
         }
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            if(bufferSize <= _bufferSize)
+            {
+                //Use internal buffer instead of allocationg a new one.
+                return CopyToAsyncImpl(destination, _buffer, cancellationToken);
+            }
+            else
+            {
+                return base.CopyToAsync(destination, bufferSize, cancellationToken);
+            }            
+        }
+
+        private async Task CopyToAsyncImpl(Stream destination, byte[] buffer, CancellationToken cancellationToken)
+        {
+            Debug.Assert(destination != null);
+            Debug.Assert(CanRead);
+            Debug.Assert(destination.CanWrite);
+            
+            int bytesRead;
+            while ((bytesRead = await ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) != 0)
+            {
+                await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+            }
+        }
     }  // class BufferedStream
 }  // namespace
