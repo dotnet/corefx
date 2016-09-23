@@ -155,8 +155,8 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="TestModule\System.Reflection.TestModule.ilproj">
-    </ProjectReference>
+    <Reference Include="TestModule\System.Reflection.TestModule.dll">
+    </Reference>
     <ProjectReference Include="..\pkg\System.Runtime.pkgproj">
       <Project>{ADBCF120-3454-4A3C-9D1D-AC4293E795D6}</Project>
       <Name>System.Runtime</Name>
