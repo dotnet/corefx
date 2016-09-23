@@ -29,6 +29,18 @@
     </ItemGroup>
   </Target>
 
+  <!-- Default Test platform to deploy the netstandard compiled tests to -->
+  <PropertyGroup>
+    <TestTFM Condition="'$(TestTFM)'=='' and ('$(NuGetTargetMoniker)'=='.NETStandard,Version=v1.7' or '$(NuGetTargetMoniker)'=='NETCoreApp,Version=v1.1')">netcoreapp1.1</TestTFM>
+    <TestTFM Condition="'$(TestTFM)'==''">netcoreapp1.0</TestTFM>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TestNugetTargetMoniker Include=".NETCoreApp,Version=v1.1" Condition="'$(TestTFM)' == 'netcoreapp1.1'">
+      <Folder>netcoreapp1.1</Folder>
+    </TestNugetTargetMoniker>
+  </ItemGroup>
+
   <Import Project="$(ToolsDir)/Build.Common.targets" Condition="Exists('$(ToolsDir)/Build.Common.targets')" />
 
   <!-- permit a wrapping build system to contribute targets to this build -->
