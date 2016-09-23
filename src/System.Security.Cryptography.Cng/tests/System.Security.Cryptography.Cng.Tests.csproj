@@ -130,11 +130,8 @@
   <ItemGroup Condition="'$(TargetGroup)'==''">
     <Compile Include="DSACngProvider.cs" />
     <Compile Include="DSACngTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AsymmetricKeyExchangeFormatterTests.cs">
-      <Link>CommonTest\System\Security\Cryptography\AsymmetricKeyExchangeFormatterTests.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AsymmetricSignatureFormatterTests.cs">
-      <Link>CommonTest\System\Security\Cryptography\AsymmetricSignatureFormatterTests.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AsymmetricSignatureFormatter.cs">
+      <Link>CommonTest\System\Security\Cryptography\AsymmetricSignatureFormatter.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAFactory.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAFactory.cs</Link>

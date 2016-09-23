@@ -6,7 +6,7 @@ namespace System.Security.Cryptography
 {
     public class RSAPKCS1KeyExchangeDeformatter : AsymmetricKeyExchangeDeformatter
     {
-        RSA _rsaKey;
+        private RSA _rsaKey;
 
         public RSAPKCS1KeyExchangeDeformatter() { }
 
@@ -20,13 +20,8 @@ namespace System.Security.Cryptography
 
         public override string Parameters
         {
-            get
-            {
-                return null;
-            }
-            set
-            {
-            }
+            get {return null;}
+            set { }
         }
 
         public override byte[] DecryptKeyExchange(byte[] rgbIn)

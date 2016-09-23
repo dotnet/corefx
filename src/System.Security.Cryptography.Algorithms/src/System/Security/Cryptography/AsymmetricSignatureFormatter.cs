@@ -18,7 +18,7 @@ namespace System.Security.Cryptography
             if (hash == null)
                 throw new ArgumentNullException(nameof(hash));
 
-            SetHashAlgorithm(HashAlgorithmNames.ToAlgorithmName(hash));
+            SetHashAlgorithm(hash.ToAlgorithmName());
             return CreateSignature(hash.Hash);
         }
 

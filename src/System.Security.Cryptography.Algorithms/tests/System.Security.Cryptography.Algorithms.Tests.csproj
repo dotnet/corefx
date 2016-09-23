@@ -133,12 +133,13 @@
     <Compile Include="TripleDesTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.7'">
+    <Compile Include="AsymmetricSignatureFormatterTests.cs" />
+    <Compile Include="DSASignatureFormatterTests.cs" />
+    <Compile Include="RSAKeyExchangeFormatterTests.cs" />
+    <Compile Include="RSASignatureFormatterTests.cs" />
     <Compile Include="DefaultDSAProvider.cs" />
-    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AsymmetricKeyExchangeFormatterTests.cs">
-      <Link>CommonTest\System\Security\Cryptography\AsymmetricKeyExchangeFormatterTests.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AsymmetricSignatureFormatterTests.cs">
-      <Link>CommonTest\System\Security\Cryptography\AsymmetricSignatureFormatterTests.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AsymmetricSignatureFormatter.cs">
+      <Link>CommonTest\System\Security\Cryptography\AsymmetricSignatureFormatter.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAFactory.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAFactory.cs</Link>

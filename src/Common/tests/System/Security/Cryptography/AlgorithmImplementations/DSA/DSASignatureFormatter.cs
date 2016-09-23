@@ -7,29 +7,17 @@ using Xunit;
 
 namespace System.Security.Cryptography.Dsa.Tests
 {
-    public class DSAFormatterTests
+    public partial class DSASignatureFormatterTests : AsymmetricSignatureFormatterTests
     {
-        [Fact]
-        public static void FormatterArguments()
-        {
-            AsymmetricSignatureFormatterTests.FormatterArguments(new DSASignatureFormatter());
-        }
-
-        [Fact]
-        public static void DeformatterArguments()
-        {
-            AsymmetricSignatureFormatterTests.DeformatterArguments(new DSASignatureDeformatter());
-        }
-
         [Fact]
         public static void VerifySignature_SHA1()
         {
             using (DSA dsa = DSAFactory.Create())
             {
-
                 var formatter = new DSASignatureFormatter(dsa);
                 var deformatter = new DSASignatureDeformatter(dsa);
-                AsymmetricSignatureFormatterTests.VerifySignature(formatter, deformatter, SHA1.Create(), HashAlgorithmName.SHA1);
+                VerifySignature(formatter, deformatter, SHA1.Create(), "SHA1");
+                VerifySignature(formatter, deformatter, SHA1.Create(), "sha1");
             }
         }
 
@@ -40,7 +28,43 @@ namespace System.Security.Cryptography.Dsa.Tests
             {
                 var formatter = new DSASignatureFormatter(dsa);
                 var deformatter = new DSASignatureDeformatter(dsa);
-                AsymmetricSignatureFormatterTests.VerifySignature(formatter, deformatter, SHA256.Create(), HashAlgorithmName.SHA256);
+                VerifySignature(formatter, deformatter, SHA256.Create(), "SHA256");
+                VerifySignature(formatter, deformatter, SHA256.Create(), "sha256");
+            }
+        }
+
+        [Fact]
+        public static void InvalidHashAlgorithm()
+        {
+            using (DSA dsa = DSAFactory.Create())
+            {
+                var formatter = new DSASignatureFormatter(dsa);
+                var deformatter = new DSASignatureDeformatter(dsa);
+
+                // Unlike RSA, DSA will throw during SetHashAlgorithm
+                Assert.Throws<CryptographicUnexpectedOperationException>(() =>
+                    formatter.SetHashAlgorithm("INVALIDVALUE"));
+                Assert.Throws<CryptographicUnexpectedOperationException>(() =>
+                    deformatter.SetHashAlgorithm("INVALIDVALUE"));
+            }
+        }
+
+        [Fact]
+        public static void VerifyKnownSignature()
+        {
+            using (DSA dsa = DSAFactory.Create())
+            {
+                byte[] hash = SHA1.Create().ComputeHash(DSATestData.GetDSA1024_186_2_Data());
+                byte[] signature = DSATestData.GetDSA1024_186_2_Signature();
+
+                DSAParameters dsaParameters = DSATestData.GetDSA1024_186_2_Params();
+                dsa.ImportParameters(dsaParameters);
+                var deformatter = new DSASignatureDeformatter(dsa);
+                deformatter.VerifySignature(hash, signature);
+
+                // Negative case
+                signature[signature.Length - 1] ^= 0xff;
+                Assert.False(deformatter.VerifySignature(hash, signature));
             }
         }
 

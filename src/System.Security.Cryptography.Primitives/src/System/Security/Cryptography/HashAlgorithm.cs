@@ -8,9 +8,7 @@ namespace System.Security.Cryptography
 {
     public abstract class HashAlgorithm : IDisposable, ICryptoTransform
     {
-        protected HashAlgorithm()
-        {
-        }
+        protected HashAlgorithm() { }
 
         public virtual int HashSize
         {
@@ -107,7 +105,7 @@ namespace System.Security.Cryptography
 
         // ICryptoTransform methods
 
-        // we assume any HashAlgorithm can take input a byte at a time
+        // We assume any HashAlgorithm can take input a byte at a time
         public virtual int InputBlockSize
         {
             get { return (1); }
@@ -176,10 +174,10 @@ namespace System.Security.Cryptography
             }
             else
             {
-                outputBytes = new byte[0];
+                outputBytes = Array.Empty<byte>();
             }
 
-            // reset the State value
+            // Reset the State value
             State = 0;
 
             return outputBytes;

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.Cryptography;
+
 namespace System.Security.Cryptography
 {
     public class RSAPKCS1SignatureFormatter : AsymmetricSignatureFormatter
@@ -34,12 +36,12 @@ namespace System.Security.Cryptography
                 // Verify the name
                 Oid.FromFriendlyName(strName, OidGroup.HashAlgorithm);
 
-                // Keep the raw strName as Oid may change the case ("SHA1" to "sha1") making it incompatible.
-                _algName = strName;
+                // Uppercase known names as required for BCrypt
+                _algName = HashAlgorithmNames.ToUpper(strName);
             }
             catch (CryptographicException)
             {
-                // For desktop compat there is no exception here
+                // For desktop compat, exception is deferred until VerifySignature
                 _algName = null;
             }
         }

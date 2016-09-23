@@ -6,7 +6,7 @@ namespace System.Security.Cryptography
 {
     public class RSAPKCS1KeyExchangeFormatter : AsymmetricKeyExchangeFormatter
     {
-        RSA _rsaKey;
+        private RSA _rsaKey;
 
         public RSAPKCS1KeyExchangeFormatter() { }
 

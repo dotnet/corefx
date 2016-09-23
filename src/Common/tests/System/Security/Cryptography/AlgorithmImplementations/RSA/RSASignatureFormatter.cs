@@ -8,39 +8,45 @@ using Xunit;
 
 namespace System.Security.Cryptography.Rsa.Tests
 {
-    public class RSASignatureFormatterTests
+    public partial class RSASignatureFormatterTests : AsymmetricSignatureFormatterTests
     {
-        [Fact]
-        public static void FormatterArguments()
-        {
-            AsymmetricSignatureFormatterTests.FormatterArguments(new RSAPKCS1SignatureFormatter());
-        }
-
-        [Fact]
-        public static void DeformatterArguments()
-        {
-            AsymmetricSignatureFormatterTests.DeformatterArguments(new RSAPKCS1SignatureDeformatter());
-        }
-
         [Fact]
         public static void VerifySignature_SHA1()
         {
-            using (RSA rsa = RSAFactory.Create(1024))
+            using (RSA rsa = RSAFactory.Create())
             {
                 var formatter = new RSAPKCS1SignatureFormatter(rsa);
                 var deformatter = new RSAPKCS1SignatureDeformatter(rsa);
-                AsymmetricSignatureFormatterTests.VerifySignature(formatter, deformatter, SHA1.Create(), HashAlgorithmName.SHA1);
+                VerifySignature(formatter, deformatter, SHA1.Create(), "SHA1");
+                VerifySignature(formatter, deformatter, SHA1.Create(), "sha1");
             }
         }
 
         [Fact]
         public static void VerifySignature_SHA256()
         {
-            using (RSA rsa = RSAFactory.Create(1024))
+            using (RSA rsa = RSAFactory.Create())
             {
                 var formatter = new RSAPKCS1SignatureFormatter(rsa);
                 var deformatter = new RSAPKCS1SignatureDeformatter(rsa);
-                AsymmetricSignatureFormatterTests.VerifySignature(formatter, deformatter, SHA256.Create(), HashAlgorithmName.SHA256);
+                VerifySignature(formatter, deformatter, SHA256.Create(), "SHA256");
+                VerifySignature(formatter, deformatter, SHA256.Create(), "sha256");
+            }
+        }
+
+        [Fact]
+        public static void InvalidHashAlgorithm()
+        {
+            using (RSA rsa = RSAFactory.Create())
+            {
+                var formatter = new RSAPKCS1SignatureFormatter(rsa);
+                var deformatter = new RSAPKCS1SignatureDeformatter(rsa);
+
+                // Exception is deferred until VerifySignature
+                formatter.SetHashAlgorithm("INVALIDVALUE");
+                deformatter.SetHashAlgorithm("INVALIDVALUE");
+                Assert.Throws<CryptographicUnexpectedOperationException>(() =>
+                    VerifySignature(formatter, deformatter, SHA1.Create(), "INVALIDVALUE"));
             }
         }
 
@@ -50,7 +56,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             byte[] hash = "012d161304fa0c6321221516415813022320620c".HexToByteArray();
             byte[] sig;
 
-            using (RSA key = RSAFactory.Create(1024))
+            using (RSA key = RSAFactory.Create())
             {
                 key.ImportParameters(TestData.RSA1024Params);
                 RSAPKCS1SignatureFormatter formatter = new RSAPKCS1SignatureFormatter(key);
@@ -64,7 +70,7 @@ namespace System.Security.Cryptography.Rsa.Tests
                 Assert.Equal(expectedSig, sig);
             }
 
-            using (RSA key = RSAFactory.Create(1024))
+            using (RSA key = RSAFactory.Create()) // Test against a different instance
             {
                 key.ImportParameters(TestData.RSA1024Params);
                 RSAPKCS1SignatureDeformatter deformatter = new RSAPKCS1SignatureDeformatter(key);
