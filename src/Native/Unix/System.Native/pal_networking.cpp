@@ -2177,7 +2177,7 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
             // SO_REUSEADDR + SO_REUSEPORT other systems. 
             //
             int err = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, optionValue, static_cast<socklen_t>(optionLen));
-            if (err != 0)
+            if (err == 0)
             {
                 err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, optionValue, static_cast<socklen_t>(optionLen));
             }
