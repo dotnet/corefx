@@ -38,14 +38,12 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netcore50' AND '$(TargetGroup)' != 'netcore50aot'">
     <Compile Include="XmlSerializerTests.Internal.cs" Condition="'$(UseContractReferences)' == ''" />
-    <ProjectReference Include="..\..\src\System.Private.Xml.csproj" />
-    <!-- ToDo: Remove this P2P references once packages are updated -->
-    <ProjectReference Include="..\..\..\System.Xml.XmlDocument\src\System.Xml.XmlDocument.csproj" />
-    <ProjectReference Include="..\..\..\System.Xml.XmlSerializer\src\System.Xml.XmlSerializer.csproj" />
-    <ProjectReference Include="..\..\..\System.Xml.ReaderWriter\src\System.Xml.ReaderWriter.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcore50' OR '$(TargetGroup)' == 'netcore50aot'">
+  <ItemGroup>
+    <!-- ToDo: Remove these P2P references once packages are updated -->
+    <ProjectReference Include="..\..\..\System.Xml.XmlDocument\pkg\System.Xml.XmlDocument.pkgproj" />
     <ProjectReference Include="..\..\..\System.Xml.XmlSerializer\pkg\System.Xml.XmlSerializer.pkgproj" />
+    <ProjectReference Include="..\..\..\System.Xml.ReaderWriter\pkg\System.Xml.ReaderWriter.pkgproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

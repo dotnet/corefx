@@ -95,7 +95,7 @@
       <OSGroup>Windows_NT</OSGroup>
     </Project>
     <Project Include="XmlSerializer\System.Xml.XmlSerializer.Tests.csproj" >
-      <TestTFMs>netcoreapp1.0;uap101;uap101aot;netcore50;netcore50aot;net46</TestTFMs>
+      <TestTFMs>netcoreapp1.1;uap101;uap101aot;netcore50;netcore50aot;net463</TestTFMs>
       <OSGroup>Windows_NT</OSGroup>
     </Project>
 
