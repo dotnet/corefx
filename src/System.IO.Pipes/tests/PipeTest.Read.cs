@@ -140,7 +140,7 @@ namespace System.IO.Pipes.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/975
         public async Task ReadWithZeroLengthBuffer_Nop()
         {
             using (ServerClientPair pair = CreateServerClientPair())
@@ -308,6 +308,31 @@ namespace System.IO.Pipes.Tests
 
                     await writerTask;
                 }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(AsyncReadWriteChain_MemberData))]
+        public async Task AsyncReadWriteChain_CopyToAsync(int iterations, int writeBufferSize, int readBufferSize, bool cancelableToken)
+        {
+            var writeBuffer = new byte[writeBufferSize * iterations];
+            new Random().NextBytes(writeBuffer);
+            var cancellationToken = cancelableToken ? new CancellationTokenSource().Token : CancellationToken.None;
+
+            using (ServerClientPair pair = CreateServerClientPair())
+            {
+                var readData = new MemoryStream();
+                Task copyTask = pair.readablePipe.CopyToAsync(readData, readBufferSize, cancellationToken);
+
+                for (int iter = 0; iter < iterations; iter++)
+                {
+                    await pair.writeablePipe.WriteAsync(writeBuffer, iter * writeBufferSize, writeBufferSize, cancellationToken);
+                }
+                pair.writeablePipe.Dispose();
+
+                await copyTask;
+                Assert.Equal(writeBuffer.Length, readData.Length);
+                Assert.Equal(writeBuffer, readData.ToArray());
             }
         }
 

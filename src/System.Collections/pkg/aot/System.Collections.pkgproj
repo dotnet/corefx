@@ -3,16 +3,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <Version>4.0.12.0</Version>
     <PackageTargetRuntime>aot</PackageTargetRuntime>
     <PreventImplementationReference>true</PreventImplementationReference>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\redist\System.Collections.depproj">
-      <TargetGroup>netcore50aot</TargetGroup>
-    </ProjectReference>
-  </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

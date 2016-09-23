@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -47,6 +48,7 @@ namespace System.Threading.Tasks
     /// a <see cref="Task"/>-returning method completes synchronously and successfully.
     /// </para>
     /// </remarks>
+    [AsyncMethodBuilder(typeof(AsyncValueTaskMethodBuilder<>))]
     [StructLayout(LayoutKind.Auto)]
     public struct ValueTask<TResult> : IEquatable<ValueTask<TResult>>
     {
@@ -174,5 +176,12 @@ namespace System.Threading.Tasks
                     string.Empty;
             }
         }
+
+        // TODO: Remove CreateAsyncMethodBuilder once the C# compiler relies on the AsyncBuilder attribute.
+
+        /// <summary>Creates a method builder for use with an async method.</summary>
+        /// <returns>The created builder.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)] // intended only for compiler consumption
+        public static AsyncValueTaskMethodBuilder<TResult> CreateAsyncMethodBuilder() => AsyncValueTaskMethodBuilder<TResult>.Create();
     }
 }

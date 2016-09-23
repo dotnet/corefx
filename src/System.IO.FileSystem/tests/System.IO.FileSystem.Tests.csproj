@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
@@ -11,7 +11,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.IO.FileSystem.Tests</AssemblyName>
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NugetTargetMoniker Condition="'$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.IO.FileSystem.pkgproj">
       <Project>{879c23dc-d828-4dfb-8e92-abbc11b71035}</Project>
+      <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
       <Name>System.IO.FileSystem</Name>
       <Private>True</Private>
     </ProjectReference>
@@ -43,12 +44,14 @@
     <Compile Include="DirectoryInfo\Root.cs" />
     <Compile Include="Directory\EnumerableAPIs.cs" />
     <Compile Include="Directory\GetFileSystemEntries_str_str_so.cs" />
+    <Compile Include="Directory\GetLogicalDrives.cs" Condition="'$(TargetGroup)'=='netstandard1.7'" />
     <Compile Include="Directory\GetParent.cs" />
     <Compile Include="FileInfo\GetSetAttributes.cs" />
     <Compile Include="FileInfo\Length.cs" />
     <Compile Include="FileInfo\Open.cs" />
     <Compile Include="FileStream\FlushAsync.cs" />
     <Compile Include="FileStream\Pipes.cs" />
+    <Compile Include="FileStream\Handle.cs" Condition="'$(TargetGroup)'=='netstandard1.7'" />
     <Compile Include="FileStream\SafeFileHandle.cs" />
     <Compile Include="FileStream\IsAsync.cs" />
     <Compile Include="FileStream\CanTimeout.cs" />
@@ -56,6 +59,7 @@
     <Compile Include="FileStream\Name.cs" />
     <Compile Include="FileStream\CanWrite.cs" />
     <Compile Include="FileStream\CanRead.cs" />
+    <Compile Include="FileStream\CopyToAsync.cs" />
     <Compile Include="FileStream\Buffering_regression.cs" />
     <Compile Include="FileStream\Flush.cs" />
     <Compile Include="FileStream\Dispose.cs" />
@@ -68,6 +72,7 @@
     <Compile Include="FileStream\ReadByte.cs" />
     <Compile Include="FileStream\SetLength.cs" />
     <Compile Include="FileStream\Length.cs" />
+    <Compile Include="FileStream\LockUnlock.cs" Condition="'$(TargetGroup)'=='netstandard1.7'" />
     <Compile Include="FileStream\Position.cs" />
     <Compile Include="FileStream\Seek.cs" />
     <Compile Include="FileStream\ctor_sfh_fa_buffer_async.cs" />
@@ -83,10 +88,13 @@
     <Compile Include="FileStream\ctor_str_fm_fa.cs" />
     <Compile Include="FileStream\ctor_str_fm.cs" />
     <Compile Include="File\Append.cs" />
+    <Compile Include="File\EncryptDecrypt.cs" Condition="'$(TargetGroup)'=='netstandard1.7'" />
+    <Compile Include="File\Replace.cs" Condition="'$(TargetGroup)'=='netstandard1.7'" />
     <Compile Include="File\Create.cs" />
     <Compile Include="File\Delete.cs" />
     <Compile Include="File\GetSetAttributes.cs" />
     <Compile Include="File\Move.cs" />
+    <Compile Include="File\ReadWriteAllLines.netstandard1.7.cs" Condition="'$(TargetGroup)'=='netstandard1.7'" />
     <Compile Include="File\ReadWriteAllText.cs" />
     <Compile Include="File\ReadWriteAllLines.cs" />
     <Compile Include="UnseekableFileStream.cs" />
@@ -159,6 +167,7 @@
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
+      <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

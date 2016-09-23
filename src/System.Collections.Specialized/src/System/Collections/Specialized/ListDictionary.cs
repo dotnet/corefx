@@ -11,12 +11,14 @@ namespace System.Collections.Specialized
     ///    This should not be used if performance is important for large numbers of elements.
     ///  </para>
     /// </devdoc>
+    [Serializable]
     public class ListDictionary : IDictionary
     {
         private DictionaryNode _head;
         private int _version;
         private int _count;
         private readonly IComparer _comparer;
+        [NonSerialized]
         private Object _syncRoot;
 
         public ListDictionary()
@@ -226,10 +228,6 @@ namespace System.Collections.Specialized
                 throw new ArgumentNullException(nameof(array));
             if (index < 0)
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (array.Rank != 1)
-                throw new ArgumentException(SR.Arg_MultiRank, nameof(array));
-            if (array.GetLowerBound(0) != 0)
-                throw new ArgumentException(SR.Arg_NonZeroLowerBound, nameof(array));
 
             if (array.Length - index < _count)
                 throw new ArgumentException(SR.Arg_InsufficientSpace);
@@ -391,13 +389,6 @@ namespace System.Collections.Specialized
                     throw new ArgumentNullException(nameof(array));
                 if (index < 0)
                     throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
-                if (array.Rank != 1)
-                    throw new ArgumentException(SR.Arg_MultiRank, nameof(array));
-                if (array.GetLowerBound(0) != 0)
-                    throw new ArgumentException(SR.Arg_NonZeroLowerBound, nameof(array));
-
-                if (array.Length - index < _list.Count)
-                    throw new ArgumentException(SR.Arg_InsufficientSpace);
 
                 for (DictionaryNode node = _list._head; node != null; node = node.next)
                 {
@@ -500,6 +491,7 @@ namespace System.Collections.Specialized
             }
         }
 
+        [Serializable]
         private class DictionaryNode
         {
             public object key;

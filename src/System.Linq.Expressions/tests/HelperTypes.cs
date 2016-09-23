@@ -267,4 +267,33 @@ namespace System.Linq.Expressions.Tests
         {
         }
     }
+
+    public static class Unreadable<T>
+    {
+        public static T WriteOnly { set { } }
+    }
+
+    public class GenericClass<T>
+    {
+        public void Method() { }
+    }
+
+    public class NonGenericClass
+    {
+        #pragma warning disable 0067
+        public event EventHandler Event;
+        #pragma warning restore 0067
+
+        public void GenericMethod<T>() { }
+        public static void StaticMethod() { }
+    }
+
+    public enum ByteEnum : byte { A = Byte.MaxValue }
+    public enum SByteEnum : sbyte { A = SByte.MaxValue }
+    public enum Int16Enum : short { A = Int16.MaxValue }
+    public enum UInt16Enum : ushort { A = UInt16.MaxValue }
+    public enum Int32Enum : int { A = Int32.MaxValue }
+    public enum UInt32Enum : uint { A = UInt32.MaxValue }
+    public enum Int64Enum : long { A = Int64.MaxValue }
+    public enum UInt64Enum : ulong { A = UInt64.MaxValue }
 }

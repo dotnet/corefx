@@ -179,7 +179,7 @@ namespace System.Linq.Expressions.Tests
         {
             Expression variable = Expression.Variable(typeof(string));
             MethodInfo method = typeof(object).GetTypeInfo().GetDeclaredMethod("ReferenceEquals");
-            Assert.Throws<ArgumentException>(null, () => Expression.PostDecrementAssign(variable, method));
+            Assert.Throws<ArgumentException>("method", () => Expression.PostDecrementAssign(variable, method));
         }
 
         [Fact]
@@ -285,6 +285,13 @@ namespace System.Linq.Expressions.Tests
         {
             UnaryExpression op = Expression.PostDecrementAssign(Expression.Variable(typeof(int)));
             Assert.NotSame(op, op.Update(Expression.Variable(typeof(int))));
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            var e = Expression.PostDecrementAssign(Expression.Parameter(typeof(int), "x"));
+            Assert.Equal("x--", e.ToString());
         }
     }
 }

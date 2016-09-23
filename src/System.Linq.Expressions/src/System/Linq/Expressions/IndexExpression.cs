@@ -272,42 +272,24 @@ namespace System.Linq.Expressions
 
         private static PropertyInfo FindProperty(Type type, string propertyName, Expression[] arguments, BindingFlags flags)
         {
-            var props = type.GetProperties(flags).Where(x => x.Name.Equals(propertyName, StringComparison.CurrentCultureIgnoreCase)); ;
-            PropertyInfo[] members = new List<PropertyInfo>(props).ToArray();
-            if (members == null || members.Length == 0)
-                return null;
+            PropertyInfo property = null;
 
-            PropertyInfo pi;
-            var propertyInfos = members.Map(t => (PropertyInfo)t);
-            int count = FindBestProperty(propertyInfos, arguments, out pi);
-
-            if (count == 0)
-                return null;
-            if (count > 1)
-                throw Error.PropertyWithMoreThanOneMatch(propertyName, type);
-            return pi;
-        }
-
-        private static int FindBestProperty(IEnumerable<PropertyInfo> properties, Expression[] args, out PropertyInfo property)
-        {
-            int count = 0;
-            property = null;
-            foreach (PropertyInfo pi in properties)
+            foreach (PropertyInfo pi in type.GetProperties(flags))
             {
-                if (pi != null && IsCompatible(pi, args))
+                if (pi.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase) && IsCompatible(pi, arguments))
                 {
                     if (property == null)
                     {
                         property = pi;
-                        count = 1;
                     }
                     else
                     {
-                        count++;
+                        throw Error.PropertyWithMoreThanOneMatch(propertyName, type);
                     }
                 }
             }
-            return count;
+
+            return property;
         }
 
         private static bool IsCompatible(PropertyInfo pi, Expression[] args)
@@ -398,7 +380,7 @@ namespace System.Linq.Expressions
             if (getter != null)
             {
                 getParameters = getter.GetParametersCached();
-                ValidateAccessor(instance, getter, getParameters, ref argList);
+                ValidateAccessor(instance, getter, getParameters, ref argList, nameof(property));
             }
 
             MethodInfo setter = property.GetSetMethod(true);
@@ -425,7 +407,7 @@ namespace System.Linq.Expressions
                 }
                 else
                 {
-                    ValidateAccessor(instance, setter, setParameters.RemoveLast(), ref argList);
+                    ValidateAccessor(instance, setter, setParameters.RemoveLast(), ref argList, nameof(property));
                 }
             }
 
@@ -435,7 +417,7 @@ namespace System.Linq.Expressions
             }
         }
 
-        private static void ValidateAccessor(Expression instance, MethodInfo method, ParameterInfo[] indexes, ref ReadOnlyCollection<Expression> arguments)
+        private static void ValidateAccessor(Expression instance, MethodInfo method, ParameterInfo[] indexes, ref ReadOnlyCollection<Expression> arguments, string paramName)
         {
             ContractUtils.RequiresNotNull(arguments, nameof(arguments));
 
@@ -452,33 +434,33 @@ namespace System.Linq.Expressions
                 ValidateCallInstanceType(instance.Type, method);
             }
 
-            ValidateAccessorArgumentTypes(method, indexes, ref arguments);
+            ValidateAccessorArgumentTypes(method, indexes, ref arguments, paramName);
         }
 
-        private static void ValidateAccessorArgumentTypes(MethodInfo method, ParameterInfo[] indexes, ref ReadOnlyCollection<Expression> arguments)
+        private static void ValidateAccessorArgumentTypes(MethodInfo method, ParameterInfo[] indexes, ref ReadOnlyCollection<Expression> arguments, string paramName)
         {
             if (indexes.Length > 0)
             {
                 if (indexes.Length != arguments.Count)
                 {
-                    throw Error.IncorrectNumberOfMethodCallArguments(method);
+                    throw Error.IncorrectNumberOfMethodCallArguments(method, paramName);
                 }
                 Expression[] newArgs = null;
                 for (int i = 0, n = indexes.Length; i < n; i++)
                 {
                     Expression arg = arguments[i];
                     ParameterInfo pi = indexes[i];
-                    RequiresCanRead(arg, nameof(arguments));
+                    RequiresCanRead(arg, nameof(arguments), i);
 
                     Type pType = pi.ParameterType;
-                    if (pType.IsByRef) throw Error.AccessorsCannotHaveByRefArgs($"{nameof(indexes)}[{i}]");
-                    TypeUtils.ValidateType(pType, $"{nameof(indexes)}[{i}]");
+                    if (pType.IsByRef) throw Error.AccessorsCannotHaveByRefArgs(nameof(indexes), i);
+                    TypeUtils.ValidateType(pType, nameof(indexes), i);
 
                     if (!TypeUtils.AreReferenceAssignable(pType, arg.Type))
                     {
                         if (!TryQuote(pType, ref arg))
                         {
-                            throw Error.ExpressionTypeDoesNotMatchMethodParameter(arg.Type, pType, method);
+                            throw Error.ExpressionTypeDoesNotMatchMethodParameter(arg.Type, pType, method, nameof(arguments), i);
                         }
                     }
                     if (newArgs == null && arg != arguments[i])
@@ -501,7 +483,7 @@ namespace System.Linq.Expressions
             }
             else if (arguments.Count > 0)
             {
-                throw Error.IncorrectNumberOfMethodCallArguments(method);
+                throw Error.IncorrectNumberOfMethodCallArguments(method, paramName);
             }
         }
         #endregion

@@ -3,15 +3,12 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <Version>4.1.1</Version>
     <PackageTargetRuntime>aot</PackageTargetRuntime>
     <PreventImplementationReference>true</PreventImplementationReference>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\redist\System.Runtime.InteropServices.depproj">
-      <TargetGroup>netcore50aot</TargetGroup>
-    </ProjectReference>
+    <!-- all assets are harvested -->
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

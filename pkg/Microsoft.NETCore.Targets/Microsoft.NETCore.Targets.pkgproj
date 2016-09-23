@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   
   <PropertyGroup>
-    <Version>1.0.3</Version>
+    <PackageVersion>1.0.3</PackageVersion>
     <IsLineupPackage>true</IsLineupPackage>
     <RuntimeFileSource>runtime.json</RuntimeFileSource>
     <SkipValidatePackage>true</SkipValidatePackage>
@@ -22,6 +22,8 @@
     <NativePackage Include="runtime.native.System" />
     <NativePackage Include="runtime.native.System.Net.Http" />
     <NativePackage Include="runtime.native.System.Security.Cryptography" />
+    <NativePackage Include="runtime.native.System.Security.Cryptography.Apple" />
+    <NativePackage Include="runtime.native.System.Security.Cryptography.OpenSsl" />
     <NativePackage Include="runtime.native.System.Net.Security" />
   </ItemGroup>
 

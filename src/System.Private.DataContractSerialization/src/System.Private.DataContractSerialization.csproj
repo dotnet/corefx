@@ -3,7 +3,6 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Private.DataContractSerialization</AssemblyName>
-    <AssemblyVersion>4.1.2.0</AssemblyVersion>
     <RootNamespace>System.Private.DataContractSerialization</RootNamespace>
     <NoWarn>$(NoWarn);1634;1691;649</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -12,7 +11,6 @@
     <DebugSymbols>true</DebugSymbols>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DefineConstants Condition="'$(TargetGroup)'=='netcore50aot'">$(DefineConstants);NET_NATIVE</DefineConstants>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
     <!-- We do not want to block reflection for this assembly -->
     <BlockReflectionAttribute Condition="'$(TargetGroup)'=='netcore50aot'">false</BlockReflectionAttribute>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
@@ -147,6 +145,14 @@
     <Compile Include="$(JsonSources)\ByteArrayHelperWithString.cs" />
     <Compile Include="$(JsonSources)\JsonEncodingStreamWrapper.cs" />
     <Compile Include="$(JsonSources)\JsonFormatGeneratorStatics.cs" Condition="!$(NetNative)" />
+    <Compile Include="System\Runtime\Serialization\AccessorBuilder.cs" />
+    <Compile Include="System\Runtime\Serialization\Json\ReflectionJsonFormatReader.cs" />
+    <Compile Include="System\Runtime\Serialization\Json\ReflectionJsonFormatWriter.cs" />
+    <Compile Include="System\Runtime\Serialization\ReflectionReader.cs" />
+    <Compile Include="System\Runtime\Serialization\ReflectionClassWriter.cs" />
+    <Compile Include="System\Runtime\Serialization\ReflectionXmlFormatReader.cs" />
+    <Compile Include="System\Runtime\Serialization\ReflectionXmlFormatWriter.cs" />
+    <Compile Include="System\Runtime\Serialization\SerializationOption.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcore50aot'">
     <TargetingPackReference Include="System.Private.CoreLib.Augments" />

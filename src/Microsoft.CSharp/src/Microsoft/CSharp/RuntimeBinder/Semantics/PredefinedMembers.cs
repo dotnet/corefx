@@ -300,7 +300,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return ctor;
-            throw Error.InternalCompilerError();
         }
 
         // property specific helpers
@@ -421,7 +420,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private CType LoadTypeFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
         {
-            Debug.Assert(signature != null && signature != null);
+            Debug.Assert(signature != null);
 
             MethodSignatureEnum current = (MethodSignatureEnum)signature[indexIntoSignatures];
             indexIntoSignatures++;

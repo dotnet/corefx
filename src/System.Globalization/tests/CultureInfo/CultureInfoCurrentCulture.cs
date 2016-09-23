@@ -12,6 +12,7 @@ namespace System.Globalization.Tests
     public class CurrentCultureTests : RemoteExecutorTestBase
     {
         [Fact]
+        [ActiveIssue(11381, Xunit.PlatformID.AnyUnix)]
         public void CurrentCulture()
         {
             RemoteInvoke(() =>
@@ -38,6 +39,7 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
+        [ActiveIssue(11381, Xunit.PlatformID.AnyUnix)]
         public void CurrentUICulture()
         {
             RemoteInvoke(() =>
@@ -112,7 +114,8 @@ namespace System.Globalization.Tests
             var psi = new ProcessStartInfo();
             psi.Environment.Clear();
 
-            CopyHomeIfPresent(psi.Environment);
+            CopyEssentialTestEnvironment(psi.Environment);
+
             psi.Environment["LANG"] = langEnvVar;
 
             RemoteInvoke(expected =>
@@ -136,7 +139,8 @@ namespace System.Globalization.Tests
             var psi = new ProcessStartInfo();
             psi.Environment.Clear();
 
-            CopyHomeIfPresent(psi.Environment);
+            CopyEssentialTestEnvironment(psi.Environment);
+
             if (langEnvVar != null)
             {
                psi.Environment["LANG"] = langEnvVar;
@@ -154,13 +158,17 @@ namespace System.Globalization.Tests
             }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
-        private static void CopyHomeIfPresent(IDictionary<string, string> environment)
+        private static void CopyEssentialTestEnvironment(IDictionary<string, string> environment)
         {
-            string currentHome = Environment.GetEnvironmentVariable("HOME");
-
-            if (currentHome != null)
+            string[] essentialVariables = { "HOME", "LD_LIBRARY_PATH" };
+            foreach(string essentialVariable in essentialVariables)
             {
-                environment["HOME"] = currentHome;
+                string varValue = Environment.GetEnvironmentVariable(essentialVariable);
+
+                if (varValue != null)
+                {
+                    environment[essentialVariable] = varValue;
+                }
             }
         }
     }

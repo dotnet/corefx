@@ -10,13 +10,8 @@ namespace System.ComponentModel
     /// <summary>
     ///    <para>Provides a description of a property.</para>
     /// </summary>
-#if NETSTANDARD10
-    public abstract class PropertyDescriptor
-#else
     public abstract class PropertyDescriptor : MemberDescriptor
-#endif
     {
-#if !NETSTANDARD10
         private TypeConverter _converter = null;
         private Hashtable _valueChangedHandlers;
         private object[] _editors;
@@ -247,7 +242,6 @@ namespace System.ComponentModel
             base.FillAttributes(attributeList);
         }
 
-        /// <include file='doc\PropertyDescriptor.uex' path='docs/doc[@for="PropertyDescriptor.GetChildProperties"]/*' />
         /// <summary>
         ///    <para>[To be supplied.]</para>
         /// </summary>
@@ -532,6 +526,5 @@ namespace System.ComponentModel
                 return false;
             }
         }
-#endif // NETSTANDARD10
     }
 }

@@ -27,6 +27,10 @@ namespace System.Reflection.Metadata
         private MemoryBlockProvider _blockProviderOpt;
         private AbstractMemoryBlock _lazyMetadataBlock;
 
+        // cached reader
+        private MetadataReader _lazyMetadataReader;
+        private readonly object _metadataReaderGuard = new object();
+
         private MetadataReaderProvider(AbstractMemoryBlock metadataBlock)
         {
             Debug.Assert(metadataBlock != null);
@@ -128,6 +132,8 @@ namespace System.Reflection.Metadata
         /// specified, the caller retains full ownership of the stream and is assured that it will not be manipulated by the <see cref="MetadataReaderProvider"/>
         /// after construction.
         /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="stream"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="stream"/> doesn't support read and seek operations.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Size is negative or extends past the end of the stream.</exception>
         public static MetadataReaderProvider FromPortablePdbStream(Stream stream, MetadataStreamOptions options = MetadataStreamOptions.Default, int size = 0) => FromMetadataStream(stream, options, size);
 
@@ -151,7 +157,10 @@ namespace System.Reflection.Metadata
         /// specified, the caller retains full ownership of the stream and is assured that it will not be manipulated by the <see cref="MetadataReaderProvider"/>
         /// after construction.
         /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="stream"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="stream"/> doesn't support read and seek operations.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Size is negative or extends past the end of the stream.</exception>
+        /// <exception cref="IOException">Error reading from the stream (only when <see cref="MetadataStreamOptions.PrefetchMetadata"/> is specified).</exception>
         public static MetadataReaderProvider FromMetadataStream(Stream stream, MetadataStreamOptions options = MetadataStreamOptions.Default, int size = 0)
         {
             if (stream == null)
@@ -217,6 +226,8 @@ namespace System.Reflection.Metadata
 
             _lazyMetadataBlock?.Dispose();
             _lazyMetadataBlock = null;
+
+            _lazyMetadataReader = null;
         }
 
         /// <summary>
@@ -224,22 +235,58 @@ namespace System.Reflection.Metadata
         /// </summary>
         /// <remarks>
         /// The caller must keep the <see cref="MetadataReaderProvider"/> alive and undisposed throughout the lifetime of the metadata reader.
+        /// 
+        /// If this method is called multiple times each call with arguments equal to the arguments passed to the previous successful call 
+        /// returns the same instance of <see cref="MetadataReader"/> as the previous call.
         /// </remarks>
         /// <exception cref="ArgumentException">The encoding of <paramref name="utf8Decoder"/> is not <see cref="UTF8Encoding"/>.</exception>
         /// <exception cref="PlatformNotSupportedException">The current platform is big-endian.</exception>
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
+        /// <exception cref="ObjectDisposedException">Provider has been disposed.</exception>
         public unsafe MetadataReader GetMetadataReader(MetadataReaderOptions options = MetadataReaderOptions.Default, MetadataStringDecoder utf8Decoder = null)
         {
-            AbstractMemoryBlock metadata = GetMetadataBlock();
-            return new MetadataReader(metadata.Pointer, metadata.Size, options, utf8Decoder);
+            var cachedReader = _lazyMetadataReader;
+
+            if (CanReuseReader(cachedReader, options, utf8Decoder))
+            {
+                return cachedReader;
+            }
+
+            // If multiple threads attempt to open a metadata reader with the same options and decoder 
+            // it's cheaper to wait for the other thread to finish initializing the reader than to open 
+            // two readers and discard one.
+            // Note that it's rare to reader the same metadata using different options.
+            lock (_metadataReaderGuard)
+            {
+                cachedReader = _lazyMetadataReader;
+
+                if (CanReuseReader(cachedReader, options, utf8Decoder))
+                {
+                    return cachedReader;
+                }
+
+                AbstractMemoryBlock metadata = GetMetadataBlock();
+                var newReader = new MetadataReader(metadata.Pointer, metadata.Size, options, utf8Decoder);
+                _lazyMetadataReader = newReader;
+                return newReader;
+            }
+        }
+
+        private static bool CanReuseReader(MetadataReader reader, MetadataReaderOptions options, MetadataStringDecoder utf8DecoderOpt)
+        {
+            return reader != null && reader.Options == options && ReferenceEquals(reader.UTF8Decoder, utf8DecoderOpt ?? MetadataStringDecoder.DefaultUTF8);
         }
 
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
+        /// <exception cref="ObjectDisposedException">Provider has been disposed.</exception>
         internal AbstractMemoryBlock GetMetadataBlock()
         {
             if (_lazyMetadataBlock == null)
             {
-                Debug.Assert(_blockProviderOpt != null);
+                if (_blockProviderOpt == null)
+                {
+                    throw new ObjectDisposedException(nameof(MetadataReaderProvider));
+                }
 
                 var newBlock = _blockProviderOpt.GetMemoryBlock(0, _blockProviderOpt.Size);
                 if (Interlocked.CompareExchange(ref _lazyMetadataBlock, newBlock, null) != null)

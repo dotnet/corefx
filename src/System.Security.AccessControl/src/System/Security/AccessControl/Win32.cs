@@ -6,12 +6,12 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Principal;
-using System.Diagnostics.Contracts;
 
 namespace System.Security.AccessControl
 {
@@ -300,7 +300,7 @@ nameof(handle));
                 else
                 {
                     // both are null, shouldn't happen
-                    Contract.Assert(false, "Internal error: both name and handle are null");
+                    Debug.Assert(false, "Internal error: both name and handle are null");
                     throw new ArgumentException();
                 }
 

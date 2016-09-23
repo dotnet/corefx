@@ -17,13 +17,42 @@ namespace System
         public static bool IsOSX { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         public static bool IsNetBSD { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD"));
         public static bool IsNotWindowsNanoServer { get; } = (IsWindows &&
-                File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "regedit.exe")));
+            File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "regedit.exe")));
+        public static bool IsWindows10Version1607OrGreater { get; } = IsWindows &&
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
 
         public static int WindowsVersion { get; } = GetWindowsVersion();
+
+        private static Lazy<bool> m_isWindowsSubsystemForLinux = new Lazy<bool>(GetIsWindowsSubsystemForLinux);
+
+        public static bool IsWindowsSubsystemForLinux => m_isWindowsSubsystemForLinux.Value;
+        public static bool IsNotWindowsSubsystemForLinux => !IsWindowsSubsystemForLinux;
+
+        private static bool GetIsWindowsSubsystemForLinux()
+        {
+            // https://github.com/Microsoft/BashOnWindows/issues/423#issuecomment-221627364
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                const string versionFile = "/proc/version";
+                if (File.Exists(versionFile))
+                {
+                    var s = File.ReadAllText(versionFile);
+
+                    if (s.Contains("Microsoft") || s.Contains("WSL"))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         public static bool IsDebian8 { get; } = IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1510 { get; } = IsDistroAndVersion("ubuntu", "15.10");
         public static bool IsUbuntu1604 { get; } = IsDistroAndVersion("ubuntu", "16.04");
+        public static bool IsUbuntu1610 { get; } = IsDistroAndVersion("ubuntu", "16.10");
         public static bool IsFedora23 { get; } = IsDistroAndVersion("fedora", "23");
 
         private static bool IsDistroAndVersion(string distroId, string versionId)
@@ -102,6 +131,19 @@ namespace System
                 osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
                 Assert.Equal(0, RtlGetVersion(out osvi));
                 return (int)osvi.dwMinorVersion;
+            }
+
+            return -1;
+        }
+
+        private static int GetWindowsBuildNumber()
+        {
+            if (IsWindows)
+            {
+                RTL_OSVERSIONINFOEX osvi = new RTL_OSVERSIONINFOEX();
+                osvi.dwOSVersionInfoSize = (uint)Marshal.SizeOf(osvi);
+                Assert.Equal(0, RtlGetVersion(out osvi));
+                return (int)osvi.dwBuildNumber;
             }
 
             return -1;

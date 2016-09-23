@@ -12,17 +12,6 @@ using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
-    // TODO (#7852):
-    //
-    // - Connect(EndPoint):
-    //   - disconnected socket
-    // - Accept(EndPoint):
-    //   - disconnected socket
-    //
-    // End*:
-    // - Invalid asyncresult type
-    // - asyncresult from different object
-    // - asyncresult with end already called
     public class ArgumentValidation
     {
         // This type is used to test Socket.Select's argument validation.
@@ -1285,8 +1274,7 @@ namespace System.Net.Sockets.Tests
             EndPoint remote = new IPEndPoint(IPAddress.IPv6Loopback, 1);
             IPPacketInformation packetInfo;
 
-            // Behavior difference from Desktop: used to throw ArgumentException.
-            Assert.Throws<ArgumentNullException>(() => GetSocket(AddressFamily.InterNetwork).EndReceiveMessageFrom(null, ref flags, ref remote, out packetInfo));
+            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).EndReceiveMessageFrom(null, ref flags, ref remote, out packetInfo));
         }
 
         [Fact]
