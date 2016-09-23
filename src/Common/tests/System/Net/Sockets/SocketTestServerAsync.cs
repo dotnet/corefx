@@ -191,7 +191,7 @@ namespace System.Net.Sockets.Tests
 
                 if (Interlocked.Decrement(ref _acceptRetryCount) <= 0)
                 {
-                    throw new Exception("accept retry limit exceeded.");
+                    throw new InvalidOperationException("accept retry limit exceeded.");
                 }
 
                 Task.Delay(500).Wait();
