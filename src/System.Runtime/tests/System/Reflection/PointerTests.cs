@@ -93,6 +93,16 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        public void IntPtrFieldSetValue(int value)
+        {
+            var obj = new PointerHolder();
+            FieldInfo field = typeof(PointerHolder).GetField("field");
+            field.SetValue(obj, (IntPtr)value);
+            Assert.Equal(value, (int)obj.field);
+        }
+
+        [Theory]
+        [MemberData(nameof(Pointers))]
         public void PointerFieldSetValue_InvalidType(int value)
         {
             var obj = new PointerHolder();
@@ -128,6 +138,16 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        public void IntPtrPropertySetValue(int value)
+        {
+            var obj = new PointerHolder();
+            PropertyInfo property = typeof(PointerHolder).GetProperty("Property");
+            property.SetValue(obj, (IntPtr)value);
+            Assert.Equal(value, (int)obj.Property);
+        }
+
+        [Theory]
+        [MemberData(nameof(Pointers))]
         public void PointerPropertySetValue_InvalidType(int value)
         {
             var obj = new PointerHolder();
@@ -158,6 +178,15 @@ namespace System.Reflection.Tests
             var obj = new PointerHolder();
             MethodInfo method = typeof(PointerHolder).GetMethod("Method");
             method.Invoke(obj, new[] { Pointer.Box((void*)value, typeof(byte*)), value });
+        }
+
+        [Theory]
+        [MemberData(nameof(Pointers))]
+        public void IntPtrMethodParameter(int value)
+        {
+            var obj = new PointerHolder();
+            MethodInfo method = typeof(PointerHolder).GetMethod("Method");
+            method.Invoke(obj, new object[] { (IntPtr)value, value });
         }
 
         [Theory]
