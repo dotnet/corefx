@@ -11,14 +11,8 @@
     <OutputType>Library</OutputType>
     <StringResourcesPath>../src/Resources/Strings.resx</StringResourcesPath>
     <DefineConstants Condition="'$(TargetGroup)'=='netstandard1.7'">$(DefineConstants);netstandard17</DefineConstants>
-    <NugetTargetMoniker Condition="'$(TargetGroup)'=='netstandard1.7' AND '$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.7</NugetTargetMoniker>
     <NugetTargetMoniker Condition="'$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.7'">
-    <TestNugetTargetMoniker Include="$(NugetTargetMoniker)">
-      <Folder>netcoreapp1.1</Folder>
-    </TestNugetTargetMoniker>
-  </ItemGroup>
   
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
@@ -27,14 +21,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />  
   
   <ItemGroup>
-    <Compile Include="AuthorizationTest.cs" />
-    <Compile Include="AuthenticationManagerTest.cs" />
-    <Compile Include="HttpRequestCachePolicyTest.cs" />
     <Compile Include="HttpWebRequestTest.cs" />
     <Compile Include="HttpWebResponseTest.cs" />
-    <Compile Include="RequestCachePolicyTest.cs" />
     <Compile Include="RequestStreamTest.cs" />
-    <Compile Include="ServicePointManagerTest.cs" />
     <Compile Include="WebRequestTest.cs" />
 
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
@@ -52,8 +41,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.7'">
+    <Compile Include="AuthorizationTest.cs" />
+    <Compile Include="AuthenticationManagerTest.cs" />
     <Compile Include="HttpRequestCachePolicyTest.cs" />
     <Compile Include="RequestCachePolicyTest.cs" />
+    <Compile Include="ServicePointManagerTest.cs" />
   </ItemGroup>
   
   <ItemGroup>
@@ -67,11 +59,5 @@
     <None Include="project.json" />
   </ItemGroup>
 
-  <!-- ToDo: Remove this target once the infrastructure for testing in netcoreapp1.1 is ready -->
-  <Target Name="RemoveUnwantedTestMonikers" Condition="'$(TargetGroup)'=='netstandard1.7'" BeforeTargets="CopyTestToTestDirectory">
-    <ItemGroup>
-      <TestNugetTargetMoniker Remove=".NETCoreApp,Version=v1.1" />
-    </ItemGroup>
-  </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
