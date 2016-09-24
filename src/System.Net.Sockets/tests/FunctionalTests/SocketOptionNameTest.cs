@@ -17,7 +17,8 @@ namespace System.Net.Sockets.Tests
         {
             get
             {
-                return Capability.SocketsReuseUnicastPortSupport();
+                return Capability.SocketsReuseUnicastPortSupport().HasValue &&
+                    Capability.SocketsReuseUnicastPortSupport().Value;
             }
         }
 
@@ -25,7 +26,8 @@ namespace System.Net.Sockets.Tests
         {
             get
             {
-                return !Capability.SocketsReuseUnicastPortSupport();
+                return Capability.SocketsReuseUnicastPortSupport().HasValue &&
+                    !Capability.SocketsReuseUnicastPortSupport().Value;
             }
         }
 
