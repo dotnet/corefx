@@ -246,15 +246,6 @@ namespace System.Collections.Tests
             return StructuralComparisons.StructuralEqualityComparer.GetHashCode(obj);
         }
     }
-    
-    public enum SByteEnum : sbyte { }
-    public enum ByteEnum : byte { }
-    public enum ShortEnum : short { }
-    public enum UShortEnum : ushort { }
-    public enum IntEnum : int { }
-    public enum UIntEnum : uint { }
-    public enum LongEnum : long { }
-    public enum ULongEnum : ulong { }
 
     public class GenericComparable : IComparable<GenericComparable>
     {
