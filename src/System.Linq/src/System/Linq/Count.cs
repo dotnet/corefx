@@ -16,37 +16,10 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            ICollection<TSource> collectionoft = source as ICollection<TSource>;
-            if (collectionoft != null)
-            {
-                return collectionoft.Count;
-            }
-
-            IIListProvider<TSource> listProv = source as IIListProvider<TSource>;
-            if (listProv != null)
-            {
-                return listProv.GetCount(onlyIfCheap: false);
-            }
-
-            ICollection collection = source as ICollection;
-            if (collection != null)
-            {
-                return collection.Count;
-            }
-
-            int count = 0;
-            using (IEnumerator<TSource> e = source.GetEnumerator())
-            {
-                checked
-                {
-                    while (e.MoveNext())
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
+            var listProvider = source as IIListProvider<TSource>;
+            return listProvider != null ?
+                listProvider.GetCount(onlyIfCheap: false) :
+                EnumerableHelpers.GetCount(source);
         }
 
         public static int Count<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
