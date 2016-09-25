@@ -1,12 +1,12 @@
 {
   "dependencies": {
-    "System.Runtime": "4.3.0-preview1-24524-03",
-    "Microsoft.NETCore.Platforms": "1.0.2-preview1-24524-03",
-    "System.Console": "4.3.0-preview1-24524-03",
-    "System.Diagnostics.Process": "4.3.0-preview1-24524-03",
-    "System.IO": "4.3.0-preview1-24524-03",
-    "System.Reflection": "4.3.0-preview1-24524-03",
-    "System.Threading.Tasks": "4.3.0-preview1-24524-03",
+    "System.Runtime": "4.3.0-preview1-24525-02",
+    "Microsoft.NETCore.Platforms": "1.0.2-preview1-24525-02",
+    "System.Console": "4.3.0-preview1-24525-02",
+    "System.Diagnostics.Process": "4.3.0-preview1-24525-02",
+    "System.IO": "4.3.0-preview1-24525-02",
+    "System.Reflection": "4.3.0-preview1-24525-02",
+    "System.Threading.Tasks": "4.3.0-preview1-24525-02",
     "test-runtime": {
       "target": "project",
       "exclude": "compile"
