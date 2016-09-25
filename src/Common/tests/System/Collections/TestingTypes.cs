@@ -326,5 +326,35 @@ namespace System.Collections.Tests
             Value.CompareTo(other.Value);
     }
 
+    public class Equatable : IEquatable<Equatable>
+    {
+        public Equatable(int value)
+        {
+            Value = value;
+        }
+
+        public int Value { get; }
+        
+        // Equals(object) is not implemented on purpose.
+        // EqualityComparer is only supposed to call through to the strongly-typed Equals since we implement IEquatable.
+
+        public bool Equals(Equatable other)
+        {
+            return other != null && Value == other.Value;
+        }
+
+        public override int GetHashCode() => Value;
+    }
+
+    public struct NonEquatableValueType
+    {
+        public NonEquatableValueType(int value)
+        {
+            Value = value;
+        }
+
+        public int Value { get; set; }
+    }
+
     #endregion
 }
