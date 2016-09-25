@@ -28,6 +28,7 @@ namespace System.Collections.Generic.Tests
 
         [Theory]
         [MemberData(nameof(ByteData))]
+        [MemberData(nameof(Int32Data))]
         [MemberData(nameof(StringData))]
         [MemberData(nameof(IEquatableData))]
         [MemberData(nameof(Int16EnumData))]
@@ -93,6 +94,83 @@ namespace System.Collections.Generic.Tests
             }
         }
 
+        // xUnit has problems with nullable type inference since a T? is
+        // boxed to just a plain T. So we have separate theories for nullables.
+
+        [Theory]
+        [MemberData(nameof(ByteData))]
+        [MemberData(nameof(Int32Data))]
+        [MemberData(nameof(Int16EnumData))]
+        [MemberData(nameof(SByteEnumData))]
+        [MemberData(nameof(Int32EnumData))]
+        [MemberData(nameof(Int64EnumData))]
+        [MemberData(nameof(NonEquatableValueTypeData))]
+        public void NullableEquals<T>(T left, T right, bool expected) where T : struct
+        {
+            var comparer = EqualityComparer<T?>.Default;
+            IEqualityComparer nonGenericComparer = comparer;
+
+            // The following code may look similar to what we have in the other theory.
+            // The difference is that we're using EqualityComparer<T?> instead of EqualityComparer<T>
+            // and the inputs are being implicitly converted to nullables.
+
+            Assert.Equal(expected, comparer.Equals(left, right));
+            Assert.Equal(expected, comparer.Equals(right, left));
+
+            Assert.Equal(expected, nonGenericComparer.Equals(left, right));
+            Assert.Equal(expected, nonGenericComparer.Equals(right, left));
+
+            Assert.True(comparer.Equals(left, left));
+            Assert.True(comparer.Equals(right, right));
+
+            Assert.True(nonGenericComparer.Equals(left, left));
+            Assert.True(nonGenericComparer.Equals(right, right));
+
+            Assert.True(comparer.Equals(default(T), default(T)));
+
+            Assert.True(nonGenericComparer.Equals(default(T), default(T)));
+
+            // EqualityComparer<T?> should check for HasValue before dispatching
+            // to IEquatable<T>.Equals().
+            Assert.True(comparer.Equals(null, null));
+
+            // A non-null nullable should never be equal to a null one.
+            Assert.False(comparer.Equals(left, null));
+            Assert.False(comparer.Equals(null, left));
+
+            Assert.False(comparer.Equals(right, null));
+            Assert.False(comparer.Equals(null, right));
+
+            // Even if the underlying value is a default value.
+            Assert.False(comparer.Equals(default(T), null));
+            Assert.False(comparer.Equals(null, default(T)));
+
+            // These should hold true for the non-generic comparer as well.
+            Assert.True(nonGenericComparer.Equals(null, null));
+            
+            Assert.False(nonGenericComparer.Equals(left, null));
+            Assert.False(nonGenericComparer.Equals(null, left));
+
+            Assert.False(nonGenericComparer.Equals(right, null));
+            Assert.False(nonGenericComparer.Equals(null, right));
+
+            Assert.False(nonGenericComparer.Equals(default(T), null));
+            Assert.False(nonGenericComparer.Equals(null, default(T)));
+
+            // GetHashCode: If 2 objects are equal, then their hash code should be the same.
+
+            if (expected)
+            {
+                int hash = comparer.GetHashCode(left);
+
+                Assert.Equal(hash, comparer.GetHashCode(left)); // Should return the same result across multiple invocations
+                Assert.Equal(hash, comparer.GetHashCode(right));
+
+                Assert.Equal(hash, nonGenericComparer.GetHashCode(left));
+                Assert.Equal(hash, nonGenericComparer.GetHashCode(right));
+            }
+        }
+
         public static EqualsData<byte> ByteData()
         {
             return new EqualsData<byte>
@@ -100,7 +178,19 @@ namespace System.Collections.Generic.Tests
                 { 3, 3, true },
                 { 3, 4, false },
                 { 0, 255, false },
-                { 0, 128, false }
+                { 0, 128, false },
+                { 255, 255, true }
+            };
+        }
+
+        public static EqualsData<int> Int32Data()
+        {
+            return new EqualsData<int>
+            {
+                { 3, 3, true },
+                { 3, 5, false },
+                { int.MinValue + 1, 1, false },
+                { int.MinValue, int.MinValue, true }
             };
         }
 
@@ -206,6 +296,7 @@ namespace System.Collections.Generic.Tests
 
         [Theory]
         [MemberData(nameof(ByteHashData))]
+        [MemberData(nameof(Int32HashData))]
         [MemberData(nameof(StringHashData))]
         [MemberData(nameof(IEquatableHashData))]
         [MemberData(nameof(Int16EnumHashData))]
@@ -236,7 +327,33 @@ namespace System.Collections.Generic.Tests
             }
         }
 
+        [Theory]
+        [MemberData(nameof(ByteHashData))]
+        [MemberData(nameof(Int32HashData))]
+        [MemberData(nameof(Int16EnumHashData))]
+        [MemberData(nameof(SByteEnumHashData))]
+        [MemberData(nameof(Int32EnumHashData))]
+        [MemberData(nameof(Int64EnumHashData))]
+        [MemberData(nameof(NonEquatableValueTypeHashData))]
+        public void NullableGetHashCode<T>(T value, int expected) where T : struct
+        {
+            var comparer = EqualityComparer<T?>.Default;
+            IEqualityComparer nonGenericComparer = comparer;
+
+            Assert.Equal(expected, comparer.GetHashCode(value));
+            Assert.Equal(expected, comparer.GetHashCode(value));
+
+            Assert.Equal(expected, nonGenericComparer.GetHashCode(value));
+            Assert.Equal(expected, nonGenericComparer.GetHashCode(value));
+
+            Assert.Equal(0, comparer.GetHashCode(null));
+
+            Assert.Equal(0, nonGenericComparer.GetHashCode(null));
+        }
+
         public static HashData<byte> ByteHashData() => GenerateHashData(ByteData());
+
+        public static HashData<int> Int32HashData() => GenerateHashData(Int32Data());
 
         public static HashData<string> StringHashData() => GenerateHashData(StringData());
 
