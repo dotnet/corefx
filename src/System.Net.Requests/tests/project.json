@@ -27,10 +27,10 @@
   },
   "supports": {
     "coreFx.Test.netcoreapp1.0": { },
+    "corefx.Test.netcoreapp1.1": { },
     "coreFx.Test.net46": { },
     "coreFx.Test.net461": { },
     "coreFx.Test.net462": { },
-    "coreFx.Test.net463": { },
-    "corefx.Test.netcoreapp1.1": { }
+    "coreFx.Test.net463": { }
   }
 }
