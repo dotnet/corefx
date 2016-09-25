@@ -347,5 +347,24 @@ namespace System.Collections.Tests
         public int Value { get; set; }
     }
 
+    public class DelegateEquatable : IEquatable<DelegateEquatable>
+    {
+        public DelegateEquatable()
+        {
+            EqualsWorker = _ => false;
+        }
+
+        public Func<DelegateEquatable, bool> EqualsWorker { get; set; }
+
+        public bool Equals(DelegateEquatable other) => EqualsWorker(other);
+    }
+
+    public struct ValueDelegateEquatable : IEquatable<ValueDelegateEquatable>
+    {
+        public Func<ValueDelegateEquatable, bool> EqualsWorker { get; set; }
+
+        public bool Equals(ValueDelegateEquatable other) => EqualsWorker(other);
+    }
+
     #endregion
 }

@@ -371,6 +371,50 @@ namespace System.Collections.Generic.Tests
 
         public static HashData<object> ObjectHashData() => GenerateHashData(ObjectData());
 
+        [Fact]
+        public void TryCallLeftHandEqualsFirst()
+        {
+            // Given two non-null inputs x and y, Comparer<T>.Equals should try
+            // to call x.Equals() first. y.Equals() should only be called if x
+            // is null and y is not.
+
+            var comparer = EqualityComparer<DelegateEquatable>.Default;
+
+            int state1 = 0, state2 = 0;
+
+            var left = new DelegateEquatable { EqualsWorker = _ => { state1++; return false; } };
+            var right = new DelegateEquatable { EqualsWorker = _ => { state2++; return true; } };
+
+            Assert.False(comparer.Equals(left, right));
+            Assert.Equal(1, state1);
+            Assert.Equal(0, state2);
+
+            Assert.True(comparer.Equals(right, left));
+            Assert.Equal(1, state1);
+            Assert.Equal(1, state2);
+        }
+
+        [Fact]
+        public void NullableTryCallLeftHandEqualsFirst()
+        {
+            // Comparer<T>.Default is specialized when T is a nullable of a type that implements IEquatable.
+
+            var comparer = EqualityComparer<ValueDelegateEquatable?>.Default;
+
+            int state1 = 0, state2 = 0;
+
+            var left = new ValueDelegateEquatable { EqualsWorker = _ => { state1++; return false; } };
+            var right = new ValueDelegateEquatable { EqualsWorker = _ => { state2++; return true; } };
+
+            Assert.False(comparer.Equals(left, right));
+            Assert.Equal(1, state1);
+            Assert.Equal(0, state2);
+
+            Assert.True(comparer.Equals(right, left));
+            Assert.Equal(1, state1);
+            Assert.Equal(1, state2);
+        }
+
         private static HashData<T> GenerateHashData<T>(EqualsData<T> input)
         {
             Debug.Assert(input != null);
