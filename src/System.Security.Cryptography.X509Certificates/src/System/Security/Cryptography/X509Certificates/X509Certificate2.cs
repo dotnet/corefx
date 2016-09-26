@@ -61,6 +61,11 @@ namespace System.Security.Cryptography.X509Certificates
         {
         }
 
+        public X509Certificate2(X509Certificate cert)
+            : base(cert)
+        {
+        }
+
         public bool Archived
         {
             get

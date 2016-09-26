@@ -2,15 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
-using System.Text;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.InteropServices;
-
 using Internal.Cryptography;
 using Internal.Cryptography.Pal;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
 
 namespace System.Security.Cryptography.X509Certificates
 {
@@ -70,6 +67,14 @@ namespace System.Security.Cryptography.X509Certificates
                 throw new ArgumentException(SR.Argument_InvalidFlag, nameof(keyStorageFlags));
 
             Pal = CertificatePal.FromFile(fileName, password, keyStorageFlags);
+        }
+
+        public X509Certificate(X509Certificate cert)
+        {
+            if (cert == null)
+                throw new ArgumentNullException(nameof(cert));
+
+            Pal = CertificatePal.FromHandle(cert.Handle); // Let FromHandle throw if certHandle is 0
         }
 
         public IntPtr Handle
@@ -177,10 +182,22 @@ namespace System.Security.Cryptography.X509Certificates
             }
         }
 
+        public virtual string GetRawCertDataString()
+        {
+            ThrowIfInvalid();
+            return GetRawCertData().ToHexStringUpper();
+        }
+
         public virtual byte[] GetCertHash()
         {
             ThrowIfInvalid();
             return GetRawCertHash().CloneByteArray();
+        }
+
+        public virtual string GetCertHashString()
+        {
+            ThrowIfInvalid();
+            return GetRawCertHash().ToHexStringUpper();
         }
 
         // Only use for internal purposes when the returned byte[] will not be mutated
@@ -189,9 +206,31 @@ namespace System.Security.Cryptography.X509Certificates
             return _lazyCertHash ?? (_lazyCertHash = Pal.Thumbprint);
         }
 
+        public virtual string GetEffectiveDateString()
+        {
+            return GetNotBefore().ToString();
+        }
+
+        public virtual string GetExpirationDateString()
+        {
+            return GetNotAfter().ToString();
+        }
+
         public virtual string GetFormat()
         {
             return "X509";
+        }
+
+        public virtual string GetPublicKeyString()
+        {
+            return GetPublicKey().ToHexStringUpper();
+        }
+
+        public virtual byte[] GetRawCertData()
+        {
+            ThrowIfInvalid();
+
+            return Pal.RawData.CloneByteArray();
         }
 
         public override int GetHashCode()
@@ -253,10 +292,29 @@ namespace System.Security.Cryptography.X509Certificates
             return GetRawSerialNumber().CloneByteArray();
         }
 
+        public virtual string GetSerialNumberString()
+        {
+            ThrowIfInvalid();
+
+            return GetRawSerialNumber().ToHexStringUpper();
+        }
+
         // Only use for internal purposes when the returned byte[] will not be mutated
         private byte[] GetRawSerialNumber()
         {
             return _lazySerialNumber ?? (_lazySerialNumber = Pal.SerialNumber);
+        }
+
+        [Obsolete("This method has been deprecated.  Please use the Subject property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public virtual string GetName()
+        {
+            return Subject;
+        }
+
+        [Obsolete("This method has been deprecated.  Please use the Issuer property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public virtual string GetIssuerName()
+        {
+            return Issuer;
         }
 
         public override string ToString()

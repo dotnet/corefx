@@ -35,11 +35,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.ThrowsAny<CryptographicException>(() => c.FriendlyName = "Hi");
                 Assert.ThrowsAny<CryptographicException>(() => ignored = c.SubjectName);
                 Assert.ThrowsAny<CryptographicException>(() => ignored = c.IssuerName);
+#if netstandard17
+                Assert.ThrowsAny<CryptographicException>(() => c.GetCertHashString());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetEffectiveDateString());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetExpirationDateString());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetPublicKeyString());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetRawCertData());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetRawCertDataString());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetSerialNumberString());
+#pragma warning disable 0618
+                Assert.ThrowsAny<CryptographicException>(() => c.GetIssuerName());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetName());
+#pragma warning restore 0618
+#endif
             }
         }
 
         [Fact]
-        public static void TestByteArrayConstructor_DER()
+        public static void TestConstructor_DER()
         {
             byte[] expectedThumbPrint = new byte[]
             {
@@ -48,17 +61,28 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 0xc3, 0x13, 0x87, 0xfe,
             };
 
-            using (X509Certificate2 c = new X509Certificate2(TestData.MsCertificate))
+            Action<X509Certificate2> assert = (c) =>
             {
                 IntPtr h = c.Handle;
                 Assert.NotEqual(IntPtr.Zero, h);
                 byte[] actualThumbprint = c.GetCertHash();
                 Assert.Equal(expectedThumbPrint, actualThumbprint);
+            };
+
+            using (X509Certificate2 c = new X509Certificate2(TestData.MsCertificate))
+            {
+                assert(c);
+#if netstandard17
+                using (X509Certificate2 c2 = new X509Certificate2(c))
+                {
+                    assert(c2);
+                }
+#endif
             }
         }
 
         [Fact]
-        public static void TestByteArrayConstructor_PEM()
+        public static void TestConstructor_PEM()
         {
             byte[] expectedThumbPrint =
             {
@@ -67,26 +91,83 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 0xc3, 0x13, 0x87, 0xfe,
             };
 
-            using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificatePemBytes))
+            Action<X509Certificate2> assert = (cert) =>
             {
                 IntPtr h = cert.Handle;
                 Assert.NotEqual(IntPtr.Zero, h);
                 byte[] actualThumbprint = cert.GetCertHash();
                 Assert.Equal(expectedThumbPrint, actualThumbprint);
+            };
+
+            using (X509Certificate2 c = new X509Certificate2(TestData.MsCertificatePemBytes))
+            {
+                assert(c);
+#if netstandard17
+                using (X509Certificate2 c2 = new X509Certificate2(c))
+                {
+                    assert(c2);
+                }
+#endif
+            }
+        }
+
+        [Fact]
+        public static void TestConstructor_CertificateArg_Lifetime()
+        {
+            var c1 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword);
+            var c2 = new X509Certificate2(c1);
+            TestPrivateKey(c1, true);
+            TestPrivateKey(c2, true);
+
+            c1.Dispose();
+            TestPrivateKey(c1, false);
+            TestPrivateKey(c2, true);
+
+            c2.Dispose();
+            TestPrivateKey(c2, false);
+        }
+
+        private static void TestPrivateKey(X509Certificate2 c, bool expectSuccess)
+        {
+            {
+                using (RSA rsa = c.GetRSAPrivateKey())
+                {
+                    byte[] hash = new byte[20];
+                    if (expectSuccess)
+                    {
+                        byte[] sig = rsa.SignHash(hash, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+                        Assert.Equal(TestData.PfxSha1Empty_ExpectedSig, sig);
+                    }
+                    else
+                    {
+                        Assert.ThrowsAny<CryptographicException>(() => rsa.SignHash(hash, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1));
+                    }
+                }
             }
         }
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public static void TestByteArrayConstructor_SerializedCert_Windows()
+        public static void TestConstructor_SerializedCert_Windows()
         {
             const string ExpectedThumbPrint = "71CB4E2B02738AD44F8B382C93BD17BA665F9914";
 
-            using (X509Certificate2 cert = new X509Certificate2(TestData.StoreSavedAsSerializedCerData))
+            Action<X509Certificate2> assert = (cert) =>
             {
                 IntPtr h = cert.Handle;
                 Assert.NotEqual(IntPtr.Zero, h);
                 Assert.Equal(ExpectedThumbPrint, cert.Thumbprint);
+            };
+
+            using (X509Certificate2 c = new X509Certificate2(TestData.StoreSavedAsSerializedCerData))
+            {
+                assert(c);
+#if netstandard17
+                using (X509Certificate2 c2 = new X509Certificate2(c))
+                {
+                    assert(c2);
+                }
+#endif
             }
         }
 
@@ -104,6 +185,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Throws<ArgumentException>(() => new X509Certificate2(new byte[0], (String)null));
             Assert.Throws<ArgumentException>(() => new X509Certificate2((byte[])null, (String)null, X509KeyStorageFlags.DefaultKeySet));
             Assert.Throws<ArgumentException>(() => new X509Certificate2(new byte[0], (String)null, X509KeyStorageFlags.DefaultKeySet));
+#if netstandard17
+            Assert.Throws<ArgumentNullException>(() => new X509Certificate2((X509Certificate2)null));
+#endif
 
             // For compat reasons, the (byte[]) constructor (and only that constructor) treats a null or 0-length array as the same
             // as calling the default constructor.
