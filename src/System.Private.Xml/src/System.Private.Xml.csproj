@@ -10,7 +10,6 @@
     <NoWarn>$(NoWarn),649</NoWarn>
     <DefineConstants>ASYNC;ASTORIA_LIGHT</DefineConstants><!-- TODO: this should be prepended with $(DefineConstants); - otherwise DEBUG and TRACE are not being passed -->
     <DefineConstants Condition="'$(TargetGroup)' == 'uap101aot'">$(DefineConstants);NET_NATIVE</DefineConstants>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.7</PackageTargetFramework>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -18,10 +17,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
-  <ItemGroup>
-    <!-- remove this project reference when new packages are generated -->
-    <ProjectReference Include="..\..\System.IO.FileSystem\ref\System.IO.FileSystem.csproj" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
     <Compile Include="$(CommonPath)\System\ValueTuple.cs">
       <Link>Common\System\ValueTuple.cs</Link>

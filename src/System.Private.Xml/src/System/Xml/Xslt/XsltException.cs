@@ -9,10 +9,7 @@ using System.Xml.XPath;
 
 namespace System.Xml.Xsl
 {
-
-#if SERIALIZABLE_DEFINED
     [Serializable]
-#endif
     public class XsltException : SystemException
     {
         private string _res;
@@ -140,9 +137,7 @@ namespace System.Xml.Xsl
         }
     }
 
-#if SERIALIZABLE_DEFINED
     [Serializable]
-#endif
     public class XsltCompileException : XsltException
     {
         protected XsltCompileException(SerializationInfo info, StreamingContext context) : base(info, context) {}

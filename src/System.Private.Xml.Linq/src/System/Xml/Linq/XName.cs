@@ -196,9 +196,7 @@ namespace System.Xml.Linq
         }
     }
 
-#if SERIALIZABLE_DEFINED
     [Serializable()]
-#endif
     internal sealed class NameSerializer : IObjectReference, ISerializable
     {
         string _expandedName;

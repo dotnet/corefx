@@ -45,10 +45,7 @@
         "System.Threading": "4.3.0-beta-24522-03",
         "System.Threading.Tasks": "4.3.0-beta-24522-03",
         "System.Threading.Tasks.Extensions": "4.3.0-beta-24522-03"
-      },
-      "imports": [
-        "dotnet5.8"
-      ]
+      }
     },
     "net463": {
       "dependencies": {

@@ -13,9 +13,7 @@ namespace System.Xml.Schema
     using System.Diagnostics;
 
     /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException"]/*' />
-#if SERIALIZABLE_DEFINED
     [Serializable]
-#endif
     public class XmlSchemaException : SystemException
     {
         private string _res;
@@ -24,9 +22,7 @@ namespace System.Xml.Schema
         private int _lineNumber;
         private int _linePosition;
 
-#if SERIALIZABLE_DEFINED
         [NonSerialized]
-#endif
         private XmlSchemaObject _sourceSchemaObject;
 
         // message != null for V1 exceptions deserialized in Whidbey

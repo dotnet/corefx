@@ -46,28 +46,36 @@ namespace System.Xml.Serialization
         public SoapAttributes(ICustomAttributeProvider provider)
         {
             object[] attrs = provider.GetCustomAttributes(false);
-            for (int i = 0; i < attrs.Length; i++) {
-                if (attrs[i] is SoapIgnoreAttribute || attrs[i] is ObsoleteAttribute) {
+            for (int i = 0; i < attrs.Length; i++)
+            {
+                if (attrs[i] is SoapIgnoreAttribute || attrs[i] is ObsoleteAttribute)
+                {
                     _soapIgnore = true;
                     break;
                 }
-                else if (attrs[i] is SoapElementAttribute) {
+                else if (attrs[i] is SoapElementAttribute)
+                {
                     _soapElement = (SoapElementAttribute)attrs[i];
                 }
-                else if (attrs[i] is SoapAttributeAttribute) {
+                else if (attrs[i] is SoapAttributeAttribute)
+                {
                     _soapAttribute = (SoapAttributeAttribute)attrs[i];
                 }
-                else if (attrs[i] is SoapTypeAttribute) {
+                else if (attrs[i] is SoapTypeAttribute)
+                {
                     _soapType = (SoapTypeAttribute)attrs[i];
                 }
-                else if (attrs[i] is SoapEnumAttribute) {
+                else if (attrs[i] is SoapEnumAttribute)
+                {
                     _soapEnum = (SoapEnumAttribute)attrs[i];
                 }
-                else if (attrs[i] is DefaultValueAttribute) {
+                else if (attrs[i] is DefaultValueAttribute)
+                {
                     _soapDefaultValue = ((DefaultValueAttribute)attrs[i]).Value;
                 }
             }
-            if (_soapIgnore) {
+            if (_soapIgnore)
+            {
                 _soapElement = null;
                 _soapAttribute = null;
                 _soapType = null;
