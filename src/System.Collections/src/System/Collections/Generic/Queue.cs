@@ -228,7 +228,9 @@ namespace System.Collections.Generic
         public T Dequeue()
         {
             if (_size == 0)
-                throw new InvalidOperationException(SR.InvalidOperation_EmptyQueue);
+            {
+                ThrowForEmptyQueue();
+            }
 
             T removed = _array[_head];
             _array[_head] = default(T);
