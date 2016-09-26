@@ -24,12 +24,12 @@ namespace System.Net
         [Obsolete("GetHostByName is obsoleted for this type, please use GetHostEntry instead. http://go.microsoft.com/fwlink/?linkid=14202")]
         public static IPHostEntry GetHostByName(string hostName)
         {
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             if (hostName == null)
             {
                 throw new ArgumentNullException(nameof(hostName));
             }
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
 
             // See if it's an IP Address.
             IPAddress address;
@@ -40,7 +40,7 @@ namespace System.Net
             return InternalGetHostByName(hostName, false);
         }
 
-        internal static IPHostEntry InternalGetHostByName(string hostName, bool includeIPv6)
+        private static IPHostEntry InternalGetHostByName(string hostName, bool includeIPv6)
         {
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Enter(NetEventSource.ComponentType.Socket, "DNS", "GetHostByName", hostName);
             IPHostEntry ipHostEntry = null;
@@ -99,6 +99,8 @@ namespace System.Net
         {
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Enter(NetEventSource.ComponentType.Socket, "DNS", "GetHostByAddress", address);
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             if (address == null)
             {
                 throw new ArgumentNullException(nameof(address));
@@ -108,8 +110,6 @@ namespace System.Net
             {
                 GlobalLog.Print("Dns.GetHostByAddress: " + address);
             }
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
 
             IPHostEntry ipHostEntry = InternalGetHostByAddress(IPAddress.Parse(address), false);
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Exit(NetEventSource.ComponentType.Socket, "DNS", "GetHostByAddress", ipHostEntry);
@@ -121,12 +121,12 @@ namespace System.Net
         {
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Enter(NetEventSource.ComponentType.Socket, "DNS", "GetHostByAddress", "");
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             if (address == null)
             {
                 throw new ArgumentNullException(nameof(address));
             }
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
 
             IPHostEntry ipHostEntry = InternalGetHostByAddress(address, false);
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Exit(NetEventSource.ComponentType.Socket, "DNS", "GetHostByAddress", ipHostEntry);
@@ -242,12 +242,12 @@ namespace System.Net
         {
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Enter(NetEventSource.ComponentType.Socket, "DNS", "Resolve", hostName);
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             if (hostName == null)
             {
                 throw new ArgumentNullException(nameof(hostName));
             }
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
 
             // See if it's an IP Address.
             IPAddress address;
@@ -485,12 +485,12 @@ namespace System.Net
         {
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Enter(NetEventSource.ComponentType.Socket, "DNS", "GetHostEntry", hostNameOrAddress);
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             if (hostNameOrAddress == null)
             {
                 throw new ArgumentNullException(nameof(hostNameOrAddress));
             }
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
 
             // See if it's an IP Address.
             IPAddress address;
@@ -518,6 +518,8 @@ namespace System.Net
         {
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Enter(NetEventSource.ComponentType.Socket, "DNS", "GetHostEntry", "");
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             if (address == null)
             {
                 throw new ArgumentNullException(nameof(address));
@@ -528,8 +530,6 @@ namespace System.Net
                 throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(address)));
             }
 
-            NameResolutionPal.EnsureSocketsAreInitialized();
-
             IPHostEntry ipHostEntry = InternalGetHostByAddress(address, true);
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Exit(NetEventSource.ComponentType.Socket, "DNS", "GetHostEntry", ipHostEntry);
             return ipHostEntry;
@@ -539,12 +539,12 @@ namespace System.Net
         {
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Enter(NetEventSource.ComponentType.Socket, "DNS", "GetHostAddresses", hostNameOrAddress);
 
+            NameResolutionPal.EnsureSocketsAreInitialized();
+
             if (hostNameOrAddress == null)
             {
                 throw new ArgumentNullException(nameof(hostNameOrAddress));
             }
-
-            NameResolutionPal.EnsureSocketsAreInitialized();
 
             // See if it's an IP Address.
             IPAddress address;
