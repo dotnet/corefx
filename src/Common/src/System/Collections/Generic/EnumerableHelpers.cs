@@ -172,11 +172,10 @@ namespace System.Collections.Generic
 
                     // Copy from the buffers in the list that came before this one
                     int copied = first.Length;
-                    for (int i = 0; i < buffers.Count; i++)
+                    foreach (T[] buffer in buffers)
                     {
-                        T[] previous = buffers[i];
-                        Array.Copy(previous, 0, result, copied, previous.Length);
-                        copied += previous.Length;
+                        Array.Copy(buffer, 0, result, copied, buffer.Length);
+                        copied += buffer.Length;
                     }
 
                     // Copy the remaining data from this buffer
