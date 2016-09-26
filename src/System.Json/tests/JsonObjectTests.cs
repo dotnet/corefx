@@ -23,6 +23,7 @@ namespace System.Json.Tests
         [Fact]
         public void Ctor_Array()
         {
+            // Workaround xunit/xunit#987: InvalidOperationException thrown if this is in MemberData
             KeyValuePair<string, JsonValue>[] items = new KeyValuePair<string, JsonValue>[] { new KeyValuePair<string, JsonValue>("key", new JsonPrimitive(true)) };
             JsonObject obj = new JsonObject(items);
 
@@ -40,6 +41,7 @@ namespace System.Json.Tests
         [Fact]
         public void Ctor_IEnumerable()
         {
+            // Workaround xunit/xunit#987: InvalidOperationException thrown if this is in MemberData
             KeyValuePair<string, JsonValue>[] items = new KeyValuePair<string, JsonValue>[] { new KeyValuePair<string, JsonValue>("key", new JsonPrimitive(true)) };
             JsonObject obj = new JsonObject((IEnumerable<KeyValuePair<string, JsonValue>>)items);
 

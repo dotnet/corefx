@@ -38,6 +38,7 @@ namespace System.Json.Tests
         [Fact]
         public void Ctor_Array_Works()
         {
+        	// Workaround xunit/xunit#987: InvalidOperationException thrown if this is in MemberData
             JsonValue[] items = new JsonValue[] { new JsonPrimitive(true) };
             JsonArray array = new JsonArray(items);
             Assert.Equal(1, array.Count);
@@ -47,6 +48,7 @@ namespace System.Json.Tests
         [Fact]
         public void Ctor_IEnumerable_Works()
         {
+        	// Workaround xunit/xunit#987: InvalidOperationException thrown if this is in MemberData
             JsonValue[] items = new JsonValue[] { new JsonPrimitive(true) };
             JsonArray array = new JsonArray((IEnumerable<JsonValue>)items);
             Assert.Equal(1, array.Count);
