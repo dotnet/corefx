@@ -90,7 +90,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void Name()
         {
-            Assert.Equal("system.runtime.tests.dll", Module.Name);
+            Assert.Equal("system.runtime.tests.dll", Module.Name, ignoreCase: true);
         }
 
         [Fact]
