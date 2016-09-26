@@ -65,6 +65,11 @@
       <Link>Common\System\Xml\XmlConst.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System" />
+    <TargetingPackReference Include="System.Xml" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Xml\XmlAttributeEx.cs" />
     <Compile Include="System\Xml\XmlDocumentEx.cs" />
