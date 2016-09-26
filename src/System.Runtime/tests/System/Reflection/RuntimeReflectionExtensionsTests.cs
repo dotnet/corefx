@@ -59,8 +59,9 @@ namespace System.Reflection.Tests
         {
             var fields = typeof(TestType).GetRuntimeFields().ToList();
             Assert.Equal(2, fields.Count);
-            Assert.Equal("StuffHappened", fields[0].Name);
-            Assert.Equal("_pizzaSize", fields[1].Name);
+            var fieldNames = fields.Select(f => f.Name).ToList();
+            Assert.Contains("StuffHappened", fieldNames);
+            Assert.Contains("_pizzaSize", fieldNames);
         }
 
         [Fact]
