@@ -244,8 +244,10 @@ namespace System.Collections.Generic
         public T Peek()
         {
             if (_size == 0)
-                throw new InvalidOperationException(SR.InvalidOperation_EmptyQueue);
-
+            {
+                ThrowForEmptyQueue();
+            }
+            
             return _array[_head];
         }
 
@@ -326,6 +328,12 @@ namespace System.Collections.Generic
             // than a simple comparison and a rarely taken branch.   
             int tmp = index + 1;
             index = (tmp == _array.Length) ? 0 : tmp;
+        }
+
+        private void ThrowForEmptyQueue()
+        {
+            Debug.Assert(_size == 0);
+            throw new InvalidOperationException(SR.InvalidOperation_EmptyQueue);
         }
 
         public void TrimExcess()
