@@ -60,14 +60,7 @@ namespace System.Collections.Generic
                     else
                     {
                         // Resize from a previous iteration
-                        T[] last = buffer;
-                        int newLength = last.Length * 2;
-                        buffer = new T[newLength];
-
-                        // We are using a for-loop instead of Array.Resize under the assumption
-                        // we are copying < 32 elements.
-                        Debug.Assert(last.Length < BufferListThreshold);
-                        for (int i = 0; i < last.Length; i++) buffer[i] = last[i];
+                        Array.Resize(ref buffer, buffer.Length * 2);
                     }
 
                     do
@@ -82,26 +75,19 @@ namespace System.Collections.Generic
                     }
                     while (en.MoveNext());
 
-                    if (index < buffer.Length)
-                    {
-                        // Since MoveNext returned false, this means that we finished enumerating
-                        // before we reached the end of the buffer.
-                        int finalLength = index;
-                        Debug.Assert(finalLength < buffer.Length); // case where they're == is taken care of below
-                        
-                        // Since we only arrive here for enumerables of length < 32,
-                        // copy using a manual for-loop rather than Array.Resize, which
-                        // does not perform as well for smaller arrays.
-                        var result = new T[finalLength];
-                        for (int i = 0; i < result.Length; i++) result[i] = buffer[i];
-                        return result;
-                    }
+                    // If the first condition is hit that means that we exited from
+                    // the loop via MoveNext returning false, so we're done enumerating.
+                    // Otherwise we must have exited after calling Current, however
+                    // the loop expects to be entered with MoveNext already having been
+                    // called. So we need to call MoveNext ourselves in that case.
+                    
+                    // If the next MoveNext returns false, then we allocated just enough
+                    // space to fit the enumerable's elements.
 
-                    // We called Current last, but the loop expects MoveNext to be called
-                    // before it is entered. So we need to call it again here.
-                    if (!en.MoveNext())
+                    if (index < buffer.Length || !en.MoveNext())
                     {
-                        // The enumerable fits perfectly into the buffer, so no resizing to do
+                        int finalLength = index;
+                        Array.Resize(ref buffer, finalLength);
                         return buffer;
                     }
                 }
@@ -178,12 +164,10 @@ namespace System.Collections.Generic
                     // buffer we were just processing.
                     
                     int remainder = index >= 0 ? index : current.Length; // If we got here from !en.MoveNext() that means index == -1 and there was just enough space
-                    int finalLength = read + remainder;
+                    int finalLength = checked(read + remainder);
 
                     var result = new T[finalLength];
 
-                    // Use Array.Copy for everything, since this codepath is only taken for
-                    // buffers of length > 32
                     Array.Copy(first, 0, result, 0, first.Length);
 
                     // Copy from the buffers in the list that came before this one
@@ -205,13 +189,15 @@ namespace System.Collections.Generic
                 }
 
                 // Since we exhausted the buffer, update read
-                read += current.Length;
+                checked
+                {
+                    read += current.Length;
+                }
 
                 // There was not enough space in the current buffer- add it to the list,
                 // and allocate a new buffer twice our size for the next iteration.
                 buffers.Add(current);
-                int nextCapacity = current.Length * 2;
-                current = new T[nextCapacity];
+                current = new T[current.Length * 2];
             }
         }
 
