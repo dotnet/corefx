@@ -76,7 +76,7 @@ namespace System.Json.Tests
         }
 
         [Fact]
-        public void Item_Set()
+        public void Item_Set_Get()
         {
             JsonArray array = new JsonArray(new JsonPrimitive(true));
             JsonPrimitive value = new JsonPrimitive(false);

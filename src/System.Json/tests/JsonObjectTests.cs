@@ -81,7 +81,7 @@ namespace System.Json.Tests
         }
 
         [Fact]
-        public void Item_Get()
+        public void Item_Set_Get()
         {
             JsonObject obj = new JsonObject();
 
