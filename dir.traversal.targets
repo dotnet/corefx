@@ -112,6 +112,34 @@
     <Message Text="%(PackageIds.Identity)" Importance="High" />
   </Target>
 
+  <Target Name="GetTargetPath" DependsOnTargets="FilterProjects" Returns="@(_ProjectTargetPath)">
+    <SelectTargetPath TargetPaths="@(Project)">
+      <Output TaskParameter="TargetPath" ItemName="_TargetProject"/>
+    </SelectTargetPath>
+    <MSBuild Targets="GetTargetPath"
+             Projects="@(_TargetProject)"
+             BuildInParallel="true">
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectTargetPath"/>
+    </MSBuild>
+  </Target>
+
+  <UsingTask TaskName="SelectTargetPath" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <TargetPaths ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true"/>
+      <TargetPath ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true"/>
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System"/>
+      <Using Namespace="System.Linq"/>
+      <Using Namespace="Microsoft.Build.Framework"/>
+      <Code>
+      <![CDATA[
+      TargetPath = TargetPaths.Take(1).ToArray();
+      ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
   <Target Name="BuildAllProjects" DependsOnTargets="FilterProjects">
     <PropertyGroup>
       <DefaultBuildAllTarget Condition="'$(DefaultBuildAllTarget)'==''">$(MSBuildProjectDefaultTargets)</DefaultBuildAllTarget>
