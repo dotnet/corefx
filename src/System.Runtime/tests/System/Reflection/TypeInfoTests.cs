@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -127,7 +128,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void DeclaredConstructors()
         {
-            var ctors = TypeInfo.DeclaredConstructors.ToList();
+            List<ConstructorInfo> ctors = TypeInfo.DeclaredConstructors.ToList();
             Assert.Equal(1, ctors.Count);
             Assert.True(ctors[0].IsSpecialName);
             Assert.Equal(0, ctors[0].GetParameters().Count());
@@ -136,7 +137,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void DeclaredEvents()
         {
-            var events = TypeInfo.DeclaredEvents.ToList();
+            List<EventInfo> events = TypeInfo.DeclaredEvents.ToList();
             Assert.Equal(1, events.Count);
             Assert.Equal("StuffHappened", events[0].Name);
             Assert.Equal("Action`1", events[0].EventHandlerType.Name);
@@ -151,12 +152,12 @@ namespace System.Reflection.Tests
         [Fact]
         public void DeclaredFields()
         {
-            var fields = TypeInfo.DeclaredFields.ToList();
+            List<FieldInfo> fields = TypeInfo.DeclaredFields.ToList();
             Assert.Equal(2, fields.Count);
-            var stuffHappened = fields.Single(f => f.Name == "StuffHappened");
+            FieldInfo stuffHappened = fields.Single(f => f.Name == "StuffHappened");
             Assert.Equal(typeof(Action<int>), stuffHappened.FieldType);
             Assert.True(stuffHappened.IsPrivate);
-            var pizzaSize = fields.Single(f => f.Name == "_pizzaSize");
+            FieldInfo pizzaSize = fields.Single(f => f.Name == "_pizzaSize");
             Assert.Equal(typeof(int), pizzaSize.FieldType);
             Assert.True(pizzaSize.IsPrivate);
         }
@@ -170,9 +171,9 @@ namespace System.Reflection.Tests
         [Fact]
         public void DeclaredMethods()
         {
-            var methods = TypeInfo.DeclaredMethods.OrderBy(m => m.Name).ToList();
+            List<MethodInfo> methods = TypeInfo.DeclaredMethods.OrderBy(m => m.Name).ToList();
             Assert.Equal(13, methods.Count);
-            var methodNames = methods.Select(m => m.Name).ToList();
+            List<string> methodNames = methods.Select(m => m.Name).ToList();
             Assert.Contains("add_StuffHappened", methodNames);
             Assert.Contains("Flush", methodNames);
             Assert.Contains("get_CanRead", methodNames);
@@ -197,7 +198,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void DeclaredNestedTypes()
         {
-            var types = TypeInfo.DeclaredNestedTypes.ToList();
+            List<TypeInfo> types = TypeInfo.DeclaredNestedTypes.ToList();
             Assert.Equal(1, types.Count);
             Assert.Equal("Nested", types[0].Name);
             Assert.True(types[0].IsNestedPublic);
@@ -212,7 +213,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void DeclaredProperties()
         {
-            var properties = TypeInfo.DeclaredProperties.OrderBy(p => p.Name).ToList();
+            List<PropertyInfo> properties = TypeInfo.DeclaredProperties.OrderBy(p => p.Name).ToList();
             Assert.Equal(5, properties.Count);
             Assert.Equal("CanRead", properties[0].Name);
             Assert.Equal("CanSeek", properties[1].Name);
@@ -230,14 +231,14 @@ namespace System.Reflection.Tests
         [Fact]
         public void GenericTypeParameters()
         {
-            var parameters = TypeInfo.GenericTypeParameters;
+            Type[] parameters = TypeInfo.GenericTypeParameters;
             Assert.Equal(0, parameters.Length);
         }
 
         [Fact]
         public void ImplementedInterfaces()
         {
-            var interfaces = TypeInfo.ImplementedInterfaces.OrderBy(t => t.Name).ToList();
+            List<Type> interfaces = TypeInfo.ImplementedInterfaces.OrderBy(t => t.Name).ToList();
             Assert.Equal(1, interfaces.Count);
             Assert.Equal(typeof(IDisposable), interfaces[0]);
         }
@@ -245,7 +246,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void AsType()
         {
-            var type = TypeInfo.AsType();
+            Type type = TypeInfo.AsType();
             Assert.Equal(typeof(TestType), type);
         }
 

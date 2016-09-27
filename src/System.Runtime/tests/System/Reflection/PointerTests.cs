@@ -28,7 +28,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void Box_TypeNull()
         {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
                 Pointer.Box((void*)0, null);
             });
@@ -218,8 +218,8 @@ namespace System.Reflection.Tests
         [ActiveIssue(11980)]
         public void PointerSerializes(int value)
         {
-            var pointer = Pointer.Box((void*)value, typeof(int*));
-            var cloned = BinaryFormatterHelpers.Clone((Pointer)pointer);
+            object pointer = Pointer.Box((void*)value, typeof(int*));
+            Pointer cloned = BinaryFormatterHelpers.Clone((Pointer)pointer);
             Assert.Equal((long)Pointer.Unbox(pointer), (long)Pointer.Unbox(cloned));
         }
     }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -49,7 +50,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetRuntimeEvents()
         {
-            var events = typeof(TestType).GetRuntimeEvents().ToList();
+            List<EventInfo> events = typeof(TestType).GetRuntimeEvents().ToList();
             Assert.Equal(1, events.Count);
             Assert.Equal("StuffHappened", events[0].Name);
         }
@@ -57,9 +58,9 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetRuntimeFields()
         {
-            var fields = typeof(TestType).GetRuntimeFields().ToList();
+            List<FieldInfo> fields = typeof(TestType).GetRuntimeFields().ToList();
             Assert.Equal(2, fields.Count);
-            var fieldNames = fields.Select(f => f.Name).ToList();
+            List<string> fieldNames = fields.Select(f => f.Name).ToList();
             Assert.Contains("StuffHappened", fieldNames);
             Assert.Contains("_pizzaSize", fieldNames);
         }
@@ -67,8 +68,8 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetRuntimeMethods()
         {
-            var methods = typeof(TestType).GetRuntimeMethods().ToList();
-            var methodNames = methods.Select(m => m.Name).Distinct().ToList();
+            List<MethodInfo> methods = typeof(TestType).GetRuntimeMethods().ToList();
+            List<string> methodNames = methods.Select(m => m.Name).Distinct().ToList();
             Assert.Contains("remove_StuffHappened", methodNames);
             Assert.Contains("add_StuffHappened", methodNames);
             Assert.Contains("Equals", methodNames);
@@ -81,8 +82,8 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetRuntimeProperties()
         {
-            var properties = typeof(TestType).GetRuntimeProperties().ToList();
-            var propertyNames = properties.Select(p => p.Name).Distinct().ToList();
+            List<PropertyInfo> properties = typeof(TestType).GetRuntimeProperties().ToList();
+            List<string> propertyNames = properties.Select(p => p.Name).Distinct().ToList();
             Assert.Equal(5, properties.Count);
             Assert.Contains("Length", propertyNames);
             Assert.Contains("Position", propertyNames);

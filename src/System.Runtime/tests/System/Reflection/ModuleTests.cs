@@ -62,11 +62,11 @@ namespace System.Reflection.Tests
         {
             List<CustomAttributeData> customAttributes = Module.CustomAttributes.ToList();
             Assert.Equal(2, customAttributes.Count);
-            var fooAttribute = customAttributes.Single(a => a.AttributeType == typeof(FooAttribute));
+            CustomAttributeData fooAttribute = customAttributes.Single(a => a.AttributeType == typeof(FooAttribute));
             Assert.Equal(typeof(FooAttribute).GetConstructors().First(), fooAttribute.Constructor);
             Assert.Equal(0, fooAttribute.ConstructorArguments.Count);
             Assert.Equal(0, fooAttribute.NamedArguments.Count);
-            var complicatedAttribute = customAttributes.Single(a => a.AttributeType == typeof(ComplicatedAttribute));
+            CustomAttributeData complicatedAttribute = customAttributes.Single(a => a.AttributeType == typeof(ComplicatedAttribute));
             Assert.Equal(typeof(ComplicatedAttribute).GetConstructors().First(), complicatedAttribute.Constructor);
             Assert.Equal(1, complicatedAttribute.ConstructorArguments.Count);
             Assert.Equal(typeof(int), complicatedAttribute.ConstructorArguments[0].ArgumentType);
@@ -122,7 +122,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void IsDefined_NullType()
         {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
                 Module.IsDefined(null, false);
             });
@@ -134,7 +134,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetField_NullName()
         {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
                 Module.GetField(null);
             });
@@ -154,11 +154,11 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetField()
         {
-            var testInt = TestModule.GetField("TestInt", BindingFlags.Public | BindingFlags.Static);
+            FieldInfo testInt = TestModule.GetField("TestInt", BindingFlags.Public | BindingFlags.Static);
             Assert.Equal(1, (int)testInt.GetValue(null));
             testInt.SetValue(null, 100);
             Assert.Equal(100, (int)testInt.GetValue(null));
-            var testLong = TestModule.GetField("TestLong", BindingFlags.NonPublic | BindingFlags.Static);
+            FieldInfo testLong = TestModule.GetField("TestLong", BindingFlags.NonPublic | BindingFlags.Static);
             Assert.Equal(2L, (long)testLong.GetValue(null));
             testLong.SetValue(null, 200);
             Assert.Equal(200L, (long)testLong.GetValue(null));
@@ -167,7 +167,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetFields()
         {
-            var fields = TestModule.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).ToList();
+            List<FieldInfo> fields = TestModule.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).ToList();
             Assert.Equal(2, fields.Count);
             Assert.Equal(TestModule.GetField("TestInt"), fields[0]);
             Assert.Equal(TestModule.GetField("TestLong", BindingFlags.NonPublic | BindingFlags.Static), fields[1]);
@@ -297,7 +297,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetTypes()
         {
-            var types = TestModule.GetTypes().ToList();
+            List<Type> types = TestModule.GetTypes().ToList();
             Assert.Equal(1, types.Count);
             Assert.Equal("System.Reflection.TestModule.Dummy, System.Reflection.TestModule, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", types[0].AssemblyQualifiedName);
         }
