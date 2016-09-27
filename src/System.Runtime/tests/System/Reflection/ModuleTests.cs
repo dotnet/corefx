@@ -62,13 +62,11 @@ namespace System.Reflection.Tests
         {
             List<CustomAttributeData> customAttributes = Module.CustomAttributes.ToList();
             Assert.Equal(2, customAttributes.Count);
-            var fooAttribute = customAttributes[0];
-            Assert.Equal(typeof(FooAttribute), fooAttribute.AttributeType);
+            var fooAttribute = customAttributes.Single(a => a.AttributeType == typeof(FooAttribute));
             Assert.Equal(typeof(FooAttribute).GetConstructors().First(), fooAttribute.Constructor);
             Assert.Equal(0, fooAttribute.ConstructorArguments.Count);
             Assert.Equal(0, fooAttribute.NamedArguments.Count);
-            var complicatedAttribute = customAttributes[1];
-            Assert.Equal(typeof(ComplicatedAttribute), complicatedAttribute.AttributeType);
+            var complicatedAttribute = customAttributes.Single(a => a.AttributeType == typeof(ComplicatedAttribute));
             Assert.Equal(typeof(ComplicatedAttribute).GetConstructors().First(), complicatedAttribute.Constructor);
             Assert.Equal(1, complicatedAttribute.ConstructorArguments.Count);
             Assert.Equal(typeof(int), complicatedAttribute.ConstructorArguments[0].ArgumentType);

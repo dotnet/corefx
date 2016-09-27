@@ -5,11 +5,50 @@
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Reflection.Tests
 {
-    public class TestType : Stream
+    public abstract class TestTypeBase : IDisposable
+    {
+        public abstract bool CanRead { get; }
+        public abstract bool CanWrite { get; }
+        public abstract bool CanSeek { get; }
+        public abstract long Length { get; }
+        public abstract long Position { get; set; }
+
+        public virtual Task FlushAsync()
+        {
+            throw null;
+        }
+
+        public abstract void Flush();
+
+        public virtual Task<int> ReadAsync(byte[] buffer, int offset, int count)
+        {
+            throw null;
+        }
+
+        public abstract int Read(byte[] buffer, int offset, int count);
+
+        public abstract long Seek(long offset, SeekOrigin origin);
+
+        public abstract void SetLength(long value);
+
+        public abstract void Write(byte[] buffer, int offset, int count);
+        public virtual Task WriteAsync(byte[] buffer, int offset, int count)
+        {
+            throw null;
+        }
+
+        public void Dispose()
+        {
+            throw null;
+        }
+    }
+
+    public class TestType : TestTypeBase
     {
         public TestType()
         {
@@ -114,12 +153,12 @@ namespace System.Reflection.Tests
         {
             var fields = TypeInfo.DeclaredFields.ToList();
             Assert.Equal(2, fields.Count);
-            Assert.Equal("StuffHappened", fields[0].Name);
-            Assert.Equal(typeof(Action<int>), fields[0].FieldType);
-            Assert.True(fields[0].IsPrivate);
-            Assert.Equal("_pizzaSize", fields[1].Name);
-            Assert.Equal(typeof(int), fields[1].FieldType);
-            Assert.True(fields[1].IsPrivate);
+            var stuffHappened = fields.Single(f => f.Name == "StuffHappened");
+            Assert.Equal(typeof(Action<int>), stuffHappened.FieldType);
+            Assert.True(stuffHappened.IsPrivate);
+            var pizzaSize = fields.Single(f => f.Name == "_pizzaSize");
+            Assert.Equal(typeof(int), pizzaSize.FieldType);
+            Assert.True(pizzaSize.IsPrivate);
         }
 
         [Fact]

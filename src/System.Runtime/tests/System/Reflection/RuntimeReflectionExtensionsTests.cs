@@ -83,14 +83,12 @@ namespace System.Reflection.Tests
         {
             var properties = typeof(TestType).GetRuntimeProperties().ToList();
             var propertyNames = properties.Select(p => p.Name).Distinct().ToList();
-            Assert.Equal(8, properties.Count);
+            Assert.Equal(5, properties.Count);
             Assert.Contains("Length", propertyNames);
             Assert.Contains("Position", propertyNames);
             Assert.Contains("CanRead", propertyNames);
             Assert.Contains("CanWrite", propertyNames);
             Assert.Contains("CanSeek", propertyNames);
-            Assert.Contains("ReadTimeout", propertyNames);
-            Assert.Contains("WriteTimeout", propertyNames);
         }
     }
 }
