@@ -164,6 +164,11 @@ namespace System.IO
         public StreamReader(System.IO.Stream stream, System.Text.Encoding encoding, bool detectEncodingFromByteOrderMarks) { }
         public StreamReader(System.IO.Stream stream, System.Text.Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize) { }
         public StreamReader(System.IO.Stream stream, System.Text.Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize, bool leaveOpen) { }
+        public StreamReader(string path) { }
+        public StreamReader(string path, bool detectEncodingFromByteOrderMarks) { }
+        public StreamReader(string path, System.Text.Encoding encoding) { }
+        public StreamReader(string path, System.Text.Encoding encoding, bool detectEncodingFromByteOrderMarks) { }
+        public StreamReader(string path, System.Text.Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize) { }
         public virtual System.IO.Stream BaseStream { get { return default(System.IO.Stream); } }
         public virtual System.Text.Encoding CurrentEncoding { get { return default(System.Text.Encoding); } }
         public bool EndOfStream { get { return default(bool); } }
@@ -188,6 +193,10 @@ namespace System.IO
         public StreamWriter(System.IO.Stream stream, System.Text.Encoding encoding) { }
         public StreamWriter(System.IO.Stream stream, System.Text.Encoding encoding, int bufferSize) { }
         public StreamWriter(System.IO.Stream stream, System.Text.Encoding encoding, int bufferSize, bool leaveOpen) { }
+        public StreamWriter(string path) { }
+        public StreamWriter(string path, bool append) { }
+        public StreamWriter(string path, bool append, System.Text.Encoding encoding) { }
+        public StreamWriter(string path, bool append, System.Text.Encoding encoding, int bufferSize) { }
         public virtual bool AutoFlush { get { return default(bool); } set { } }
         public virtual System.IO.Stream BaseStream { get { return default(System.IO.Stream); } }
         public override System.Text.Encoding Encoding { get { return default(System.Text.Encoding); } }

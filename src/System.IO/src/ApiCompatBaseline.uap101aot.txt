@@ -1,2 +1,9 @@
 MembersMustExist : Member 'System.IO.FileNotFoundException..ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.IO.IOException..ctor(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StreamReader..ctor(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StreamReader..ctor(System.String, System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StreamReader..ctor(System.String, System.Text.Encoding)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StreamReader..ctor(System.String, System.Text.Encoding, System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StreamWriter..ctor(System.String)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StreamWriter..ctor(System.String, System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.IO.StreamWriter..ctor(System.String, System.Boolean, System.Text.Encoding)' does not exist in the implementation but it does exist in the contract.
