@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -163,12 +163,10 @@
     <ProjectReference Include="..\pkg\System.Runtime.pkgproj">
       <Project>{ADBCF120-3454-4A3C-9D1D-AC4293E795D6}</Project>
       <Name>System.Runtime</Name>
-      <!--<UndefineProperties>Configuration</UndefineProperties>-->
     </ProjectReference>
     <ProjectReference Include="..\..\System.Private.Uri\pkg\System.Private.Uri.pkgproj">
       <Project>{4AC5343E-6E31-4BA5-A795-0493AE7E9008}</Project>
       <Name>System.Private.Uri</Name>
-      <!--<UndefineProperties>Configuration</UndefineProperties>-->
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
