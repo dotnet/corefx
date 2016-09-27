@@ -63,4 +63,23 @@
     </ItemGroup>
   </Target>
 
+  <!-- Copied from https://github.com/dotnet/buildtools/blob/6a703fe4d4dc3cd75414f5350fff939e5bc10c44/src/Microsoft.DotNet.Build.Tasks/PackageFiles/publishtest.targets#L252-L266
+       to avoid forking buildtools for release/1.1.0 -->
+  <!-- archive the test binaries along with some supporting files -->
+  <Target Name="ArchiveTestBuild" Condition="'$(ArchiveTests)' == 'true'"  DependsOnTargets="RunTestsForProject">
+    <PropertyGroup>
+      <TestArchiveDir>$(TestWorkingDir)$(OSPlatformConfig)/archive/tests/$(TargetOutputRelPath)</TestArchiveDir>
+      <TestArchiveDir Condition="'$(TestTFM)' != ''">$(TestArchiveDir)$(TestTFM)/</TestArchiveDir>
+      <ProjectJson Condition="!Exists('$(ProjectJson)')">$(OriginalProjectJson)</ProjectJson>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(TestProjectName)'==''">
+      <TestProjectName>$(MSBuildProjectName)</TestProjectName>
+    </PropertyGroup>
+
+    <!-- the project json and runner script files need to be included in the archive -->
+    <Copy SourceFiles="$(ProjectJson);$(ProjectLockJson)" DestinationFolder="$(TestPath)%(TestNugetTargetMoniker.Folder)" />
+    <MakeDir Directories="$(TestArchiveDir)" />
+    <ZipFileCreateFromDirectory SourceDirectory="$(TestPath)%(TestNugetTargetMoniker.Folder)" DestinationArchive="$(TestArchiveDir)$(TestProjectName).zip" OverwriteDestination="true" />
+  </Target>
+
 </Project>
