@@ -268,5 +268,47 @@ namespace System.Linq.Tests
             public IEnumerator<T> GetEnumerator() => GetEnumeratorWorker();
             IEnumerator IEnumerable.GetEnumerator() => NonGenericGetEnumeratorWorker();
         }
+
+        protected class DelegateBasedNonGenericEnumerator : IEnumerator
+        {
+            public Func<bool> MoveNextWorker { get; set; }
+            public Func<object> CurrentWorker { get; set; }
+            public Action ResetWorker { get; set; }
+
+            public DelegateBasedNonGenericEnumerator()
+            {
+                MoveNextWorker = () => false;
+                CurrentWorker = () => null;
+                ResetWorker = () => { };
+            }
+
+            public bool MoveNext() => MoveNextWorker();
+            public object Current => CurrentWorker();
+            public void Reset() => ResetWorker();
+        }
+
+        protected class DisposableDelegateBasedNonGenericEnumerator : DelegateBasedNonGenericEnumerator, IDisposable
+        {
+            public Action DisposeWorker { get; set; }
+
+            public DisposableDelegateBasedNonGenericEnumerator() : base()
+            {
+                DisposeWorker = () => { };
+            }
+
+            public void Dispose() => DisposeWorker();
+        }
+
+        protected class DelegateBasedNonGenericEnumerable : IEnumerable
+        {
+            public Func<IEnumerator> GetEnumeratorWorker { get; set; }
+
+            public DelegateBasedNonGenericEnumerable()
+            {
+                GetEnumeratorWorker = () => Array.Empty<object>().GetEnumerator();
+            }
+
+            public IEnumerator GetEnumerator() => GetEnumeratorWorker();
+        }
     }
 }

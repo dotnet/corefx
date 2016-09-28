@@ -2,11 +2,54 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Collections.Generic
 {
     /// <summary>Internal helper functions for working with enumerables.</summary>
     internal static class EnumerableHelpers
     {
+        /// <summary>Gets the count of an enumerable.</summary>
+        /// <param name="source">The enumerable to count.</param>
+        /// <returns>The count of the enumerable.</returns>
+        internal static int GetCount<T>(IEnumerable<T> source)
+        {
+            Debug.Assert(source != null);
+
+            var genericCollection = source as ICollection<T>;
+            if (genericCollection != null)
+            {
+                return genericCollection.Count;
+            }
+
+            var collection = source as ICollection;
+            if (collection != null)
+            {
+                return collection.Count;
+            }
+
+            return FallbackGetCount(source);
+        }
+
+        private static int FallbackGetCount<T>(IEnumerable<T> source)
+        {
+            Debug.Assert(source != null);
+
+            int count = 0;
+            using (IEnumerator<T> e = source.GetEnumerator())
+            {
+                checked
+                {
+                    while (e.MoveNext())
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
+        }
+
         /// <summary>Converts an enumerable to an array using the same logic as does List{T}.</summary>
         /// <param name="source">The enumerable to convert.</param>
         /// <returns>The resulting array.</returns>
