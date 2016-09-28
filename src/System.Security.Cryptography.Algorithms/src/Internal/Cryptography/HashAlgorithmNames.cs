@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 
 namespace Internal.Cryptography
@@ -16,7 +17,7 @@ namespace Internal.Cryptography
         public const string SHA384 = "SHA384";
         public const string SHA512 = "SHA512";
 
-        private const string ALL_NAMES = "MD5 SHA1 SHA256 SHA384 SHA512";
+        private static readonly HashSet<string> s_allNames = CreateAllNames();
 
         /// <summary>
         /// Map HashAlgorithm type to string; desktop uses CryptoConfig functionality.
@@ -43,11 +44,25 @@ namespace Internal.Cryptography
         /// </summary>
         public static string ToUpper(string hashAlgorithName)
         {
-            if (ALL_NAMES.IndexOf(hashAlgorithName, StringComparison.OrdinalIgnoreCase) >= 0)
+            if (s_allNames.Contains(hashAlgorithName))
             {
                 return hashAlgorithName.ToUpperInvariant();
             }
+
             return hashAlgorithName;
+        }
+
+        private static HashSet<string> CreateAllNames()
+        {
+            var allNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            allNames.Add(HashAlgorithmNames.SHA1);
+            allNames.Add(HashAlgorithmNames.SHA256);
+            allNames.Add(HashAlgorithmNames.SHA384);
+            allNames.Add(HashAlgorithmNames.SHA512);
+            allNames.Add(HashAlgorithmNames.MD5);
+
+            return allNames;
         }
     }
 }

@@ -52,11 +52,12 @@ namespace System.Security.Cryptography.Dsa.Tests
         {
             using (DSA dsa = DSAFactory.Create())
             {
-                DSAParameters dsaParameters = DSATestData.GetDSA1024_186_2_Params();
-                dsa.ImportParameters(dsaParameters);
+                byte[] data;
+                byte[] signature;
+                DSAParameters dsaParameters;
+                DSATestData.GetDSA1024_186_2(out dsaParameters, out signature, out data);
 
-                byte[] data = DSATestData.GetDSA1024_186_2_Data();
-                byte[] signature = DSATestData.GetDSA1024_186_2_Signature();
+                dsa.ImportParameters(dsaParameters);
                 Assert.True(dsa.VerifyData(data, signature, HashAlgorithmName.SHA1));
 
                 // Negative case

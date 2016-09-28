@@ -22,8 +22,6 @@ namespace System.Security.Cryptography.Tests
             byte[] hash = hashAlgorithm.ComputeHash(HelloBytes);
 
             VerifySignatureWithHashBytes(formatter, deformatter, hash);
-
-            // Check that the hash is preserved from the ComputeHash above
             VerifySignatureWithHashAlgorithm(formatter, deformatter, hashAlgorithm);
         }
 

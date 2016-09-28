@@ -350,7 +350,6 @@ namespace System.Security.Cryptography
         public byte[] P;
         public byte[] Q;
     }
-    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class RSAPKCS1KeyExchangeDeformatter : System.Security.Cryptography.AsymmetricKeyExchangeDeformatter
     {
         public RSAPKCS1KeyExchangeDeformatter() { }

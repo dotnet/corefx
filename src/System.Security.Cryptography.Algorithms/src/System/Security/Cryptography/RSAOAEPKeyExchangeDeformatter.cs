@@ -19,13 +19,8 @@ namespace System.Security.Cryptography
 
         public override string Parameters
         {
-            get
-            {
-                return null;
-            }
-            set
-            {
-            }
+            get {return null;}
+            set { }
         }
 
         public override byte[] DecryptKeyExchange(byte[] rgbData)

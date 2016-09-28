@@ -21,18 +21,6 @@ namespace System.Security.Cryptography.Dsa.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsFips186_3))]
-        public static void VerifySignature_SHA256()
-        {
-            using (DSA dsa = DSAFactory.Create())
-            {
-                var formatter = new DSASignatureFormatter(dsa);
-                var deformatter = new DSASignatureDeformatter(dsa);
-                VerifySignature(formatter, deformatter, SHA256.Create(), "SHA256");
-                VerifySignature(formatter, deformatter, SHA256.Create(), "sha256");
-            }
-        }
-
         [Fact]
         public static void InvalidHashAlgorithm()
         {
@@ -46,6 +34,12 @@ namespace System.Security.Cryptography.Dsa.Tests
                     formatter.SetHashAlgorithm("INVALIDVALUE"));
                 Assert.Throws<CryptographicUnexpectedOperationException>(() =>
                     deformatter.SetHashAlgorithm("INVALIDVALUE"));
+
+                // Currently anything other than SHA1 fails
+                Assert.Throws<CryptographicUnexpectedOperationException>(() =>
+                    formatter.SetHashAlgorithm("SHA256"));
+                Assert.Throws<CryptographicUnexpectedOperationException>(() =>
+                    deformatter.SetHashAlgorithm("SHA256"));
             }
         }
 
@@ -54,10 +48,13 @@ namespace System.Security.Cryptography.Dsa.Tests
         {
             using (DSA dsa = DSAFactory.Create())
             {
-                byte[] hash = SHA1.Create().ComputeHash(DSATestData.GetDSA1024_186_2_Data());
-                byte[] signature = DSATestData.GetDSA1024_186_2_Signature();
+                byte[] data;
+                byte[] signature;
+                DSAParameters dsaParameters;
+                DSATestData.GetDSA1024_186_2(out dsaParameters, out signature, out data);
 
-                DSAParameters dsaParameters = DSATestData.GetDSA1024_186_2_Params();
+                byte[] hash = SHA1.Create().ComputeHash(data);
+
                 dsa.ImportParameters(dsaParameters);
                 var deformatter = new DSASignatureDeformatter(dsa);
                 deformatter.VerifySignature(hash, signature);

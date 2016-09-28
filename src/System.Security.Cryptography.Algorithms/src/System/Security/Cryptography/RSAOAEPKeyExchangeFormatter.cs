@@ -18,7 +18,6 @@ namespace System.Security.Cryptography
             _rsaKey = (RSA)key;
         }
 
-        /// <internalonly/>
         public byte[] Parameter
         {
             get
@@ -43,13 +42,9 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <internalonly/>
         public override string Parameters
         {
-            get
-            {
-                return null;
-            }
+            get {return null;}
         }
 
         public override void SetKey(AsymmetricAlgorithm key)

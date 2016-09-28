@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.Cryptography;
+
 namespace System.Security.Cryptography
 {
     public class DSASignatureFormatter : AsymmetricSignatureFormatter
@@ -28,14 +30,9 @@ namespace System.Security.Cryptography
 
         public override void SetHashAlgorithm(string strName)
         {
-            try
+            if (strName.ToUpperInvariant() != HashAlgorithmNames.SHA1)
             {
-                // Verify the name is a valid HashAlgorithm even though it is not currently used
-                Oid.FromFriendlyName(strName, OidGroup.HashAlgorithm);
-            }
-            catch (CryptographicException)
-            {
-                // For desktop compat, throw this exception instead
+                // To match desktop, throw here
                 throw new CryptographicUnexpectedOperationException(SR.Cryptography_InvalidOperation);
             }
         }

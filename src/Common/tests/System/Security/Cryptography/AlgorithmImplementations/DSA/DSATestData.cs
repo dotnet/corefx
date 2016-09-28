@@ -69,9 +69,9 @@ namespace System.Security.Cryptography.Dsa.Tests
         }
 
         // The parameters and signature come from FIPS 186-2 APPENDIX 5. EXAMPLE OF THE DSA
-        internal static DSAParameters GetDSA1024_186_2_Params()
+        internal static void GetDSA1024_186_2(out DSAParameters parameters, out byte[] signature, out byte[] data)
         {
-            return new DSAParameters()
+            parameters = new DSAParameters()
             {
                 P = (
                 "8df2a494492276aa3d25759bb06869cbeac0d83afb8d0cf7cbb8324f0d7882e5d0762fc5b7210eafc2e9adac32ab7aac" +
@@ -85,21 +85,15 @@ namespace System.Security.Cryptography.Dsa.Tests
                 "19131871d75b1612a819f29d78d1b0d7346f7aa77bb62a859bfd6c5675da9d212d3a36ef1672ef660b8c7c255cc0ec74" +
                 "858fba33f44c06699630a76b030ee333").HexToByteArray()
             };
-        }
 
-        internal static byte[] GetDSA1024_186_2_Signature()
-        {
-            return (
+            signature = (
                 // r
                 "8bac1ab66410435cb7181f95b16ab97c92b341c0" +
                 // s
                 "41e2345f1f56df2458f426d155b4ba2db6dcd8c8"
                 ).HexToByteArray();
-        }
 
-        internal static byte[] GetDSA1024_186_2_Data()
-        {
-            return Encoding.ASCII.GetBytes("abc");
+            data = Encoding.ASCII.GetBytes("abc");
         }
     }
 }
