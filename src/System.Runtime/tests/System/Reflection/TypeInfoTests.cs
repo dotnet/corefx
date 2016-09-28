@@ -123,12 +123,12 @@ namespace System.Reflection.Tests
 
     public class TypeInfoTests
     {
-        public TypeInfo TypeInfo => typeof(TestType).GetTypeInfo();
+        public TypeInfo TestTypeInfo => typeof(TestType).GetTypeInfo();
 
         [Fact]
         public void DeclaredConstructors()
         {
-            List<ConstructorInfo> ctors = TypeInfo.DeclaredConstructors.ToList();
+            List<ConstructorInfo> ctors = TestTypeInfo.DeclaredConstructors.ToList();
             Assert.Equal(1, ctors.Count);
             Assert.True(ctors[0].IsSpecialName);
             Assert.Equal(0, ctors[0].GetParameters().Count());
@@ -137,7 +137,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void DeclaredEvents()
         {
-            List<EventInfo> events = TypeInfo.DeclaredEvents.ToList();
+            List<EventInfo> events = TestTypeInfo.DeclaredEvents.ToList();
             Assert.Equal(1, events.Count);
             Assert.Equal("StuffHappened", events[0].Name);
             Assert.Equal("Action`1", events[0].EventHandlerType.Name);
@@ -146,13 +146,13 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetDeclaredEvent()
         {
-            Assert.Equal("StuffHappened", TypeInfo.GetDeclaredEvent("StuffHappened").Name);
+            Assert.Equal("StuffHappened", TestTypeInfo.GetDeclaredEvent("StuffHappened").Name);
         }
 
         [Fact]
         public void DeclaredFields()
         {
-            List<FieldInfo> fields = TypeInfo.DeclaredFields.ToList();
+            List<FieldInfo> fields = TestTypeInfo.DeclaredFields.ToList();
             Assert.Equal(2, fields.Count);
             FieldInfo stuffHappened = fields.Single(f => f.Name == "StuffHappened");
             Assert.Equal(typeof(Action<int>), stuffHappened.FieldType);
@@ -165,13 +165,13 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetDeclaredField()
         {
-            Assert.Equal("_pizzaSize", TypeInfo.GetDeclaredField("_pizzaSize").Name);
+            Assert.Equal("_pizzaSize", TestTypeInfo.GetDeclaredField("_pizzaSize").Name);
         }
 
         [Fact]
         public void DeclaredMethods()
         {
-            List<MethodInfo> methods = TypeInfo.DeclaredMethods.OrderBy(m => m.Name).ToList();
+            List<MethodInfo> methods = TestTypeInfo.DeclaredMethods.OrderBy(m => m.Name).ToList();
             Assert.Equal(13, methods.Count);
             List<string> methodNames = methods.Select(m => m.Name).ToList();
             Assert.Contains("add_StuffHappened", methodNames);
@@ -192,13 +192,13 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetDeclaredMethod()
         {
-            Assert.Equal("Flush", TypeInfo.GetDeclaredMethod("Flush").Name);
+            Assert.Equal("Flush", TestTypeInfo.GetDeclaredMethod("Flush").Name);
         }
 
         [Fact]
         public void DeclaredNestedTypes()
         {
-            List<TypeInfo> types = TypeInfo.DeclaredNestedTypes.ToList();
+            List<TypeInfo> types = TestTypeInfo.DeclaredNestedTypes.ToList();
             Assert.Equal(1, types.Count);
             Assert.Equal("Nested", types[0].Name);
             Assert.True(types[0].IsNestedPublic);
@@ -207,13 +207,13 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetDeclaredNestedType()
         {
-            Assert.Equal("Nested", TypeInfo.GetDeclaredNestedType("Nested").Name);
+            Assert.Equal("Nested", TestTypeInfo.GetDeclaredNestedType("Nested").Name);
         }
 
         [Fact]
         public void DeclaredProperties()
         {
-            List<PropertyInfo> properties = TypeInfo.DeclaredProperties.OrderBy(p => p.Name).ToList();
+            List<PropertyInfo> properties = TestTypeInfo.DeclaredProperties.OrderBy(p => p.Name).ToList();
             Assert.Equal(5, properties.Count);
             Assert.Equal("CanRead", properties[0].Name);
             Assert.Equal("CanSeek", properties[1].Name);
@@ -225,20 +225,20 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetDeclaredProperty()
         {
-            Assert.Equal("CanRead", TypeInfo.GetDeclaredProperty("CanRead").Name);
+            Assert.Equal("CanRead", TestTypeInfo.GetDeclaredProperty("CanRead").Name);
         }
 
         [Fact]
         public void GenericTypeParameters()
         {
-            Type[] parameters = TypeInfo.GenericTypeParameters;
+            Type[] parameters = TestTypeInfo.GenericTypeParameters;
             Assert.Equal(0, parameters.Length);
         }
 
         [Fact]
         public void ImplementedInterfaces()
         {
-            List<Type> interfaces = TypeInfo.ImplementedInterfaces.OrderBy(t => t.Name).ToList();
+            List<Type> interfaces = TestTypeInfo.ImplementedInterfaces.OrderBy(t => t.Name).ToList();
             Assert.Equal(1, interfaces.Count);
             Assert.Equal(typeof(IDisposable), interfaces[0]);
         }
@@ -246,7 +246,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void AsType()
         {
-            Type type = TypeInfo.AsType();
+            Type type = TestTypeInfo.AsType();
             Assert.Equal(typeof(TestType), type);
         }
 
