@@ -2375,8 +2375,12 @@
         "4.0.1.0": "4.3.0"
       }
     },
-    "runtime.native.System.Security.Cryptography.Apple": {},
-    "runtime.native.System.Security.Cryptography.OpenSsl": {}
+    "runtime.native.System.Security.Cryptography.Apple": {
+      "BaselineVersion": "4.3.0"
+    },
+    "runtime.native.System.Security.Cryptography.OpenSsl": {
+      "BaselineVersion": "4.3.0"
+    }
   },
   "ModulesToPackages": {
     "System.Native": "runtime.native.System",
