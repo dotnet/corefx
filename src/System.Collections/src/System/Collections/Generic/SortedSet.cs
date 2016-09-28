@@ -1344,11 +1344,14 @@ namespace System.Collections.Generic
                 if (Contains(item))
                 {
                     toSave.Add(item);
-                    Remove(item);
                 }
             }
-            Clear();
-            AddAllElements(toSave);
+
+            if (toSave.Count < this.Count)
+            {
+                Clear();
+                AddAllElements(toSave);
+            }
         }
 
         /// <summary>
@@ -2204,11 +2207,15 @@ namespace System.Collections.Generic
                     if (Contains(item))
                     {
                         toSave.Add(item);
-                        Remove(item);
                     }
                 }
-                Clear();
-                AddAllElements(toSave);
+
+                if (toSave.Count < Count)
+                {
+                    Clear();
+                    AddAllElements(toSave);
+                }
+
 #if DEBUG
                 Debug.Assert(this.versionUpToDate() && _root == _underlying.FindRange(_min, _max));
 #endif
