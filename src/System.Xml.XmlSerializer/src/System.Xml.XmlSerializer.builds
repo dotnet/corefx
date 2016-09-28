@@ -10,7 +10,8 @@
     <Project Include="System.Xml.XmlSerializer.csproj">
       <TargetGroup>net463</TargetGroup>
     </Project>
-    <!--<Project Include="System.Xml.XmlSerializer.csproj">
+    <!-- Disabling this for now as this will need all the dependencies to also support uap101aot
+    <Project Include="System.Xml.XmlSerializer.csproj">
       <TargetGroup>uap101aot</TargetGroup>
     </Project>-->
   </ItemGroup>
