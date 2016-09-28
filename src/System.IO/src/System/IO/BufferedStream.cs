@@ -1095,28 +1095,17 @@ namespace System.IO
 
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
-            if(bufferSize <= _bufferSize)
-            {
-                //Use internal buffer instead of allocationg a new one.
-                return CopyToAsyncImpl(destination, _buffer, cancellationToken);
-            }
-            else
-            {
-                return base.CopyToAsync(destination, bufferSize, cancellationToken);
-            }            
+            StreamHelpers.ValidateCopyToAsyncArgs(this, destination, bufferSize);
+            var flushTask = FlushAsync(cancellationToken);
+            return flushTask.Status == TaskStatus.RanToCompletion ?
+                _stream.CopyToAsync(destination, bufferSize, cancellationToken) :
+                CopyToAsyncCore(flushTask, destination, bufferSize, cancellationToken);
         }
 
-        private async Task CopyToAsyncImpl(Stream destination, byte[] buffer, CancellationToken cancellationToken)
+        private async Task CopyToAsyncCore(Task flushTask, Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
-            Debug.Assert(destination != null);
-            Debug.Assert(CanRead);
-            Debug.Assert(destination.CanWrite);
-            
-            int bytesRead;
-            while ((bytesRead = await ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) != 0)
-            {
-                await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
-            }
+            await flushTask.ConfigureAwait(false);
+            await _stream.CopyToAsync(destination, bufferSize, cancellationToken).ConfigureAwait(false);
         }
     }  // class BufferedStream
 }  // namespace
