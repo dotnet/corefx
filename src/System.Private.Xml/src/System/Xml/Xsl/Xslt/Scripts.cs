@@ -284,12 +284,6 @@ namespace System.Xml.Xsl.Xslt
                         unit.UserData["AllowLateBound"] = true;   // Allow variables to be declared untyped
                         unit.UserData["RequireVariableDeclaration"] = false;  // Allow variables to be undeclared
                     }
-
-                    // Put SecurityTransparentAttribute on the first CodeCompileUnit only
-                    if (idx == 0)
-                    {
-                        unit.AssemblyCustomAttributes.Add(new CodeAttributeDeclaration("System.Security.SecurityTransparentAttribute"));
-                    }
                 }
 
                 codeUnits[idx] = unit;

@@ -304,10 +304,6 @@ namespace System.Xml.Serialization
 
                 IndentedWriter writer = new IndentedWriter(compiler.Source, false);
 
-                writer.WriteLine("#if _DYNAMIC_XMLSERIALIZER_COMPILATION");
-                writer.WriteLine("[assembly:System.Security.AllowPartiallyTrustedCallers()]");
-                writer.WriteLine("[assembly:System.Security.SecurityTransparent()]");
-                writer.WriteLine("#endif");
                 // Add AssemblyVersion attribute to match parent accembly version
                 if (types != null && types.Length > 0 && types[0] != null)
                 {
@@ -417,15 +413,6 @@ namespace System.Xml.Serialization
 
             string assemblyName = "Microsoft.GeneratedCode";
             AssemblyBuilder assemblyBuilder = CodeGenerator.CreateAssemblyBuilder(assemblyName);
-            ConstructorInfo SecurityTransparentAttribute_ctor = typeof(SecurityTransparentAttribute).GetConstructor(
-                CodeGenerator.InstanceBindingFlags,
-                Array.Empty<Type>()
-                );
-            assemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(SecurityTransparentAttribute_ctor, Array.Empty<object>()));
-            ConstructorInfo AllowPartiallyTrustedCallersAttribute_ctor = typeof(AllowPartiallyTrustedCallersAttribute).GetConstructor(
-                CodeGenerator.EmptyTypeArray
-                );
-            assemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(AllowPartiallyTrustedCallersAttribute_ctor, new Object[0]));
             // Add AssemblyVersion attribute to match parent accembly version
             if (types != null && types.Length > 0 && types[0] != null)
             {
