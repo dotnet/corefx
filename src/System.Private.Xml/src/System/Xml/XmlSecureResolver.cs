@@ -42,10 +42,12 @@ namespace System.Xml
             return _resolver.ResolveUri(baseUri, relativeUri);
         }
 
+#if CAS
         internal static Evidence CreateEvidenceForUrl(string securityUrl)
         {
             return new Evidence();
         }
+#endif
 
         [Serializable]
         private class UncDirectory
