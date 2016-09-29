@@ -297,6 +297,22 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        public async Task GetAsync_ServerNeedsBasicAuthAndSetDefaultCredentials_StatusCodeUnauthorized()
+        {
+            var handler = new HttpClientHandler();
+            handler.Credentials = CredentialCache.DefaultCredentials;
+            using (var client = new HttpClient(handler))
+            {
+                Uri uri = HttpTestServers.BasicAuthUriForCreds(secure:false, userName:Username, password:Password);
+                using (HttpResponseMessage response = await client.GetAsync(uri))
+                {
+                    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                }
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
         public async Task GetAsync_ServerNeedsAuthAndSetCredential_StatusCodeOK()
         {
             var handler = new HttpClientHandler();
@@ -322,6 +338,32 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("WWW-Authenticate: CustomAuth\r\n")]
+        [InlineData("")] // RFC7235 requires servers to send this header with 401 but some servers don't.
+        public async Task GetAsync_ServerNeedsNonStandardAuthAndSetCredential_StatusCodeUnauthorized(string authHeaders)
+        {
+            string responseHeaders =
+                $"HTTP/1.1 401 Unauthorized\r\nDate: {DateTimeOffset.UtcNow:R}\r\n{authHeaders}Content-Length: 0\r\n\r\n";
+            _output.WriteLine(responseHeaders);
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                var handler = new HttpClientHandler();
+                handler.Credentials = new NetworkCredential("unused", "unused");
+                using (var client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server, responseHeaders);
+
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                    }
+                }
+            });
         }
 
         [Theory, MemberData(nameof(RedirectStatusCodes))]
@@ -1437,6 +1479,45 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { new NetworkCredential("user:name", "password"), wrapCredsInCache };
                 yield return new object[] { new NetworkCredential("username", "password", "dom:\\ain"), wrapCredsInCache };
             }
+        }
+        #endregion
+
+        #region Uri wire transmission encoding tests
+        [Fact]
+        public async Task SendRequest_UriPathHasReservedChars_ServerReceivedExpectedPath()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, rootUrl) =>
+            {
+                var uri = new Uri($"http://{rootUrl.Host}:{rootUrl.Port}/test[]");
+                _output.WriteLine(uri.AbsoluteUri.ToString());
+                var request = new HttpRequestMessage(HttpMethod.Get, uri);
+                string statusLine = string.Empty;
+
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.SendAsync(request);
+
+                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                    {
+                        statusLine = reader.ReadLine();
+                        _output.WriteLine(statusLine);
+                        while (!string.IsNullOrEmpty(reader.ReadLine())) ;
+
+                        await writer.WriteAsync(
+                            $"HTTP/1.1 200 OK\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "Content-Length: 0\r\n" +
+                            "\r\n");
+                        s.Shutdown(SocketShutdown.Send);
+                    });
+
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.True(statusLine.Contains(uri.PathAndQuery), $"statusLine should contain {uri.PathAndQuery}");
+                    }
+                }
+            });
         }
         #endregion
     }
