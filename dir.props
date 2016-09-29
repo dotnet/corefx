@@ -230,6 +230,16 @@
     </Otherwise>
   </Choose>
 
+  <!-- initialize all the targets variables to false as they should only be set below -->
+  <PropertyGroup>
+    <TargetsWindows>false</TargetsWindows>
+    <TargetsUnix>false</TargetsUnix>
+    <TargetsLinux>false</TargetsLinux>
+    <TargetsOSX>false</TargetsOSX>
+    <TargetsFreeBSD>false</TargetsFreeBSD>
+    <TargetsNetBSD>false</TargetsNetBSD>
+  </PropertyGroup>
+
   <!-- Setup properties per OSGroup -->
   <Choose>
     <When Condition="'$(OSGroup)'=='AnyOS'">
@@ -551,7 +561,7 @@
     <IntermediateOutputRootPath Condition="'$(IntermediateOutputRootPath)' == ''">$(BaseIntermediateOutputPath)$(OSPlatformConfig)/</IntermediateOutputRootPath>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(IntermediateOutputRootPath)$(MSBuildProjectName)/$(TargetOutputRelPath)</IntermediateOutputPath>
 
-    <TestPath Condition="'$(TestPath)'==''">$(TestWorkingDir)$(OSPlatformConfig)/$(MSBuildProjectName)/</TestPath>
+    <TestPath Condition="'$(TestPath)'==''">$(TestWorkingDir)$(OSPlatformConfig)/$(MSBuildProjectName)/$(TargetOutputRelPath)</TestPath>
 
     <PackagesBasePath Condition="'$(PackagesBasePath)'==''">$(BinDir)$(OSPlatformConfig)</PackagesBasePath>
     <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$(PackageOutputRoot)$(ConfigurationGroup)/</PackageOutputPath>
