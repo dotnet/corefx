@@ -3,6 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="runtime.native.System.Data.SqlClient.sni.pkgproj" />
+    <!-- The following packages are built in TFS 
     <Project Include="win\runtime.native.System.Data.SqlClient.sni.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>x86</Platform>
@@ -14,7 +15,7 @@
     <Project Include="win\runtime.native.System.Data.SqlClient.sni.pkgproj">
       <OSGroup>Windows_NT</OSGroup>
       <Platform>arm64</Platform>
-    </Project>
+    </Project> -->
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
