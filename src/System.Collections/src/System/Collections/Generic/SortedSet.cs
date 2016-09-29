@@ -2199,13 +2199,13 @@ namespace System.Collections.Generic
                 return ret;
             }
 
+#if DEBUG
             internal override void IntersectWithEnumerable(IEnumerable<T> other)
             {
                 base.IntersectWithEnumerable(other);
-#if DEBUG
-                Debug.Assert(this.versionUpToDate() && _root == _underlying.FindRange(_min, _max));
-#endif
+                Debug.Assert(versionUpToDate() && _root == _underlying.FindRange(_min, _max));
             }
+#endif
 
             void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
             {
