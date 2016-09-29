@@ -17,8 +17,12 @@ namespace System.Security.Cryptography.Rsa.Tests
             {
                 var formatter = new RSAPKCS1SignatureFormatter(rsa);
                 var deformatter = new RSAPKCS1SignatureDeformatter(rsa);
-                VerifySignature(formatter, deformatter, SHA1.Create(), "SHA1");
-                VerifySignature(formatter, deformatter, SHA1.Create(), "sha1");
+
+                using (SHA1 alg = SHA1.Create())
+                {
+                    VerifySignature(formatter, deformatter, alg, "SHA1");
+                    VerifySignature(formatter, deformatter, alg, "sha1");
+                }
             }
         }
 
@@ -29,8 +33,12 @@ namespace System.Security.Cryptography.Rsa.Tests
             {
                 var formatter = new RSAPKCS1SignatureFormatter(rsa);
                 var deformatter = new RSAPKCS1SignatureDeformatter(rsa);
-                VerifySignature(formatter, deformatter, SHA256.Create(), "SHA256");
-                VerifySignature(formatter, deformatter, SHA256.Create(), "sha256");
+
+                using (SHA256 alg = SHA256.Create())
+                {
+                    VerifySignature(formatter, deformatter, alg, "SHA256");
+                    VerifySignature(formatter, deformatter, alg, "sha256");
+                }
             }
         }
 
@@ -45,8 +53,12 @@ namespace System.Security.Cryptography.Rsa.Tests
                 // Exception is deferred until VerifySignature
                 formatter.SetHashAlgorithm("INVALIDVALUE");
                 deformatter.SetHashAlgorithm("INVALIDVALUE");
-                Assert.Throws<CryptographicUnexpectedOperationException>(() =>
-                    VerifySignature(formatter, deformatter, SHA1.Create(), "INVALIDVALUE"));
+
+                using (SHA1 alg = SHA1.Create())
+                {
+                    Assert.Throws<CryptographicUnexpectedOperationException>(() =>
+                        VerifySignature(formatter, deformatter, alg, "INVALIDVALUE"));
+                }
             }
         }
 

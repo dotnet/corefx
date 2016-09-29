@@ -39,7 +39,7 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(buffer));
 
             HashCore(buffer, 0, buffer.Length);
-            return CaptureHashCodeAndReinitialize();
+            return CaptureHashCodeAndReinitialize(buffer.Length);
         }
 
         public byte[] ComputeHash(byte[] buffer, int offset, int count)
@@ -57,7 +57,7 @@ namespace System.Security.Cryptography
                 throw new ObjectDisposedException(null);
 
             HashCore(buffer, offset, count);
-            return CaptureHashCodeAndReinitialize();
+            return CaptureHashCodeAndReinitialize(count);
         }
 
         public byte[] ComputeHash(Stream inputStream)
@@ -68,20 +68,40 @@ namespace System.Security.Cryptography
             // Default the buffer size to 4K.
             byte[] buffer = new byte[4096];
             int bytesRead;
+            int bytesRead_firstBlock = 0;
             while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
             {
+                if (bytesRead_firstBlock == 0)
+                {
+                    bytesRead_firstBlock = bytesRead;
+                }
                 HashCore(buffer, 0, bytesRead);
             }
-            return CaptureHashCodeAndReinitialize();
+            return CaptureHashCodeAndReinitialize(bytesRead_firstBlock);
         }
 
-        private byte[] CaptureHashCodeAndReinitialize()
+        private byte[] CaptureHashCodeAndReinitialize(int inputCount)
         {
-            HashValue = HashFinal();
+            if (_mustCallInitialize)
+            {
+                if (inputCount > 0)
+                {
+                    // Emulate desktop semantics where ComputeHash (which calls Initialize) 
+                    // must be called after TransformFinalBlock.
+                    throw new CryptographicException(SR.Cryptography_BadHashState);
+                }
+                // Keep previously created HashValue
+            }
+            else
+            {
+                HashValue = HashFinal();
+            }
+
             // Clone the hash value prior to invoking Initialize in case the user-defined Initialize
             // manipulates the array.
             byte[] tmp = (byte[])HashValue.Clone();
             Initialize();
+            _mustCallInitialize = false;
             return tmp;
         }
 
@@ -128,41 +148,23 @@ namespace System.Security.Cryptography
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            // Do some validation, we let BlockCopy do the destination array validation
-            if (inputBuffer == null)
-                throw new ArgumentNullException(nameof(inputBuffer));
-            if (inputOffset < 0)
-                throw new ArgumentOutOfRangeException(nameof(inputOffset), SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (inputCount < 0 || inputCount > inputBuffer.Length)
-                throw new ArgumentException(SR.Argument_InvalidValue);
-            if ((inputBuffer.Length - inputCount) < inputOffset)
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-
-            if (_disposed)
-                throw new ObjectDisposedException(null);
+            ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 
             // Change the State value
             State = 1;
 
             HashCore(inputBuffer, inputOffset, inputCount);
             if ((outputBuffer != null) && ((inputBuffer != outputBuffer) || (inputOffset != outputOffset)))
+            {
+                // We let BlockCopy do the destination array validation
                 Buffer.BlockCopy(inputBuffer, inputOffset, outputBuffer, outputOffset, inputCount);
+            }
             return inputCount;
         }
 
         public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
-            if (inputBuffer == null)
-                throw new ArgumentNullException(nameof(inputBuffer));
-            if (inputOffset < 0)
-                throw new ArgumentOutOfRangeException(nameof(inputOffset), SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (inputCount < 0 || inputCount > inputBuffer.Length)
-                throw new ArgumentException(SR.Argument_InvalidValue);
-            if ((inputBuffer.Length - inputCount) < inputOffset)
-                throw new ArgumentException(SR.Argument_InvalidOffLen);
-
-            if (_disposed)
-                throw new ObjectDisposedException(null);
+            ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 
             HashCore(inputBuffer, inputOffset, inputCount);
             HashValue = HashFinal();
@@ -180,7 +182,30 @@ namespace System.Security.Cryptography
             // Reset the State value
             State = 0;
 
+            // Ensure ComputeHash is called before another TranformsBlock\TransformFinalBlock
+            _mustCallInitialize = true;
+
             return outputBytes;
+        }
+
+        private void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
+        {
+            if (inputBuffer == null)
+                throw new ArgumentNullException(nameof(inputBuffer));
+            if (inputOffset < 0)
+                throw new ArgumentOutOfRangeException(nameof(inputOffset), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (inputCount < 0 || inputCount > inputBuffer.Length)
+                throw new ArgumentException(SR.Argument_InvalidValue);
+            if ((inputBuffer.Length - inputCount) < inputOffset)
+                throw new ArgumentException(SR.Argument_InvalidOffLen);
+
+            if (_disposed)
+                throw new ObjectDisposedException(null);
+
+            // Emulate desktop semantics where ComputeHash (which calls Initialize) 
+            // must be called after TransformFinalBlock.
+            if (_mustCallInitialize && inputCount > 0)
+                throw new CryptographicException(SR.Cryptography_BadHashState);
         }
 
         protected abstract void HashCore(byte[] array, int ibStart, int cbSize);
@@ -188,6 +213,7 @@ namespace System.Security.Cryptography
         public abstract void Initialize();
 
         private bool _disposed;
+        private bool _mustCallInitialize;
         protected internal byte[] HashValue;
         protected int State = 0;
     }

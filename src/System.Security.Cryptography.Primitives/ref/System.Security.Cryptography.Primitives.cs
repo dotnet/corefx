@@ -28,6 +28,7 @@ namespace System.Security.Cryptography
     {
         public CryptographicException() { }
         public CryptographicException(int hr) { }
+        protected CryptographicException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public CryptographicException(string message) { }
         public CryptographicException(string message, System.Exception inner) { }
         public CryptographicException(string format, string insert) { }
@@ -35,6 +36,7 @@ namespace System.Security.Cryptography
     public partial class CryptographicUnexpectedOperationException : System.Security.Cryptography.CryptographicException
     {
         public CryptographicUnexpectedOperationException() { }
+        protected CryptographicUnexpectedOperationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public CryptographicUnexpectedOperationException(string message) { }
         public CryptographicUnexpectedOperationException(string message, System.Exception inner) { }
         public CryptographicUnexpectedOperationException(string format, string insert) { }

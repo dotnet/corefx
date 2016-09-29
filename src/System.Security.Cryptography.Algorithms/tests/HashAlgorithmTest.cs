@@ -95,27 +95,25 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
                 byte[] actual = hash.ComputeHash(block2, 0, block2.Length);
                 Assert.Equal(expected, actual);
 
-                // Verify ComputeHash cleared hash
+                // Verify ComputeHash above cleared hash
                 actual = hash.ComputeHash(Array.Empty<byte>(), 0, 0);
                 Assert.Equal(expectedEmpty, actual);
 
-                // Re-hash the same data
+                // We should now be able to re-hash
                 hash.TransformBlock(block1, 0, block1.Length, null, 0);
                 actual = hash.ComputeHash(block2, 0, block2.Length);
                 Assert.Equal(expected, actual);
 
-                // Verify TransformFinalBlock
+                // TransformBlock + TransformFinalBlock
                 hash.TransformBlock(block1, 0, block1.Length, null, 0);
                 hash.TransformFinalBlock(block2, 0, block2.Length);
                 Assert.Equal(expected, hash.Hash);
                 Assert.Equal(expected, hash.Hash); // .Hash doesn't clear hash
+                // ComputeHash with 0 bytes resets without interfering with hash
+                actual = hash.ComputeHash(Array.Empty<byte>(), 0, 0);
+                Assert.Equal(expected, actual);
 
-                // Todo: this will also fail due to the ActiveIssue below in VerifyUseAfterTransformFinalBlock
-                // but commented out so the other tests can run
-                // actual = hash.ComputeHash(Array.Empty<byte>(), 0, 0);
-                // Assert.Equal(expected, actual);
-
-                // TransformBlock + TransformBlock + ComputeHash
+                // TransformBlock + TransformBlock + ComputeHash(empty)
                 hash.TransformBlock(block1, 0, block1.Length, null, 0);
                 hash.TransformBlock(block2, 0, block2.Length, null, 0);
                 actual = hash.ComputeHash(Array.Empty<byte>(), 0, 0);
@@ -147,7 +145,6 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         }
 
         [Fact]
-        [ActiveIssue(0)] // Todo: netfx treats HashFinal and Initialize separately, corefx doesn't and Initialize is a no-op
         public void VerifyUseAfterTransformFinalBlock()
         {
             byte[] block = new byte[1] {1};
@@ -157,7 +154,6 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
                 hash.TransformBlock(block, 0, block.Length, null, 0);
                 hash.TransformFinalBlock(block, 0, block.Length);
 
-                // Todo: these do not throw on corefx, but do on netfx
                 Assert.Throws<CryptographicException>(() => hash.TransformBlock(block, 0, block.Length, null, 0));
                 Assert.Throws<CryptographicException>(() => hash.TransformFinalBlock(block, 0, block.Length));
 

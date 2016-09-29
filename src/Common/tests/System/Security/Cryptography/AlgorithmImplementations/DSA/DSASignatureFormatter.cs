@@ -16,8 +16,11 @@ namespace System.Security.Cryptography.Dsa.Tests
             {
                 var formatter = new DSASignatureFormatter(dsa);
                 var deformatter = new DSASignatureDeformatter(dsa);
-                VerifySignature(formatter, deformatter, SHA1.Create(), "SHA1");
-                VerifySignature(formatter, deformatter, SHA1.Create(), "sha1");
+                using (SHA1 alg = SHA1.Create())
+                {
+                    VerifySignature(formatter, deformatter, alg, "SHA1");
+                    VerifySignature(formatter, deformatter, alg, "sha1");
+                }
             }
         }
 
@@ -53,7 +56,11 @@ namespace System.Security.Cryptography.Dsa.Tests
                 DSAParameters dsaParameters;
                 DSATestData.GetDSA1024_186_2(out dsaParameters, out signature, out data);
 
-                byte[] hash = SHA1.Create().ComputeHash(data);
+                byte[] hash;
+                using (SHA1 alg = SHA1.Create())
+                {
+                    hash = alg.ComputeHash(data);
+                }
 
                 dsa.ImportParameters(dsaParameters);
                 var deformatter = new DSASignatureDeformatter(dsa);
