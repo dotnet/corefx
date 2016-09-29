@@ -9,7 +9,15 @@
       <OSGroup>Windows_NT</OSGroup>
     </Project>
     <Project Include="System.Net.Sockets.csproj">
-      <TargetGroup>net46</TargetGroup>
+      <TargetGroup>netstandard1.3</TargetGroup>
+      <OSGroup>Unix</OSGroup>
+    </Project>
+    <Project Include="System.Net.Sockets.csproj">
+      <TargetGroup>netstandard1.3</TargetGroup>
+      <OSGroup>Windows_NT</OSGroup>
+    </Project>
+    <Project Include="System.Net.Sockets.csproj">
+      <TargetGroup>net463</TargetGroup>
     </Project>
     <Project Include="System.Net.Sockets.csproj">
       <OSGroup>Windows_NT</OSGroup>
