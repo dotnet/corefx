@@ -167,7 +167,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void GetFields()
         {
-            List<FieldInfo> fields = TestModule.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).ToList();
+            List<FieldInfo> fields = TestModule.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).OrderBy(f => f.Name).ToList();
             Assert.Equal(2, fields.Count);
             Assert.Equal(TestModule.GetField("TestInt"), fields[0]);
             Assert.Equal(TestModule.GetField("TestLong", BindingFlags.NonPublic | BindingFlags.Static), fields[1]);
