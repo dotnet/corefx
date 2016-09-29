@@ -38,8 +38,8 @@ namespace System.Security.Cryptography
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            HashCore(buffer, 0, buffer.Length);
-            return CaptureHashCodeAndReinitialize(buffer.Length);
+            HashCoreInternal(buffer, 0, buffer.Length);
+            return CaptureHashCodeAndReinitialize();
         }
 
         public byte[] ComputeHash(byte[] buffer, int offset, int count)
@@ -56,8 +56,8 @@ namespace System.Security.Cryptography
             if (_disposed)
                 throw new ObjectDisposedException(null);
 
-            HashCore(buffer, offset, count);
-            return CaptureHashCodeAndReinitialize(count);
+            HashCoreInternal(buffer, offset, count);
+            return CaptureHashCodeAndReinitialize();
         }
 
         public byte[] ComputeHash(Stream inputStream)
@@ -68,29 +68,29 @@ namespace System.Security.Cryptography
             // Default the buffer size to 4K.
             byte[] buffer = new byte[4096];
             int bytesRead;
-            int bytesRead_firstBlock = 0;
             while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                if (bytesRead_firstBlock == 0)
-                {
-                    bytesRead_firstBlock = bytesRead;
-                }
-                HashCore(buffer, 0, bytesRead);
+                HashCoreInternal(buffer, 0, bytesRead);
             }
-            return CaptureHashCodeAndReinitialize(bytesRead_firstBlock);
+            return CaptureHashCodeAndReinitialize();
         }
 
-        private byte[] CaptureHashCodeAndReinitialize(int inputCount)
+        private void HashCoreInternal(byte[] array, int ibStart, int cbSize)
         {
-            if (_mustCallInitialize)
+            // Emulate desktop semantics where HashCore(nonempty) cannot be
+            // called after TransformFinalBlock\HashFinal.
+            if (_hashFinalCalledWithoutInitialize && cbSize > 0)
+                throw new CryptographicException(SR.Cryptography_BadHashState);
+
+            HashCore(array, ibStart, cbSize);
+        }
+
+        private byte[] CaptureHashCodeAndReinitialize()
+        {
+            if (_hashFinalCalledWithoutInitialize)
             {
-                if (inputCount > 0)
-                {
-                    // Emulate desktop semantics where ComputeHash (which calls Initialize) 
-                    // must be called after TransformFinalBlock.
-                    throw new CryptographicException(SR.Cryptography_BadHashState);
-                }
-                // Keep previously created HashValue
+                // Keep the previous hash value for desktop compat; the previous call to
+                // HashCore was for zero bytes.
             }
             else
             {
@@ -101,7 +101,7 @@ namespace System.Security.Cryptography
             // manipulates the array.
             byte[] tmp = (byte[])HashValue.Clone();
             Initialize();
-            _mustCallInitialize = false;
+            _hashFinalCalledWithoutInitialize = false;
             return tmp;
         }
 
@@ -153,7 +153,7 @@ namespace System.Security.Cryptography
             // Change the State value
             State = 1;
 
-            HashCore(inputBuffer, inputOffset, inputCount);
+            HashCoreInternal(inputBuffer, inputOffset, inputCount);
             if ((outputBuffer != null) && ((inputBuffer != outputBuffer) || (inputOffset != outputOffset)))
             {
                 // We let BlockCopy do the destination array validation
@@ -166,7 +166,7 @@ namespace System.Security.Cryptography
         {
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 
-            HashCore(inputBuffer, inputOffset, inputCount);
+            HashCoreInternal(inputBuffer, inputOffset, inputCount);
             HashValue = HashFinal();
             byte[] outputBytes;
             if (inputCount != 0)
@@ -182,8 +182,9 @@ namespace System.Security.Cryptography
             // Reset the State value
             State = 0;
 
-            // Ensure ComputeHash is called before another TranformsBlock\TransformFinalBlock
-            _mustCallInitialize = true;
+            // For desktop compat, set a flag to enforce that ComputeHash must be called
+            // with non-empty value before another HashCore.
+            _hashFinalCalledWithoutInitialize = true;
 
             return outputBytes;
         }
@@ -201,11 +202,6 @@ namespace System.Security.Cryptography
 
             if (_disposed)
                 throw new ObjectDisposedException(null);
-
-            // Emulate desktop semantics where ComputeHash (which calls Initialize) 
-            // must be called after TransformFinalBlock.
-            if (_mustCallInitialize && inputCount > 0)
-                throw new CryptographicException(SR.Cryptography_BadHashState);
         }
 
         protected abstract void HashCore(byte[] array, int ibStart, int cbSize);
@@ -213,7 +209,7 @@ namespace System.Security.Cryptography
         public abstract void Initialize();
 
         private bool _disposed;
-        private bool _mustCallInitialize;
+        private bool _hashFinalCalledWithoutInitialize;
         protected internal byte[] HashValue;
         protected int State = 0;
     }
