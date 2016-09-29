@@ -187,6 +187,16 @@
         ]
     },
     {
+        "Name": "System.CodeDom",
+        "Description": "Provides types that can be used to model the structure of a source code document and to output source code for that model in a supported language.",
+        "CommonTypes": [
+            "System.CodeDom.CodeObject",
+            "System.CodeDom.Compiler.CodeDomProvider",
+            "Microsoft.CSharp.CSharpCodeProvider",
+            "Microsoft.VisualBasic.VBCodeProvider"
+        ]
+    },
+    {
         "Name": "System.Collections",
         "Description": "Provides classes that define generic collections, which allow developers to create strongly typed collections that provide better type safety and performance than non-generic strongly typed collections.",
         "CommonTypes": [
@@ -545,6 +555,7 @@
         "Name": "System.Drawing.Primitives",
         "Description": "Provides basic drawing primitive structures, that exposes the corresponding System.Drawing.dll types in .NET Core.",
         "CommonTypes": [
+            "System.Drawing.Color",
             "System.Drawing.Point",
             "System.Drawing.PointF",
             "System.Drawing.Size",
@@ -791,16 +802,11 @@
         "Name": "System.Linq.Expressions",
         "Description": "Provides classes, interfaces and enumerations that enable language-level code expressions to be represented as objects in the form of expression trees.",
         "CommonTypes": [
-            "System.Linq.Expressions.Expression<TDelegate>",
-            "System.Linq.Expressions.Expression",
-            "System.Linq.Expressions.MemberExpression",
-            "System.Linq.Expressions.ExpressionVisitor",
-            "System.Linq.Expressions.MethodCallExpression",
             "System.Linq.IQueryable<T>",
             "System.Linq.IQueryable",
-            "System.Linq.Expressions.NewExpression",
-            "System.Linq.Expressions.ParameterExpression",
-            "System.Linq.Expressions.ConstantExpression"
+            "System.Linq.Expressions.Expression<TDelegate>",
+            "System.Linq.Expressions.Expression",
+            "System.Linq.Expressions.ExpressionVisitor"
         ]
     },
     {
@@ -863,6 +869,16 @@
         "Description": "Provides a message handler for HttpClient based on the WinHTTP interface of Windows. While similar to HttpClientHandler, it provides developers more granular control over the application's HTTP communication than the HttpClientHandler.",
         "CommonTypes": [
             "System.Net.Http.WinHttpHandler"
+        ]
+    },
+    {
+        "Name": "System.Net.Mime",
+        "Description": "Provides types that are used to represent Multipurpose Internet Mail Exchange (MIME) headers.",
+        "CommonTypes": [
+            "System.Net.Mime.ContentDisposition",
+            "System.Net.Mime.ContentType",
+            "System.Net.Mime.DispositionTypeNames",
+            "System.Net.Mime.MediaTypeNames"
         ]
     },
     {
@@ -941,12 +957,26 @@
         ]
     },
     {
+        "Name": "System.Net.WebClient",
+        "Description": "Provides the System.Net.WebClient class, which supports sending data to and receiving data from a resource identified by a URI.",
+        "CommonTypes": [
+            "System.Net.WebClient"
+        ]
+    },
+    {
         "Name": "System.Net.WebHeaderCollection",
         "Description": "Contains types that represent HTTP request and response headers. This library is used with classes such as System.Net.HttpWebRequest and System.Net.HttpWebResponse and allows developers to query/edit header names/values.",
         "CommonTypes": [
             "System.Net.HttpRequestHeader",
             "System.Net.HttpResponseHeader",
             "System.Net.WebHeaderCollection"
+        ]
+    },
+    {
+        "Name": "System.Net.WebProxy",
+        "Description": "Provides the System.Net.WebProxy class, which supports sending data to and receiving data from a resource identified by a URI.",
+        "CommonTypes": [
+            "System.Net.WebProxy"
         ]
     },
     {
@@ -1695,10 +1725,6 @@
             "System.Threading.Tasks.Dataflow.BroadcastBlock<T>",
             "System.Threading.Tasks.Dataflow.BufferBlock<T>",
             "System.Threading.Tasks.Dataflow.DataflowBlock",
-            "System.Threading.Tasks.Dataflow.DataflowBlockOptions",
-            "System.Threading.Tasks.Dataflow.DataflowLinkOptions",
-            "System.Threading.Tasks.Dataflow.ExecutionDataflowBlockOptions",
-            "System.Threading.Tasks.Dataflow.GroupingDataflowBlockOptions",
             "System.Threading.Tasks.Dataflow.JoinBlock<T1, T2>",
             "System.Threading.Tasks.Dataflow.JoinBlock<T1, T2, T3>",
             "System.Threading.Tasks.Dataflow.TransformBlock<TInput, TOutput>",

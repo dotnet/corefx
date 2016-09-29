@@ -5,7 +5,6 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -456,7 +455,7 @@ namespace System.Collections.Generic
 
         private void Resize(int newSize, bool forceNewHashCodes)
         {
-            Contract.Assert(newSize >= entries.Length);
+            Debug.Assert(newSize >= entries.Length);
             int[] newBuckets = new int[newSize];
             for (int i = 0; i < newBuckets.Length; i++) newBuckets[i] = -1;
 

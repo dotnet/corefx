@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions
 {
@@ -355,7 +356,7 @@ namespace System.Linq.Expressions
             return visitor.VisitBinary(this);
         }
 
-        internal static Expression Create(ExpressionType nodeType, Expression left, Expression right, Type type, MethodInfo method, LambdaExpression conversion)
+        internal static BinaryExpression Create(ExpressionType nodeType, Expression left, Expression right, Type type, MethodInfo method, LambdaExpression conversion)
         {
             Debug.Assert(nodeType != ExpressionType.Assign);
             if (conversion != null)
@@ -2874,8 +2875,7 @@ namespace System.Linq.Expressions
             RequiresCanRead(right, nameof(right));
             if (method == null)
             {
-                Type mathType = typeof(System.Math);
-                method = mathType.GetMethod("Pow", BindingFlags.Static | BindingFlags.Public);
+                method = Math_Pow_Double_Double;
                 if (method == null)
                 {
                     throw Error.BinaryOperatorNotDefined(ExpressionType.Power, left.Type, right.Type);
@@ -2929,8 +2929,7 @@ namespace System.Linq.Expressions
             RequiresCanRead(right, nameof(right));
             if (method == null)
             {
-                Type mathType = typeof(System.Math);
-                method = mathType.GetMethod("Pow", BindingFlags.Static | BindingFlags.Public);
+                method = Math_Pow_Double_Double;
                 if (method == null)
                 {
                     throw Error.BinaryOperatorNotDefined(ExpressionType.PowerAssign, left.Type, right.Type);

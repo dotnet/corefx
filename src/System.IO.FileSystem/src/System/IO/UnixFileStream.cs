@@ -671,7 +671,7 @@ namespace System.IO
         /// The total number of bytes read into the buffer. This might be less than the number of bytes requested 
         /// if that number of bytes are not currently available, or zero if the end of the stream is reached.
         /// </returns>
-        public override int Read([In, Out] byte[] array, int offset, int count)
+        public override int Read(byte[] array, int offset, int count)
         {
             ValidateReadWriteArgs(array, offset, count);
 
@@ -1212,6 +1212,18 @@ namespace System.IO
         {
             // TODO #5964: Implement this with fcntl and F_SETLK in System.Native
             throw new PlatformNotSupportedException();
+        }
+
+        /// <summary>
+        /// Asynchronously reads the bytes from the current stream and writes them to another
+        /// stream, using a specified buffer size.
+        /// </summary>
+        /// <param name="destination">The stream to which the contents of the current stream will be copied.</param>
+        /// <param name="bufferSize">The size, in bytes, of the buffer.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            return StreamHelpers.ArrayPoolCopyToAsync(_parent, destination, bufferSize, cancellationToken);
         }
 
         /// <summary>Sets the current position of this stream to the given value.</summary>

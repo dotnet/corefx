@@ -500,11 +500,10 @@ namespace System
                         // Hence anything like x:sdsd is a relative path and be added to the baseUri Path
                         break;
                     }
-                    string scheme = relativeStr.Substring(0, i);
-                    fixed (char* sptr = scheme)
+                    fixed (char* sptr = relativeStr) // relativeStr.Substring(0, i) represents the scheme
                     {
                         UriParser syntax = null;
-                        if (CheckSchemeSyntax(sptr, (ushort)scheme.Length, ref syntax) == ParsingError.None)
+                        if (CheckSchemeSyntax(sptr, (ushort)i, ref syntax) == ParsingError.None)
                         {
                             if (baseUri.Syntax == syntax)
                             {
@@ -3290,6 +3289,12 @@ namespace System
                         _string = _syntax.SchemeName + SchemeDelimiter;
                     }
                 }
+                
+                // If host is absent, uri is abnormal and relative as in RFC 3986 section 5.4.2
+                if (_info.Offset.Host == _info.Offset.Path)
+                {
+                    _string = _syntax.SchemeName + ":";
+                }
 
                 _info.Offset.Path = (ushort)_string.Length;
                 idx = _info.Offset.Path;
@@ -4184,7 +4189,7 @@ namespace System
                             && StaticNotAny(flags, Flags.HostUnicodeNormalized))
                         {
                             // Normalize any other host
-                            string user = new string(pString, startOtherHost, startOtherHost - end);
+                            string user = new string(pString, startOtherHost, end - startOtherHost);
                             try
                             {
                                 newHost += user.Normalize(NormalizationForm.FormC);

@@ -532,7 +532,7 @@ namespace System.Collections.Generic
                             // update sibling, this is necessary for following processing
                             sibling = (parent.Left == current) ? parent.Right : parent.Left;
                         }
-                        Debug.Assert(sibling != null || sibling.IsRed == false, "sibling must not be null and it must be black!");
+                        Debug.Assert(sibling != null && sibling.IsRed == false, "sibling must not be null and it must be black!");
 
                         if (Is2Node(sibling))
                         {
@@ -1845,9 +1845,18 @@ namespace System.Collections.Generic
         {
             get
             {
-                T ret = default(T);
-                InOrderTreeWalk(delegate (SortedSet<T>.Node n) { ret = n.Item; return false; });
-                return ret;
+                if (_root == null)
+                {
+                    return default(T);
+                }
+
+                Node current = _root;
+                while (current.Left != null)
+                {
+                    current = current.Left;
+                }
+
+                return current.Item;
             }
         }
 
@@ -1855,9 +1864,18 @@ namespace System.Collections.Generic
         {
             get
             {
-                T ret = default(T);
-                InOrderTreeWalk(delegate (SortedSet<T>.Node n) { ret = n.Item; return false; }, true);
-                return ret;
+                if (_root == null)
+                {
+                    return default(T);
+                }
+
+                Node current = _root;
+                while (current.Right != null)
+                {
+                    current = current.Right;
+                }
+
+                return current.Item;
             }
         }
 
@@ -2601,7 +2619,6 @@ namespace System.Collections.Generic
         // used for set checking operations (using enumerables) that rely on counting
         private static int log2(int value)
         {
-            //Contract.Requires(value>0)
             int c = 0;
             while (value > 0)
             {

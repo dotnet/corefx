@@ -22,6 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CallInfoTests.cs" />
+    <Compile Include="Dynamic.Context\Common.cs" />
     <Compile Include="Dynamic.Context\Conformance.dynamic.context.attribute.cs" />
     <Compile Include="Dynamic.Context\Conformance.dynamic.context.delegateEvent.delegate.cs" />
     <Compile Include="Dynamic.Context\Conformance.dynamic.context.ExplicitImple.basic.cs" />
@@ -161,7 +162,11 @@
     <Compile Include="Dynamic.Variance\Conformance.dynamic.Variance.decl.cs" />
     <Compile Include="Dynamic.Variance\Conformance.dynamic.Variance.expr.cs" />
     <Compile Include="Dynamic.Variance\Conformance.dynamic.Variance.implem.cs" />
+    <Compile Include="Common.cs" />
     <Compile Include="ErrorVerifier.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.Dynamic.Runtime.pkgproj">

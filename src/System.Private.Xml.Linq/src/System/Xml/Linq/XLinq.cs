@@ -329,7 +329,7 @@ namespace System.Xml.Linq
 
     internal struct NamespaceResolver
     {
-        private class NamespaceDeclaration
+        class NamespaceDeclaration
         {
             public string prefix;
             public XNamespace ns;
@@ -559,16 +559,8 @@ namespace System.Xml.Linq
             FlushElement();
             _element = e;
             Write(e.content);
-            bool contentWritten = _element == null;
             FlushElement();
-            if (contentWritten)
-            {
-                _writer.WriteFullEndElement();
-            }
-            else
-            {
-                _writer.WriteEndElement();
-            }
+            _writer.WriteEndElement();
             _resolver.PopScope();
         }
 

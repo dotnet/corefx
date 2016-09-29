@@ -26,11 +26,20 @@ namespace System.IO.IsolatedStorage
             'y', 'z', '0', '1', '2', '3', '4', '5'
         };
 
+        /// <summary>
+        /// The full root directory is the relevant special folder from Environment.GetFolderPath() plus "IsolatedStorage"
+        /// and a set of random directory names if not roaming.
+        /// 
+        /// Examples:
+        /// 
+        ///     User: @"C:\Users\jerem\AppData\Local\IsolatedStorage\10v31ho4.bo2\eeolfu22.f2w\"
+        ///     User|Roaming: @"C:\Users\jerem\AppData\Roaming\IsolatedStorage\"
+        ///     Machine: @"C:\ProgramData\IsolatedStorage\nin03cyc.wr0\o3j0urs3.0sn\"
+        /// 
+        /// Identity for the current store gets tacked on after this.
+        /// </summary>
         internal static string GetRootDirectory(IsolatedStorageScope scope)
         {
-            // The full root directory is the relevant special folder from Environment.GetFolderPath() plus "IsolatedStorage"
-            // and a set of random directory names if not roaming. The current identity gets tacked on after this.
-
             if (IsRoaming(scope))
             {
                 if (string.IsNullOrEmpty(s_roamingUserRootDirectory))
@@ -139,10 +148,10 @@ namespace System.IO.IsolatedStorage
                     bw.Write(publicKey);
                     bw.Write(name.Version.Major);
                     bw.Write(name.Name);
-                }
 
-                ms.Position = 0;
-                return GetStrongHashSuitableForObjectName(ms);
+                    ms.Position = 0;
+                    return GetStrongHashSuitableForObjectName(ms);
+                }
             }
         }
 
@@ -153,10 +162,10 @@ namespace System.IO.IsolatedStorage
                 using (BinaryWriter b = new BinaryWriter(ms))
                 {
                     b.Write(name.ToUpperInvariant());
-                }
 
-                ms.Position = 0;
-                return GetStrongHashSuitableForObjectName(ms);
+                    ms.Position = 0;
+                    return GetStrongHashSuitableForObjectName(ms);
+                }
             }
         }
 

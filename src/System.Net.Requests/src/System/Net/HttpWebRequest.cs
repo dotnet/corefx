@@ -286,7 +286,7 @@ namespace System.Net
             }
         }
 
-        private Task<Stream> GetRequestStream()
+        private Task<Stream> GetRequestStreamTask()
         {
             CheckAbort();
 
@@ -310,7 +310,7 @@ namespace System.Net
             return Task.FromResult((Stream)_requestStream);
         }
 
-        public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, Object state)
+        public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
         {
             CheckAbort();
 
@@ -320,7 +320,7 @@ namespace System.Net
             }
 
             _requestStreamCallback = callback;
-            _requestStreamOperation = GetRequestStream().ToApm(callback, state);
+            _requestStreamOperation = GetRequestStreamTask().ToApm(callback, state);
 
             return _requestStreamOperation.Task;
         }

@@ -16,6 +16,7 @@ namespace System.Net.WebSockets.Client.Tests
     {
         public SendReceiveTest(ITestOutputHelper output) : base(output) { }
 
+        [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(10702)]
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_PartialMessage_Success(Uri server)
@@ -51,6 +52,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendAsync_SendCloseMessageType_ThrowsArgumentExceptionWithMessage(Uri server)
         {
@@ -78,6 +80,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendAsync_MultipleOutstandingSendOperations_Throws(Uri server)
         {
@@ -135,6 +138,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task ReceiveAsync_MultipleOutstandingReceiveOperations_Throws(Uri server)
         {
@@ -196,6 +200,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendAsync_SendZeroLengthPayloadAsEndOfMessage_Success(Uri server)
         {
@@ -231,6 +236,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_VaryingLengthBuffers_Success(Uri server)
         {
@@ -268,6 +274,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_Concurrent_Success(Uri server)
         {

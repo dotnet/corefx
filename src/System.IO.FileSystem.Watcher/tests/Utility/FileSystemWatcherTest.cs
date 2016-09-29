@@ -19,7 +19,8 @@ namespace System.IO.Tests
         // going to fail the test.  If we don't expect an event to occur, then we need
         // to keep the timeout short, as in a successful run we'll end up waiting for
         // the entire timeout specified.
-        public const int WaitForExpectedEventTimeout = 500;          // ms to wait for an event to happen
+        public const int WaitForExpectedEventTimeout = 500;         // ms to wait for an event to happen
+        public const int LongWaitTimeout = 10000;                   // ms to wait for an event that takes a longer time than the average operation
         public const int SubsequentExpectedWait = 10;               // ms to wait for checks that occur after the first.
         public const int WaitForExpectedEventTimeout_NoRetry = 3000;// ms to wait for an event that isn't surrounded by a retry.
         public const int DefaultAttemptsForExpectedEvent = 3;       // Number of times an expected event should be retried if failing.
@@ -141,9 +142,9 @@ namespace System.IO.Tests
         /// <param name="cleanup">Optional. Undoes the action and cleans up the watcher so the test may be run again if necessary.</param>
         /// <param name="expectedPath">Optional. Adds path verification to all expected events.</param>
         /// <param name="attempts">Optional. Number of times the test should be executed if it's failing.</param>
-        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, Action cleanup = null, string expectedPath = null, int attempts = DefaultAttemptsForExpectedEvent)
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, Action cleanup = null, string expectedPath = null, int attempts = DefaultAttemptsForExpectedEvent, int timeout = WaitForExpectedEventTimeout)
         {
-            ExpectEvent(watcher, expectedEvents, action, cleanup, expectedPath == null ? null : new string[] { expectedPath }, attempts);
+            ExpectEvent(watcher, expectedEvents, action, cleanup, expectedPath == null ? null : new string[] { expectedPath }, attempts, timeout);
         }
 
         /// <summary>
@@ -156,7 +157,7 @@ namespace System.IO.Tests
         /// <param name="cleanup">Optional. Undoes the action and cleans up the watcher so the test may be run again if necessary.</param>
         /// <param name="expectedPath">Optional. Adds path verification to all expected events.</param>
         /// <param name="attempts">Optional. Number of times the test should be executed if it's failing.</param>
-        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, Action cleanup = null, string[] expectedPaths = null, int attempts = DefaultAttemptsForExpectedEvent)
+        public static void ExpectEvent(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, Action cleanup = null, string[] expectedPaths = null, int attempts = DefaultAttemptsForExpectedEvent, int timeout = WaitForExpectedEventTimeout)
         {
             int attemptsCompleted = 0;
             bool result = false;
@@ -179,7 +180,7 @@ namespace System.IO.Tests
                     Thread.Sleep(500); 
                 }
 
-                result = ExecuteAndVerifyEvents(watcher, expectedEvents, action, attemptsCompleted == attempts, expectedPaths);
+                result = ExecuteAndVerifyEvents(watcher, expectedEvents, action, attemptsCompleted == attempts, expectedPaths, timeout);
 
                 if (cleanup != null)
                     cleanup();
@@ -195,7 +196,7 @@ namespace System.IO.Tests
         /// <param name="assertExpected">True if results should be asserted. Used if there is no retry.</param>
         /// <param name="expectedPath"> Adds path verification to all expected events.</param>
         /// <returns>True if the events raised correctly; else, false.</returns>
-        private static bool ExecuteAndVerifyEvents(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, bool assertExpected, string[] expectedPaths)
+        private static bool ExecuteAndVerifyEvents(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, bool assertExpected, string[] expectedPaths, int timeout)
         {
             bool result = true, verifyChanged = true, verifyCreated = true, verifyDeleted = true, verifyRenamed = true;
             AutoResetEvent changed = null, created = null, deleted = null, renamed = null;
@@ -229,7 +230,7 @@ namespace System.IO.Tests
             if (verifyChanged)
             {
                 bool Changed_expected = ((expectedEvents & WatcherChangeTypes.Changed) > 0);
-                bool Changed_actual = changed.WaitOne(WaitForExpectedEventTimeout);
+                bool Changed_actual = changed.WaitOne(timeout);
                 result = Changed_expected == Changed_actual;
                 if (assertExpected)
                     Assert.True(Changed_expected == Changed_actual, "Changed event did not occur as expected");
@@ -239,7 +240,7 @@ namespace System.IO.Tests
             if (verifyCreated)
             {
                 bool Created_expected = ((expectedEvents & WatcherChangeTypes.Created) > 0);
-                bool Created_actual = created.WaitOne(verifyChanged ? SubsequentExpectedWait : WaitForExpectedEventTimeout);
+                bool Created_actual = created.WaitOne(verifyChanged ? SubsequentExpectedWait : timeout);
                 result = result && Created_expected == Created_actual;
                 if (assertExpected)
                     Assert.True(Created_expected == Created_actual, "Created event did not occur as expected");
@@ -249,7 +250,7 @@ namespace System.IO.Tests
             if (verifyDeleted)
             {
                 bool Deleted_expected = ((expectedEvents & WatcherChangeTypes.Deleted) > 0);
-                bool Deleted_actual = deleted.WaitOne(verifyChanged || verifyCreated ? SubsequentExpectedWait : WaitForExpectedEventTimeout);
+                bool Deleted_actual = deleted.WaitOne(verifyChanged || verifyCreated ? SubsequentExpectedWait : timeout);
                 result = result && Deleted_expected == Deleted_actual;
                 if (assertExpected)
                     Assert.True(Deleted_expected == Deleted_actual, "Deleted event did not occur as expected");
@@ -259,7 +260,7 @@ namespace System.IO.Tests
             if (verifyRenamed)
             {
                 bool Renamed_expected = ((expectedEvents & WatcherChangeTypes.Renamed) > 0);
-                bool Renamed_actual = renamed.WaitOne(verifyChanged || verifyCreated  || verifyDeleted? SubsequentExpectedWait : WaitForExpectedEventTimeout);
+                bool Renamed_actual = renamed.WaitOne(verifyChanged || verifyCreated  || verifyDeleted? SubsequentExpectedWait : timeout);
                 result = result && Renamed_expected == Renamed_actual;
                 if (assertExpected)
                     Assert.True(Renamed_expected == Renamed_actual, "Renamed event did not occur as expected");
@@ -397,7 +398,7 @@ namespace System.IO.Tests
             }
             else
             {
-                symLinkProcess.StartInfo.FileName = "ln";
+                symLinkProcess.StartInfo.FileName = "/bin/ln";
                 symLinkProcess.StartInfo.Arguments = string.Format("-s \"{0}\" \"{1}\"", Path.GetFullPath(targetPath), Path.GetFullPath(linkPath));
             }
             symLinkProcess.StartInfo.RedirectStandardOutput = true;

@@ -3,11 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 using AstUtils = System.Linq.Expressions.Utils;
 
@@ -291,6 +293,8 @@ namespace System.Linq.Expressions.Interpreter
         private readonly Stack<ParameterExpression> _exceptionForRethrowStack = new Stack<ParameterExpression>();
 
         private readonly LightCompiler _parent;
+
+        private readonly StackGuard _guard = new StackGuard();
 
         private static LocalDefinition[] s_emptyLocals = Array.Empty<LocalDefinition>();
 
@@ -756,11 +760,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        private static bool IsNullableOrReferenceType(Type t)
-        {
-            return !t.GetTypeInfo().IsValueType || TypeUtils.IsNullableType(t);
-        }
-
         private void CompileBinaryExpression(Expression expr)
         {
             var node = (BinaryExpression)expr;
@@ -853,7 +852,7 @@ namespace System.Linq.Expressions.Interpreter
                         default:
                             BranchLabel loadDefault = _instructions.MakeLabel();
 
-                            if (IsNullableOrReferenceType(node.Left.Type))
+                            if (node.Left.Type.IsNullableOrReferenceType())
                             {
                                 _instructions.EmitLoadLocal(leftTemp.Index);
                                 _instructions.EmitLoad(null, typeof(object));
@@ -861,7 +860,7 @@ namespace System.Linq.Expressions.Interpreter
                                 _instructions.EmitBranchTrue(loadDefault);
                             }
 
-                            if (IsNullableOrReferenceType(node.Right.Type))
+                            if (node.Right.Type.IsNullableOrReferenceType())
                             {
                                 _instructions.EmitLoadLocal(rightTemp.Index);
                                 _instructions.EmitLoad(null, typeof(object));
@@ -1110,7 +1109,7 @@ namespace System.Linq.Expressions.Interpreter
 
             // use numeric conversions for both numeric types and enums
             if ((TypeUtils.IsNumericOrBool(nonNullableFrom) || nonNullableFrom.GetTypeInfo().IsEnum)
-                 && (TypeUtils.IsNumeric(nonNullableTo) || nonNullableTo.GetTypeInfo().IsEnum))
+                 && (TypeUtils.IsNumeric(nonNullableTo) || nonNullableTo.GetTypeInfo().IsEnum || nonNullableTo == typeof(decimal)))
             {
                 Type enumTypeTo = null;
 
@@ -1483,7 +1482,7 @@ namespace System.Linq.Expressions.Interpreter
             CompileAsVoid(node.Body);
 
             // emit loop branch:
-            _instructions.EmitBranch(continueLabel.GetLabel(this), expr.Type != typeof(void), false);
+            _instructions.EmitBranch(continueLabel.GetLabel(this), node.Type != typeof(void), false);
 
             _instructions.MarkLabel(breakLabel.GetLabel(this));
 
@@ -1513,7 +1512,7 @@ namespace System.Linq.Expressions.Interpreter
                     {
                         // If there are no cases and no default then the type must be void.
                         // Assert that earlier validation caught any exceptions to that.
-                        Debug.Assert(expr.Type == typeof(void));
+                        Debug.Assert(node.Type == typeof(void));
                     }
                     return;
                 }
@@ -1550,7 +1549,7 @@ namespace System.Linq.Expressions.Interpreter
                 if (switchType == TypeCode.String)
                 {
                     // If we have a comparison other than string equality, bail
-                    MethodInfo equality = typeof(string).GetMethod("op_Equality", new[] { typeof(string), typeof(string) });
+                    MethodInfo equality = String_op_Equality_String_String;
                     if (equality != null && !equality.IsStatic)
                     {
                         equality = null;
@@ -2417,7 +2416,7 @@ namespace System.Linq.Expressions.Interpreter
             }
             else
             {
-                Debug.Assert(expr.Type.GetTypeInfo().IsValueType);
+                Debug.Assert(node.Type.GetTypeInfo().IsValueType);
                 _instructions.EmitDefaultValue(node.Type);
             }
         }
@@ -2577,6 +2576,23 @@ namespace System.Linq.Expressions.Interpreter
         {
             var node = (BinaryExpression)expr;
 
+            var hasConversion = node.Conversion != null;
+            var hasImplicitConversion = false;
+            if (!hasConversion && TypeUtils.IsNullableType(node.Left.Type))
+            {
+                // reference types don't need additional conversions (the interpreter operates on Object
+                // anyway); non-nullable value types can't occur on the left side; all that's left is
+                // nullable value types with implicit (numeric) conversions which are allowed by Coalesce
+                // factory methods
+
+                Type nnLeftType = TypeUtils.GetNonNullableType(node.Left.Type);
+                if (!TypeUtils.AreEquivalent(node.Type, nnLeftType))
+                {
+                    hasImplicitConversion = true;
+                    hasConversion = true;
+                }
+            }
+
             var leftNotNull = _instructions.MakeLabel();
             BranchLabel end = null;
 
@@ -2585,7 +2601,7 @@ namespace System.Linq.Expressions.Interpreter
             _instructions.EmitPop();
             Compile(node.Right);
 
-            if (node.Conversion != null)
+            if (hasConversion)
             {
                 // skip over conversion on RHS
                 end = _instructions.MakeLabel();
@@ -2605,7 +2621,15 @@ namespace System.Linq.Expressions.Interpreter
                 );
 
                 _locals.UndefineLocal(local, _instructions.Count);
+            }
+            else if (hasImplicitConversion)
+            {
+                Type nnLeftType = TypeUtils.GetNonNullableType(node.Left.Type);
+                CompileConvertToType(nnLeftType, node.Type, isChecked: true, isLiftedToNull: false);
+            }
 
+            if (hasConversion)
+            {
                 _instructions.MarkLabel(end);
             }
         }
@@ -2643,16 +2667,17 @@ namespace System.Linq.Expressions.Interpreter
             CompileListInit(initializers);
         }
 
-        private void CompileListInit(IList<ElementInit> initializers)
+        private void CompileListInit(ReadOnlyCollection<ElementInit> initializers)
         {
             for (int i = 0; i < initializers.Count; i++)
             {
+                ElementInit initializer = initializers[i];
                 _instructions.EmitDup();
-                foreach (var arg in initializers[i].Arguments)
+                foreach (var arg in initializer.Arguments)
                 {
                     Compile(arg);
                 }
-                var add = initializers[i].AddMethod;
+                var add = initializer.AddMethod;
                 _instructions.EmitCall(add);
                 if (add.ReturnType != typeof(void))
                     _instructions.EmitPop();
@@ -2667,7 +2692,7 @@ namespace System.Linq.Expressions.Interpreter
             CompileMemberInit(node.Bindings);
         }
 
-        private void CompileMemberInit(Collections.ObjectModel.ReadOnlyCollection<MemberBinding> bindings)
+        private void CompileMemberInit(ReadOnlyCollection<MemberBinding> bindings)
         {
             foreach (var binding in bindings)
             {
@@ -2824,7 +2849,7 @@ namespace System.Linq.Expressions.Interpreter
 
             Compile(node.Operand);
 
-            if (expr.Type.GetTypeInfo().IsValueType && !TypeUtils.IsNullableType(expr.Type))
+            if (node.Type.GetTypeInfo().IsValueType && !TypeUtils.IsNullableType(node.Type))
             {
                 _instructions.Emit(NullCheckInstruction.Instance);
             }
@@ -2949,74 +2974,83 @@ namespace System.Linq.Expressions.Interpreter
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void CompileNoLabelPush(Expression expr)
         {
+            // When compling deep trees, we run the risk of triggering a terminating StackOverflowException,
+            // so we use the StackGuard utility here to probe for sufficient stack and continue the work on
+            // another thread when we run out of stack space.
+            if (!_guard.TryEnterOnCurrentStack())
+            {
+                _guard.RunOnEmptyStack((LightCompiler @this, Expression e) => @this.CompileNoLabelPush(e), this, expr);
+                return;
+            }
+
             int startingStackDepth = _instructions.CurrentStackDepth;
             switch (expr.NodeType)
             {
-                case ExpressionType.Add: CompileBinaryExpression(expr); break;
-                case ExpressionType.AddChecked: CompileBinaryExpression(expr); break;
-                case ExpressionType.And: CompileBinaryExpression(expr); break;
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                case ExpressionType.And:
+                case ExpressionType.ArrayIndex:
+                case ExpressionType.Divide:
+                case ExpressionType.Equal:
+                case ExpressionType.ExclusiveOr:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.LeftShift:
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.Modulo:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.NotEqual:
+                case ExpressionType.Or:
+                case ExpressionType.Power:
+                case ExpressionType.RightShift:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked: CompileBinaryExpression(expr); break;
                 case ExpressionType.AndAlso: CompileAndAlsoBinaryExpression(expr); break;
-                case ExpressionType.ArrayLength: CompileUnaryExpression(expr); break;
-                case ExpressionType.ArrayIndex: CompileBinaryExpression(expr); break;
-                case ExpressionType.Call: CompileMethodCallExpression(expr); break;
+                case ExpressionType.OrElse: CompileOrElseBinaryExpression(expr); break;
                 case ExpressionType.Coalesce: CompileCoalesceBinaryExpression(expr); break;
+                case ExpressionType.ArrayLength:
+                case ExpressionType.Decrement:
+                case ExpressionType.Increment:
+                case ExpressionType.IsTrue:
+                case ExpressionType.IsFalse:
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                case ExpressionType.Not:
+                case ExpressionType.OnesComplement:
+                case ExpressionType.TypeAs:
+                case ExpressionType.UnaryPlus: CompileUnaryExpression(expr); break;
+                case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked: CompileConvertUnaryExpression(expr); break;
+                case ExpressionType.Quote: CompileQuoteUnaryExpression(expr); break;
+                case ExpressionType.Throw: CompileThrowUnaryExpression(expr, expr.Type == typeof(void)); break;
+                case ExpressionType.Unbox: CompileUnboxUnaryExpression(expr); break;
+                case ExpressionType.Call: CompileMethodCallExpression(expr); break;
                 case ExpressionType.Conditional: CompileConditionalExpression(expr, expr.Type == typeof(void)); break;
                 case ExpressionType.Constant: CompileConstantExpression(expr); break;
-                case ExpressionType.Convert: CompileConvertUnaryExpression(expr); break;
-                case ExpressionType.ConvertChecked: CompileConvertUnaryExpression(expr); break;
-                case ExpressionType.Divide: CompileBinaryExpression(expr); break;
-                case ExpressionType.Equal: CompileBinaryExpression(expr); break;
-                case ExpressionType.ExclusiveOr: CompileBinaryExpression(expr); break;
-                case ExpressionType.GreaterThan: CompileBinaryExpression(expr); break;
-                case ExpressionType.GreaterThanOrEqual: CompileBinaryExpression(expr); break;
                 case ExpressionType.Invoke: CompileInvocationExpression(expr); break;
                 case ExpressionType.Lambda: CompileLambdaExpression(expr); break;
-                case ExpressionType.LeftShift: CompileBinaryExpression(expr); break;
-                case ExpressionType.LessThan: CompileBinaryExpression(expr); break;
-                case ExpressionType.LessThanOrEqual: CompileBinaryExpression(expr); break;
                 case ExpressionType.ListInit: CompileListInitExpression(expr); break;
                 case ExpressionType.MemberAccess: CompileMemberExpression(expr); break;
                 case ExpressionType.MemberInit: CompileMemberInitExpression(expr); break;
-                case ExpressionType.Modulo: CompileBinaryExpression(expr); break;
-                case ExpressionType.Multiply: CompileBinaryExpression(expr); break;
-                case ExpressionType.MultiplyChecked: CompileBinaryExpression(expr); break;
-                case ExpressionType.Negate: CompileUnaryExpression(expr); break;
-                case ExpressionType.UnaryPlus: CompileUnaryExpression(expr); break;
-                case ExpressionType.NegateChecked: CompileUnaryExpression(expr); break;
                 case ExpressionType.New: CompileNewExpression(expr); break;
-                case ExpressionType.NewArrayInit: CompileNewArrayExpression(expr); break;
+                case ExpressionType.NewArrayInit:
                 case ExpressionType.NewArrayBounds: CompileNewArrayExpression(expr); break;
-                case ExpressionType.Not: CompileUnaryExpression(expr); break;
-                case ExpressionType.NotEqual: CompileBinaryExpression(expr); break;
-                case ExpressionType.Or: CompileBinaryExpression(expr); break;
-                case ExpressionType.OrElse: CompileOrElseBinaryExpression(expr); break;
                 case ExpressionType.Parameter: CompileParameterExpression(expr); break;
-                case ExpressionType.Power: CompileBinaryExpression(expr); break;
-                case ExpressionType.Quote: CompileQuoteUnaryExpression(expr); break;
-                case ExpressionType.RightShift: CompileBinaryExpression(expr); break;
-                case ExpressionType.Subtract: CompileBinaryExpression(expr); break;
-                case ExpressionType.SubtractChecked: CompileBinaryExpression(expr); break;
-                case ExpressionType.TypeAs: CompileUnaryExpression(expr); break;
                 case ExpressionType.TypeIs: CompileTypeIsExpression(expr); break;
+                case ExpressionType.TypeEqual: CompileTypeEqualExpression(expr); break;
                 case ExpressionType.Assign: CompileAssignBinaryExpression(expr, expr.Type == typeof(void)); break;
                 case ExpressionType.Block: CompileBlockExpression(expr, expr.Type == typeof(void)); break;
                 case ExpressionType.DebugInfo: CompileDebugInfoExpression(expr); break;
-                case ExpressionType.Decrement: CompileUnaryExpression(expr); break;
                 case ExpressionType.Default: CompileDefaultExpression(expr); break;
                 case ExpressionType.Goto: CompileGotoExpression(expr); break;
-                case ExpressionType.Increment: CompileUnaryExpression(expr); break;
                 case ExpressionType.Index: CompileIndexExpression(expr); break;
                 case ExpressionType.Label: CompileLabelExpression(expr); break;
                 case ExpressionType.RuntimeVariables: CompileRuntimeVariablesExpression(expr); break;
                 case ExpressionType.Loop: CompileLoopExpression(expr); break;
                 case ExpressionType.Switch: CompileSwitchExpression(expr); break;
-                case ExpressionType.Throw: CompileThrowUnaryExpression(expr, expr.Type == typeof(void)); break;
                 case ExpressionType.Try: CompileTryExpression(expr); break;
-                case ExpressionType.Unbox: CompileUnboxUnaryExpression(expr); break;
-                case ExpressionType.TypeEqual: CompileTypeEqualExpression(expr); break;
-                case ExpressionType.OnesComplement: CompileUnaryExpression(expr); break;
-                case ExpressionType.IsTrue: CompileUnaryExpression(expr); break;
-                case ExpressionType.IsFalse: CompileUnaryExpression(expr); break;
                 default:
                     Compile(expr.ReduceAndCheck());
                     break;
