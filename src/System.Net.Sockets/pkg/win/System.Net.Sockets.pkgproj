@@ -13,10 +13,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\src\System.Net.Sockets.csproj">
       <OSGroup>Windows_NT</OSGroup>
-      <TargetGroup>netstandard1.3</TargetGroup>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\System.Net.Sockets.csproj">
-      <OSGroup>Windows_NT</OSGroup>
       <TargetGroup>netcore50</TargetGroup>
     </ProjectReference>
     <!-- don't use the dotnet implementation for any version of desktop, it's implementation comes from the reference package -->

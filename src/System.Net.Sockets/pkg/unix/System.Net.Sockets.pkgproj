@@ -11,10 +11,6 @@
     <ProjectReference Include="..\..\src\System.Net.Sockets.csproj" >
       <OSGroup>Unix</OSGroup>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\System.Net.Sockets.csproj" >
-      <TargetGroup>netstandard1.3</TargetGroup>
-      <OSGroup>Unix</OSGroup>
-    </ProjectReference>
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

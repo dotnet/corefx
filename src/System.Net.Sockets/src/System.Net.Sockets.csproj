@@ -11,9 +11,9 @@
     <EnableWinRT Condition="'$(TargetGroup)' == 'netcore50'">true</EnableWinRT>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
-    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.3' OR '$(TargetGroup)' == 'netcore50'">4.1.1.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)' == 'netcore50'">4.1.1.0</AssemblyVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' AND ('$(TargetGroup)' == '' OR '$(TargetGroup)' == 'netstandard1.3')">
+  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' == ''">
     <ProjectJson>win/project.json</ProjectJson>
     <ProjectLockJson>win/project.lock.json</ProjectLockJson>
   </PropertyGroup>
