@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -27,13 +28,9 @@ namespace System.Net.Sockets.Performance.Tests
             int iterations,
             int bufferSize,
             int socketInstances,
-            long expectedMilliseconds)
+            long expectedMilliseconds = 0)
         {
             long milliseconds;
-
-#if arm
-            iterations /= 100;
-#endif
 
             int numConnections = socketInstances * 5;
             int receiveBufferSize = bufferSize * 2;
@@ -60,9 +57,12 @@ namespace System.Net.Sockets.Performance.Tests
                     socketInstances);
             }
 
-            Assert.True(
-                milliseconds < expectedMilliseconds,
-                "Test execution is expected to be shorter than " + expectedMilliseconds + " but was " + milliseconds);
+            if (expectedMilliseconds != 0)
+            {
+                Assert.True(
+                    milliseconds < expectedMilliseconds,
+                    "Test execution is expected to be shorter than " + expectedMilliseconds + " but was " + milliseconds);
+            }
         }
 
         public void ClientServerTest(
@@ -71,7 +71,7 @@ namespace System.Net.Sockets.Performance.Tests
             int iterations,
             int bufferSize,
             int socketInstances,
-            long expectedMilliseconds)
+            long expectedMilliseconds = 0)
         {
             // NOTE: port '0' below indicates that the server should bind to an anonymous port.
             ClientServerTest(0, serverType, clientType, iterations, bufferSize, socketInstances, expectedMilliseconds);

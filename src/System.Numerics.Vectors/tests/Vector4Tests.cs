@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -46,24 +47,25 @@ namespace System.Numerics.Tests
         public void Vector4GetHashCodeTest()
         {
             Vector4 v1 = new Vector4(2.5f, 2.0f, 3.0f, 3.3f);
-
+            Vector4 v2 = new Vector4(2.5f, 2.0f, 3.0f, 3.3f);
             Vector4 v3 = new Vector4(2.5f, 2.0f, 3.0f, 3.3f);
             Vector4 v5 = new Vector4(3.3f, 3.0f, 2.0f, 2.5f);
-            Assert.True(v1.GetHashCode() == v1.GetHashCode());
-            Assert.False(v1.GetHashCode() == v5.GetHashCode());
-            Assert.True(v1.GetHashCode() == v3.GetHashCode());
+            Assert.Equal(v1.GetHashCode(), v1.GetHashCode());
+            Assert.Equal(v1.GetHashCode(), v2.GetHashCode());
+            Assert.NotEqual(v1.GetHashCode(), v5.GetHashCode());
+            Assert.Equal(v1.GetHashCode(), v3.GetHashCode());
             Vector4 v4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f);
             Vector4 v6 = new Vector4(1.0f, 0.0f, 0.0f, 0.0f);
             Vector4 v7 = new Vector4(0.0f, 1.0f, 0.0f, 0.0f);
             Vector4 v8 = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
             Vector4 v9 = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
-            Assert.False(v4.GetHashCode() == v6.GetHashCode());
-            Assert.False(v4.GetHashCode() == v7.GetHashCode());
-            Assert.False(v4.GetHashCode() == v8.GetHashCode());
-            Assert.False(v7.GetHashCode() == v6.GetHashCode());
-            Assert.False(v8.GetHashCode() == v6.GetHashCode());
-            Assert.False(v8.GetHashCode() == v7.GetHashCode());
-            Assert.False(v9.GetHashCode() == v7.GetHashCode());
+            Assert.NotEqual(v4.GetHashCode(), v6.GetHashCode());
+            Assert.NotEqual(v4.GetHashCode(), v7.GetHashCode());
+            Assert.NotEqual(v4.GetHashCode(), v8.GetHashCode());
+            Assert.NotEqual(v7.GetHashCode(), v6.GetHashCode());
+            Assert.NotEqual(v8.GetHashCode(), v6.GetHashCode());
+            Assert.NotEqual(v8.GetHashCode(), v7.GetHashCode());
+            Assert.NotEqual(v9.GetHashCode(), v7.GetHashCode());
         }
 
         [Fact]

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
@@ -25,6 +26,11 @@ namespace System.IO
         public override void CopyFile(string sourceFullPath, string destFullPath, bool overwrite)
         {
             Select(sourceFullPath, destFullPath).CopyFile(sourceFullPath, destFullPath, overwrite);
+        }
+
+        public override void ReplaceFile(string sourceFullPath, string destFullPath, string destBackupFullPath, bool ignoreMetadataErrors)
+        {
+            Select(sourceFullPath, destFullPath, destBackupFullPath).ReplaceFile(sourceFullPath, destFullPath, destBackupFullPath, ignoreMetadataErrors);
         }
 
         public override void CreateDirectory(string fullPath)
@@ -146,6 +152,20 @@ namespace System.IO
         private FileSystem Select(string sourceFullPath, string destFullPath)
         {
             return (ShouldUseWinRT(sourceFullPath, isCreate: false) || ShouldUseWinRT(destFullPath, isCreate: true)) ? _winRTFileSystem : _win32FileSystem;
+        }
+
+        private FileSystem Select(string sourceFullPath, string destFullPath, string destFullBackupPath)
+        {
+            return 
+                (ShouldUseWinRT(sourceFullPath, isCreate: false) || ShouldUseWinRT(destFullPath, isCreate: true) || ShouldUseWinRT(destFullBackupPath, isCreate: true)) ?
+                _winRTFileSystem :
+                _win32FileSystem;
+        }
+
+        public override string[] GetLogicalDrives()
+        {
+            // This API is always blocked on WinRT, don't use Win32
+            return _winRTFileSystem.GetLogicalDrives();
         }
 
         private static bool ShouldUseWinRT(string fullPath, bool isCreate)

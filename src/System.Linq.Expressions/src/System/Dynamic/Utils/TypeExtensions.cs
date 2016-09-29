@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Reflection;
 using System.Collections.Generic;
@@ -94,17 +95,15 @@ namespace System.Dynamic.Utils
                 return TypeCode.Object;
         }
 
-        public static MethodInfo[] GetStaticMethods(this Type type)
+        public static IEnumerable<MethodInfo> GetStaticMethods(this Type type)
         {
-            var list = new List<MethodInfo>();
             foreach (var method in type.GetRuntimeMethods())
             {
                 if (method.IsStatic)
                 {
-                    list.Add(method);
+                    yield return method;
                 }
             }
-            return list.ToArray();
         }
 
         public static MethodInfo GetAnyStaticMethod(this Type type, string name)
@@ -117,20 +116,6 @@ namespace System.Dynamic.Utils
                 }
             }
             return null;
-        }
-
-        public static MethodInfo[] GetMethodsIgnoreCase(this Type type, BindingFlags flags, string name)
-        {
-            var list = new List<MethodInfo>();
-            foreach (var method in type.GetRuntimeMethods())
-            {
-                // TODO: Binding flags filter
-                if (method.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    list.Add(method);
-                }
-            }
-            return list.ToArray();
         }
     }
 }

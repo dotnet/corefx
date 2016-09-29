@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Runtime.InteropServices;
@@ -22,7 +23,7 @@ namespace System.Net.Sockets
 
         private bool _ownsSocket;
 
-        // Creates a new instance of the System.Net.Sockets.NetworkStream without initalization.
+        // Creates a new instance of the System.Net.Sockets.NetworkStream without initialization.
         internal NetworkStream()
         {
             _ownsSocket = true;
@@ -30,22 +31,21 @@ namespace System.Net.Sockets
 
         // Creates a new instance of the System.Net.Sockets.NetworkStream class for the specified System.Net.Sockets.Socket.
         public NetworkStream(Socket socket)
+            : this(socket, FileAccess.ReadWrite, ownsSocket: false)
         {
-#if DEBUG
-            using (GlobalLog.SetThreadKind(ThreadKinds.User))
-            {
-#endif
-                if (socket == null)
-                {
-                    throw new ArgumentNullException("socket");
-                }
-                InitNetworkStream(socket);
-#if DEBUG
-            }
-#endif
         }
 
         public NetworkStream(Socket socket, bool ownsSocket)
+            : this(socket, FileAccess.ReadWrite, ownsSocket)
+        {
+        }
+
+        public NetworkStream(Socket socket, FileAccess access)
+            : this(socket, access, ownsSocket: false)
+        {
+        }
+
+        public NetworkStream(Socket socket, FileAccess access, bool ownsSocket)
         {
 #if DEBUG
             using (GlobalLog.SetThreadKind(ThreadKinds.User))
@@ -53,24 +53,41 @@ namespace System.Net.Sockets
 #endif
                 if (socket == null)
                 {
-                    throw new ArgumentNullException("socket");
+                    throw new ArgumentNullException(nameof(socket));
                 }
-                InitNetworkStream(socket);
+                if (!socket.Blocking)
+                {
+                    throw new IOException(SR.net_sockets_blocking);
+                }
+                if (!socket.Connected)
+                {
+                    throw new IOException(SR.net_notconnected);
+                }
+                if (socket.SocketType != SocketType.Stream)
+                {
+                    throw new IOException(SR.net_notstream);
+                }
+
+                _streamSocket = socket;
                 _ownsSocket = ownsSocket;
+
+                switch (access)
+                {
+                    case FileAccess.Read:
+                        _readable = true;
+                        break;
+                    case FileAccess.Write:
+                        _writeable = true;
+                        break;
+                    case FileAccess.ReadWrite:
+                    default: // assume FileAccess.ReadWrite
+                        _readable = true;
+                        _writeable = true;
+                        break;
+                }
 #if DEBUG
             }
 #endif
-        }
-
-        internal NetworkStream(NetworkStream networkStream, bool ownsSocket)
-        {
-            Socket socket = networkStream.Socket;
-            if (socket == null)
-            {
-                throw new ArgumentNullException("networkStream");
-            }
-            InitNetworkStream(socket);
-            _ownsSocket = ownsSocket;
         }
 
         // Socket - provides access to socket for stream closing
@@ -217,7 +234,7 @@ namespace System.Net.Sockets
 #endif
                     if (value <= 0 && value != System.Threading.Timeout.Infinite)
                     {
-                        throw new ArgumentOutOfRangeException("value", SR.net_io_timeout_use_gt_zero);
+                        throw new ArgumentOutOfRangeException(nameof(value), SR.net_io_timeout_use_gt_zero);
                     }
                     SetSocketTimeoutOption(SocketShutdown.Receive, value, false);
 #if DEBUG
@@ -254,7 +271,7 @@ namespace System.Net.Sockets
 #endif
                     if (value <= 0 && value != System.Threading.Timeout.Infinite)
                     {
-                        throw new ArgumentOutOfRangeException("value", SR.net_io_timeout_use_gt_zero);
+                        throw new ArgumentOutOfRangeException(nameof(value), SR.net_io_timeout_use_gt_zero);
                     }
                     SetSocketTimeoutOption(SocketShutdown.Send, value, false);
 #if DEBUG
@@ -323,26 +340,6 @@ namespace System.Net.Sockets
             throw new NotSupportedException(SR.net_noseek);
         }
 
-        internal void InitNetworkStream(Socket socket)
-        {
-            if (!socket.Blocking)
-            {
-                throw new IOException(SR.net_sockets_blocking);
-            }
-            if (!socket.Connected)
-            {
-                throw new IOException(SR.net_notconnected);
-            }
-            if (socket.SocketType != SocketType.Stream)
-            {
-                throw new IOException(SR.net_notstream);
-            }
-
-            _streamSocket = socket;
-            _readable = true;
-            _writeable = true;
-        }
-
         internal bool PollRead()
         {
             if (_cleanedUp)
@@ -388,7 +385,7 @@ namespace System.Net.Sockets
         // Returns:
         // 
         //     Number of bytes we read, or 0 if the socket is closed.
-        public override int Read([In, Out] byte[] buffer, int offset, int size)
+        public override int Read(byte[] buffer, int offset, int size)
         {
 #if DEBUG
             using (GlobalLog.SetThreadKind(ThreadKinds.User | ThreadKinds.Sync))
@@ -407,15 +404,15 @@ namespace System.Net.Sockets
                 // Validate input parameters.
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (offset < 0 || offset > buffer.Length)
                 {
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
                 }
                 if (size < 0 || size > buffer.Length - offset)
                 {
-                    throw new ArgumentOutOfRangeException("size");
+                    throw new ArgumentOutOfRangeException(nameof(size));
                 }
 
                 Socket chkStreamSocket = _streamSocket;
@@ -480,15 +477,15 @@ namespace System.Net.Sockets
                 // Validate input parameters.
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (offset < 0 || offset > buffer.Length)
                 {
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
                 }
                 if (size < 0 || size > buffer.Length - offset)
                 {
-                    throw new ArgumentOutOfRangeException("size");
+                    throw new ArgumentOutOfRangeException(nameof(size));
                 }
 
                 Socket chkStreamSocket = _streamSocket;
@@ -519,6 +516,24 @@ namespace System.Net.Sockets
 #endif
         }
 
+        private int _closeTimeout = Socket.DefaultCloseTimeout; // -1 = respect linger options
+
+        public void Close(int timeout)
+        {
+#if DEBUG
+            using (GlobalLog.SetThreadKind(ThreadKinds.User | ThreadKinds.Sync))
+            {
+#endif
+                if (timeout < -1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(timeout));
+                }
+                _closeTimeout = timeout;
+                Dispose();
+#if DEBUG
+            }
+#endif
+        }
         private volatile bool _cleanedUp = false;
         protected override void Dispose(bool disposing)
         {
@@ -549,7 +564,7 @@ namespace System.Net.Sockets
                             if (chkStreamSocket != null)
                             {
                                 chkStreamSocket.InternalShutdown(SocketShutdown.Both);
-                                chkStreamSocket.Dispose();
+                                chkStreamSocket.Close(_closeTimeout);
                             }
                         }
                     }
@@ -618,15 +633,15 @@ namespace System.Net.Sockets
                 // Validate input parameters.
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (offset < 0 || offset > buffer.Length)
                 {
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
                 }
                 if (size < 0 || size > buffer.Length - offset)
                 {
-                    throw new ArgumentOutOfRangeException("size");
+                    throw new ArgumentOutOfRangeException(nameof(size));
                 }
 
                 Socket chkStreamSocket = _streamSocket;
@@ -726,7 +741,7 @@ namespace System.Net.Sockets
                 // Validate input parameters.
                 if (asyncResult == null)
                 {
-                    throw new ArgumentNullException("asyncResult");
+                    throw new ArgumentNullException(nameof(asyncResult));
                 }
 
                 Socket chkStreamSocket = _streamSocket;
@@ -789,15 +804,15 @@ namespace System.Net.Sockets
                 // Validate input parameters.
                 if (buffer == null)
                 {
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if (offset < 0 || offset > buffer.Length)
                 {
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
                 }
                 if (size < 0 || size > buffer.Length - offset)
                 {
-                    throw new ArgumentOutOfRangeException("size");
+                    throw new ArgumentOutOfRangeException(nameof(size));
                 }
 
                 Socket chkStreamSocket = _streamSocket;
@@ -907,7 +922,7 @@ namespace System.Net.Sockets
                 // Validate input parameters.
                 if (asyncResult == null)
                 {
-                    throw new ArgumentNullException("asyncResult");
+                    throw new ArgumentNullException(nameof(asyncResult));
                 }
 
                 Socket chkStreamSocket = _streamSocket;
@@ -946,7 +961,7 @@ namespace System.Net.Sockets
         //     buffer            - Buffer to read into.
         //     offset            - Offset into the buffer where we're to read.
         //     size              - Number of bytes to read.
-        //     cancellationtoken - Token used to request cancellation of the operation
+        //     cancellationToken - Token used to request cancellation of the operation
         // 
         // Returns:
         // 
@@ -977,7 +992,7 @@ namespace System.Net.Sockets
         //     buffer  - Buffer to write into.
         //     offset  - Offset into the buffer where we're to write.
         //     size    - Number of bytes to write.
-        //     cancellationtoken - Token used to request cancellation of the operation
+        //     cancellationToken - Token used to request cancellation of the operation
         // 
         // Returns:
         // 
@@ -1018,8 +1033,11 @@ namespace System.Net.Sockets
         private int _currentWriteTimeout = -1;
         internal void SetSocketTimeoutOption(SocketShutdown mode, int timeout, bool silent)
         {
-            GlobalLog.Print("NetworkStream#" + Logging.HashString(this) + "::SetSocketTimeoutOption() mode:" + mode + " silent:" + silent + " timeout:" + timeout + " m_CurrentReadTimeout:" + _currentReadTimeout + " m_CurrentWriteTimeout:" + _currentWriteTimeout);
-            GlobalLog.ThreadContract(ThreadKinds.Unknown, "NetworkStream#" + Logging.HashString(this) + "::SetSocketTimeoutOption");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("NetworkStream#" + LoggingHash.HashString(this) + "::SetSocketTimeoutOption() mode:" + mode + " silent:" + silent + " timeout:" + timeout + " m_CurrentReadTimeout:" + _currentReadTimeout + " m_CurrentWriteTimeout:" + _currentWriteTimeout);
+            }
+            GlobalLog.ThreadContract(ThreadKinds.Unknown, "NetworkStream#" + LoggingHash.HashString(this) + "::SetSocketTimeoutOption");
 
             if (timeout < 0)
             {
@@ -1054,7 +1072,11 @@ namespace System.Net.Sockets
         {
             if (_streamSocket != null)
             {
-                GlobalLog.Print("_streamSocket:");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("_streamSocket:");
+                }
+
                 _streamSocket.DebugMembers();
             }
         }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -20,7 +21,7 @@ namespace System.Reflection.Tests
             C clsObj = new C();
 
             mi = GetMethod(typeof(C), "M_IntPtr");
-            IntPtr intptr = (IntPtr)mi.Invoke(clsObj, (Object[])null);
+            IntPtr intptr = (IntPtr)mi.Invoke(clsObj, null);
 
             Assert.True(intptr.ToInt32().Equals(200));
         }
@@ -34,7 +35,7 @@ namespace System.Reflection.Tests
             C clsObj = new C();
 
             mi = GetMethod(typeof(C), "M_Array1");
-            int[] array1 = (int[])mi.Invoke(clsObj, (Object[])null);
+            int[] array1 = (int[])mi.Invoke(clsObj, null);
 
             Assert.True(array1[0].Equals(2));
 

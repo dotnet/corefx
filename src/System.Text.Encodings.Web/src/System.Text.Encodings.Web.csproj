@@ -2,15 +2,13 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1DD0FF15-6234-4BD6-850A-317F05479554}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <RootNamespace>System.Text.Encodings.Web</RootNamespace>
     <AssemblyName>System.Text.Encodings.Web</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFramework>dotnet5.1</PackageTargetFramework>
+    <UseOpenKey Condition="'$(UseOpenKey)'==''">true</UseOpenKey>
+    <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.0</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -22,7 +20,7 @@
     <Compile Include="System\Text\Encodings\Web\BufferInternal.cs" />
     <Compile Include="System\Text\Encodings\Web\HexUtil.cs" />
     <Compile Include="System\Text\Encodings\Web\HtmlEncoder.cs" />
-    <Compile Include="System\Text\Encodings\Web\JavaScriptStringEncoder.cs" />
+    <Compile Include="System\Text\Encodings\Web\JavaScriptEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\TextEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\TextEncoderSettings.cs" />
     <Compile Include="System\Text\Encodings\Web\UnicodeHelpers.cs" />
@@ -34,7 +32,7 @@
     <Compile Include="Properties\GlobalSuppressions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\unicode-8.0.0-defined-characters.bin" />
+    <EmbeddedResource Include="Resources\unicode8definedcharacters.bin" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

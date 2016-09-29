@@ -1,6 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Test.Cryptography;
 using Xunit;
 
@@ -8,6 +11,19 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 {
     public static class PfxTests
     {
+        public static IEnumerable<object[]> BrainpoolCurvesPfx
+        {
+            get
+            {
+#if NETNATIVE
+                yield break;
+#else
+                yield return new object[] { TestData.ECDsabrainpoolP160r1_Pfx };
+                yield return new object[] { TestData.ECDsabrainpoolP160r1_Explicit_Pfx };
+#endif
+            }
+        }
+
         [Fact]
         public static void TestConstructor()
         {
@@ -68,7 +84,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(2583, PlatformID.Windows)]
         public static void TestPrivateKey()
         {
             using (var c = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
@@ -86,7 +101,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(2885, PlatformID.Windows)]
         public static void ExportWithPrivateKey()
         {
             using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.Exportable))
@@ -100,6 +114,89 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Assert.True(certFromPfx.HasPrivateKey);
                     Assert.Equal(cert, certFromPfx);
                 }
+            }
+        }
+
+        [Fact]
+        public static void ReadECDsaPrivateKey_WindowsPfx()
+        {
+            using (var cert = new X509Certificate2(TestData.ECDsaP256_DigitalSignature_Pfx_Windows, "Test"))
+            using (ECDsa ecdsa = cert.GetECDsaPrivateKey())
+            {
+                Assert.NotNull(ecdsa);
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    AssertEccAlgorithm(ecdsa, "ECDSA_P256");
+                }
+            }
+        }
+
+        [Theory, MemberData(nameof(BrainpoolCurvesPfx))]
+        public static void ReadECDsaPrivateKey_BrainpoolP160r1_Pfx(byte[] pfxData)
+        {
+            try
+            {
+                using (var cert = new X509Certificate2(pfxData, TestData.PfxDataPassword))
+                {
+                    using (ECDsa ecdsa = cert.GetECDsaPrivateKey())
+                    {
+                        Assert.NotNull(ecdsa);
+
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            AssertEccAlgorithm(ecdsa, "ECDH");
+                        }
+                    }
+                }
+            }
+            catch (CryptographicException)
+            {
+                // Windows 7, Windows 8, Ubuntu 14, CentOS can fail. Verify known good platforms don't fail.
+                Assert.False(PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10);
+                Assert.False(PlatformDetection.IsUbuntu1604);
+                Assert.False(PlatformDetection.IsUbuntu1610);
+                Assert.False(PlatformDetection.IsOSX);
+
+                return;
+            }
+        }
+
+        [Fact]
+        public static void ReadECDsaPrivateKey_OpenSslPfx()
+        {
+            using (var cert = new X509Certificate2(TestData.ECDsaP256_DigitalSignature_Pfx_OpenSsl, "Test"))
+            using (ECDsa ecdsa = cert.GetECDsaPrivateKey())
+            {
+                Assert.NotNull(ecdsa);
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // If Windows were to start detecting this case as ECDSA that wouldn't be bad,
+                    // but this assert is the only proof that this certificate was made with OpenSSL.
+                    //
+                    // Windows ECDSA PFX files contain metadata in the private key keybag which identify it
+                    // to Windows as ECDSA.  OpenSSL doesn't have anywhere to persist that data when
+                    // extracting it to the key PEM file, and so no longer has it when putting the PFX
+                    // together.  But, it also wouldn't have had the Windows-specific metadata when the
+                    // key was generated on the OpenSSL side in the first place.
+                    //
+                    // So, again, it's not important that Windows "mis-detects" this as ECDH.  What's
+                    // important is that we were able to create an ECDsa object from it.
+                    AssertEccAlgorithm(ecdsa, "ECDH_P256");
+                }
+            }
+        }
+
+        // Keep the ECDsaCng-ness contained within this helper method so that it doesn't trigger a
+        // FileNotFoundException on Unix.
+        private static void AssertEccAlgorithm(ECDsa ecdsa, string algorithmId)
+        {
+            ECDsaCng cng = ecdsa as ECDsaCng;
+
+            if (cng != null)
+            {
+                Assert.Equal(algorithmId, cng.Key.Algorithm.Algorithm);
             }
         }
 

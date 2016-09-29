@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using Xunit;
 
@@ -26,7 +26,7 @@ namespace System.Collections.Immutable.Tests
 
         private ImmutableStack<T> InitStackHelper<T>(params T[] values)
         {
-            Contract.Requires(values != null);
+            Assert.NotNull(values);
 
             var result = ImmutableStack<T>.Empty;
             foreach (var value in values)
@@ -51,8 +51,8 @@ namespace System.Collections.Immutable.Tests
 
         private void PopTestHelper<T>(params T[] values)
         {
-            Contract.Requires(values != null);
-            Contract.Requires(values.Length > 0);
+            Assert.NotNull(values);
+            Assert.InRange(values.Length, 1, int.MaxValue);
 
             var full = this.InitStackHelper(values);
             var currentStack = full;
@@ -73,8 +73,8 @@ namespace System.Collections.Immutable.Tests
 
         private void PeekTestHelper<T>(params T[] values)
         {
-            Contract.Requires(values != null);
-            Contract.Requires(values.Length > 0);
+            Assert.NotNull(values);
+            Assert.InRange(values.Length, 1, int.MaxValue);
 
             var current = this.InitStackHelper(values);
             for (int i = values.Length - 1; i >= 0; i--)
@@ -239,8 +239,8 @@ namespace System.Collections.Immutable.Tests
             Assert.False(stack.IsEmpty);
             Assert.Equal(new[] { 2, 1 }, stack);
 
-            Assert.Throws<ArgumentNullException>(() => ImmutableStack.CreateRange((IEnumerable<int>)null));
-            Assert.Throws<ArgumentNullException>(() => ImmutableStack.Create((int[])null));
+            Assert.Throws<ArgumentNullException>("items", () => ImmutableStack.CreateRange((IEnumerable<int>)null));
+            Assert.Throws<ArgumentNullException>("items", () => ImmutableStack.Create((int[])null));
         }
 
         [Fact]

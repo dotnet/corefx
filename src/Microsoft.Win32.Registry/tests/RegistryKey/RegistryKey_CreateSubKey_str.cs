@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -8,7 +9,7 @@ using Xunit;
 
 namespace Microsoft.Win32.RegistryTests
 {
-    public class RegistryKey_CreateSubKey_str : RegistryTestsBase
+    public class RegistryKey_CreateSubKey_str : RegistryKeyCreateSubKeyTestsBase
     {
         [Fact]
         public void NegativeTests()
@@ -19,18 +20,6 @@ namespace Microsoft.Win32.RegistryTests
             // Should throw if key length above 255 characters
             const int maxValueNameLength = 255;
             Assert.Throws<ArgumentException>(() => TestRegistryKey.CreateSubKey(new string('a', maxValueNameLength + 1)));
-
-            // Max number of parts to the registry key path is 509 (failing once it hits 510). 
-            // As TestRegistryKey is already a subkey, that gives us 507 remaining parts before an 
-            // exception is thrown.
-            const int maxNestedLevel = 507;
-            string exceedsNestedSubkeyName = string.Join(@"\", Enumerable.Repeat("a", maxNestedLevel));
-            using (RegistryKey k = TestRegistryKey.CreateSubKey(exceedsNestedSubkeyName))
-            {
-                // Verify TestRegistryKey is already nested, with 508 slashes meaning 509 parts
-                Assert.Equal(maxNestedLevel + 1, k.Name.Count(c => c == '\\')); 
-            }
-            Assert.Throws<IOException>(() => TestRegistryKey.CreateSubKey(exceedsNestedSubkeyName + @"\" + maxNestedLevel));
 
             // Should throw if RegistryKey is readonly
             const string name = "FooBar";
@@ -50,6 +39,23 @@ namespace Microsoft.Win32.RegistryTests
                 TestRegistryKey.Dispose();
                 TestRegistryKey.CreateSubKey(TestRegistryKeyName);
             });
+        }
+
+        [ActiveIssue(10546)]
+        [Fact]
+        public void NegativeTest_DeeplyNestedKey()
+        {
+            // Max number of parts to the registry key path is 509 (failing once it hits 510). 
+            // As TestRegistryKey is already a subkey, that gives us 507 remaining parts before an 
+            // exception is thrown.
+            const int maxNestedLevel = 507;
+            string exceedsNestedSubkeyName = string.Join(@"\", Enumerable.Repeat("a", maxNestedLevel));
+            using (RegistryKey k = TestRegistryKey.CreateSubKey(exceedsNestedSubkeyName))
+            {
+                // Verify TestRegistryKey is already nested, with 508 slashes meaning 509 parts
+                Assert.Equal(maxNestedLevel + 1, k.Name.Count(c => c == '\\'));
+            }
+            Assert.Throws<IOException>(() => TestRegistryKey.CreateSubKey(exceedsNestedSubkeyName + @"\" + maxNestedLevel));
         }
 
         [Fact]
@@ -113,5 +119,15 @@ namespace Microsoft.Win32.RegistryTests
                 rk.CreateSubKey(subkeyName);
             }
         }
+
+        [Theory]
+        [MemberData(nameof(TestRegistrySubKeyNames))]
+        public void CreateSubKey_KeyExists_OpensKeyWithFixedUpName(string expected, string subKeyName) =>
+            Verify_CreateSubKey_KeyExists_OpensKeyWithFixedUpName(expected, () => TestRegistryKey.CreateSubKey(subKeyName));
+
+        [Theory]
+        [MemberData(nameof(TestRegistrySubKeyNames))]
+        public void CreateSubKey_KeyDoesNotExist_CreatesKeyWithFixedUpName(string expected, string subKeyName) =>
+            Verify_CreateSubKey_KeyDoesNotExist_CreatesKeyWithFixedUpName(expected, () => TestRegistryKey.CreateSubKey(subKeyName));
     }
 }

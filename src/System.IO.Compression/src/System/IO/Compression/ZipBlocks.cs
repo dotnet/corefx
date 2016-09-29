@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -440,7 +441,8 @@ namespace System.IO.Compression
     internal struct ZipCentralDirectoryFileHeader
     {
         public const UInt32 SignatureConstant = 0x02014B50;
-        public UInt16 VersionMadeBy;
+        public byte VersionMadeByCompatibility;
+        public byte VersionMadeBySpecification;
         public UInt16 VersionNeededToExtract;
         public UInt16 GeneralPurposeBitFlag;
         public UInt16 CompressionMethod;
@@ -468,8 +470,8 @@ namespace System.IO.Compression
 
             if (reader.ReadUInt32() != SignatureConstant)
                 return false;
-
-            header.VersionMadeBy = reader.ReadUInt16();
+            header.VersionMadeBySpecification = reader.ReadByte();
+            header.VersionMadeByCompatibility = reader.ReadByte();
             header.VersionNeededToExtract = reader.ReadUInt16();
             header.GeneralPurposeBitFlag = reader.ReadUInt16();
             header.CompressionMethod = reader.ReadUInt16();

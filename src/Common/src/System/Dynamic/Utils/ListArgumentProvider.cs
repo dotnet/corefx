@@ -1,12 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace System.Dynamic.Utils
@@ -41,7 +39,7 @@ namespace System.Dynamic.Utils
                 return 0;
             }
 
-            for (int i = 1; i < _provider.ArgumentCount; i++)
+            for (int i = 1, n = _provider.ArgumentCount; i < n; i++)
             {
                 if (_provider.GetArgument(i) == item)
                 {
@@ -93,29 +91,20 @@ namespace System.Dynamic.Utils
             throw ContractUtils.Unreachable;
         }
 
-        public bool Contains(Expression item)
-        {
-            return IndexOf(item) != -1;
-        }
+        public bool Contains(Expression item) => IndexOf(item) != -1;
 
         public void CopyTo(Expression[] array, int arrayIndex)
         {
             array[arrayIndex++] = _arg0;
-            for (int i = 1; i < _provider.ArgumentCount; i++)
+            for (int i = 1, n = _provider.ArgumentCount; i < n; i++)
             {
                 array[arrayIndex++] = _provider.GetArgument(i);
             }
         }
 
-        public int Count
-        {
-            get { return _provider.ArgumentCount; }
-        }
+        public int Count => _provider.ArgumentCount;
 
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
+        public bool IsReadOnly => true;
 
         public bool Remove(Expression item)
         {
@@ -130,7 +119,7 @@ namespace System.Dynamic.Utils
         {
             yield return _arg0;
 
-            for (int i = 1; i < _provider.ArgumentCount; i++)
+            for (int i = 1, n = _provider.ArgumentCount; i < n; i++)
             {
                 yield return _provider.GetArgument(i);
             }
@@ -140,15 +129,8 @@ namespace System.Dynamic.Utils
 
         #region IEnumerable Members
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            yield return _arg0;
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
 
-            for (int i = 1; i < _provider.ArgumentCount; i++)
-            {
-                yield return _provider.GetArgument(i);
-            }
-        }
         #endregion
     }
 }

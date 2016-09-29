@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -22,7 +23,7 @@ namespace System.Security.Cryptography
         public AsnEncodedData(AsnEncodedData asnEncodedData)
         {
             if (asnEncodedData == null)
-                throw new ArgumentNullException("asnEncodedData");
+                throw new ArgumentNullException(nameof(asnEncodedData));
             Reset(asnEncodedData._oid, asnEncodedData._rawData);
         }
 
@@ -60,7 +61,7 @@ namespace System.Security.Cryptography
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 _rawData = value.CloneByteArray();
             }
         }
@@ -68,7 +69,7 @@ namespace System.Security.Cryptography
         public virtual void CopyFrom(AsnEncodedData asnEncodedData)
         {
             if (asnEncodedData == null)
-                throw new ArgumentNullException("asnEncodedData");
+                throw new ArgumentNullException(nameof(asnEncodedData));
             Reset(asnEncodedData._oid, asnEncodedData._rawData);
         }
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ namespace Internal.Cryptography
     //
     internal abstract class HashProvider : IDisposable
     {
-        // Adds new data to be hashed. This can be called repeatedly in order to hash data from incontiguous sources.
+        // Adds new data to be hashed. This can be called repeatedly in order to hash data from noncontiguous sources.
         public void AppendHashData(byte[] data, int offset, int count)
         {
             // AppendHashData can be called via exposed APIs (e.g. a type that derives from
@@ -20,18 +21,18 @@ namespace Internal.Cryptography
             // an invalid number of bytes read.  Since our implementations of AppendHashDataCore
             // end up using unsafe code, we want to be sure the arguments are valid.
             if (data == null)
-                throw new ArgumentNullException("data", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(data), SR.ArgumentNull_Buffer);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(offset), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (data.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
 
             AppendHashDataCore(data, offset, count);
         }
 
-        // Adds new data to be hashed. This can be called repeatedly in order to hash data from incontiguous sources.
+        // Adds new data to be hashed. This can be called repeatedly in order to hash data from noncontiguous sources.
         // Argument validation is handled by AppendHashData.
         public abstract void AppendHashDataCore(byte[] data, int offset, int count);
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Xml.Schema
 {
@@ -138,7 +139,7 @@ namespace System.Xml.Schema
     {
         public static bool ToBoolean(string value)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             return XmlConvert.ToBoolean((string)value);
         }
@@ -150,28 +151,28 @@ namespace System.Xml.Schema
 
         public static DateTime ToDateTime(string value)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             return UntypedAtomicToDateTime((string)value);
         }
 
         public static double ToDouble(string value)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             return XmlConvert.ToDouble((string)value);
         }
 
         public static int ToInt32(string value)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             return XmlConvert.ToInt32((string)value);
         }
 
         public static long ToInt64(string value)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             return XmlConvert.ToInt64((string)value);
         }
@@ -232,7 +233,7 @@ namespace System.Xml.Schema
 
         public static string ToString(object value, IXmlNamespaceResolver nsResolver)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             Type sourceType = value.GetType();
 
@@ -269,7 +270,7 @@ namespace System.Xml.Schema
         private static short Int32ToInt16(int value)
         {
             if (value < (int)Int16.MinValue || value > (int)Int16.MaxValue)
-                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "Int16" }));
+                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), nameof(Int16) }));
 
             return (short)value;
         }
@@ -277,7 +278,7 @@ namespace System.Xml.Schema
         private static byte Int32ToByte(int value)
         {
             if (value < (int)Byte.MinValue || value > (int)Byte.MaxValue)
-                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "Byte" }));
+                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), nameof(Byte) }));
 
             return (byte)value;
         }
@@ -285,7 +286,7 @@ namespace System.Xml.Schema
         private static ulong DecimalToUInt64(decimal value)
         {
             if (value < (decimal)UInt64.MinValue || value > (decimal)UInt64.MaxValue)
-                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "UInt64" }));
+                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), nameof(UInt64) }));
 
             return (ulong)value;
         }
@@ -293,7 +294,7 @@ namespace System.Xml.Schema
         private static sbyte Int32ToSByte(int value)
         {
             if (value < (int)SByte.MinValue || value > (int)SByte.MaxValue)
-                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "SByte" }));
+                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), nameof(SByte) }));
 
             return (sbyte)value;
         }
@@ -335,7 +336,7 @@ namespace System.Xml.Schema
         private static ushort Int32ToUInt16(int value)
         {
             if (value < (int)UInt16.MinValue || value > (int)UInt16.MaxValue)
-                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "UInt16" }));
+                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), nameof(UInt16) }));
 
             return (ushort)value;
         }
@@ -343,15 +344,15 @@ namespace System.Xml.Schema
         private static uint Int64ToUInt32(long value)
         {
             if (value < (long)UInt32.MinValue || value > (long)UInt32.MaxValue)
-                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), "UInt32" }));
+                throw new OverflowException(SR.Format(SR.XmlConvert_Overflow, new string[] { XmlConvert.ToString(value), nameof(UInt32) }));
 
             return (uint)value;
         }
 
         public static object ChangeType(string value, Type destinationType, IXmlNamespaceResolver nsResolver)
         {
-            if (value == null) throw new ArgumentNullException("value");
-            if (destinationType == null) throw new ArgumentNullException("destinationType");
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
 
             if (destinationType == BooleanType) return XmlConvert.ToBoolean((string)value);
             if (destinationType == ByteType) return Int32ToByte(XmlConvert.ToInt32((string)value));

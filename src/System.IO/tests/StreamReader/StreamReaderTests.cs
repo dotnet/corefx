@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -8,15 +9,40 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace StreamReaderTests
+namespace System.IO.Tests
 {
     public class StreamReaderTests
     {
-        static Tuple<char[], StreamReader> GetCharArrayStream()
+        protected virtual Stream CreateStream()
+        {
+            return new MemoryStream();
+        }
+
+        protected virtual Stream GetSmallStream()
+        {
+            byte[] testData = new byte[] { 72, 69, 76, 76, 79 };
+            return new MemoryStream(testData);
+        }
+
+        protected virtual Stream GetLargeStream()
+        {
+            byte[] testData = new byte[] { 72, 69, 76, 76, 79 };
+            // System.Collections.Generic.
+
+            List<byte> data = new List<byte>();
+            for (int i = 0; i < 1000; i++)
+            {
+                data.AddRange(testData);
+            }
+
+            return new MemoryStream(data.ToArray());
+        }
+
+        protected Tuple<char[], StreamReader> GetCharArrayStream()
         {
             var chArr = new char[]{
-                Char.MinValue
-                ,Char.MaxValue
+                char.MinValue
+                ,char.MaxValue
                 ,'\t'
                 ,' '
                 ,'$'
@@ -30,7 +56,7 @@ namespace StreamReaderTests
                 ,'A'
                 ,'5'
                 ,'\r'
-                ,'\uFE70' 
+                ,'\uFE70'
                 ,'-'
                 ,';'
                 ,'\r'
@@ -41,9 +67,7 @@ namespace StreamReaderTests
                 ,'K'
                 ,'\u00E6'
             };
-
-
-            var ms = new MemoryStream();
+            var ms = CreateStream();
             var sw = new StreamWriter(ms);
 
             for (int i = 0; i < chArr.Length; i++)
@@ -54,29 +78,8 @@ namespace StreamReaderTests
             return new Tuple<char[], StreamReader>(chArr, new StreamReader(ms));
         }
 
-        static MemoryStream GetSmallStream()
-        {
-            byte[] testData = new byte[] { 72, 69, 76, 76, 79 };
-            return new System.IO.MemoryStream(testData);
-        }
-
-        static MemoryStream GetLargeStream()
-        {
-            byte[] testData = new byte[] { 72, 69, 76, 76, 79 };
-            // System.Collections.Generic.
-
-            List<byte> data = new List<byte>();
-            for (int i = 0; i < 1000; i++)
-            {
-                data.AddRange(testData);
-            }
-
-            return new System.IO.MemoryStream(data.ToArray());
-        }
-
-
         [Fact]
-        public static void EndOfStream()
+        public void EndOfStream()
         {
             var sw = new StreamReader(GetSmallStream());
 
@@ -88,7 +91,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void EndOfStreamSmallDataLargeBuffer()
+        public void EndOfStreamSmallDataLargeBuffer()
         {
             var sw = new StreamReader(GetSmallStream(), Encoding.UTF8, true, 1024);
 
@@ -100,7 +103,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void EndOfStreamLargeDataSmallBuffer()
+        public void EndOfStreamLargeDataSmallBuffer()
         {
             var sw = new StreamReader(GetLargeStream(), Encoding.UTF8, true, 1);
 
@@ -112,7 +115,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void EndOfStreamLargeDataLargeBuffer()
+        public void EndOfStreamLargeDataLargeBuffer()
         {
             var sw = new StreamReader(GetLargeStream(), Encoding.UTF8, true, 1 << 16);
 
@@ -124,7 +127,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static async Task ReadToEndAsync()
+        public async Task ReadToEndAsync()
         {
             var sw = new StreamReader(GetLargeStream());
             var result = await sw.ReadToEndAsync();
@@ -133,7 +136,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void GetBaseStream()
+        public void GetBaseStream()
         {
             var ms = GetSmallStream();
             var sw = new StreamReader(ms);
@@ -142,7 +145,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void TestRead()
+        public void TestRead()
         {
             var baseInfo = GetCharArrayStream();
             var sr = baseInfo.Item2;
@@ -158,7 +161,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void TestPeek()
+        public void TestPeek()
         {
             var baseInfo = GetCharArrayStream();
             var sr = baseInfo.Item2;
@@ -173,7 +176,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void ArgumentNullOnNullArray()
+        public void ArgumentNullOnNullArray()
         {
             var baseInfo = GetCharArrayStream();
             var sr = baseInfo.Item2;
@@ -182,28 +185,28 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void ArgumentOutOfRangeOnInvalidOffset()
+        public void ArgumentOutOfRangeOnInvalidOffset()
         {
             var sr = GetCharArrayStream().Item2;
             Assert.Throws<ArgumentOutOfRangeException>(() => sr.Read(new char[0], -1, 0));
         }
 
         [Fact]
-        public static void ArgumentOutOfRangeOnNegativCount()
+        public void ArgumentOutOfRangeOnNegativCount()
         {
             var sr = GetCharArrayStream().Item2;
             Assert.Throws<ArgumentException>(() => sr.Read(new char[0], 0, 1));
         }
 
         [Fact]
-        public static void ArgumentExceptionOffsetAndCount()
+        public void ArgumentExceptionOffsetAndCount()
         {
             var sr = GetCharArrayStream().Item2;
-            Assert.Throws<ArgumentException>(() => sr.Read(new Char[0], 2, 0));
+            Assert.Throws<ArgumentException>(() => sr.Read(new char[0], 2, 0));
         }
 
         [Fact]
-        public static void ObjectDisposedExceptionDisposedStream()
+        public void ObjectDisposedExceptionDisposedStream()
         {
             var sr = GetCharArrayStream().Item2;
             sr.Dispose();
@@ -212,7 +215,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void ObjectDisposedExceptionDisposedBaseStream()
+        public void ObjectDisposedExceptionDisposedBaseStream()
         {
             var ms = GetSmallStream();
             var sr = new StreamReader(ms);
@@ -222,9 +225,9 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void EmptyStream()
+        public void EmptyStream()
         {
-            var ms = new MemoryStream();
+            var ms = CreateStream();
             var sr = new StreamReader(ms);
 
             var buffer = new char[10];
@@ -233,12 +236,12 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void VanillaReads1()
+        public void VanillaReads1()
         {
             var baseInfo = GetCharArrayStream();
             var sr = baseInfo.Item2;
 
-            var chArr = new Char[baseInfo.Item1.Length];
+            var chArr = new char[baseInfo.Item1.Length];
 
             var read = sr.Read(chArr, 0, chArr.Length);
 
@@ -250,13 +253,13 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static async Task VanillaReads2WithAsync()
+        public async Task VanillaReads2WithAsync()
         {
             var baseInfo = GetCharArrayStream();
 
             var sr = baseInfo.Item2;
 
-            var chArr = new Char[baseInfo.Item1.Length];
+            var chArr = new char[baseInfo.Item1.Length];
 
             var read = await sr.ReadAsync(chArr, 4, 3);
 
@@ -268,7 +271,7 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void ObjectDisposedReadLine()
+        public void ObjectDisposedReadLine()
         {
             var baseInfo = GetCharArrayStream();
             var sr = baseInfo.Item2;
@@ -277,8 +280,20 @@ namespace StreamReaderTests
             Assert.Throws<ObjectDisposedException>(() => sr.ReadLine());
         }
 
+#if netstandard17
         [Fact]
-        public static void ObjectDisposedReadLineBaseStream()
+        public void ObjectClosedReadLine()
+        {
+            var baseInfo = GetCharArrayStream();
+            var sr = baseInfo.Item2;
+
+            sr.Close();
+            Assert.Throws<ObjectDisposedException>(() => sr.ReadLine());
+        }
+#endif //netstandard17
+
+        [Fact]
+        public void ObjectDisposedReadLineBaseStream()
         {
             var ms = GetLargeStream();
             var sr = new StreamReader(ms);
@@ -286,14 +301,26 @@ namespace StreamReaderTests
             ms.Dispose();
             Assert.Throws<ObjectDisposedException>(() => sr.ReadLine());
         }
-       
+
+#if netstandard17
         [Fact]
-        public static void VanillaReadLines()
+        public void ObjectClosedReadLineBaseStream()
+        {
+            var ms = GetLargeStream();
+            var sr = new StreamReader(ms);
+
+            ms.Close();
+            Assert.Throws<ObjectDisposedException>(() => sr.ReadLine());
+        }
+#endif //netstandard17
+
+        [Fact]
+        public void VanillaReadLines()
         {
             var baseInfo = GetCharArrayStream();
             var sr = baseInfo.Item2;
 
-            String valueString = new String(baseInfo.Item1);
+            string valueString = new string(baseInfo.Item1);
 
 
             var data = sr.ReadLine();
@@ -310,12 +337,12 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void VanillaReadLines2()
+        public void VanillaReadLines2()
         {
             var baseInfo = GetCharArrayStream();
             var sr = baseInfo.Item2;
 
-            String valueString = new String(baseInfo.Item1);
+            string valueString = new string(baseInfo.Item1);
 
             var temp = new char[10];
             sr.Read(temp, 0, 1);
@@ -324,9 +351,9 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static async Task ContinuousNewLinesAndTabsAsync()
+        public async Task ContinuousNewLinesAndTabsAsync()
         {
-            var ms = new MemoryStream();
+            var ms = CreateStream();
             var sw = new StreamWriter(ms);
             sw.Write("\n\n\r\r\n");
             sw.Flush();
@@ -338,7 +365,7 @@ namespace StreamReaderTests
             for (int i = 0; i < 4; i++)
             {
                 var data = await sr.ReadLineAsync();
-                Assert.Equal(String.Empty, data);
+                Assert.Equal(string.Empty, data);
             }
 
             var eol = await sr.ReadLineAsync();
@@ -346,9 +373,9 @@ namespace StreamReaderTests
         }
 
         [Fact]
-        public static void CurrentEncoding()
+        public void CurrentEncoding()
         {
-            var ms = new MemoryStream();
+            var ms = CreateStream();
 
             var sr = new StreamReader(ms);
             Assert.Equal(Encoding.UTF8, sr.CurrentEncoding);

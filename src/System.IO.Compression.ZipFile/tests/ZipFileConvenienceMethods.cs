@@ -1,126 +1,137 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace System.IO.Compression.Tests
 {
-    public partial class ZipTest
+    public class ZipFileTest_ConvenienceMethods : ZipFileTestBase
     {
         [Fact]
         public async Task CreateFromDirectoryNormal()
         {
-            await TestCreateDirectory(zfolder("normal"), true);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // [ActiveIssue(846, PlatformID.AnyUnix)]
-            {
-                await TestCreateDirectory(zfolder("unicode"), true);
-            }
-        }
-
-        private async Task TestCreateDirectory(string folderName, Boolean testWithBaseDir)
-        {
-            string noBaseDir = GetTmpFilePath();
+            string folderName = zfolder("normal");
+            string noBaseDir = GetTestFilePath();
             ZipFile.CreateFromDirectory(folderName, noBaseDir);
 
-            await IsZipSameAsDirAsync(noBaseDir, folderName, ZipArchiveMode.Read, true, true);
-
-            if (testWithBaseDir)
-            {
-                string withBaseDir = GetTmpFilePath();
-                ZipFile.CreateFromDirectory(folderName, withBaseDir, CompressionLevel.Optimal, true);
-                SameExceptForBaseDir(noBaseDir, withBaseDir, folderName);
-            }
+            await IsZipSameAsDirAsync(noBaseDir, folderName, ZipArchiveMode.Read, requireExplicit: false, checkTimes: false);
         }
 
-        private static void SameExceptForBaseDir(string zipNoBaseDir, string zipBaseDir, string baseDir)
+        [Fact]
+        public void CreateFromDirectory_IncludeBaseDirectory()
         {
-            //b has the base dir
-            using (ZipArchive a = ZipFile.Open(zipNoBaseDir, ZipArchiveMode.Read),
-                              b = ZipFile.Open(zipBaseDir, ZipArchiveMode.Read))
+            string folderName = zfolder("normal");
+            string withBaseDir = GetTestFilePath();
+            ZipFile.CreateFromDirectory(folderName, withBaseDir, CompressionLevel.Optimal, true);
+
+            IEnumerable<string> expected = Directory.EnumerateFiles(zfolder("normal"), "*", SearchOption.AllDirectories);
+            using (ZipArchive actual_withbasedir = ZipFile.Open(withBaseDir, ZipArchiveMode.Read))
             {
-                var aCount = a.Entries.Count;
-                var bCount = b.Entries.Count;
-                Assert.Equal(aCount, bCount);
-
-                int bIdx = 0;
-                foreach (ZipArchiveEntry aEntry in a.Entries)
+                foreach (ZipArchiveEntry actualEntry in actual_withbasedir.Entries)
                 {
-                    ZipArchiveEntry bEntry = b.Entries[bIdx++];
-
-                    Assert.Equal(Path.GetFileName(baseDir) + "/" + aEntry.FullName, bEntry.FullName);
-                    Assert.Equal(aEntry.Name, bEntry.Name);
-                    Assert.Equal(aEntry.Length, bEntry.Length);
-                    Assert.Equal(aEntry.CompressedLength, bEntry.CompressedLength);
-                    using (Stream aStream = aEntry.Open(), bStream = bEntry.Open())
+                    string expectedFile = expected.Single(i => Path.GetFileName(i).Equals(actualEntry.Name));
+                    Assert.True(actualEntry.FullName.StartsWith("normal"));
+                    Assert.Equal(new FileInfo(expectedFile).Length, actualEntry.Length);
+                    using (Stream expectedStream = File.OpenRead(expectedFile))
+                    using (Stream actualStream = actualEntry.Open())
                     {
-                        StreamsEqual(aStream, bStream);
+                        StreamsEqual(expectedStream, actualStream);
                     }
                 }
             }
         }
 
         [Fact]
-        public void ExtractToDirectoryNormal()
+        public void CreateFromDirectoryUnicode()
         {
-            TestExtract(zfile("normal.zip"), zfolder("normal"));
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // [ActiveIssue(846, PlatformID.AnyUnix)]
+            string folderName = zfolder("unicode");
+            string noBaseDir = GetTestFilePath();
+            ZipFile.CreateFromDirectory(folderName, noBaseDir);
+
+            using (ZipArchive archive = ZipFile.OpenRead(noBaseDir))
             {
-                TestExtract(zfile("unicode.zip"), zfolder("unicode"));
+                IEnumerable<string> actual = archive.Entries.Select(entry => entry.Name);
+                IEnumerable<string> expected = Directory.EnumerateFileSystemEntries(zfolder("unicode"), "*", SearchOption.AllDirectories).ToList();
+                Assert.True(Enumerable.SequenceEqual(expected.Select(i => Path.GetFileName(i)), actual.Select(i => i)));
             }
-            TestExtract(zfile("empty.zip"), zfolder("empty"));
-            TestExtract(zfile("explicitdir1.zip"), zfolder("explicitdir"));
-            TestExtract(zfile("explicitdir2.zip"), zfolder("explicitdir"));
-            TestExtract(zfile("appended.zip"), zfolder("small"));
-            TestExtract(zfile("prepended.zip"), zfolder("small"));
-            TestExtract(zfile("noexplicitdir.zip"), zfolder("explicitdir"));
         }
 
-        private void TestExtract(string zipFileName, string folderName)
+        [Theory]
+        [InlineData("normal.zip", "normal")]
+        [InlineData("empty.zip", "empty")]
+        [InlineData("explicitdir1.zip", "explicitdir")]
+        [InlineData("explicitdir2.zip", "explicitdir")]
+        [InlineData("appended.zip", "small")]
+        [InlineData("prepended.zip", "small")]
+        [InlineData("noexplicitdir.zip", "explicitdir")]
+        public void ExtractToDirectoryNormal(string file, string folder)
         {
-            string tempFolder = GetTmpDirPath(true);
-            ZipFile.ExtractToDirectory(zipFileName, tempFolder);
-            DirsEqual(tempFolder, folderName);
-
-            Assert.Throws<ArgumentNullException>(() => ZipFile.ExtractToDirectory(null, tempFolder));
+            string zipFileName = zfile(file);
+            string folderName = zfolder(folder);
+            using (var tempFolder = new TempDirectory(GetTestFilePath()))
+            {
+                ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path);
+                DirsEqual(tempFolder.Path, folderName);
+            }
         }
 
-        #region "Extension Methods"
+        [Fact]
+        public void ExtractToDirectoryNull()
+        {
+            Assert.Throws<ArgumentNullException>("sourceArchiveFileName", () => ZipFile.ExtractToDirectory(null, GetTestFilePath()));
+        }
+
+        [Fact]
+        public void ExtractToDirectoryUnicode()
+        {
+            string zipFileName = zfile("unicode.zip");
+            string folderName = zfolder("unicode");
+            using (var tempFolder = new TempDirectory(GetTestFilePath()))
+            {
+                ZipFile.ExtractToDirectory(zipFileName, tempFolder.Path);
+                DirFileNamesEqual(tempFolder.Path, folderName);
+            }
+        }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public async Task CreateEntryFromFileTest(bool withCompressionLevel)
+        public async Task CreateEntryFromFileExtension(bool withCompressionLevel)
         {
             //add file
-            string testArchive = CreateTempCopyFile(zfile("normal.zip"));
-
-            using (ZipArchive archive = ZipFile.Open(testArchive, ZipArchiveMode.Update))
+            using (TempFile testArchive = CreateTempCopyFile(zfile("normal.zip"), GetTestFilePath()))
             {
-                string entryName = "added.txt";
-                string sourceFilePath = zmodified(Path.Combine("addFile", entryName));
+                using (ZipArchive archive = ZipFile.Open(testArchive.Path, ZipArchiveMode.Update))
+                {
+                    string entryName = "added.txt";
+                    string sourceFilePath = zmodified(Path.Combine("addFile", entryName));
 
-                Assert.Throws<ArgumentNullException>(() => ((ZipArchive)null).CreateEntryFromFile(sourceFilePath, entryName));
-                Assert.Throws<ArgumentNullException>(() => archive.CreateEntryFromFile(null, entryName));
-                Assert.Throws<ArgumentNullException>(() => archive.CreateEntryFromFile(sourceFilePath, null));
+                    Assert.Throws<ArgumentNullException>(() => ((ZipArchive)null).CreateEntryFromFile(sourceFilePath, entryName));
+                    Assert.Throws<ArgumentNullException>(() => archive.CreateEntryFromFile(null, entryName));
+                    Assert.Throws<ArgumentNullException>(() => archive.CreateEntryFromFile(sourceFilePath, null));
 
-                ZipArchiveEntry e = withCompressionLevel ?
-                    archive.CreateEntryFromFile(sourceFilePath, entryName) :
-                    archive.CreateEntryFromFile(sourceFilePath, entryName, CompressionLevel.Fastest);
-                Assert.NotNull(e);
+                    ZipArchiveEntry e = withCompressionLevel ?
+                        archive.CreateEntryFromFile(sourceFilePath, entryName) :
+                        archive.CreateEntryFromFile(sourceFilePath, entryName, CompressionLevel.Fastest);
+                    Assert.NotNull(e);
+                }
+                await IsZipSameAsDirAsync(testArchive.Path, zmodified("addFile"), ZipArchiveMode.Read, requireExplicit: false, checkTimes: false);
             }
-
-            await IsZipSameAsDirAsync(testArchive, zmodified("addFile"), ZipArchiveMode.Read, true, true);
         }
 
         [Fact]
-        public void ExtractToFileTest()
+        public void ExtractToFileExtension()
         {
             using (ZipArchive archive = ZipFile.Open(zfile("normal.zip"), ZipArchiveMode.Read))
             {
-                string file = GetTmpFilePath();
+                string file = GetTestFilePath();
                 ZipArchiveEntry e = archive.GetEntry("first.txt");
 
                 Assert.Throws<ArgumentNullException>(() => ((ZipArchiveEntry)null).ExtractToFile(file));
@@ -150,64 +161,67 @@ namespace System.IO.Compression.Tests
         }
 
         [Fact]
-        public void ExtractToDirectoryTest()
+        public void ExtractToDirectoryExtension()
         {
             using (ZipArchive archive = ZipFile.Open(zfile("normal.zip"), ZipArchiveMode.Read))
             {
-                string tempFolder = GetTmpDirPath(false);
+                string tempFolder = GetTestFilePath();
                 Assert.Throws<ArgumentNullException>(() => ((ZipArchive)null).ExtractToDirectory(tempFolder));
                 Assert.Throws<ArgumentNullException>(() => archive.ExtractToDirectory(null));
                 archive.ExtractToDirectory(tempFolder);
 
                 DirsEqual(tempFolder, zfolder("normal"));
             }
+        }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // [ActiveIssue(846, PlatformID.AnyUnix)]
+        [Fact]
+        public void ExtractToDirectoryExtension_Unicode()
+        {
+            using (ZipArchive archive = ZipFile.OpenRead(zfile("unicode.zip")))
             {
-                using (ZipArchive archive = ZipFile.OpenRead(zfile("unicode.zip")))
-                {
-                    string tempFolder = GetTmpDirPath(false);
-                    archive.ExtractToDirectory(tempFolder);
-
-                    DirsEqual(tempFolder, zfolder("unicode"));
-                }
+                string tempFolder = GetTestFilePath();
+                archive.ExtractToDirectory(tempFolder);
+                DirFileNamesEqual(tempFolder, zfolder("unicode"));
             }
         }
 
         [Fact]
         public void CreatedEmptyDirectoriesRoundtrip()
         {
-            DirectoryInfo rootDir = new DirectoryInfo(GetTmpDirPath(create: true));
-            rootDir.CreateSubdirectory("empty1");
-
-            string archivePath = GetTmpFilePath();
-            ZipFile.CreateFromDirectory(
-                rootDir.FullName, archivePath,
-                CompressionLevel.Optimal, false, Encoding.UTF8);
-
-            using (ZipArchive archive = ZipFile.OpenRead(archivePath))
+            using (var tempFolder = new TempDirectory(GetTestFilePath()))
             {
-                Assert.Equal(1, archive.Entries.Count);
-                Assert.True(archive.Entries[0].FullName.StartsWith("empty1"));
+                DirectoryInfo rootDir = new DirectoryInfo(tempFolder.Path);
+                rootDir.CreateSubdirectory("empty1");
+
+                string archivePath = GetTestFilePath();
+                ZipFile.CreateFromDirectory(
+                    rootDir.FullName, archivePath,
+                    CompressionLevel.Optimal, false, Encoding.UTF8);
+
+                using (ZipArchive archive = ZipFile.OpenRead(archivePath))
+                {
+                    Assert.Equal(1, archive.Entries.Count);
+                    Assert.True(archive.Entries[0].FullName.StartsWith("empty1"));
+                }
             }
         }
 
         [Fact]
         public void CreatedEmptyRootDirectoryRoundtrips()
         {
-            DirectoryInfo emptyRoot = new DirectoryInfo(GetTmpDirPath(create: true));
-
-            string archivePath = GetTmpFilePath();
-            ZipFile.CreateFromDirectory(
-                emptyRoot.FullName, archivePath,
-                CompressionLevel.Optimal, true);
-
-            using (ZipArchive archive = ZipFile.OpenRead(archivePath))
+            using (var tempFolder = new TempDirectory(GetTestFilePath()))
             {
-                Assert.Equal(1, archive.Entries.Count);
+                DirectoryInfo emptyRoot = new DirectoryInfo(tempFolder.Path);
+                string archivePath = GetTestFilePath();
+                ZipFile.CreateFromDirectory(
+                    emptyRoot.FullName, archivePath,
+                    CompressionLevel.Optimal, true);
+
+                using (ZipArchive archive = ZipFile.OpenRead(archivePath))
+                {
+                    Assert.Equal(1, archive.Entries.Count);
+                }
             }
         }
-
-        #endregion
     }
 }

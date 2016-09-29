@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 using Xunit;
@@ -8,7 +9,7 @@ namespace System.Tests
 {
     public class EnvironmentProcessorCount
     {
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         [Fact]
         public void Windows_ProcessorCountTest()
         {
@@ -25,12 +26,15 @@ namespace System.Tests
             Assert.Equal(expected, actual);
         }
 
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
         [Fact]
         public void Unix_ProcessorCountTest()
         {
             //arrange
-            int _SC_NPROCESSORS_ONLN = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? 84 : 58;
+            int _SC_NPROCESSORS_ONLN =
+                RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? 84 :
+                RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD")) ? 1002 :
+                58;
             int expected = (int)sysconf(_SC_NPROCESSORS_ONLN);
 
             //act

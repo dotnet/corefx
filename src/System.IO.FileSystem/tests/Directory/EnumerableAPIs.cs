@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -126,6 +128,24 @@ namespace System.IO.Tests
         public override string[] GetEntries(string dirName, string searchPattern)
         {
             return Directory.EnumerateFileSystemEntries(dirName, searchPattern, SearchOption.TopDirectoryOnly).ToArray();
+        }
+
+        public override string[] GetEntries(string dirName, string searchPattern, SearchOption option)
+        {
+            return Directory.EnumerateFileSystemEntries(dirName, searchPattern, option).ToArray();
+        }
+    }
+
+    public class Directory_EnumFSE_str_str_so_alldirs : Directory_GetFileSystemEntries_str_str_so_alldirs
+    {
+        public override string[] GetEntries(string dirName)
+        {
+            return Directory.EnumerateFileSystemEntries(dirName, "*", SearchOption.AllDirectories).ToArray();
+        }
+
+        public override string[] GetEntries(string dirName, string searchPattern)
+        {
+            return Directory.EnumerateFileSystemEntries(dirName, searchPattern, SearchOption.AllDirectories).ToArray();
         }
 
         public override string[] GetEntries(string dirName, string searchPattern, SearchOption option)

@@ -1,12 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
 namespace Microsoft.Win32
 {
     [Flags]
-    public enum RegistryOptions
+#if REGISTRY_ASSEMBLY
+    public
+#else
+    internal
+#endif
+    enum RegistryOptions
     {
         None = Interop.mincore.RegistryOptions.REG_OPTION_NON_VOLATILE,       // 0x0000
         Volatile = Interop.mincore.RegistryOptions.REG_OPTION_VOLATILE,      // 0x0001

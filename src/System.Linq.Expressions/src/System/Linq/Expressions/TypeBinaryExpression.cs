@@ -1,10 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions
 {
@@ -66,31 +68,36 @@ namespace System.Linq.Expressions
         {
             Type cType = Expression.Type;
 
-            // For value types (including Void, but not nullables), we can
-            // determine the result now
-            if (cType.GetTypeInfo().IsValueType && !cType.IsNullableType())
+            if (cType.GetTypeInfo().IsValueType)
             {
-                return Expression.Block(Expression, Expression.Constant(cType == _typeOperand.GetNonNullableType()));
+                if (cType.IsNullableType())
+                {
+                    // If the expression type is a a nullable type, it will match if
+                    // the value is not null and the type operand
+                    // either matches or is its type argument (T to its T?).
+                    if (cType.GetNonNullableType() != _typeOperand.GetNonNullableType())
+                    {
+                        return Expression.Block(Expression, Expression.Constant(false));
+                    }
+                    else
+                    {
+                        return Expression.NotEqual(Expression, Expression.Constant(null, Expression.Type));
+                    }
+                }
+                else
+                {
+                    // For other value types (including Void), we can
+                    // determine the result now
+                    return Expression.Block(Expression, Expression.Constant(cType == _typeOperand.GetNonNullableType()));
+                }
             }
+
+            Debug.Assert(TypeUtils.AreReferenceAssignable(typeof(object), Expression.Type), "Expecting reference types only after this point.");
 
             // Can check the value right now for constants.
             if (Expression.NodeType == ExpressionType.Constant)
             {
                 return ReduceConstantTypeEqual();
-            }
-
-            // If the operand type is a sealed reference type or a nullable
-            // type, it will match if value is not null
-            if (cType.GetTypeInfo().IsSealed && (cType == _typeOperand))
-            {
-                if (cType.IsNullableType())
-                {
-                    return Expression.NotEqual(Expression, Expression.Constant(null, Expression.Type));
-                }
-                else
-                {
-                    return Expression.ReferenceNotEqual(Expression, Expression.Constant(null, Expression.Type));
-                }
             }
 
             // expression is a ByVal parameter. Can safely reevaluate.
@@ -103,16 +110,9 @@ namespace System.Linq.Expressions
             // Create a temp so we only evaluate the left side once
             parameter = Expression.Parameter(typeof(object));
 
-            // Convert to object if necessary
-            var expression = Expression;
-            if (!TypeUtils.AreReferenceAssignable(typeof(object), expression.Type))
-            {
-                expression = Expression.Convert(expression, typeof(object));
-            }
-
             return Expression.Block(
                 new[] { parameter },
-                Expression.Assign(parameter, expression),
+                Expression.Assign(parameter, Expression),
                 ByValParameterTypeEqual(parameter)
             );
         }
@@ -120,7 +120,7 @@ namespace System.Linq.Expressions
         // Helper that is used when re-eval of LHS is safe.
         private Expression ByValParameterTypeEqual(ParameterExpression value)
         {
-            Expression getType = Expression.Call(value, typeof(object).GetMethod("GetType"));
+            Expression getType = Expression.Call(value, Object_GetType);
 
             // In remoting scenarios, obj.GetType() can return an interface.
             // But JIT32's optimized "obj.GetType() == typeof(ISomething)" codegen,
@@ -200,9 +200,9 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="TypeBinaryExpression"/> for which the <see cref="NodeType"/> property is equal to <see cref="TypeIs"/> and for which the <see cref="Expression"/> and <see cref="TypeBinaryExpression.TypeOperand"/> properties are set to the specified values.</returns>
         public static TypeBinaryExpression TypeIs(Expression expression, Type type)
         {
-            RequiresCanRead(expression, "expression");
-            ContractUtils.RequiresNotNull(type, "type");
-            if (type.IsByRef) throw Error.TypeMustNotBeByRef();
+            RequiresCanRead(expression, nameof(expression));
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            if (type.IsByRef) throw Error.TypeMustNotBeByRef(nameof(type));
 
             return new TypeBinaryExpression(expression, type, ExpressionType.TypeIs);
         }
@@ -215,9 +215,9 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="TypeBinaryExpression"/> for which the <see cref="NodeType"/> property is equal to <see cref="TypeEqual"/> and for which the <see cref="Expression"/> and <see cref="TypeBinaryExpression.TypeOperand"/> properties are set to the specified values.</returns>
         public static TypeBinaryExpression TypeEqual(Expression expression, Type type)
         {
-            RequiresCanRead(expression, "expression");
-            ContractUtils.RequiresNotNull(type, "type");
-            if (type.IsByRef) throw Error.TypeMustNotBeByRef();
+            RequiresCanRead(expression, nameof(expression));
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            if (type.IsByRef) throw Error.TypeMustNotBeByRef(nameof(type));
 
             return new TypeBinaryExpression(expression, type, ExpressionType.TypeEqual);
         }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -19,7 +20,7 @@ namespace System.Resources
             return FastResourceComparer.HashFunction(key);
         }
 
-        // This hash function MUST be publically documented with the resource
+        // This hash function MUST be publicly documented with the resource
         // file format, AND we may NEVER change this hash function's return 
         // value (without changing the file format).
         internal static int HashFunction(String key)

@@ -1,10 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
+    /// <summary>
+    /// Local variable. Stored in debug metadata.
+    /// </summary>
+    /// <remarks>
+    /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#localvariable-table-0x33.
+    /// </remarks>
     public struct LocalVariable
     {
         private readonly MetadataReader _reader;
@@ -21,33 +28,10 @@ namespace System.Reflection.Metadata
             _rowId = handle.RowId;
         }
 
-        private LocalVariableHandle Handle
-        {
-            get { return LocalVariableHandle.FromRowId(_rowId); }
-        }
+        private LocalVariableHandle Handle => LocalVariableHandle.FromRowId(_rowId);
 
-        public LocalVariableAttributes Attributes
-        {
-            get
-            {
-                return _reader.LocalVariableTable.GetAttributes(Handle);
-            }
-        }
-
-        public int Index
-        {
-            get
-            {
-                return _reader.LocalVariableTable.GetIndex(Handle);
-            }
-        }
-
-        public StringHandle Name
-        {
-            get
-            {
-                return _reader.LocalVariableTable.GetName(Handle);
-            }
-        }
+        public LocalVariableAttributes Attributes => _reader.LocalVariableTable.GetAttributes(Handle);
+        public int Index => _reader.LocalVariableTable.GetIndex(Handle);
+        public StringHandle Name => _reader.LocalVariableTable.GetName(Handle);
     }
 }

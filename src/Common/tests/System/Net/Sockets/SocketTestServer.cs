@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Net.Sockets.Tests
 {
@@ -11,57 +12,33 @@ namespace System.Net.Sockets.Tests
         private const int DefaultReceiveBufferSize = 1024;
 
         protected abstract int Port { get; }
+        public abstract EndPoint EndPoint { get; }
 
-        public static SocketTestServer SocketTestServerFactory(EndPoint endpoint)
+        public static SocketTestServer SocketTestServerFactory(SocketImplementationType type, EndPoint endpoint, ProtocolType protocolType = ProtocolType.Tcp)
         {
-            return SocketTestServerFactory(DefaultNumConnections, DefaultReceiveBufferSize, endpoint);
+            return SocketTestServerFactory(type, DefaultNumConnections, DefaultReceiveBufferSize, endpoint, protocolType);
         }
 
-        public static SocketTestServer SocketTestServerFactory(IPAddress address, out int port)
+        public static SocketTestServer SocketTestServerFactory(SocketImplementationType type, IPAddress address, out int port)
         {
-            return SocketTestServerFactory(DefaultNumConnections, DefaultReceiveBufferSize, address, out port);
-        }
-
-        public static SocketTestServer SocketTestServerFactory(
-            int numConnections,
-            int receiveBufferSize,
-            EndPoint localEndPoint)
-        {
-            return SocketTestServerFactory(
-                s_implementationType,
-                numConnections,
-                receiveBufferSize,
-                localEndPoint);
-        }
-
-        public static SocketTestServer SocketTestServerFactory(
-            int numConnections,
-            int receiveBufferSize,
-            IPAddress address,
-            out int port)
-        {
-            return SocketTestServerFactory(
-                s_implementationType,
-                numConnections,
-                receiveBufferSize,
-                address,
-                out port);
+            return SocketTestServerFactory(type, DefaultNumConnections, DefaultReceiveBufferSize, address, out port);
         }
 
         public static SocketTestServer SocketTestServerFactory(
             SocketImplementationType type,
             int numConnections,
             int receiveBufferSize,
-            EndPoint localEndPoint)
+            EndPoint localEndPoint,
+            ProtocolType protocolType = ProtocolType.Tcp)
         {
             switch (type)
             {
                 case SocketImplementationType.APM:
                     return new SocketTestServerAPM(numConnections, receiveBufferSize, localEndPoint);
                 case SocketImplementationType.Async:
-                    return new SocketTestServerAsync(numConnections, receiveBufferSize, localEndPoint);
+                    return new SocketTestServerAsync(numConnections, receiveBufferSize, localEndPoint, protocolType);
                 default:
-                    throw new ArgumentOutOfRangeException("type");
+                    throw new ArgumentOutOfRangeException(nameof(type));
             }
         }
 

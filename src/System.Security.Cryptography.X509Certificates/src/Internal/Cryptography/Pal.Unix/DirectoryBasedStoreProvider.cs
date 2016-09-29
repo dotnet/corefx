@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace Internal.Cryptography.Pal
     /// <summary>
     /// Provides an implementation of an X509Store which is backed by files in a directory.
     /// </summary>
-    internal class DirectoryBasedStoreProvider : IStorePal
+    internal sealed class DirectoryBasedStoreProvider : IStorePal
     {
         // {thumbprint}.1.pfx to {thumbprint}.9.pfx
         private const int MaxSaveAttempts = 9;
@@ -27,9 +28,6 @@ namespace Internal.Cryptography.Pal
         private static string s_userStoreRoot;
 
         private readonly string _storePath;
-        private readonly object _fileWatcherLock = new object();
-        private List<X509Certificate2> _certificates;
-        private FileSystemWatcher _watcher;
 
         private readonly bool _readOnly;
 
@@ -83,103 +81,40 @@ namespace Internal.Cryptography.Pal
 
         public void Dispose()
         {
-            if (_watcher != null)
-            {
-                _watcher.Dispose();
-                _watcher = null;
-            }
         }
 
-        public byte[] Export(X509ContentType contentType, string password)
-        {
-            // Export is for X509Certificate2Collections in their IStorePal guise,
-            // if someone wanted to export whole stores they'd need to do
-            // store.Certificates.Export(...), which would end up in the
-            // CollectionBackedStoreProvider.
-            Debug.Fail("Export was unexpected on a DirectoryBasedStore");
-            throw new InvalidOperationException();
-        }
-
-        public void CopyTo(X509Certificate2Collection collection)
+        public void CloneTo(X509Certificate2Collection collection)
         {
             Debug.Assert(collection != null);
 
-            // Copy the reference locally, any directory change operations
-            // will cause the field to be reset to null.
-            List<X509Certificate2> certificates = _certificates;
-
-            if (certificates == null)
-            {
-                // ReadDirectory will both load _certificates and return the answer, so this call
-                // will have stable results across multiple adds/deletes happening in parallel.
-                certificates = ReadDirectory();
-                Debug.Assert(certificates != null);
-            }
-
-            foreach (X509Certificate2 cert in certificates)
-            {
-                collection.Add(cert);
-            }
-        }
-
-        private List<X509Certificate2> ReadDirectory()
-        {
             if (!Directory.Exists(_storePath))
             {
-                // Don't assign the field here, because we don't have a FileSystemWatcher
-                // yet to tell us that something has been added.
-                return new List<X509Certificate2>(0);
+                return;
             }
 
-            List<X509Certificate2> certs = new List<X509Certificate2>();
+            var loadedCerts = new HashSet<X509Certificate2>();
 
-            lock (_fileWatcherLock)
+            foreach (string filePath in Directory.EnumerateFiles(_storePath, PfxWildcard))
             {
-                if (_watcher == null)
+                try
                 {
-                    _watcher = new FileSystemWatcher(_storePath, PfxWildcard)
+                    var cert = new X509Certificate2(filePath);
+
+                    // If we haven't already loaded a cert .Equal to this one, copy it to the collection.
+                    if (loadedCerts.Add(cert))
                     {
-                        NotifyFilter = NotifyFilters.LastWrite,
-                    };
-
-                    FileSystemEventHandler handler = FlushCache;
-                    _watcher.Changed += handler;
-                    _watcher.Created += handler;
-                    _watcher.Deleted += handler;
-                    // The Renamed event has a different delegate type
-                    _watcher.Renamed += FlushCache;
-                    _watcher.Error += FlushCache;
+                        collection.Add(cert);
+                    }
+                    else
+                    {
+                        cert.Dispose();
+                    }
                 }
-
-                // Start watching for change events to know that another instance
-                // has messed with the underlying store.  This keeps us aligned
-                // with the Windows implementation, which opens stores with change
-                // notifications.
-                _watcher.EnableRaisingEvents = true;
-
-                foreach (string filePath in Directory.EnumerateFiles(_storePath, PfxWildcard))
+                catch (CryptographicException)
                 {
-                    X509Certificate2 cert;
-
-                    try
-                    {
-                        cert = new X509Certificate2(filePath);
-                    }
-                    catch (CryptographicException)
-                    {
-                        // The file wasn't a certificate, move on to the next one.
-                        continue;
-                    }
-
-                    certs.Add(cert);
+                    // The file wasn't a certificate, move on to the next one.
                 }
-
-                // Don't release _fileWatcherLock until _certificates is assigned, otherwise
-                // we may be setting it to a stale value after the change event said to clear it
-                _certificates = certs;
             }
-
-            return certs;
         }
 
         public void Add(ICertificatePal certPal)
@@ -190,40 +125,16 @@ namespace Internal.Cryptography.Pal
                 throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
             }
 
-            // Save the collection to a local so it's consistent for the whole method
-            List<X509Certificate2> certificates = _certificates;
+            // This may well be the first time that we've added something to this store.
+            Directory.CreateDirectory(_storePath);
+
+            uint userId = Interop.Sys.GetEUid();
+            EnsureDirectoryPermissions(_storePath, userId);
+
             OpenSslX509CertificateReader cert = (OpenSslX509CertificateReader)certPal;
 
             using (X509Certificate2 copy = new X509Certificate2(cert.DuplicateHandles()))
             {
-                // certificates will be null if anything has changed since the last call to
-                // get_Certificates; including Add being called without get_Certificates being
-                // called at all.
-                if (certificates != null)
-                {
-                    foreach (X509Certificate2 inCollection in certificates)
-                    {
-                        if (inCollection.Equals(copy))
-                        {
-                            if (!copy.HasPrivateKey || inCollection.HasPrivateKey)
-                            {
-                                // If the existing store only knows about a public key, but we're
-                                // adding a public+private pair, continue with the add.
-                                //
-                                // So, therefore, if we aren't adding a private key, or already have one,
-                                // we don't need to do anything.
-                                return;
-                            }
-                        }
-                    }
-                }
-
-                // This may well be the first time that we've added something to this store.
-                Directory.CreateDirectory(_storePath);
-
-                uint userId = Interop.Sys.GetEUid();
-                EnsureDirectoryPermissions(_storePath, userId);
-
                 string thumbprint = copy.Thumbprint;
                 bool findOpenSlot;
 
@@ -232,41 +143,26 @@ namespace Internal.Cryptography.Pal
 
                 if (existingFilename != null)
                 {
-                    bool dataExistsAlready = false;
-
-                    // If the file on disk is just a public key, but we're trying to add a private key,
-                    // we'll want to overwrite it.
-                    if (copy.HasPrivateKey)
+                    if (!copy.HasPrivateKey)
                     {
-                        try
+                        return;
+                    }
+
+                    try
+                    {
+                        using (X509Certificate2 fromFile = new X509Certificate2(existingFilename))
                         {
-                            using (X509Certificate2 fromFile = new X509Certificate2(existingFilename))
+                            if (fromFile.HasPrivateKey)
                             {
-                                if (fromFile.HasPrivateKey)
-                                {
-                                    // We have a private key, the file has a private key, we're done here.
-                                    dataExistsAlready = true;
-                                }
+                                // We have a private key, the file has a private key, we're done here.
+                                return;
                             }
                         }
-                        catch (CryptographicException)
-                        {
-                            // We can't read this file anymore, but a moment ago it was this certificate,
-                            // so go ahead and overwrite it.
-                        }
                     }
-                    else
+                    catch (CryptographicException)
                     {
-                        // If we're just a public key then the file has at least as much data as we do.
-                        dataExistsAlready = true;
-                    }
-
-                    if (dataExistsAlready)
-                    {
-                        // The file was added but our collection hasn't resynced yet.
-                        // Set _certificates to null to force a resync.
-                        _certificates = null;
-                        return;
+                        // We can't read this file anymore, but a moment ago it was this certificate,
+                        // so go ahead and overwrite it.
                     }
                 }
 
@@ -294,9 +190,6 @@ namespace Internal.Cryptography.Pal
                     stream.Write(pkcs12, 0, pkcs12.Length);
                 }
             }
-
-            // Null out _certificates so the next call to get_Certificates causes a re-scan.
-            _certificates = null;
         }
 
         public void Remove(ICertificatePal certPal)
@@ -305,23 +198,25 @@ namespace Internal.Cryptography.Pal
 
             using (X509Certificate2 copy = new X509Certificate2(cert.DuplicateHandles()))
             {
-                bool hadCandidates;
-                string currentFilename = FindExistingFilename(copy, _storePath, out hadCandidates);
+                string currentFilename;
 
-                if (currentFilename != null)
+                do
                 {
-                    if (_readOnly)
+                    bool hadCandidates;
+                    currentFilename = FindExistingFilename(copy, _storePath, out hadCandidates);
+
+                    if (currentFilename != null)
                     {
-                        // Windows compatibility, the readonly check isn't done until after a match is found.
-                        throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
+                        if (_readOnly)
+                        {
+                            // Windows compatibility, the readonly check isn't done until after a match is found.
+                            throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
+                        }
+
+                        File.Delete(currentFilename);
                     }
-
-                    File.Delete(currentFilename);
-                }
+                } while (currentFilename != null);
             }
-
-            // Null out _certificates so the next call to get_Certificates causes a re-scan.
-            _certificates = null;
         }
 
         private static string FindExistingFilename(X509Certificate2 cert, string storePath, out bool hadCandidates)
@@ -382,25 +277,6 @@ namespace Internal.Cryptography.Pal
             throw new CryptographicException(SR.Cryptography_X509_StoreNoFileAvailable);
         }
 
-        private void FlushCache(object sender, EventArgs e)
-        {
-            lock (_fileWatcherLock)
-            {
-                // Events might end up not firing until after the object was disposed, which could cause
-                // problems consistently reading _watcher; so save it to a local.
-                FileSystemWatcher watcher = _watcher;
-
-                if (watcher != null)
-                {
-                    // Stop processing events until we read again, particularly because
-                    // there's nothing else we'll do until then.
-                    watcher.EnableRaisingEvents = false;
-                }
-
-                _certificates = null;
-            }
-        }
-
         private static string GetDirectoryName(string storeName)
         {
             Debug.Assert(storeName != null);
@@ -447,14 +323,14 @@ namespace Internal.Cryptography.Pal
                 throw new CryptographicException(SR.Format(SR.Cryptography_OwnerNotCurrentUser, path));
             }
 
-            if ((dirStat.Mode & (int)Interop.Sys.Permissions.Mask) != (int)Interop.Sys.Permissions.S_IRWXU)
+            if ((dirStat.Mode & (int)Interop.Sys.Permissions.S_IRWXU) != (int)Interop.Sys.Permissions.S_IRWXU)
             {
                 throw new CryptographicException(SR.Format(SR.Cryptography_InvalidDirectoryPermissions, path));
             }
         }
 
         /// <summary>
-        /// Checks the file has the correct permissions.
+        /// Checks the file has the correct permissions and attempts to modify them if they're inappropriate.
         /// </summary>
         /// <param name="stream">
         /// The file stream to check.
@@ -464,23 +340,16 @@ namespace Internal.Cryptography.Pal
         /// </param>
         private static void EnsureFilePermissions(FileStream stream, uint userId)
         {
-            // Verify that we're creating files with u+rw and o-rw, g-rw.
+            // Verify that we're creating files with u+rw and g-rw, o-rw.
             const Interop.Sys.Permissions requiredPermissions =
-                Interop.Sys.Permissions.S_IRUSR |
-                Interop.Sys.Permissions.S_IWUSR;
+                Interop.Sys.Permissions.S_IRUSR | Interop.Sys.Permissions.S_IWUSR;
 
             const Interop.Sys.Permissions forbiddenPermissions =
-                Interop.Sys.Permissions.S_IROTH |
-                Interop.Sys.Permissions.S_IWOTH |
-                Interop.Sys.Permissions.S_IRGRP |
-                Interop.Sys.Permissions.S_IWGRP;
-
-            // NOTE: no need to call DangerousAddRef here, since the FileStream is 
-            // held open outside of this method
-            int fileDescriptor = (int)stream.SafeFileHandle.DangerousGetHandle();
+                Interop.Sys.Permissions.S_IRGRP | Interop.Sys.Permissions.S_IWGRP |
+                Interop.Sys.Permissions.S_IROTH | Interop.Sys.Permissions.S_IWOTH;
 
             Interop.Sys.FileStatus stat;
-            if (Interop.Sys.FStat(fileDescriptor, out stat) != 0)
+            if (Interop.Sys.FStat(stream.SafeFileHandle, out stat) != 0)
             {
                 Interop.ErrorInfo error = Interop.Sys.GetLastErrorInfo();
                 throw new CryptographicException(
@@ -493,14 +362,20 @@ namespace Internal.Cryptography.Pal
                 throw new CryptographicException(SR.Format(SR.Cryptography_OwnerNotCurrentUser, stream.Name));
             }
 
-            if ((stat.Mode & (int)requiredPermissions) != (int)requiredPermissions)
+            if ((stat.Mode & (int)requiredPermissions) != (int)requiredPermissions ||
+                (stat.Mode & (int)forbiddenPermissions) != 0)
             {
-                throw new CryptographicException(SR.Format(SR.Cryptography_InsufficientFilePermissions, stream.Name));
-            }
+                if (Interop.Sys.FChMod(stream.SafeFileHandle, (int)requiredPermissions) < 0)
+                {
+                    Interop.ErrorInfo error = Interop.Sys.GetLastErrorInfo();
+                    throw new CryptographicException(
+                        SR.Format(SR.Cryptography_InvalidFilePermissions, stream.Name),
+                        new IOException(error.GetErrorMessage(), error.RawErrno));
+                }
 
-            if ((stat.Mode & (int)forbiddenPermissions) != 0)
-            {
-                throw new CryptographicException(SR.Format(SR.Cryptography_TooBroadFilePermissions, stream.Name));
+                Debug.Assert(Interop.Sys.FStat(stream.SafeFileHandle, out stat) == 0);
+                Debug.Assert((stat.Mode & (int)requiredPermissions) == (int)requiredPermissions);
+                Debug.Assert((stat.Mode & (int)forbiddenPermissions) == 0);
             }
         }
     }

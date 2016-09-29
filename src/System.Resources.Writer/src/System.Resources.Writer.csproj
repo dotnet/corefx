@@ -4,11 +4,8 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>System.Resources.Writer</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <OutputType>Library</OutputType>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <RootNamespace>System.Resources</RootNamespace>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

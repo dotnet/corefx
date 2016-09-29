@@ -1,15 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 
 using Internal.Cryptography;
-
-using ErrorCode = Interop.NCrypt.ErrorCode;
 
 namespace System.Security.Cryptography
 {
@@ -24,9 +19,9 @@ namespace System.Security.Cryptography
         public static CngKey Open(SafeNCryptKeyHandle keyHandle, CngKeyHandleOpenOptions keyHandleOpenOptions)
         {
             if (keyHandle == null)
-                throw new ArgumentNullException("keyHandle");
+                throw new ArgumentNullException(nameof(keyHandle));
             if (keyHandle.IsClosed || keyHandle.IsInvalid)
-                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, "keyHandle");
+                throw new ArgumentException(SR.Cryptography_OpenInvalidHandle, nameof(keyHandle));
 
             SafeNCryptKeyHandle keyHandleCopy = keyHandle.Duplicate();
 
@@ -65,7 +60,7 @@ namespace System.Security.Cryptography
                 }
                 else if (key.IsEphemeral && !openingEphemeralKey)
                 {
-                    throw new ArgumentException(SR.Cryptography_OpenEphemeralKeyHandleWithoutEphemeralFlag, "keyHandleOpenOptions");
+                    throw new ArgumentException(SR.Cryptography_OpenEphemeralKeyHandleWithoutEphemeralFlag, nameof(keyHandleOpenOptions));
                 }
             }
             catch

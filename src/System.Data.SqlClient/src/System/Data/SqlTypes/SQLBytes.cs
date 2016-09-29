@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //------------------------------------------------------------------------------
@@ -8,8 +9,8 @@
 using System.Diagnostics;
 using System.Data.Common;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Res = System.SR;
-
 
 namespace System.Data.SqlTypes
 {
@@ -40,7 +41,7 @@ namespace System.Data.SqlTypes
         //      - m_stream must not be null
         //      - m_rgbBuf could be null or not. if not null, content is garbage, should never look into it.
         //		- m_lCurLen must be x_lNull.
-        // 5) SqlBytes contains a Lazy Materialized Blob (ie, StorageState.Delayed)
+        // 5) SqlBytes contains a Lazy Materialized Blob (i.e, StorageState.Delayed)
         //
         internal byte[] m_rgbBuf;   // Data buffer
         private long _lCurLen; // Current data length
@@ -193,7 +194,7 @@ namespace System.Data.SqlTypes
 
                     default:
                         buffer = new byte[_lCurLen];
-                        Array.Copy(m_rgbBuf, buffer, (int)_lCurLen);
+                        System.Buffer.BlockCopy(m_rgbBuf, 0, buffer, 0, (int)_lCurLen);
                         break;
                 }
 
@@ -207,7 +208,7 @@ namespace System.Data.SqlTypes
             get
             {
                 if (offset < 0 || offset >= this.Length)
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
 
                 if (_rgbWorkBuf == null)
                     _rgbWorkBuf = new byte[1];
@@ -277,7 +278,7 @@ namespace System.Data.SqlTypes
         public void SetLength(long value)
         {
             if (value < 0)
-                throw new ArgumentOutOfRangeException("value");
+                throw new ArgumentOutOfRangeException(nameof(value));
 
             if (FStream())
             {
@@ -293,7 +294,7 @@ namespace System.Data.SqlTypes
                     throw new SqlTypeException(Res.GetString(Res.SqlMisc_NoBufferMessage));
 
                 if (value > (long)m_rgbBuf.Length)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 else if (IsNull)
                     // At this point we know that value is small enough
@@ -314,16 +315,16 @@ namespace System.Data.SqlTypes
 
             // Validate the arguments
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
 
             if (offset > this.Length || offset < 0)
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
 
             if (offsetInBuffer > buffer.Length || offsetInBuffer < 0)
-                throw new ArgumentOutOfRangeException("offsetInBuffer");
+                throw new ArgumentOutOfRangeException(nameof(offsetInBuffer));
 
             if (count < 0 || count > buffer.Length - offsetInBuffer)
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             // Adjust count based on data length
             if (count > this.Length - offset)
@@ -342,7 +343,7 @@ namespace System.Data.SqlTypes
                     default:
                         // ProjectK\Core doesn't support long-typed array indexers
                         Debug.Assert(offset < int.MaxValue);
-                        Array.Copy(m_rgbBuf, checked((int)offset), buffer, offsetInBuffer, count);
+                        System.Buffer.BlockCopy(m_rgbBuf, checked((int)offset), buffer, offsetInBuffer, count);
                         break;
                 }
             }
@@ -362,21 +363,21 @@ namespace System.Data.SqlTypes
             {
                 // Validate the arguments
                 if (buffer == null)
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
 
                 if (m_rgbBuf == null)
                     throw new SqlTypeException(Res.GetString(Res.SqlMisc_NoBufferMessage));
 
                 if (offset < 0)
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
                 if (offset > m_rgbBuf.Length)
                     throw new SqlTypeException(Res.GetString(Res.SqlMisc_BufferInsufficientMessage));
 
                 if (offsetInBuffer < 0 || offsetInBuffer > buffer.Length)
-                    throw new ArgumentOutOfRangeException("offsetInBuffer");
+                    throw new ArgumentOutOfRangeException(nameof(offsetInBuffer));
 
                 if (count < 0 || count > buffer.Length - offsetInBuffer)
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
 
                 if (count > m_rgbBuf.Length - offset)
                     throw new SqlTypeException(Res.GetString(Res.SqlMisc_BufferInsufficientMessage));
@@ -408,7 +409,7 @@ namespace System.Data.SqlTypes
                 {
                     // ProjectK\Core doesn't support long-typed array indexers
                     Debug.Assert(offset < int.MaxValue);
-                    Array.Copy(buffer, offsetInBuffer, m_rgbBuf, checked((int)offset), count);
+                    System.Buffer.BlockCopy(buffer, offsetInBuffer, m_rgbBuf, checked((int)offset), count);
 
                     // If the last position that has been written is after
                     // the current data length, reset the length
@@ -493,17 +494,6 @@ namespace System.Data.SqlTypes
         {
             return _state == SqlBytesCharsState.Stream;
         }
-
-        private void SetBuffer(byte[] buffer)
-        {
-            m_rgbBuf = buffer;
-            _lCurLen = (m_rgbBuf == null) ? x_lNull : (long)m_rgbBuf.Length;
-            m_stream = null;
-            _state = (m_rgbBuf == null) ? SqlBytesCharsState.Null : SqlBytesCharsState.Buffer;
-
-            AssertValid();
-        }
-
 
         // --------------------------------------------------------------
         //	  Static fields, properties
@@ -595,7 +585,7 @@ namespace System.Data.SqlTypes
             {
                 CheckIfStreamClosed("set_Position");
                 if (value < 0 || value > _sb.Length)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 else
                     _lPosition = value;
             }
@@ -607,7 +597,7 @@ namespace System.Data.SqlTypes
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            CheckIfStreamClosed("Seek");
+            CheckIfStreamClosed();
 
             long lPosition = 0;
 
@@ -615,26 +605,26 @@ namespace System.Data.SqlTypes
             {
                 case SeekOrigin.Begin:
                     if (offset < 0 || offset > _sb.Length)
-                        throw new ArgumentOutOfRangeException("offset");
+                        throw new ArgumentOutOfRangeException(nameof(offset));
                     _lPosition = offset;
                     break;
 
                 case SeekOrigin.Current:
                     lPosition = _lPosition + offset;
                     if (lPosition < 0 || lPosition > _sb.Length)
-                        throw new ArgumentOutOfRangeException("offset");
+                        throw new ArgumentOutOfRangeException(nameof(offset));
                     _lPosition = lPosition;
                     break;
 
                 case SeekOrigin.End:
                     lPosition = _sb.Length + offset;
                     if (lPosition < 0 || lPosition > _sb.Length)
-                        throw new ArgumentOutOfRangeException("offset");
+                        throw new ArgumentOutOfRangeException(nameof(offset));
                     _lPosition = lPosition;
                     break;
 
                 default:
-                    throw ADP.InvalidSeekOrigin("offset");
+                    throw ADP.InvalidSeekOrigin(nameof(offset));
             }
 
             return _lPosition;
@@ -643,14 +633,14 @@ namespace System.Data.SqlTypes
         // The Read/Write/ReadByte/WriteByte simply delegates to SqlBytes
         public override int Read(byte[] buffer, int offset, int count)
         {
-            CheckIfStreamClosed("Read");
+            CheckIfStreamClosed();
 
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             if (offset < 0 || offset > buffer.Length)
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             if (count < 0 || count > buffer.Length - offset)
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             int iBytesRead = (int)_sb.Read(_lPosition, buffer, offset, count);
             _lPosition += iBytesRead;
@@ -660,14 +650,14 @@ namespace System.Data.SqlTypes
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            CheckIfStreamClosed("Write");
+            CheckIfStreamClosed();
 
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             if (offset < 0 || offset > buffer.Length)
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             if (count < 0 || count > buffer.Length - offset)
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             _sb.Write(_lPosition, buffer, offset, count);
             _lPosition += count;
@@ -675,7 +665,7 @@ namespace System.Data.SqlTypes
 
         public override int ReadByte()
         {
-            CheckIfStreamClosed("ReadByte");
+            CheckIfStreamClosed();
 
             // If at the end of stream, return -1, rather than call SqlBytes.ReadByte,
             // which will throw exception. This is the behavior for Stream.
@@ -690,7 +680,7 @@ namespace System.Data.SqlTypes
 
         public override void WriteByte(byte value)
         {
-            CheckIfStreamClosed("WriteByte");
+            CheckIfStreamClosed();
 
             _sb[_lPosition] = value;
             _lPosition++;
@@ -698,7 +688,7 @@ namespace System.Data.SqlTypes
 
         public override void SetLength(long value)
         {
-            CheckIfStreamClosed("SetLength");
+            CheckIfStreamClosed();
 
             _sb.SetLength(value);
             if (_lPosition > value)
@@ -715,7 +705,7 @@ namespace System.Data.SqlTypes
         protected override void Dispose(bool disposing)
         {
             // When m_sb is null, it means the stream has been closed, and
-            // any opearation in the future should fail.
+            // any operation in the future should fail.
             // This is the only case that m_sb is null.
             try
             {
@@ -736,7 +726,7 @@ namespace System.Data.SqlTypes
             return _sb == null;
         }
 
-        private void CheckIfStreamClosed(string methodname)
+        private void CheckIfStreamClosed([CallerMemberName] string methodname = "")
         {
             if (FClosed())
                 throw ADP.StreamClosed(methodname);

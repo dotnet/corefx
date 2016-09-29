@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -30,6 +32,11 @@ namespace System.Dynamic.Utils
         public static bool IsNullableType(this Type type)
         {
             return type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+        }
+
+        public static bool IsNullableOrReferenceType(this Type type)
+        {
+            return !type.GetTypeInfo().IsValueType || IsNullableType(type);
         }
 
         public static bool IsBool(Type type)
@@ -158,6 +165,11 @@ namespace System.Dynamic.Utils
                 }
             }
             return false;
+        }
+
+        public static bool IsNumericOrBool(Type type)
+        {
+            return IsNumeric(type) || IsBool(type);
         }
 
         // Checks if the type is a valid target for an instance call
@@ -467,55 +479,62 @@ namespace System.Dynamic.Utils
             // check for implicit coercions first
             Type nnExprType = TypeUtils.GetNonNullableType(convertFrom);
             Type nnConvType = TypeUtils.GetNonNullableType(convertToType);
+
+            bool retryForLifted = !AreEquivalent(nnExprType, convertFrom) || !AreEquivalent(nnConvType, convertToType);
+
             // try exact match on types
-            MethodInfo[] eMethods = nnExprType.GetStaticMethods();
+            IEnumerable<MethodInfo> eMethods = nnExprType.GetStaticMethods();
+            if (retryForLifted)
+            {
+                // If this may be scanned again for a lifted match, store it in a list.
+                eMethods = new List<MethodInfo>(eMethods);
+            }
+
             MethodInfo method = FindConversionOperator(eMethods, convertFrom, convertToType, implicitOnly);
             if (method != null)
             {
                 return method;
             }
-            MethodInfo[] cMethods = nnConvType.GetStaticMethods();
+
+            IEnumerable<MethodInfo> cMethods = nnConvType.GetStaticMethods();
+            if (retryForLifted)
+            {
+                cMethods = new List<MethodInfo>(cMethods);
+            }
+
             method = FindConversionOperator(cMethods, convertFrom, convertToType, implicitOnly);
             if (method != null)
             {
                 return method;
             }
+
             // try lifted conversion
-            if (!TypeUtils.AreEquivalent(nnExprType, convertFrom) ||
-                !TypeUtils.AreEquivalent(nnConvType, convertToType))
+            if (retryForLifted)
             {
-                method = FindConversionOperator(eMethods, nnExprType, nnConvType, implicitOnly);
-                if (method == null)
-                {
-                    method = FindConversionOperator(cMethods, nnExprType, nnConvType, implicitOnly);
-                }
-                if (method != null)
-                {
-                    return method;
-                }
+                return FindConversionOperator(eMethods, nnExprType, nnConvType, implicitOnly)
+                    ?? FindConversionOperator(cMethods, nnExprType, nnConvType, implicitOnly);
             }
+
             return null;
         }
 
-        public static MethodInfo FindConversionOperator(MethodInfo[] methods, Type typeFrom, Type typeTo, bool implicitOnly)
+        private static MethodInfo FindConversionOperator(IEnumerable<MethodInfo> methods, Type typeFrom, Type typeTo, bool implicitOnly)
         {
             foreach (MethodInfo mi in methods)
             {
-                if (mi.Name != "op_Implicit" && (implicitOnly || mi.Name != "op_Explicit"))
+                if (
+                    (mi.Name == "op_Implicit" || (!implicitOnly && mi.Name == "op_Explicit"))
+                    && AreEquivalent(mi.ReturnType, typeTo)
+                    )
                 {
-                    continue;
+                    ParameterInfo[] pis = mi.GetParametersCached();
+                    if (pis.Length == 1 && AreEquivalent(pis[0].ParameterType, typeFrom))
+                    {
+                        return mi;
+                    }
                 }
-                if (!TypeUtils.AreEquivalent(mi.ReturnType, typeTo))
-                {
-                    continue;
-                }
-                ParameterInfo[] pis = mi.GetParametersCached();
-                if (!TypeUtils.AreEquivalent(pis[0].ParameterType, typeFrom))
-                {
-                    continue;
-                }
-                return mi;
             }
+
             return null;
         }
 
@@ -591,7 +610,7 @@ namespace System.Dynamic.Utils
                 case TypeCode.UInt32:
                     switch (tcDest)
                     {
-                        case TypeCode.UInt32:
+                        case TypeCode.Int64:
                         case TypeCode.UInt64:
                         case TypeCode.Single:
                         case TypeCode.Double:
@@ -680,7 +699,7 @@ namespace System.Dynamic.Utils
         /// NOTE: This was designed to satisfy the needs of op_True and
         /// op_False, because we have to do runtime lookup for those. It may
         /// not work right for unary operators in general.
-        ///// </summary>
+        /// </summary>
         public static MethodInfo GetBooleanOperator(Type type, string name)
         {
             do

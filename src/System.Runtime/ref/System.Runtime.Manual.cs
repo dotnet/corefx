@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -36,10 +37,13 @@ namespace System
         public const double PositiveInfinity = (double)1.0 / (double)(0.0);
         public const double NaN = (double)0.0 / (double)0.0;
     }
-    public partial class Type
+}
+namespace System.Reflection
+{
+    // These should be made public when reflection extensibility via contracts is supported on all platforms.
+    // In the meantime, these will be exposed via wrapper factory methods in System.Private.Reflection.Extensibility.
+    public partial struct CustomAttributeNamedArgument
     {
-        // Members promoted from MemberInfo
-        public abstract Type DeclaringType { get; }
-        public abstract string Name { get; }
+        internal CustomAttributeNamedArgument(Type attributeType, string memberName, bool isField, CustomAttributeTypedArgument typedValue) { }
     }
 }

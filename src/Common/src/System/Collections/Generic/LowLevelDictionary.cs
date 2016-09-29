@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -20,10 +21,7 @@ namespace System.Collections.Generic
     ** behavior.)
     ** 
     ===========================================================*/
-#if TYPE_LOADER_IMPLEMENTATION
-    [System.Runtime.CompilerServices.ForceDictionaryLookups]
-#endif
-    internal class LowLevelDictionary<TKey, TValue>
+    internal partial class LowLevelDictionary<TKey, TValue>
     {
         private const int DefaultSize = 17;
 
@@ -60,22 +58,22 @@ namespace System.Collections.Generic
             get
             {
                 if (key == null)
-                    throw new ArgumentNullException("key");
+                    throw new ArgumentNullException(nameof(key));
 
                 Entry entry = Find(key);
                 if (entry == null)
                     throw new KeyNotFoundException();
-                return entry.m_value;
+                return entry._value;
             }
             set
             {
                 if (key == null)
-                    throw new ArgumentNullException("key");
+                    throw new ArgumentNullException(nameof(key));
 
                 _version++;
                 Entry entry = Find(key);
                 if (entry != null)
-                    entry.m_value = value;
+                    entry._value = value;
                 else
                     UncheckedAdd(key, value);
             }
@@ -85,11 +83,11 @@ namespace System.Collections.Generic
         {
             value = default(TValue);
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             Entry entry = Find(key);
             if (entry != null)
             {
-                value = entry.m_value;
+                value = entry._value;
                 return true;
             }
             return false;
@@ -98,10 +96,10 @@ namespace System.Collections.Generic
         public void Add(TKey key, TValue value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             Entry entry = Find(key);
             if (entry != null)
-                throw new ArgumentException(SR.Argument_AddingDuplicate);
+                throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key));
             _version++;
             UncheckedAdd(key, value);
         }
@@ -116,21 +114,21 @@ namespace System.Collections.Generic
         public bool Remove(TKey key)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             int bucket = GetBucket(key);
             Entry prev = null;
             Entry entry = _buckets[bucket];
             while (entry != null)
             {
-                if (_comparer.Equals(key, entry.m_key))
+                if (_comparer.Equals(key, entry._key))
                 {
                     if (prev == null)
                     {
-                        _buckets[bucket] = entry.m_next;
+                        _buckets[bucket] = entry._next;
                     }
                     else
                     {
-                        prev.m_next = entry.m_next;
+                        prev._next = entry._next;
                     }
                     _version++;
                     _numEntries--;
@@ -138,7 +136,7 @@ namespace System.Collections.Generic
                 }
 
                 prev = entry;
-                entry = entry.m_next;
+                entry = entry._next;
             }
             return false;
         }
@@ -147,7 +145,7 @@ namespace System.Collections.Generic
         {
             Entry entry = Find(key);
             if (entry != null)
-                return entry.m_value;
+                return entry._value;
             UncheckedAdd(key, value);
             return value;
         }
@@ -158,10 +156,10 @@ namespace System.Collections.Generic
             Entry entry = _buckets[bucket];
             while (entry != null)
             {
-                if (_comparer.Equals(key, entry.m_key))
+                if (_comparer.Equals(key, entry._key))
                     return entry;
 
-                entry = entry.m_next;
+                entry = entry._next;
             }
             return null;
         }
@@ -169,11 +167,11 @@ namespace System.Collections.Generic
         private Entry UncheckedAdd(TKey key, TValue value)
         {
             Entry entry = new Entry();
-            entry.m_key = key;
-            entry.m_value = value;
+            entry._key = key;
+            entry._value = value;
 
             int bucket = GetBucket(key);
-            entry.m_next = _buckets[bucket];
+            entry._next = _buckets[bucket];
             _buckets[bucket] = entry;
 
             _numEntries++;
@@ -195,10 +193,10 @@ namespace System.Collections.Generic
                     Entry entry = _buckets[i];
                     while (entry != null)
                     {
-                        Entry nextEntry = entry.m_next;
+                        Entry nextEntry = entry._next;
 
-                        int bucket = GetBucket(entry.m_key, newNumBuckets);
-                        entry.m_next = newBuckets[bucket];
+                        int bucket = GetBucket(entry._key, newNumBuckets);
+                        entry._next = newBuckets[bucket];
                         newBuckets[bucket] = entry;
 
                         entry = nextEntry;
@@ -219,14 +217,11 @@ namespace System.Collections.Generic
         }
 
 
-#if TYPE_LOADER_IMPLEMENTATION
-        [System.Runtime.CompilerServices.ForceDictionaryLookups]
-#endif
         private sealed class Entry
         {
-            public TKey m_key;
-            public TValue m_value;
-            public Entry m_next;
+            public TKey _key;
+            public TValue _value;
+            public Entry _next;
         }
 
         private Entry[] _buckets;
@@ -235,9 +230,6 @@ namespace System.Collections.Generic
         private IEqualityComparer<TKey> _comparer;
 
         // This comparator is used if no comparator is supplied. It emulates the behavior of EqualityComparer<T>.Default.
-#if TYPE_LOADER_IMPLEMENTATION
-        [System.Runtime.CompilerServices.ForceDictionaryLookups]
-#endif
         private sealed class DefaultComparer<T> : IEqualityComparer<T>
         {
             public bool Equals(T x, T y)
@@ -256,9 +248,6 @@ namespace System.Collections.Generic
             }
         }
 
-#if TYPE_LOADER_IMPLEMENTATION
-        [System.Runtime.CompilerServices.ForceDictionaryLookups]
-#endif
         protected sealed class LowLevelDictEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>
         {
             public LowLevelDictEnumerator(LowLevelDictionary<TKey, TValue> dict)
@@ -273,7 +262,7 @@ namespace System.Collections.Generic
                     while (entry != null)
                     {
                         entries[dst++] = entry;
-                        entry = entry.m_next;
+                        entry = entry._next;
                     }
                 }
                 _entries = entries;
@@ -289,7 +278,7 @@ namespace System.Collections.Generic
                     if (_curPosition == -1 || _curPosition == _entries.Length)
                         throw new InvalidOperationException("InvalidOperation_EnumOpCantHappen");
                     Entry entry = _entries[_curPosition];
-                    return new KeyValuePair<TKey, TValue>(entry.m_key, entry.m_value);
+                    return new KeyValuePair<TKey, TValue>(entry._key, entry._value);
                 }
             }
 
@@ -327,23 +316,6 @@ namespace System.Collections.Generic
             private Entry[] _entries;
             private int _curPosition;
             private int _version;
-        }
-    }
-
-    /// <summary>
-    /// LowLevelDictionary when enumeration is needed
-    /// </summary>
-    internal sealed class LowLevelDictionaryWithIEnumerable<TKey, TValue> : LowLevelDictionary<TKey, TValue>, IEnumerable<KeyValuePair<TKey, TValue>>
-    {
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            return new LowLevelDictEnumerator(this);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            IEnumerator<KeyValuePair<TKey, TValue>> ie = GetEnumerator();
-            return ie;
         }
     }
 }

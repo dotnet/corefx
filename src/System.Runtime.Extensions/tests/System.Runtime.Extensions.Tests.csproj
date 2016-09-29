@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -8,20 +11,45 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.Runtime.Extensions.Tests</RootNamespace>
     <AssemblyName>System.Runtime.Extensions.Tests</AssemblyName>
-    <RestorePackages>true</RestorePackages>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IncludePerformanceTests>true</IncludePerformanceTests>
+    <DefineConstants Condition="'$(TargetGroup)'=='netstandard1.7'">$(DefineConstants);netstandard17</DefineConstants>
+    <NugetTargetMoniker Condition="'$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.5</NugetTargetMoniker>
   </PropertyGroup>
+  <!-- Folder logic needs moved into common targets: https://github.com/dotnet/corefx/issues/11468 -->
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.7'">
+    <TestNugetTargetMoniker Include="$(NugetTargetMoniker)">
+      <Folder>ns1.7-netcoreapp1.1</Folder>
+    </TestNugetTargetMoniker>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp1.1'">
+    <TestNugetTargetMoniker Include="$(NugetTargetMoniker)">
+      <Folder>netcoreapp1.1</Folder>
+    </TestNugetTargetMoniker>
+  </ItemGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netcoreapp1.1_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netcoreapp1.1_Release|AnyCPU' " />
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.7' or '$(TargetGroup)'=='netcoreapp1.1'">
+    <Compile Include="System\IO\PathTests.netstandard1.7.cs" />
+    <Compile Include="System\Convert.netstandard1.7.cs" />
+    <Compile Include="System\EnvironmentTests.cs" />
+    <Compile Include="System\Math.netstandard1.7.cs" />
+    <Compile Include="System\StringComparer.netstandard1.7.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp1.1'">
+    <Compile Include="System\IO\Path.GetRelativePath.cs" />
+  </ItemGroup>
   <ItemGroup>
+    <Compile Include="System\AppDomainTests.cs" Condition="'$(TargetGroup)'=='netstandard1.7'" />
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
+    <Compile Include="System\Environment.MachineName.cs" />
+    <Compile Include="System\IO\Path.Combine.cs" />
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />
     <Compile Include="System\IO\PathTests.cs" />
-    <Compile Include="System\IO\Path.Combine.cs" />
     <Compile Include="System\Net\WebUtility.cs" />
     <Compile Include="System\BitConverter.cs" />
     <Compile Include="System\Convert.BoxedObjectCheck.cs" />
@@ -57,7 +85,12 @@
     <Compile Include="System\Progress.cs" />
     <Compile Include="System\Random.cs" />
     <Compile Include="System\StringComparer.cs" />
-	
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetNodeName.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.GetNodeName.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Diagnostics\AssertWithCallerAttributes.cs">
       <Link>Common\tests\System\Diagnostics\AssertWithCallerAttributes.cs</Link>
     </Compile>
@@ -70,50 +103,27 @@
     <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
     </Compile>
-    <!-- Performance Tests -->
-    <Compile Include="Performance\Perf.Environment.cs" />
-    <Compile Include="Performance\Perf.Path.cs" />
-    <Compile Include="Performance\Perf.Random.cs" />
-    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
-      <Link>Common\System\PerfUtils.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ref\System.Runtime.Extensions.csproj">
-      <Project>{da96367e-04d1-4057-997e-aed4a2773f0d}</Project>
-      <Name>System.Runtime.Extensions</Name>
-      <!-- Don't deploy reference assembly -->
-      <Private>false</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\src\System.Runtime.Extensions.CoreCLR.csproj">
+    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj" />
+    <ProjectReference Include="..\pkg\System.Runtime.Extensions.pkgproj">
       <Project>{1e689c1b-690c-4799-bde9-6e7990585894}</Project>
       <Name>System.Runtime.Extensions.CoreCLR</Name>
-      <!-- Don't reference implementation assembly, but do deploy it. -->
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <OutputItemType>Content</OutputItemType>
     </ProjectReference>
-    <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.CoreCLR.csproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <OutputItemType>Content</OutputItemType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <OutputItemType>Content</OutputItemType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Diagnostics.Process\src\System.Diagnostics.Process.csproj">
-      <Project>{63634289-90D7-4947-8BF3-DBBE98D76C85}</Project>
-      <Name>System.Diagnostics.Process</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\..\System.Private.Uri\pkg\System.Private.Uri.pkgproj" />
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
+    <ProjectReference Include="VoidMainWithExitCodeApp\VoidMainWithExitCodeApp.csproj">
+      <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
+      <Name>VoidMainWithExitCodeApp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

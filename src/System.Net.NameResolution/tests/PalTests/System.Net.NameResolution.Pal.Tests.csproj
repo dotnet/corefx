@@ -1,29 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
     <ProjectGuid>{F6D1C093-081D-46DE-B5A8-516533375FDD}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <StringResourcesPath>..\..\src\Resources\Strings.resx</StringResourcesPath>
-    <UnsupportedPlatforms>FreeBSD</UnsupportedPlatforms>
+    <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   
   <ItemGroup>
     <Compile Include="NameResolutionPalTests.cs" />
     <Compile Include="Fakes\GlobalLog.cs" />
-    <Compile Include="Fakes\Logging.cs" />
+    
+    <Compile Include="$(CommonPath)\System\Net\Logging\LoggingHash.cs">
+      <Link>Common\System\Net\Logging\LoggingHash.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.cs">
+      <Link>Common\System\Net\Logging\NetEventSource.cs</Link>
+    </Compile>
 
     <Compile Include="..\..\src\System\Net\IPHostEntry.cs" >
       <Link>ProductionCode\System\Net\IPHostEntry.cs</Link>
@@ -41,6 +46,13 @@
 
     <Compile Include="$(CommonPath)\System\Net\IPEndPointStatics.cs">
       <Link>Common\System\Net\IPEndPointStatics.cs</Link>
+    </Compile>
+
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
+      <Link>Common\System\Net\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Http.cs">
+      <Link>Common\System\Net\Configuration.Http.cs</Link>
     </Compile>
   </ItemGroup>
 
@@ -135,8 +147,11 @@
     <Compile Include="$(CommonPath)\System\Net\InteropIPAddressExtensions.Unix.cs">
       <Link>Common\System\Net\InteropIPAddressExtensions.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Internals\SocketException.Unix.cs">
-      <Link>ProductionCode\Common\System\Net\Internals\SocketException.Unix.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketExceptionFactory.cs">
+      <Link>ProductionCode\Common\System\Net\Internals\SocketExceptionFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Internals\SocketExceptionFactory.Unix.cs">
+      <Link>ProductionCode\Common\System\Net\Internals\SocketExceptionFactory.Unix.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\NameResolutionPal.Unix.cs">
       <Link>ProductionCode\System\Net\NameResolutionPal.Unix.cs</Link>

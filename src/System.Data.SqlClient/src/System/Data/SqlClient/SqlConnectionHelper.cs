@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // In the desktop version of the framework, this file is generated from ProviderBase\DbConnectionHelper.cs
@@ -27,22 +28,6 @@ namespace System.Data.SqlClient
         {
             GC.SuppressFinalize(this);
             _innerConnection = DbConnectionClosedNeverOpened.SingletonInstance;
-        }
-
-        private void CopyFrom(SqlConnection connection)
-        {
-            ADP.CheckArgumentNull(connection, "connection");
-            _userConnectionOptions = connection.UserConnectionOptions;
-            _poolGroup = connection.PoolGroup;
-
-            if (DbConnectionClosedNeverOpened.SingletonInstance == connection._innerConnection)
-            {
-                _innerConnection = DbConnectionClosedNeverOpened.SingletonInstance;
-            }
-            else
-            {
-                _innerConnection = DbConnectionClosedPreviouslyOpened.SingletonInstance;
-            }
         }
 
         internal int CloseCount
@@ -77,13 +62,6 @@ namespace System.Data.SqlClient
             return ((null != connectionOptions) ? connectionOptions.UsersConnectionString(hidePassword) : "");
         }
 
-        private void ConnectionString_Set(string value)
-        {
-            DbConnectionPoolKey key = new DbConnectionPoolKey(value);
-
-            ConnectionString_Set(key);
-        }
-
         private void ConnectionString_Set(DbConnectionPoolKey key)
         {
             DbConnectionOptions connectionOptions = null;
@@ -102,7 +80,7 @@ namespace System.Data.SqlClient
             }
             if (!flag)
             {
-                throw ADP.OpenConnectionPropertySet(ADP.ConnectionString, connectionInternal.State);
+                throw ADP.OpenConnectionPropertySet(nameof(ConnectionString), connectionInternal.State);
             }
         }
 

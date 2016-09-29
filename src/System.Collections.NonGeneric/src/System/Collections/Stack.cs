@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*=============================================================================
 **
@@ -11,7 +12,6 @@
 **
 =============================================================================*/
 
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -22,12 +22,14 @@ namespace System.Collections
     // so Push can be O(n).  Pop is O(1).
     [DebuggerTypeProxy(typeof(System.Collections.Stack.StackDebugView))]
     [DebuggerDisplay("Count = {Count}")]
+    [Serializable]
     public class Stack : ICollection
     {
         private Object[] _array;     // Storage for stack elements
         [ContractPublicPropertyName("Count")]
         private int _size;           // Number of items in the stack.
         private int _version;        // Used to keep enumerator in sync w/ collection.
+        [NonSerialized]
         private Object _syncRoot;
 
         private const int _defaultCapacity = 10;
@@ -44,7 +46,7 @@ namespace System.Collections
         public Stack(int initialCapacity)
         {
             if (initialCapacity < 0)
-                throw new ArgumentOutOfRangeException("initialCapacity", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(initialCapacity), SR.ArgumentOutOfRange_NeedNonNegNum);
             Contract.EndContractBlock();
             if (initialCapacity < _defaultCapacity)
                 initialCapacity = _defaultCapacity;  // Simplify doubling logic in Push.
@@ -59,7 +61,7 @@ namespace System.Collections
         public Stack(ICollection col) : this((col == null ? 32 : col.Count))
         {
             if (col == null)
-                throw new ArgumentNullException("col");
+                throw new ArgumentNullException(nameof(col));
             Contract.EndContractBlock();
             IEnumerator en = col.GetEnumerator();
             while (en.MoveNext())
@@ -134,11 +136,11 @@ namespace System.Collections
         public virtual void CopyTo(Array array, int index)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             if (array.Rank != 1)
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             if (index < 0)
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (array.Length - index < _size)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             Contract.EndContractBlock();
@@ -214,7 +216,7 @@ namespace System.Collections
         public static Stack Synchronized(Stack stack)
         {
             if (stack == null)
-                throw new ArgumentNullException("stack");
+                throw new ArgumentNullException(nameof(stack));
             Contract.Ensures(Contract.Result<Stack>() != null);
             Contract.EndContractBlock();
             return new SyncStack(stack);
@@ -239,6 +241,7 @@ namespace System.Collections
             return objArray;
         }
 
+        [Serializable]
         private class SyncStack : Stack
         {
             private Stack _s;
@@ -349,7 +352,7 @@ namespace System.Collections
             }
         }
 
-
+        [Serializable]
         private class StackEnumerator : IEnumerator
         {
             private Stack _stack;
@@ -415,7 +418,7 @@ namespace System.Collections
             public StackDebugView(Stack stack)
             {
                 if (stack == null)
-                    throw new ArgumentNullException("stack");
+                    throw new ArgumentNullException(nameof(stack));
                 Contract.EndContractBlock();
 
                 _stack = stack;

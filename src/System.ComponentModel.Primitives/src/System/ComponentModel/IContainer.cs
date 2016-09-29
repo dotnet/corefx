@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 
@@ -14,36 +15,36 @@ namespace System.ComponentModel
      * scenarios, including both visual and non-visual scenarios.
      */
 
-    /// <devdoc>
+    /// <summary>
     ///    <para>Provides
     ///       functionality for containers. Containers are objects that logically contain zero or more components.</para>
-    /// </devdoc>
+    /// </summary>
     public interface IContainer : IDisposable
     {
         // Adds a component to the container.
-        /// <devdoc>
+        /// <summary>
         /// <para>Adds the specified <see cref='System.ComponentModel.IComponent'/> to the <see cref='System.ComponentModel.IContainer'/>
         /// at the end of the list.</para>
-        /// </devdoc>
+        /// </summary>
         void Add(IComponent component);
 
         //  Adds a component to the container.
-        /// <devdoc>
+        /// <summary>
         /// <para>Adds the specified <see cref='System.ComponentModel.IComponent'/> to the <see cref='System.ComponentModel.IContainer'/>
         /// at the end of the list, and assigns a name to the component.</para>
-        /// </devdoc>
+        /// </summary>
         void Add(IComponent component, String name);
 
         // The components in the container.
-        /// <devdoc>
+        /// <summary>
         /// <para>Gets all the components in the <see cref='System.ComponentModel.IContainer'/>.</para>
-        /// </devdoc>
+        /// </summary>
         ComponentCollection Components { get; }
 
         // Removes a component from the container.
-        /// <devdoc>
+        /// <summary>
         /// <para>Removes a component from the <see cref='System.ComponentModel.IContainer'/>.</para>
-        /// </devdoc>
+        /// </summary>
         void Remove(IComponent component);
     }
 }

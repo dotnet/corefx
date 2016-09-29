@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Runtime;
@@ -82,6 +83,12 @@ namespace System.Runtime.Serialization.Json
             }
         }
 
+        internal static JsonReadWriteDelegates TryGetReadWriteDelegatesFromGeneratedAssembly(DataContract c)
+        {
+            JsonReadWriteDelegates result = GetGeneratedReadWriteDelegates(c);
+            return result;
+        }
+
         [SecuritySafeCritical]
         public static JsonDataContract GetJsonDataContract(DataContract traditionalDataContract)
         {
@@ -121,7 +128,7 @@ namespace System.Runtime.Serialization.Json
 
         protected static bool TryReadNullAtTopLevel(XmlReaderDelegator reader)
         {
-            while (reader.MoveToAttribute(JsonGlobals.typeString) && (reader.Value == JsonGlobals.nullString))
+            if (reader.MoveToAttribute(JsonGlobals.typeString) && (reader.Value == JsonGlobals.nullString))
             {
                 reader.Skip();
                 reader.MoveToElement();
@@ -289,7 +296,7 @@ namespace System.Runtime.Serialization.Json
                         }
                         else
                         {
-                            throw new ArgumentException(SR.Format(SR.JsonTypeNotSupportedByDataContractJsonSerializer, traditionalDataContract.UnderlyingType), "traditionalDataContract");
+                            throw new ArgumentException(SR.Format(SR.JsonTypeNotSupportedByDataContractJsonSerializer, traditionalDataContract.UnderlyingType), nameof(traditionalDataContract));
                         }
                     }
                     return dataContract;

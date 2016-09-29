@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -177,6 +178,30 @@ namespace System.Threading.Tasks.Tests
 
             bool cr = tokenSource.IsCancellationRequested; //this is ok after dispose.
             tokenSource.Dispose(); //Repeat calls to Dispose should be ok.
+        }
+
+        [Fact]
+        public static void TokenSourceDispose_Negative()
+        {
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+            CancellationToken token = tokenSource.Token;
+
+            CancellationTokenRegistration preDisposeRegistration = token.Register(() => { });
+
+            //WaitHandle and Dispose
+            tokenSource.Dispose();
+            Assert.Throws<ObjectDisposedException>(() =>  token.WaitHandle);
+
+            Assert.Throws<ObjectDisposedException>(() =>tokenSource.Token);
+
+            //shouldn't throw
+            token.Register(() => { });
+
+            // Allow ctr.Dispose() to succeed when the backing cts has already been disposed.
+            preDisposeRegistration.Dispose();
+
+            //shouldn't throw
+            CancellationTokenSource.CreateLinkedTokenSource(new[] { token, token });
         }
 
         /// <summary>

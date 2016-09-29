@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /// This class is primarily used to test buffer boundary integrity of readers.
 ///	This class constructs a memory stream from the given buffer boundary length such that
@@ -130,7 +131,7 @@ namespace XmlCoreTest.Common
             return CreateReader(readerParams);
         }
 
-        //This API doesnt attach a default validation event handler.
+        //This API doesn't attach a default validation event handler.
         public static XmlReader CreateReader(ReaderType readerType, Stream stream, string baseUri, bool enableNormalization)
         {
             return CreateReader(readerType.ToString(), stream, baseUri, enableNormalization, null, null, false);

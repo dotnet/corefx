@@ -1,13 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------
-//------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Collections.Generic;
 using System.Text;
-using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Threading.Tasks;
@@ -21,7 +17,6 @@ namespace System.Xml
         private int _offset;
         private bool _ownsStream;
         private const int bufferLength = 512;
-        private const int maxEntityLength = 32;
         private const int maxBytesPerChar = 3;
         private Encoding _encoding;
         private static UTF8Encoding s_UTF8Encoding = new UTF8Encoding(false, true);
@@ -469,12 +464,7 @@ namespace System.Xml
                             chars++;
                         }
 
-                        string tmp = new string(charsStart, 0, (int)(chars - charsStart));
-                        byte[] newBytes = _encoding != null ? _encoding.GetBytes(tmp) : s_UTF8Encoding.GetBytes(tmp);
-                        int toCopy = Math.Min(newBytes.Length, (int)(bytesMax - bytes));
-                        Array.Copy(newBytes, 0, buffer, (int)(bytes - _bytes) + offset, toCopy);
-
-                        bytes += toCopy;
+                        bytes += (_encoding ?? s_UTF8Encoding).GetBytes(charsStart, (int)(chars - charsStart), bytes, (int)(bytesMax - bytes));
 
                         if (chars >= charsMax)
                             break;

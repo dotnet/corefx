@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.IO;
@@ -106,36 +107,6 @@ namespace System.Reflection.PortableExecutable
                 }
             }
             return Encoding.UTF8.GetString(bytes, 0, nonPaddedLength);
-        }
-
-        /// <summary>
-        /// Resolve image size as either the given user-specified size or distance from current position to end-of-stream.
-        /// Also performs the relevant argument validation and publicly visible caller has same argument names.
-        /// </summary>
-        /// <exception cref="ArgumentException">size is null and distance from current position to end-of-stream can't fit in Int32.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Size is negative or extends past the end-of-stream from current position.</exception>
-        public static int GetAndValidateSize(Stream peStream, int? size)
-        {
-            long maxSize = peStream.Length - peStream.Position;
-
-            if (size.HasValue)
-            {
-                if (unchecked(size.Value) > maxSize)
-                {
-                    throw new ArgumentOutOfRangeException("size");
-                }
-
-                return size.Value;
-            }
-            else
-            {
-                if (maxSize > int.MaxValue)
-                {
-                    throw new ArgumentException(SR.StreamTooLarge, "peStream");
-                }
-
-                return (int)maxSize;
-            }
         }
 
         private void CheckBounds(uint count)

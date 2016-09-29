@@ -1,9 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Globalization;
 using System.IO;
@@ -131,10 +133,10 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Reduces the node and then calls the visitor delegate on the reduced expression.
+        /// Reduces the node and then calls the <see cref="ExpressionVisitor.Visit(Expression)"/> method passing the reduced expression.
         /// Throws an exception if the node isn't reducible.
         /// </summary>
-        /// <param name="visitor">An instance of <see cref="Func{Expression, Expression}"/>.</param>
+        /// <param name="visitor">An instance of <see cref="ExpressionVisitor"/>.</param>
         /// <returns>The expression being visited, or an expression which should replace it in the tree.</returns>
         /// <remarks>
         /// Override this method to provide logic to walk the node's children. 
@@ -219,8 +221,10 @@ namespace System.Linq.Expressions
         /// Creates a <see cref="String"/> representation of the Expression.
         /// </summary>
         /// <returns>A <see cref="String"/> representation of the Expression.</returns>
-        public string DebugView
+        private string DebugView
         {
+            // Note that this property is often accessed using reflection. As such it will have more dependencies than one
+            // might surmise from its being internal, and removing it requires greater caution than with other internal methods.
             get
             {
                 using (System.IO.StringWriter writer = new System.IO.StringWriter(CultureInfo.CurrentCulture))
@@ -242,7 +246,7 @@ namespace System.Linq.Expressions
         /// Ultimately this saves us from having to allocate a ReadOnlyCollection for our
         /// data types because the compiler is capable of going directly to the IList of T.
         /// </summary>
-        public static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IList<T> collection)
+        internal static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IList<T> collection)
         {
             return ExpressionUtils.ReturnReadOnly<T>(ref collection);
         }
@@ -273,37 +277,31 @@ namespace System.Linq.Expressions
         /// contains a ReadOnlyCollection or the Expression.  We check for the Expression and if it's
         /// present we return that, otherwise we return the 1st element of the ReadOnlyCollection.
         /// </summary>
-        public static T ReturnObject<T>(object collectionOrT) where T : class
+        internal static T ReturnObject<T>(object collectionOrT) where T : class
         {
             return ExpressionUtils.ReturnObject<T>(collectionOrT);
         }
 
-        public static void RequiresCanRead(Expression expression, string paramName)
+        private static void RequiresCanRead(Expression expression, string paramName)
         {
-            ExpressionUtils.RequiresCanRead(expression, paramName);
+            ExpressionUtils.RequiresCanRead(expression, paramName, -1);
         }
 
-        public static void RequiresCanRead(IEnumerable<Expression> items, string paramName)
+        private static void RequiresCanRead(Expression expression, string paramName, int index)
         {
-            if (items != null)
-            {
-                // this is called a lot, avoid allocating an enumerator if we can...
-                IList<Expression> listItems = items as IList<Expression>;
-                if (listItems != null)
-                {
-                    for (int i = 0; i < listItems.Count; i++)
-                    {
-                        RequiresCanRead(listItems[i], paramName);
-                    }
-                    return;
-                }
+            ExpressionUtils.RequiresCanRead(expression, paramName, index);
+        }
 
-                foreach (var i in items)
-                {
-                    RequiresCanRead(i, paramName);
-                }
+        private static void RequiresCanRead(IReadOnlyList<Expression> items, string paramName)
+        {
+            Debug.Assert(items != null);
+            // this is called a lot, avoid allocating an enumerator if we can...
+            for (int i = 0, n = items.Count; i < n; i++)
+            {
+                RequiresCanRead(items[i], paramName, i);
             }
         }
+
         private static void RequiresCanWrite(Expression expression, string paramName)
         {
             if (expression == null)
@@ -311,45 +309,40 @@ namespace System.Linq.Expressions
                 throw new ArgumentNullException(paramName);
             }
 
-            bool canWrite = false;
             switch (expression.NodeType)
             {
                 case ExpressionType.Index:
-                    IndexExpression index = (IndexExpression)expression;
-                    if (index.Indexer != null)
+                    PropertyInfo indexer = ((IndexExpression)expression).Indexer;
+                    if (indexer == null || indexer.CanWrite)
                     {
-                        canWrite = index.Indexer.CanWrite;
-                    }
-                    else
-                    {
-                        canWrite = true;
+                        return;
                     }
                     break;
                 case ExpressionType.MemberAccess:
-                    MemberExpression member = (MemberExpression)expression;
-                    PropertyInfo prop = member.Member as PropertyInfo;
+                    MemberInfo member = ((MemberExpression)expression).Member;
+                    PropertyInfo prop = member as PropertyInfo;
                     if (prop != null)
                     {
-                        canWrite = prop.CanWrite;
+                        if(prop.CanWrite)
+                        {
+                            return;
+                        }
                     }
                     else
                     {
-                        FieldInfo field = member.Member as FieldInfo;
-                        if (field != null)
+                        Debug.Assert(member is FieldInfo);
+                        FieldInfo field = (FieldInfo)member;
+                        if (!(field.IsInitOnly || field.IsLiteral))
                         {
-                            canWrite = !(field.IsInitOnly || field.IsLiteral);
+                            return;
                         }
                     }
                     break;
                 case ExpressionType.Parameter:
-                    canWrite = true;
-                    break;
+                    return;
             }
 
-            if (!canWrite)
-            {
-                throw new ArgumentException(Strings.ExpressionMustBeWriteable, paramName);
-            }
+            throw Error.ExpressionMustBeWriteable(paramName);
         }
     }
 }

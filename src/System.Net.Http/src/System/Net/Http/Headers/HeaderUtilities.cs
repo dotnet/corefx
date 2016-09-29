@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,7 +28,7 @@ namespace System.Net.Http.Headers
 
         internal static void SetQuality(ObjectCollection<NameValueHeaderValue> parameters, double? value)
         {
-            Contract.Requires(parameters != null);
+            Debug.Assert(parameters != null);
 
             NameValueHeaderValue qualityParameter = NameValueHeaderValue.Find(parameters, qualityName);
             if (value.HasValue)
@@ -39,7 +40,7 @@ namespace System.Net.Http.Headers
                 // value.
                 if ((value < 0) || (value > 1))
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 string qualityString = ((double)value).ToString("0.0##", NumberFormatInfo.InvariantInfo);
@@ -64,7 +65,7 @@ namespace System.Net.Http.Headers
 
         internal static double? GetQuality(ObjectCollection<NameValueHeaderValue> parameters)
         {
-            Contract.Requires(parameters != null);
+            Debug.Assert(parameters != null);
 
             NameValueHeaderValue qualityParameter = NameValueHeaderValue.Find(parameters, qualityName);
             if (qualityParameter != null)
@@ -78,7 +79,7 @@ namespace System.Net.Http.Headers
                     return qualityValue;
                 }
                 // If the stored value is an invalid quality value, just return null and log a warning. 
-                if (Logging.On) Logging.PrintError(Logging.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_invalid_quality, qualityParameter.Value));
+                if (NetEventSource.Log.IsEnabled()) NetEventSource.PrintError(NetEventSource.ComponentType.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_invalid_quality, qualityParameter.Value));
             }
             return null;
         }
@@ -195,8 +196,8 @@ namespace System.Net.Http.Headers
         internal static int GetNextNonEmptyOrWhitespaceIndex(string input, int startIndex, bool skipEmptyValues,
             out bool separatorFound)
         {
-            Contract.Requires(input != null);
-            Contract.Requires(startIndex <= input.Length); // it's OK if index == value.Length.
+            Debug.Assert(input != null);
+            Debug.Assert(startIndex <= input.Length); // it's OK if index == value.Length.
 
             separatorFound = false;
             int current = startIndex + HttpRuleParser.GetWhitespaceLength(input, startIndex);
@@ -206,7 +207,7 @@ namespace System.Net.Http.Headers
                 return current;
             }
 
-            // If we have a separator, skip the separator and all following whitespaces. If we support
+            // If we have a separator, skip the separator and all following whitespace. If we support
             // empty values, continue until the current character is neither a separator nor a whitespace.
             separatorFound = true;
             current++; // skip delimiter.
@@ -226,7 +227,7 @@ namespace System.Net.Http.Headers
 
         internal static DateTimeOffset? GetDateTimeOffsetValue(string headerName, HttpHeaders store)
         {
-            Contract.Requires(store != null);
+            Debug.Assert(store != null);
 
             object storedValue = store.GetParsedValues(headerName);
             if (storedValue != null)
@@ -238,7 +239,7 @@ namespace System.Net.Http.Headers
 
         internal static TimeSpan? GetTimeSpanValue(string headerName, HttpHeaders store)
         {
-            Contract.Requires(store != null);
+            Debug.Assert(store != null);
 
             object storedValue = store.GetParsedValues(headerName);
             if (storedValue != null)
@@ -306,7 +307,7 @@ namespace System.Net.Http.Headers
             }
             catch (FormatException e)
             {
-                if (Logging.On) Logging.PrintError(Logging.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_wrong_email_format, value, e.Message));
+                if (NetEventSource.Log.IsEnabled()) NetEventSource.PrintError(NetEventSource.ComponentType.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_wrong_email_format, value, e.Message));
             }
             return false;
         }

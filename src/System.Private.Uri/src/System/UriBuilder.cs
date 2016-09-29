@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Text;
 using System.Globalization;
@@ -48,7 +49,7 @@ namespace System
         public UriBuilder(Uri uri)
         {
             if ((object)uri == null)
-                throw new ArgumentNullException("uri");
+                throw new ArgumentNullException(nameof(uri));
 
             Init(uri);
         }
@@ -120,7 +121,7 @@ namespace System
                     throw;
                 }
 
-                throw new ArgumentException("extraValue");
+                throw new ArgumentException(SR.Argument_ExtraNotValid, nameof(extraValue));
             }
         }
 
@@ -155,7 +156,7 @@ namespace System
                     }
                     else
                     {
-                        throw new ArgumentException("value");
+                        throw new ArgumentException(SR.Argument_ExtraNotValid, nameof(value));
                     }
                 }
                 else
@@ -178,7 +179,7 @@ namespace System
                 {
                     value = string.Empty;
                 }
-                if (value.Length > 0)
+                if (value.Length > 0 && value[0] != '#')
                 {
                     value = '#' + value;
                 }
@@ -240,7 +241,7 @@ namespace System
                 {
                     value = "/";
                 }
-                _path = Uri.InternalEscapeString(ConvertSlashes(value));
+                _path = Uri.InternalEscapeString(value.Replace('\\', '/'));
                 _changed = true;
             }
         }
@@ -255,7 +256,7 @@ namespace System
             {
                 if (value < -1 || value > 0xFFFF)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 _port = value;
                 _changed = true;
@@ -274,7 +275,7 @@ namespace System
                 {
                     value = string.Empty;
                 }
-                if (value.Length > 0)
+                if (value.Length > 0 && value[0] != '?')
                 {
                     value = '?' + value;
                 }
@@ -306,7 +307,7 @@ namespace System
                 {
                     if (!Uri.CheckSchemeName(value))
                     {
-                        throw new ArgumentException("value");
+                        throw new ArgumentException(SR.net_uri_BadScheme, nameof(value));
                     }
                     value = value.ToLowerInvariant();
                 }
@@ -347,23 +348,6 @@ namespace System
         }
 
         // methods
-
-        private string ConvertSlashes(string path)
-        {
-            StringBuilder sb = new StringBuilder(path.Length);
-            char ch;
-
-            for (int i = 0; i < path.Length; ++i)
-            {
-                ch = path[i];
-                if (ch == '\\')
-                {
-                    ch = '/';
-                }
-                sb.Append(ch);
-            }
-            return sb.ToString();
-        }
 
         public override bool Equals(object rparam)
         {
@@ -432,7 +416,7 @@ namespace System
                     + ((_password.Length > 0) ? (":" + _password) : string.Empty)
                     + ((_username.Length > 0) ? "@" : string.Empty)
                     + _host
-                    + (((_port != -1) && (_host.Length > 0)) ? (":" + _port) : string.Empty)
+                    + (((_port != -1) && (_host.Length > 0)) ? (":" + _port.ToString()) : string.Empty)
                     + (((_host.Length > 0) && (_path.Length != 0) && (_path[0] != '/')) ? "/" : string.Empty) + _path
                     + _query
                     + _fragment;

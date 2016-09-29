@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -147,8 +148,26 @@ namespace System.Net.Http
             Debug.Assert(state != null, "OnRequestReadComplete: state is null");
             Debug.Assert(state.TcsReadFromResponseStream != null, "TcsReadFromResponseStream is null");
             Debug.Assert(!state.TcsReadFromResponseStream.Task.IsCompleted, "TcsReadFromResponseStream.Task is completed");
-            
-            state.TcsReadFromResponseStream.TrySetResult((int)bytesRead);
+
+            state.DisposeCtrReadFromResponseStream();
+
+            // If we read to the end of the stream and we're using 'Content-Length' semantics on the response body,
+            // then verify we read at least the number of bytes required.
+            if (bytesRead == 0
+                && state.ExpectedBytesToRead.HasValue
+                && state.CurrentBytesRead < state.ExpectedBytesToRead.Value)
+            {
+                state.TcsReadFromResponseStream.TrySetException(
+                    new IOException(string.Format(
+                        SR.net_http_io_read_incomplete,
+                        state.ExpectedBytesToRead.Value,
+                        state.CurrentBytesRead)).InitializeStackTrace());
+            }
+            else
+            {
+                state.CurrentBytesRead += (long)bytesRead;
+                state.TcsReadFromResponseStream.TrySetResult((int)bytesRead);
+            }
         }
 
         private static void OnRequestWriteComplete(WinHttpRequestState state)
@@ -171,8 +190,6 @@ namespace System.Net.Http
 
         private static void OnRequestRedirect(WinHttpRequestState state, Uri redirectUri)
         {
-            const string EmptyCookieHeader = "Cookie:";
-
             Debug.Assert(state != null, "OnRequestRedirect: state is null");
             Debug.Assert(redirectUri != null, "OnRequestRedirect: redirectUri is null");
             Debug.Assert(state.TcsReceiveResponseHeaders != null, "TcsReceiveResponseHeaders is null");
@@ -181,34 +198,11 @@ namespace System.Net.Http
             // If we're manually handling cookies, we need to reset them based on the new URI.
             if (state.Handler.CookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer)
             {
-                // Clear cookies.
-                if (!Interop.WinHttp.WinHttpAddRequestHeaders(
-                    state.RequestHandle,
-                    EmptyCookieHeader,
-                    (uint)EmptyCookieHeader.Length,
-                    Interop.WinHttp.WINHTTP_ADDREQ_FLAG_REPLACE))
-                {
-                    int lastError = Marshal.GetLastWin32Error();
-                    if (lastError != Interop.WinHttp.ERROR_WINHTTP_HEADER_NOT_FOUND)
-                    {
-                        throw WinHttpException.CreateExceptionUsingError(lastError);
-                    }
-                }
-
-                // Re-add cookies. The GetCookieHeader() method will return the correct set of
-                // cookies based on the redirectUri.
-                string cookieHeader = WinHttpHandler.GetCookieHeader(redirectUri, state.Handler.CookieContainer);
-                if (!string.IsNullOrEmpty(cookieHeader))
-                {
-                    if (!Interop.WinHttp.WinHttpAddRequestHeaders(
-                        state.RequestHandle,
-                        cookieHeader,
-                        (uint)cookieHeader.Length,
-                        Interop.WinHttp.WINHTTP_ADDREQ_FLAG_ADD))
-                    {
-                        WinHttpException.ThrowExceptionUsingLastError();
-                    }
-                }
+                // Add any cookies that may have arrived with redirect response.
+                WinHttpCookieContainerAdapter.AddResponseCookiesToContainer(state);
+                
+                // Reset cookie request headers based on redirectUri.
+                WinHttpCookieContainerAdapter.ResetCookieRequestHeaders(state, redirectUri);
             }
 
             state.RequestMessage.RequestUri = redirectUri;
@@ -236,6 +230,7 @@ namespace System.Net.Http
         private static void OnRequestSendingRequest(WinHttpRequestState state)
         {
             Debug.Assert(state != null, "OnRequestSendingRequest: state is null");
+            Debug.Assert(state.RequestHandle != null, "OnRequestSendingRequest: state.RequestHandle is null");
             
             if (state.RequestMessage.RequestUri.Scheme != UriScheme.Https)
             {
@@ -259,6 +254,19 @@ namespace System.Net.Http
                     ref certHandleSize))
                 {
                     int lastError = Marshal.GetLastWin32Error();
+                    WinHttpTraceHelper.Trace(
+                        "OnRequestSendingRequest: Error getting WINHTTP_OPTION_SERVER_CERT_CONTEXT, {0}",
+                        lastError);
+
+                    if (lastError == Interop.WinHttp.ERROR_WINHTTP_INCORRECT_HANDLE_STATE)
+                    {
+                        // Not yet an SSL/TLS connection. This occurs while connecting thru a proxy where the
+                        // CONNECT verb hasn't yet been processed due to the proxy requiring authentication.
+                        // We need to ignore this notification. Another notification will be sent once the final
+                        // connection thru the proxy is completed.
+                        return;
+                    }
+
                     throw WinHttpException.CreateExceptionUsingError(lastError);
                 }
                 
@@ -296,6 +304,8 @@ namespace System.Net.Http
                     {
                         chain.Dispose();
                     }
+
+                    serverCertificate.Dispose();
                 }
             }
         }
@@ -306,7 +316,7 @@ namespace System.Net.Http
             
             Debug.Assert(state != null, "OnRequestError: state is null");
 
-            var innerException = WinHttpException.CreateExceptionUsingError((int)asyncResult.dwError);
+            var innerException = WinHttpException.CreateExceptionUsingError((int)asyncResult.dwError).InitializeStackTrace();
 
             switch ((uint)asyncResult.dwResult.ToInt32())
             {
@@ -327,6 +337,7 @@ namespace System.Net.Http
                         // (which means we have no certs to send). For security reasons, we don't
                         // allow the certificate to be re-applied. But we need to tell WinHttp
                         // explicitly that we don't have any certificate to send.
+                        Debug.Assert(state.RequestHandle != null, "OnRequestError: state.RequestHandle is null");
                         WinHttpHandler.SetNoClientCertificate(state.RequestHandle);
                         state.RetryRequest = true;
                         state.TcsReceiveResponseHeaders.TrySetResult(false);
@@ -357,6 +368,8 @@ namespace System.Net.Http
                     break;
 
                 case Interop.WinHttp.API_READ_DATA:
+                    state.DisposeCtrReadFromResponseStream();
+
                     if (asyncResult.dwError == Interop.WinHttp.ERROR_WINHTTP_OPERATION_CANCELLED)
                     {
                         // TODO: Issue #2165. We need to pass in the cancellation token from the

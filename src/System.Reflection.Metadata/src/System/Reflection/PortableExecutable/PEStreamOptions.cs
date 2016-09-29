@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Reflection.PortableExecutable
 {
@@ -33,14 +34,19 @@ namespace System.Reflection.PortableExecutable
         /// <remarks>
         /// <see cref="PEReader"/> closes the stream automatically by the time the constructor returns unless <see cref="LeaveOpen"/> is specified.
         /// </remarks>
-        PrefetchEntireImage = 1 << 2
+        PrefetchEntireImage = 1 << 2,
+
+        /// <summary>
+        /// Indicates that the underlying PE image has been loaded into memory by the OS loader.
+        /// </summary>
+        IsLoadedImage = 1 << 3,
     }
 
     internal static class PEStreamOptionsExtensions
     {
         public static bool IsValid(this PEStreamOptions options)
         {
-            return (options & ~(PEStreamOptions.LeaveOpen | PEStreamOptions.PrefetchEntireImage | PEStreamOptions.PrefetchMetadata)) == 0;
+            return (options & ~(PEStreamOptions.LeaveOpen | PEStreamOptions.PrefetchEntireImage | PEStreamOptions.PrefetchMetadata | PEStreamOptions.IsLoadedImage)) == 0;
         }
     }
 }

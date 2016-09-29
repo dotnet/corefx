@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -12,17 +13,17 @@ internal static partial class Interop
         internal delegate int AppVerifyCallback(IntPtr storeCtx, IntPtr arg);
         internal delegate int ClientCertCallback(IntPtr ssl, out IntPtr x509, out IntPtr pkey);
 
-        [DllImport(Libraries.CryptoNative)]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslCtxCreate")]
         internal static extern SafeSslContextHandle SslCtxCreate(IntPtr method);
 
-        [DllImport(Libraries.CryptoNative)]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslCtxDestroy")]
         internal static extern void SslCtxDestroy(IntPtr ctx);
 
-        [DllImport(Libraries.CryptoNative)]
-        internal static extern void SslCtxSetCertVerifyCallback(SafeSslContextHandle ctx, AppVerifyCallback cb, IntPtr arg);
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslCtxSetCertVerifyCallback")]
+        internal static extern void SslCtxSetCertVerifyCallback(IntPtr ctx, AppVerifyCallback cb, IntPtr arg);
 
-        [DllImport(Libraries.CryptoNative)]
-        internal static extern void SslCtxSetClientCertCallback(SafeSslContextHandle ctx, ClientCertCallback callback);
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslCtxSetClientCertCallback")]
+        internal static extern void SslCtxSetClientCertCallback(IntPtr ctx, ClientCertCallback callback);
     }
 }
 

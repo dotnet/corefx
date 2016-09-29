@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -189,9 +190,9 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(2, stringIntDictionary["2"]);
             Assert.Equal(2, intDictionary.Count);
 
-            Assert.Throws<ArgumentNullException>(() => list.ToImmutableDictionary<int, int>(null));
-            Assert.Throws<ArgumentNullException>(() => list.ToImmutableDictionary<int, int, int>(null, v => v));
-            Assert.Throws<ArgumentNullException>(() => list.ToImmutableDictionary<int, int, int>(k => k, null));
+            Assert.Throws<ArgumentNullException>("keySelector", () => list.ToImmutableDictionary<int, int>(null));
+            Assert.Throws<ArgumentNullException>("keySelector", () => list.ToImmutableDictionary<int, int, int>(null, v => v));
+            Assert.Throws<ArgumentNullException>("elementSelector", () => list.ToImmutableDictionary<int, int, int>(k => k, null));
 
             list.ToDictionary(k => k, v => v, null); // verifies BCL behavior is to not throw.
             list.ToImmutableDictionary(k => k, v => v, null, null);
@@ -250,7 +251,7 @@ namespace System.Collections.Immutable.Tests
             // Now check where collisions have conflicting values.
             map = ImmutableDictionary.Create<string, string>()
               .Add("a", "1").Add("A", "2").Add("b", "3");
-            Assert.Throws<ArgumentException>(() => map.WithComparers(StringComparer.OrdinalIgnoreCase));
+            Assert.Throws<ArgumentException>(null, () => map.WithComparers(StringComparer.OrdinalIgnoreCase));
 
             // Force all values to be considered equal.
             map = map.WithComparers(StringComparer.OrdinalIgnoreCase, EverythingEqual<string>.Default);
@@ -266,7 +267,7 @@ namespace System.Collections.Immutable.Tests
         {
             var map = ImmutableDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
-            var exception = Assert.Throws<ArgumentException>(() => map.Add("firstKey", "3"));
+            var exception = Assert.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
             Assert.Contains("firstKey", exception.Message);
         }
 

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Text;
@@ -8,14 +9,16 @@ namespace System.Net.NetworkInformation
 {
     internal static class UnixCommandLinePing
     {
-        // Ubuntu has ping under /bin, OSX under /sbin.
-        private static readonly string[] s_binFolders = { "/bin/", "/sbin/" };
+        // Ubuntu has ping under /bin, OSX under /sbin, ArchLinux under /usr/bin.
+        private static readonly string[] s_binFolders = { "/bin/", "/sbin/", "/usr/bin/" };
         private const string s_ipv4PingFile = "ping";
         private const string s_ipv6PingFile = "ping6";
 
         private static readonly string s_discoveredPing4UtilityPath = GetPingUtilityPath(ipv4: true);
         private static readonly string s_discoveredPing6UtilityPath = GetPingUtilityPath(ipv4: false);
 
+        // We don't want to pick up an arbitrary or malicious ping
+        // command, so that's why we do the path probing ourselves.
         private static string GetPingUtilityPath(bool ipv4)
         {
             string fileName = ipv4 ? s_ipv4PingFile : s_ipv6PingFile;

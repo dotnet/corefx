@@ -1,21 +1,22 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Reflection.PortableExecutable
 {
     public sealed class CorHeader
     {
-        public ushort MajorRuntimeVersion { get; private set; }
-        public ushort MinorRuntimeVersion { get; private set; }
-        public DirectoryEntry MetadataDirectory { get; private set; }
-        public CorFlags Flags { get; private set; }
-        public int EntryPointTokenOrRelativeVirtualAddress { get; private set; }
-        public DirectoryEntry ResourcesDirectory { get; private set; }
-        public DirectoryEntry StrongNameSignatureDirectory { get; private set; }
-        public DirectoryEntry CodeManagerTableDirectory { get; private set; }
-        public DirectoryEntry VtableFixupsDirectory { get; private set; }
-        public DirectoryEntry ExportAddressTableJumpsDirectory { get; private set; }
-        public DirectoryEntry ManagedNativeHeaderDirectory { get; private set; }
+        public ushort MajorRuntimeVersion { get; }
+        public ushort MinorRuntimeVersion { get; }
+        public DirectoryEntry MetadataDirectory { get; }
+        public CorFlags Flags { get; }
+        public int EntryPointTokenOrRelativeVirtualAddress { get; }
+        public DirectoryEntry ResourcesDirectory { get; }
+        public DirectoryEntry StrongNameSignatureDirectory { get; }
+        public DirectoryEntry CodeManagerTableDirectory { get; }
+        public DirectoryEntry VtableFixupsDirectory { get; }
+        public DirectoryEntry ExportAddressTableJumpsDirectory { get; }
+        public DirectoryEntry ManagedNativeHeaderDirectory { get; }
 
         internal CorHeader(ref PEBinaryReader reader)
         {

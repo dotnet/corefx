@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -17,6 +18,9 @@ namespace System.IO
         // as the alternate separator on Windows, so same definition is used for both.
         public static readonly char AltDirectorySeparatorChar = '/';
 
+        [Obsolete("Please use GetInvalidPathChars or GetInvalidFileNameChars instead.")]
+        public static readonly char[] InvalidPathChars = GetInvalidPathChars();
+
         // Changes the extension of a file path. The path parameter
         // specifies a file path, and the extension parameter
         // specifies a file extension (with a leading period, such as
@@ -27,7 +31,7 @@ namespace System.IO
         // the specified extension. If path is null, the function
         // returns null. If path does not contain a file extension,
         // the new file extension is appended to the path. If extension
-        // is null, any exsiting extension is removed from path.
+        // is null, any existing extension is removed from path.
         public static string ChangeExtension(string path, string extension)
         {
             if (path != null)
@@ -43,7 +47,7 @@ namespace System.IO
                         s = path.Substring(0, i);
                         break;
                     }
-                    if (IsDirectoryOrVolumeSeparator(ch)) break;
+                    if (PathInternal.IsDirectoryOrVolumeSeparator(ch)) break;
                 }
 
                 if (extension != null && path.Length != 0)
@@ -69,14 +73,12 @@ namespace System.IO
             if (path != null)
             {
                 PathInternal.CheckInvalidPathChars(path);
+                path = PathInternal.NormalizeDirectorySeparators(path);
                 int root = PathInternal.GetRootLength(path);
-                path = RemoveRelativeSegments(path, root);
 
                 int i = path.Length;
                 if (i > root)
                 {
-                    i = path.Length;
-                    if (i == root) return null;
                     while (i > root && !PathInternal.IsDirectorySeparator(path[--i])) ;
                     return path.Substring(0, i);
                 }
@@ -86,12 +88,7 @@ namespace System.IO
 
         public static char[] GetInvalidPathChars()
         {
-            return (char[])PathInternal.InvalidPathChars.Clone();
-        }
-
-        public static char[] GetInvalidFileNameChars()
-        {
-            return (char[])InvalidFileNameChars.Clone();
+            return PathInternal.GetInvalidPathChars();
         }
 
         // Returns the extension of the given path. The returned value includes the
@@ -116,7 +113,7 @@ namespace System.IO
                     else
                         return string.Empty;
                 }
-                if (IsDirectoryOrVolumeSeparator(ch))
+                if (PathInternal.IsDirectoryOrVolumeSeparator(ch))
                     break;
             }
             return string.Empty;
@@ -128,19 +125,12 @@ namespace System.IO
         [Pure]
         public static string GetFileName(string path)
         {
-            if (path != null)
-            {
-                PathInternal.CheckInvalidPathChars(path);
-
-                int length = path.Length;
-                for (int i = length - 1; i >= 0; i--)
-                {
-                    char ch = path[i];
-                    if (IsDirectoryOrVolumeSeparator(ch))
-                        return path.Substring(i + 1, length - i - 1);
-                }
-            }
-            return path;
+            if (path == null)
+                return null;
+            
+            int offset = PathInternal.FindFileNameIndex(path);
+            int count = path.Length - offset;
+            return path.Substring(offset, count);
         }
 
         [Pure]
@@ -149,34 +139,28 @@ namespace System.IO
             if (path == null)
                 return null;
 
-            path = GetFileName(path);
-            int i;
-            return (i = path.LastIndexOf('.')) == -1 ?
-                path : // No path extension found
-                path.Substring(0, i);
+            int length = path.Length;
+            int offset = PathInternal.FindFileNameIndex(path);
+            
+            int end = path.LastIndexOf('.', length - 1, length - offset);
+            return end == -1 ?
+                path.Substring(offset) : // No extension was found
+                path.Substring(offset, end - offset);
         }
 
         // Returns a cryptographically strong random 8.3 string that can be 
         // used as either a folder name or a file name.
-        public static string GetRandomFileName()
+        public static unsafe string GetRandomFileName()
         {
-            // 5 bytes == 40 bits == 40/5 == 8 chars in our encoding.
-            // So 10 bytes provides 16 chars, of which we need 11
-            // for the 8.3 name.
-            byte[] key = CreateCryptoRandomByteArray(10);
+            // 8 random bytes provides 12 chars in our encoding for the 8.3 name.
+            const int KeyLength = 8;
+            byte* pKey = stackalloc byte[KeyLength];
+            GetCryptoRandomBytes(pKey, KeyLength);
 
-            // rndCharArray is expected to be 16 chars
-            char[] rndCharArray = ToBase32StringSuitableForDirName(key).ToCharArray();
-            rndCharArray[8] = '.';
-            return new string(rndCharArray, 0, 12);
-        }
-
-        // Returns a unique temporary file name, and creates a 0-byte file by that
-        // name on disk.
-        [System.Security.SecuritySafeCritical]
-        public static string GetTempFileName()
-        {
-            return InternalGetTempFileName(checkHost: true);
+            const int RandomFileNameLength = 12;
+            char* pRandomFileName = stackalloc char[RandomFileNameLength];
+            Populate83FileNameFromRandomBytes(pKey, KeyLength, pRandomFileName, RandomFileNameLength);
+            return new string(pRandomFileName, 0, RandomFileNameLength);
         }
 
         // Tests if a path includes a file extension. The result is
@@ -197,7 +181,7 @@ namespace System.IO
                     {
                         return i != path.Length - 1;
                     }
-                    if (IsDirectoryOrVolumeSeparator(ch)) break;
+                    if (PathInternal.IsDirectoryOrVolumeSeparator(ch)) break;
                 }
             }
             return false;
@@ -228,25 +212,39 @@ namespace System.IO
             return CombineNoChecks(path1, path2, path3);
         }
 
+        public static string Combine(string path1, string path2, string path3, string path4)
+        {
+            if (path1 == null || path2 == null || path3 == null || path4 == null)
+                throw new ArgumentNullException((path1 == null) ? "path1" : (path2 == null) ? "path2" : (path3 == null) ? "path3" : "path4");
+            Contract.EndContractBlock();
+
+            PathInternal.CheckInvalidPathChars(path1);
+            PathInternal.CheckInvalidPathChars(path2);
+            PathInternal.CheckInvalidPathChars(path3);
+            PathInternal.CheckInvalidPathChars(path4);
+
+            return CombineNoChecks(path1, path2, path3, path4);
+        }
+
         public static string Combine(params string[] paths)
         {
             if (paths == null)
             {
-                throw new ArgumentNullException("paths");
+                throw new ArgumentNullException(nameof(paths));
             }
             Contract.EndContractBlock();
 
             int finalSize = 0;
             int firstComponent = 0;
 
-            // We have two passes, the first calcuates how large a buffer to allocate and does some precondition
+            // We have two passes, the first calculates how large a buffer to allocate and does some precondition
             // checks on the paths passed in.  The second actually does the combination.
 
             for (int i = 0; i < paths.Length; i++)
             {
                 if (paths[i] == null)
                 {
-                    throw new ArgumentNullException("paths");
+                    throw new ArgumentNullException(nameof(paths));
                 }
 
                 if (paths[i].Length == 0)
@@ -267,7 +265,7 @@ namespace System.IO
                 }
 
                 char ch = paths[i][paths[i].Length - 1];
-                if (!IsDirectoryOrVolumeSeparator(ch))
+                if (!PathInternal.IsDirectoryOrVolumeSeparator(ch))
                     finalSize++;
             }
 
@@ -287,7 +285,7 @@ namespace System.IO
                 else
                 {
                     char ch = finalPath[finalPath.Length - 1];
-                    if (!IsDirectoryOrVolumeSeparator(ch))
+                    if (!PathInternal.IsDirectoryOrVolumeSeparator(ch))
                     {
                         finalPath.Append(DirectorySeparatorChar);
                     }
@@ -311,7 +309,7 @@ namespace System.IO
                 return path2;
 
             char ch = path1[path1.Length - 1];
-            return IsDirectoryOrVolumeSeparator(ch) ?
+            return PathInternal.IsDirectoryOrVolumeSeparator(ch) ?
                 path1 + path2 :
                 path1 + DirectorySeparatorCharAsString + path2;
         }
@@ -330,8 +328,8 @@ namespace System.IO
             if (IsPathRooted(path2))
                 return CombineNoChecks(path2, path3);
 
-            bool hasSep1 = IsDirectoryOrVolumeSeparator(path1[path1.Length - 1]);
-            bool hasSep2 = IsDirectoryOrVolumeSeparator(path2[path2.Length - 1]);
+            bool hasSep1 = PathInternal.IsDirectoryOrVolumeSeparator(path1[path1.Length - 1]);
+            bool hasSep2 = PathInternal.IsDirectoryOrVolumeSeparator(path2[path2.Length - 1]);
 
             if (hasSep1 && hasSep2)
             {
@@ -359,154 +357,218 @@ namespace System.IO
             }
         }
 
-        private static readonly char[] s_Base32Char = {
+        private static string CombineNoChecks(string path1, string path2, string path3, string path4)
+        {
+            if (path1.Length == 0)
+                return CombineNoChecks(path2, path3, path4);
+            if (path2.Length == 0)
+                return CombineNoChecks(path1, path3, path4);
+            if (path3.Length == 0)
+                return CombineNoChecks(path1, path2, path4);
+            if (path4.Length == 0)
+                return CombineNoChecks(path1, path2, path3);
+
+            if (IsPathRooted(path4))
+                return path4;
+            if (IsPathRooted(path3))
+                return CombineNoChecks(path3, path4);
+            if (IsPathRooted(path2))
+                return CombineNoChecks(path2, path3, path4);
+
+            bool hasSep1 = PathInternal.IsDirectoryOrVolumeSeparator(path1[path1.Length - 1]);
+            bool hasSep2 = PathInternal.IsDirectoryOrVolumeSeparator(path2[path2.Length - 1]);
+            bool hasSep3 = PathInternal.IsDirectoryOrVolumeSeparator(path3[path3.Length - 1]);
+
+            if (hasSep1 && hasSep2 && hasSep3)
+            {
+                // Use string.Concat overload that takes four strings
+                return path1 + path2 + path3 + path4;
+            }
+            else
+            {
+                // string.Concat only has string-based overloads up to four arguments; after that requires allocating
+                // a params string[].  Instead, try to use a cached StringBuilder.
+                StringBuilder sb = StringBuilderCache.Acquire(path1.Length + path2.Length + path3.Length + path4.Length + 3);
+
+                sb.Append(path1);
+                if (!hasSep1)
+                {
+                    sb.Append(DirectorySeparatorChar);
+                }
+
+                sb.Append(path2);
+                if (!hasSep2)
+                {
+                    sb.Append(DirectorySeparatorChar);
+                }
+
+                sb.Append(path3);
+                if (!hasSep3)
+                {
+                    sb.Append(DirectorySeparatorChar);
+                }
+
+                sb.Append(path4);
+
+                return StringBuilderCache.GetStringAndRelease(sb);
+            }
+        }
+
+        private static readonly char[] s_base32Char = {
                 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
                 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
                 'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
                 'y', 'z', '0', '1', '2', '3', '4', '5'};
 
-        private static string ToBase32StringSuitableForDirName(byte[] buff)
+        private static unsafe void Populate83FileNameFromRandomBytes(byte* bytes, int byteCount, char* chars, int charCount)
         {
-            // This routine is optimised to be used with buffs of length 20
-            Debug.Assert(((buff.Length % 5) == 0), "Unexpected hash length");
+            Debug.Assert(bytes != null);
+            Debug.Assert(chars != null);
 
-            // For every 5 bytes, 8 characters are appended.
-            StringBuilder sb = StringBuilderCache.Acquire();
+            // This method requires bytes of length 8 and chars of length 12.
+            Debug.Assert(byteCount == 8, $"Unexpected {nameof(byteCount)}");
+            Debug.Assert(charCount == 12, $"Unexpected {nameof(charCount)}");
 
-            // Create l char for each of the last 5 bits of each byte.  
-            // Consume 3 MSB bits 5 bytes at a time.
-            int len = buff.Length;
-            int i = 0;
-            do
-            {
-                byte b0 = (i < len) ? buff[i++] : (byte)0;
-                byte b1 = (i < len) ? buff[i++] : (byte)0;
-                byte b2 = (i < len) ? buff[i++] : (byte)0;
-                byte b3 = (i < len) ? buff[i++] : (byte)0;
-                byte b4 = (i < len) ? buff[i++] : (byte)0;
+            byte b0 = bytes[0];
+            byte b1 = bytes[1];
+            byte b2 = bytes[2];
+            byte b3 = bytes[3];
+            byte b4 = bytes[4];
 
-                // Consume the 5 Least significant bits of each byte
-                sb.Append(s_Base32Char[b0 & 0x1F]);
-                sb.Append(s_Base32Char[b1 & 0x1F]);
-                sb.Append(s_Base32Char[b2 & 0x1F]);
-                sb.Append(s_Base32Char[b3 & 0x1F]);
-                sb.Append(s_Base32Char[b4 & 0x1F]);
+            // Consume the 5 Least significant bits of the first 5 bytes
+            chars[0] = s_base32Char[b0 & 0x1F];
+            chars[1] = s_base32Char[b1 & 0x1F];
+            chars[2] = s_base32Char[b2 & 0x1F];
+            chars[3] = s_base32Char[b3 & 0x1F];
+            chars[4] = s_base32Char[b4 & 0x1F];
 
-                // Consume 3 MSB of b0, b1, MSB bits 6, 7 of b3, b4
-                sb.Append(s_Base32Char[(
-                        ((b0 & 0xE0) >> 5) |
-                        ((b3 & 0x60) >> 2))]);
+            // Consume 3 MSB of b0, b1, MSB bits 6, 7 of b3, b4
+            chars[5] = s_base32Char[(
+                    ((b0 & 0xE0) >> 5) |
+                    ((b3 & 0x60) >> 2))];
 
-                sb.Append(s_Base32Char[(
-                        ((b1 & 0xE0) >> 5) |
-                        ((b4 & 0x60) >> 2))]);
+            chars[6] = s_base32Char[(
+                    ((b1 & 0xE0) >> 5) |
+                    ((b4 & 0x60) >> 2))];
 
-                // Consume 3 MSB bits of b2, 1 MSB bit of b3, b4
+            // Consume 3 MSB bits of b2, 1 MSB bit of b3, b4
+            b2 >>= 5;
 
-                b2 >>= 5;
+            Debug.Assert(((b2 & 0xF8) == 0), "Unexpected set bits");
 
-                Debug.Assert(((b2 & 0xF8) == 0), "Unexpected set bits");
+            if ((b3 & 0x80) != 0)
+                b2 |= 0x08;
+            if ((b4 & 0x80) != 0)
+                b2 |= 0x10;
 
-                if ((b3 & 0x80) != 0)
-                    b2 |= 0x08;
-                if ((b4 & 0x80) != 0)
-                    b2 |= 0x10;
+            chars[7] = s_base32Char[b2];
 
-                sb.Append(s_Base32Char[b2]);
+            // Set the file extension separator
+            chars[8] = '.';
 
-            } while (i < len);
-
-            return StringBuilderCache.GetStringAndRelease(sb);
+            // Consume the 5 Least significant bits of the remaining 3 bytes
+            chars[9] = s_base32Char[(bytes[5] & 0x1F)];
+            chars[10] = s_base32Char[(bytes[6] & 0x1F)];
+            chars[11] = s_base32Char[(bytes[7] & 0x1F)];
         }
 
         /// <summary>
-        /// Try and remove relative segments from the given path (without combining with a root).
+        /// Create a relative path from one path to another. Paths will be resolved before calculating the difference.
+        /// Default path comparison for the active platform will be used (OrdinalIgnoreCase for Windows or Mac, Ordinal for Unix).
         /// </summary>
-        /// <param name="skip">Skip the specified number of characters before evaluating.</param>
-        private static string RemoveRelativeSegments(string path, int skip = 0)
+        /// <param name="relativeTo">The source path the output should be relative to. This path is always considered to be a directory.</param>
+        /// <param name="path">The destination path.</param>
+        /// <returns>The relative path or <paramref name="path"/> if the paths don't share the same root.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="relativeTo"/> or <paramref name="path"/> is <c>null</c> or an empty string.</exception>
+        public static string GetRelativePath(string relativeTo, string path)
         {
-            bool flippedSeparator = false;
+            return GetRelativePath(relativeTo, path, StringComparison);
+        }
 
-            // Remove "//", "/./", and "/../" from the path by copying each character to the output, 
-            // except the ones we're removing, such that the builder contains the normalized path 
-            // at the end.
-            var sb = StringBuilderCache.Acquire(path.Length);
-            if (skip > 0)
-                sb.Append(path, 0, skip);
+        private static string GetRelativePath(string relativeTo, string path, StringComparison comparisonType)
+        {
+            if (string.IsNullOrEmpty(relativeTo)) throw new ArgumentNullException(nameof(relativeTo));
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentNullException(nameof(path));
+            Debug.Assert(comparisonType == StringComparison.Ordinal || comparisonType == StringComparison.OrdinalIgnoreCase);
 
-            int componentCharCount = 0;
-            for (int i = skip; i < path.Length; i++)
-            {
-                char c = path[i];
+            relativeTo = GetFullPath(relativeTo);
+            path = GetFullPath(path);
 
-                if (PathInternal.IsDirectorySeparator(c) && i + 1 < path.Length)
-                {
-                    componentCharCount = 0;
-
-                    // Skip this character if it's a directory separator and if the next character is, too,
-                    // e.g. "parent//child" => "parent/child"
-                    if (PathInternal.IsDirectorySeparator(path[i + 1]))
-                    {
-                        continue;
-                    }
-
-                    // Skip this character and the next if it's referring to the current directory,
-                    // e.g. "parent/./child" =? "parent/child"
-                    if ((i + 2 == path.Length || PathInternal.IsDirectorySeparator(path[i + 2])) &&
-                        path[i + 1] == '.')
-                    {
-                        i++;
-                        continue;
-                    }
-
-                    // Skip this character and the next two if it's referring to the parent directory,
-                    // e.g. "parent/child/../grandchild" => "parent/grandchild"
-                    if (i + 2 < path.Length &&
-                        (i + 3 == path.Length || PathInternal.IsDirectorySeparator(path[i + 3])) &&
-                        path[i + 1] == '.' && path[i + 2] == '.')
-                    {
-                        // Unwind back to the last slash (and if there isn't one, clear out everything).
-                        int s;
-                        for (s = sb.Length - 1; s >= 0; s--)
-                        {
-                            if (PathInternal.IsDirectorySeparator(sb[s]))
-                            {
-                                sb.Length = s;
-                                break;
-                            }
-                        }
-                        if (s < 0)
-                            sb.Length = 0;
-
-                        i += 2;
-                        continue;
-                    }
-                }
-
-                if (++componentCharCount > MaxComponentLength)
-                {
-                    throw new PathTooLongException(SR.IO_PathTooLong);
-                }
-
-                // Normalize the directory separator if needed
-                if (c != Path.DirectorySeparatorChar && c == Path.AltDirectorySeparatorChar)
-                {
-                    c = Path.DirectorySeparatorChar;
-                    flippedSeparator = true;
-                }
-
-                sb.Append(c);
-            }
-
-            if (flippedSeparator || sb.Length != path.Length)
-            {
-                return StringBuilderCache.GetStringAndRelease(sb);
-            }
-            else
-            {
-                // We haven't changed the source path, return the original
-                StringBuilderCache.Release(sb);
+            // Need to check if the roots are different- if they are we need to return the "to" path.
+            if (!PathInternal.AreRootsEqual(relativeTo, path, comparisonType))
                 return path;
+
+            int commonLength = PathInternal.GetCommonPathLength(relativeTo, path, ignoreCase: comparisonType == StringComparison.OrdinalIgnoreCase);
+
+            // If there is nothing in common they can't share the same root, return the "to" path as is.
+            if (commonLength == 0)
+                return path;
+
+            // Trailing separators aren't significant for comparison
+            int relativeToLength = relativeTo.Length;
+            if (PathInternal.EndsInDirectorySeparator(relativeTo))
+                relativeToLength--;
+
+            bool pathEndsInSeparator = PathInternal.EndsInDirectorySeparator(path);
+            int pathLength = path.Length;
+            if (pathEndsInSeparator)
+                pathLength--;
+
+            // If we have effectively the same path, return "."
+            if (relativeToLength == pathLength && commonLength >= relativeToLength) return ".";
+
+            // We have the same root, we need to calculate the difference now using the
+            // common Length and Segment count past the length.
+            //
+            // Some examples:
+            //
+            //  C:\Foo C:\Bar L3, S1 -> ..\Bar
+            //  C:\Foo C:\Foo\Bar L6, S0 -> Bar
+            //  C:\Foo\Bar C:\Bar\Bar L3, S2 -> ..\..\Bar\Bar
+            //  C:\Foo\Foo C:\Foo\Bar L7, S1 -> ..\Bar
+
+            StringBuilder sb = StringBuilderCache.Acquire(Math.Max(relativeTo.Length, path.Length));
+
+            // Add parent segments for segments past the common on the "from" path
+            if (commonLength < relativeToLength)
+            {
+                sb.Append(PathInternal.ParentDirectoryPrefix);
+
+                for (int i = commonLength; i < relativeToLength; i++)
+                {
+                    if (PathInternal.IsDirectorySeparator(relativeTo[i]))
+                    {
+                        sb.Append(PathInternal.ParentDirectoryPrefix);
+                    }
+                }
+            }
+            else if (PathInternal.IsDirectorySeparator(path[commonLength]))
+            {
+                // No parent segments and we need to eat the initial separator
+                //  (C:\Foo C:\Foo\Bar case)
+                commonLength++;
+            }
+
+            // Now add the rest of the "to" path, adding back the trailing separator
+            int count = pathLength - commonLength;
+            if (pathEndsInSeparator)
+                count++;
+
+            sb.Append(path, commonLength, count);
+            return StringBuilderCache.GetStringAndRelease(sb);
+        }
+
+        // StringComparison and IsCaseSensitive are also available in PathInternal.CaseSensitivity but we are
+        // too low in System.Runtime.Extensions to use it (no FileStream, etc.)
+
+        /// <summary>Returns a comparison that can be used to compare file and directory names for equality.</summary>
+        internal static StringComparison StringComparison
+        {
+            get
+            {
+                return IsCaseSensitive ?
+                    StringComparison.Ordinal :
+                    StringComparison.OrdinalIgnoreCase;
             }
         }
     }

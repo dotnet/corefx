@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -53,17 +54,23 @@ namespace System.Net.Http.Functional.Tests
             Assert.Throws<ArgumentException>(() => { new HttpMethod(null); } );
         }
 
-        // TODO: This should be a [Theory]
-        [Fact]
-        public void Ctor_SeparatorInMethod_Exception()
+        [Theory]
+        [InlineData('(')]
+        [InlineData(')')]
+        [InlineData('<')]
+        [InlineData('>')]
+        [InlineData('@')]
+        [InlineData(',')]
+        [InlineData(';')]
+        [InlineData(':')]
+        [InlineData('\\')]
+        [InlineData('"')]
+        [InlineData('/')]
+        [InlineData('[')]
+        [InlineData(']')]
+        public void Ctor_SeparatorInMethod_Exception(char separator)
         {
-            char[] separators = new char[] { '(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '/', '[', ']', 
-                '?', '=', '{', '}', ' ', '\t' };
-
-            for (int i = 0; i < separators.Length; i++)
-            {
-                Assert.Throws<FormatException>(() => { new HttpMethod("Get" + separators[i]); } );
-            }
+            Assert.Throws<FormatException>(() => { new HttpMethod("Get" + separator); } );
         }
 
         [Fact]
@@ -107,7 +114,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [MemberData("StaticHttpMethods")]
+        [MemberData(nameof(StaticHttpMethods))]
         public void GetHashCode_StaticMethods_SameAsStringToUpperInvariantHashCode(HttpMethod method)
         {
             Assert.Equal(method.ToString().ToUpperInvariant().GetHashCode(), method.GetHashCode());

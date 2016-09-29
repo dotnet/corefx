@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using System.Net.Http.Headers;
@@ -136,7 +137,7 @@ namespace System.Net.Http.Tests
         [Fact]
         public void GetRangeLength_DifferentInvalidScenarios_AllReturnZero()
         {
-            CheckInvalidGetRangeLength(" bytes=1-2", 0); // no leading whitespaces allowed
+            CheckInvalidGetRangeLength(" bytes=1-2", 0); // no leading whitespace allowed
             CheckInvalidGetRangeLength("bytes=1", 0);
             CheckInvalidGetRangeLength("bytes=", 0);
             CheckInvalidGetRangeLength("bytes", 0);

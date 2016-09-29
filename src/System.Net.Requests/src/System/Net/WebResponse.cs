@@ -1,20 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System.Collections;
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace System.Net
 {
     /// <devdoc>
     ///    <para>
     ///       A
-    ///       response from a Uniform Resource Indentifier (Uri). This is an abstract class.
+    ///       response from a Uniform Resource Identifier (Uri). This is an abstract class.
     ///    </para>
     /// </devdoc>
-    public abstract class WebResponse : IDisposable
+    public abstract class WebResponse : ISerializable, IDisposable
     {
         /// <devdoc>
         ///    <para>Initializes a new
@@ -22,6 +21,23 @@ namespace System.Net
         ///       class.</para>
         /// </devdoc>
         protected WebResponse()
+        {
+        }
+
+        protected WebResponse(SerializationInfo serializationInfo, StreamingContext streamingContext)
+        {
+        }
+
+        void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+        {
+            GetObjectData(serializationInfo, streamingContext);
+        }
+
+        protected virtual void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+        {
+        }
+
+        public virtual void Close()
         {
         }
 
@@ -33,17 +49,31 @@ namespace System.Net
 
         protected virtual void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                try
+                {
+                    Close();
+                }
+                catch { }
+            }
         }
-
 
         /// <devdoc>
         ///    <para>When overridden in a derived class, gets or
         ///       sets
         ///       the content length of data being received.</para>
         /// </devdoc>
-        public abstract long ContentLength
+        public virtual long ContentLength
         {
-            get;
+            get
+            {
+                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
+            }
+            set
+            {
+                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
+            }
         }
 
 
@@ -52,26 +82,42 @@ namespace System.Net
         ///       gets
         ///       or sets the content type of the data being received.</para>
         /// </devdoc>
-        public abstract string ContentType
+        public virtual string ContentType
         {
-            get;
+            get
+            {
+                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
+            }
+            set
+            {
+                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
+            }
         }
+
+        public virtual bool IsFromCache => false;
+
+        public virtual bool IsMutuallyAuthenticated => false;
 
         /// <devdoc>
         /// <para>When overridden in a derived class, returns the <see cref='System.IO.Stream'/> object used
         ///    for reading data from the resource referenced in the <see cref='System.Net.WebRequest'/>
         ///    object.</para>
         /// </devdoc>
-        public abstract Stream GetResponseStream();
-
+        public virtual Stream GetResponseStream()
+        {
+             throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
+        }
 
         /// <devdoc>
         ///    <para>When overridden in a derived class, gets the Uri that
         ///       actually responded to the request.</para>
         /// </devdoc>
-        public abstract Uri ResponseUri
+        public virtual Uri ResponseUri
         {
-            get;
+            get
+            {
+                throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
+            }
         }
 
         /// <devdoc>
@@ -84,7 +130,6 @@ namespace System.Net
             // read-only
             get
             {
-                Contract.Ensures(Contract.Result<WebHeaderCollection>() != null);
                 throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException);
             }
         }

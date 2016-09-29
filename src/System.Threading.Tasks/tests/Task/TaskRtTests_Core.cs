@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace System.Threading.Tasks.Tests
 {
@@ -233,21 +235,6 @@ namespace System.Threading.Tasks.Tests
                    () => tcs.SetException(new Exception("some other exception")));
                 Assert.Throws<InvalidOperationException>(
                    () => tcs.SetException(new[] { new Exception("some other exception") }));
-
-                //
-                // Test that disposed task TCS.Task throws ODE on [Try]SetXYZ() after being Disposed
-                // It used to, but now it should throw InvalidOperationException, since the task has already completed
-                //
-                //@TODO VERIFY this one.. tests might not pass.
-                //tcs.Task.Dispose();
-
-                Assert.Throws<InvalidOperationException>(
-                    () => { tcs.SetResult(10); });
-                Assert.Throws<InvalidOperationException>(
-                    () => { tcs.SetCanceled(); });
-                Exception fake = new Exception("blah!");
-                Assert.Throws<InvalidOperationException>(
-                    () => { tcs.SetException(fake); });
             }
         }
 
@@ -1340,6 +1327,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => Task.WaitAll(new Task[] { Task.Factory.StartNew(() => { }) }, -2));
             Assert.Throws<ArgumentOutOfRangeException>(() => Task.WaitAll(new Task[] { Task.Factory.StartNew(() => { }) }, TimeSpan.FromMilliseconds(-2)));
 
+            ThreadPoolHelpers.EnsureMinThreadsAtLeast(10);
             RunTaskWaitAllTest(false, 1);
             RunTaskWaitAllTest(false, 10);
         }
@@ -1363,8 +1351,7 @@ namespace System.Threading.Tasks.Tests
             Action<object> sleepAndAckCancelAction = delegate (Object o)
             {
                 CancellationToken ct = (CancellationToken)o;
-                while (!ct.IsCancellationRequested)
-                { }
+                if (!ct.IsCancellationRequested) ct.WaitHandle.WaitOne();
                 throw new OperationCanceledException(ct);   // acknowledge
             };
             Action<object> exceptionThrowAction = delegate (Object o) { throw new Exception(excpMsg); };
@@ -1600,16 +1587,16 @@ namespace System.Threading.Tasks.Tests
                 {
                     cde.Signal(); // indicate that task has begun execution
                     Debug.WriteLine("Signalled");
-                    while (!mre.WaitOne(0)) ;
+                    mre.WaitOne();
                 }, CancellationToken.None, TaskCreationOptions.LongRunning, tm);
             }
             bool waitSucceeded = cde.Wait(5000);
-            foreach (Task task in tasks)
-                Debug.WriteLine("Status: " + task.Status);
-            int count = cde.CurrentCount;
-            int initialCount = cde.InitialCount;
             if (!waitSucceeded)
             {
+                foreach (Task task in tasks)
+                    Debug.WriteLine("Status: " + task.Status);
+                int count = cde.CurrentCount;
+                int initialCount = cde.InitialCount;
                 Debug.WriteLine("Wait failed. CDE.CurrentCount: {0}, CDE.Initial Count: {1}", count, initialCount);
                 Assert.True(false, string.Format("RunLongRunningTaskTests - TaskCreationOptions.LongRunning:    > FAILED.  Timed out waiting for tasks to start."));
             }

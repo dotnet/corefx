@@ -9,15 +9,12 @@ Intro to .NET Core
 Learn about .NET Core
 ====================
 
-- [[WIP] Official .NET Core Docs](http://dotnet.readthedocs.org)
+- [[WIP] Official .NET Core Docs](http://dotnet.github.io/)
 
 Get .NET Core
 =============
 
-- [Get .NET Core DNX SDK on Windows](https://github.com/dotnet/coreclr/blob/master/Documentation/install/get-dotnetcore-dnx-windows.md)
-- [Get .NET Core DNX SDK on OS X](https://github.com/dotnet/coreclr/blob/master/Documentation/install/get-dotnetcore-dnx-osx.md)
-- [Get .NET Core DNX SDK on Linux](https://github.com/dotnet/coreclr/blob/master/Documentation/install/get-dotnetcore-dnx-linux.md)
-- [Get .NET Core (Raw) on Windows](https://github.com/dotnet/coreclr/blob/master/Documentation/install/get-dotnetcore-windows.md)
+- [Get .NET Core SDK](https://www.microsoft.com/net/core)
 
 Project Docs
 ============
@@ -32,8 +29,9 @@ Project Docs
 - [Branching Guide](project-docs/branching-guide.md)
 - [API Review Process](project-docs/api-review-process.md)
 - [Strong Name Signing](project-docs/strong-name-signing.md)
-- [Open Source Signing](project-docs/oss-signing.md)
+- [Public Signing](project-docs/public-signing.md)
 - [Repo Organization](project-docs/repo-organization.md)
+- [Project NuGet Dependencies](project-docs/project-nuget-dependencies.md)
 
 Coding Guidelines
 =================
@@ -46,12 +44,14 @@ Coding Guidelines
 - [Breaking Changes](coding-guidelines/breaking-changes.md)
 - [Breaking Change Definitions](coding-guidelines/breaking-change-definitions.md)
 - [Breaking Change Rules](coding-guidelines/breaking-change-rules.md)
+- [Project Guidelines](coding-guidelines/project-guidelines.md)
 
 Building from Source
 ====================
 
 - [Building CoreFX on FreeBSD, Linux and OS X](building/unix-instructions.md)
 - [Code Coverage](building/code-coverage.md)
+- [Package and Assembly File Versioning](building/versioning.md)
 
 Other Information
 =================

@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -70,7 +72,7 @@ namespace System.ComponentModel.DataAnnotations
 
         #region Internal Properties
         /// <summary>
-        /// Gets or sets and the default error message string.
+        /// Sets the default error message string.
         /// This message will be used if the user has not set <see cref="ErrorMessage"/>
         /// or the <see cref="ErrorMessageResourceType"/> and <see cref="ErrorMessageResourceName"/> pair.
         /// This property was added after the public contract for DataAnnotations was created.
@@ -78,10 +80,6 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         internal string DefaultErrorMessage
         {
-            get
-            {
-                return _defaultErrorMessage;
-            }
             set
             {
                 _defaultErrorMessage = value;
@@ -115,7 +113,7 @@ namespace System.ComponentModel.DataAnnotations
 
         /// <summary>
         ///     A flag indicating that the attribute requires a non-null
-        ///     <see cref= System.ComponentModel.DataAnnotations.ValidationContext /> to perform validation.
+        ///     <see cref="ValidationContext" /> to perform validation.
         ///     Base class returns false. Override in child classes as appropriate.
         /// </summary>
         public virtual bool RequiresValidationContext
@@ -128,7 +126,7 @@ namespace System.ComponentModel.DataAnnotations
         #region Public Properties
 
         /// <summary>
-        ///     Gets or sets and explicit error message string.
+        ///     Gets or sets the explicit error message string.
         /// </summary>
         /// <value>
         ///     This property is intended to be used for non-localizable error messages.  Use
@@ -251,54 +249,48 @@ namespace System.ComponentModel.DataAnnotations
 
         private void SetResourceAccessorByPropertyLookup()
         {
-            if (_errorMessageResourceType != null && !string.IsNullOrEmpty(_errorMessageResourceName))
+            Debug.Assert(_errorMessageResourceType != null);
+            Debug.Assert(!string.IsNullOrEmpty(_errorMessageResourceName));
+            var property = _errorMessageResourceType
+                .GetTypeInfo().GetDeclaredProperty(_errorMessageResourceName);
+            if (property != null && !ValidationAttributeStore.IsStatic(property))
             {
-                var property = _errorMessageResourceType
-                    .GetTypeInfo().GetDeclaredProperty(_errorMessageResourceName);
-                if (property != null && !ValidationAttributeStore.IsStatic(property))
+                property = null;
+            }
+
+            if (property != null)
+            {
+                var propertyGetter = property.GetMethod;
+
+                // We only support internal and public properties
+                if (propertyGetter == null || (!propertyGetter.IsAssembly && !propertyGetter.IsPublic))
                 {
+                    // Set the property to null so the exception is thrown as if the property wasn't found
                     property = null;
                 }
-
-                if (property != null)
-                {
-                    var propertyGetter = property.GetMethod;
-
-                    // We only support internal and public properties
-                    if (propertyGetter == null || (!propertyGetter.IsAssembly && !propertyGetter.IsPublic))
-                    {
-                        // Set the property to null so the exception is thrown as if the property wasn't found
-                        property = null;
-                    }
-                }
-
-                if (property == null)
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            SR.ValidationAttribute_ResourceTypeDoesNotHaveProperty,
-                            _errorMessageResourceType.FullName,
-                            _errorMessageResourceName));
-                }
-
-                if (property.PropertyType != typeof(string))
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            SR.ValidationAttribute_ResourcePropertyNotStringType,
-                            property.Name,
-                            _errorMessageResourceType.FullName));
-                }
-
-                _errorMessageResourceAccessor = delegate { return (string)property.GetValue(null, null); };
             }
-            else
+
+            if (property == null)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    SR.ValidationAttribute_NeedBothResourceTypeAndResourceName));
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        SR.ValidationAttribute_ResourceTypeDoesNotHaveProperty,
+                        _errorMessageResourceType.FullName,
+                        _errorMessageResourceName));
             }
+
+            if (property.PropertyType != typeof(string))
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        SR.ValidationAttribute_ResourcePropertyNotStringType,
+                        property.Name,
+                        _errorMessageResourceType.FullName));
+            }
+
+            _errorMessageResourceAccessor = delegate { return (string)property.GetValue(null, null); };
         }
 
         #endregion
@@ -435,7 +427,7 @@ namespace System.ComponentModel.DataAnnotations
         {
             if (validationContext == null)
             {
-                throw new ArgumentNullException("validationContext");
+                throw new ArgumentNullException(nameof(validationContext));
             }
 
             var result = IsValid(value, validationContext);
@@ -505,7 +497,7 @@ namespace System.ComponentModel.DataAnnotations
         {
             if (validationContext == null)
             {
-                throw new ArgumentNullException("validationContext");
+                throw new ArgumentNullException(nameof(validationContext));
             }
 
             ValidationResult result = GetValidationResult(value, validationContext);

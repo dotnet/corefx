@@ -1,17 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Reflection;
-using System.Collections;
-using System.Text;
-using System.Runtime.InteropServices;
 using Xunit;
 
-namespace System.Runtime.Extension.Tests
+namespace System.Tests
 {
-
     public class GetCommandLineArgs : RemoteExecutorTestBase
     {
         [Fact]
@@ -61,15 +57,19 @@ namespace System.Runtime.Extension.Tests
             switch (args.Length)
             {
                 case 1:
-                    RemoteInvoke((arg) => { return CheckCommandLineArgs(new string[] { arg }); }, args[0]);
+                    RemoteInvoke((arg) => CheckCommandLineArgs(new string[] { arg }), args[0]);
                     break;
 
                 case 2:
-                    RemoteInvoke((arg1, arg2) => { return CheckCommandLineArgs(new string[] { arg1, arg2 }); }, args[0], args[1]);
+                    RemoteInvoke((arg1, arg2) => CheckCommandLineArgs(new string[] { arg1, arg2 }), args[0], args[1]);
                     break;
 
                 case 3:
-                    RemoteInvoke((arg1, arg2, arg3) => { return CheckCommandLineArgs(new string[] { arg1, arg2, arg3 }); }, args[0], args[1], args[2]);
+                    RemoteInvoke((arg1, arg2, arg3) => CheckCommandLineArgs(new string[] { arg1, arg2, arg3 }), args[0], args[1], args[2]);
+                    break;
+
+                default:
+                    Assert.True(false, "Unexpected number of args passed to test");
                     break;
             }
 
@@ -77,12 +77,10 @@ namespace System.Runtime.Extension.Tests
 
         public static int CheckCommandLineArgs(string[] args)
         {
-
             string[] cmdLineArgs = Environment.GetCommandLineArgs();
 
             Assert.InRange(cmdLineArgs.Length, 4, int.MaxValue); /*AppName, AssemblyName, TypeName, MethodName*/
             Assert.True(cmdLineArgs[0].Contains(TestConsoleApp)); /*The host returns the fullName*/
-
 
             Type t = typeof(GetCommandLineArgs);
             MethodInfo mi = t.GetMethod("CheckCommandLineArgs");

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -15,7 +16,6 @@ namespace System.Runtime.Loader.Tests
     {
         private const string TestAssembly = "System.Runtime.Loader.Test.Assembly";
 
-        [ActiveIssue(/* dotnet/coreclr */ 1187, PlatformID.Windows)] // dependency on coreclr behavior, waiting for new coreclr
         [Fact]
         public static void GetAssemblyNameTest_ValidAssembly()
         {
@@ -86,11 +86,13 @@ namespace System.Runtime.Loader.Tests
             var asmName = AssemblyLoadContext.GetAssemblyName("System.Runtime.dll");
             var loadContext = new CustomTPALoadContext();
 
-            // Usage of TPA and AssemblyLoadContext is mutually exclusive, you cannot use both.
-            // Since the premise is that you either want to use the default binding mechanism (via coreclr TPA binder) 
-            // or supply your own (via AssemblyLoadContext) for your own assemblies.
-            Assert.Throws(typeof(FileLoadException), 
-                () => loadContext.LoadFromAssemblyName(asmName));
+            // We should be able to override (and thus, load) assemblies that were
+            // loaded in TPA load context.
+            var asm = loadContext.LoadFromAssemblyName(asmName);
+            Assert.NotNull(asm);
+            var loadedContext = AssemblyLoadContext.GetLoadContext(asm);
+            Assert.NotNull(loadedContext);
+            Assert.Same(loadContext, loadedContext);
         }
 
         [Fact]
@@ -113,23 +115,6 @@ namespace System.Runtime.Loader.Tests
             var context = AssemblyLoadContext.GetLoadContext(asm);
 
             Assert.NotNull(context);
-        }
-
-        [Fact]
-        public static void InitializeDefaultContextTest()
-        {
-            // The coreclr binding model will become locked upon loading the first assembly that is not on the TPA list, or
-            // upon initializing the default context for the first time. For this test, test assemblies are located alongside
-            // corerun, and hence will be on the TPA list. So, we should be able to set the default context once successfully,
-            // and fail on the second try.
-
-            var loadContext = new ResourceAssemblyLoadContext();
-            AssemblyLoadContext.InitializeDefaultContext(loadContext);
-            Assert.Equal(loadContext, AssemblyLoadContext.Default);
-
-            loadContext = new ResourceAssemblyLoadContext();
-            Assert.Throws(typeof(InvalidOperationException), 
-                () => AssemblyLoadContext.InitializeDefaultContext(loadContext));
         }
     }
 }

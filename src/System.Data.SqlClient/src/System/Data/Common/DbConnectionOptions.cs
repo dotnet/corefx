@@ -1,11 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
 //------------------------------------------------------------------------------
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -49,7 +51,7 @@ namespace System.Data.Common
             + "(?<![\"']))"                                            // unquoted value must not stop with " or '
             + ")(\\s*)(;|[\u0000\\s]*$)"                                // whitespace after value up to semicolon or end-of-line
             + ")*"                                                      // repeat the key-value pair
-            + "[\\s;]*[\u0000\\s]*"                                     // traling whitespace/semicolons (DataSourceLocator), embedded nulls are allowed only in the end
+            + "[\\s;]*[\u0000\\s]*"                                     // trailing whitespace/semicolons (DataSourceLocator), embedded nulls are allowed only in the end
         ;
 
 
@@ -66,24 +68,22 @@ namespace System.Data.Common
             internal const string Integrated_Security = "integrated security";
             internal const string Password = "password";
             internal const string Persist_Security_Info = "persist security info";
-            internal const string User_ID = "user id";
         };
 
         // known connection string common synonyms
         private static class SYNONYM
         {
             internal const string Pwd = "pwd";
-            internal const string UID = "uid";
         };
 
         private readonly string _usersConnectionString;
-        private readonly Hashtable _parsetable;
+        private readonly Dictionary<string, string> _parsetable;
         internal readonly NameValuePair KeyChain;
         internal readonly bool HasPasswordKeyword;
 
-        public DbConnectionOptions(string connectionString, Hashtable synonyms)
+        public DbConnectionOptions(string connectionString, Dictionary<string, string> synonyms)
         {
-            _parsetable = new Hashtable();
+            _parsetable = new Dictionary<string, string>();
             _usersConnectionString = ((null != connectionString) ? connectionString : "");
 
             // first pass on parsing, initial syntax check
@@ -136,20 +136,15 @@ namespace System.Data.Common
             get { return (null == KeyChain); }
         }
 
-        internal Hashtable Parsetable
-        {
-            get { return _parsetable; }
-        }
+        internal bool TryGetParsetableValue(string key, out string value) => _parsetable.TryGetValue(key, out value);
 
 
         public bool ConvertValueToBoolean(string keyName, bool defaultValue)
         {
-            object value = _parsetable[keyName];
-            if (null == value)
-            {
-                return defaultValue;
-            }
-            return ConvertValueToBooleanInternal(keyName, (string)value);
+            string value;
+            return _parsetable.TryGetValue(keyName, out value) ?
+                ConvertValueToBooleanInternal(keyName, value) :
+                defaultValue;
         }
 
         internal static bool ConvertValueToBooleanInternal(string keyName, string stringValue)
@@ -175,12 +170,10 @@ namespace System.Data.Common
         // same as Boolean, but with SSPI thrown in as valid yes
         public bool ConvertValueToIntegratedSecurity()
         {
-            object value = _parsetable[KEY.Integrated_Security];
-            if (null == value)
-            {
-                return false;
-            }
-            return ConvertValueToIntegratedSecurityInternal((string)value);
+            string value;
+            return _parsetable.TryGetValue(KEY.Integrated_Security, out value) ?
+                ConvertValueToIntegratedSecurityInternal(value) :
+                false;
         }
 
         internal bool ConvertValueToIntegratedSecurityInternal(string stringValue)
@@ -205,12 +198,10 @@ namespace System.Data.Common
 
         public int ConvertValueToInt32(string keyName, int defaultValue)
         {
-            object value = _parsetable[keyName];
-            if (null == value)
-            {
-                return defaultValue;
-            }
-            return ConvertToInt32Internal(keyName, (string)value);
+            string value;
+            return _parsetable.TryGetValue(keyName, out value) ?
+                ConvertToInt32Internal(keyName, value) :
+                defaultValue;
         }
 
         internal static int ConvertToInt32Internal(string keyname, string stringValue)
@@ -231,8 +222,8 @@ namespace System.Data.Common
 
         public string ConvertValueToString(string keyName, string defaultValue)
         {
-            string value = (string)_parsetable[keyName];
-            return ((null != value) ? value : defaultValue);
+            string value;
+            return _parsetable.TryGetValue(keyName, out value) && value != null ? value : defaultValue;
         }
 
         static private bool CompareInsensitiveInvariant(string strvalue, string strconst)
@@ -248,7 +239,7 @@ namespace System.Data.Common
 
 #if DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
-        private static void DebugTraceKeyValuePair(string keyname, string keyvalue, Hashtable synonyms)
+        private static void DebugTraceKeyValuePair(string keyname, string keyvalue, Dictionary<string, string> synonyms)
         {
         }
 #endif
@@ -281,7 +272,7 @@ namespace System.Data.Common
             return buffer.ToString(index, count - index);
         }
 
-        // transistion states used for parsing
+        // transition states used for parsing
         private enum ParserState
         {
             NothingYet = 1,   //start point
@@ -345,7 +336,7 @@ namespace System.Data.Common
                     case ParserState.KeyEqual: // \\s*=(?!=)\\s*
                         if ('=' == currentChar) { parserState = ParserState.Key; break; }
                         keyname = GetKeyName(buffer);
-                        if (ADP.IsEmpty(keyname)) { throw ADP.ConnectionStringSyntax(startposition); }
+                        if (string.IsNullOrEmpty(keyname)) { throw ADP.ConnectionStringSyntax(startposition); }
                         buffer.Length = 0;
                         parserState = ParserState.KeyEnd;
                         goto case ParserState.KeyEnd;
@@ -429,7 +420,7 @@ namespace System.Data.Common
                 case ParserState.KeyEqual:
                     // equal sign at end of line
                     keyname = GetKeyName(buffer);
-                    if (ADP.IsEmpty(keyname)) { throw ADP.ConnectionStringSyntax(startposition); }
+                    if (string.IsNullOrEmpty(keyname)) { throw ADP.ConnectionStringSyntax(startposition); }
                     break;
 
                 case ParserState.UnquotedValue:
@@ -494,9 +485,9 @@ namespace System.Data.Common
         }
 
 #if DEBUG
-        private static Hashtable SplitConnectionString(string connectionString, Hashtable synonyms)
+        private static Dictionary<string, string> SplitConnectionString(string connectionString, Dictionary<string, string> synonyms)
         {
-            Hashtable parsetable = new Hashtable();
+            var parsetable = new Dictionary<string, string>();
             Regex parser = s_connectionStringRegex;
 
             const int KeyIndex = 1, ValueIndex = 2;
@@ -538,11 +529,16 @@ namespace System.Data.Common
                     }
                     DebugTraceKeyValuePair(keyname, keyvalue, synonyms);
 
-                    string realkeyname = ((null != synonyms) ? (string)synonyms[keyname] : keyname);
+                    string synonym;
+                    string realkeyname = null != synonyms ?
+                        (synonyms.TryGetValue(keyname, out synonym) ? synonym : null) :
+                        keyname;
+
                     if (!IsKeyNameValid(realkeyname))
                     {
                         throw ADP.KeywordNotSupported(keyname);
                     }
+                    else
                     {
                         parsetable[realkeyname] = keyvalue; // last key-value pair wins (or first)
                     }
@@ -551,18 +547,19 @@ namespace System.Data.Common
             return parsetable;
         }
 
-        private static void ParseComparison(Hashtable parsetable, string connectionString, Hashtable synonyms, Exception e)
+        private static void ParseComparison(Dictionary<string, string> parsetable, string connectionString, Dictionary<string, string> synonyms, Exception e)
         {
             try
             {
-                Hashtable parsedvalues = SplitConnectionString(connectionString, synonyms);
-                foreach (DictionaryEntry entry in parsedvalues)
+                Dictionary<string, string> parsedvalues = SplitConnectionString(connectionString, synonyms);
+                foreach (KeyValuePair<string, string> pair in parsedvalues)
                 {
-                    string keyname = (string)entry.Key;
-                    string value1 = (string)entry.Value;
-                    string value2 = (string)parsetable[keyname];
-                    Debug.Assert(parsetable.Contains(keyname), "ParseInternal code vs. regex mismatch keyname <" + keyname + ">");
-                    Debug.Assert(value1 == value2, "ParseInternal code vs. regex mismatch keyvalue <" + value1 + "> <" + value2 + ">");
+                    string keyname = pair.Key;
+                    string value1 = pair.Value;
+                    string value2;
+                    bool parsetableContainsKey = parsetable.TryGetValue(keyname, out value2);
+                    Debug.Assert(parsetableContainsKey, $"{nameof(ParseInternal)} code vs. regex mismatch keyname <{keyname}>");
+                    Debug.Assert(value1 == value2, $"{nameof(ParseInternal)} code vs. regex mismatch keyvalue <{value1}> <{value2}>");
                 }
             }
             catch (ArgumentException f)
@@ -602,7 +599,7 @@ namespace System.Data.Common
         }
 #endif
 
-        private static NameValuePair ParseInternal(Hashtable parsetable, string connectionString, bool buildChain, Hashtable synonyms)
+        private static NameValuePair ParseInternal(Dictionary<string, string> parsetable, string connectionString, bool buildChain, Dictionary<string, string> synonyms)
         {
             Debug.Assert(null != connectionString, "null connectionstring");
             StringBuilder buffer = new StringBuilder();
@@ -619,7 +616,7 @@ namespace System.Data.Common
 
                     string keyname, keyvalue;
                     nextStartPosition = GetKeyValuePair(connectionString, startPosition, buffer, out keyname, out keyvalue);
-                    if (ADP.IsEmpty(keyname))
+                    if (string.IsNullOrEmpty(keyname))
                     {
                         // if (nextStartPosition != endPosition) { throw; }
                         break;
@@ -630,11 +627,16 @@ namespace System.Data.Common
                     Debug.Assert(IsKeyNameValid(keyname), "ParseFailure, invalid keyname");
                     Debug.Assert(IsValueValidInternal(keyvalue), "parse failure, invalid keyvalue");
 #endif
-                    string realkeyname = ((null != synonyms) ? (string)synonyms[keyname] : keyname);
+                    string synonym;
+                    string realkeyname = null != synonyms ?
+                        (synonyms.TryGetValue(keyname, out synonym) ? synonym : null) :
+                        keyname;
+
                     if (!IsKeyNameValid(realkeyname))
                     {
                         throw ADP.KeywordNotSupported(keyname);
                     }
+                    else
                     {
                         parsetable[realkeyname] = keyvalue; // last key-value pair wins (or first)
                     }

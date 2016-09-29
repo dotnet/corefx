@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 //-----------------------------------------------------------------------------
 //
@@ -14,13 +15,9 @@
 //
 //-----------------------------------------------------------------------------
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Xml;                           // for XmlReader/Writer
-using System.IO.Packaging;
-using System.IO;
 using System.Diagnostics;
 
 namespace System.IO.Packaging
@@ -30,11 +27,6 @@ namespace System.IO.Packaging
     /// </summary>
     internal class InternalRelationshipCollection : IEnumerable<PackageRelationship>
     {
-        //------------------------------------------------------
-        //
-        //  Public Methods
-        //
-        //------------------------------------------------------
         #region IEnumerable
         /// <summary>
         /// Returns an enumerator over all the relationships for a Package or a PackagePart
@@ -46,7 +38,7 @@ namespace System.IO.Packaging
         }
 
         /// <summary>
-        /// Returns an enumertor over all the relationships for a Package or a PackagePart
+        /// Returns an enumerator over all the relationships for a Package or a PackagePart
         /// </summary>
         /// <returns></returns>
         IEnumerator<PackageRelationship> IEnumerable<PackageRelationship>.GetEnumerator()
@@ -55,7 +47,7 @@ namespace System.IO.Packaging
         }
 
         /// <summary>
-        /// Returns an enumertor over all the relationships for a Package or a PackagePart
+        /// Returns an enumerator over all the relationships for a Package or a PackagePart
         /// </summary>
         /// <returns></returns>
         public List<PackageRelationship>.Enumerator GetEnumerator()
@@ -64,12 +56,7 @@ namespace System.IO.Packaging
         }
 
         #endregion
-
-        //------------------------------------------------------
-        //
-        //  Internal Methods
-        //
-        //------------------------------------------------------
+        
         #region Internal Methods
         /// <summary>
         /// Constructor
@@ -97,7 +84,7 @@ namespace System.IO.Packaging
         /// Null OK (ID will be generated).</param>
         internal PackageRelationship Add(Uri targetUri, TargetMode targetMode, string relationshipType, string id)
         {
-            return Add(targetUri, targetMode, relationshipType, id, false /*not parsing*/);
+            return Add(targetUri, targetMode, relationshipType, id, parsing: false);
         }
 
         /// <summary>
@@ -192,11 +179,6 @@ namespace System.IO.Packaging
 
         #endregion Internal Methods
 
-        //------------------------------------------------------
-        //
-        //  Private Methods
-        //
-        //------------------------------------------------------
         #region Private Methods
         /// <summary>
         /// Constructor
@@ -322,7 +304,10 @@ namespace System.IO.Packaging
                                         if (!reader.IsEmptyElement)
                                             ProcessEndElementForRelationshipTag(reader);
                                     }
-                                    else throw new XmlException(SR.RelationshipTagDoesntMatchSchema, null, reader.LineNumber, reader.LinePosition);
+                                    else
+                                    {
+                                        throw new XmlException(SR.RelationshipTagDoesntMatchSchema, null, reader.LineNumber, reader.LinePosition);
+                                    }
                                 }
                                 else
                                     if (!(String.CompareOrdinal(s_relationshipsTagName, reader.LocalName) == 0 && (reader.NodeType == XmlNodeType.EndElement)))
@@ -350,7 +335,7 @@ namespace System.IO.Packaging
             {
                 try
                 {
-                    relationshipTargetMode = (TargetMode)(Enum.Parse(typeof(TargetMode), targetModeAttributeValue, false /* ignore case */));
+                    relationshipTargetMode = (TargetMode)(Enum.Parse(typeof(TargetMode), targetModeAttributeValue, ignoreCase: false));
                 }
                 catch (ArgumentNullException argNullEx)
                 {
@@ -366,24 +351,24 @@ namespace System.IO.Packaging
             // Attribute : Target
             // create a new PackageRelationship
             string targetAttributeValue = reader.GetAttribute(s_targetAttributeName);
-            if (targetAttributeValue == null || targetAttributeValue == String.Empty)
+            if (string.IsNullOrEmpty(targetAttributeValue))
                 throw new XmlException(SR.Format(SR.RequiredRelationshipAttributeMissing, s_targetAttributeName), null, reader.LineNumber, reader.LinePosition);
 
             Uri targetUri = new Uri(targetAttributeValue, UriKind.RelativeOrAbsolute);
 
             // Attribute : Type
             string typeAttributeValue = reader.GetAttribute(s_typeAttributeName);
-            if (typeAttributeValue == null || typeAttributeValue == String.Empty)
+            if (string.IsNullOrEmpty(typeAttributeValue))
                 throw new XmlException(SR.Format(SR.RequiredRelationshipAttributeMissing, s_typeAttributeName), null, reader.LineNumber, reader.LinePosition);
 
             // Attribute : Id
             // Get the Id attribute (required attribute).
             string idAttributeValue = reader.GetAttribute(s_idAttributeName);
-            if (idAttributeValue == null || idAttributeValue == String.Empty)
+            if (string.IsNullOrEmpty(idAttributeValue))
                 throw new XmlException(SR.Format(SR.RequiredRelationshipAttributeMissing, s_idAttributeName), null, reader.LineNumber, reader.LinePosition);
 
             // Add the relationship to the collection
-            Add(targetUri, relationshipTargetMode, typeAttributeValue, idAttributeValue, true /*parsing*/);
+            Add(targetUri, relationshipTargetMode, typeAttributeValue, idAttributeValue, parsing: true);
         }
 
         //If End element is present for Relationship then we process it
@@ -416,20 +401,20 @@ namespace System.IO.Packaging
         private PackageRelationship Add(Uri targetUri, TargetMode targetMode, string relationshipType, string id, bool parsing)
         {
             if (targetUri == null)
-                throw new ArgumentNullException("targetUri");
+                throw new ArgumentNullException(nameof(targetUri));
 
             if (relationshipType == null)
-                throw new ArgumentNullException("relationshipType");
+                throw new ArgumentNullException(nameof(relationshipType));
 
             ThrowIfInvalidRelationshipType(relationshipType);
 
             //Verify if the Enum value is valid
             if (targetMode < TargetMode.Internal || targetMode > TargetMode.External)
-                throw new ArgumentOutOfRangeException("targetMode");
+                throw new ArgumentOutOfRangeException(nameof(targetMode));
 
             // don't accept absolute Uri's if targetMode is Internal.
             if (targetMode == TargetMode.Internal && targetUri.IsAbsoluteUri)
-                throw new ArgumentException(SR.RelationshipTargetMustBeRelative, "targetUri");
+                throw new ArgumentException(SR.RelationshipTargetMustBeRelative, nameof(targetUri));
 
             // don't allow relationships to relationships
             //  This check should be made for following cases
@@ -447,7 +432,7 @@ namespace System.IO.Packaging
                 if (resolvedUri != null)
                 {
                     if (PackUriHelper.IsRelationshipPartUri(resolvedUri))
-                        throw new ArgumentException(SR.RelationshipToRelationshipIllegal, "targetUri");
+                        throw new ArgumentException(SR.RelationshipToRelationshipIllegal, nameof(targetUri));
                 }
             }
 
@@ -522,7 +507,7 @@ namespace System.IO.Packaging
                 // We would like to persist the uri as passed in by the user and so we use the
                 // OriginalString property. This makes the persisting behavior consistent
                 // for relative and absolute Uris. 
-                // Since we accpeted the Uri as a string, we are at the minimum guaranteed that
+                // Since we accepted the Uri as a string, we are at the minimum guaranteed that
                 // the string can be converted to a valid Uri. 
                 // Also, we are just using it here to persist the information and we are not
                 // resolving or fetching a resource based on this Uri.
@@ -572,27 +557,13 @@ namespace System.IO.Packaging
         /// <returns>Resolved Uri</returns>
         private Uri GetResolvedTargetUri(Uri target, TargetMode targetMode)
         {
-            if (targetMode == TargetMode.Internal)
-            {
-                Debug.Assert(!target.IsAbsoluteUri, "Uri should be relative at this stage");
+            Debug.Assert(targetMode == TargetMode.Internal);
+            Debug.Assert(!target.IsAbsoluteUri, "Uri should be relative at this stage");
 
-                if (_sourcePart == null) //indicates that the source is the package root
-                    return PackUriHelper.ResolvePartUri(PackUriHelper.PackageRootUri, target);
-                else
-                    return PackUriHelper.ResolvePartUri(_sourcePart.Uri, target);
-            }
+            if (_sourcePart == null) //indicates that the source is the package root
+                return PackUriHelper.ResolvePartUri(PackUriHelper.PackageRootUri, target);
             else
-            {
-                if (target.IsAbsoluteUri)
-                {
-                    if (String.CompareOrdinal(target.Scheme, PackUriHelper.UriSchemePack) == 0)
-                        return PackUriHelper.GetPartUri(target);
-                }
-                else
-                    Debug.Assert(false, "Uri should not be relative at this stage");
-            }
-            // relative to the location of the package.
-            return target;
+                return PackUriHelper.ResolvePartUri(_sourcePart.Uri, target);
         }
 
         //Throws an exception if the relationship part does not have the correct content type
@@ -665,11 +636,6 @@ namespace System.IO.Packaging
 
         #endregion Private Properties
 
-        //------------------------------------------------------
-        //
-        //  Private Members
-        //
-        //------------------------------------------------------
         #region Private Members
         private List<PackageRelationship> _relationships;
         private bool _dirty;    // true if we have uncommitted changes to _relationships

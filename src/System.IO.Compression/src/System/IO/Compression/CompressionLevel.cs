@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.IO.Compression
 {
@@ -8,11 +9,11 @@ namespace System.IO.Compression
     /// </summary>
 
     // This is an abstract concept and NOT the ZLib compression level.
-    // There may or may not be any correspondance with the a possible implementation-specific level-parameter of the deflater.
+    // There may or may not be any correspondence with the a possible implementation-specific level-parameter of the deflater.
     public enum CompressionLevel
     {
         Optimal = 0,
         Fastest = 1,
         NoCompression = 2
-    }  // internal enum CompressionLevel
-}  // namespace System.IO.Compression
+    }
+}

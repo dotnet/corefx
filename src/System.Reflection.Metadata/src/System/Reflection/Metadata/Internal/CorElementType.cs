@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Reflection.Metadata.Ecma335
 {
@@ -10,14 +11,14 @@ namespace System.Reflection.Metadata.Ecma335
         ELEMENT_TYPE_VOID = 0x1,
         ELEMENT_TYPE_BOOLEAN = 0x2,
         ELEMENT_TYPE_CHAR = 0x3,
-        ELEMENT_TYPE_I1 = 0x4,
+        ELEMENT_TYPE_I1 = 0x4, // SByte
         ELEMENT_TYPE_U1 = 0x5, // Byte
-        ELEMENT_TYPE_I2 = 0x6, // Short, int16
-        ELEMENT_TYPE_U2 = 0x7, // UShort
-        ELEMENT_TYPE_I4 = 0x8, // Integer, int32
-        ELEMENT_TYPE_U4 = 0x9, // Uinteger 
-        ELEMENT_TYPE_I8 = 0xA, // Long, int64
-        ELEMENT_TYPE_U8 = 0xB, // ULong
+        ELEMENT_TYPE_I2 = 0x6, // Int16
+        ELEMENT_TYPE_U2 = 0x7, // UInt16
+        ELEMENT_TYPE_I4 = 0x8, // Int32
+        ELEMENT_TYPE_U4 = 0x9, // UInt32
+        ELEMENT_TYPE_I8 = 0xA, // Int64
+        ELEMENT_TYPE_U8 = 0xB, // UInt64
         ELEMENT_TYPE_R4 = 0xC, // Single
         ELEMENT_TYPE_R8 = 0xD, // Double
         ELEMENT_TYPE_STRING = 0xE,

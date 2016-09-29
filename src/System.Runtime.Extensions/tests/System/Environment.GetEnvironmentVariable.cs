@@ -1,138 +1,188 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Runtime.InteropServices;
 using Xunit;
 
-public class GetEnvironmentVariable
+namespace System.Tests
 {
-    [Fact]
-    public void NullVariableThrowsArgumentNull()
+    public class GetEnvironmentVariable
     {
-        Assert.Throws<ArgumentNullException>(() => Environment.GetEnvironmentVariable(null));
-        Assert.Throws<ArgumentNullException>(() => Environment.SetEnvironmentVariable(null, "test"));
-        Assert.Throws<ArgumentException>(() => Environment.SetEnvironmentVariable("", "test"));
-    }
-
-    [Fact]
-    public void EmptyVariableReturnsNull()
-    {
-        Assert.Null(Environment.GetEnvironmentVariable(String.Empty));
-    }
-
-    [Fact]
-    [ActiveIssue("https://github.com/dotnet/coreclr/issues/635", PlatformID.AnyUnix)]
-    public void RandomLongVariableNameCanRoundTrip()
-    {
-        // NOTE: The limit of 32766 characters enforced by dekstop
-        // SetEnvironmentVariable is antiquated. I was
-        // able to create ~1GB names and values on my Windows 8.1 box. On
-        // desktop, GetEnvironmentVariable throws OOM during its attempt to
-        // demand huge EnvironmentPermission well before that. Also, the old
-        // test for long name case wasn't very good: it just checked that an
-        // arbitrary long name > 32766 characters returned null (not found), but
-        // that had nothing to do with the limit, the variable was simply not
-        // found!
-
-        string variable = "LongVariable_" + new string('@', 33000);
-        const string value = "TestValue";
-
-        try
+        [Fact]
+        public void InvalidArguments_ThrowsExceptions()
         {
-            SetEnvironmentVariableWithPInvoke(variable, value);
+            Assert.Throws<ArgumentNullException>("variable", () => Environment.GetEnvironmentVariable(null));
+            Assert.Throws<ArgumentNullException>("variable", () => Environment.SetEnvironmentVariable(null, "test"));
+            Assert.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable("", "test"));
+            Assert.Throws<ArgumentException>("value", () => Environment.SetEnvironmentVariable("test", new string('s', 65 * 1024)));
 
-            Assert.Equal(value, Environment.GetEnvironmentVariable(variable));
-        }
-        finally
-        {
-            SetEnvironmentVariableWithPInvoke(variable, null);
-        }
-    }
-
-    [Fact]
-    public void RandomVariableThatDoesNotExistReturnsNull()
-    {
-        string variable = "TestVariable_SurelyThisDoesNotExist";
-        Assert.Null(Environment.GetEnvironmentVariable(variable));
-    }
-
-    [Fact]
-    public void VariableNamesAreCaseInsensitiveAsAppropriate()
-    {
-        string value = "TestValue";
-
-        try
-        {
-            Environment.SetEnvironmentVariable("ThisIsATestEnvironmentVariable", value);
-
-            Assert.Equal(value, Environment.GetEnvironmentVariable("ThisIsATestEnvironmentVariable"));
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+#if netstandard17
+            Assert.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable("", "test", EnvironmentVariableTarget.Machine));
+            Assert.Throws<ArgumentNullException>("variable", () => Environment.SetEnvironmentVariable(null, "test", EnvironmentVariableTarget.User));
+            Assert.Throws<ArgumentNullException>("variable", () => Environment.GetEnvironmentVariable(null, EnvironmentVariableTarget.Process));
+            Assert.Throws<ArgumentOutOfRangeException>("target", () => Environment.GetEnvironmentVariable("test", (EnvironmentVariableTarget)42));
+            Assert.Throws<ArgumentOutOfRangeException>("target", () => Environment.SetEnvironmentVariable("test", "test", (EnvironmentVariableTarget)(-1)));
+            Assert.Throws<ArgumentOutOfRangeException>("target", () => Environment.GetEnvironmentVariables((EnvironmentVariableTarget)(3)));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                value = null;
+                Assert.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable(new string('s', 256), "value", EnvironmentVariableTarget.User));
             }
-
-            Assert.Equal(value, Environment.GetEnvironmentVariable("thisisatestenvironmentvariable"));
-            Assert.Equal(value, Environment.GetEnvironmentVariable("THISISATESTENVIRONMENTVARIABLE"));
-            Assert.Equal(value, Environment.GetEnvironmentVariable("ThISISATeSTENVIRoNMEnTVaRIABLE"));
+#endif
         }
-        finally
+
+        [Fact]
+        public void EmptyVariableReturnsNull()
         {
-            Environment.SetEnvironmentVariable("ThisIsATestEnvironmentVariable", null);
+            Assert.Null(Environment.GetEnvironmentVariable(String.Empty));
         }
-    }
 
-    [Fact]
-    public void CanGetAllVariablesIndividually()
-    {
-        Random r = new Random();
-        string envVar1 = "TestVariable_CanGetVariablesIndividually_" + r.Next().ToString();
-        string envVar2 = "TestVariable_CanGetVariablesIndividually_" + r.Next().ToString();
-
-        try
+        [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)] // GetEnvironmentVariable by design doesn't respect changes via setenv
+        public void RandomLongVariableNameCanRoundTrip()
         {
-            Environment.SetEnvironmentVariable(envVar1, envVar1);
-            Environment.SetEnvironmentVariable(envVar2, envVar2);
+            // NOTE: The limit of 32766 characters enforced by desktop
+            // SetEnvironmentVariable is antiquated. I was
+            // able to create ~1GB names and values on my Windows 8.1 box. On
+            // desktop, GetEnvironmentVariable throws OOM during its attempt to
+            // demand huge EnvironmentPermission well before that. Also, the old
+            // test for long name case wasn't very good: it just checked that an
+            // arbitrary long name > 32766 characters returned null (not found), but
+            // that had nothing to do with the limit, the variable was simply not
+            // found!
 
-            IDictionary envBlock = Environment.GetEnvironmentVariables();
+            string variable = "LongVariable_" + new string('@', 33000);
+            const string value = "TestValue";
 
-            // Make sure the environment variables we set are part of the dictionary returned.
-            Assert.True(envBlock.Contains(envVar1));
-            Assert.True(envBlock.Contains(envVar1));
+            try
+            {
+                SetEnvironmentVariableWithPInvoke(variable, value);
 
-            // Make sure the values match the expected ones.
-            Assert.Equal(envVar1, envBlock[envVar1]);
-            Assert.Equal(envVar2, envBlock[envVar2]);
-
-            // Make sure we can read the individual variables as well
-            Assert.Equal(envVar1, Environment.GetEnvironmentVariable(envVar1));
-            Assert.Equal(envVar2, Environment.GetEnvironmentVariable(envVar2));
+                Assert.Equal(value, Environment.GetEnvironmentVariable(variable));
+            }
+            finally
+            {
+                SetEnvironmentVariableWithPInvoke(variable, null);
+            }
         }
-        finally
+
+        [Fact]
+        public void RandomVariableThatDoesNotExistReturnsNull()
         {
-            // Clear the variables we just set
-            Environment.SetEnvironmentVariable(envVar1, null);
-            Environment.SetEnvironmentVariable(envVar2, null);
+            string variable = "TestVariable_SurelyThisDoesNotExist";
+            Assert.Null(Environment.GetEnvironmentVariable(variable));
         }
+
+        [Fact]
+        public void VariableNamesAreCaseInsensitiveAsAppropriate()
+        {
+            string value = "TestValue";
+
+            try
+            {
+                Environment.SetEnvironmentVariable("ThisIsATestEnvironmentVariable", value);
+
+                Assert.Equal(value, Environment.GetEnvironmentVariable("ThisIsATestEnvironmentVariable"));
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    value = null;
+                }
+
+                Assert.Equal(value, Environment.GetEnvironmentVariable("thisisatestenvironmentvariable"));
+                Assert.Equal(value, Environment.GetEnvironmentVariable("THISISATESTENVIRONMENTVARIABLE"));
+                Assert.Equal(value, Environment.GetEnvironmentVariable("ThISISATeSTENVIRoNMEnTVaRIABLE"));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("ThisIsATestEnvironmentVariable", null);
+            }
+        }
+
+        [Fact]
+        public void CanGetAllVariablesIndividually()
+        {
+            Random r = new Random();
+            string envVar1 = "TestVariable_CanGetVariablesIndividually_" + r.Next().ToString();
+            string envVar2 = "TestVariable_CanGetVariablesIndividually_" + r.Next().ToString();
+
+            try
+            {
+                Environment.SetEnvironmentVariable(envVar1, envVar1);
+                Environment.SetEnvironmentVariable(envVar2, envVar2);
+
+                IDictionary envBlock = Environment.GetEnvironmentVariables();
+
+                // Make sure the environment variables we set are part of the dictionary returned.
+                Assert.True(envBlock.Contains(envVar1));
+                Assert.True(envBlock.Contains(envVar1));
+
+                // Make sure the values match the expected ones.
+                Assert.Equal(envVar1, envBlock[envVar1]);
+                Assert.Equal(envVar2, envBlock[envVar2]);
+
+                // Make sure we can read the individual variables as well
+                Assert.Equal(envVar1, Environment.GetEnvironmentVariable(envVar1));
+                Assert.Equal(envVar2, Environment.GetEnvironmentVariable(envVar2));
+            }
+            finally
+            {
+                // Clear the variables we just set
+                Environment.SetEnvironmentVariable(envVar1, null);
+                Environment.SetEnvironmentVariable(envVar2, null);
+            }
+        }
+
+#if netstandard17
+        [OuterLoop] // manipulating environment variables broader in scope than the process
+        [Theory]
+        [InlineData(EnvironmentVariableTarget.Process)]
+        [InlineData(EnvironmentVariableTarget.Machine)]
+        [InlineData(EnvironmentVariableTarget.User)]
+        public void EnumerateEnvironmentVariables(EnvironmentVariableTarget target)
+        {
+            IDictionary results = Environment.GetEnvironmentVariables(target);
+            foreach (DictionaryEntry result in results)
+            {
+                string key = (string)result.Key;
+                string value = (string)result.Value ?? string.Empty;
+
+                // Make sure the iterated value we got matches the one we get explicitly
+                Assert.NotNull(result.Key as string);
+                Assert.Equal(value, Environment.GetEnvironmentVariable(key, target));
+
+                try
+                {
+                    // Change it to something else.  Not all values can be changed and will silently
+                    // not change, so we don't re-check and assert for equality.
+                    Environment.SetEnvironmentVariable(key, value + "changed", target);
+                }
+                finally
+                {
+                    // Change it back
+                    Environment.SetEnvironmentVariable(key, value, target);
+                }
+            }
+        }
+#endif
+
+        private static void SetEnvironmentVariableWithPInvoke(string name, string value)
+        {
+            bool success =
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
+                    SetEnvironmentVariable(name, value) :
+                    (value != null ? setenv(name, value, 1) : unsetenv(name)) == 0;
+            Assert.True(success);
+        }
+
+        [DllImport("api-ms-win-core-processenvironment-l1-1-0.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool SetEnvironmentVariable(string lpName, string lpValue);
+
+        [DllImport("libc")]
+        private static extern int setenv(string name, string value, int overwrite);
+
+        [DllImport("libc")]
+        private static extern int unsetenv(string name);
     }
-
-    private static void SetEnvironmentVariableWithPInvoke(string name, string value)
-    {
-        bool success =
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
-                SetEnvironmentVariable(name, value) :
-                (value != null ? setenv(name, value, 1) : unsetenv(name)) == 0;
-        Assert.True(success);
-    }
-
-    [DllImport("api-ms-win-core-processenvironment-l1-1-0.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern bool SetEnvironmentVariable(string lpName, string lpValue);
-
-    [DllImport("libc")]
-    private static extern int setenv(string name, string value, int overwrite);
-
-    [DllImport("libc")]
-    private static extern int unsetenv(string name);
 }

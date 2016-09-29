@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -73,7 +74,7 @@ namespace System.Net.Http.Headers
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
             CheckHeaderName(name);
 
@@ -129,7 +130,7 @@ namespace System.Net.Http.Headers
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
             if (!TryCheckHeaderName(name))
             {
@@ -373,9 +374,9 @@ namespace System.Net.Http.Headers
 
         internal void AddParsedValue(string name, object value)
         {
-            Contract.Requires((name != null) && (name.Length > 0));
-            Contract.Requires(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
-            Contract.Requires(value != null);
+            Debug.Assert((name != null) && (name.Length > 0));
+            Debug.Assert(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
+            Debug.Assert(value != null);
 
             HeaderStoreItemInfo info = GetOrCreateHeaderInfo(name, true);
             Debug.Assert(info.Parser != null, "Can't add parsed value if there is no parser available.");
@@ -389,9 +390,9 @@ namespace System.Net.Http.Headers
 
         internal void SetParsedValue(string name, object value)
         {
-            Contract.Requires((name != null) && (name.Length > 0));
-            Contract.Requires(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
-            Contract.Requires(value != null);
+            Debug.Assert((name != null) && (name.Length > 0));
+            Debug.Assert(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
+            Debug.Assert(value != null);
 
             // This method will first clear all values. This is used e.g. when setting the 'Date' or 'Host' header.
             // I.e. headers not supporting collections.
@@ -419,9 +420,9 @@ namespace System.Net.Http.Headers
 
         internal bool RemoveParsedValue(string name, object value)
         {
-            Contract.Requires((name != null) && (name.Length > 0));
-            Contract.Requires(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
-            Contract.Requires(value != null);
+            Debug.Assert((name != null) && (name.Length > 0));
+            Debug.Assert(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
+            Debug.Assert(value != null);
 
             if (_headerStore == null)
             {
@@ -470,7 +471,7 @@ namespace System.Net.Http.Headers
                         {
                             // Remove 'item' rather than 'value', since the 'comparer' may consider two values
                             // equal even though the default obj.Equals() may not (e.g. if 'comparer' does
-                            // case-insentive comparison for strings, but string.Equals() is case-sensitive).
+                            // case-insensitive comparison for strings, but string.Equals() is case-sensitive).
                             result = parsedValues.Remove(item);
                             break;
                         }
@@ -497,9 +498,9 @@ namespace System.Net.Http.Headers
 
         internal bool ContainsParsedValue(string name, object value)
         {
-            Contract.Requires((name != null) && (name.Length > 0));
-            Contract.Requires(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
-            Contract.Requires(value != null);
+            Debug.Assert((name != null) && (name.Length > 0));
+            Debug.Assert(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
+            Debug.Assert(value != null);
 
             if (_headerStore == null)
             {
@@ -553,7 +554,7 @@ namespace System.Net.Http.Headers
 
         internal virtual void AddHeaders(HttpHeaders sourceHeaders)
         {
-            Contract.Requires(sourceHeaders != null);
+            Debug.Assert(sourceHeaders != null);
             Debug.Assert(_parserStore == sourceHeaders._parserStore,
                 "Can only copy headers from an instance with the same header parsers.");
 
@@ -686,8 +687,8 @@ namespace System.Net.Http.Headers
 
         private HeaderStoreItemInfo GetOrCreateHeaderInfo(string name, bool parseRawValues)
         {
-            Contract.Requires((name != null) && (name.Length > 0));
-            Contract.Requires(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
+            Debug.Assert((name != null) && (name.Length > 0));
+            Debug.Assert(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
             Contract.Ensures(Contract.Result<HeaderStoreItemInfo>() != null);
 
             HeaderStoreItemInfo result = null;
@@ -775,7 +776,7 @@ namespace System.Net.Http.Headers
                     // contain invalid newline chars. Reset RawValue.
                     info.RawValue = null;
 
-                    // During parsing, we removed tha value since it contains invalid newline chars. Return false to indicate that
+                    // During parsing, we removed the value since it contains invalid newline chars. Return false to indicate that
                     // this is an empty header. If the caller specified to remove empty headers, we'll remove the header before
                     // returning.
                     if ((info.InvalidValue == null) && (info.ParsedValue == null))
@@ -813,7 +814,7 @@ namespace System.Net.Http.Headers
                 {
                     if (!TryParseAndAddRawHeaderValue(name, info, rawValue, true))
                     {
-                        if (Logging.On) Logging.PrintWarning(Logging.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_invalid_value, name, rawValue));
+                        if (HttpEventSource.Log.IsEnabled()) HttpEventSource.Log.HeadersInvalidValue(name, rawValue);
                     }
                 }
             }
@@ -835,7 +836,7 @@ namespace System.Net.Http.Headers
             {
                 if (!TryParseAndAddRawHeaderValue(name, info, rawValue, true))
                 {
-                    if (Logging.On) Logging.PrintWarning(Logging.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_invalid_value, name, rawValue));
+                    if (HttpEventSource.Log.IsEnabled()) HttpEventSource.Log.HeadersInvalidValue(name, rawValue);
                 }
             }
         }
@@ -865,8 +866,8 @@ namespace System.Net.Http.Headers
         // See ParseAndAddValue
         private static bool TryParseAndAddRawHeaderValue(string name, HeaderStoreItemInfo info, string value, bool addWhenInvalid)
         {
-            Contract.Requires(info != null);
-            Contract.Requires(info.Parser != null);
+            Debug.Assert(info != null);
+            Debug.Assert(info.Parser != null);
 
             // Values are added as 'invalid' if we either can't parse the value OR if we already have a value
             // and the current header doesn't support multiple values: e.g. trying to add a date/time value
@@ -1012,8 +1013,8 @@ namespace System.Net.Http.Headers
         // is to optimize the most common scenario where a header has only one value.
         internal object GetParsedValues(string name)
         {
-            Contract.Requires((name != null) && (name.Length > 0));
-            Contract.Requires(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
+            Debug.Assert((name != null) && (name.Length > 0));
+            Debug.Assert(HttpRuleParser.GetTokenLength(name, 0) == name.Length);
 
             HeaderStoreItemInfo info = null;
 
@@ -1038,7 +1039,7 @@ namespace System.Net.Http.Headers
 
         private void ParseAndAddValue(string name, HeaderStoreItemInfo info, string value)
         {
-            Contract.Requires(info != null);
+            Debug.Assert(info != null);
 
             if (info.Parser == null)
             {
@@ -1118,7 +1119,7 @@ namespace System.Net.Http.Headers
         {
             if (string.IsNullOrEmpty(name))
             {
-                throw new ArgumentException(SR.net_http_argument_empty_string, "name");
+                throw new ArgumentException(SR.net_http_argument_empty_string, nameof(name));
             }
 
             if (HttpRuleParser.GetTokenLength(name, 0) != name.Length)
@@ -1169,7 +1170,7 @@ namespace System.Net.Http.Headers
         {
             if (HttpRuleParser.ContainsInvalidNewLine(value))
             {
-                if (Logging.On) Logging.PrintError(Logging.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_no_newlines, name, value));
+                if (NetEventSource.Log.IsEnabled()) NetEventSource.PrintError(NetEventSource.ComponentType.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_log_headers_no_newlines, name, value));
                 return true;
             }
             return false;
@@ -1212,7 +1213,7 @@ namespace System.Net.Http.Headers
 
         private static int GetValueCount(HeaderStoreItemInfo info)
         {
-            Contract.Requires(info != null);
+            Debug.Assert(info != null);
 
             int valueCount = 0;
             UpdateValueCount<string>(info.RawValue, ref valueCount);
@@ -1243,7 +1244,7 @@ namespace System.Net.Http.Headers
         private static void ReadStoreValues<T>(string[] values, object storeValue, HttpHeaderParser parser,
             T exclude, ref int currentIndex)
         {
-            Contract.Requires(values != null);
+            Debug.Assert(values != null);
 
             if (storeValue != null)
             {
@@ -1290,7 +1291,7 @@ namespace System.Net.Http.Headers
 
         private bool AreEqual(object value, object storeValue, IEqualityComparer comparer)
         {
-            Contract.Requires(value != null);
+            Debug.Assert(value != null);
 
             if (comparer != null)
             {
@@ -1343,7 +1344,7 @@ namespace System.Net.Http.Headers
                     // If the header only supports one value, and we have already a value set, then we can't add
                     // another value. E.g. the 'Date' header only supports one value. We can't add multiple timestamps
                     // to 'Date'.
-                    // So if this is a known header, ask the parser if it supports multiple values and check wheter
+                    // So if this is a known header, ask the parser if it supports multiple values and check whether
                     // we already have a (valid or invalid) value.
                     // Note that we ignore the rawValue by purpose: E.g. we are parsing 2 raw values for a header only 
                     // supporting 1 value. When the first value gets parsed, CanAddValue returns true and we add the

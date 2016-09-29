@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -31,7 +32,7 @@ namespace System.Linq.Parallel
     /// <typeparam name="TInputOutput"></typeparam>
     /// <typeparam name="THashKey"></typeparam>
     /// <typeparam name="TOrderKey"></typeparam>
-    internal abstract class HashRepartitionStream<TInputOutput, THashKey, TOrderKey> : PartitionedStream<Pair, TOrderKey>
+    internal abstract class HashRepartitionStream<TInputOutput, THashKey, TOrderKey> : PartitionedStream<Pair<TInputOutput,THashKey>, TOrderKey>
     {
         private readonly IEqualityComparer<THashKey> _keyComparer; // The optional key comparison routine.
         private readonly IEqualityComparer<TInputOutput> _elementComparer; // The optional element comparison routine.

@@ -1,104 +1,119 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Globalization;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class TextInfoToLower
     {
-        // PosTest1: uppercase character
-        [Fact]
-        public void TestEnUSUppercaseCharacter()
+        public static IEnumerable<object[]> ToLower_TestData()
         {
-            char ch = 'A';
-            char expectedChar = 'a';
-            TextInfo textInfo = new CultureInfo("en-US").TextInfo;
-
-            char actualChar = textInfo.ToLower(ch);
-            Assert.Equal(expectedChar, actualChar);
-        }
-
-        // PosTest2: lowercase character
-        [Fact]
-        public void TestEnUSLowercaseCharacter()
-        {
-            char ch = 'a';
-            char expectedChar = ch;
-            TextInfo textInfo = new CultureInfo("en-US").TextInfo;
-
-            char actualChar = textInfo.ToLower(ch);
-            Assert.Equal(expectedChar, actualChar);
-        }
-
-        // PosTest3: non-alphabetic character
-        [Fact]
-        public void TestNonAlphabeticCharacter()
-        {
-            for (int i = 0; i <= 9; i++)
+            foreach (string cultureName in new string[] { "", "en-US", "fr", "fr-FR" })
             {
-                char ch = Convert.ToChar(i);
-                char expectedChar = ch;
-                TextInfo textInfo = new CultureInfo("en-US").TextInfo;
+                yield return new object[] { cultureName, "", "" };
 
-                char actualChar = textInfo.ToLower(ch);
-                Assert.Equal(expectedChar, actualChar);
+                yield return new object[] { cultureName, "A", "a" };
+                yield return new object[] { cultureName, "a", "a" };
+                yield return new object[] { cultureName, "ABC", "abc" };
+                yield return new object[] { cultureName, "abc", "abc" };
+
+                yield return new object[] { cultureName, "1", "1" };
+                yield return new object[] { cultureName, "123", "123" };
+                yield return new object[] { cultureName, "!", "!" };
+
+                yield return new object[] { cultureName, "HELLOWOR!LD123", "hellowor!ld123" };
+                yield return new object[] { cultureName, "HelloWor!ld123", "hellowor!ld123" };
+                yield return new object[] { cultureName, "Hello\n\0World\u0009!", "hello\n\0world\t!" };
+
+                yield return new object[] { cultureName, "THIS IS A LONGER TEST CASE", "this is a longer test case" };
+                yield return new object[] { cultureName, "this Is A LONGER mIXEd casE test case", "this is a longer mixed case test case" };
+
+                yield return new object[] { cultureName, "THIS \t hAs \t SOMe \t tabs", "this \t has \t some \t tabs" };
+                yield return new object[] { cultureName, "EMBEDDED\0NuLL\0Byte\0", "embedded\0null\0byte\0" };
+
+                // LATIN CAPITAL LETTER O WITH ACUTE, which has a lower case variant.
+                yield return new object[] { cultureName, "\u00D3", "\u00F3" };
+
+                // SNOWMAN, which does not have a lower case variant.
+                yield return new object[] { cultureName, "\u2603", "\u2603" };
+#if net46
+                if (PlatformDetection.IsWindows7)
+                {
+                    // on Windows 7, Desktop framework is using its own sorting DLL and not calling the OS except with Invariant culture
+                    yield return new object[] { cultureName, "\U00010400", cultureName == "" ? "\U00010400" : "\U00010428" };
+                }
+                else 
+                {
+                    yield return new object[] { cultureName, "\U00010400", "\U00010428" };
+                }
+#else //!net46
+                // DESERT CAPITAL LETTER LONG I has a lower case variant (but not on Windows 7).
+                yield return new object[] { cultureName, "\U00010400", PlatformDetection.IsWindows7 ? "\U00010400" : "\U00010428" };
+#endif // net46
+
+                // RAINBOW (outside the BMP and does not case)
+                yield return new object[] { cultureName, "\U0001F308", "\U0001F308" };
+
+                // Unicode defines some codepoints which expand into multiple codepoints
+                // when cased (see SpecialCasing.txt from UNIDATA for some examples). We have never done
+                // these sorts of expansions, since it would cause string lengths to change when cased,
+                // which is non-intuitive. In addition, there are some context sensitive mappings which
+                // we also don't preform.
+                // Greek Capital Letter Sigma (does not to case to U+03C2 with "final sigma" rule).
+                yield return new object[] { cultureName, "\u03A3", "\u03C3" };
+            }
+
+            foreach (string cultureName in new string[] { "tr", "tr-TR", "az", "az-Latn-AZ" })
+            {
+                yield return new object[] { cultureName, "\u0130", "i" };
+                yield return new object[] { cultureName, "i", "i" };
+                yield return new object[] { cultureName, "I", "\u0131" };
+                yield return new object[] { cultureName, "HI!", "h\u0131!" };
+                yield return new object[] { cultureName, "HI\n\0H\u0130\t!", "h\u0131\n\0hi\u0009!" };
+            }
+
+            // ICU has special tailoring for the en-US-POSIX locale which treats "i" and "I" as different letters
+            // instead of two letters with a case difference during collation.  Make sure this doesn't confuse our
+            // casing implementation, which uses collation to understand if we need to do Turkish casing or not.
+            if (!PlatformDetection.IsWindows)
+            {
+                yield return new object[] { "en-US-POSIX", "I", "i" };
             }
         }
 
-        // PosTest4: uppercase character and TextInfo is french CultureInfo's
-        [Fact]
-        public void TestFrFRUpperCaseCharacter()
+        [Theory]
+        [MemberData(nameof(ToLower_TestData))]
+        public void ToLower(string name, string str, string expected)
         {
-            char ch = 'G';
-            char expectedChar = 'g';
-            TextInfo textInfo = new CultureInfo("fr-FR").TextInfo;
-            char actualChar = textInfo.ToLower(ch);
-            Assert.Equal(expectedChar, actualChar);
+            Assert.Equal(expected, new CultureInfo(name).TextInfo.ToLower(str));
+            if (str.Length == 1)
+            {
+                Assert.Equal(expected[0], new CultureInfo(name).TextInfo.ToLower(str[0]));
+            }
         }
 
-        // PosTest5: lowercase character and TextInfo is french(France) CultureInfo's
         [Fact]
-        public void TestFrFRLowerCaseCharacter()
+        public void ToLower_InvalidSurrogates()
         {
-            char ch = 'g';
-            char expectedChar = ch;
-            TextInfo textInfo = new CultureInfo("fr-FR").TextInfo;
-
-            char actualChar = textInfo.ToLower(ch);
-            Assert.Equal(expectedChar, actualChar);
+            // Invalid UTF-16 in a string (mismatched surrogate pairs) should be unchanged.
+            foreach (string cultureName in new string[] { "", "en-US", "fr" })
+            {
+                ToLower(cultureName, "BE CAREFUL, \uD83C\uD83C, THIS ONE IS TRICKY", "be careful, \uD83C\uD83C, this one is tricky");
+                ToLower(cultureName, "BE CAREFUL, \uDF08\uD83C, THIS ONE IS TRICKY", "be careful, \uDF08\uD83C, this one is tricky");
+                ToLower(cultureName, "BE CAREFUL, \uDF08\uDF08, THIS ONE IS TRICKY", "be careful, \uDF08\uDF08, this one is tricky");
+            }
         }
 
-        // PosTest6: uppercase character for Turkish Culture
-        [Fact]
-        public void TestTrTRUppercaseCharacter()
+        [Theory]
+        [InlineData("")]
+        [InlineData("en-US")]
+        [InlineData("fr")]
+        public void ToLower_Null_ThrowsArgumentNullException(string cultureName)
         {
-            char ch = '\u0130';
-            char expectedChar = 'i';
-            TextInfo textInfo = new CultureInfo("tr-TR").TextInfo;
-
-            char actualChar = textInfo.ToLower(ch);
-            Assert.Equal(expectedChar, actualChar);
-
-            ch = 'I';
-            expectedChar = '\u0131';
-            actualChar = textInfo.ToLower(ch);
-            Assert.Equal(expectedChar, actualChar);
-        }
-
-        // PosTest7: lowercase character for Turkish Culture
-        [Fact]
-        public void TestTrTRLowercaseCharacter()
-        {
-            char ch = 'i';
-            char expectedChar = ch;
-            TextInfo textInfo = new CultureInfo("tr-TR").TextInfo;
-
-            char actualChar = textInfo.ToLower(ch);
-            Assert.Equal(expectedChar, actualChar);
+            Assert.Throws<ArgumentNullException>("str", () => new CultureInfo(cultureName).TextInfo.ToLower(null));
         }
     }
 }
-

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Net.Internals;
@@ -54,7 +55,7 @@ namespace System.Net
 
         private static unsafe bool IsProtocolSupported(AddressFamily af)
         {
-            int socket = -1;
+            IntPtr socket = (IntPtr)(-1);
             try
             {
                 Interop.Error err = Interop.Sys.Socket(af, SocketType.Dgram, (ProtocolType)0, &socket);
@@ -62,7 +63,7 @@ namespace System.Net
             }
             finally
             {
-                if (socket != -1)
+                if (socket != (IntPtr)(-1))
                 {
                     Interop.Sys.Close(socket);
                 }

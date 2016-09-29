@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -20,7 +21,7 @@ namespace System.Net.WebSockets
         {
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             Count = count;
@@ -30,23 +31,10 @@ namespace System.Net.WebSockets
             CloseStatusDescription = closeStatusDescription;
         }
 
-        public int Count { get; private set; }
-        public bool EndOfMessage { get; private set; }
-        public WebSocketMessageType MessageType { get; private set; }
-        public WebSocketCloseStatus? CloseStatus { get; private set; }
-        public string CloseStatusDescription { get; private set; }
-
-        internal WebSocketReceiveResult Copy(int count)
-        {
-            Debug.Assert(count >= 0, "'count' MUST NOT be negative.");
-            Debug.Assert(count <= Count, "'count' MUST NOT be bigger than 'this.Count'.");
-
-            Count -= count;
-            return new WebSocketReceiveResult(count,
-                MessageType,
-                Count == 0 && this.EndOfMessage,
-                CloseStatus,
-                CloseStatusDescription);
-        }
+        public int Count { get; }
+        public bool EndOfMessage { get; }
+        public WebSocketMessageType MessageType { get; }
+        public WebSocketCloseStatus? CloseStatus { get; }
+        public string CloseStatusDescription { get; }
     }
 }

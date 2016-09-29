@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
@@ -31,7 +32,7 @@ namespace System.Resources
         public ResourceReader(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             if (!stream.CanRead)
                 throw new ArgumentException(SR.Argument_StreamNotReadable);
             if (!stream.CanSeek)
@@ -330,9 +331,10 @@ namespace System.Resources
 
         private static byte[] EncodeStringName()
         {
-            var type = typeof(string);
-            var name = type.AssemblyQualifiedName;
-            int length = name.IndexOf(", Version=");
+            // ResourceWriter always write the resources with legacy core library name (i.e. mscorlib).
+            // Ensure that when we read the type name, we update the library name to be the same.
+            var name = "System.String, mscorlib";
+            int length = name.Length;
 
             var buffer = new byte[length + 1];
             var encoded = Encoding.UTF8.GetBytes(name, 0, length, buffer, 1);

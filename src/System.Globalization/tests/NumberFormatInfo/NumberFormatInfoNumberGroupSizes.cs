@@ -1,90 +1,55 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Globalization;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class NumberFormatInfoNumberGroupSizes
     {
-        // PosTest1: Verify default value of property NumberGroupSizes
-        [Fact]
-        public void PosTest1()
+        public static IEnumerable<object[]> NumberGroupSizes_TestData()
         {
-            NumberFormatInfo nfi = new NumberFormatInfo();
-            int[] expected = nfi.NumberGroupSizes;
-            Assert.Equal(1, expected.Length);
-            Assert.Equal(3, expected[0]);
-        }
+            yield return new object[] { NumberFormatInfo.InvariantInfo, new int[] { 3 } };
+            yield return new object[] { new CultureInfo("en-US").NumberFormat, new int[] { 3 } };
 
-        // PosTest2: Verify set value of property NumberGroupSizes
-        [Fact]
-        public void PosTest2()
-        {
-            NumberFormatInfo nfi = new NumberFormatInfo();
-            nfi.NumberGroupSizes = new int[] { 2, 3, 4 };
-            int[] expected = nfi.NumberGroupSizes;
-            Assert.Equal(3, expected.Length);
-            Assert.Equal(2, expected[0]);
-            Assert.Equal(3, expected[1]);
-            Assert.Equal(4, expected[2]);
-        }
-
-        // NegTest1: ArgumentNullException is thrown
-        [Fact]
-        public void NegTest1()
-        {
-            int[] expected = null;
-            NumberFormatInfo nfi = new NumberFormatInfo();
-            Assert.Throws<ArgumentNullException>(() =>
+            // TODO: when dotnet/corefx#2103 is addressed, we should also check fr-FR
+            if (!PlatformDetection.IsUbuntu1510 && !PlatformDetection.IsUbuntu1604 && !PlatformDetection.IsUbuntu1610 && !PlatformDetection.IsWindows7)
             {
-                nfi.NumberGroupSizes = expected;
-            });
+                yield return new object[] { new CultureInfo("ur-IN").NumberFormat, NumberFormatInfoData.UrINNumberGroupSizes() };
+            }
         }
 
-        // NegTest2: ArgumentOutOfRangeException is thrown
-        [Fact]
-        public void NegTest2()
-        {
-            VerificationHelper<ArgumentException>(new int[] { -1, 1, 2 });
-            VerificationHelper<ArgumentException>(new int[] { 98, 99, 100 });
-            VerificationHelper<ArgumentException>(new int[] { 0, 1, 2 });
-        }
-
-        // NegTest3: InvalidOperationException is thrown
-        [Fact]
-        public void NegTest3()
-        {
-            NumberFormatInfo nfi = new NumberFormatInfo();
-            NumberFormatInfo nfiReadOnly = NumberFormatInfo.ReadOnly(nfi);
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                nfiReadOnly.NumberGroupSizes = new int[] { 2, 3, 4 };
-            });
-        }
-
-        // TestNumberGroupSizesLocale: Verify value of property NumberGroupSizes for specific locales
         [Theory]
-        [InlineData("en-US")]
-        [InlineData("ur-IN")]
-        public void TestNumberGroupSizesLocale(string locale)
+        [MemberData(nameof(NumberGroupSizes_TestData))]
+        public void NumberGroupSizes_Get(NumberFormatInfo format, int[] expected)
         {
-            CultureInfo myTestCulture = new CultureInfo(locale);
-            NumberFormatInfo nfi = myTestCulture.NumberFormat;
-
-            int[] expected = NumberFormatInfoData.GetNumberGroupSizes(myTestCulture);
-            Assert.Equal(expected, nfi.NumberGroupSizes);
+            Assert.Equal(expected, format.NumberGroupSizes);
         }
 
-        private void VerificationHelper<T>(int[] intArray) where T : Exception
+        [Theory]
+        [InlineData(new int[0])]
+        [InlineData(new int[] { 2, 3, 4 })]
+        [InlineData(new int[] { 2, 3, 4, 0 })]
+        [InlineData(new int[] { 0 })]
+        public void NumberGroupSizes_Set(int[] newNumberGroupSizes)
         {
-            NumberFormatInfo nfi = new NumberFormatInfo();
-            Assert.Throws<T>(() =>
-            {
-                nfi.NumberGroupSizes = intArray;
-            });
+            NumberFormatInfo format = new NumberFormatInfo();
+            format.NumberGroupSizes = newNumberGroupSizes;
+            Assert.Equal(newNumberGroupSizes, format.NumberGroupSizes);
+        }
+
+        [Fact]
+        public void NumberGroupSizes_Set_Invalid()
+        {
+            Assert.Throws<ArgumentNullException>("NumberGroupSizes", () => new NumberFormatInfo().NumberGroupSizes = null);
+
+            Assert.Throws<ArgumentException>("NumberGroupSizes", () => new NumberFormatInfo().NumberGroupSizes = new int[] { -1, 1, 2 });
+            Assert.Throws<ArgumentException>("NumberGroupSizes", () => new NumberFormatInfo().NumberGroupSizes = new int[] { 98, 99, 100 });
+            Assert.Throws<ArgumentException>("NumberGroupSizes", () => new NumberFormatInfo().NumberGroupSizes = new int[] { 0, 1, 2 });
+
+            Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.NumberGroupSizes = new int[] { 1, 2, 3 });
         }
     }
 }

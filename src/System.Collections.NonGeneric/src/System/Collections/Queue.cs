@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*=============================================================================
 **
@@ -9,7 +10,6 @@
 **
 =============================================================================*/
 
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -20,6 +20,7 @@ namespace System.Collections
     // buffer, so Enqueue can be O(n).  Dequeue is O(1).
     [DebuggerTypeProxy(typeof(System.Collections.Queue.QueueDebugView))]
     [DebuggerDisplay("Count = {Count}")]
+    [Serializable]
     public class Queue : ICollection
     {
         private Object[] _array;
@@ -28,6 +29,7 @@ namespace System.Collections
         private int _size;       // Number of elements.
         private int _growFactor; // 100 == 1.0, 130 == 1.3, 200 == 2.0
         private int _version;
+        [NonSerialized]
         private Object _syncRoot;
 
         private const int _MinimumGrow = 4;
@@ -54,9 +56,9 @@ namespace System.Collections
         public Queue(int capacity, float growFactor)
         {
             if (capacity < 0)
-                throw new ArgumentOutOfRangeException("capacity", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(capacity), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (!(growFactor >= 1.0 && growFactor <= 10.0))
-                throw new ArgumentOutOfRangeException("growFactor", SR.Format(SR.ArgumentOutOfRange_QueueGrowFactor, 1, 10));
+                throw new ArgumentOutOfRangeException(nameof(growFactor), SR.Format(SR.ArgumentOutOfRange_QueueGrowFactor, 1, 10));
             Contract.EndContractBlock();
 
             _array = new Object[capacity];
@@ -72,7 +74,7 @@ namespace System.Collections
         public Queue(ICollection col) : this((col == null ? 32 : col.Count))
         {
             if (col == null)
-                throw new ArgumentNullException("col");
+                throw new ArgumentNullException(nameof(col));
             Contract.EndContractBlock();
             IEnumerator en = col.GetEnumerator();
             while (en.MoveNext())
@@ -145,11 +147,11 @@ namespace System.Collections
         public virtual void CopyTo(Array array, int index)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             if (array.Rank != 1)
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             if (index < 0)
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             int arrayLen = array.Length;
             if (arrayLen - index < _size)
@@ -228,7 +230,7 @@ namespace System.Collections
         public static Queue Synchronized(Queue queue)
         {
             if (queue == null)
-                throw new ArgumentNullException("queue");
+                throw new ArgumentNullException(nameof(queue));
             Contract.EndContractBlock();
             return new SynchronizedQueue(queue);
         }
@@ -319,6 +321,7 @@ namespace System.Collections
 
 
         // Implements a synchronization wrapper around a queue.
+        [Serializable]
         private class SynchronizedQueue : Queue
         {
             private Queue _q;
@@ -441,6 +444,7 @@ namespace System.Collections
         // Implements an enumerator for a Queue.  The enumerator uses the
         // internal version number of the list to ensure that no modifications are
         // made to the list while an enumeration is in progress.
+        [Serializable]
         private class QueueEnumerator : IEnumerator
         {
             private Queue _q;
@@ -509,7 +513,7 @@ namespace System.Collections
             public QueueDebugView(Queue queue)
             {
                 if (queue == null)
-                    throw new ArgumentNullException("queue");
+                    throw new ArgumentNullException(nameof(queue));
                 Contract.EndContractBlock();
 
                 _queue = queue;

@@ -1,19 +1,20 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 using System.Reflection;
 
 namespace System.ComponentModel
 {
-    /// <devdoc>
+    /// <summary>
     ///    <para>Provides a base type converter for integral types.</para>
-    /// </devdoc>
+    /// </summary>
     public abstract class BaseNumberConverter : TypeConverter
     {
-        /// <devdoc>
+        /// <summary>
         /// Determines whether this editor will attempt to convert hex (0x or #) strings
-        /// </devdoc>
+        /// </summary>
         internal virtual bool AllowHex
         {
             get
@@ -22,58 +23,54 @@ namespace System.ComponentModel
             }
         }
 
-        /// <devdoc>
+        /// <summary>
         /// The Type this converter is targeting (e.g. Int16, UInt32, etc.)
-        /// </devdoc>
+        /// </summary>
         internal abstract Type TargetType
         {
             get;
         }
 
-        /// <devdoc>
+        /// <summary>
         /// Convert the given value to a string using the given radix
-        /// </devdoc>
+        /// </summary>
         internal abstract object FromString(string value, int radix);
 
-        /// <devdoc>
+        /// <summary>
         /// Convert the given value to a string using the given formatInfo
-        /// </devdoc>
+        /// </summary>
         internal abstract object FromString(string value, NumberFormatInfo formatInfo);
 
-        /// <devdoc>
+        /// <summary>
         /// Convert the given value to a string using the given CultureInfo
-        /// </devdoc>
+        /// </summary>
         internal abstract object FromString(string value, CultureInfo culture);
 
-        /// <devdoc>
+        /// <summary>
         /// Create an error based on the failed text and the exception thrown.
-        /// </devdoc>
+        /// </summary>
         internal virtual Exception FromStringError(string failedText, Exception innerException)
         {
             return new Exception(SR.Format(SR.ConvertInvalidPrimitive, failedText, this.TargetType.Name), innerException);
         }
 
-        /// <devdoc>
+        /// <summary>
         /// Convert the given value from a string using the given formatInfo
-        /// </devdoc>
+        /// </summary>
         internal abstract string ToString(object value, NumberFormatInfo formatInfo);
 
-        /// <devdoc>
+        /// <summary>
         ///    <para>Gets a value indicating whether this converter can convert an object in the
         ///       given source type to the TargetType object using the specified context.</para>
-        /// </devdoc>
+        /// </summary>
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            if (sourceType == typeof(string))
-            {
-                return true;
-            }
-            return base.CanConvertFrom(context, sourceType);
+            return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
         }
 
-        /// <devdoc>
+        /// <summary>
         ///    <para>Converts the given value object to an object of Type TargetType.</para>
-        /// </devdoc>
+        /// </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             string text = value as string;
@@ -87,10 +84,8 @@ namespace System.ComponentModel
                     {
                         return this.FromString(text.Substring(1), 16);
                     }
-                    else if (this.AllowHex && text.StartsWith("0x")
-                             || text.StartsWith("0X")
-                             || text.StartsWith("&h")
-                             || text.StartsWith("&H"))
+                    else if (this.AllowHex && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+                             || text.StartsWith("&h", StringComparison.OrdinalIgnoreCase))
                     {
                         return this.FromString(text.Substring(2), 16);
                     }
@@ -112,14 +107,14 @@ namespace System.ComponentModel
             return base.ConvertFrom(context, culture, value);
         }
 
-        /// <devdoc>
+        /// <summary>
         ///    <para>Converts the given value object to the destination type.</para>
-        /// </devdoc>
+        /// </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
             {
-                throw new ArgumentNullException("destinationType");
+                throw new ArgumentNullException(nameof(destinationType));
             }
 
             if (destinationType == typeof(string) && value != null && this.TargetType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo()))
@@ -141,11 +136,7 @@ namespace System.ComponentModel
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            if (base.CanConvertTo(context, destinationType) || destinationType.GetTypeInfo().IsPrimitive)
-            {
-                return true;
-            }
-            return false;
+            return base.CanConvertTo(context, destinationType) || destinationType.GetTypeInfo().IsPrimitive;
         }
     }
 }

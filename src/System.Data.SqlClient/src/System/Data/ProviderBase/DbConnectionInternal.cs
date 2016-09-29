@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -150,7 +151,7 @@ namespace System.Data.ProviderBase
             get;
         }
 
-        // this should be abstract but untill it is added to all the providers virtual will have to do
+        // this should be abstract but until it is added to all the providers virtual will have to do
         virtual public string ServerVersionNormalized
         {
             get
@@ -208,7 +209,7 @@ namespace System.Data.ProviderBase
 
         virtual public void ChangeDatabase(string value)
         {
-            throw ADP.MethodNotImplemented("ChangeDatabase");
+            throw ADP.MethodNotImplemented();
         }
 
         internal virtual void CloseConnection(DbConnection owningObject, DbConnectionFactory connectionFactory)
@@ -256,7 +257,7 @@ namespace System.Data.ProviderBase
             // if an exception occurs after the state change but before the try block
             // the connection will be stuck in OpenBusy state.  The commented out try-catch
             // block doesn't really help because a ThreadAbort during the finally block
-            // would just refert the connection to a bad state.
+            // would just revert the connection to a bad state.
             // Open->Closed: guarantee internal connection is returned to correct pool
             if (connectionFactory.SetInnerConnectionFrom(owningObject, DbConnectionOpenBusy.SingletonInstance, this))
             {
@@ -310,12 +311,12 @@ namespace System.Data.ProviderBase
 
         virtual internal void PrepareForReplaceConnection()
         {
-            // By default, there is no preperation required
+            // By default, there is no preparation required
         }
 
         virtual protected void PrepareForCloseConnection()
         {
-            // By default, there is no preperation required
+            // By default, there is no preparation required
         }
 
         virtual protected object ObtainAdditionalLocksForClose()
@@ -427,7 +428,7 @@ namespace System.Data.ProviderBase
 
         internal virtual bool TryReplaceConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
         {
-            throw ADP.MethodNotImplemented("TryReplaceConnection");
+            throw ADP.MethodNotImplemented();
         }
 
         protected bool TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
@@ -446,7 +447,7 @@ namespace System.Data.ProviderBase
                 }
                 catch
                 {
-                    // This should occure for all exceptions, even ADP.UnCatchableExceptions.
+                    // This should occur for all exceptions, even ADP.UnCatchableExceptions.
                     connectionFactory.SetInnerConnectionTo(outerConnection, this);
                     throw;
                 }

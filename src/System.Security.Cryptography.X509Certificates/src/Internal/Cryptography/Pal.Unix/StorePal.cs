@@ -1,11 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
@@ -14,10 +14,11 @@ namespace Internal.Cryptography.Pal
 {
     internal sealed partial class StorePal
     {
-        private static X509Certificate2Collection s_machineRootStore;
-        private static readonly X509Certificate2Collection s_machineIntermediateStore = new X509Certificate2Collection();
+        private static CollectionBackedStoreProvider s_machineRootStore;
+        private static CollectionBackedStoreProvider s_machineIntermediateStore;
+        private static readonly object s_machineLoadLock = new object();
 
-        public static IStorePal FromBlob(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
+        public static ILoaderPal FromBlob(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
         {
             ICertificatePal singleCert;
 
@@ -28,7 +29,7 @@ namespace Internal.Cryptography.Pal
                 // collections have that behavior.
                 Debug.Assert(singleCert != null);
 
-                return SingleCertToStorePal(singleCert);
+                return SingleCertToLoaderPal(singleCert);
             }
 
             List<ICertificatePal> certPals;
@@ -39,13 +40,13 @@ namespace Internal.Cryptography.Pal
             {
                 Debug.Assert(certPals != null);
 
-                return ListToStorePal(certPals);
+                return ListToLoaderPal(certPals);
             }
-            
-            return null;
+
+            throw Interop.Crypto.CreateOpenSslCryptographicException();
         }
 
-        public static IStorePal FromFile(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
+        public static ILoaderPal FromFile(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
         {
             using (SafeBioHandle bio = Interop.Crypto.BioNewFile(fileName, "rb"))
             {
@@ -55,7 +56,7 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        private static IStorePal FromBio(SafeBioHandle bio, string password)
+        private static ILoaderPal FromBio(SafeBioHandle bio, string password)
         {
             int bioPosition = Interop.Crypto.BioTell(bio);
             Debug.Assert(bioPosition >= 0);
@@ -64,7 +65,7 @@ namespace Internal.Cryptography.Pal
 
             if (CertificatePal.TryReadX509Pem(bio, out singleCert))
             {
-                return SingleCertToStorePal(singleCert);
+                return SingleCertToLoaderPal(singleCert);
             }
 
             // Rewind, try again.
@@ -72,7 +73,7 @@ namespace Internal.Cryptography.Pal
 
             if (CertificatePal.TryReadX509Der(bio, out singleCert))
             {
-                return SingleCertToStorePal(singleCert);
+                return SingleCertToLoaderPal(singleCert);
             }
 
             // Rewind, try again.
@@ -82,7 +83,7 @@ namespace Internal.Cryptography.Pal
 
             if (PkcsFormatReader.TryReadPkcs7Pem(bio, out certPals))
             {
-                return ListToStorePal(certPals);
+                return ListToLoaderPal(certPals);
             }
 
             // Rewind, try again.
@@ -90,7 +91,7 @@ namespace Internal.Cryptography.Pal
 
             if (PkcsFormatReader.TryReadPkcs7Der(bio, out certPals))
             {
-                return ListToStorePal(certPals);
+                return ListToLoaderPal(certPals);
             }
 
             // Rewind, try again.
@@ -98,7 +99,7 @@ namespace Internal.Cryptography.Pal
 
             if (PkcsFormatReader.TryReadPkcs12(bio, password, out certPals))
             {
-                return ListToStorePal(certPals);
+                return ListToLoaderPal(certPals);
             }
 
             // Since we aren't going to finish reading, leaving the buffer where it was when we got
@@ -115,16 +116,14 @@ namespace Internal.Cryptography.Pal
             throw openSslException;
         }
 
-        public static IStorePal FromCertificate(ICertificatePal cert)
+        public static IExportPal FromCertificate(ICertificatePal cert)
         {
-            ICertificatePal duplicatedHandles = ((OpenSslX509CertificateReader)cert).DuplicateHandles();
-
-            return new CollectionBackedStoreProvider(new X509Certificate2(duplicatedHandles));
+            return new ExportProvider(cert);
         }
 
-        public static IStorePal LinkFromCertificateCollection(X509Certificate2Collection certificates)
+        public static IExportPal LinkFromCertificateCollection(X509Certificate2Collection certificates)
         {
-            return new CollectionBackedStoreProvider(certificates);
+            return new ExportProvider(certificates);
         }
 
         public static IStorePal FromSystemStore(string storeName, StoreLocation storeLocation, OpenFlags openFlags)
@@ -134,17 +133,17 @@ namespace Internal.Cryptography.Pal
                 return new DirectoryBasedStoreProvider(storeName, openFlags);
             }
 
-            if (openFlags.HasFlag(OpenFlags.ReadWrite))
+            if ((openFlags & OpenFlags.ReadWrite) == OpenFlags.ReadWrite)
             {
                 throw new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresReadOnly);
             }
 
             // The static store approach here is making an optimization based on not
             // having write support.  Once writing is permitted the stores would need
-            // to fresh-read whenever being requested (or use FileWatcher/etc).
+            // to fresh-read whenever being requested.
             if (s_machineRootStore == null)
             {
-                lock (s_machineIntermediateStore)
+                lock (s_machineLoadLock)
                 {
                     if (s_machineRootStore == null)
                     {
@@ -155,151 +154,128 @@ namespace Internal.Cryptography.Pal
 
             if (StringComparer.Ordinal.Equals("Root", storeName))
             {
-                return CloneStore(s_machineRootStore);
+                return s_machineRootStore;
             }
 
             if (StringComparer.Ordinal.Equals("CA", storeName))
             {
-                return CloneStore(s_machineIntermediateStore);
+                return s_machineIntermediateStore;
             }
 
             throw new PlatformNotSupportedException(SR.Cryptography_Unix_X509_MachineStoresRootOnly);
         }
 
-        private static IStorePal SingleCertToStorePal(ICertificatePal singleCert)
+        private static ILoaderPal SingleCertToLoaderPal(ICertificatePal singleCert)
         {
-            return new OpenSslX509StoreProvider(
-                new X509Certificate2Collection(
-                    new X509Certificate2(singleCert)));
+            return new SingleCertLoader(singleCert);
         }
 
-        private static IStorePal ListToStorePal(List<ICertificatePal> certPals)
+        private static ILoaderPal ListToLoaderPal(List<ICertificatePal> certPals)
         {
-            X509Certificate2Collection coll = new X509Certificate2Collection();
-
-            for (int i = 0; i < certPals.Count; i++)
-            {
-                coll.Add(new X509Certificate2(certPals[i]));
-            }
-
-            return new OpenSslX509StoreProvider(coll);
-        }
-
-        private static IStorePal PfxToCollection(OpenSslPkcs12Reader pfx, string password)
-        {
-            pfx.Decrypt(password);
-
-            X509Certificate2Collection coll = new X509Certificate2Collection();
-
-            foreach (OpenSslX509CertificateReader certPal in pfx.ReadCertificates())
-            {
-                coll.Add(new X509Certificate2(certPal));
-            }
-
-            return new OpenSslX509StoreProvider(coll);
-        }
-
-        private static IStorePal CloneStore(X509Certificate2Collection seed)
-        {
-            X509Certificate2Collection coll = new X509Certificate2Collection();
-
-            foreach (X509Certificate2 cert in seed)
-            {
-                // Duplicate the certificate context into a new handle.
-                coll.Add(new X509Certificate2(cert.Handle));
-            }
-
-            return new OpenSslX509StoreProvider(coll);
+            return new CertCollectionLoader(certPals);
         }
 
         private static void LoadMachineStores()
         {
             Debug.Assert(
-                Monitor.IsEntered(s_machineIntermediateStore),
-                "LoadMachineStores assumes a lock(s_machineIntermediateStore)");
+                Monitor.IsEntered(s_machineLoadLock),
+                "LoadMachineStores assumes a lock(s_machineLoadLock)");
 
-            X509Certificate2Collection rootStore = new X509Certificate2Collection();
+            var rootStore = new List<X509Certificate2>();
+            var intermedStore = new List<X509Certificate2>();
 
-            DirectoryInfo directoryInfo;
+            DirectoryInfo rootStorePath = null;
+            IEnumerable<FileInfo> trustedCertFiles;
 
             try
             {
-                directoryInfo = new DirectoryInfo(Interop.Crypto.GetX509RootStorePath());
+                rootStorePath = new DirectoryInfo(Interop.Crypto.GetX509RootStorePath());
             }
             catch (ArgumentException)
             {
                 // If SSL_CERT_DIR is set to the empty string, or anything else which gives
-                // "The path is not of a legal form", then just call it a day.
-                s_machineRootStore = rootStore;
-                return;
+                // "The path is not of a legal form", then the GetX509RootStorePath value is ignored.
             }
 
-            if (!directoryInfo.Exists)
+            if (rootStorePath != null && rootStorePath.Exists)
             {
-                s_machineRootStore = rootStore;
-                return;
+                trustedCertFiles = rootStorePath.EnumerateFiles();
+            }
+            else
+            {
+                trustedCertFiles = Array.Empty<FileInfo>();
+            }
+
+            FileInfo rootStoreFile = null;
+
+            try
+            {
+                rootStoreFile = new FileInfo(Interop.Crypto.GetX509RootStoreFile());
+            }
+            catch (ArgumentException)
+            {
+                // If SSL_CERT_FILE is set to the empty string, or anything else which gives
+                // "The path is not of a legal form", then the GetX509RootStoreFile value is ignored.
+            }
+
+            if (rootStoreFile != null && rootStoreFile.Exists)
+            {
+                trustedCertFiles = Append(trustedCertFiles, rootStoreFile);
             }
 
             HashSet<X509Certificate2> uniqueRootCerts = new HashSet<X509Certificate2>();
             HashSet<X509Certificate2> uniqueIntermediateCerts = new HashSet<X509Certificate2>();
 
-            foreach (FileInfo file in directoryInfo.EnumerateFiles())
+            foreach (FileInfo file in trustedCertFiles)
             {
-                byte[] bytes;
+                using (SafeBioHandle fileBio = Interop.Crypto.BioNewFile(file.FullName, "rb"))
+                {
+                    ICertificatePal pal;
 
-                try
-                {
-                    bytes = File.ReadAllBytes(file.FullName);
-                }
-                catch (IOException)
-                {
-                    // Broken symlink, symlink to a network file share that's timing out,
-                    // file was deleted since being enumerated, etc.
-                    //
-                    // Skip anything that we can't read, we'll just be a bit restrictive
-                    // on our trust model, that's all.
-                    continue;
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    // If, for some reason, one of the files is not world-readable,
-                    // and this user doesn't have access to read it, just pretend it
-                    // isn't there.
-                    continue;
-                }
-
-                X509Certificate2 cert;
-
-                try
-                {
-                    cert = new X509Certificate2(bytes);
-                }
-                catch (CryptographicException)
-                {
-                    // The data was in a format we didn't understand. Maybe it was a text file,
-                    // or just a certificate type we don't know how to read. Either way, let's load
-                    // what we can.
-                    continue;
-                }
-
-                // The HashSets are just used for uniqueness filters, they do not survive this method.
-                if (StringComparer.Ordinal.Equals(cert.Subject, cert.Issuer))
-                {
-                    if (uniqueRootCerts.Add(cert))
+                    while (CertificatePal.TryReadX509Pem(fileBio, out pal) ||
+                        CertificatePal.TryReadX509Der(fileBio, out pal))
                     {
-                        rootStore.Add(cert);
-                    }
-                }
-                else
-                {
-                    if (uniqueIntermediateCerts.Add(cert))
-                    {
-                        s_machineIntermediateStore.Add(cert);
+                        X509Certificate2 cert = new X509Certificate2(pal);
+
+                        // The HashSets are just used for uniqueness filters, they do not survive this method.
+                        if (StringComparer.Ordinal.Equals(cert.Subject, cert.Issuer))
+                        {
+                            if (uniqueRootCerts.Add(cert))
+                            {
+                                rootStore.Add(cert);
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            if (uniqueIntermediateCerts.Add(cert))
+                            {
+                                intermedStore.Add(cert);
+                                continue;
+                            }
+                        }
+
+                        // There's a good chance we'll encounter duplicates on systems that have both one-cert-per-file
+                        // and one-big-file trusted certificate stores. Anything that wasn't unique will end up here.
+                        cert.Dispose();
                     }
                 }
             }
 
-            s_machineRootStore = rootStore;
+            var rootStorePal = new CollectionBackedStoreProvider(rootStore);
+            s_machineIntermediateStore = new CollectionBackedStoreProvider(intermedStore);
+
+            // s_machineRootStore's nullarity is the loaded-state sentinel, so write it with Volatile.
+            Debug.Assert(Monitor.IsEntered(s_machineLoadLock), "LoadMachineStores assumes a lock(s_machineLoadLock)");
+            Volatile.Write(ref s_machineRootStore, rootStorePal);
+        }
+
+        private static IEnumerable<T> Append<T>(IEnumerable<T> current, T addition)
+        {
+            foreach (T element in current)
+                yield return element;
+
+            yield return addition;
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -81,8 +82,8 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
                 {
                     return;
                 }
-                Assert.Throws<ArgumentException>("key", () => aes.CreateEncryptor(key, iv));
-                Assert.Throws<ArgumentException>("key", () => aes.CreateDecryptor(key, iv));
+                Assert.Throws<ArgumentException>("rgbKey", () => aes.CreateEncryptor(key, iv));
+                Assert.Throws<ArgumentException>("rgbKey", () => aes.CreateDecryptor(key, iv));
             }
         }
 
@@ -105,8 +106,8 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
                 {
                     return;
                 }
-                Assert.Throws<ArgumentException>("iv", () => aes.CreateEncryptor(key, iv));
-                Assert.Throws<ArgumentException>("iv", () => aes.CreateDecryptor(key, iv));
+                Assert.Throws<ArgumentException>("rgbIV", () => aes.CreateEncryptor(key, iv));
+                Assert.Throws<ArgumentException>("rgbIV", () => aes.CreateDecryptor(key, iv));
             }
         }
 

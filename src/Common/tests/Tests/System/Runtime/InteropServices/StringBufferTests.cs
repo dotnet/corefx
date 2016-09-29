@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -26,14 +27,15 @@ namespace Tests.System.Runtime.InteropServices
         public unsafe void CreateFromString()
         {
             string testString = "Test";
-            using (var buffer = new StringBuffer(testString))
+            using (var buffer = new StringBuffer())
             {
-                Assert.Equal((ulong)testString.Length, buffer.Length);
-                Assert.Equal((ulong)testString.Length + 1, buffer.CharCapacity);
+                buffer.Append(testString);
+                Assert.Equal((uint)testString.Length, buffer.Length);
+                Assert.Equal((uint)testString.Length + 1, buffer.CharCapacity);
 
                 for (int i = 0; i < testString.Length; i++)
                 {
-                    Assert.Equal(testString[i], buffer[(ulong)i]);
+                    Assert.Equal(testString[i], buffer[(uint)i]);
                 }
 
                 // Check the null termination
@@ -46,13 +48,14 @@ namespace Tests.System.Runtime.InteropServices
         [Fact]
         public void ReduceLength()
         {
-            using (var buffer = new StringBuffer("Food"))
+            using (var buffer = new StringBuffer())
             {
-                Assert.Equal((ulong)5, buffer.CharCapacity);
+                buffer.Append("Food");
+                Assert.Equal((uint)5, buffer.CharCapacity);
                 buffer.Length = 3;
                 Assert.Equal("Foo", buffer.ToString());
                 // Shouldn't reduce capacity when dropping length
-                Assert.Equal((ulong)5, buffer.CharCapacity);
+                Assert.Equal((uint)5, buffer.CharCapacity);
             }
         }
 
@@ -87,8 +90,9 @@ namespace Tests.System.Runtime.InteropServices
             ]
         public void StartsWith(string source, string value, bool expected)
         {
-            using (var buffer = new StringBuffer(source))
+            using (var buffer = new StringBuffer())
             {
+                buffer.Append(source);
                 Assert.Equal(expected, buffer.StartsWith(value));
             }
         }
@@ -123,8 +127,9 @@ namespace Tests.System.Runtime.InteropServices
         [Fact]
         public void SubstringEqualsOverSizeCountWithIndexThrows()
         {
-            using (var buffer = new StringBuffer("A"))
+            using (var buffer = new StringBuffer())
             {
+                buffer.Append("A");
                 Assert.Throws<ArgumentOutOfRangeException>(() => buffer.SubstringEquals("", startIndex: 1, count: 1));
             }
         }
@@ -148,9 +153,10 @@ namespace Tests.System.Runtime.InteropServices
             ]
         public void SubstringEquals(string source, string value, int startIndex, int count, bool expected)
         {
-            using (var buffer = new StringBuffer(source))
+            using (var buffer = new StringBuffer())
             {
-                Assert.Equal(expected, buffer.SubstringEquals(value, startIndex: (ulong)startIndex, count: count));
+                buffer.Append(source);
+                Assert.Equal(expected, buffer.SubstringEquals(value, startIndex: (uint)startIndex, count: count));
             }
         }
 
@@ -198,20 +204,24 @@ namespace Tests.System.Runtime.InteropServices
         public void AppendTests(string source, string value, int startIndex, int count, string expected)
         {
             // From string
-            using (var buffer = new StringBuffer(source))
+            using (var buffer = new StringBuffer())
             {
+                if (source != null) buffer.Append(source);
                 buffer.Append(value, startIndex, count);
                 Assert.Equal(expected, buffer.ToString());
             }
 
             // From buffer
-            using (var buffer = new StringBuffer(source))
-            using (var valueBuffer = new StringBuffer(value))
+            using (var buffer = new StringBuffer())
+            using (var valueBuffer = new StringBuffer())
             {
+                if (source != null) buffer.Append(source);
+                valueBuffer.Append(value);
+
                 if (count == -1)
-                    buffer.Append(valueBuffer, (ulong)startIndex, valueBuffer.Length - (ulong)startIndex);
+                    buffer.Append(valueBuffer, (uint)startIndex, valueBuffer.Length - (uint)startIndex);
                 else
-                    buffer.Append(valueBuffer, (ulong)startIndex, (ulong)count);
+                    buffer.Append(valueBuffer, (uint)startIndex, (uint)count);
                 Assert.Equal(expected, buffer.ToString());
             }
         }
@@ -230,7 +240,7 @@ namespace Tests.System.Runtime.InteropServices
         {
             using (var buffer = new StringBuffer())
             {
-                Assert.Throws<ArgumentNullException>(() => buffer.Append((StringBuffer)null));
+                Assert.Throws<ArgumentNullException>(() => buffer.Append((StringBuffer)null, 0, 0));
             }
         }
 
@@ -309,17 +319,20 @@ namespace Tests.System.Runtime.InteropServices
             ]
         public void ToStringTest(string source, int startIndex, int count, string expected)
         {
-            using (var buffer = new StringBuffer(source))
+            using (var buffer = new StringBuffer())
             {
-                Assert.Equal(expected, buffer.Substring(startIndex: (ulong)startIndex, count: count));
+                buffer.Append(source);
+                Assert.Equal(expected, buffer.Substring(startIndex: (uint)startIndex, count: count));
             }
         }
 
         [Fact]
         public unsafe void SetLengthToFirstNullNoNull()
         {
-            using (var buffer = new StringBuffer("A"))
+            using (var buffer = new StringBuffer())
             {
+                buffer.Append("A");
+
                 // Wipe out the last null
                 buffer.CharPointer[buffer.Length] = 'B';
                 buffer.SetLengthToFirstNull();
@@ -345,8 +358,10 @@ namespace Tests.System.Runtime.InteropServices
             ]
         public unsafe void SetLengthToFirstNullTests(string content, ulong startLength, ulong endLength)
         {
-            using (var buffer = new StringBuffer(content))
+            using (var buffer = new StringBuffer())
             {
+                buffer.Append(content);
+
                 // With existing content
                 Assert.Equal(startLength, buffer.Length);
                 buffer.SetLengthToFirstNull();
@@ -359,7 +374,7 @@ namespace Tests.System.Runtime.InteropServices
                     Buffer.MemoryCopy(contentPointer, buffer.CharPointer, (long)buffer.CharCapacity * 2, content.Length * sizeof(char));
                 }
 
-                Assert.Equal((ulong)0, buffer.Length);
+                Assert.Equal((uint)0, buffer.Length);
                 buffer.SetLengthToFirstNull();
                 Assert.Equal(endLength, buffer.Length);
             }
@@ -374,12 +389,17 @@ namespace Tests.System.Runtime.InteropServices
             InlineData("", new char[] { 'b' }, ""),
             InlineData("foo", new char[] { 'o' }, "f"),
             InlineData("foo", new char[] { 'o', 'f' }, ""),
+            // Add a couple cases to try and get the trim to walk off the front of the buffer.
+            InlineData("foo", new char[] { 'o', 'f', '\0' }, ""),
+            InlineData("foo", new char[] { 'o', 'f', '\u9000' }, "")
             ]
         public void TrimEnd(string content, char[] trimChars, string expected)
         {
             // We want equivalence with built-in string behavior
-            using (var buffer = new StringBuffer(content))
+            using (var buffer = new StringBuffer())
             {
+                buffer.Append(content);
+
                 buffer.TrimEnd(trimChars);
                 Assert.Equal(expected, buffer.ToString());
             }
@@ -393,10 +413,12 @@ namespace Tests.System.Runtime.InteropServices
             InlineData(@"Foo", @"Bar", 1, 0, 3, "FBar"),
             InlineData(@"Foo", @"Bar", 1, 1, 2, "Far"),
             ]
-        public void CopyFromString(string content, string source, ulong bufferIndex, int sourceIndex, int count, string expected)
+        public void CopyFromString(string content, string source, uint bufferIndex, int sourceIndex, int count, string expected)
         {
-            using (var buffer = new StringBuffer(content))
+            using (var buffer = new StringBuffer())
             {
+                buffer.Append(content);
+
                 buffer.CopyFrom(bufferIndex, source, sourceIndex, count);
                 Assert.Equal(expected, buffer.ToString());
             }
@@ -443,11 +465,14 @@ namespace Tests.System.Runtime.InteropServices
             InlineData(@"Foo", @"Bar", 1, 0, 3, "FBar"),
             InlineData(@"Foo", @"Bar", 1, 1, 2, "Far"),
             ]
-        public void CopyToBufferString(string destination, string content, ulong destinationIndex, ulong bufferIndex, ulong count, string expected)
+        public void CopyToBufferString(string destination, string content, uint destinationIndex, uint bufferIndex, uint count, string expected)
         {
-            using (var buffer = new StringBuffer(content))
-            using (var destinationBuffer = new StringBuffer(destination))
+            using (var buffer = new StringBuffer())
+            using (var destinationBuffer = new StringBuffer())
             {
+                buffer.Append(content);
+                destinationBuffer.Append(destination);
+
                 buffer.CopyTo(bufferIndex, destinationBuffer, destinationIndex, count);
                 Assert.Equal(expected, destinationBuffer.ToString());
             }
@@ -469,11 +494,13 @@ namespace Tests.System.Runtime.InteropServices
             InlineData("Foo", 3, 1),
             InlineData("Foo", 4, 0),
             ]
-        public void CopyToBufferThrowsIndexingBeyondSourceBufferLength(string source, ulong index, ulong count)
+        public void CopyToBufferThrowsIndexingBeyondSourceBufferLength(string source, uint index, uint count)
         {
-            using (var buffer = new StringBuffer(source))
+            using (var buffer = new StringBuffer())
             using (var targetBuffer = new StringBuffer())
             {
+                buffer.Append(source);
+
                 Assert.Throws<ArgumentOutOfRangeException>(() => { buffer.CopyTo(index, targetBuffer, 0, count); });
             }
         }

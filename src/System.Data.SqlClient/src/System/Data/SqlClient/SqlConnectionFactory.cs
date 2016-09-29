@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -17,7 +18,6 @@ namespace System.Data.SqlClient
         private SqlConnectionFactory() : base() { }
 
         public static readonly SqlConnectionFactory SingletonInstance = new SqlConnectionFactory();
-        private const string _metaDataXml = "MetaDataXml";
 
         override public DbProviderFactory ProviderFactory
         {
@@ -39,19 +39,22 @@ namespace System.Data.SqlClient
             SqlInternalConnection result = null;
             SessionData recoverySessionData = null;
 
+            SqlConnection sqlOwningConnection = (SqlConnection)owningConnection;
+            bool applyTransientFaultHandling = sqlOwningConnection != null ? sqlOwningConnection._applyTransientFaultHandling : false;
+
             SqlConnectionString userOpt = null;
             if (userOptions != null)
             {
                 userOpt = (SqlConnectionString)userOptions;
             }
-            else if (owningConnection != null)
+            else if (sqlOwningConnection != null)
             {
-                userOpt = (SqlConnectionString)(((SqlConnection)owningConnection).UserConnectionOptions);
+                userOpt = (SqlConnectionString)(sqlOwningConnection.UserConnectionOptions);
             }
 
-            if (owningConnection != null)
+            if (sqlOwningConnection != null)
             {
-                recoverySessionData = ((SqlConnection)owningConnection)._recoverySessionData;
+                recoverySessionData = sqlOwningConnection._recoverySessionData;
             }
 
             bool redirectedUserInstance = false;
@@ -90,7 +93,7 @@ namespace System.Data.SqlClient
                         //       This first connection is established to SqlExpress to get the instance name 
                         //       of the UserInstance.
                         SqlConnectionString sseopt = new SqlConnectionString(opt, opt.DataSource, true /* user instance=true */);
-                        sseConnection = new SqlInternalConnectionTds(identity, sseopt, null, false);
+                        sseConnection = new SqlInternalConnectionTds(identity, sseopt, null, false, applyTransientFaultHandling: applyTransientFaultHandling);
                         // NOTE: Retrieve <UserInstanceName> here. This user instance name will be used below to connect to the Sql Express User Instance.
                         instanceName = sseConnection.InstanceName;
 
@@ -127,13 +130,13 @@ namespace System.Data.SqlClient
                 opt = new SqlConnectionString(opt, instanceName, false /* user instance=false */);
                 poolGroupProviderInfo = null; // null so we do not pass to constructor below...
             }
-            result = new SqlInternalConnectionTds(identity, opt, poolGroupProviderInfo, redirectedUserInstance, userOpt, recoverySessionData);
+            result = new SqlInternalConnectionTds(identity, opt, poolGroupProviderInfo, redirectedUserInstance, userOpt, recoverySessionData, applyTransientFaultHandling: applyTransientFaultHandling);
             return result;
         }
 
         protected override DbConnectionOptions CreateConnectionOptions(string connectionString, DbConnectionOptions previous)
         {
-            Debug.Assert(!ADP.IsEmpty(connectionString), "empty connectionString");
+            Debug.Assert(!string.IsNullOrEmpty(connectionString), "empty connectionString");
             SqlConnectionString result = new SqlConnectionString(connectionString);
             return result;
         }

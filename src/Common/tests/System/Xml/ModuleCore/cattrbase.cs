@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -30,15 +31,15 @@ namespace OLEDB.Test.ModuleCore
         private CAttrBase _parent = null;
         private string _filter;
 
-        //Allows Inhertiance (ie: object to determine if ever been set)
-        private object _priority;       //Allows Inhertiance
-        private object _implemented;    //Allows Inhertiance
-        private object _skipped;        //Allows Inhertiance
-        private object _error;          //Allows Inhertiance
-        private object _security;       //Allows Inhertiance
-        private object _filtercriteria;//Allows Inhertiance
-        private object[] _languages;        //Allows Inhertiance
-        private object _xml;            //Allows Inhertiance
+        //Allows Inheritance (i.e.: object to determine if ever been set)
+        private object _priority;       //Allows Inheritance
+        private object _implemented;    //Allows Inheritance
+        private object _skipped;        //Allows Inheritance
+        private object _error;          //Allows Inheritance
+        private object _security;       //Allows Inheritance
+        private object _filtercriteria;//Allows Inheritance
+        private object[] _languages;        //Allows Inheritance
+        private object _xml;            //Allows Inheritance
 
         //Constructors
         public CAttrBase()
@@ -419,7 +420,7 @@ namespace OLEDB.Test.ModuleCore
 
         public virtual string Files
         {
-            //Search Pattern (ie: *.*)
+            //Search Pattern (i.e.: *.*)
             get { return _files; }
             set { _files = value; }
         }

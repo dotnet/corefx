@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 
@@ -19,26 +20,26 @@ namespace System.ComponentModel
      * provided "site".
      */
 
-    /// <devdoc>
+    /// <summary>
     ///    <para>Provides functionality required by all components.</para>
-    /// </devdoc>
+    /// </summary>
     public interface IComponent : IDisposable
     {
         // The site of the component.
-        /// <devdoc>
+        /// <summary>
         ///    <para>When implemented by a class, gets or sets
         ///       the <see cref='System.ComponentModel.ISite'/> associated
         ///       with the <see cref='System.ComponentModel.IComponent'/>.</para>
-        /// </devdoc>
+        /// </summary>
         ISite Site
         {
             get;
             set;
         }
 
-        /// <devdoc>
+        /// <summary>
         ///    <para>Adds a event handler to listen to the Disposed event on the component.</para>
-        /// </devdoc>
+        /// </summary>
         event EventHandler Disposed;
     }
 }

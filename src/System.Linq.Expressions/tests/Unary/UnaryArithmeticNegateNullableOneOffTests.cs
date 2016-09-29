@@ -1,16 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
-using System.Linq.Expressions;
 using Xunit;
 
-namespace Tests.ExpressionCompiler.Unary
+namespace System.Linq.Expressions.Tests
 {
     public static class UnaryArithmeticNegateNullableOneOffTests
     {
-        [Fact] //[WorkItem(3197, "https://github.com/dotnet/corefx/issues/3197")]
-        public static void UnaryArithmeticNegateNullableStackBalance()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void UnaryArithmeticNegateNullableStackBalance(bool useInterpreter)
         {
             var e = Expression.Lambda<Func<decimal?>>(
                 Expression.Negate(
@@ -20,7 +20,7 @@ namespace Tests.ExpressionCompiler.Unary
                 )
             );
 
-            var f = e.Compile();
+            var f = e.Compile(useInterpreter);
 
             Assert.True(f() == 1.0m);
         }

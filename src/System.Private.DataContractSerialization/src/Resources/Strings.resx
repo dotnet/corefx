@@ -276,9 +276,6 @@
   <data name="IndexedPropertyCannotBeSerialized" xml:space="preserve">
     <value>Property '{1}' in type '{0}' cannot be serialized because serialization of indexed properties is not supported.</value>
   </data>
-  <data name="InterfaceTypeCannotBeCreated" xml:space="preserve">
-    <value>Interface type '{0}' cannot be created. Consider replacing with a non-interface serializable type.</value>
-  </data>
   <data name="InvalidCollectionContractItemName" xml:space="preserve">
     <value>Type '{0}' cannot have CollectionDataContractAttribute attribute ItemName set to null or empty string.</value>
   </data>
@@ -399,9 +396,6 @@
   <data name="KnownTypeAttributeOneScheme" xml:space="preserve">
     <value>Type '{0}': If a KnownTypeAttribute attribute specifies a method it must be the only KnownTypeAttribute attribute on that type.</value>
   </data>
-  <data name="KnownTypeConfigClosedGenericDeclared" xml:space="preserve">
-    <value>Declared type '{0}' in config cannot be a closed or partial generic type.</value>
-  </data>
   <data name="KnownTypeAttributeValidMethodTypes" xml:space="preserve">
     <value>Method specified by KnownTypeAttribute attribute on type '{0}' does not expose valid types.</value>
   </data>
@@ -433,7 +427,7 @@
     <value>One of the known types provided to the serializer via '{0}' argument was invalid because it was null. All known types specified must be non-null values.</value>
   </data>
   <data name="NullValueReturnedForGetOnlyCollection" xml:space="preserve">
-    <value>The get-only collection of type '{0}' returned a null value.  The input stream contains collection items which cannot be added if the instance is null.  Consider initializing the collection either in the constructor of the the object or in the getter.</value>
+    <value>The get-only collection of type '{0}' returned a null value.  The input stream contains collection items which cannot be added if the instance is null.  Consider initializing the collection either in the constructor of the object or in the getter.</value>
   </data>
   <data name="ObjectTableOverflow" xml:space="preserve">
     <value>An internal error has occurred. Object table overflow. This could be caused by serializing or deserializing extremely large object graphs.</value>
@@ -801,6 +795,12 @@
   <data name="XmlMaxNameTableCharCountExceeded" xml:space="preserve">
     <value>The maximum nametable character count quota ({0}) has been exceeded while reading XML data. The nametable is a data structure used to store strings encountered during XML processing - long XML documents with non-repeating element names, attribute names and attribute values may trigger this quota. This quota may be increased by changing the MaxNameTableCharCount property on the XmlDictionaryReaderQuotas object used when creating the XML reader.</value>
   </data>
+  <data name="XmlMaxDepthExceeded" xml:space="preserve">
+    <value>The maximum read depth ({0}) has been exceeded because XML data being read has more levels of nesting than is allowed by the quota. This quota may be increased by changing the MaxDepth property on the XmlDictionaryReaderQuotas object used when creating the XML reader.</value>
+  </data>
+  <data name="XmlMaxStringContentLengthExceeded" xml:space="preserve">
+    <value>The maximum string content length quota ({0}) has been exceeded while reading XML data. This quota may be increased by changing the MaxStringContentLength property on the XmlDictionaryReaderQuotas object used when creating the XML reader.</value>
+  </data>
   <data name="XmlMethodNotSupported" xml:space="preserve">
     <value>This XmlWriter implementation does not support the '{0}' method.</value>
   </data>
@@ -902,9 +902,6 @@
   </data>
   <data name="JsonInvalidBytes" xml:space="preserve">
     <value>Invalid byte encoding.</value>
-  </data>
-  <data name="JsonDuplicateMemberInInput" xml:space="preserve">
-    <value>The dictionary cannot be deserialized because the member '{0}' was found more than once in the input.</value>
   </data>
   <data name="JsonDuplicateMemberNames" xml:space="preserve">
     <value>The data contract type '{0}' is not serializable with DataContractJsonSerializer because the data member '{1}' is duplicated in its type hierarchy.</value>
@@ -1089,13 +1086,19 @@
   <data name="KeyTypeCannotBeParsedInSimpleDictionary" xml:space="preserve">
     <value>The dictionary of type '{0}' cannot be deserialized as a simple dictionary because its key type '{1}' does not have a public static Parse method.</value>
   </data>
-  <data name="JsonDuplicateMemberInInput" xml:space="preserve">
-    <value>The data contract type '{0}' cannot be deserialized because the data member '{1}' was found more than once in the input.</value>
-  </data>
   <data name="SurrogatesWithGetOnlyCollectionsNotSupportedSerDeser" xml:space="preserve">
     <value>Using surrogates with get-only collection properties is not supported.  Consider removing the surrogate associated with '{0}'.</value>
   </data>
   <data name="FactoryObjectContainsSelfReference" xml:space="preserve">
     <value>Object graph of type '{0}' with Id '{2}' contains a reference to itself. The object has been replaced with a new object of type '{1}' either because it implements IObjectReference or because it is surrogated. The serializer does not support fixing up the nested reference to the new object and cannot deserialize this object. Consider changing the object to remove the nested self-reference.</value>
+  </data>  
+  <data name="RecursiveCollectionType" xml:space="preserve">
+    <value>Type '{0}' is a recursive collection data contract which is not supported. Consider modifying the definition of collection '{0}' to remove references to itself.</value>
   </data>
+  <data name="UnknownXmlType" xml:space="preserve">
+    <value>Type '{0}' is not a valid XML type.</value>
+  </data>
+  <data name="TypeNotSerializableViaReflection" xml:space="preserve">
+    <value>Cannot serialize type {0} via reflection. Required type metadata was missing.</value>
+  </data> 
 </root>

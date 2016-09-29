@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
+using XunitPlatformID = Xunit.PlatformID;
 
 namespace System.IO.Tests
 {
@@ -23,6 +25,10 @@ namespace System.IO.Tests
                 yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                     ((path, time) => File.SetCreationTimeUtc(path, time)),
                     ((path) => File.GetCreationTimeUtc(path)),
+                    DateTimeKind.Unspecified);
+                yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
+                    ((path, time) => File.SetCreationTimeUtc(path, time)),
+                    ((path) => File.GetCreationTimeUtc(path)),
                     DateTimeKind.Utc);
             }
             yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
@@ -32,11 +38,19 @@ namespace System.IO.Tests
             yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                 ((path, time) => File.SetLastAccessTimeUtc(path, time)),
                 ((path) => File.GetLastAccessTimeUtc(path)),
+                DateTimeKind.Unspecified);
+            yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
+                ((path, time) => File.SetLastAccessTimeUtc(path, time)),
+                ((path) => File.GetLastAccessTimeUtc(path)),
                 DateTimeKind.Utc);
             yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                 ((path, time) => File.SetLastWriteTime(path, time)),
                 ((path) => File.GetLastWriteTime(path)),
                 DateTimeKind.Local);
+            yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
+                ((path, time) => File.SetLastWriteTimeUtc(path, time)),
+                ((path) => File.GetLastWriteTimeUtc(path)),
+                DateTimeKind.Unspecified);
             yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                 ((path, time) => File.SetLastWriteTimeUtc(path, time)),
                 ((path) => File.GetLastWriteTimeUtc(path)),
@@ -76,7 +90,17 @@ namespace System.IO.Tests
                 var result = tuple.Item2(testFile.FullName);
                 Assert.Equal(dt, result);
                 Assert.Equal(dt.ToLocalTime(), result.ToLocalTime());
-                Assert.Equal(dt.ToUniversalTime(), result.ToUniversalTime());
+
+                // File and Directory UTC APIs treat a DateTimeKind.Unspecified as UTC whereas
+                // ToUniversalTime treats it as local.
+                if (tuple.Item3 == DateTimeKind.Unspecified)
+                {
+                    Assert.Equal(dt, result.ToUniversalTime());
+                }
+                else
+                {
+                    Assert.Equal(dt.ToUniversalTime(), result.ToUniversalTime());
+                }
             });
         }
 
@@ -98,7 +122,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(XunitPlatformID.Windows)]
         public void Windows_FileDoesntExist_ReturnDefaultValues()
         {
             string path = GetTestFilePath();
@@ -127,7 +151,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(XunitPlatformID.AnyUnix)]
         public void Unix_FileDoesntExist_Throws_FileNotFoundException()
         {
             string path = GetTestFilePath();

@@ -2,26 +2,74 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <AssemblyName>System.Linq</AssemblyName>
-    <AssemblyVersion>4.0.1.0</AssemblyVersion>
     <RootNamespace>System.Linq</RootNamespace>
-    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
+    <!-- The following line needs to be removed once we have a targeting pack for 4.6.3 -->
+    <TargetingPackNugetPackageId Condition="'$(TargetGroup)' == 'net463'">Microsoft.TargetingPack.NETFramework.v4.6.1</TargetingPackNugetPackageId>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.6</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
       <Link>System\Collections\Generic\EnumerableHelpers.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs">
+      <Link>System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs</Link>
+    </Compile>
+    <Compile Include="System\Linq\Aggregate.cs" />
+    <Compile Include="System\Linq\AnyAll.cs" />
+    <Compile Include="System\Linq\AppendPrepend.cs" />
+    <Compile Include="System\Linq\Average.cs" />
+    <Compile Include="System\Linq\Buffer.cs" />
+    <Compile Include="System\Linq\Cast.cs" />
+    <Compile Include="System\Linq\Concatenate.cs" />
+    <Compile Include="System\Linq\Contains.cs" />
+    <Compile Include="System\Linq\Count.cs" />
+    <Compile Include="System\Linq\DebugView.cs" />
+    <Compile Include="System\Linq\DefaultIfEmpty.cs" />
+    <Compile Include="System\Linq\Distinct.cs" />
+    <Compile Include="System\Linq\ElementAt.cs" />
     <Compile Include="System\Linq\Enumerable.cs" />
     <Compile Include="System\Linq\Errors.cs" />
+    <Compile Include="System\Linq\Except.cs" />
+    <Compile Include="System\Linq\First.cs" />
+    <Compile Include="System\Linq\Grouping.cs" />
+    <Compile Include="System\Linq\GroupJoin.cs" />
+    <Compile Include="System\Linq\Intersect.cs" />
+    <Compile Include="System\Linq\Iterator.cs" />
+    <Compile Include="System\Linq\Join.cs" />
+    <Compile Include="System\Linq\Last.cs" />
+    <Compile Include="System\Linq\Lookup.cs" />
+    <Compile Include="System\Linq\Max.cs" />
+    <Compile Include="System\Linq\Min.cs" />
+    <Compile Include="System\Linq\OrderBy.cs" />
+    <Compile Include="System\Linq\OrderedEnumerable.cs" />
+    <Compile Include="System\Linq\Partition.cs" />
+    <Compile Include="System\Linq\Range.cs" />
+    <Compile Include="System\Linq\Repeat.cs" />
+    <Compile Include="System\Linq\Reverse.cs" />
+    <Compile Include="System\Linq\Select.cs" />
+    <Compile Include="System\Linq\SelectMany.cs" />
+    <Compile Include="System\Linq\SequenceEqual.cs" />
+    <Compile Include="System\Linq\Set.cs" />
+    <Compile Include="System\Linq\Single.cs" />
+    <Compile Include="System\Linq\Skip.cs" />
+    <Compile Include="System\Linq\Sum.cs" />
+    <Compile Include="System\Linq\Take.cs" />
+    <Compile Include="System\Linq\ToCollection.cs" />
+    <Compile Include="System\Linq\Union.cs" />
+    <Compile Include="System\Linq\Where.cs" />
+    <Compile Include="System\Linq\Zip.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

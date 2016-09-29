@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// <copyright>
-// </copyright>
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 
@@ -19,7 +18,7 @@ namespace System.Runtime.Serialization
         private DateTimeStyles _dateTimeStyles;
 
         /// <summary>
-        /// Initailizes a new <see cref="DateTimeFormat"/> with the specified
+        /// Initializes a new <see cref="DateTimeFormat"/> with the specified
         /// formatString and DateTimeFormatInfo.CurrentInfo as the
         /// formatProvider.
         /// </summary>
@@ -29,7 +28,7 @@ namespace System.Runtime.Serialization
         }
 
         /// <summary>
-        /// Initailizes a new <see cref="DateTimeFormat"/> with the specified
+        /// Initializes a new <see cref="DateTimeFormat"/> with the specified
         /// formatString and formatProvider.
         /// </summary>
         /// <param name="formatString">Specifies the formatString to be used.</param>

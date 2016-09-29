@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -124,8 +125,6 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="P:ListInitExpression.NodeType"/> property equal to ListInit and the <see cref="P:ListInitExpression.NewExpression"/> property set to the specified value.</returns>
         public static ListInitExpression ListInit(NewExpression newExpression, params Expression[] initializers)
         {
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
             return ListInit(newExpression, initializers as IEnumerable<Expression>);
         }
 
@@ -137,13 +136,13 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="P:ListInitExpression.NodeType"/> property equal to ListInit and the <see cref="P:ListInitExpression.NewExpression"/> property set to the specified value.</returns>
         public static ListInitExpression ListInit(NewExpression newExpression, IEnumerable<Expression> initializers)
         {
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
+            ContractUtils.RequiresNotNull(newExpression, nameof(newExpression));
+            ContractUtils.RequiresNotNull(initializers, nameof(initializers));
 
             var initializerlist = initializers.ToReadOnly();
             if (initializerlist.Count == 0)
             {
-                throw Error.ListInitializerWithZeroMembers();
+                return new ListInitExpression(newExpression, EmptyReadOnlyCollection<ElementInit>.Instance);
             }
 
             MethodInfo addMethod = FindMethod(newExpression.Type, "Add", null, new Expression[] { initializerlist[0] }, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -159,12 +158,6 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="P:ListInitExpression.NodeType"/> property equal to ListInit and the <see cref="P:ListInitExpression.NewExpression"/> property set to the specified value.</returns>
         public static ListInitExpression ListInit(NewExpression newExpression, MethodInfo addMethod, params Expression[] initializers)
         {
-            if (addMethod == null)
-            {
-                return ListInit(newExpression, initializers as IEnumerable<Expression>);
-            }
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
             return ListInit(newExpression, addMethod, initializers as IEnumerable<Expression>);
         }
 
@@ -181,14 +174,10 @@ namespace System.Linq.Expressions
             {
                 return ListInit(newExpression, initializers);
             }
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
+            ContractUtils.RequiresNotNull(newExpression, nameof(newExpression));
+            ContractUtils.RequiresNotNull(initializers, nameof(initializers));
 
             var initializerlist = initializers.ToReadOnly();
-            if (initializerlist.Count == 0)
-            {
-                throw Error.ListInitializerWithZeroMembers();
-            }
             ElementInit[] initList = new ElementInit[initializerlist.Count];
             for (int i = 0; i < initializerlist.Count; i++)
             {
@@ -227,14 +216,10 @@ namespace System.Linq.Expressions
         /// </remarks>
         public static ListInitExpression ListInit(NewExpression newExpression, IEnumerable<ElementInit> initializers)
         {
-            ContractUtils.RequiresNotNull(newExpression, "newExpression");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
+            ContractUtils.RequiresNotNull(newExpression, nameof(newExpression));
+            ContractUtils.RequiresNotNull(initializers, nameof(initializers));
             var initializerlist = initializers.ToReadOnly();
-            if (initializerlist.Count == 0)
-            {
-                throw Error.ListInitializerWithZeroMembers();
-            }
-            ValidateListInitArgs(newExpression.Type, initializerlist);
+            ValidateListInitArgs(newExpression.Type, initializerlist, nameof(newExpression));
             return new ListInitExpression(newExpression, initializerlist);
         }
     }

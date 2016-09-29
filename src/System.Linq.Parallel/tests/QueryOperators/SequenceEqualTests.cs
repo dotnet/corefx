@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class SequenceEqualTests
+    public static class SequenceEqualTests
     {
         private const int DuplicateFactor = 8;
 
@@ -17,7 +18,7 @@ namespace System.Linq.Parallel.Tests
         //
         public static IEnumerable<object[]> SequenceEqualData(int[] counts)
         {
-            foreach (object[] left in Sources.Ranges(counts.Cast<int>()))
+            foreach (object[] left in Sources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount / 4)))
             {
                 foreach (object[] right in Sources.Ranges(new[] { (int)left[1] }))
                 {
@@ -28,7 +29,7 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> SequenceEqualUnequalSizeData(int[] counts)
         {
-            foreach (object[] left in Sources.Ranges(counts.Cast<int>()))
+            foreach (object[] left in Sources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount / 4)))
             {
                 foreach (object[] right in Sources.Ranges(new[] { 1, ((int)left[1] - 1) / 2 + 1, (int)left[1] * 2 + 1 }.Distinct()))
                 {
@@ -39,7 +40,7 @@ namespace System.Linq.Parallel.Tests
 
         public static IEnumerable<object[]> SequenceEqualUnequalData(int[] counts)
         {
-            foreach (object[] left in Sources.Ranges(counts.Cast<int>()))
+            foreach (object[] left in Sources.Ranges(counts.DefaultIfEmpty(Sources.OuterLoopCount / 4)))
             {
                 Func<int, IEnumerable<int>> items = x => new[] { 0, x / 8, x / 2, x * 7 / 8, x - 1 }.Distinct();
                 foreach (object[] right in Sources.Ranges(new[] { (int)left[1] }, items))
@@ -50,7 +51,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("SequenceEqualData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SequenceEqualData), new[] { 0, 1, 2, 16 })]
         public static void SequenceEqual(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -62,14 +63,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SequenceEqualData", (object)(new int[] { 1024 * 4, 1024 * 128 }))]
+        [MemberData(nameof(SequenceEqualData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void SequenceEqual_Longrunning(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
         {
             SequenceEqual(left, right, count);
         }
 
         [Theory]
-        [MemberData("SequenceEqualData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SequenceEqualData), new[] { 0, 1, 2, 16 })]
         public static void SequenceEqual_CustomComparator(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -87,14 +88,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SequenceEqualData", (object)(new int[] { 1024 * 4, 1024 * 128 }))]
+        [MemberData(nameof(SequenceEqualData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void SequenceEqual_CustomComparator_Longrunning(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
         {
             SequenceEqual_CustomComparator(left, right, count);
         }
 
         [Theory]
-        [MemberData("SequenceEqualUnequalSizeData", (object)(new int[] { 0, 4, 16 }))]
+        [MemberData(nameof(SequenceEqualUnequalSizeData), new[] { 0, 4, 16 })]
         public static void SequenceEqual_UnequalSize(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -107,14 +108,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SequenceEqualUnequalSizeData", (object)(new int[] { 1024 * 4, 1024 * 128 }))]
+        [MemberData(nameof(SequenceEqualUnequalSizeData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void SequenceEqual_UnequalSize_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             SequenceEqual_UnequalSize(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("SequenceEqualUnequalData", (object)(new int[] { 1, 2, 16 }))]
+        [MemberData(nameof(SequenceEqualUnequalData), new[] { 1, 2, 16 })]
         public static void SequenceEqual_Unequal(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count, int item)
         {
             ParallelQuery<int> leftQuery = left.Item;
@@ -127,7 +128,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("SequenceEqualUnequalData", (object)(new int[] { 1024 * 4, 1024 * 128 }))]
+        [MemberData(nameof(SequenceEqualUnequalData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void SequenceEqual_Unequal_Longrunning(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count, int item)
         {
             SequenceEqual_Unequal(left, right, count, item);
@@ -141,25 +142,65 @@ namespace System.Linq.Parallel.Tests
 #pragma warning restore 618
         }
 
-        [Theory]
-        [MemberData("SequenceEqualUnequalData", (object)(new int[] { 4 }))]
-        public static void SequenceEqual_OperationCanceledException_PreCanceled(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count, int item)
+        [Fact]
+        public static void SequenceEqual_OperationCanceledException()
         {
-            CancellationTokenSource cs = new CancellationTokenSource();
-            cs.Cancel();
+            AssertThrows.EventuallyCanceled((source, canceler) => source.OrderBy(x => x).SequenceEqual(ParallelEnumerable.Range(0, 128).AsOrdered(), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.EventuallyCanceled((source, canceler) => ParallelEnumerable.Range(0, 128).AsOrdered().SequenceEqual(source.OrderBy(x => x), new CancelingEqualityComparer<int>(canceler)));
+        }
 
-            Functions.AssertIsCanceled(cs, () => left.Item.WithCancellation(cs.Token).SequenceEqual(right.Item));
-            Functions.AssertIsCanceled(cs, () => left.Item.WithCancellation(cs.Token).SequenceEqual(right.Item, new ModularCongruenceComparer(1)));
+        [Fact]
+        public static void SequenceEqual_AggregateException_Wraps_OperationCanceledException()
+        {
+            AssertThrows.OtherTokenCanceled((source, canceler) => source.OrderBy(x => x).SequenceEqual(ParallelEnumerable.Range(0, 128).AsOrdered(), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.OtherTokenCanceled((source, canceler) => ParallelEnumerable.Range(0, 128).AsOrdered().SequenceEqual(source.OrderBy(x => x), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => source.OrderBy(x => x).SequenceEqual(ParallelEnumerable.Range(0, 128).AsOrdered(), new CancelingEqualityComparer<int>(canceler)));
+            AssertThrows.SameTokenNotCanceled((source, canceler) => ParallelEnumerable.Range(0, 128).AsOrdered().SequenceEqual(source.OrderBy(x => x), new CancelingEqualityComparer<int>(canceler)));
+        }
 
-            Functions.AssertIsCanceled(cs, () => left.Item.SequenceEqual(right.Item.WithCancellation(cs.Token)));
-            Functions.AssertIsCanceled(cs, () => left.Item.SequenceEqual(right.Item.WithCancellation(cs.Token), new ModularCongruenceComparer(1)));
+        [Fact]
+        public static void SequenceEqual_OperationCanceledException_PreCanceled()
+        {
+            AssertThrows.AlreadyCanceled(source => source.SequenceEqual(ParallelEnumerable.Range(0, 2)));
+            AssertThrows.AlreadyCanceled(source => source.SequenceEqual(ParallelEnumerable.Range(0, 2), new ModularCongruenceComparer(1)));
+
+            AssertThrows.AlreadyCanceled(source => ParallelEnumerable.Range(0, 2).SequenceEqual(source));
+            AssertThrows.AlreadyCanceled(source => ParallelEnumerable.Range(0, 2).SequenceEqual(source, new ModularCongruenceComparer(1)));
         }
 
         [Theory]
-        [MemberData("SequenceEqualUnequalData", (object)(new int[] { 4 }))]
-        public static void SequenceEqual_AggregateException(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count, int item)
+        [ActiveIssue("Cancellation token not shared")]
+        [MemberData("SequenceEqualData", new int[] { /* Sources.OuterLoopCount */ })]
+        public static void SequenceEqual_SharedLeft_Cancellation(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
         {
-            Functions.AssertThrowsWrapped<DeliberateTestException>(() => left.Item.SequenceEqual(right.Item, new FailingEqualityComparer<int>()));
+            IntegerRangeSet seen = new IntegerRangeSet(0, count);
+            CancellationTokenSource cs = new CancellationTokenSource();
+
+            Assert.Throws<OperationCanceledException>(() => left.Item.WithCancellation(cs.Token)
+              .SequenceEqual(right.Item.Except(ParallelEnumerable.Range(0, count).Select(x => { cs.Cancel(); seen.Add(x); return x; }))));
+            // Canceled query means some elements should not be seen.
+            Assert.False(seen.All(x => x.Value));
+        }
+
+        [Theory]
+        [ActiveIssue("Cancellation token not shared")]
+        [MemberData("SequenceEqualData", new int[] { /* Sources.OuterLoopCount */ })]
+        public static void SequenceEqual_SharedRight_Cancellation(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
+        {
+            IntegerRangeSet seen = new IntegerRangeSet(0, count);
+            CancellationTokenSource cs = new CancellationTokenSource();
+
+            Assert.Throws<OperationCanceledException>(() => left.Item.Except(ParallelEnumerable.Range(0, count).Select(x => { cs.Cancel(); seen.Add(x); return x; }))
+              .SequenceEqual(right.Item.WithCancellation(cs.Token)));
+            // Canceled query means some elements should not be seen.
+            Assert.False(seen.All(x => x.Value));
+        }
+
+        [Theory]
+        [MemberData(nameof(SequenceEqualData), new[] { 4 })]
+        public static void SequenceEqual_AggregateException(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
+        {
+            AssertThrows.Wrapped<DeliberateTestException>(() => left.Item.SequenceEqual(right.Item, new FailingEqualityComparer<int>()));
         }
 
         [Fact]
@@ -176,24 +217,21 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void SequenceEqual_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).SequenceEqual(ParallelEnumerable.Range(0, 1)));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).SequenceEqual((ParallelQuery<int>)null));
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).SequenceEqual(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).SequenceEqual((ParallelQuery<int>)null, EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).SequenceEqual(ParallelEnumerable.Range(0, 1)));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).SequenceEqual((ParallelQuery<int>)null));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).SequenceEqual(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).SequenceEqual((ParallelQuery<int>)null, EqualityComparer<int>.Default));
         }
 
         [Theory]
-        [MemberData("SequenceEqualData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(SequenceEqualData), new[] { 0, 1, 2, 16 })]
         public static void SequenceEqual_DisposeException(Labeled<ParallelQuery<int>> left, Labeled<ParallelQuery<int>> right, int count)
         {
             ParallelQuery<int> leftQuery = left.Item;
             ParallelQuery<int> rightQuery = right.Item;
 
-            AggregateException ex = Assert.Throws<AggregateException>(() => leftQuery.SequenceEqual(new DisposeExceptionEnumerable<int>(rightQuery).AsParallel()));
-            Assert.All(ex.InnerExceptions, e => Assert.IsType<TestDisposeException>(e));
-
-            ex = Assert.Throws<AggregateException>(() => new DisposeExceptionEnumerable<int>(leftQuery).AsParallel().SequenceEqual(rightQuery));
-            Assert.All(ex.InnerExceptions, e => Assert.IsType<TestDisposeException>(e));
+            AssertThrows.Wrapped<TestDisposeException>(() => leftQuery.SequenceEqual(new DisposeExceptionEnumerable<int>(rightQuery).AsParallel()));
+            AssertThrows.Wrapped<TestDisposeException>(() => new DisposeExceptionEnumerable<int>(leftQuery).AsParallel().SequenceEqual(rightQuery));
         }
 
         private class DisposeExceptionEnumerable<T> : IEnumerable<T>

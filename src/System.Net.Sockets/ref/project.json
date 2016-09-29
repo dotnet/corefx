@@ -1,11 +1,16 @@
 {
   "dependencies": {
     "System.IO": "4.0.0",
+    "System.IO.FileSystem.Primitives": "4.0.1",
     "System.Net.Primitives": "4.0.10",
     "System.Runtime": "4.0.0",
     "System.Threading.Tasks": "4.0.0"
   },
   "frameworks": {
-    "dotnet5.4": {}
+    "netstandard1.3": {
+      "imports": [
+        "dotnet5.4"
+      ]
+    }
   }
 }

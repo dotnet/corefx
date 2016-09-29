@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -8,7 +9,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-using Internal.NativeCrypto;
 using Internal.Cryptography;
 using Internal.Cryptography.Pal.Native;
 
@@ -206,7 +206,7 @@ namespace Internal.Cryptography.Pal
         private static PfxCertStoreFlags MapKeyStorageFlags(X509KeyStorageFlags keyStorageFlags)
         {
             if ((keyStorageFlags & (X509KeyStorageFlags)~0x1F) != 0)
-                throw new ArgumentException(SR.Argument_InvalidFlag, "keyStorageFlags");
+                throw new ArgumentException(SR.Argument_InvalidFlag, nameof(keyStorageFlags));
 
             PfxCertStoreFlags pfxCertStoreFlags = 0;
             if ((keyStorageFlags & X509KeyStorageFlags.UserKeySet) == X509KeyStorageFlags.UserKeySet)

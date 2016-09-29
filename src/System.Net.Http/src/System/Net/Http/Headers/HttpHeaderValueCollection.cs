@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 
 namespace System.Net.Http.Headers
 {
@@ -81,8 +81,8 @@ namespace System.Net.Http.Headers
         internal HttpHeaderValueCollection(string headerName, HttpHeaders store, T specialValue,
             Action<HttpHeaderValueCollection<T>, T> validator)
         {
-            Contract.Requires(headerName != null);
-            Contract.Requires(store != null);
+            Debug.Assert(headerName != null);
+            Debug.Assert(store != null);
 
             _store = store;
             _headerName = headerName;
@@ -121,12 +121,12 @@ namespace System.Net.Http.Headers
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
             // Allow arrayIndex == array.Length in case our own collection is empty
             if ((arrayIndex < 0) || (arrayIndex > array.Length))
             {
-                throw new ArgumentOutOfRangeException("arrayIndex");
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex));
             }
 
             object storeValue = _store.GetParsedValues(_headerName);
@@ -240,7 +240,7 @@ namespace System.Net.Http.Headers
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             // If this instance has a custom validator for validating arguments, call it now.

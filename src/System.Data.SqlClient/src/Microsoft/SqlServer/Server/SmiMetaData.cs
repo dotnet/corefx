@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -10,32 +11,31 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Data;
 using System.Data.SqlTypes;
-using System.Globalization;
 
 namespace Microsoft.SqlServer.Server
 {
     // DESIGN NOTES
     //
-    //  The following classes are a tight inheritance heirarchy, and are not designed for
+    //  The following classes are a tight inheritance hierarchy, and are not designed for
     //  being inherited outside of this file.  Instances are guaranteed to be immutable, and
     //  outside classes rely on this fact.
     //
     //  The various levels may not all be used outside of this file, but for clarity of purpose
-    //  they are all usefull distinctions to make.
+    //  they are all useful distinctions to make.
     //
-    //  In general, moving lower in the type heirarchy exposes less portable values.  Thus,
+    //  In general, moving lower in the type hierarchy exposes less portable values.  Thus,
     //  the root metadata can be readily shared across different (MSSQL) servers and clients,
     //  while QueryMetaData has attributes tied to a specific query, running against specific
     //  data storage on a specific server.
     //
-    //  The SmiMetaData heirarchy does not do data validation on retail builds!  It will assert
+    //  The SmiMetaData hierarchy does not do data validation on retail builds!  It will assert
     //  that the values passed to it have been validated externally, however.
     //
 
 
     // SmiMetaData
     //
-    //  Root of the heirarchy.
+    //  Root of the hierarchy.
     //  Represents the minimal amount of metadata required to represent any Sql Server datum
     //  without any references to any particular server or schema (thus, no server-specific multi-part names).
     //  It could be used to communicate solely between two disconnected clients, for instance.
@@ -132,14 +132,14 @@ namespace Microsoft.SqlServer.Server
                         DefaultNVarChar_NoCollation.MaxLength,
                         DefaultNVarChar_NoCollation.Precision,
                         DefaultNVarChar_NoCollation.Scale,
-                        LocaleInterop.GetCurrentCultureLcid(),
+                        Locale.GetCurrentCultureLcid(),
                         SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth
                         );
             }
         }
 
 
-        // SMI V100 (aka V3) constructor.  Superceded in V200.
+        // SMI V100 (aka V3) constructor.  Superseded in V200.
         internal SmiMetaData(
                                 SqlDbType dbType,
                                 long maxLength,
@@ -288,8 +288,8 @@ namespace Microsoft.SqlServer.Server
             //  1) not null
             //  2) read only
             //  3) same number of columns in each list (0 count acceptable for properties that are "unused")
-            Debug.Assert(null != _extendedProperties && _extendedProperties.IsReadOnly, "SmiMetaData.ctor: _extendedProperties is " + (null != _extendedProperties ? "writeable" : "null"));
-            Debug.Assert(null != _fieldMetaData && _fieldMetaData.IsReadOnly, "SmiMetaData.ctor: _fieldMetaData is " + (null != _fieldMetaData ? "writeable" : "null"));
+            Debug.Assert(null != _extendedProperties && _extendedProperties.IsReadOnly, "SmiMetaData.ctor: _extendedProperties is " + (null != _extendedProperties ? "writable" : "null"));
+            Debug.Assert(null != _fieldMetaData && _fieldMetaData.IsReadOnly, "SmiMetaData.ctor: _fieldMetaData is " + (null != _fieldMetaData ? "writable" : "null"));
 #if DEBUG
             ((SmiDefaultFieldsProperty)_extendedProperties[SmiPropertySelector.DefaultFields]).CheckCount(_fieldMetaData.Count);
             ((SmiUniqueKeyProperty)_extendedProperties[SmiPropertySelector.UniqueKey]).CheckCount(_fieldMetaData.Count);
@@ -317,7 +317,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // Units of length depend on type.
-        //  NVarChar, NChar, NText: # of unicode characters
+        //  NVarChar, NChar, NText: # of Unicode characters
         //  Everything else: # of bytes
         internal long MaxLength
         {
@@ -458,48 +458,6 @@ namespace Microsoft.SqlServer.Server
                 DefaultDateTimeOffset,         // SqlDbType.DateTimeOffset
             };
 
-        // static array of type names ordered by corresponding SqlDbType.
-        // NOTE: INDEXED BY SqlDbType ENUM!  MUST UPDATE THIS ARRAY WHEN UPDATING SqlDbType!
-        //   ONLY ACCESS THIS GLOBAL FROM get_TypeName!
-        private static string[] s_typeNameByDatabaseType =
-            {
-                "bigint",               // SqlDbType.BigInt
-                "binary",               // SqlDbType.Binary
-                "bit",                  // SqlDbType.Bit
-                "char",                 // SqlDbType.Char
-                "datetime",             // SqlDbType.DateTime
-                "decimal",              // SqlDbType.Decimal
-                "float",                // SqlDbType.Float
-                "image",                // SqlDbType.Image
-                "int",                  // SqlDbType.Int
-                "money",                // SqlDbType.Money
-                "nchar",                // SqlDbType.NChar
-                "ntext",                // SqlDbType.NText
-                "nvarchar",             // SqlDbType.NVarChar
-                "real",                 // SqlDbType.Real
-                "uniqueidentifier",     // SqlDbType.UniqueIdentifier
-                "smalldatetime",        // SqlDbType.SmallDateTime
-                "smallint",             // SqlDbType.SmallInt
-                "smallmoney",           // SqlDbType.SmallMoney
-                "text",                 // SqlDbType.Text
-                "timestamp",            // SqlDbType.Timestamp
-                "tinyint",              // SqlDbType.TinyInt
-                "varbinary",            // SqlDbType.VarBinary
-                "varchar",              // SqlDbType.VarChar
-                "sql_variant",          // SqlDbType.Variant
-                null,                   // placeholder for 24
-                "xml",                  // SqlDbType.Xml
-                null,                   // placeholder for 26
-                null,                   // placeholder for 27
-                null,                   // placeholder for 28
-                String.Empty,           // SqlDbType.Udt  -- get type name from Type.FullName instead.
-                String.Empty,           // Structured types have user-defined type names.
-                "date",                 // SqlDbType.Date
-                "time",                 // SqlDbType.Time
-                "datetime2",            // SqlDbType.DateTime2
-                "datetimeoffset",       // SqlDbType.DateTimeOffset
-            };
-
         // Internal setter to be used by constructors only!  Modifies state!
         private void SetDefaultsForType(SqlDbType dbType)
         {
@@ -523,7 +481,7 @@ namespace Microsoft.SqlServer.Server
     //
     internal class SmiExtendedMetaData : SmiMetaData
     {
-        private string _name;           // context-dependant identifier, ie. parameter name for parameters, column name for columns, etc.
+        private string _name;           // context-dependent identifier, i.e. parameter name for parameters, column name for columns, etc.
 
         // three-part name for typed xml schema and for udt names
         private string _typeSpecificNamePart1;
@@ -754,7 +712,7 @@ namespace Microsoft.SqlServer.Server
 
     // SmiStorageMetaData
     //
-    //  This class represents the addition of storage-level attributes to the heirarchy (i.e. attributes from 
+    //  This class represents the addition of storage-level attributes to the hierarchy (i.e. attributes from 
     //  underlying table, source variables, or whatever).
     //
     //  Most values use Null (either IsNullable == true or CLR null) to indicate "Not specified" state.  Selection

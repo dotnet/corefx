@@ -1,39 +1,45 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using Xunit;
 
-namespace Tests.ExpressionCompiler.Unary
+namespace System.Linq.Expressions.Tests
 {
     public static class UnaryIsTrueTests
     {
         #region Test methods
 
-        [Fact] //[WorkItem(3196, "https://github.com/dotnet/corefx/issues/3196")]
-        public static void CheckUnaryIsTrueBoolTest()
+        [Theory, ClassData(typeof(CompilationTypes))] //[WorkItem(3196, "https://github.com/dotnet/corefx/issues/3196")]
+        public static void CheckUnaryIsTrueBoolTest(bool useInterpreter)
         {
             bool[] values = new bool[] { false, true };
             for (int i = 0; i < values.Length; i++)
             {
-                VerifyIsTrueBool(values[i]);
+                VerifyIsTrueBool(values[i], useInterpreter);
             }
+        }
+
+        [Fact]
+        public static void ToStringTest()
+        {
+            var e = Expression.IsTrue(Expression.Parameter(typeof(bool), "x"));
+            Assert.Equal("IsTrue(x)", e.ToString());
         }
 
         #endregion
 
         #region Test verifiers
 
-        private static void VerifyIsTrueBool(bool value)
+        private static void VerifyIsTrueBool(bool value, bool useInterpreter)
         {
             Expression<Func<bool>> e =
                 Expression.Lambda<Func<bool>>(
                     Expression.IsTrue(Expression.Constant(value, typeof(bool))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool> f = e.Compile();
+            Func<bool> f = e.Compile(useInterpreter);
             Assert.Equal((bool)(value == true), f());
         }
 

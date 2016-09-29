@@ -8,11 +8,11 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Linq.Tests</AssemblyName>
     <RootNamespace>System.Linq.Tests</RootNamespace>
-    <IncludePerformanceTests>true</IncludePerformanceTests>
+    <NugetTargetMoniker>.NETStandard,Version=v1.6</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="AggregateTests.cs" />
     <Compile Include="AllTests.cs" />
@@ -20,7 +20,9 @@
     <Compile Include="AsEnumerableTests.cs" />
     <Compile Include="AverageTests.cs" />
     <Compile Include="CastTests.cs" />
+    <Compile Include="AppendPrependTests.cs" />
     <Compile Include="ConcatTests.cs" />
+    <Compile Include="ConsistencyTests.cs" />
     <Compile Include="ContainsTests.cs" />
     <Compile Include="CountTests.cs" />
     <Compile Include="DefaultIfEmptyTests.cs" />
@@ -28,6 +30,7 @@
     <Compile Include="ElementAtOrDefaultTests.cs" />
     <Compile Include="ElementAtTests.cs" />
     <Compile Include="EmptyEnumerable.cs" />
+    <Compile Include="EmptyPartitionTests.cs" />
     <Compile Include="EnumerableDebugViewTests.cs" />
     <Compile Include="EnumerableTests.cs" />
     <Compile Include="ExceptTests.cs" />
@@ -45,6 +48,7 @@
     <Compile Include="OfTypeTests.cs" />
     <Compile Include="OrderByDescendingTests.cs" />
     <Compile Include="OrderByTests.cs" />
+    <Compile Include="OrderedSubsetting.cs" />
     <Compile Include="RangeTests.cs" />
     <Compile Include="RepeatTests.cs" />
     <Compile Include="ReverseTests.cs" />
@@ -52,6 +56,7 @@
     <Compile Include="SelectTests.cs" />
     <Compile Include="SequenceEqualTests.cs" />
     <Compile Include="ShortCircuitingTests.cs" />
+    <Compile Include="Shuffler.cs" />
     <Compile Include="SingleOrDefaultTests.cs" />
     <Compile Include="SingleTests.cs" />
     <Compile Include="SkipTests.cs" />
@@ -68,18 +73,15 @@
     <Compile Include="UnionTests.cs" />
     <Compile Include="WhereTests.cs" />
     <Compile Include="ZipTests.cs" />
-    <!-- Performance Tests -->
-    <Compile Include="Performance\Perf.Linq.cs" />
-    <Compile Include="Performance\Perf.LinqTestBase.cs" />
-    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
-      <Link>Common\System\PerfUtils.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\System.Linq.csproj">
+    <ProjectReference Include="..\pkg\System.Linq.pkgproj">
       <Project>{ca488507-3b6e-4494-b7be-7b4eeeb2c4d1}</Project>
       <Name>System.Linq</Name>
       <Private>True</Private>

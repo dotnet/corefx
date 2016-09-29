@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Xml;
 using System.Runtime.Serialization;
@@ -207,7 +208,7 @@ namespace System.Runtime.Serialization.Json
                 throw XmlExceptionHelper.CreateConversionException(ticksvalue, "Int64", exception);
             }
 
-            // Convert from # millseconds since epoch to # of 100-nanosecond units, which is what DateTime understands
+            // Convert from # milliseconds since epoch to # of 100-nanosecond units, which is what DateTime understands
             long ticks = millisecondsSinceUnixEpoch * 10000 + JsonGlobals.unixEpochTicks;
 
             try
@@ -233,6 +234,17 @@ namespace System.Runtime.Serialization.Json
         internal override DateTime ReadElementContentAsDateTime()
         {
             return ParseJsonDate(ReadElementContentAsString(), _dateTimeFormat);
+        }
+
+        #if USE_REFEMIT
+        public override bool TryReadDateTimeArray(XmlObjectSerializerReadContext context,
+#else
+        internal override bool TryReadDateTimeArray(XmlObjectSerializerReadContext context,
+#endif
+        XmlDictionaryString itemName, XmlDictionaryString itemNamespace,
+            int arrayLength, out DateTime[] array)
+        {
+            return TryReadJsonDateTimeArray(context, itemName, itemNamespace, arrayLength, out array);
         }
 
         internal bool TryReadJsonDateTimeArray(XmlObjectSerializerReadContext context,

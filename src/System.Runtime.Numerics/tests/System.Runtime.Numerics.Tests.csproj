@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -10,6 +10,7 @@
     <RootNamespace>System.Numerics.Tests</RootNamespace>
     <AssemblyName>System.Runtime.Numerics.Tests</AssemblyName>
     <ProjectGuid>{28AE24F8-BEF4-4358-B612-ADD9D587C8E1}</ProjectGuid>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -17,7 +18,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\System.Runtime.Numerics.csproj">
+    <ProjectReference Include="..\pkg\System.Runtime.Numerics.pkgproj">
       <Project>{d2c99d27-0bef-4319-adb3-05cbeba8f69b}</Project>
       <Name>System.Runtime.Numerics</Name>
       <Private>true</Private>
@@ -76,34 +77,10 @@
     <Compile Include="BigInteger\stackcalculator.cs" />
     <Compile Include="BigInteger\subtract.cs" />
     <Compile Include="BigInteger\ToByteArray.cs" />
-    <Compile Include="Complex\arithmaticOperation_Abs.cs" />
-    <Compile Include="Complex\arithmaticOperation_BinaryDivide_Divide.cs" />
-    <Compile Include="Complex\arithmaticOperation_BinaryMinus_Subtract.cs" />
-    <Compile Include="Complex\arithmaticOperation_BinaryMultiply_Multiply.cs" />
-    <Compile Include="Complex\arithmaticOperation_BinaryPlus_Add.cs" />
-    <Compile Include="Complex\arithmaticOperation_Conjugate.cs" />
-    <Compile Include="Complex\arithmaticOperation_Reciprocal.cs" />
-    <Compile Include="Complex\arithmaticOperation_UnaryMinus_Negate.cs" />
-    <Compile Include="Complex\ComplexTestSupport.cs" />
-    <Compile Include="Complex\ctor.cs" />
-    <Compile Include="Complex\factoryMethod.cs" />
-    <Compile Include="Complex\formattingOperations.cs" />
-    <Compile Include="Complex\implicitExplicitCastOperators.cs" />
-    <Compile Include="Complex\operation_ComparisonHashCode.cs" />
-    <Compile Include="Complex\standardNumericalFunctions_Exp.cs" />
-    <Compile Include="Complex\standardNumericalFunctions_Log.cs" />
-    <Compile Include="Complex\standardNumericalFunctions_Pow.cs" />
-    <Compile Include="Complex\standardNumericalFunctions_Sqrt.cs" />
-    <Compile Include="Complex\staticConstants.cs" />
-    <Compile Include="Complex\trigonometricOperations_ACos.cs" />
-    <Compile Include="Complex\trigonometricOperations_ASin.cs" />
-    <Compile Include="Complex\trigonometricOperations_ATan.cs" />
-    <Compile Include="Complex\trigonometricOperations_Cos.cs" />
-    <Compile Include="Complex\trigonometricOperations_Cosh.cs" />
-    <Compile Include="Complex\trigonometricOperations_Sin.cs" />
-    <Compile Include="Complex\trigonometricOperations_Sinh.cs" />
-    <Compile Include="Complex\trigonometricOperations_Tan.cs" />
-    <Compile Include="Complex\trigonometricOperations_Tanh.cs" />
+    <Compile Include="ComplexTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

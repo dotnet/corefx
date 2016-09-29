@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
@@ -133,8 +134,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public PropertySymbol CreateProperty(Name name, ParentSymbol parent, AggregateDeclaration declaration)
         {
             PropertySymbol sym = newBasicSym(SYMKIND.SK_PropertySymbol, name, parent).AsPropertySymbol();
-            sym.declaration = declaration;
             Debug.Assert(sym != null);
+            sym.declaration = declaration;
             return (sym);
         }
 

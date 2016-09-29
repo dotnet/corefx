@@ -1,20 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    // TODO: This class will eventually be moved to Common once the HttpTestServers are finalized.
+    // TODO (#5525): This class will eventually be moved to Common once the HttpTestServers are finalized.
     public static class TestHelper
     {
         public static bool JsonMessageContainsKeyValue(string message, string key, string value)
         {
-            // TODO: Align with the rest of tests w.r.t response parsing once the test server is finalized.
+            // TODO (#5525): Align with the rest of tests w.r.t response parsing once the test server is finalized.
             // Currently not adding any new dependencies
             string pattern = string.Format(@"""{0}"": ""{1}""", key, value);
             return message.Contains(pattern);
@@ -22,7 +24,7 @@ namespace System.Net.Http.Functional.Tests
 
         public static bool JsonMessageContainsKey(string message, string key)
         {
-            // TODO: Align with the rest of tests w.r.t response parsing once the test server is finalized.
+            // TODO (#5525): Align with the rest of tests w.r.t response parsing once the test server is finalized.
             // Currently not adding any new dependencies
             string pattern = string.Format(@"""{0}"": """, key);
             return message.Contains(pattern);
@@ -38,7 +40,7 @@ namespace System.Net.Http.Functional.Tests
             byte[] actualMD5Hash = ComputeMD5Hash(responseContent);
             Assert.Equal(expectedMD5Hash, actualMD5Hash);
 
-            // Verify upload semsntics: 'Content-Length' vs. 'Transfer-Encoding: chunked'.
+            // Verify upload semantics: 'Content-Length' vs. 'Transfer-Encoding: chunked'.
             if (requestBody != null)
             {
                 bool requestUsedContentLengthUpload =
@@ -77,6 +79,33 @@ namespace System.Net.Http.Functional.Tests
             {
                 return md5.ComputeHash(data);
             }        
+        }
+
+        public static Task WhenAllCompletedOrAnyFailed(params Task[] tasks)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+
+            int remaining = tasks.Length;
+            foreach (var task in tasks)
+            {
+                task.ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        tcs.SetException(t.Exception.InnerExceptions);
+                    }
+                    else if (t.IsCanceled)
+                    {
+                        tcs.SetCanceled();
+                    }
+                    else if (Interlocked.Decrement(ref remaining) == 0)
+                    {
+                        tcs.SetResult(true);
+                    }
+                }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            }
+
+            return tcs.Task;
         }
     }
 }

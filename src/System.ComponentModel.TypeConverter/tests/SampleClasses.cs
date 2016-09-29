@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using Xunit;
@@ -81,7 +82,13 @@ namespace System.ComponentModel.Tests
         }
     }
 
+#if FUNCTIONAL_TESTS
     [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Tests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null")]
+#elif PERFORMANCE_TESTS
+    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Performance.Tests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null")]
+#else
+#error Define FUNCTIONAL_TESTS or PERFORMANCE_TESTS
+#endif
     public class BaseClass
     {
         public BaseClass()

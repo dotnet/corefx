@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace System.Collections.Specialized
 {
@@ -15,16 +15,26 @@ namespace System.Collections.Specialized
     /// OrderedDictionary is used by the ParameterCollection because MSAccess relies on ordering of
     /// parameters, while almost all other DBs do not.  DataKeyArray also uses it so
     /// DataKeys can be retrieved by either their name or their index.
+    /// 
+    /// OrderedDictionary implements IDeserializationCallback because it needs to have the
+    /// contained ArrayList and Hashtable deserialized before it tries to get its count and objects.
     /// </para>
     /// </devdoc>
-    public class OrderedDictionary : IOrderedDictionary
+    [Serializable]
+    public class OrderedDictionary : IOrderedDictionary, ISerializable, IDeserializationCallback
     {
         private ArrayList _objectsArray;
         private Hashtable _objectsTable;
-        private readonly int _initialCapacity;
-        private readonly IEqualityComparer _comparer;
-        private readonly bool _readOnly;
+        private int _initialCapacity;
+        private IEqualityComparer _comparer;
+        private bool _readOnly;
         private Object _syncRoot;
+        private SerializationInfo _siInfo; //A temporary variable which we need during deserialization.
+
+        private const string KeyComparerName = "KeyComparer";
+        private const string ArrayListName = "ArrayList";
+        private const string ReadOnlyName = "ReadOnly";
+        private const string InitCapacityName = "InitialCapacity";
 
         public OrderedDictionary() : this(0)
         {
@@ -46,16 +56,21 @@ namespace System.Collections.Specialized
 
         private OrderedDictionary(OrderedDictionary dictionary)
         {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException("dictionary");
-            }
+            Debug.Assert(dictionary != null);
 
             _readOnly = true;
             _objectsArray = dictionary._objectsArray;
             _objectsTable = dictionary._objectsTable;
             _comparer = dictionary._comparer;
             _initialCapacity = dictionary._initialCapacity;
+        }
+
+        protected OrderedDictionary(SerializationInfo info, StreamingContext context)
+        {
+            // We can't do anything with the keys and values until the entire graph has been deserialized
+            // and getting Counts and objects won't fail.  For the time being, we'll just cache this.  
+            // The graph is not valid until OnDeserialization has been called.
+            _siInfo = info;
         }
 
         /// <devdoc>
@@ -169,7 +184,7 @@ namespace System.Collections.Specialized
                 }
                 if (index < 0 || index >= objectsArray.Count)
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
                 object key = ((DictionaryEntry)objectsArray[index]).Key;
                 objectsArray[index] = new DictionaryEntry(key, value);
@@ -299,7 +314,7 @@ namespace System.Collections.Specialized
             }
             if (index > Count || index < 0)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             objectsTable.Add(key, value);
             objectsArray.Insert(index, new DictionaryEntry(key, value));
@@ -316,7 +331,7 @@ namespace System.Collections.Specialized
             }
             if (index >= Count || index < 0)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             object key = ((DictionaryEntry)objectsArray[index]).Key;
             objectsArray.RemoveAt(index);
@@ -334,7 +349,7 @@ namespace System.Collections.Specialized
             }
             if (key == null)
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             int index = IndexOfKey(key);
@@ -347,19 +362,71 @@ namespace System.Collections.Specialized
             objectsArray.RemoveAt(index);
         }
 
-        #region IDictionary implementation
+#region IDictionary implementation
         public virtual IDictionaryEnumerator GetEnumerator()
         {
             return new OrderedDictionaryEnumerator(objectsArray, OrderedDictionaryEnumerator.DictionaryEntry);
         }
-        #endregion
+#endregion
 
-        #region IEnumerable implementation
+#region IEnumerable implementation
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new OrderedDictionaryEnumerator(objectsArray, OrderedDictionaryEnumerator.DictionaryEntry);
         }
-        #endregion
+#endregion
+
+#region ISerializable implementation 
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info));
+            }
+
+            info.AddValue(KeyComparerName, _comparer, typeof(IEqualityComparer));
+            info.AddValue(ReadOnlyName, _readOnly);
+            info.AddValue(InitCapacityName, _initialCapacity);
+
+            object[] serArray = new object[Count];
+            _objectsArray.CopyTo(serArray);
+            info.AddValue(ArrayListName, serArray);
+        }
+#endregion
+
+#region IDeserializationCallback implementation
+        void IDeserializationCallback.OnDeserialization(object sender)
+        {
+            if (_siInfo == null)
+            {
+                throw new SerializationException(SR.Serialization_InvalidOnDeser);
+            }
+            _comparer = (IEqualityComparer)_siInfo.GetValue(KeyComparerName, typeof(IEqualityComparer));
+            _readOnly = _siInfo.GetBoolean(ReadOnlyName);
+            _initialCapacity = _siInfo.GetInt32(InitCapacityName);
+
+            object[] serArray = (object[])_siInfo.GetValue(ArrayListName, typeof(object[]));
+
+            if (serArray != null)
+            {
+                foreach (object o in serArray)
+                {
+                    DictionaryEntry entry;
+                    try
+                    {
+                        // DictionaryEntry is a value type, so it can only be casted.
+                        entry = (DictionaryEntry)o;
+                    }
+                    catch
+                    {
+                        throw new SerializationException(SR.OrderedDictionary_SerializationMismatch);
+                    }
+                    objectsArray.Add(entry);
+                    objectsTable.Add(entry.Key, entry.Value);
+                }
+            }
+        }
+#endregion
 
         /// <devdoc>
         /// OrderedDictionaryEnumerator works just like any other IDictionaryEnumerator, but it retrieves DictionaryEntries
@@ -467,9 +534,9 @@ namespace System.Collections.Specialized
             void ICollection.CopyTo(Array array, int index)
             {
                 if (array == null)
-                    throw new ArgumentNullException("array");
+                    throw new ArgumentNullException(nameof(array));
                 if (index < 0)
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
                 foreach (object o in _objects)
                 {
                     array.SetValue(_isKeys ? ((DictionaryEntry)o).Key : ((DictionaryEntry)o).Value, index);

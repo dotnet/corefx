@@ -1,10 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Net.Tests;
+using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +22,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
     {
         // TODO: This is a placeholder until GitHub Issue #2383 gets resolved.
         private const string SlowServer = "http://httpbin.org/drip?numbytes=1&duration=1&delay=40&code=200";
-        
+
         private readonly ITestOutputHelper _output;
 
         public WinHttpHandlerTest(ITestOutputHelper output)
@@ -29,6 +30,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             _output = output;
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SendAsync_SimpleGet_Success()
         {
@@ -36,13 +38,46 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             using (var client = new HttpClient(handler))
             {
                 // TODO: This is a placeholder until GitHub Issue #2383 gets resolved.
-                var response = client.GetAsync(HttpTestServers.RemoteEchoServer).Result;
+                var response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 _output.WriteLine(responseContent);
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(CookieUsePolicy.UseInternalCookieStoreOnly, "cookieName1", "cookieValue1")]
+        [InlineData(CookieUsePolicy.UseSpecifiedCookieContainer, "cookieName2", "cookieValue2")]
+        public async Task GetAsync_RedirectResponseHasCookie_CookieSentToFinalUri(
+            CookieUsePolicy cookieUsePolicy,
+            string cookieName,
+            string cookieValue)
+        {
+            Uri uri = Configuration.Http.RedirectUriForDestinationUri(false, 302, Configuration.Http.RemoteEchoServer, 1);
+            var handler = new WinHttpHandler();
+            handler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
+            handler.CookieUsePolicy = cookieUsePolicy;
+            if (cookieUsePolicy == CookieUsePolicy.UseSpecifiedCookieContainer)
+            {
+                handler.CookieContainer = new CookieContainer();
+            }
+
+            using (HttpClient client = new HttpClient(handler))
+            {
+                client.DefaultRequestHeaders.Add(
+                    "X-SetCookie",
+                    string.Format("{0}={1};Path=/", cookieName, cookieValue));
+                using (HttpResponseMessage httpResponse = await client.GetAsync(uri))
+                {
+                    string responseText = await httpResponse.Content.ReadAsStringAsync();
+                    _output.WriteLine(responseText);
+                    Assert.True(JsonMessageContainsKeyValue(responseText, cookieName, cookieValue));
+                }
+            }            
+        }
+
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [OuterLoop]
         public async Task SendAsync_SlowServerAndCancel_ThrowsTaskCanceledException()
@@ -61,6 +96,7 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
             }
         }        
         
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [OuterLoop]
         public void SendAsync_SlowServerRespondsAfterDefaultReceiveTimeout_ThrowsHttpRequestException()
@@ -74,5 +110,12 @@ namespace System.Net.Http.WinHttpHandlerFunctional.Tests
                 Assert.IsType<HttpRequestException>(ag.InnerException);
             }
         }
+
+        public static bool JsonMessageContainsKeyValue(string message, string key, string value)
+        {
+            // TODO: Merge with System.Net.Http TestHelper class as part of GitHub Issue #4989.
+            string pattern = string.Format(@"""{0}"": ""{1}""", key, value);
+            return message.Contains(pattern);
+        }      
     }
 }

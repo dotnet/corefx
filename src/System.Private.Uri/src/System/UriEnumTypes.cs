@@ -1,14 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System
 {
-    // Used to control whether absolute absolute or relative URIs are used
+    // Used to control whether absolute or relative URIs are used
     public enum UriKind
     {
-        RelativeOrAbsolute  = 0,
-        Absolute            = 1,
-        Relative            = 2
+        RelativeOrAbsolute = 0,
+        Absolute = 1,
+        Relative = 2
     }
 
     [Flags]
@@ -16,23 +17,23 @@ namespace System
     {
         // Generic parts.
         // ATTN: The values must stay in sync with Uri.Flags.xxxNotCanonical
-        Scheme      = 0x1,
-        UserInfo    = 0x2,
-        Host        = 0x4,
-        Port        = 0x8,
-        Path        = 0x10,
-        Query       = 0x20,
-        Fragment    = 0x40,
+        Scheme = 0x1,
+        UserInfo = 0x2,
+        Host = 0x4,
+        Port = 0x8,
+        Path = 0x10,
+        Query = 0x20,
+        Fragment = 0x40,
 
-        StrongPort  = 0x80,
+        StrongPort = 0x80,
         NormalizedHost = 0x100,
 
         // This will also return respective delimiters for scheme, userinfo or port
-        // Valid only for a single componet requests.
+        // Valid only for a single component requests.
         KeepDelimiter = 0x40000000,
 
         // This is used by GetObjectData and can also be used directly.
-        // Works for both absolute and relaitve Uris
+        // Works for both absolute and relative Uris
         SerializationInfoString = unchecked((int)0x80000000),
 
         // Shortcuts for general cases

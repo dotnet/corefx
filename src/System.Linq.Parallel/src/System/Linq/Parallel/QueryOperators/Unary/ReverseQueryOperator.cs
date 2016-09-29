@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -39,9 +40,9 @@ namespace System.Linq.Parallel
         {
             Debug.Assert(child != null, "child data source cannot be null");
 
-            if (Child.OrdinalIndexState == OrdinalIndexState.Indexible)
+            if (Child.OrdinalIndexState == OrdinalIndexState.Indexable)
             {
-                SetOrdinalIndexState(OrdinalIndexState.Indexible);
+                SetOrdinalIndexState(OrdinalIndexState.Indexable);
             }
             else
             {
@@ -52,7 +53,7 @@ namespace System.Linq.Parallel
         internal override void WrapPartitionedStream<TKey>(
             PartitionedStream<TSource, TKey> inputStream, IPartitionedStreamRecipient<TSource> recipient, bool preferStriping, QuerySettings settings)
         {
-            Debug.Assert(Child.OrdinalIndexState != OrdinalIndexState.Indexible, "Don't take this code path if the child is indexible.");
+            Debug.Assert(Child.OrdinalIndexState != OrdinalIndexState.Indexable, "Don't take this code path if the child is indexable.");
 
             int partitionCount = inputStream.PartitionCount;
             PartitionedStream<TSource, TKey> outputStream = new PartitionedStream<TSource, TKey>(
@@ -104,7 +105,7 @@ namespace System.Linq.Parallel
         {
             private readonly QueryOperatorEnumerator<TSource, TKey> _source; // The data source to reverse.
             private readonly CancellationToken _cancellationToken;
-            private List<Pair> _buffer; // Our buffer. [allocate in moveNext to avoid false-sharing]
+            private List<Pair<TSource, TKey>> _buffer; // Our buffer. [allocate in moveNext to avoid false-sharing]
             private Shared<int> _bufferIndex; // Our current index within the buffer. [allocate in moveNext to avoid false-sharing]
 
             //---------------------------------------------------------------------------------------
@@ -130,7 +131,7 @@ namespace System.Linq.Parallel
                 {
                     _bufferIndex = new Shared<int>(0);
                     // Buffer all of our data.
-                    _buffer = new List<Pair>();
+                    _buffer = new List<Pair<TSource, TKey>>();
                     TSource current = default(TSource);
                     TKey key = default(TKey);
                     int i = 0;
@@ -139,7 +140,7 @@ namespace System.Linq.Parallel
                         if ((i++ & CancellationState.POLL_INTERVAL) == 0)
                             CancellationState.ThrowIfCanceled(_cancellationToken);
 
-                        _buffer.Add(new Pair(current, key));
+                        _buffer.Add(new Pair<TSource, TKey>(current, key));
                         _bufferIndex.Value++;
                     }
                 }
@@ -147,8 +148,8 @@ namespace System.Linq.Parallel
                 // Continue yielding elements from our buffer.
                 if (--_bufferIndex.Value >= 0)
                 {
-                    currentElement = (TSource)_buffer[_bufferIndex.Value].First;
-                    currentKey = (TKey)_buffer[_bufferIndex.Value].Second;
+                    currentElement = _buffer[_bufferIndex.Value].First;
+                    currentKey = _buffer[_bufferIndex.Value].Second;
                     return true;
                 }
 
@@ -162,8 +163,8 @@ namespace System.Linq.Parallel
         }
 
         //-----------------------------------------------------------------------------------
-        // Query results for a Reverse operator. The results are indexible if the child
-        // results were indexible.
+        // Query results for a Reverse operator. The results are indexable if the child
+        // results were indexable.
         //
 
         class ReverseQueryOperatorResults : UnaryQueryOperatorResults

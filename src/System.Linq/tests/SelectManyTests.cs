@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
-namespace System.Linq.Tests.LegacyTests
+namespace System.Linq.Tests
 {
     public class SelectManyTests : EnumerableTests
     {
@@ -197,7 +198,7 @@ namespace System.Linq.Tests.LegacyTests
         }
 
         [Fact]
-        [OuterLoop]
+        [ActiveIssue("Valid test but too intensive to enable even in OuterLoop")]
         public void IndexOverflow()
         {
             var selected = new FastInfiniteEnumerator<int>().SelectMany((e, i) => Enumerable.Empty<int>());
@@ -331,7 +332,7 @@ namespace System.Linq.Tests.LegacyTests
         public void ForcedToEnumeratorDoesntEnumerate()
         {
             var iterator = NumberRangeGuaranteedNotCollectionType(0, 3).SelectMany(i => new int[0]);
-            // Don't insist on this behaviour, but check its correct if it happens
+            // Don't insist on this behaviour, but check it's correct if it happens
             var en = iterator as IEnumerator<int>;
             Assert.False(en != null && en.MoveNext());
         }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Data.Common;
 using System.Diagnostics;
@@ -26,7 +27,7 @@ namespace System.Data.SqlClient
             _currentTask = null;
             _disposalTokenSource = new CancellationTokenSource();
 
-            // Safely safely convert the CommandTimeout from seconds to milliseconds
+            // Safely convert the CommandTimeout from seconds to milliseconds
             if ((reader.Command != null) && (reader.Command.CommandTimeout != 0))
             {
                 _readTimeout = (int)Math.Min((long)reader.Command.CommandTimeout * 1000L, (long)Int32.MaxValue);
@@ -82,7 +83,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    throw ADP.ArgumentOutOfRange("value");
+                    throw ADP.ArgumentOutOfRange(nameof(value));
                 }
             }
         }
@@ -273,7 +274,7 @@ namespace System.Data.SqlClient
         }
 
         /// <summary>
-        /// Checks the the parameters passed into a Read() method are valid
+        /// Checks the parameters passed into a Read() method are valid
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="index"></param>
@@ -282,15 +283,15 @@ namespace System.Data.SqlClient
         {
             if (buffer == null)
             {
-                throw ADP.ArgumentNull(ADP.ParameterBuffer);
+                throw ADP.ArgumentNull(nameof(buffer));
             }
             if (offset < 0)
             {
-                throw ADP.ArgumentOutOfRange(ADP.ParameterOffset);
+                throw ADP.ArgumentOutOfRange(nameof(offset));
             }
             if (count < 0)
             {
-                throw ADP.ArgumentOutOfRange(ADP.ParameterCount);
+                throw ADP.ArgumentOutOfRange(nameof(count));
             }
             try
             {

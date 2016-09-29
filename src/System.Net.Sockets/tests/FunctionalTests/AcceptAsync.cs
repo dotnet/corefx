@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Test.Common;
 using System.Threading;
@@ -31,6 +32,7 @@ namespace System.Net.Sockets.Tests
             handle.Set();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [Trait("IPv4", "true")]
         public void AcceptAsync_IpV4_Success()
@@ -72,6 +74,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [Trait("IPv6", "true")]
         public void AcceptAsync_IPv6_Success()
@@ -113,9 +116,88 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void AcceptAsync_WithReceiveBuffer_Success()
+        {
+            Assert.True(Capability.IPv4Support());
+
+            AutoResetEvent accepted = new AutoResetEvent(false);
+
+            using (Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                int port = server.BindToAnonymousPort(IPAddress.Loopback);
+                server.Listen(1);
+
+                const int acceptBufferOverheadSize = 288; // see https://msdn.microsoft.com/en-us/library/system.net.sockets.socket.acceptasync(v=vs.110).aspx
+                const int acceptBufferDataSize = 256;
+                const int acceptBufferSize = acceptBufferOverheadSize + acceptBufferDataSize;
+
+                byte[] sendBuffer = new byte[acceptBufferDataSize];
+                new Random().NextBytes(sendBuffer);
+
+                SocketAsyncEventArgs acceptArgs = new SocketAsyncEventArgs();
+                acceptArgs.Completed += OnAcceptCompleted;
+                acceptArgs.UserToken = accepted;
+                acceptArgs.SetBuffer(new byte[acceptBufferSize], 0, acceptBufferSize);
+
+                Assert.True(server.AcceptAsync(acceptArgs));
+                _log.WriteLine("IPv4 Server: Waiting for clients.");
+
+                using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    client.Connect(IPAddress.Loopback, port);
+                    client.Send(sendBuffer);
+                    client.Shutdown(SocketShutdown.Both);
+                }
+
+                Assert.True(
+                    accepted.WaitOne(TestSettings.PassingTestTimeout), "Test completed in alotted time");
+
+                Assert.Equal(
+                    SocketError.Success, acceptArgs.SocketError);
+
+                Assert.Equal(
+                    acceptBufferDataSize, acceptArgs.BytesTransferred);
+
+                Assert.Equal(
+                    new ArraySegment<byte>(sendBuffer), 
+                    new ArraySegment<byte>(acceptArgs.Buffer, 0, acceptArgs.BytesTransferred));
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void AcceptAsync_WithReceiveBuffer_Failure()
+        {
+            //
+            // Unix platforms don't yet support receiving data with AcceptAsync.
+            //
+
+            Assert.True(Capability.IPv4Support());
+
+            using (Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                int port = server.BindToAnonymousPort(IPAddress.Loopback);
+                server.Listen(1);
+
+                SocketAsyncEventArgs acceptArgs = new SocketAsyncEventArgs();
+                acceptArgs.Completed += OnAcceptCompleted;
+                acceptArgs.UserToken = new ManualResetEvent(false);
+
+                byte[] buffer = new byte[1024];
+                acceptArgs.SetBuffer(buffer, 0, buffer.Length);
+
+                Assert.Throws<PlatformNotSupportedException>(() => server.AcceptAsync(acceptArgs));
+            }
+        }
+
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
         // that used Sockets. 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void TestFinalizers()
         {

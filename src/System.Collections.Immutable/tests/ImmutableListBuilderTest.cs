@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -122,8 +123,8 @@ namespace System.Collections.Immutable.Tests
             mutable.Insert(2, 3);
             Assert.Equal(new[] { 0, 1, 3 }, mutable);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable.Insert(-1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable.Insert(4, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.Insert(-1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.Insert(4, 0));
         }
 
         [Fact]
@@ -154,7 +155,7 @@ namespace System.Collections.Immutable.Tests
             mutable.AddRange(new int[0]);
             Assert.Equal(new[] { 1, 4, 5, 2, 3 }, mutable);
 
-            Assert.Throws<ArgumentNullException>(() => mutable.AddRange(null));
+            Assert.Throws<ArgumentNullException>("items", () => mutable.AddRange(null));
         }
 
         [Fact]
@@ -188,14 +189,14 @@ namespace System.Collections.Immutable.Tests
             mutable.RemoveAt(0);
             Assert.Equal(new[] { 2 }, mutable);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable.RemoveAt(1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(1));
 
             mutable.RemoveAt(0);
             Assert.Equal(new int[0], mutable);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable.RemoveAt(0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable.RemoveAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable.RemoveAt(1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(0));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(1));
         }
 
         [Fact]
@@ -236,10 +237,10 @@ namespace System.Collections.Immutable.Tests
             mutable[2] = -3;
             Assert.Equal(new[] { -2, 5, -3 }, mutable);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable[3] = 4);
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable[-1] = 4);
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable[3]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => mutable[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable[3] = 4);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable[-1] = 4);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable[3]);
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable[-1]);
         }
 
         [Fact]

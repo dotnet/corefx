@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -20,12 +21,12 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Xunit;
 
 namespace System.Threading.Tasks.Tests
 {
-
-    public class Partitioner1Chunk
+    public static class Partitioner1Chunk
     {
         /// <summary>
         /// Test the fact that every call of the get*DynamicPartitions.GetEnumerator().MoveNext 
@@ -49,7 +50,7 @@ namespace System.Threading.Tasks.Tests
         }
         private static void OneMoveNext(int length, bool isOrderable)
         {
-            Logger.LogInformation("Length: {0} IsOrderable: {1}", length, isOrderable);
+            Debug.WriteLine("Length: {0} IsOrderable: {1}", length, isOrderable);
             List<int> ds = new List<int>();
             for (int i = 0; i < length; i++)
                 ds.Add(i);
@@ -292,7 +293,7 @@ namespace System.Threading.Tasks.Tests
         //the enumerators should be disposed
         private ConcurrentBag<UserActionEnumerator<T>> _allEnumerators = new ConcurrentBag<UserActionEnumerator<T>>();
 
-        //called in the begining of enumerator Move Next 
+        //called in the beginning of enumerator Move Next 
         private Action<int> _moveNextAction = null;
 
         public UserActionEnumerable(List<T> enumerable, Action<int> moveNextAction)

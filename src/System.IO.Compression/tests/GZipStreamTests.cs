@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Text;
 using System.Threading.Tasks;
@@ -7,19 +8,7 @@ using Xunit;
 
 namespace System.IO.Compression.Tests
 {
-    public class ZLibGZipStreamTests : GZipStreamTests, IDisposable
-    {
-        public ZLibGZipStreamTests() { Common.SetDeflaterMode("zlib"); }
-        public void Dispose() { Common.SetDeflaterMode("unknown"); }
-    }
-
-    public class ManagedGZipStreamTests : GZipStreamTests, IDisposable
-    {
-        public ManagedGZipStreamTests() { Common.SetDeflaterMode("managed"); }
-        public void Dispose() { Common.SetDeflaterMode("unknown"); }
-    }
-
-    public abstract class GZipStreamTests
+    public class GZipStreamTests
     {
         static String gzTestFile(String fileName) { return Path.Combine("GZTestData", fileName); }
 
@@ -51,7 +40,7 @@ namespace System.IO.Compression.Tests
             var zip = new GZipStream(ms, CompressionMode.Decompress);
             int size = 1024;
             Byte[] bytes = new Byte[size];
-            zip.BaseStream.Read(bytes, 0, size); // This will throw if the underlying stream is not writeable as expected
+            zip.BaseStream.Read(bytes, 0, size); // This will throw if the underlying stream is not writable as expected
         }
 
         [Fact]
@@ -108,7 +97,7 @@ namespace System.IO.Compression.Tests
 
             int size = 1024;
             Byte[] bytes = new Byte[size];
-            baseStream.Read(bytes, 0, size); // This will throw if the underlying stream is not writeable as expected
+            baseStream.Read(bytes, 0, size); // This will throw if the underlying stream is not writable as expected
         }
 
         [Fact]
@@ -154,20 +143,7 @@ namespace System.IO.Compression.Tests
             var zip = new GZipStream(gzStream, CompressionMode.Decompress);
 
             var GZipStream = new MemoryStream();
-
-            int _bufferSize = 1024;
-            var bytes = new Byte[_bufferSize];
-            bool finished = false;
-            int retCount;
-            while (!finished)
-            {
-                retCount = await zip.ReadAsync(bytes, 0, _bufferSize);
-
-                if (retCount != 0)
-                    await GZipStream.WriteAsync(bytes, 0, retCount);
-                else
-                    finished = true;
-            }
+            await zip.CopyToAsync(GZipStream);
 
             GZipStream.Position = 0;
             compareStream.Position = 0;
@@ -234,6 +210,23 @@ namespace System.IO.Compression.Tests
             {
                 var gzip = new GZipStream(ms, CompressionMode.Decompress);
             });
+        }
+
+        [Fact]
+        public void CopyToAsyncArgumentValidation()
+        {
+            using (GZipStream gs = new GZipStream(new MemoryStream(), CompressionMode.Decompress))
+            {
+                Assert.Throws<ArgumentNullException>("destination", () => { gs.CopyToAsync(null); });
+                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { gs.CopyToAsync(new MemoryStream(), 0); });
+                Assert.Throws<NotSupportedException>(() => { gs.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
+                gs.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => { gs.CopyToAsync(new MemoryStream()); });
+            }
+            using (GZipStream gs = new GZipStream(new MemoryStream(), CompressionMode.Compress))
+            {
+                Assert.Throws<NotSupportedException>(() => { gs.CopyToAsync(new MemoryStream()); });
+            }
         }
 
         [Fact]

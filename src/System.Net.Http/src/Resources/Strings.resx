@@ -204,7 +204,7 @@
   <data name="net_http_client_send_canceled" xml:space="preserve">
     <value>Request for {0} was canceled.</value>
   </data>
-  <data name="net_http_client_send_completed" xml:space="preserve">
+  <data name="event_ClientSendCompleted" xml:space="preserve">
     <value>Request for {0} completed successfully. Returning response {1}: {2}</value>
   </data>
   <data name="net_http_parser_invalid_base64_string" xml:space="preserve">
@@ -222,7 +222,7 @@
   <data name="net_http_content_field_too_long" xml:space="preserve">
     <value>The field cannot be longer than {0} characters.</value>
   </data>
-  <data name="net_http_log_headers_invalid_value" xml:space="preserve">
+  <data name="event_HeadersInvalidValue" xml:space="preserve">
     <value>Value for header '{0}' has invalid format. Value: '{1}'.</value>
   </data>
   <data name="net_http_log_headers_no_newlines" xml:space="preserve">
@@ -237,7 +237,7 @@
   <data name="net_http_log_content_no_task_returned_copytoasync" xml:space="preserve">
     <value>Type '{0}.CopyToAsync()' did not return a System.Threading.Tasks.Task object.</value>
   </data>
-  <data name="net_http_log_content_null" xml:space="preserve">
+  <data name="event_ContentNull" xml:space="preserve">
     <value>Content set to '&lt;null&gt;'.</value>
   </data>
   <data name="net_http_handler_not_assigned" xml:space="preserve">
@@ -254,6 +254,9 @@
   </data>
   <data name="net_http_io_read" xml:space="preserve">
     <value>The read operation failed, see inner exception.</value>
+  </data>
+  <data name="net_http_io_read_incomplete" xml:space="preserve">
+    <value>Unable to read data from the transport connection. The connection was closed before all data could be read. Expected {0} bytes, read {1} bytes.</value>
   </data>
   <data name="net_http_io_write" xml:space="preserve">
     <value>The write operation failed, see inner exception.</value>
@@ -294,20 +297,14 @@
   <data name="net_http_invalid_cookiecontainer_unix" xml:space="preserve">
     <value>CookieContainer property must not be null.</value>
   </data>
-  <data name="net_http_unix_invalid_client_cert_option" xml:space="preserve">
-    <value>ClientCertificateOption.Automatic is supported only with libcurl with libssl compatible backend.</value>
+  <data name="net_http_unix_invalid_certcallback_option" xml:space="preserve">
+    <value>The libcurl library in use ({0}) and its SSL backend ("{1}") do not support custom handling of certificates. A libcurl built with OpenSSL is required.</value>
   </data>
   <data name="net_http_unix_invalid_credential" xml:space="preserve">
-    <value>libcurl does not support different credentials for different authentication schemes</value>
-  </data>
-  <data name="net_http_unix_https_libcurl_no_versioninfo" xml:space="preserve">
-    <value>The call to curl_version_info failed unexpectedly.</value>
-  </data>
-  <data name="net_http_unix_https_libcurl_too_old" xml:space="preserve">
-    <value>libcurl library available is too old</value>
+    <value>The libcurl library in use ({0}) does not support different credentials for different authentication schemes.</value>
   </data>
   <data name="net_http_unix_https_support_unavailable_libcurl" xml:space="preserve">
-    <value>libcurl library available on the system does not support https</value>
+    <value>The libcurl library in use ({0}) does not support HTTPS.</value>
   </data>
   <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
     <value>Specified file length was too large for the file system.</value>
@@ -353,5 +350,14 @@
   </data>
   <data name="net_http_unix_invalid_response" xml:space="preserve">
     <value>The server returned an invalid or unrecognized response.</value>
+  </data>
+  <data name="net_http_unix_handler_disposed" xml:space="preserve">
+    <value>The handler was disposed of while active operations were in progress.</value>
+  </data>
+  <data name="net_http_buffer_insufficient_length" xml:space="preserve">
+    <value>The buffer was not long enough.</value>
+  </data>
+  <data name="net_http_response_headers_exceeded_length" xml:space="preserve">
+    <value>The HTTP response headers length exceeded the set limit of {0} bytes.</value>
   </data>
 </root>

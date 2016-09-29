@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -39,15 +40,10 @@ namespace System.Linq.Expressions.Interpreter
             get { return (_flags & InClosureFlag) != 0; }
         }
 
-        public bool InClosureOrBoxed
-        {
-            get { return InClosure | IsBoxed; }
-        }
-
-        internal LocalVariable(int index, bool closure, bool boxed)
+        internal LocalVariable(int index, bool closure)
         {
             Index = index;
-            _flags = (closure ? InClosureFlag : 0) | (boxed ? IsBoxedFlag : 0);
+            _flags = (closure ? InClosureFlag : 0);
         }
 
         internal Expression LoadFromArray(Expression frameData, Expression closure, Type parameterType)
@@ -133,7 +129,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public LocalDefinition DefineLocal(ParameterExpression variable, int start)
         {
-            LocalVariable result = new LocalVariable(_localCount++, false, false);
+            LocalVariable result = new LocalVariable(_localCount++, false);
             _maxLocalCount = System.Math.Max(_localCount, _maxLocalCount);
 
             VariableScope existing, newScope;
@@ -273,7 +269,7 @@ namespace System.Linq.Expressions.Interpreter
             {
                 _closureVariables = new Dictionary<ParameterExpression, LocalVariable>();
             }
-            LocalVariable result = new LocalVariable(_closureVariables.Count, true, false);
+            LocalVariable result = new LocalVariable(_closureVariables.Count, true);
             _closureVariables.Add(variable, result);
             return result;
         }

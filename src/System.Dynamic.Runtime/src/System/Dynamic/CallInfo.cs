@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -48,12 +49,12 @@ namespace System.Dynamic
         /// <returns>The new CallInfo</returns>
         public CallInfo(int argCount, IEnumerable<string> argNames)
         {
-            ContractUtils.RequiresNotNull(argNames, "argNames");
+            ContractUtils.RequiresNotNull(argNames, nameof(argNames));
 
             var argNameCol = argNames.ToReadOnly();
 
             if (argCount < argNameCol.Count) throw Error.ArgCntMustBeGreaterThanNameCnt();
-            ContractUtils.RequiresNotNullItems(argNameCol, "argNames");
+            ContractUtils.RequiresNotNullItems(argNameCol, nameof(argNames));
 
             _argCount = argCount;
             _argNames = argNameCol;
@@ -92,7 +93,7 @@ namespace System.Dynamic
         public override bool Equals(object obj)
         {
             var other = obj as CallInfo;
-            return _argCount == other._argCount && _argNames.ListEquals(other._argNames);
+            return other != null && _argCount == other._argCount && _argNames.ListEquals(other._argNames);
         }
     }
 }

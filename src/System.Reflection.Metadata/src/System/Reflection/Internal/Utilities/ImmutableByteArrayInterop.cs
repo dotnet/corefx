@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
@@ -24,7 +25,7 @@ namespace System.Reflection.Internal
     /// 
     /// Also, since we don't have access to immutable collection internals, we use a trick involving
     /// overlapping a <see cref="ImmutableArray{Byte}"/> with a <see cref="T:Byte[]"/> refer. While
-    /// unverifiable, it is valid. See Ecma 335, section II.10.7 Controlling instance layout:
+    /// unverifiable, it is valid. See ECMA-335, section II.10.7 Controlling instance layout:
     /// 
     /// "It is possible to overlap fields in this way, though offsets occupied by an object reference 
     /// shall not overlap with offsets occupied by a built-in value type or a part of

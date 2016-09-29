@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Tests
@@ -57,12 +59,14 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        public void ThrowWhenHandlePositionIsChanged()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ThrowWhenHandlePositionIsChanged(bool useAsync)
         {
             string fileName = GetTestFilePath();
 
-            using (FileStream fs = new FileStream(fileName, FileMode.Create))
+            using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite, 0x100, useAsync))
             {
                 // write some data to move the position, flush to ensure OS position is updated
                 fs.Write(TestBuffer, 0, TestBuffer.Length);
@@ -74,7 +78,7 @@ namespace System.IO.Tests
                     return;
                 }
 
-                using (FileStream fsr = new FileStream(fs.SafeFileHandle, FileAccess.Read, TestBuffer.Length))
+                using (FileStream fsr = new FileStream(fs.SafeFileHandle, FileAccess.Read, TestBuffer.Length, useAsync))
                 {
                     Assert.Equal(TestBuffer.Length, fs.Position);
                     Assert.Equal(TestBuffer.Length, fsr.Position);
@@ -92,13 +96,13 @@ namespace System.IO.Tests
 
                     fs.WriteByte(0);
                     fsr.Position++;
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // TODO: [ActiveIssue(812)]: Remove guard when async I/O is properly implemented on Unix
+                    if (useAsync && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Async I/O behaviors differ due to kernel-based implementation on Windows
                     {
                         Assert.Throws<IOException>(() => FSAssert.CompletesSynchronously(fs.ReadAsync(new byte[1], 0, 1)));
                     }
                     else
                     {
-                        Assert.ThrowsAsync<IOException>(() => fs.ReadAsync(new byte[1], 0, 1)).Wait();
+                        await Assert.ThrowsAsync<IOException>(() => fs.ReadAsync(new byte[1], 0, 1));
                     }
 
                     fs.WriteByte(0);

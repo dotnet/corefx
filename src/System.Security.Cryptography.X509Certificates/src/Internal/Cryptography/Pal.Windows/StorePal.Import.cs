@@ -1,32 +1,24 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
-using System.Text;
-using System.Diagnostics;
-using System.Globalization;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-
-using Internal.NativeCrypto;
-using Internal.Cryptography;
-using Internal.Cryptography.Pal.Native;
-
-
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+
+using Internal.Cryptography.Pal.Native;
 
 namespace Internal.Cryptography.Pal
 {
-    internal sealed partial class StorePal : IDisposable, IStorePal
+    internal sealed partial class StorePal : IDisposable, IStorePal, IExportPal, ILoaderPal
     {
-        public static IStorePal FromBlob(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
+        public static ILoaderPal FromBlob(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
         {
             return FromBlobOrFile(rawData, null, password, keyStorageFlags);
         }
 
-        public static IStorePal FromFile(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
+        public static ILoaderPal FromFile(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
         {
             return FromBlobOrFile(null, fileName, password, keyStorageFlags);
         }
@@ -81,17 +73,21 @@ namespace Internal.Cryptography.Pal
                                 if (certStore == null || certStore.IsInvalid)
                                     throw Marshal.GetLastWin32Error().ToCryptographicException();
                             }
-                        }
 
-
-                        if (!persistKeySet)
-                        {
-                            SafeCertContextHandle pCertContext = null;
-                            while (Interop.crypt32.CertEnumCertificatesInStore(certStore, ref pCertContext))
+                            if (!persistKeySet)
                             {
-                                CRYPTOAPI_BLOB nullBlob = new CRYPTOAPI_BLOB(0, null);
-                                if (!Interop.crypt32.CertSetCertificateContextProperty(pCertContext, CertContextPropId.CERT_DELETE_KEYSET_PROP_ID, CertSetPropertyFlags.CERT_SET_PROPERTY_INHIBIT_PERSIST_FLAG, &nullBlob))
-                                    throw Marshal.GetLastWin32Error().ToCryptographicException();
+                                //
+                                // If the user did not want us to persist private keys, then we should loop through all
+                                // the certificates in the collection and set our custom CERT_DELETE_KEYSET_PROP_ID property
+                                // so the key container will be deleted when the cert contexts will go away.
+                                //
+                                SafeCertContextHandle pCertContext = null;
+                                while (Interop.crypt32.CertEnumCertificatesInStore(certStore, ref pCertContext))
+                                {
+                                    CRYPTOAPI_BLOB nullBlob = new CRYPTOAPI_BLOB(0, null);
+                                    if (!Interop.crypt32.CertSetCertificateContextProperty(pCertContext, CertContextPropId.CERT_DELETE_KEYSET_PROP_ID, CertSetPropertyFlags.CERT_SET_PROPERTY_INHIBIT_PERSIST_FLAG, &nullBlob))
+                                        throw Marshal.GetLastWin32Error().ToCryptographicException();
+                                }
                             }
                         }
 
@@ -101,7 +97,7 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        public static IStorePal FromCertificate(ICertificatePal cert)
+        public static IExportPal FromCertificate(ICertificatePal cert)
         {
             CertificatePal certificatePal = (CertificatePal)cert;
 
@@ -122,7 +118,7 @@ namespace Internal.Cryptography.Pal
         /// Note: this factory method creates the store using links to the original certificates rather than copies. This means that any changes to certificate properties
         /// in the store changes the original.
         /// </summary>
-        public static IStorePal LinkFromCertificateCollection(X509Certificate2Collection certificates)
+        public static IExportPal LinkFromCertificateCollection(X509Certificate2Collection certificates)
         {
             // we always want to use CERT_STORE_ENUM_ARCHIVED_FLAG since we want to preserve the collection in this operation.
             // By default, Archived certificates will not be included.

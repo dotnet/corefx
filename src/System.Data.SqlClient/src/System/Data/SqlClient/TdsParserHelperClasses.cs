@@ -1,11 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Diagnostics;
@@ -269,13 +271,39 @@ namespace System.Data.SqlClient
         internal MultiPartTableName multiPartTableName;
         internal readonly int ordinal;
         internal byte updatability;     // two bit field (0 is read only, 1 is updatable, 2 is updatability unknown)
+        internal bool isDifferentName;
         internal bool isKey;
         internal bool isHidden;
+        internal bool isExpression;
         internal bool isIdentity;
+        internal string baseColumn;
         internal _SqlMetaData(int ordinal) : base()
         {
             this.ordinal = ordinal;
         }
+
+        internal string serverName
+        {
+            get
+            {
+                return multiPartTableName.ServerName;
+            }
+        }
+        internal string catalogName
+        {
+            get
+            {
+                return multiPartTableName.CatalogName;
+            }
+        }
+        internal string schemaName
+        {
+            get
+            {
+                return multiPartTableName.SchemaName;
+            }
+        }
+
         internal string tableName
         {
             get
@@ -320,6 +348,7 @@ namespace System.Data.SqlClient
         internal int[] indexMap;
         internal int visibleColumns;
         private readonly _SqlMetaData[] _metaDataArray;
+        internal ReadOnlyCollection<DbColumn> dbColumnSchema;
 
         internal _SqlMetaDataSet(int count)
         {
@@ -336,6 +365,7 @@ namespace System.Data.SqlClient
             // although indexMap is not immutable, in practice it is initialized once and then passed around
             this.indexMap = original.indexMap;
             this.visibleColumns = original.visibleColumns;
+            this.dbColumnSchema = original.dbColumnSchema;
             if (original._metaDataArray == null)
             {
                 _metaDataArray = null;

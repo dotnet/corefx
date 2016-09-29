@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Text;
@@ -12,6 +13,7 @@ namespace System.IO
      * For example - colored console writers can be synchronized with non-colored
      * writers by locking on Console.On (Issue#2855).
      */
+    [Serializable]
     internal sealed class SyncTextWriter : TextWriter, IDisposable
     {
         internal readonly TextWriter _out;

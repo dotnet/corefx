@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 
@@ -47,16 +48,20 @@ namespace System.Data.SqlClient.SNI
         /// <returns>Bytes read</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int readBytes;
-            byte[] scratch = new byte[count < TdsEnums.HEADER_LEN ? TdsEnums.HEADER_LEN : count];
+            int readBytes = 0;
+            byte[] packetData = new byte[count < TdsEnums.HEADER_LEN ? TdsEnums.HEADER_LEN : count];
 
             if (_encapsulate)
             {
                 if (_packetBytes == 0)
                 {
-                    readBytes = _stream.Read(scratch, 0, TdsEnums.HEADER_LEN);
-                    _packetBytes = scratch[2] * 0x100;
-                    _packetBytes += scratch[3];
+                    // Account for split packets
+                    while (readBytes < TdsEnums.HEADER_LEN)
+                    {
+                        readBytes += _stream.Read(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes);
+                    }
+
+                    _packetBytes = (packetData[TdsEnums.HEADER_LEN_FIELD_OFFSET] << 8) | packetData[TdsEnums.HEADER_LEN_FIELD_OFFSET + 1];
                     _packetBytes -= TdsEnums.HEADER_LEN;
                 }
 
@@ -66,14 +71,14 @@ namespace System.Data.SqlClient.SNI
                 }
             }
 
-            readBytes = _stream.Read(scratch, 0, count);
+            readBytes = _stream.Read(packetData, 0, count);
 
             if (_encapsulate)
             {
                 _packetBytes -= readBytes;
             }
 
-            Buffer.BlockCopy(scratch, 0, buffer, offset, readBytes);
+            Buffer.BlockCopy(packetData, 0, buffer, offset, readBytes);
             return readBytes;
         }
 
@@ -106,30 +111,36 @@ namespace System.Data.SqlClient.SNI
 
                     count -= currentCount;
 
-                    byte[] header = new byte[TdsEnums.HEADER_LEN];
+                    // Prepend buffer data with TDS prelogin header
+                    byte[] combinedBuffer = new byte[TdsEnums.HEADER_LEN + currentCount];
 
                     // We can only send 4088 bytes in one packet. Header[1] is set to 1 if this is a 
                     // partial packet (whether or not count != 0).
                     // 
-                    header[0] = PRELOGIN_PACKET_TYPE;
-                    header[1] = (byte)(count > 0 ? 0 : 1);
-                    header[2] = (byte)((currentCount + TdsEnums.HEADER_LEN) / 0x100);
-                    header[3] = (byte)((currentCount + TdsEnums.HEADER_LEN) % 0x100);
-                    header[4] = 0;
-                    header[5] = 0;
-                    header[6] = 0;
-                    header[7] = 0;
+                    combinedBuffer[0] = PRELOGIN_PACKET_TYPE;
+                    combinedBuffer[1] = (byte)(count > 0 ? 0 : 1);
+                    combinedBuffer[2] = (byte)((currentCount + TdsEnums.HEADER_LEN) / 0x100);
+                    combinedBuffer[3] = (byte)((currentCount + TdsEnums.HEADER_LEN) % 0x100);
+                    combinedBuffer[4] = 0;
+                    combinedBuffer[5] = 0;
+                    combinedBuffer[6] = 0;
+                    combinedBuffer[7] = 0;
 
-                    _stream.Write(header, 0, TdsEnums.HEADER_LEN);
-                    _stream.Flush();
+                    for(int i = TdsEnums.HEADER_LEN; i < combinedBuffer.Length; i++)
+                    {
+                        combinedBuffer[i] = buffer[currentOffset + (i - TdsEnums.HEADER_LEN)];
+                    }
+
+                    _stream.Write(combinedBuffer, 0, combinedBuffer.Length);
                 }
                 else
                 {
                     currentCount = count;
                     count = 0;
+
+                    _stream.Write(buffer, currentOffset, currentCount);
                 }
 
-                _stream.Write(buffer, currentOffset, currentCount);
                 _stream.Flush();
                 currentOffset += currentCount;
             }

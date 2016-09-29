@@ -1,18 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Runtime.Versioning;
 
 using Internal.NativeCrypto;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Cryptography
 {
-    //ToDo: Remove before code review - Copied from SafeCryptoHandels.cs
-
     /// <summary>
     /// Safehandle representing HCRYPTPROV
     /// </summary>
@@ -24,7 +20,6 @@ namespace System.Security.Cryptography
         private int _type;
         private uint _flags;
         private bool _fPersistKeyInCsp;
-        private bool _fReleaseProvider;
 
         private SafeProvHandle() : base(true)
         {
@@ -34,18 +29,6 @@ namespace System.Security.Cryptography
             _type = 0;
             _flags = 0;
             _fPersistKeyInCsp = true;
-            _fReleaseProvider = true;
-        }
-
-        private SafeProvHandle(IntPtr handle) : base(true)
-        {
-            SetHandle(handle);
-            _containerName = null;
-            _providerName = null;
-            _type = 0;
-            _flags = 0;
-            _fPersistKeyInCsp = true;
-            _fReleaseProvider = true;
         }
 
         internal string ContainerName
@@ -108,21 +91,17 @@ namespace System.Security.Cryptography
             }
         }
 
-        internal bool ReleaseProvider
-        {
-            get
-            {
-                return _fReleaseProvider;
-            }
-            set
-            {
-                _fReleaseProvider = value;
-            }
-        }
-
         internal static SafeProvHandle InvalidHandle
         {
-            get { return new SafeProvHandle(); }
+            get { return SafeHandleCache<SafeProvHandle>.GetInvalidHandle(() => new SafeProvHandle()); }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!SafeHandleCache<SafeProvHandle>.IsCachedInvalidHandle(this))
+            {
+                base.Dispose(disposing);
+            }
         }
 
         protected override bool ReleaseHandle()
@@ -135,7 +114,7 @@ namespace System.Security.Cryptography
                 uint flags = (_flags & (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET) | (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_DELETEKEYSET;
                 SafeProvHandle hIgnoredProv;
                 bool ignoredSuccess = CapiHelper.CryptAcquireContext(out hIgnoredProv, _containerName, _providerName, _type, flags);
-
+                hIgnoredProv.Dispose();
                 // Ignoring success result code as CryptAcquireContext is being called to delete a key container rather than acquire a context.
                 // If it fails, we can't do anything about it anyway as we're in a dispose method.
             }
@@ -148,7 +127,6 @@ namespace System.Security.Cryptography
         }
     }
 
-
     /// <summary>
     ///     Safe handle representing a HCRYPTKEY 
     /// </summary>
@@ -157,24 +135,18 @@ namespace System.Security.Cryptography
     ///     pointer to a CRYPT_KEY_CTX unmanaged structure whose destructor decrements a refCount. Only when
     ///     the provider refCount is 0 it is deleted. This way, we loose a race in the critical finalization
     ///     of the key handle and provider handle. This also applies to hash handles, which point to a 
-    ///     CRYPT_HASH_CTX. Those strucutres are defined in COMCryptography.h
+    ///     CRYPT_HASH_CTX. Those structures are defined in COMCryptography.h
     /// </summary>
     [SecurityCritical]  // auto-generated
     internal sealed class SafeKeyHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        //SafeProvHandle safeProvHandle;
         private int _keySpec;
         private bool _fPublicOnly;
+        private SafeProvHandle _parent;
+
         private SafeKeyHandle() : base(true)
         {
             SetHandle(IntPtr.Zero);
-            _keySpec = 0;
-            _fPublicOnly = false;
-        }
-
-        private SafeKeyHandle(IntPtr handle) : base(true)
-        {
-            SetHandle(handle);
             _keySpec = 0;
             _fPublicOnly = false;
         }
@@ -203,22 +175,46 @@ namespace System.Security.Cryptography
             }
         }
 
-        internal static SafeKeyHandle InvalidHandle
+        internal void SetParent(SafeProvHandle parent)
         {
-            get { return new SafeKeyHandle(); }
+            if (IsInvalid || IsClosed)
+            {
+                return;
+            }
+
+            Debug.Assert(_parent == null);
+            Debug.Assert(!parent.IsClosed);
+            Debug.Assert(!parent.IsInvalid);
+
+            _parent = parent;
+
+            bool ignored = false;
+            _parent.DangerousAddRef(ref ignored);
         }
 
-        //[DllImport(JitHelpers.QCall, CharSet = CharSet.Unicode)]
-        //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        //[ResourceExposure(ResourceScope.None)]
-        //[SuppressUnmanagedCodeSecurity]
-        //private static extern void FreeKey(IntPtr pKeyCotext);
+        internal static SafeKeyHandle InvalidHandle
+        {
+            get { return SafeHandleCache<SafeKeyHandle>.GetInvalidHandle(() => new SafeKeyHandle()); }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!SafeHandleCache<SafeKeyHandle>.IsCachedInvalidHandle(this))
+            {
+                base.Dispose(disposing);
+            }
+        }
 
         [SecurityCritical]
         protected override bool ReleaseHandle()
         {
             bool successfullyFreed = CapiHelper.CryptDestroyKey(handle);
             Debug.Assert(successfullyFreed);
+
+            SafeProvHandle parent = _parent;
+            _parent = null;
+            parent?.DangerousRelease();
+
             return successfullyFreed;
         }
     }
@@ -229,28 +225,53 @@ namespace System.Security.Cryptography
     [SecurityCritical]
     internal sealed class SafeHashHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        private SafeProvHandle _parent;
+
         private SafeHashHandle() : base(true)
         {
             SetHandle(IntPtr.Zero);
         }
 
-        private SafeHashHandle(IntPtr handle) : base(true)
+        internal void SetParent(SafeProvHandle parent)
         {
-            SetHandle(handle);
+            if (IsInvalid || IsClosed)
+            {
+                return;
+            }
+
+            Debug.Assert(_parent == null);
+            Debug.Assert(!parent.IsClosed);
+            Debug.Assert(!parent.IsInvalid);
+
+            _parent = parent;
+
+            bool ignored = false;
+            _parent.DangerousAddRef(ref ignored);
         }
 
         internal static SafeHashHandle InvalidHandle
         {
-            get { return new SafeHashHandle(); }
+            get { return SafeHandleCache<SafeHashHandle>.GetInvalidHandle(() => new SafeHashHandle()); }
         }
 
-        //private static extern void FreeHash(IntPtr pHashContext);
+        protected override void Dispose(bool disposing)
+        {
+            if (!SafeHandleCache<SafeHashHandle>.IsCachedInvalidHandle(this))
+            {
+                base.Dispose(disposing);
+            }
+        }
 
         [SecurityCritical]
         protected override bool ReleaseHandle()
         {
             bool successfullyFreed = CapiHelper.CryptDestroyHash(handle);
             Debug.Assert(successfullyFreed);
+
+            SafeProvHandle parent = _parent;
+            _parent = null;
+            parent?.DangerousRelease();
+
             return successfullyFreed;
         }
     }

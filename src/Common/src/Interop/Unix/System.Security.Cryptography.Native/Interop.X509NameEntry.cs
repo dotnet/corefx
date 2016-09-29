@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -9,13 +10,13 @@ internal static partial class Interop
 {
     internal static partial class Crypto
     {
-        [DllImport(Libraries.CryptoNative, EntryPoint = "GetX509NameEntry")]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetX509NameEntry")]
         private static extern SafeSharedX509NameEntryHandle GetX509NameEntry_private(SafeX509NameHandle x509Name, int loc);
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "GetX509NameEntryOid")]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetX509NameEntryOid")]
         private static extern SafeSharedAsn1ObjectHandle GetX509NameEntryOid_private(SafeSharedX509NameEntryHandle nameEntry);
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "GetX509NameEntryData")]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetX509NameEntryData")]
         private static extern SafeSharedAsn1StringHandle GetX509NameEntryData_private(SafeSharedX509NameEntryHandle nameEntry);
 
         internal static SafeSharedX509NameEntryHandle GetX509NameEntry(SafeX509NameHandle x509Name, int loc)

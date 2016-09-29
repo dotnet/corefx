@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*============================================================
 **
@@ -55,7 +56,7 @@ namespace System.Resources
         public ResourceWriter(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             if (!stream.CanWrite)
                 throw new ArgumentException(SR.Argument_StreamNotWritable);
             Contract.EndContractBlock();
@@ -70,7 +71,7 @@ namespace System.Resources
         public void AddResource(String name, String value)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             Contract.EndContractBlock();
             if (_resourceList == null)
                 throw new InvalidOperationException(SR.InvalidOperation_ResourceWriterSaved);
@@ -256,7 +257,7 @@ namespace System.Resources
 
         private static void Write7BitEncodedInt(BinaryWriter store, int value)
         {
-            Contract.Requires(store != null);
+            Debug.Assert(store != null);
             // Write out an int 7 bits at a time.  The high bit of the byte,
             // when on, tells reader to continue reading more bytes.
             uint v = (uint)value;   // support negative numbers

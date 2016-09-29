@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -10,27 +11,56 @@ namespace System
     public static partial class Console
     {
         public static System.ConsoleColor BackgroundColor { get { return default(System.ConsoleColor); } set { } }
+        public static void Beep() { }
+        public static void Beep(int frequency, int duration) { }
+        public static int BufferHeight { get { return default(int); } set { } }
+        public static int BufferWidth { get { return default(int); } set { } }
+        public static bool CapsLock { get { return default(bool); } }
+        public static event System.ConsoleCancelEventHandler CancelKeyPress { add { } remove { } }
+        public static void Clear() { }
+        public static int CursorLeft { get { return default(int); } set { } }
+        public static int CursorSize { get { return default(int); } set { } }
+        public static int CursorTop { get { return default(int); } set { } }
         public static bool CursorVisible { get { return default(bool); } set { } }
         public static System.IO.TextWriter Error { get { return default(System.IO.TextWriter); } }
         public static System.ConsoleColor ForegroundColor { get { return default(System.ConsoleColor); } set { } }
+        public static System.Text.Encoding InputEncoding { get { return default(System.Text.Encoding); } set { } }
+        public static bool IsErrorRedirected { get { return false; } }
         public static bool IsInputRedirected { get { return false; } }
         public static bool IsOutputRedirected { get { return false; } }
-        public static bool IsErrorRedirected { get { return false; } }
         public static System.IO.TextReader In { get { return default(System.IO.TextReader); } }
-        public static System.IO.TextWriter Out { get { return default(System.IO.TextWriter); } }
-        public static event System.ConsoleCancelEventHandler CancelKeyPress { add { } remove { } }
+        public static bool KeyAvailable { get { return default(bool); }}
+        public static int LargestWindowWidth { get { return default(int); } }
+        public static int LargestWindowHeight { get { return default(int); }}
+        public static void MoveBufferArea(int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop) { }
+        public static void MoveBufferArea(int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop, char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor) { }
+        public static bool NumberLock { get { return default(bool); }}
         public static System.IO.Stream OpenStandardError() { return default(System.IO.Stream); }
+        public static System.IO.Stream OpenStandardError(int bufferSize) { return default(System.IO.Stream); }
         public static System.IO.Stream OpenStandardInput() { return default(System.IO.Stream); }
+        public static System.IO.Stream OpenStandardInput(int bufferSize) { return default(System.IO.Stream); }
         public static System.IO.Stream OpenStandardOutput() { return default(System.IO.Stream); }
+        public static System.IO.Stream OpenStandardOutput(int bufferSize) { return default(System.IO.Stream); }
+        public static System.IO.TextWriter Out { get { return default(System.IO.TextWriter); } }
+        public static System.Text.Encoding OutputEncoding { get { return default(System.Text.Encoding); } set { } }
         public static int Read() { return default(int); }
         public static ConsoleKeyInfo ReadKey() { return default(ConsoleKeyInfo); }
         public static ConsoleKeyInfo ReadKey(bool intercept) { return default(ConsoleKeyInfo); }
         public static string ReadLine() { return default(string); }
         public static void ResetColor() { }
+        public static void SetBufferSize(int width, int height) { }
+        public static void SetCursorPosition(int left, int top) { }
         public static void SetError(System.IO.TextWriter newError) { }
         public static void SetIn(System.IO.TextReader newIn) { }
         public static void SetOut(System.IO.TextWriter newOut) { }
+        public static void SetWindowPosition(int left, int top) { }
+        public static void SetWindowSize(int width, int height) { }
+        public static string Title { get { return default(string); } set { } }
+        public static bool TreatControlCAsInput { get { return default(bool); } set { } }
+        public static int WindowHeight { get { return default(int); } set { } }
         public static int WindowWidth { get { return default(int); } set { } }
+        public static int WindowLeft { get { return default(int); } set { } }
+        public static int WindowTop { get { return default(int); } set { } }
         public static void Write(bool value) { }
         public static void Write(char value) { }
         public static void Write(char[] buffer) { }
@@ -70,6 +100,10 @@ namespace System
         public static void WriteLine(uint value) { }
         [System.CLSCompliantAttribute(false)]
         public static void WriteLine(ulong value) { }
+        //[System.CLSCompliantAttribute(false)]
+        //public static void Write(string format, object arg0, object arg1, object arg2, object arg3, __arglist)
+        //[System.CLSCompliantAttribute(false)]
+        //public static void WriteLine(string format, object arg0, object arg1, object arg2, object arg3, __arglist)
     }
     public sealed partial class ConsoleCancelEventArgs : System.EventArgs
     {
@@ -103,6 +137,11 @@ namespace System
         public char KeyChar { get { return default(char); } }
         public ConsoleKey Key { get { return default(ConsoleKey); } }
         public ConsoleModifiers Modifiers { get { return default(ConsoleModifiers); ; } }
+        public bool Equals(ConsoleKeyInfo obj) { return default(bool); }
+        public override bool Equals(object value) { return default(bool); }
+        public override int GetHashCode() { return default(int); }
+        public static bool operator ==(ConsoleKeyInfo a, ConsoleKeyInfo b) { return default(bool); }
+        public static bool operator !=(ConsoleKeyInfo a, ConsoleKeyInfo b) { return default(bool); }
     }
     public enum ConsoleKey
     {
@@ -164,6 +203,9 @@ namespace System
         X = 0x58,
         Y = 0x59,
         Z = 0x5A,
+        LeftWindows = 0x5B,
+        RightWindows = 0x5C,
+        Applications = 0x5D,
         Sleep = 0x5F,
         NumPad0 = 0x60,
         NumPad1 = 0x61,
@@ -205,6 +247,24 @@ namespace System
         F22 = 0x85,
         F23 = 0x86,
         F24 = 0x87,
+        BrowserBack = 0xA6,
+        BrowserForward = 0xA7,
+        BrowserRefresh = 0xA8,
+        BrowserStop = 0xA9,
+        BrowserSearch = 0xAA,
+        BrowserFavorites = 0xAB,
+        BrowserHome = 0xAC,
+        VolumeMute = 0xAD,
+        VolumeDown = 0xAE,
+        VolumeUp = 0xAF,
+        MediaNext = 0xB0,
+        MediaPrevious = 0xB1,
+        MediaStop = 0xB2,
+        MediaPlay = 0xB3,
+        LaunchMail = 0xB4,
+        LaunchMediaSelect = 0xB5,
+        LaunchApp1 = 0xB6,
+        LaunchApp2 = 0xB7,
         Oem1 = 0xBA,
         OemPlus = 0xBB,
         OemComma = 0xBC,
@@ -217,6 +277,17 @@ namespace System
         Oem6 = 0xDD,
         Oem7 = 0xDE,
         Oem8 = 0xDF,
+        Oem102 = 0xE2,
+        Process = 0xE5,
+        Packet = 0xE7,
+        Attention = 0xF6,
+        CrSel = 0xF7,
+        ExSel = 0xF8,
+        EraseEndOfFile = 0xF9,
+        Play = 0xFA,
+        Zoom = 0xFB,
+        NoName = 0xFC,
+        Pa1 = 0xFD,
         OemClear = 0xFE,
     }
     [Flags]

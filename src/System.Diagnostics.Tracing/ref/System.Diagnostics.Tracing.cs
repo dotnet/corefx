@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -52,6 +53,10 @@ namespace System.Diagnostics.Tracing
         public System.Diagnostics.Tracing.EventCommand Command { get { return default(System.Diagnostics.Tracing.EventCommand); } }
         public bool DisableEvent(int eventId) { return default(bool); }
         public bool EnableEvent(int eventId) { return default(bool); }
+    }
+    public class EventCounter {
+        public EventCounter(string name, EventSource eventSource) { }
+        public void WriteMetric(float value) { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(12), Inherited = false)]
     public partial class EventDataAttribute : System.Attribute
@@ -116,7 +121,7 @@ namespace System.Diagnostics.Tracing
         public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level) { }
         public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords matchAnyKeyword) { }
         public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords matchAnyKeyword, System.Collections.Generic.IDictionary<string, string> arguments) { }
-        public static int EventSourceIndex(System.Diagnostics.Tracing.EventSource eventSource) { return default(int); }
+        protected static int EventSourceIndex(System.Diagnostics.Tracing.EventSource eventSource) { return default(int); }
         protected internal virtual void OnEventSourceCreated(System.Diagnostics.Tracing.EventSource eventSource) { }
         protected internal abstract void OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs eventData);
     }

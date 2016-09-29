@@ -1,12 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-//-----------------------------------------------------------------------------
-//
-// Description:
-//  This class represents a PackageRelationshipSelector. 
-//
-//-----------------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -20,12 +14,6 @@ namespace System.IO.Packaging
     /// what the actual criteria is. </summary>
     public sealed class PackageRelationshipSelector
     {
-        //------------------------------------------------------
-        //
-        //  Public Constructors
-        //
-        //------------------------------------------------------
-
         #region Public Constructor
 
         /// <summary>
@@ -44,10 +32,10 @@ namespace System.IO.Packaging
         public PackageRelationshipSelector(Uri sourceUri, PackageRelationshipSelectorType selectorType, string selectionCriteria)
         {
             if (sourceUri == null)
-                throw new ArgumentNullException("sourceUri");
+                throw new ArgumentNullException(nameof(sourceUri));
 
             if (selectionCriteria == null)
-                throw new ArgumentNullException("selectionCriteria");
+                throw new ArgumentNullException(nameof(selectionCriteria));
 
             //If the sourceUri is not equal to "/", it must be a valid part name.
             if (Uri.Compare(sourceUri, PackUriHelper.PackageRootUri, UriComponents.SerializationInfoString, UriFormat.UriEscaped, StringComparison.Ordinal) != 0)
@@ -61,7 +49,7 @@ namespace System.IO.Packaging
             if (selectorType == PackageRelationshipSelectorType.Id)
                 InternalRelationshipCollection.ThrowIfInvalidXsdId(selectionCriteria);
             else
-                throw new ArgumentOutOfRangeException("selectorType");
+                throw new ArgumentOutOfRangeException(nameof(selectorType));
 
             _sourceUri = sourceUri;
             _selectionCriteria = selectionCriteria;
@@ -69,11 +57,6 @@ namespace System.IO.Packaging
         }
 
         #endregion Public Constructor
-        //------------------------------------------------------
-        //
-        //  Public Properties
-        //
-        //------------------------------------------------------
 
         #region Public Properties
 
@@ -117,27 +100,21 @@ namespace System.IO.Packaging
 
 
         #endregion Public Properties
-
-        //------------------------------------------------------
-        //
-        //  Public Methods
-        //
-        //------------------------------------------------------
-
+        
         #region Public Methods
 
         /// <summary>
         /// This method returns the list of selected PackageRelationships as per the
         /// given criteria, from a part in the Package provided
         /// </summary>
-        /// <param name="package">Package object from which we get the relationsips</param>
+        /// <param name="package">Package object from which we get the relationships</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">If package parameter is null</exception>
         public List<PackageRelationship> Select(Package package)
         {
             if (package == null)
             {
-                throw new ArgumentNullException("package");
+                throw new ArgumentNullException(nameof(package));
             }
 
             List<PackageRelationship> relationships = new List<PackageRelationship>(0);
@@ -188,49 +165,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Public Methods
-
-        //------------------------------------------------------
-        //
-        //  Public Events
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Constructors
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Properties
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Methods
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Internal Events
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Private Methods
-        //
-        //------------------------------------------------------
-        // None
-        //------------------------------------------------------
-        //
-        //  Private Fields
-        //
-        //------------------------------------------------------
-
+        
         #region Private Members
 
         private Uri _sourceUri;

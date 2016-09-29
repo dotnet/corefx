@@ -1,7 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Net.Http.Headers
 {
@@ -29,7 +30,7 @@ namespace System.Net.Http.Headers
         {
             if (entityTag == null)
             {
-                throw new ArgumentNullException("entityTag");
+                throw new ArgumentNullException(nameof(entityTag));
             }
 
             _entityTag = entityTag;
@@ -42,7 +43,7 @@ namespace System.Net.Http.Headers
 
         private RangeConditionHeaderValue(RangeConditionHeaderValue source)
         {
-            Contract.Requires(source != null);
+            Debug.Assert(source != null);
 
             _entityTag = source._entityTag;
             _date = source._date;
@@ -111,7 +112,7 @@ namespace System.Net.Http.Headers
 
         internal static int GetRangeConditionLength(string input, int startIndex, out object parsedValue)
         {
-            Contract.Requires(startIndex >= 0);
+            Debug.Assert(startIndex >= 0);
 
             parsedValue = null;
 
@@ -123,7 +124,7 @@ namespace System.Net.Http.Headers
 
             int current = startIndex;
 
-            // Caller must remove leading whitespaces.
+            // Caller must remove leading whitespace.
             DateTimeOffset date = DateTimeOffset.MinValue;
             EntityTagHeaderValue entityTag = null;
 
@@ -134,7 +135,7 @@ namespace System.Net.Http.Headers
 
             if ((firstChar == '\"') || (((firstChar == 'w') || (firstChar == 'W')) && (secondChar == '/')))
             {
-                // trailing whitespaces are removed by GetEntityTagLength()
+                // trailing whitespace is removed by GetEntityTagLength()
                 int entityTagLength = EntityTagHeaderValue.GetEntityTagLength(input, current, out entityTag);
 
                 if (entityTagLength == 0)
@@ -158,7 +159,7 @@ namespace System.Net.Http.Headers
                     return 0;
                 }
 
-                // If we got a valid date, then the parser consumed the whole string (incl. trailing whitespaces).
+                // If we got a valid date, then the parser consumed the whole string (incl. trailing whitespace).
                 current = input.Length;
             }
 

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -145,6 +146,99 @@ namespace System.Linq.Tests
             int?[] expected = { null, null, null, null };
 
             Assert.Equal(expected, Enumerable.Repeat((int?)null, 4));
+        }
+
+        [Fact]
+        public void Take()
+        {
+            Assert.Equal(Enumerable.Repeat(12, 8), Enumerable.Repeat(12, 12).Take(8));
+        }
+
+        [Fact]
+        public void TakeExcessive()
+        {
+            Assert.Equal(Enumerable.Repeat("", 4), Enumerable.Repeat("", 4).Take(22));
+        }
+
+        [Fact]
+        public void Skip()
+        {
+            Assert.Equal(Enumerable.Repeat(12, 8), Enumerable.Repeat(12, 12).Skip(4));
+        }
+
+        [Fact]
+        public void SkipExcessive()
+        {
+            Assert.Empty(Enumerable.Repeat(12, 8).Skip(22));
+        }
+
+        [Fact]
+        public void TakeCanOnlyBeOne()
+        {
+            Assert.Equal(new[] { 1 }, Enumerable.Repeat(1, 10).Take(1));
+            Assert.Equal(new[] { 1 }, Enumerable.Repeat(1, 10).Skip(1).Take(1));
+            Assert.Equal(new[] { 1 }, Enumerable.Repeat(1, 10).Take(3).Skip(2));
+            Assert.Equal(new[] { 1 }, Enumerable.Repeat(1, 10).Take(3).Take(1));
+        }
+
+        [Fact]
+        public void SkipNone()
+        {
+            Assert.Equal(Enumerable.Repeat(12, 8), Enumerable.Repeat(12, 8).Skip(0));
+        }
+
+        [Fact]
+        public void First()
+        {
+            Assert.Equal("Test", Enumerable.Repeat("Test", 42).First());
+        }
+
+        [Fact]
+        public void FirstOrDefault()
+        {
+            Assert.Equal("Test", Enumerable.Repeat("Test", 42).FirstOrDefault());
+        }
+
+        [Fact]
+        public void Last()
+        {
+            Assert.Equal("Test", Enumerable.Repeat("Test", 42).Last());
+        }
+
+        [Fact]
+        public void LastOrDefault()
+        {
+            Assert.Equal("Test", Enumerable.Repeat("Test", 42).LastOrDefault());
+        }
+
+        [Fact]
+        public void ElementAt()
+        {
+            Assert.Equal("Test", Enumerable.Repeat("Test", 42).ElementAt(13));
+        }
+
+        [Fact]
+        public void ElementAtOrDefault()
+        {
+            Assert.Equal("Test", Enumerable.Repeat("Test", 42).ElementAtOrDefault(13));
+        }
+
+        [Fact]
+        public void ElementAtExcessive()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => Enumerable.Repeat(3, 3).ElementAt(100));
+        }
+
+        [Fact]
+        public void ElementAtOrDefaultExcessive()
+        {
+            Assert.Equal(0, Enumerable.Repeat(3, 3).ElementAtOrDefault(100));
+        }
+
+        [Fact]
+        public void Count()
+        {
+            Assert.Equal(42, Enumerable.Repeat("Test", 42).Count());
         }
     }
 }

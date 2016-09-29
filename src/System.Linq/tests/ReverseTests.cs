@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -59,23 +60,57 @@ namespace System.Linq.Tests
 
             Assert.Equal(q.Reverse(), q.Reverse());
         }
-        
+
         [Fact]
         public void SomeRepeatedElements()
         {
             int?[] source = new int?[] { -10, 0, 5, null, 0, 9, 100, null, 9 };
             int?[] expected = new int?[] { 9, null, 100, 9, 0, null, 5, 0, -10 };
-            
+
             Assert.Equal(expected, source.Reverse());
+        }
+
+        [Fact]
+        public void ToArray()
+        {
+            int?[] source = new int?[] { -10, 0, 5, null, 0, 9, 100, null, 9 };
+            int?[] expected = new int?[] { 9, null, 100, 9, 0, null, 5, 0, -10 };
+
+            Assert.Equal(expected, source.Reverse().ToArray());
+        }
+
+        [Fact]
+        public void ToList()
+        {
+            int?[] source = new int?[] { -10, 0, 5, null, 0, 9, 100, null, 9 };
+            int?[] expected = new int?[] { 9, null, 100, 9, 0, null, 5, 0, -10 };
+
+            Assert.Equal(expected, source.Reverse().ToList());
+        }
+
+        [Fact]
+        public void Count()
+        {
+            int?[] source = new int?[] { -10, 0, 5, null, 0, 9, 100, null, 9 };
+
+            Assert.Equal(9, source.Reverse().Count());
         }
 
         [Fact]
         public void ForcedToEnumeratorDoesntEnumerate()
         {
             var iterator = NumberRangeGuaranteedNotCollectionType(0, 3).Reverse();
-            // Don't insist on this behaviour, but check its correct if it happens
+            // Don't insist on this behaviour, but check it's correct if it happens
             var en = iterator as IEnumerator<int>;
             Assert.False(en != null && en.MoveNext());
+        }
+
+        [Fact]
+        public void RepeatEnumerating()
+        {
+            var reverse = new int?[] { -10, 0, 5, null, 0, 9, 100, null, 9 }.Reverse();
+
+            Assert.Equal(reverse, reverse);
         }
     }
 }

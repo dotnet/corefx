@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -11,6 +12,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -36,17 +38,24 @@ namespace System.Collections.Concurrent
     /// </remarks>
     [DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
+    [Serializable]
     public class ConcurrentBag<T> : IProducerConsumerCollection<T>, IReadOnlyCollection<T>
     {
         // ThreadLocalList object that contains the data per thread
+        [NonSerialized]
         private ThreadLocal<ThreadLocalList> _locals;
 
         // This head and tail pointers points to the first and last local lists, to allow enumeration on the thread locals objects
+        [NonSerialized]
         private volatile ThreadLocalList _headList, _tailList;
 
         // A flag used to tell the operations thread that it must synchronize the operation, this flag is set/unset within
         // GlobalListsLock lock
+        [NonSerialized]
         private bool _needSync;
+
+        // Used for custom serialization.
+        private T[] _serializationArray;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentBag{T}"/>
@@ -69,7 +78,7 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection", SR.ConcurrentBag_Ctor_ArgumentNullException);
+                throw new ArgumentNullException(nameof(collection), SR.ConcurrentBag_Ctor_ArgumentNullException);
             }
             Initialize(collection);
         }
@@ -92,6 +101,38 @@ namespace System.Collections.Concurrent
                     list.Add(item, false);
                 }
             }
+        }
+
+        /// <summary>Get the data array to be serialized.</summary>
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            // save the data into the serialization array to be saved
+            _serializationArray = ToArray();
+        }
+
+        /// <summary>Clear the serialized array.</summary>
+        [OnSerialized]
+        private void OnSerialized(StreamingContext context)
+        {
+            _serializationArray = null;
+        }
+
+        /// <summary>Construct the stack from a previously seiralized one.</summary>
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            _locals = new ThreadLocal<ThreadLocalList>();
+
+            ThreadLocalList list = GetThreadList(true);
+            foreach (T item in _serializationArray)
+            {
+                list.Add(item, false);
+            }
+            _headList = list;
+            _tailList = list;
+
+            _serializationArray = null;
         }
 
         /// <summary>
@@ -254,7 +295,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Local helper function to retrieve a thread local list by a thread object
         /// </summary>
-        /// <param name="forceCreate">Create a new list if the thread does ot exist</param>
+        /// <param name="forceCreate">Create a new list if the thread does not exist</param>
         /// <returns>The local list object</returns>
         private ThreadLocalList GetThreadList(bool forceCreate)
         {
@@ -323,8 +364,6 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Local helper method to steal an item from any other non empty thread
-        /// It enumerate all other threads in two passes first pass acquire the lock with TryEnter if succeeded
-        /// it steals the item, otherwise it enumerate them again in 2nd pass and acquire the lock using Enter
         /// </summary>
         /// <param name="result">To receive the item retrieved from the bag</param>
         /// <param name="take">Whether to remove or peek.</param>
@@ -435,12 +474,12 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array", SR.ConcurrentBag_CopyTo_ArgumentNullException);
+                throw new ArgumentNullException(nameof(array), SR.ConcurrentBag_CopyTo_ArgumentNullException);
             }
             if (index < 0)
             {
                 throw new ArgumentOutOfRangeException
-                    ("index", SR.ConcurrentBag_CopyTo_ArgumentOutOfRangeException);
+                    (nameof(index), SR.ConcurrentBag_CopyTo_ArgumentOutOfRangeException);
             }
 
             // Short path if the bag is empty
@@ -488,7 +527,7 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array", SR.ConcurrentBag_CopyTo_ArgumentNullException);
+                throw new ArgumentNullException(nameof(array), SR.ConcurrentBag_CopyTo_ArgumentNullException);
             }
 
             bool lockTaken = false;
@@ -513,7 +552,7 @@ namespace System.Collections.Concurrent
         {
             // Short path if the bag is empty
             if (_headList == null)
-                return new T[0];
+                return Array.Empty<T>();
 
             bool lockTaken = false;
             try
@@ -681,7 +720,7 @@ namespace System.Collections.Concurrent
         #region Freeze bag helper methods
         /// <summary>
         /// Local helper method to freeze all bag operations, it
-        /// 1- Acquire the global lock to prevent any other thread to freeze the bag, and also new new thread can be added
+        /// 1- Acquire the global lock to prevent any other thread to freeze the bag, and also new thread can be added
         /// to the dictionary
         /// 2- Then Acquire all local lists locks to prevent steal and synchronized operations
         /// 3- Wait for all un-synchronized operations to be done
@@ -855,7 +894,7 @@ namespace System.Collections.Concurrent
         /// </summary>
         internal class ThreadLocalList
         {
-            // Tead node in the list, null means the list is empty
+            // Head node in the list, null means the list is empty
             internal volatile Node _head;
 
             // Tail node for the list

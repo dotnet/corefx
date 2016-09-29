@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // The GroupCollection lists the captured Capture numbers
 // contained in a compiled Regex.
@@ -17,16 +18,18 @@ namespace System.Text.RegularExpressions
     public class GroupCollection : ICollection
     {
         private readonly Match _match;
-        private readonly Dictionary<int, int> _captureMap;
+        private readonly Hashtable _captureMap;
 
         // cache of Group objects fed to the user
         private Group[] _groups;
 
-        internal GroupCollection(Match match, Dictionary<int, int> caps)
+        internal GroupCollection(Match match, Hashtable caps)
         {
             _match = match;
             _captureMap = caps;
         }
+
+        public bool IsReadOnly => true;
 
         /// <summary>
         /// Returns the number of groups.
@@ -93,27 +96,28 @@ namespace System.Text.RegularExpressions
                 _groups = new Group[_match._matchcount.Length - 1];
                 for (int i = 0; i < _groups.Length; i++)
                 {
-                    _groups[i] = new Group(_match._text, _match._matches[i + 1], _match._matchcount[i + 1]);
+                    string groupname = _match._regex.GroupNameFromNumber(i + 1);
+                    _groups[i] = new Group(_match._text, _match._matches[i + 1], _match._matchcount[i + 1], groupname);
                 }
             }
 
             return _groups[groupnum - 1];
         }
 
-        bool ICollection.IsSynchronized
+        public bool IsSynchronized
         {
             get { return false; }
         }
 
-        object ICollection.SyncRoot
+        public object SyncRoot
         {
             get { return _match; }
         }
 
-        void ICollection.CopyTo(Array array, int arrayIndex)
+        public void CopyTo(Array array, int arrayIndex)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
 
             for (int i = arrayIndex, j = 0; j < Count; i++, j++)
             {

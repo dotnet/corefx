@@ -10,6 +10,7 @@
     <AssemblyName>System.IO.Packaging.Tests</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>824750ed</NuGetPackageImportStamp>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
@@ -25,25 +26,13 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\System.IO.Packaging.csproj">
+    <ProjectReference Include="..\pkg\System.IO.Packaging.pkgproj">
       <Project>{1f827c19-6023-48d3-909f-9f43ab42faf0}</Project>
       <Name>System.IO.Packaging</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <SupplementalTestData Include="$(PackagesDir)System.IO.Packaging.TestData\1.0.0-prerelease\content\**\*.*" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
-  <!-- Temporary until we have new work in build tools to
-       deploy content from nuget packages -->
-  <Target Name="CopySystemIOPackagingTestDataToTestDirectory" AfterTargets="CopyTestToTestDirectory" Inputs="$(PackagesDir)$(PackagingTestPackage)\content" Outputs="$(TestPath)%(TestTargetFramework.Folder)\*.*">
-    <PropertyGroup>
-      <PackagingTestPackage>System.IO.Packaging.TestData\1.0.0-prerelease</PackagingTestPackage>
-      <TestTargetFrameworkFolder>%(TestTargetFramework.Folder)</TestTargetFrameworkFolder>
-    </PropertyGroup>
-    <ItemGroup>
-      <PackagingTestDataSrc Include="$(PackagesDir)$(PackagingTestPackage)\content\**\*.*" />
-      <PackagingTestDataDest Include="@(PackagingTestDataSrc->'$(TestPath)$(TestTargetFrameworkFolder)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    </ItemGroup>
-    <Copy SourceFiles="@(PackagingTestDataSrc)" DestinationFiles="@(PackagingTestDataDest)" SkipUnchangedFiles="$(SkipCopyUnchangedFiles)" OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)" Retries="$(CopyRetryCount)" RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)" UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)">
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
-    </Copy>
-  </Target>
 </Project>

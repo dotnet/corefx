@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -18,9 +19,9 @@ namespace System.Security.Cryptography
         public CngKeyBlobFormat(string format)
         {
             if (format == null)
-                throw new ArgumentNullException("format");
+                throw new ArgumentNullException(nameof(format));
             if (format.Length == 0)
-                throw new ArgumentException(SR.Format(SR.Cryptography_InvalidKeyBlobFormat, format), "format");
+                throw new ArgumentException(SR.Format(SR.Cryptography_InvalidKeyBlobFormat, format), nameof(format));
 
             _format = format;
         }
@@ -105,6 +106,22 @@ namespace System.Security.Cryptography
             }
         }
 
+        public static CngKeyBlobFormat EccFullPrivateBlob
+        {
+            get
+            {
+                return s_eccFullPrivate ?? (s_eccFullPrivate = new CngKeyBlobFormat("ECCFULLPRIVATEBLOB")); // BCRYPT_ECCFULLPRIVATE_BLOB
+            }
+        }
+
+        public static CngKeyBlobFormat EccFullPublicBlob
+        {
+            get
+            {
+                return s_eccFullPublic ?? (s_eccFullPublic = new CngKeyBlobFormat("ECCFULLPUBLICBLOB")); // BCRYPT_ECCFULLPUBLIC_BLOB
+            }
+        }
+
         public static CngKeyBlobFormat GenericPrivateBlob
         {
             get
@@ -140,6 +157,8 @@ namespace System.Security.Cryptography
 
         private static CngKeyBlobFormat s_eccPrivate;
         private static CngKeyBlobFormat s_eccPublic;
+        private static CngKeyBlobFormat s_eccFullPrivate;
+        private static CngKeyBlobFormat s_eccFullPublic;
         private static CngKeyBlobFormat s_genericPrivate;
         private static CngKeyBlobFormat s_genericPublic;
         private static CngKeyBlobFormat s_opaqueTransport;

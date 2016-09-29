@@ -1,8 +1,21 @@
 {
   "dependencies": {
-    "System.Runtime": "4.0.0"
+    "Microsoft.NETCore.Platforms": "1.0.2-beta-24522-03",
+    "System.Runtime": "4.3.0-beta-24522-03",
+    "test-runtime": {
+      "target": "project",
+      "exclude": "compile"
+    }
   },
   "frameworks": {
-    "dnxcore50": {}
+    "netstandard1.3": {}
+  },
+  "supports": {
+    "coreFx.Test.netcore50": {},
+    "coreFx.Test.netcoreapp1.0": {},
+    "coreFx.Test.net46": {},
+    "coreFx.Test.net461": {},
+    "coreFx.Test.net462": {},
+    "coreFx.Test.net463": {}
   }
 }

@@ -1,7 +1,10 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -376,7 +379,7 @@ namespace System.Net.WebSockets
         }
 
         #region State // Code related to state management
-        // TODO: Refactor state into encapsulated class
+        // TODO (#7896): Refactor state into encapsulated class
         public void InterlockedCheckValidStates(WebSocketState[] validStates)
         {
             lock (_stateLock)

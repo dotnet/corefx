@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -406,6 +407,13 @@ namespace System.Threading.Tasks.Tests
 
     public class TaskRunSyncTests
     {
+        static TaskRunSyncTests()
+        {
+            // Tests that create tasks which need to run concurrently require us to bump up the number
+            // of threads in the pool, or else we need to wait for it to grow dynamically to the desired number
+            ThreadPoolHelpers.EnsureMinThreadsAtLeast(10);
+        }
+
         #region Test methods
 
         [Fact]

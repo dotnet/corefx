@@ -1,16 +1,21 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class DefaultIfEmptyTests
+    public static class DefaultIfEmptyTests
     {
         public static IEnumerable<object[]> EmptyData()
         {
             foreach (object[] query in UnorderedSources.Ranges(new[] { 0 }))
+            {
+                yield return new object[] { query[0], 1 };
+            }
+            foreach (object[] query in Sources.Ranges(new[] { 0 }))
             {
                 yield return new object[] { query[0], 1 };
             }
@@ -23,28 +28,28 @@ namespace System.Linq.Parallel.Tests
         // DefaultIfEmpty
         //
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
-        public static void DefaultIfEmpty_Unordered_NotEmpty(Labeled<ParallelQuery<int>> labeled, int count)
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(16)]
+        public static void DefaultIfEmpty_Unordered_NotEmpty(int count)
         {
-            ParallelQuery<int> query = labeled.Item;
             IntegerRangeSet seen = new IntegerRangeSet(0, count);
-            foreach (int i in query.DefaultIfEmpty())
+            foreach (int i in UnorderedSources.Default(count).DefaultIfEmpty())
             {
                 seen.Add(i);
             }
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 1024 }), MemberType = typeof(UnorderedSources))]
-        public static void DefaultIfEmpty_Unordered_NotEmpty_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
+        public static void DefaultIfEmpty_Unordered_NotEmpty_Longrunning()
         {
-            DefaultIfEmpty_Unordered_NotEmpty(labeled, count);
+            DefaultIfEmpty_Unordered_NotEmpty(Sources.OuterLoopCount);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void DefaultIfEmpty_NotEmpty(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -58,32 +63,32 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 1024 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.OuterLoopRanges), MemberType = typeof(Sources))]
         public static void DefaultIfEmpty_NotEmpty_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             DefaultIfEmpty_NotEmpty(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
-        public static void DefaultIfEmpty_Unordered_NotEmpty_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(16)]
+        public static void DefaultIfEmpty_Unordered_NotEmpty_NotPipelined(int count)
         {
-            ParallelQuery<int> query = labeled.Item;
             IntegerRangeSet seen = new IntegerRangeSet(0, count);
-            Assert.All(query.DefaultIfEmpty().ToList(), x => seen.Add(x));
+            Assert.All(UnorderedSources.Default(count).DefaultIfEmpty().ToList(), x => seen.Add(x));
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 1024 }), MemberType = typeof(UnorderedSources))]
-        public static void DefaultIfEmpty_Unordered_NotEmpty_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
+        public static void DefaultIfEmpty_Unordered_NotEmpty_NotPipelined_Longrunning()
         {
-            DefaultIfEmpty_Unordered_NotEmpty_NotPipelined(labeled, count);
+            DefaultIfEmpty_Unordered_NotEmpty_NotPipelined(Sources.OuterLoopCount);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void DefaultIfEmpty_NotEmpty_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -97,14 +102,14 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 1024 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.OuterLoopRanges), MemberType = typeof(Sources))]
         public static void DefaultIfEmpty_NotEmpty_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             DefaultIfEmpty_NotEmpty_NotPipelined(labeled, count);
         }
 
         [Theory]
-        [MemberData("EmptyData")]
+        [MemberData(nameof(EmptyData))]
         public static void DefaultIfEmpty_Empty<T>(Labeled<ParallelQuery<T>> labeled, T def)
         {
             ParallelQuery<T> notEmpty = labeled.Item.DefaultIfEmpty();
@@ -119,7 +124,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("EmptyData")]
+        [MemberData(nameof(EmptyData))]
         public static void DefaultIfEmpty_Empty_NotPipelined<T>(Labeled<ParallelQuery<T>> labeled, T def)
         {
             IList<T> notEmpty = labeled.Item.DefaultIfEmpty().ToList();
@@ -136,7 +141,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void DefaultIfEmpty_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<bool>)null).DefaultIfEmpty());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<bool>)null).DefaultIfEmpty());
         }
     }
 }

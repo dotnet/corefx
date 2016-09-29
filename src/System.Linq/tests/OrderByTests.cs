@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,13 @@ namespace System.Linq.Tests
         {
             int[] source = { };
             Assert.Empty(source.OrderBy(e => e));
+        }
+
+        [Fact]
+        public void OrderedCount()
+        {
+            var source = Enumerable.Range(0, 20).Shuffle();
+            Assert.Equal(20, source.OrderBy(i => i).Count());
         }
 
         //FIXME: This will hang with a larger source. Do we want to deal with that case?
@@ -255,6 +263,60 @@ namespace System.Linq.Tests
         {
             Func<DateTime, int> keySelector = null;
             Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Empty<DateTime>().OrderBy(keySelector));
+        }
+
+        [Fact]
+        public void FirstOnOrdered()
+        {
+            Assert.Equal(0, Enumerable.Range(0, 10).Shuffle().OrderBy(i => i).First());
+            Assert.Equal(9, Enumerable.Range(0, 10).Shuffle().OrderByDescending(i => i).First());
+            Assert.Equal(10, Enumerable.Range(0, 100).Shuffle().OrderByDescending(i => i.ToString().Length).ThenBy(i => i).First());
+        }
+
+        [Fact]
+        public void FirstOnEmptyOrderedThrows()
+        {
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<int>().OrderBy(i => i).First());
+        }
+
+        [Fact]
+        public void FirstOrDefaultOnOrdered()
+        {
+            Assert.Equal(0, Enumerable.Range(0, 10).Shuffle().OrderBy(i => i).FirstOrDefault());
+            Assert.Equal(9, Enumerable.Range(0, 10).Shuffle().OrderByDescending(i => i).FirstOrDefault());
+            Assert.Equal(10, Enumerable.Range(0, 100).Shuffle().OrderByDescending(i => i.ToString().Length).ThenBy(i => i).FirstOrDefault());
+            Assert.Equal(0, Enumerable.Empty<int>().OrderBy(i => i).FirstOrDefault());
+        }
+
+        [Fact]
+        public void LastOnOrdered()
+        {
+            Assert.Equal(9, Enumerable.Range(0, 10).Shuffle().OrderBy(i => i).Last());
+            Assert.Equal(0, Enumerable.Range(0, 10).Shuffle().OrderByDescending(i => i).Last());
+            Assert.Equal(10, Enumerable.Range(0, 100).Shuffle().OrderBy(i => i.ToString().Length).ThenByDescending(i => i).Last());
+        }
+
+        [Fact]
+        public void LastOnEmptyOrderedThrows()
+        {
+            Assert.Throws<InvalidOperationException>(() => Enumerable.Empty<int>().OrderBy(i => i).Last());
+        }
+
+        [Fact]
+        public void LastOrDefaultOnOrdered()
+        {
+            Assert.Equal(9, Enumerable.Range(0, 10).Shuffle().OrderBy(i => i).LastOrDefault());
+            Assert.Equal(0, Enumerable.Range(0, 10).Shuffle().OrderByDescending(i => i).LastOrDefault());
+            Assert.Equal(10, Enumerable.Range(0, 100).Shuffle().OrderBy(i => i.ToString().Length).ThenByDescending(i => i).LastOrDefault());
+            Assert.Equal(0, Enumerable.Empty<int>().OrderBy(i => i).LastOrDefault());
+        }
+
+        [Fact]
+        public void EnumeratorDoesntContinue()
+        {
+            var enumerator = NumberRangeGuaranteedNotCollectionType(0, 3).Shuffle().OrderBy(i => i).GetEnumerator();
+            while (enumerator.MoveNext()) { }
+            Assert.False(enumerator.MoveNext());
         }
     }
 }

@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -157,7 +159,7 @@ namespace System.IO.Compression
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]  // See comment in the body.
         public static ZipArchive Open(String archiveFileName, ZipArchiveMode mode, Encoding entryNameEncoding)
         {
-            // Relies on File.Open for checking of archiveFileName
+            // Relies on FileStream's ctor for checking of archiveFileName
 
             FileMode fileMode;
             FileAccess access;
@@ -184,15 +186,15 @@ namespace System.IO.Compression
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException("mode");
+                    throw new ArgumentOutOfRangeException(nameof(mode));
             }
 
-            // Surpress CA2000: fs gets passed to the new ZipArchive, which stores it internally.
+            // Suppress CA2000: fs gets passed to the new ZipArchive, which stores it internally.
             // The stream will then be owned by the archive and be disposed when the archive is disposed.        
             // If the ctor completes without throwing, we know fs has been successfully stores in the archive;
             // If the ctor throws, we need to close it here.
 
-            FileStream fs = File.Open(archiveFileName, fileMode, access, fileShare);
+            FileStream fs = new FileStream(archiveFileName, fileMode, access, fileShare, bufferSize: 0x1000, useAsync: false);
 
             try
             {
@@ -290,7 +292,7 @@ namespace System.IO.Compression
         ///                                         is in an invalid format.</exception>
         ///                                         
         /// <param name="sourceDirectoryName">The path to the directory on the file system to be archived.</param>
-        /// <param name="<code>destinationArchiveFileName</code>">The name of the archive to be created.</param>
+        /// <param name="destinationArchiveFileName">The name of the archive to be created.</param>
         /// <param name="compressionLevel">The level of the compression (speed/memory vs. compressed size trade-off).</param>
         /// <param name="includeBaseDirectory"><code>true</code> to indicate that a directory named <code>sourceDirectoryName</code> should
         /// be included at the root of the archive. <code>false</code> to indicate that the files and directories in <code>sourceDirectoryName</code>
@@ -340,7 +342,7 @@ namespace System.IO.Compression
         ///                                         is in an invalid format.</exception>
         ///                                         
         /// <param name="sourceDirectoryName">The path to the directory on the file system to be archived.</param>
-        /// <param name="<code>destinationArchiveFileName</code>">The name of the archive to be created.</param>
+        /// <param name="destinationArchiveFileName">The name of the archive to be created.</param>
         /// <param name="compressionLevel">The level of the compression (speed/memory vs. compressed size trade-off).</param>
         /// <param name="includeBaseDirectory"><code>true</code> to indicate that a directory named <code>sourceDirectoryName</code> should
         /// be included at the root of the archive. <code>false</code> to indicate that the files and directories in <code>sourceDirectoryName</code>
@@ -395,7 +397,7 @@ namespace System.IO.Compression
         /// <exception cref="DirectoryNotFoundException">The path specified by sourceArchive or destinationDirectoryName is invalid,
         /// (for example, it is on an unmapped drive).</exception>
         /// <exception cref="IOException">The directory specified by destinationDirectoryName already exists.
-        /// -or- An I/O error has occurred. -or- An archive entry’s name is zero-length, contains only white space, or contains one or
+        /// -or- An I/O error has occurred. -or- An archive entry?s name is zero-length, contains only white space, or contains one or
         /// more invalid characters as defined by InvalidPathChars. -or- Extracting an archive entry would result in a file destination that is outside the destination directory (for example, because of parent directory accessors). -or- An archive entry has the same name as an already extracted entry from the same archive.</exception>
         /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission.</exception>
         /// <exception cref="NotSupportedException">sourceArchive or destinationDirectoryName is in an invalid format. </exception>
@@ -404,7 +406,7 @@ namespace System.IO.Compression
         /// -or- An archive entry was not found or was corrupt. -or- An archive entry has been compressed using a compression method
         /// that is not supported.</exception>
         /// 
-        /// <param name="destinationArchiveFileName">The path to the archive on the file system that is to be extracted.</param>
+        /// <param name="sourceArchiveFileName">The path to the archive on the file system that is to be extracted.</param>
         /// <param name="destinationDirectoryName">The path to the directory on the file system. The directory specified must not exist, but the directory that it is contained in must exist.</param>
         public static void ExtractToDirectory(String sourceArchiveFileName, String destinationDirectoryName)
         {
@@ -431,7 +433,7 @@ namespace System.IO.Compression
         /// <exception cref="DirectoryNotFoundException">The path specified by sourceArchive or destinationDirectoryName is invalid,
         /// (for example, it is on an unmapped drive).</exception>
         /// <exception cref="IOException">The directory specified by destinationDirectoryName already exists.
-        /// -or- An I/O error has occurred. -or- An archive entry’s name is zero-length, contains only white space, or contains one or
+        /// -or- An I/O error has occurred. -or- An archive entry?s name is zero-length, contains only white space, or contains one or
         /// more invalid characters as defined by InvalidPathChars. -or- Extracting an archive entry would result in a file destination that is outside the destination directory (for example, because of parent directory accessors). -or- An archive entry has the same name as an already extracted entry from the same archive.</exception>
         /// <exception cref="UnauthorizedAccessException">The caller does not have the required permission.</exception>
         /// <exception cref="NotSupportedException">sourceArchive or destinationDirectoryName is in an invalid format. </exception>
@@ -440,7 +442,7 @@ namespace System.IO.Compression
         /// -or- An archive entry was not found or was corrupt. -or- An archive entry has been compressed using a compression method
         /// that is not supported.</exception>
         /// 
-        /// <param name="destinationArchiveFileName">The path to the archive on the file system that is to be extracted.</param>
+        /// <param name="sourceArchiveFileName">The path to the archive on the file system that is to be extracted.</param>
         /// <param name="destinationDirectoryName">The path to the directory on the file system. The directory specified must not exist, but the directory that it is contained in must exist.</param>
         /// <param name="entryNameEncoding">The encoding to use when reading or writing entry names in this ZipArchive.
         ///         ///     <para>NOTE: Specifying this parameter to values other than <c>null</c> is discouraged.
@@ -467,7 +469,7 @@ namespace System.IO.Compression
         public static void ExtractToDirectory(String sourceArchiveFileName, String destinationDirectoryName, Encoding entryNameEncoding)
         {
             if (sourceArchiveFileName == null)
-                throw new ArgumentNullException("sourceArchiveFileName");
+                throw new ArgumentNullException(nameof(sourceArchiveFileName));
 
             using (ZipArchive archive = Open(sourceArchiveFileName, ZipArchiveMode.Read, entryNameEncoding))
             {
@@ -504,38 +506,45 @@ namespace System.IO.Compression
                 // to be greater than the length of typical entry names from the file system, even
                 // on non-Windows platforms. The capacity will be increased, if needed.
                 const int DefaultCapacity = 260;
-                char[] entryNameBuffer = new char[DefaultCapacity];
+                char[] entryNameBuffer = ArrayPool<char>.Shared.Rent(DefaultCapacity);
 
-                foreach (FileSystemInfo file in di.EnumerateFileSystemInfos("*", SearchOption.AllDirectories))
+                try
                 {
-                    directoryIsEmpty = false;
-
-                    Int32 entryNameLength = file.FullName.Length - basePath.Length;
-                    Debug.Assert(entryNameLength > 0);
-
-                    if (file is FileInfo)
+                    foreach (FileSystemInfo file in di.EnumerateFileSystemInfos("*", SearchOption.AllDirectories))
                     {
-                        // Create entry for file:
-                        String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer);
-                        ZipFileExtensions.DoCreateEntryFromFile(archive, file.FullName, entryName, compressionLevel);
-                    }
-                    else
-                    {
-                        // Entry marking an empty dir:
-                        DirectoryInfo possiblyEmpty = file as DirectoryInfo;
-                        if (possiblyEmpty != null && IsDirEmpty(possiblyEmpty))
+                        directoryIsEmpty = false;
+
+                        Int32 entryNameLength = file.FullName.Length - basePath.Length;
+                        Debug.Assert(entryNameLength > 0);
+
+                        if (file is FileInfo)
                         {
-                            // FullName never returns a directory separator character on the end,
-                            // but Zip archives require it to specify an explicit directory:
-                            String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer, appendPathSeparator: true);
-                            archive.CreateEntry(entryName);
+                            // Create entry for file:
+                            String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer);
+                            ZipFileExtensions.DoCreateEntryFromFile(archive, file.FullName, entryName, compressionLevel);
                         }
-                    }
-                }  // foreach
+                        else
+                        {
+                            // Entry marking an empty dir:
+                            DirectoryInfo possiblyEmpty = file as DirectoryInfo;
+                            if (possiblyEmpty != null && IsDirEmpty(possiblyEmpty))
+                            {
+                                // FullName never returns a directory separator character on the end,
+                                // but Zip archives require it to specify an explicit directory:
+                                String entryName = EntryFromPath(file.FullName, basePath.Length, entryNameLength, ref entryNameBuffer, appendPathSeparator: true);
+                                archive.CreateEntry(entryName);
+                            }
+                        }
+                    }  // foreach
 
-                // If no entries create an empty root directory entry:
-                if (includeBaseDirectory && directoryIsEmpty)
-                    archive.CreateEntry(EntryFromPath(di.Name, 0, di.Name.Length, ref entryNameBuffer, appendPathSeparator: true));
+                    // If no entries create an empty root directory entry:
+                    if (includeBaseDirectory && directoryIsEmpty)
+                        archive.CreateEntry(EntryFromPath(di.Name, 0, di.Name.Length, ref entryNameBuffer, appendPathSeparator: true));
+                }
+                finally
+                {
+                    ArrayPool<char>.Shared.Return(entryNameBuffer);
+                }
 
             } // using
         }  // DoCreateFromDirectory
@@ -588,7 +597,8 @@ namespace System.IO.Compression
             {
                 int newCapacity = buffer.Length * 2;
                 if (newCapacity < min) newCapacity = min;
-                buffer = new char[newCapacity];
+                ArrayPool<char>.Shared.Return(buffer);
+                buffer = ArrayPool<char>.Shared.Rent(newCapacity);
             }
         }
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -90,7 +91,7 @@ namespace Microsoft.SqlServer.Server
             EnsureSubclassOverride();
             if (null == values)
             {
-                throw ADP.ArgumentNull("values");
+                throw ADP.ArgumentNull(nameof(values));
             }
 
             int copyLength = (values.Length < FieldCount) ? values.Length : FieldCount;
@@ -277,7 +278,7 @@ namespace Microsoft.SqlServer.Server
             EnsureSubclassOverride();
             if (null == values)
             {
-                throw ADP.ArgumentNull("values");
+                throw ADP.ArgumentNull(nameof(values));
             }
 
 
@@ -394,7 +395,7 @@ namespace Microsoft.SqlServer.Server
             EnsureSubclassOverride();
             if (null == values)
             {
-                throw ADP.ArgumentNull("values");
+                throw ADP.ArgumentNull(nameof(values));
             }
 
             // Allow values array longer than FieldCount, just ignore the extra cells.
@@ -648,7 +649,7 @@ namespace Microsoft.SqlServer.Server
             // Initial consistency check
             if (null == metaData)
             {
-                throw ADP.ArgumentNull("metadata");
+                throw ADP.ArgumentNull(nameof(metaData));
             }
 
             _columnMetaData = new SqlMetaData[metaData.Length];
@@ -657,7 +658,7 @@ namespace Microsoft.SqlServer.Server
             {
                 if (null == metaData[i])
                 {
-                    throw ADP.ArgumentNull("metadata[" + i + "]");
+                    throw ADP.ArgumentNull($"{nameof(metaData)}[{i}]");
                 }
                 _columnMetaData[i] = metaData[i];
                 _columnSmiMetaData[i] = MetaDataUtilsSmi.SqlMetaDataToSmiExtendedMetaData(_columnMetaData[i]);

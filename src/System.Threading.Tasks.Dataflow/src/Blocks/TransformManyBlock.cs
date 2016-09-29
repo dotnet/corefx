@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -36,6 +37,16 @@ namespace System.Threading.Tasks.Dataflow
         private readonly ReorderingBuffer<IEnumerable<TOutput>> _reorderingBuffer;
         /// <summary>The source side.</summary>
         private readonly SourceCore<TOutput> _source;
+
+        /// <summary>Gets the object to use for writing to the source when multiple threads may be involved.</summary>
+        /// <remarks>
+        /// If a reordering buffer is used, it is safe for multiple threads to write to concurrently and handles safe 
+        /// access to the source. If there's no reordering buffer because no parallelism is used, then only one thread at
+        /// a time will try to access the source, anyway.  But, if there's no reordering buffer and parallelism is being
+        /// employed, then multiple threads may try to access the source concurrently, in which case we need to manually
+        /// synchronize all such access, and this lock is used for that purpose.
+        /// </remarks>
+        private object ParallelSourceLock { get { return _source; } }
 
         /// <summary>Initializes the <see cref="TransformManyBlock{TInput,TOutput}"/> with the specified function.</summary>
         /// <param name="transform">
@@ -95,9 +106,9 @@ namespace System.Threading.Tasks.Dataflow
         {
             // Validate arguments.  It's ok for the filterFunction to be null, but not the other parameters.
             if (transformSync == null && transformAsync == null) throw new ArgumentNullException("transform");
-            if (dataflowBlockOptions == null) throw new ArgumentNullException("dataflowBlockOptions");
+            if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
 
-            Contract.Requires(transformSync == null ^ transformAsync == null, "Exactly one of transformSync and transformAsync must be null.");
+            Debug.Assert(transformSync == null ^ transformAsync == null, "Exactly one of transformSync and transformAsync must be null.");
             Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
@@ -114,7 +125,8 @@ namespace System.Threading.Tasks.Dataflow
                 onItemsRemoved);
 
             // If parallelism is employed, we will need to support reordering messages that complete out-of-order.
-            if (dataflowBlockOptions.SupportsParallelExecution)
+            // However, a developer can override this with EnsureOrdered == false.
+            if (dataflowBlockOptions.SupportsParallelExecution && dataflowBlockOptions.EnsureOrdered)
             {
                 _reorderingBuffer = new ReorderingBuffer<IEnumerable<TOutput>>(
                     this, (source, messages) => ((TransformManyBlock<TInput, TOutput>)source)._source.AddMessages(messages));
@@ -182,7 +194,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <param name="messageWithId">The message to be processed.</param>
         private void ProcessMessage(Func<TInput, IEnumerable<TOutput>> transformFunction, KeyValuePair<TInput, long> messageWithId)
         {
-            Contract.Requires(transformFunction != null, "Function to invoke is required.");
+            Debug.Assert(transformFunction != null, "Function to invoke is required.");
 
             bool userDelegateSucceeded = false;
             try
@@ -211,7 +223,7 @@ namespace System.Threading.Tasks.Dataflow
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ProcessMessageWithTask(Func<TInput, Task<IEnumerable<TOutput>>> function, KeyValuePair<TInput, long> messageWithId)
         {
-            Contract.Requires(function != null, "Function to invoke is required.");
+            Debug.Assert(function != null, "Function to invoke is required.");
 
             // Run the transform function to get the resulting task
             Task<IEnumerable<TOutput>> task = null;
@@ -273,8 +285,8 @@ namespace System.Threading.Tasks.Dataflow
         private void AsyncCompleteProcessMessageWithTask(
             Task<IEnumerable<TOutput>> completed, KeyValuePair<TInput, long> messageWithId)
         {
-            Contract.Requires(completed != null, "A task should have been provided.");
-            Contract.Requires(completed.IsCompleted, "The task should have been in a final state.");
+            Debug.Assert(completed != null, "A task should have been provided.");
+            Debug.Assert(completed.IsCompleted, "The task should have been in a final state.");
 
             switch (completed.Status)
             {
@@ -367,8 +379,8 @@ namespace System.Threading.Tasks.Dataflow
         /// <param name="item">The completed item.</param>
         private void StoreOutputItemsReordered(long id, IEnumerable<TOutput> item)
         {
-            Contract.Requires(_reorderingBuffer != null, "Expected a reordering buffer");
-            Contract.Requires(id != Common.INVALID_REORDERING_ID, "This ID should never have been handed out.");
+            Debug.Assert(_reorderingBuffer != null, "Expected a reordering buffer");
+            Debug.Assert(id != Common.INVALID_REORDERING_ID, "This ID should never have been handed out.");
 
             // Grab info about the transform
             TargetCore<TInput> target = _target;
@@ -456,10 +468,21 @@ namespace System.Threading.Tasks.Dataflow
         /// <param name="outputItems"></param>
         private void StoreOutputItemsNonReorderedAtomic(IEnumerable<TOutput> outputItems)
         {
-            Contract.Requires(_reorderingBuffer == null, "Expected not to have a reordering buffer");
-            Contract.Requires(outputItems is TOutput[] || outputItems is List<TOutput>, "outputItems must be a list we've already vetted as trusted");
+            Debug.Assert(_reorderingBuffer == null, "Expected not to have a reordering buffer");
+            Debug.Assert(outputItems is TOutput[] || outputItems is List<TOutput>, "outputItems must be a list we've already vetted as trusted");
             if (_target.IsBounded) UpdateBoundingCountWithOutputCount(count: ((ICollection<TOutput>)outputItems).Count);
-            _source.AddMessages(outputItems);
+
+            if (_target.DataflowBlockOptions.MaxDegreeOfParallelism == 1)
+            {
+                _source.AddMessages(outputItems);
+            }
+            else
+            {
+                lock (ParallelSourceLock)
+                {
+                    _source.AddMessages(outputItems);
+                }
+            }
         }
 
         /// <summary>
@@ -469,6 +492,8 @@ namespace System.Threading.Tasks.Dataflow
         /// <param name="outputItems">The untrusted enumerable.</param>
         private void StoreOutputItemsNonReorderedWithIteration(IEnumerable<TOutput> outputItems)
         {
+            bool isSerial = _target.DataflowBlockOptions.MaxDegreeOfParallelism == 1;
+
             // If we're bounding, we need to increment the bounded count
             // for each individual item as we enumerate it.
             if (_target.IsBounded)
@@ -484,7 +509,18 @@ namespace System.Threading.Tasks.Dataflow
                     {
                         if (outputFirstItem) _target.ChangeBoundingCount(count: 1);
                         else outputFirstItem = true;
-                        _source.AddMessage(item);
+
+                        if (isSerial)
+                        {
+                            _source.AddMessage(item);
+                        }
+                        else
+                        {
+                            lock (ParallelSourceLock) // don't hold lock while enumerating
+                            {
+                                _source.AddMessage(item);
+                            }
+                        }
                     }
                 }
                 finally
@@ -495,7 +531,19 @@ namespace System.Threading.Tasks.Dataflow
             // If we're not bounding, just output each individual item.
             else
             {
-                foreach (TOutput item in outputItems) _source.AddMessage(item);
+                if (isSerial)
+                {
+                    foreach (TOutput item in outputItems)
+                        _source.AddMessage(item);
+                }
+                else
+                {
+                    lock (ParallelSourceLock) // don't hold lock while enumerating
+                    {
+                        foreach (TOutput item in outputItems)
+                            _source.AddMessage(item);
+                    }
+                }
             }
         }
 
@@ -511,7 +559,7 @@ namespace System.Threading.Tasks.Dataflow
             // into account when figuring out how much to increment or decrement
             // the bounding count.
 
-            Contract.Requires(_target.IsBounded, "Expected to be in bounding mode.");
+            Debug.Assert(_target.IsBounded, "Expected to be in bounding mode.");
             if (count > 1) _target.ChangeBoundingCount(count - 1);
             else if (count == 0) _target.ChangeBoundingCount(-1);
             else Debug.Assert(count == 1, "Count shouldn't be negative.");
@@ -523,7 +571,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             _target.Complete(exception, dropPendingMessages: true);
@@ -608,7 +656,7 @@ namespace System.Threading.Tasks.Dataflow
             /// <param name="transformManyBlock">The transform being viewed.</param>
             public DebugView(TransformManyBlock<TInput, TOutput> transformManyBlock)
             {
-                Contract.Requires(transformManyBlock != null, "Need a block with which to construct the debug view.");
+                Debug.Assert(transformManyBlock != null, "Need a block with which to construct the debug view.");
                 _transformManyBlock = transformManyBlock;
                 _targetDebuggingInformation = transformManyBlock._target.GetDebuggingInformation();
                 _sourceDebuggingInformation = transformManyBlock._source.GetDebuggingInformation();

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -314,7 +315,6 @@ namespace System.Threading.Tasks.Dataflow.Tests
         }
 
         [Fact]
-        [OuterLoop] // has a timeout
         public async Task TestOutputAvailableAsyncAfterTryReceiveAll()
         {
             Func<Task<bool>> generator = () => {
@@ -331,11 +331,8 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 return outputAvailableAsync;
             };
 
-            var multipleConcurrentTestsTask = Task.WhenAll(Enumerable.Repeat(0, 1000).Select(_ => generator()));
-            var timeoutTask = Task.Delay(2000);
-            var completedTask = await Task.WhenAny(multipleConcurrentTestsTask, timeoutTask).ConfigureAwait(false);
-
-            Assert.True(completedTask != timeoutTask);
+            bool[] results = await Task.WhenAll(Enumerable.Repeat(0, 10).Select(_ => generator()));
+            Assert.All(results, Assert.True);
         }
 
         [Fact]

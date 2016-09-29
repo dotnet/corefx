@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Sockets;
 using System.Net.Test.Common;
@@ -36,14 +37,19 @@ namespace System.Net.NetworkInformation.Tests
 
                 Assert.Throws<PlatformNotSupportedException>(() => ipProperties.DhcpServerAddresses);
 
-                Assert.NotNull(ipProperties.DnsAddresses);
-                _log.WriteLine("- Dns Addresses: " + ipProperties.DnsAddresses.Count);
-                foreach (IPAddress dns in ipProperties.DnsAddresses)
+                try
                 {
-                    _log.WriteLine("-- " + dns.ToString());
+                    Assert.NotNull(ipProperties.DnsAddresses);
+                    _log.WriteLine("- Dns Addresses: " + ipProperties.DnsAddresses.Count);
+                    foreach (IPAddress dns in ipProperties.DnsAddresses)
+                    {
+                        _log.WriteLine("-- " + dns.ToString());
+                    }
+                    Assert.NotNull(ipProperties.DnsSuffix);
+                    _log.WriteLine("- Dns Suffix: " + ipProperties.DnsSuffix);
                 }
-                Assert.NotNull(ipProperties.DnsSuffix);
-                _log.WriteLine("- Dns Suffix: " + ipProperties.DnsSuffix);
+                // If /etc/resolv.conf does not exist, DNS values cannot be retrieved.
+                catch (PlatformNotSupportedException) { }
 
                 Assert.NotNull(ipProperties.GatewayAddresses);
                 _log.WriteLine("- Gateway Addresses: " + ipProperties.GatewayAddresses.Count);

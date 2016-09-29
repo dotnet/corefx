@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Data.Common;
 using System.Diagnostics;
@@ -120,7 +121,7 @@ namespace System.Data.SqlClient
                 _peekedChar = -1;
             }
 
-            // If we need more data and there is data avaiable, read
+            // If we need more data and there is data available, read
             charsRead += InternalRead(buffer, index + charsRead, charsNeeded);
 
             return charsRead;
@@ -351,7 +352,7 @@ namespace System.Data.SqlClient
 
             if (numberOfChars == 0)
             {
-                byteBuffer = new byte[0];
+                byteBuffer = Array.Empty<byte>();
                 byteBufferUsed = 0;
             }
             else
@@ -370,7 +371,7 @@ namespace System.Data.SqlClient
                     {
                         // Otherwise, copy over the leftover buffer
                         byteBuffer = new byte[byteBufferSize];
-                        Array.Copy(_leftOverBytes, byteBuffer, _leftOverBytes.Length);
+                        Buffer.BlockCopy(_leftOverBytes, 0, byteBuffer, 0, _leftOverBytes.Length);
                         byteBufferUsed = _leftOverBytes.Length;
                     }
                 }
@@ -409,7 +410,7 @@ namespace System.Data.SqlClient
             if ((!completed) && (bytesUsed < inBufferCount))
             {
                 _leftOverBytes = new byte[inBufferCount - bytesUsed];
-                Array.Copy(inBuffer, bytesUsed, _leftOverBytes, 0, _leftOverBytes.Length);
+                Buffer.BlockCopy(inBuffer, bytesUsed, _leftOverBytes, 0, _leftOverBytes.Length);
             }
             else
             {
@@ -433,15 +434,6 @@ namespace System.Data.SqlClient
         }
 
         /// <summary>
-        /// True if there is data left to read
-        /// </summary>
-        /// <returns></returns>
-        private bool IsDataLeft
-        {
-            get { return ((_leftOverBytes != null) || (_reader.ColumnDataBytesRemaining() > 0)); }
-        }
-
-        /// <summary>
         /// True if there is a peeked character available
         /// </summary>
         private bool HasPeekedChar
@@ -450,7 +442,7 @@ namespace System.Data.SqlClient
         }
 
         /// <summary>
-        /// Checks the the parameters passed into a Read() method are valid
+        /// Checks the parameters passed into a Read() method are valid
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="index"></param>
@@ -459,15 +451,15 @@ namespace System.Data.SqlClient
         {
             if (buffer == null)
             {
-                throw ADP.ArgumentNull(ADP.ParameterBuffer);
+                throw ADP.ArgumentNull(nameof(buffer));
             }
             if (index < 0)
             {
-                throw ADP.ArgumentOutOfRange(ADP.ParameterIndex);
+                throw ADP.ArgumentOutOfRange(nameof(index));
             }
             if (count < 0)
             {
-                throw ADP.ArgumentOutOfRange(ADP.ParameterCount);
+                throw ADP.ArgumentOutOfRange(nameof(count));
             }
             try
             {

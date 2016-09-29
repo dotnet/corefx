@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
@@ -34,6 +35,11 @@ namespace System.IO.MemoryMappedFiles.Tests
                     {
                         Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, 1 + (long)uint.MaxValue));
                         Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
+                    }
+                    else
+                    {
+                        Assert.Throws<IOException>(() => mmf.CreateViewAccessor(0, long.MaxValue));
+                        Assert.Throws<IOException>(() => mmf.CreateViewAccessor(0, long.MaxValue, MemoryMappedFileAccess.ReadWrite));
                     }
 
                     // Offset + Size
@@ -444,7 +450,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// Test to allow a map and view to be finalized, just to ensure we don't crash.
         /// </summary>
         [Fact]
-        public void AllowFinaliation()
+        public void AllowFinalization()
         {
             // Explicitly do not dispose, to allow finalization to happen, just to try to verify
             // that nothing fails when it does.

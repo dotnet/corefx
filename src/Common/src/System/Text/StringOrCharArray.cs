@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
 namespace System.Text
 {
     /// <summary>
-    /// Discrimated union of a string and a char array/offset/count.  Enables looking up
+    /// Discriminated union of a string and a char array/offset/count.  Enables looking up
     /// a portion of a char array as a key in a dictionary of string keys without having to
     /// allocate/copy the chars into a new string.  This comes at the expense of an extra
     /// reference field + two Int32s per key in the size of the dictionary's Entry array.

@@ -1,24 +1,26 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
     internal static partial class Sys
     {
-        [DllImport(Libraries.SystemNative, SetLastError = true)]
-        internal static extern int INotifyInit();
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_INotifyInit", SetLastError = true)]
+        internal static extern SafeFileHandle INotifyInit();
 
-        [DllImport(Libraries.SystemNative, SetLastError = true)]
-        internal static extern int INotifyAddWatch(int fd, string pathName, uint mask);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_INotifyAddWatch", SetLastError = true)]
+        internal static extern int INotifyAddWatch(SafeFileHandle fd, string pathName, uint mask);
 
-        [DllImport(Libraries.SystemNative, SetLastError = true, EntryPoint = "INotifyRemoveWatch")]
-        private static extern int INotifyRemoveWatch_private(int fd, int wd);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_INotifyRemoveWatch", SetLastError = true)]
+        private static extern int INotifyRemoveWatch_private(SafeFileHandle fd, int wd);
 
-        internal static int INotifyRemoveWatch(int fd, int wd)
+        internal static int INotifyRemoveWatch(SafeFileHandle fd, int wd)
         {
             int result = INotifyRemoveWatch_private(fd, wd);
             if (result < 0)

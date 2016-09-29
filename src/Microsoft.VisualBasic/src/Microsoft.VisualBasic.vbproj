@@ -2,10 +2,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{FE25D593-8029-4726-ABC2-944522B5BE04}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <NoVbRuntimeReference>true</NoVbRuntimeReference>
     <VBRuntime>None</VBRuntime>
     <OptionStrict>On</OptionStrict>
@@ -16,15 +13,13 @@
     <WarningsNotAsErrors>42025</WarningsNotAsErrors>
     <DefineConstants>$(DefineConstants),LATEBINDING=True</DefineConstants>
     <AssemblyName>Microsoft.VisualBasic</AssemblyName>
-    <AssemblyVersion>10.0.1.0</AssemblyVersion>
     <NoStdLib>true</NoStdLib>
-    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
+    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.3;netcore50</PackageTargetFramework>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Microsoft\VisualBasic\CallType.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\ConversionResolution.vb" />

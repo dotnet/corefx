@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Storage;
+using Windows.Storage.Search;
 using Windows.Storage.FileProperties;
 using Windows.UI.Core;
 using WinRTFileAttributes = Windows.Storage.FileAttributes;
@@ -59,7 +61,7 @@ namespace System.IO
             //}
 
             // Normal is a special case and happens to have different values in WinRT and Win32.
-            // It's meant to indicate the absense of other flags.  On WinRT this logically is 0,
+            // It's meant to indicate the absence of other flags.  On WinRT this logically is 0,
             // however on Win32 it is represented with a discrete value of 128.
             return (fileAttributes == WinRTFileAttributes.Normal) ?
                 FileAttributes.Normal :
@@ -92,6 +94,27 @@ namespace System.IO
             StorageFolder destFolder = await StorageFolder.GetFolderFromPathAsync(destDirectory).TranslateWinRTTask(destDirectory, isDirectory: true);
 
             await file.CopyAsync(destFolder, destFileName, overwrite ? NameCollisionOption.ReplaceExisting : NameCollisionOption.FailIfExists).TranslateWinRTTask(sourceFullPath);
+        }
+
+        public override void ReplaceFile(string sourceFullPath, string destFullPath, string destBackupFullPath, bool ignoreMetadataErrors)
+        {
+            EnsureBackgroundThread();
+            SynchronousResultOf(ReplaceFileAsync(sourceFullPath, destFullPath, destBackupFullPath, ignoreMetadataErrors));
+        }
+
+        private async Task ReplaceFileAsync(string sourceFullPath, string destFullPath, string destBackupFullPath, bool ignoreMetadataErrors)
+        {
+            // Copy the destination file to a backup.
+            if (destBackupFullPath != null)
+            {
+                await CopyFileAsync(destFullPath, destBackupFullPath, overwrite: true).ConfigureAwait(false);
+            }
+
+            // Then copy the contents of the source file to the destination file.
+            await CopyFileAsync(sourceFullPath, destFullPath, overwrite: true).ConfigureAwait(false);
+
+            // Finally, delete the source file.
+            await DeleteFileAsync(sourceFullPath).ConfigureAwait(false);
         }
 
         public override void CreateDirectory(string fullPath)
@@ -161,7 +184,7 @@ namespace System.IO
         {
             try
             {
-                // Note the absense of TranslateWinRTTask, we translate below in the catch block.
+                // Note the absence of TranslateWinRTTask, we translate below in the catch block.
                 StorageFile file = await StorageFile.GetFileFromPathAsync(fullPath).AsTask().ConfigureAwait(false);
                 await file.DeleteAsync(StorageDeleteOption.PermanentDelete).AsTask().ConfigureAwait(false);
             }
@@ -224,16 +247,106 @@ namespace System.IO
             return false;
         }
 
+
         public override IEnumerable<string> EnumeratePaths(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
         {
-            // Fill in implementation
-            return new string[0];
+            IReadOnlyList<IStorageItem> storageFiles = SynchronousResultOf(EnumerateFileQuery(fullPath, searchPattern, searchOption, searchTarget));
+            return IteratePathsFromStorageItems(storageFiles);
         }
 
         public override IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string fullPath, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
         {
-            // Fill in implementation
-            return new FileSystemInfo[0];
+            IReadOnlyList<IStorageItem> storageFiles = SynchronousResultOf(EnumerateFileQuery(fullPath, searchPattern, searchOption, searchTarget));
+            return IterateFileSystemInfosFromStorageItems(storageFiles);
+        }
+
+        /// <summary>
+        /// Translates IStorageItems into FileSystemInfos and yields the results.
+        /// </summary>
+        private static IEnumerable<FileSystemInfo> IterateFileSystemInfosFromStorageItems(IReadOnlyList<IStorageItem> storageFiles)
+        {
+            int count = storageFiles.Count;
+            for (int i = 0; i < count; i++)
+            {
+                if (storageFiles[i].IsOfType(StorageItemTypes.Folder))
+                {
+                    yield return new DirectoryInfo(storageFiles[i].Path);
+                }
+                else // If it is neither a File nor folder then we treat it as a File.
+                {
+                    yield return new FileInfo(storageFiles[i].Path);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Translates IStorageItems into string paths and yields the results.
+        /// </summary>
+        private static IEnumerable<string> IteratePathsFromStorageItems(IReadOnlyList<IStorageItem> storageFiles)
+        {
+            int count = storageFiles.Count;
+            for (int i = 0; i < count; i++)
+            {
+                yield return storageFiles[i].Path;
+            }
+        }
+
+        private async static Task<IReadOnlyList<IStorageItem>> EnumerateFileQuery(string path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+        {
+            // Get a StorageFolder for "path"
+            string fullPath = Path.GetFullPath(path);
+            StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(fullPath).TranslateWinRTTask(fullPath, isDirectory: true);
+
+            // Construct a query for the search.
+            QueryOptions query = new QueryOptions();
+
+            // Translate SearchOption into FolderDepth
+            query.FolderDepth = searchOption == SearchOption.AllDirectories ? FolderDepth.Deep : FolderDepth.Shallow;
+
+            // Construct an AQS filter
+            string normalizedSearchPattern = PathHelpers.NormalizeSearchPattern(searchPattern);
+            if (normalizedSearchPattern.Length == 0)
+            {
+                // An empty searchPattern will return no results and requires no AQS parsing.
+                return new IStorageItem[0];
+            }
+            else
+            {
+                // Parse the query as an ItemPathDisplay filter.
+                string searchPath = PathHelpers.GetFullSearchString(fullPath, normalizedSearchPattern);
+                string aqs = "System.ItemPathDisplay:~\"" + searchPath + "\"";
+                query.ApplicationSearchFilter = aqs;
+
+                // If the filtered path is deeper than the given user path, we need to get a new folder for it.
+                // This occurs when someone does something like Enumerate("C:\first\second\", "C:\first\second\third\*").
+                // When AllDirectories is set this isn't an issue, but for TopDirectoryOnly we have to do some special work
+                // to make sure something is actually returned when the searchPattern is a subdirectory of the path.
+                // To do this, we attempt to get a new StorageFolder for the subdirectory and return an empty enumerable
+                // if we can't.
+                string searchPatternDirName = Path.GetDirectoryName(normalizedSearchPattern);
+                string userPath = string.IsNullOrEmpty(searchPatternDirName) ? fullPath : Path.Combine(fullPath, searchPatternDirName);
+                if (userPath != folder.Path)
+                {
+                    folder = await StorageFolder.GetFolderFromPathAsync(userPath).TranslateWinRTTask(userPath, isDirectory: true);
+                }
+            }
+
+            // Execute our built query
+            if (searchTarget == SearchTarget.Files)
+            {
+                StorageFileQueryResult queryResult = folder.CreateFileQueryWithOptions(query);
+                return await queryResult.GetFilesAsync().TranslateWinRTTask(folder.Path, isDirectory: true);
+            }
+            else if (searchTarget == SearchTarget.Directories)
+            {
+                StorageFolderQueryResult queryResult = folder.CreateFolderQueryWithOptions(query);
+                return await queryResult.GetFoldersAsync().TranslateWinRTTask(folder.Path, isDirectory: true);
+            }
+            else
+            {
+                StorageItemQueryResult queryResult = folder.CreateItemQueryWithOptions(query);
+                return await queryResult.GetItemsAsync().TranslateWinRTTask(folder.Path, isDirectory: true);
+            }
         }
 
         public override bool FileExists(string fullPath)
@@ -562,7 +675,7 @@ namespace System.IO
                 throw Win32Marshal.GetExceptionForWin32Error(Interop.mincore.Errors.ERROR_DIR_NOT_EMPTY, fullPath);
 
             // StorageFolder.Delete ignores readonly attribute.  Detect and throw.
-            if ((folder.Attributes & Windows.Storage.FileAttributes.ReadOnly) == Windows.Storage.FileAttributes.ReadOnly)
+            if ((folder.Attributes & WinRTFileAttributes.ReadOnly) == WinRTFileAttributes.ReadOnly)
                 throw new IOException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, fullPath));
 
             StorageFolder parentFolder = await folder.GetParentAsync().TranslateWinRTTask(fullPath, isDirectory: true);
@@ -631,6 +744,11 @@ namespace System.IO
         {
             // intentionally noop : not supported
             // "System.DateModified" property is readonly
+        }
+
+        public override string[] GetLogicalDrives()
+        {
+            return DriveInfoInternal.GetLogicalDrives();
         }
 
         #region Task Utility

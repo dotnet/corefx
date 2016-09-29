@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -110,9 +111,11 @@ namespace System.Runtime.Serialization
             private List<DataMember> _members;
             private bool _hasDataContract;
             private Dictionary<XmlQualifiedName, DataContract> _knownDataContracts;
-            private static readonly Dictionary<string, string> s_essentialExceptionFields; //Contains the essential fields to serialize an Exception. Not all fields are serialized in an Exception. Some private fields
-                                                                                           //need to be serialized, but then again some need to be left out. This will  keep track of which ones need to be serialized
-                                                                                           //And also their display name for serialization which differs from their declared name.
+
+            //Contains the essential fields to serialize an Exception. Not all fields are serialized in an Exception. Some private fields
+            //need to be serialized, but then again some need to be left out. This will  keep track of which ones need to be serialized
+            //And also their display name for serialization which differs from their declared name.
+            private static readonly Dictionary<string, string> s_essentialExceptionFields = CreateExceptionFields();
 
             /*
              * The ordering of this dictionary is important due to the nature of the ClassDataContract that ExceptionDataContract depends on.
@@ -121,23 +124,24 @@ namespace System.Runtime.Serialization
              * and their ordering comes from this dictionary.
              * 
              * This dictionary is in the order that the Full Framework declares System.Exceptions members. This order is established
-             * in the Full Framework version of System.Exception's Iserializable interface.
+             * in the Full Framework version of System.Exception's ISerializable interface.
              */
-            static ExceptionDataContractCriticalHelper()
+            private static Dictionary<string, string> CreateExceptionFields()
             {
-                s_essentialExceptionFields = new Dictionary<string, string>();
-                s_essentialExceptionFields.Add("_className", "ClassName");
-                s_essentialExceptionFields.Add("_message", "Message");
-                s_essentialExceptionFields.Add("_data", "Data");
-                s_essentialExceptionFields.Add("_innerException", "InnerException");
-                s_essentialExceptionFields.Add("_helpURL", "HelpURL");
-                s_essentialExceptionFields.Add("_stackTraceString", "StackTraceString");
-                s_essentialExceptionFields.Add("_remoteStackTraceString", "RemoteStackTraceString");
-                s_essentialExceptionFields.Add("_remoteStackIndex", "RemoteStackIndex");
-                s_essentialExceptionFields.Add("_exceptionMethodString", "ExceptionMethod");
-                s_essentialExceptionFields.Add("_HResult", "HResult");
-                s_essentialExceptionFields.Add("_source", "Source");
-                s_essentialExceptionFields.Add("_watsonBuckets", "WatsonBuckets");
+                var essentialExceptionFields = new Dictionary<string, string>(12);
+                essentialExceptionFields.Add("_className", "ClassName");
+                essentialExceptionFields.Add("_message", "Message");
+                essentialExceptionFields.Add("_data", "Data");
+                essentialExceptionFields.Add("_innerException", "InnerException");
+                essentialExceptionFields.Add("_helpURL", "HelpURL");
+                essentialExceptionFields.Add("_stackTraceString", "StackTraceString");
+                essentialExceptionFields.Add("_remoteStackTraceString", "RemoteStackTraceString");
+                essentialExceptionFields.Add("_remoteStackIndex", "RemoteStackIndex");
+                essentialExceptionFields.Add("_exceptionMethodString", "ExceptionMethod");
+                essentialExceptionFields.Add("_HResult", "HResult");
+                essentialExceptionFields.Add("_source", "Source");
+                essentialExceptionFields.Add("_watsonBuckets", "WatsonBuckets");
+                return essentialExceptionFields;
             }
 
             public ExceptionDataContractCriticalHelper()
@@ -332,7 +336,7 @@ namespace System.Runtime.Serialization
 
             private bool HasNoConflictWithBaseMembers(DataMember memberContract)
             {
-                //Don't add redundant members, this can happen if a property overrides it's base class implementation. Because the overriden property will appear as "declared" in that type.
+                //Don't add redundant members, this can happen if a property overrides it's base class implementation. Because the overridden property will appear as "declared" in that type.
                 foreach (DataMember dm in BaseContract.Members)
                 {
                     if (dm.Name.Equals(memberContract.Name))
@@ -465,7 +469,7 @@ namespace System.Runtime.Serialization
         [SecuritySafeCritical]
         private Dictionary<string, object> GetExceptionFieldValues(Exception value)
         {
-            // Obtain the unoverrided version of Message
+            // Obtain the unoverridden version of Message
             Type exceptionType = Globals.TypeOfException;
             PropertyInfo messageProperty = exceptionType.GetProperty("Message");
             MethodInfo messageGetter = messageProperty.GetMethod;
@@ -627,12 +631,12 @@ namespace System.Runtime.Serialization
             // dictMap passes in the dictionary that is used for mapping field names to their serialized representations.
             if (dictMap == null)
             {
-                throw new ArgumentNullException("dictMap");
+                throw new ArgumentNullException(nameof(dictMap));
             }
 
             if (exceptionNamespace == null)
             {
-                throw new ArgumentNullException("exceptionNamespace");
+                throw new ArgumentNullException(nameof(exceptionNamespace));
             }
 
             _elementNamesToMap = dictMap;
@@ -811,7 +815,7 @@ namespace System.Runtime.Serialization
 
             if (_reader.NodeType == XmlNodeType.Text)
             {
-                _sb.Append(_reader.Value);
+                AppendEscapedElementString(_reader.Value);
                 Read();
             }
 
@@ -846,7 +850,7 @@ namespace System.Runtime.Serialization
             Read();
             if (_reader.NodeType == XmlNodeType.Text)
             {
-                _sb.Append(_reader.Value);
+                AppendEscapedElementString(_reader.Value);
                 Read();
                 _reader.ReadEndElement();
             }
@@ -866,6 +870,30 @@ namespace System.Runtime.Serialization
             if (!_reader.Read())
             {
                 throw new InvalidOperationException();
+            }
+        }
+
+        private void AppendEscapedElementString(string stringToEscape)
+        {
+            foreach (char ch in stringToEscape)
+            {
+                switch (ch)
+                {
+                    case '<':
+                        _sb.Append("&lt;");
+                        break;
+                    case '>':
+                        _sb.Append("&gt;");
+                        break;
+                    case '&':
+                        _sb.Append("&amp;");
+                        break;
+                    default:
+                        // We didn't escape ', ", or hex chars as there was no valid use case,
+                        // consider to escape them if necessary.
+                        _sb.Append(ch);
+                        break;
+                }
             }
         }
     }

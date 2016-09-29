@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 internal partial class Interop
 {
@@ -56,7 +57,7 @@ internal partial class Interop
             internal const int REG_DWORD = 4;               // 32-bit number
             internal const int REG_DWORD_LITTLE_ENDIAN = 4; // 32-bit number (same as REG_DWORD)
             internal const int REG_DWORD_BIG_ENDIAN = 5;    // 32-bit number
-            internal const int REG_LINK = 6;                // Symbolic Link (unicode)
+            internal const int REG_LINK = 6;                // Symbolic Link (Unicode)
             internal const int REG_MULTI_SZ = 7;            // Multiple Unicode strings
             internal const int REG_QWORD = 11;             // 64-bit number
         }

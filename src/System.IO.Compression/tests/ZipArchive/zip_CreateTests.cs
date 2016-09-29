@@ -1,38 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace System.IO.Compression.Tests
 {
-    public class zip_CreateTests 
+    public class zip_CreateTests : ZipFileTestBase
     {
-        [Fact]
-        public static async Task CreateNormal()
-        {
-            await testCreate("small", true);
-            await testCreate("small", false);
-            await testCreate("normal", true);
-            await testCreate("normal", false);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // [ActiveIssue(846, PlatformID.AnyUnix)]
-            {
-                await testCreate("unicode", true);
-                await testCreate("unicode", false);
-            }
-            await testCreate("empty", true);
-            await testCreate("empty", false);
-            await testCreate("emptydir", true);
-            await testCreate("emptydir", false);
-        }
-
-        [Fact]
-        public static void CreateEmptyEntry()
-        {
-            ZipTest.EmptyEntryTest(ZipArchiveMode.Create);
-        }
-
         [Fact]
         public static void CreateModeInvalidOperations()
         {
@@ -74,14 +52,39 @@ namespace System.IO.Compression.Tests
             Assert.Throws<ObjectDisposedException>(() => z.CreateEntry("dirka")); //"Can't create after dispose"
         }
 
-        public static async Task testCreate(String folder, bool seekable)
+        [Theory]
+        [InlineData("small", true)]
+        [InlineData("small", false)]
+        [InlineData("normal", true)]
+        [InlineData("normal", false)]
+        [InlineData("empty", true)]
+        [InlineData("empty", false)]
+        [InlineData("emptydir", true)]
+        [InlineData("emptydir", false)]
+        public static async Task CreateNormal(string folder, bool seekable)
         {
             using (var s = new MemoryStream())
             {
                 var testStream = new WrappedStream(s, false, true, seekable, null);
-                await ZipTest.CreateFromDir(ZipTest.zfolder(folder), testStream, ZipArchiveMode.Create);
+                await CreateFromDir(zfolder(folder), testStream, ZipArchiveMode.Create);
 
-                ZipTest.IsZipSameAsDir(s, ZipTest.zfolder(folder), ZipArchiveMode.Read, false, false);
+                IsZipSameAsDir(s, zfolder(folder), ZipArchiveMode.Read, requireExplicit: true, checkTimes: true);
+            }
+        }
+
+
+        [Theory]
+        [InlineData("unicode", true)]
+        [InlineData("unicode", false)]
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // Jenkins fails with unicode characters [JENKINS-12610]
+        public static async Task CreateNormal_Unicode(string folder, bool seekable)
+        {
+            using (var s = new MemoryStream())
+            {
+                var testStream = new WrappedStream(s, false, true, seekable, null);
+                await CreateFromDir(zfolder(folder), testStream, ZipArchiveMode.Create);
+
+                IsZipSameAsDir(s, zfolder(folder), ZipArchiveMode.Read, requireExplicit: true, checkTimes: true);
             }
         }
     }

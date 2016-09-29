@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -19,7 +20,7 @@ namespace System.Diagnostics
                                          object[] args, object data1, object[] data)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
 
             return String.Equals(_src, source);
         }
@@ -33,7 +34,7 @@ namespace System.Diagnostics
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("source");
+                    throw new ArgumentNullException(nameof(Source));
                 _src = value;
             }
         }

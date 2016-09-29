@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Reflection;
@@ -761,11 +762,16 @@ namespace System.Runtime.Serialization
             {
                 if (s_getDefaultValueMethod == null)
                 {
-                    s_getDefaultValueMethod = typeof(XmlObjectSerializerWriteContext).GetMethod("GetDefaultValue", Globals.ScanAllMembers);
+                    s_getDefaultValueMethod = typeof(XmlObjectSerializerWriteContext).GetMethod(nameof(XmlObjectSerializerWriteContext.GetDefaultValue), Globals.ScanAllMembers);
                     Debug.Assert(s_getDefaultValueMethod != null);
                 }
                 return s_getDefaultValueMethod;
             }
+        }
+
+        internal static object GetDefaultValue(Type type)
+        {
+            return GetDefaultValueMethod.MakeGenericMethod(type).Invoke(null, Array.Empty<object>());
         }
 
         [SecurityCritical]

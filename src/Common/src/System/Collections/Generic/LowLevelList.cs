@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*============================================================
 **
-** Class:  LowLevelList<T>
 **
 ** Private version of List<T> for internal System.Private.CoreLib use. This
 ** permits sharing more source between BCL and System.Private.CoreLib (as well as the
@@ -63,7 +63,7 @@ namespace System.Collections.Generic
         // 
         public LowLevelList(int capacity)
         {
-            if (capacity < 0) throw new ArgumentOutOfRangeException("capacity");
+            if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
             Contract.EndContractBlock();
 
             if (capacity == 0)
@@ -79,7 +79,7 @@ namespace System.Collections.Generic
         public LowLevelList(IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             Contract.EndContractBlock();
 
             ICollection<T> c = collection as ICollection<T>;
@@ -129,7 +129,7 @@ namespace System.Collections.Generic
             {
                 if (value < _size)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 Contract.EndContractBlock();
 
@@ -199,7 +199,7 @@ namespace System.Collections.Generic
         }
 
         // Ensures that the capacity of this list is at least the given minimum
-        // value. If the currect capacity of the list is less than min, the
+        // value. If the current capacity of the list is less than min, the
         // capacity is increased to twice the current capacity or to min,
         // whichever is larger.
         private void EnsureCapacity(int min)
@@ -311,7 +311,7 @@ namespace System.Collections.Generic
         public int IndexOf(T item, int index)
         {
             if (index > _size)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             Contract.Ensures(Contract.Result<int>() >= -1);
             Contract.Ensures(Contract.Result<int>() < Count);
             Contract.EndContractBlock();
@@ -327,7 +327,7 @@ namespace System.Collections.Generic
             // Note that insertions at the end are legal.
             if ((uint)index > (uint)_size)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             Contract.EndContractBlock();
             if (_size == _items.Length) EnsureCapacity(_size + 1);
@@ -349,12 +349,12 @@ namespace System.Collections.Generic
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
 
             if ((uint)index > (uint)_size)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             Contract.EndContractBlock();
 
@@ -421,7 +421,7 @@ namespace System.Collections.Generic
         {
             if (match == null)
             {
-                throw new ArgumentNullException("match");
+                throw new ArgumentNullException(nameof(match));
             }
             Contract.Ensures(Contract.Result<int>() >= 0);
             Contract.Ensures(Contract.Result<int>() <= Contract.OldValue(Count));
@@ -460,7 +460,7 @@ namespace System.Collections.Generic
         {
             if ((uint)index >= (uint)_size)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             Contract.EndContractBlock();
             _size--;

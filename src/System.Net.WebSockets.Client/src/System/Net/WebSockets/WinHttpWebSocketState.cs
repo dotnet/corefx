@@ -1,10 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.WebSockets
@@ -12,7 +12,7 @@ namespace System.Net.WebSockets
     internal sealed class WinHttpWebSocketState : IDisposable
     {
         // TODO (Issue 2506): The current locking mechanism doesn't allow any two WinHttp functions executing at
-        // the same time for the same handle. Enahnce locking to prevent only WinHttpCloseHandle being called
+        // the same time for the same handle. Enhance locking to prevent only WinHttpCloseHandle being called
         // during other API execution. E.g. using a Reader/Writer model or, even better, Interlocked functions.
 
         // The _lock object must be during the execution of any WinHttp function to ensure no race conditions with 
@@ -23,20 +23,97 @@ namespace System.Net.WebSockets
         private Interop.WinHttp.SafeWinHttpHandle _connectionHandle;
         private Interop.WinHttp.SafeWinHttpHandleWithCallback _requestHandle;
         private Interop.WinHttp.SafeWinHttpHandleWithCallback _webSocketHandle;
+        private int _handlesOpenWithCallback = 0;
 
         // A GCHandle for this operation object.
-        // This is owned by the callback and will be deallocated when the sessionHandle has been closed.
+        // This is owned by the callback and will be unpinned by the callback when it determines that
+        // no further calls will happen on the callback, i.e. all WinHTTP handles have fully closed via
+        // a WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING notification being received by the callback.
         private GCHandle _operationHandle = new GCHandle();
 
         private volatile WebSocketState _state = WebSocketState.None;
         private volatile bool _pendingReadOperation = false;
         private volatile bool _pendingWriteOperation = false;
 
+        // TODO (Issue 2505): temporary pinned buffer caches of 1 item. Will be replaced by PinnableBufferCache.
+        private GCHandle _cachedSendPinnedBuffer = default(GCHandle);
+        private GCHandle _cachedReceivePinnedBuffer = default(GCHandle);
+
         private volatile bool _disposed = false; // To detect redundant calls
 
         public WinHttpWebSocketState()
         {
+        }
+
+        public void Pin()
+        {
+            Debug.Assert(!_operationHandle.IsAllocated);
             _operationHandle = GCHandle.Alloc(this);
+        }
+
+        public void Unpin()
+        {
+            if (_operationHandle.IsAllocated)
+            {
+                Debug.Assert(_handlesOpenWithCallback == 0);
+
+                // This method only gets called when the WinHTTP request/websocket handles are fully closed and thus
+                // all async operations are done. So, it is safe at this point to unpin the buffers and release
+                // the strong GCHandle for this object.
+                if (_cachedReceivePinnedBuffer.IsAllocated)
+                {
+                    _cachedReceivePinnedBuffer.Free();
+                    _cachedReceivePinnedBuffer = default(GCHandle);
+                }
+
+                if (_cachedSendPinnedBuffer.IsAllocated)
+                {
+                    _cachedSendPinnedBuffer.Free();
+                    _cachedSendPinnedBuffer = default(GCHandle);
+                }
+
+                _operationHandle.Free();
+                _operationHandle = default(GCHandle);
+            }
+        }
+
+        public void PinSendBuffer(ArraySegment<byte> buffer)
+        {
+            if (!_cachedSendPinnedBuffer.IsAllocated || _cachedSendPinnedBuffer.Target != buffer.Array)
+            {
+                if (_cachedSendPinnedBuffer.IsAllocated)
+                {
+                    _cachedSendPinnedBuffer.Free();
+                }
+
+                _cachedSendPinnedBuffer = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
+            }
+        }
+
+        public void PinReceiveBuffer(ArraySegment<byte> buffer)
+        {
+            if (!_cachedReceivePinnedBuffer.IsAllocated || _cachedReceivePinnedBuffer.Target != buffer.Array)
+            {
+                if (_cachedReceivePinnedBuffer.IsAllocated)
+                {
+                    _cachedReceivePinnedBuffer.Free();
+                }
+
+                _cachedReceivePinnedBuffer = GCHandle.Alloc(buffer.Array, GCHandleType.Pinned);
+            }
+        }
+
+        public void IncrementHandlesOpenWithCallback()
+        {
+            Interlocked.Increment(ref _handlesOpenWithCallback);
+        }
+
+        public int DecrementHandlesOpenWithCallback()
+        {
+            int count = Interlocked.Decrement(ref _handlesOpenWithCallback);
+            Debug.Assert(count >= 0);
+            
+            return count;
         }
 
         public WebSocketState State
@@ -155,7 +232,7 @@ namespace System.Net.WebSockets
         {
             lock (_lock)
             {
-                CheckValidState(validStates);
+                WebSocketValidate.ThrowIfInvalidState(_state, _disposed, validStates);
             }
         }
 
@@ -173,28 +250,7 @@ namespace System.Net.WebSockets
         // Must be called with Lock taken.
         public void CheckValidState(WebSocketState[] validStates)
         {
-            string validStatesText = string.Empty;
-
-            if (validStates != null && validStates.Length > 0)
-            {
-                foreach (WebSocketState currentState in validStates)
-                {
-                    if (_state == currentState)
-                    {
-                        // Ordering is important to maintain .Net 4.5 WebSocket implementation exception behavior.
-                        if (_disposed)
-                        {
-                            throw new ObjectDisposedException(GetType().FullName);
-                        }
-
-                        return;
-                    }
-                }
-
-                validStatesText = string.Join(", ", validStates);
-            }
-
-            throw new WebSocketException(SR.Format(SR.net_WebSockets_InvalidState, _state, validStatesText));
+            WebSocketValidate.ThrowIfInvalidState(_state, _disposed, validStates);
         }
 
         public void UpdateState(WebSocketState value)

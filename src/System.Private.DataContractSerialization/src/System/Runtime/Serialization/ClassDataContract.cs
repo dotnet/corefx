@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Runtime.Serialization
 {
@@ -26,21 +27,21 @@ namespace System.Runtime.Serialization
         /// Review - XmlDictionaryString(s) representing the XML namespaces for class members.
         ///          statically cached and used from IL generated code. should ideally be Critical.
         ///          marked SecurityRequiresReview to be callable from transparent IL generated code. 
-        ///          not changed to property to avoid regressing performance; any changes to initalization should be reviewed.
+        ///          not changed to property to avoid regressing performance; any changes to initialization should be reviewed.
         /// </SecurityNote>
         public XmlDictionaryString[] ContractNamespaces;
         /// <SecurityNote>
         /// Review - XmlDictionaryString(s) representing the XML element names for class members.
         ///          statically cached and used from IL generated code. should ideally be Critical.
         ///          marked SecurityRequiresReview to be callable from transparent IL generated code. 
-        ///          not changed to property to avoid regressing performance; any changes to initalization should be reviewed.
+        ///          not changed to property to avoid regressing performance; any changes to initialization should be reviewed.
         /// </SecurityNote>
         public XmlDictionaryString[] MemberNames;
         /// <SecurityNote>
         /// Review - XmlDictionaryString(s) representing the XML namespaces for class members.
         ///          statically cached and used when calling IL generated code. should ideally be Critical.
         ///          marked SecurityRequiresReview to be callable from transparent code. 
-        ///          not changed to property to avoid regressing performance; any changes to initalization should be reviewed.
+        ///          not changed to property to avoid regressing performance; any changes to initialization should be reviewed.
         /// </SecurityNote>
         public XmlDictionaryString[] MemberNamespaces;
         [SecurityCritical]
@@ -149,12 +150,10 @@ namespace System.Runtime.Serialization
                 }
                 return _childElementNamespaces;
             }
-#if NET_NATIVE
             set
             {
                 _childElementNamespaces = value;
             }
-#endif
         }
 
         internal MethodInfo OnSerializing
@@ -271,6 +270,8 @@ namespace System.Runtime.Serialization
             { return _helper.GetKeyValuePairMethodInfo; }
         }
 
+        private ConstructorInfo _nonAttributedTypeConstructor;
+
         /// <SecurityNote>
         /// Critical - fetches information about which constructor should be used to initialize non-attributed types that are valid for serialization
         /// Safe - only needs to be protected for write
@@ -278,11 +279,57 @@ namespace System.Runtime.Serialization
         [SecuritySafeCritical]
         internal ConstructorInfo GetNonAttributedTypeConstructor()
         {
-            return _helper.GetNonAttributedTypeConstructor();
+            if (_nonAttributedTypeConstructor == null)
+            {
+                // Cache the ConstructorInfo to improve performance.
+                _nonAttributedTypeConstructor = _helper.GetNonAttributedTypeConstructor();
+            }
+
+            return _nonAttributedTypeConstructor;
         }
 
-#if !NET_NATIVE
+        private Func<object> _makeNewInstance;
+        private Func<object> MakeNewInstance
+        {
+            get
+            {
+                if (_makeNewInstance == null)
+                {
+                    _makeNewInstance = FastInvokerBuilder.GetMakeNewInstanceFunc(UnderlyingType);
+                }
+
+                return _makeNewInstance;
+            }
+        }
+
+        internal bool CreateNewInstanceViaDefaultConstructor(out object obj)
+        {
+            ConstructorInfo ci = GetNonAttributedTypeConstructor();
+            if (ci == null)
+            {
+                obj = null;
+                return false;
+            }
+
+            if (ci.IsPublic)
+            {
+                // Optimization for calling public default ctor.
+                obj = MakeNewInstance();
+            }
+            else
+            {
+                obj = ci.Invoke(Array.Empty<object>());
+            }
+
+            return true;
+        }
+
+#if NET_NATIVE
+        private XmlFormatClassWriterDelegate _xmlFormatWriterDelegate;
+        public XmlFormatClassWriterDelegate XmlFormatWriterDelegate
+#else
         internal XmlFormatClassWriterDelegate XmlFormatWriterDelegate
+#endif
         {
             /// <SecurityNote>
             /// Critical - fetches the critical xmlFormatWriterDelegate property
@@ -291,6 +338,13 @@ namespace System.Runtime.Serialization
             [SecuritySafeCritical]
             get
             {
+#if NET_NATIVE
+                if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
+                || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatWriterDelegate != null))
+                {
+                    return _xmlFormatWriterDelegate;
+                }
+#endif
                 if (_helper.XmlFormatWriterDelegate == null)
                 {
                     lock (this)
@@ -305,13 +359,20 @@ namespace System.Runtime.Serialization
                 }
                 return _helper.XmlFormatWriterDelegate;
             }
-        }
-#else
-        public XmlFormatClassWriterDelegate XmlFormatWriterDelegate { get; set; }
+            set
+            {
+#if NET_NATIVE
+                _xmlFormatWriterDelegate = value;
 #endif
+            }
+        }
 
-#if !NET_NATIVE
+#if NET_NATIVE
+        private XmlFormatClassReaderDelegate _xmlFormatReaderDelegate;
+        public XmlFormatClassReaderDelegate XmlFormatReaderDelegate
+#else
         internal XmlFormatClassReaderDelegate XmlFormatReaderDelegate
+#endif
         {
             /// <SecurityNote>
             /// Critical - fetches the critical xmlFormatReaderDelegate property
@@ -320,6 +381,13 @@ namespace System.Runtime.Serialization
             [SecuritySafeCritical]
             get
             {
+#if NET_NATIVE
+                if (DataContractSerializer.Option == SerializationOption.CodeGenOnly
+                || (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup && _xmlFormatReaderDelegate != null))
+                {
+                    return _xmlFormatReaderDelegate;
+                }
+#endif
                 if (_helper.XmlFormatReaderDelegate == null)
                 {
                     lock (this)
@@ -334,21 +402,27 @@ namespace System.Runtime.Serialization
                 }
                 return _helper.XmlFormatReaderDelegate;
             }
-        }
-#else
-        public XmlFormatClassReaderDelegate XmlFormatReaderDelegate { get; set; }
+            set
+            {
+#if NET_NATIVE
+                _xmlFormatReaderDelegate = value;
 #endif
+            }
+        }
 
         internal static ClassDataContract CreateClassDataContractForKeyValue(Type type, XmlDictionaryString ns, string[] memberNames)
         {
-#if !NET_NATIVE
-            return new ClassDataContract(type, ns, memberNames);
-#else
             ClassDataContract cdc = (ClassDataContract)DataContract.GetDataContractFromGeneratedAssembly(type);
-            ClassDataContract cloned = cdc.Clone();
-            cloned.UpdateNamespaceAndMembers(type, ns, memberNames);
-            return cloned;
-#endif
+            if (cdc == null)
+            {
+                return new ClassDataContract(type, ns, memberNames);
+            }
+            else
+            {
+                ClassDataContract cloned = cdc.Clone();
+                cloned.UpdateNamespaceAndMembers(type, ns, memberNames);
+                return cloned;                
+            }
         }
 
         internal static void CheckAndAddMember(List<DataMember> members, DataMember memberContract, Dictionary<string, DataMember> memberNamesTable)
@@ -439,47 +513,51 @@ namespace System.Runtime.Serialization
             }
         }
 
-        private static string[] s_knownSerializableTypeNames = new string[] {
-                "System.Collections.Queue",
-                "System.Collections.Stack",
-                "System.Globalization.CultureInfo",
-                "System.Version",
-                "System.Collections.Generic.KeyValuePair`2",
-                "System.Collections.Generic.Queue`1",
-                "System.Collections.Generic.Stack`1",
-                "System.Collections.ObjectModel.ReadOnlyCollection`1",
-                "System.Collections.ObjectModel.ReadOnlyDictionary`2",
-                "System.Tuple`1",
-                "System.Tuple`2",
-                "System.Tuple`3",
-                "System.Tuple`4",
-                "System.Tuple`5",
-                "System.Tuple`6",
-                "System.Tuple`7",
-                "System.Tuple`8",
+        private static readonly Dictionary<string, string[]> s_knownSerializableTypeInfos = new Dictionary<string, string[]> {
+            { "System.Collections.Generic.KeyValuePair`2", Array.Empty<string>() },
+            { "System.Collections.Generic.Queue`1", new [] { "_syncRoot" } },
+            { "System.Collections.Generic.Stack`1", new [] {"_syncRoot" } },
+            { "System.Collections.ObjectModel.ReadOnlyCollection`1", new [] {"_syncRoot" } },
+            { "System.Collections.ObjectModel.ReadOnlyDictionary`2", new [] {"_syncRoot", "_keys","_values" } },
+            { "System.Tuple`1", Array.Empty<string>() },
+            { "System.Tuple`2", Array.Empty<string>() },
+            { "System.Tuple`3", Array.Empty<string>() },
+            { "System.Tuple`4", Array.Empty<string>() },
+            { "System.Tuple`5", Array.Empty<string>() },
+            { "System.Tuple`6", Array.Empty<string>() },
+            { "System.Tuple`7", Array.Empty<string>() },
+            { "System.Tuple`8", Array.Empty<string>() },
+            { "System.Collections.Queue", new [] {"_syncRoot" } },
+            { "System.Collections.Stack", new [] {"_syncRoot" } },
+            { "System.Globalization.CultureInfo", Array.Empty<string>() },
+            { "System.Version", Array.Empty<string>() },
         };
+
+        private static string GetGeneralTypeName(Type type)
+        {
+            TypeInfo typeInfo = type.GetTypeInfo();
+            return typeInfo.IsGenericType && !typeInfo.IsGenericParameter
+                ? typeInfo.GetGenericTypeDefinition().FullName
+                : type.FullName;
+        }
 
         internal static bool IsKnownSerializableType(Type type)
         {
             // Applies to known types that DCS understands how to serialize/deserialize
             //
+            string typeFullName = GetGeneralTypeName(type);
 
-            // Ajdust for generic type
-            if (type.GetTypeInfo().IsGenericType && !type.GetTypeInfo().IsGenericTypeDefinition)
-            {
-                type = type.GetGenericTypeDefinition();
-            }
+            return s_knownSerializableTypeInfos.ContainsKey(typeFullName)
+                || Globals.TypeOfException.IsAssignableFrom(type);
+        }
 
-            // Check for known types
-            if (Enumerable.Contains(s_knownSerializableTypeNames, type.FullName))
-            {
-                return true;
-            }
-            //Enable ClassDataContract to give support to Exceptions.
-            if (Globals.TypeOfException.IsAssignableFrom(type))
-                return true;
+        internal static bool IsNonSerializedMember(Type type, string memberName)
+        {
+            string typeFullName = GetGeneralTypeName(type);
 
-            return false;
+            string[] members;
+            return s_knownSerializableTypeInfos.TryGetValue(typeFullName, out members)
+                && members.Contains(memberName);
         }
 
         private XmlDictionaryString[] CreateChildElementNamespaces()
@@ -540,10 +618,10 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        internal bool RequiresMemberAccessForRead(SecurityException securityException, string[] serializationAssemblyPatterns)
+        internal bool RequiresMemberAccessForRead(SecurityException securityException)
         {
             EnsureMethodsImported();
-            if (!IsTypeVisible(UnderlyingType, serializationAssemblyPatterns))
+            if (!IsTypeVisible(UnderlyingType))
             {
                 if (securityException != null)
                 {
@@ -555,10 +633,10 @@ namespace System.Runtime.Serialization
                 }
                 return true;
             }
-            if (this.BaseContract != null && this.BaseContract.RequiresMemberAccessForRead(securityException, serializationAssemblyPatterns))
+            if (this.BaseContract != null && this.BaseContract.RequiresMemberAccessForRead(securityException))
                 return true;
 
-            if (ConstructorRequiresMemberAccess(GetNonAttributedTypeConstructor(), serializationAssemblyPatterns))
+            if (ConstructorRequiresMemberAccess(GetNonAttributedTypeConstructor()))
             {
                 if (Globals.TypeOfScriptObject_IsAssignableFrom(UnderlyingType))
                 {
@@ -575,7 +653,7 @@ namespace System.Runtime.Serialization
                 return true;
             }
 
-            if (MethodRequiresMemberAccess(this.OnDeserializing, serializationAssemblyPatterns))
+            if (MethodRequiresMemberAccess(this.OnDeserializing))
             {
                 if (securityException != null)
                 {
@@ -589,7 +667,7 @@ namespace System.Runtime.Serialization
                 return true;
             }
 
-            if (MethodRequiresMemberAccess(this.OnDeserialized, serializationAssemblyPatterns))
+            if (MethodRequiresMemberAccess(this.OnDeserialized))
             {
                 if (securityException != null)
                 {
@@ -607,7 +685,7 @@ namespace System.Runtime.Serialization
             {
                 for (int i = 0; i < this.Members.Count; i++)
                 {
-                    if (this.Members[i].RequiresMemberAccessForSet(serializationAssemblyPatterns))
+                    if (this.Members[i].RequiresMemberAccessForSet())
                     {
                         if (securityException != null)
                         {
@@ -643,11 +721,11 @@ namespace System.Runtime.Serialization
         ///          since this information is used to determine whether to give the generated code access
         ///          permissions to private members, any changes to the logic should be reviewed.
         /// </SecurityNote>
-        internal bool RequiresMemberAccessForWrite(SecurityException securityException, string[] serializationAssemblyPatterns)
+        internal bool RequiresMemberAccessForWrite(SecurityException securityException)
         {
             EnsureMethodsImported();
 
-            if (!IsTypeVisible(UnderlyingType, serializationAssemblyPatterns))
+            if (!IsTypeVisible(UnderlyingType))
             {
                 if (securityException != null)
                 {
@@ -660,10 +738,10 @@ namespace System.Runtime.Serialization
                 return true;
             }
 
-            if (this.BaseContract != null && this.BaseContract.RequiresMemberAccessForWrite(securityException, serializationAssemblyPatterns))
+            if (this.BaseContract != null && this.BaseContract.RequiresMemberAccessForWrite(securityException))
                 return true;
 
-            if (MethodRequiresMemberAccess(this.OnSerializing, serializationAssemblyPatterns))
+            if (MethodRequiresMemberAccess(this.OnSerializing))
             {
                 if (securityException != null)
                 {
@@ -677,7 +755,7 @@ namespace System.Runtime.Serialization
                 return true;
             }
 
-            if (MethodRequiresMemberAccess(this.OnSerialized, serializationAssemblyPatterns))
+            if (MethodRequiresMemberAccess(this.OnSerialized))
             {
                 if (securityException != null)
                 {
@@ -695,7 +773,7 @@ namespace System.Runtime.Serialization
             {
                 for (int i = 0; i < this.Members.Count; i++)
                 {
-                    if (this.Members[i].RequiresMemberAccessForGet(serializationAssemblyPatterns))
+                    if (this.Members[i].RequiresMemberAccessForGet())
                     {
                         if (securityException != null)
                         {
@@ -737,10 +815,8 @@ namespace System.Runtime.Serialization
             private List<DataMember> _members;
             private MethodInfo _onSerializing, _onSerialized;
             private MethodInfo _onDeserializing, _onDeserialized;
-#if !NET_NATIVE
             private DataContractDictionary _knownDataContracts;
             private bool _isKnownTypeAttributeChecked;
-#endif
             private bool _isMethodChecked;
             /// <SecurityNote>
             /// in serialization/deserialization we base the decision whether to Demand SerializationFormatter permission on this value and hasDataContract
@@ -1045,7 +1121,7 @@ namespace System.Runtime.Serialization
                             DataMember memberContract = new DataMember(member);
 
                             memberContract.Name = DataContract.EncodeLocalName(member.Name);
-                            object[] optionalFields = null;
+                            object[] optionalFields = null; // TODO 11477: Add back optional field support
                             if (optionalFields == null || optionalFields.Length == 0)
                             {
                                 if (this.IsReference)
@@ -1073,7 +1149,7 @@ namespace System.Runtime.Serialization
 
             private static bool CanSerializeMember(FieldInfo field)
             {
-                return field != null;
+                return field != null && !ClassDataContract.IsNonSerializedMember(field.DeclaringType, field.Name);
             }
 
             private bool SetIfGetOnlyCollection(DataMember memberContract)
@@ -1286,12 +1362,17 @@ namespace System.Runtime.Serialization
                 }
             }
 
-#if !NET_NATIVE
+
             internal override DataContractDictionary KnownDataContracts
             {
                 [SecurityCritical]
                 get
                 {
+                    if (_knownDataContracts != null)
+                    {
+                        return _knownDataContracts;
+                    }
+
                     if (!_isKnownTypeAttributeChecked && UnderlyingType != null)
                     {
                         lock (this)
@@ -1310,7 +1391,7 @@ namespace System.Runtime.Serialization
                 set
                 { _knownDataContracts = value; }
             }
-#endif
+
 
             internal bool HasDataContract
             {
@@ -1441,7 +1522,6 @@ namespace System.Runtime.Serialization
                 internal static DataMemberConflictComparer Singleton = new DataMemberConflictComparer();
             }
 
-#if NET_NATIVE
             internal ClassDataContractCriticalHelper Clone()
             {
                 ClassDataContractCriticalHelper clonedHelper = new ClassDataContractCriticalHelper(this.UnderlyingType);
@@ -1471,7 +1551,6 @@ namespace System.Runtime.Serialization
 
                 return clonedHelper;
             }
-#endif
         }
 
 
@@ -1507,7 +1586,7 @@ namespace System.Runtime.Serialization
         }
 #endif
 
-#if NET_NATIVE
+
         internal ClassDataContract Clone()
         {
             ClassDataContract clonedDc = new ClassDataContract(this.UnderlyingType);
@@ -1537,6 +1616,20 @@ namespace System.Runtime.Serialization
                 this.MemberNamespaces[i] = ns;
             }
         }
-#endif
+
+        internal Type UnadaptedClassType
+        {
+            get
+            {
+                if (IsKeyValuePairAdapter)
+                {
+                    return Globals.TypeOfKeyValuePair.MakeGenericType(KeyValuePairGenericArguments);
+                }
+                else
+                {
+                    return UnderlyingType;
+                }
+            }
+        }
     }
 }

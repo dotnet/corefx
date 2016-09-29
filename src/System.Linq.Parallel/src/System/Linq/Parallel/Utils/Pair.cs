@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -43,40 +44,6 @@ namespace System.Linq.Parallel
         }
 
         public U Second
-        {
-            get { return _second; }
-            set { _second = value; }
-        }
-    }
-
-    //Non-generic version to avoid cycles when doing static analysis in NUTC.
-    internal struct Pair
-    {
-        // The first and second bits of data.
-        internal object _first;
-        internal object _second;
-
-        //-----------------------------------------------------------------------------------
-        // A simple constructor that initializes the first/second fields.
-        //
-
-        public Pair(object first, object second)
-        {
-            _first = first;
-            _second = second;
-        }
-
-        //-----------------------------------------------------------------------------------
-        // Accessors for the left and right data.
-        //
-
-        public object First
-        {
-            get { return _first; }
-            set { _first = value; }
-        }
-
-        public object Second
         {
             get { return _second; }
             set { _second = value; }

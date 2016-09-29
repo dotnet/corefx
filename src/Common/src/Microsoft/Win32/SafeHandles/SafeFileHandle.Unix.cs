@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -13,9 +14,18 @@ namespace Microsoft.Win32.SafeHandles
         /// <summary>A handle value of -1.</summary>
         private static readonly IntPtr s_invalidHandle = new IntPtr(-1);
 
+        private SafeFileHandle() : this(ownsHandle: true)
+        {
+        }
+
         private SafeFileHandle(bool ownsHandle)
             : base(s_invalidHandle, ownsHandle)
         {
+        }
+
+        public SafeFileHandle(IntPtr preexistingHandle, bool ownsHandle) : this(ownsHandle)
+        {
+            SetHandle(preexistingHandle);
         }
 
         /// <summary>Opens the specified file with the requested flags and mode.</summary>
@@ -27,23 +37,22 @@ namespace Microsoft.Win32.SafeHandles
         {
             Debug.Assert(path != null);
 
-            SafeFileHandle handle = new SafeFileHandle(ownsHandle: true);
-
             // If we fail to open the file due to a path not existing, we need to know whether to blame
             // the file itself or its directory.  If we're creating the file, then we blame the directory,
             // otherwise we blame the file.
             bool enoentDueToDirectory = (flags & Interop.Sys.OpenFlags.O_CREAT) != 0;
 
             // Open the file. 
-            int fd;
-            while (Interop.CheckIo(fd = Interop.Sys.Open(path, flags, mode), path, isDirectory: enoentDueToDirectory,
-                errorRewriter: e => (e.Error == Interop.Error.EISDIR) ? Interop.Error.EACCES.Info() : e)) ;
-            handle.SetHandle(fd);
+            SafeFileHandle handle = Interop.CheckIo(
+                Interop.Sys.Open(path, flags, mode),
+                path, 
+                isDirectory: enoentDueToDirectory,
+                errorRewriter: e => (e.Error == Interop.Error.EISDIR) ? Interop.Error.EACCES.Info() : e);
 
             // Make sure it's not a directory; we do this after opening it once we have a file descriptor 
             // to avoid race conditions.
             Interop.Sys.FileStatus status;
-            if (Interop.Sys.FStat(fd, out status) != 0)
+            if (Interop.Sys.FStat(handle, out status) != 0)
             {
                 handle.Dispose();
                 throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo(), path);
@@ -59,42 +68,33 @@ namespace Microsoft.Win32.SafeHandles
 
         /// <summary>Opens a SafeFileHandle for a file descriptor created by a provided delegate.</summary>
         /// <param name="fdFunc">
-        /// The function that creates the file descriptor. Returns the file descriptor on success, or -1 on error,
-        /// with Marshal.GetLastWin32Error() set to the error code.
+        /// The function that creates the file descriptor. Returns the file descriptor on success, or an invalid
+        /// file descriptor on error with Marshal.GetLastWin32Error() set to the error code.
         /// </param>
         /// <returns>The created SafeFileHandle.</returns>
-        internal static SafeFileHandle Open(Func<int> fdFunc)
+        internal static SafeFileHandle Open(Func<SafeFileHandle> fdFunc)
         {
-            var handle = new SafeFileHandle(ownsHandle: true);
-            int fd;
-            while (Interop.CheckIo(fd = fdFunc())) ;
-            handle.SetHandle(fd);
-            return handle;
-        }
+            SafeFileHandle handle = Interop.CheckIo(fdFunc());
 
-        private void SetHandle(int fd)
-        {
-            SetHandle((IntPtr)fd);
-            Debug.Assert(!IsInvalid, "File descriptor is invalid");
+            Debug.Assert(!handle.IsInvalid, "File descriptor is invalid");
+            return handle;
         }
 
         [System.Security.SecurityCritical]
         protected override bool ReleaseHandle()
         {
-            int fd = (int)handle;
-
             // When the SafeFileHandle was opened, we likely issued an flock on the created descriptor in order to add 
             // an advisory lock.  This lock should be removed via closing the file descriptor, but close can be
             // interrupted, and we don't retry closes.  As such, we could end up leaving the file locked,
             // which could prevent subsequent usage of the file until this process dies.  To avoid that, we proactively
             // try to release the lock before we close the handle. (If it's not locked, there's no behavioral
             // problem trying to unlock it.)
-            Interop.Sys.FLock(fd, Interop.Sys.LockOperations.LOCK_UN); // ignore any errors
+            Interop.Sys.FLock(handle, Interop.Sys.LockOperations.LOCK_UN); // ignore any errors
 
             // Close the descriptor. Although close is documented to potentially fail with EINTR, we never want
             // to retry, as the descriptor could actually have been closed, been subsequently reassigned, and
             // be in use elsewhere in the process.  Instead, we simply check whether the call was successful.
-            int result = Interop.Sys.Close(fd);
+            int result = Interop.Sys.Close(handle);
 #if DEBUG
             if (result != 0)
             {

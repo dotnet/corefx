@@ -1,12 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
@@ -17,11 +15,15 @@ namespace System.Net.WebSockets
         private bool _isReadOnly; // After ConnectAsync is called the options cannot be modified.
         private readonly List<string> _requestedSubProtocols;
         private readonly WebHeaderCollection _requestHeaders;
-        private TimeSpan _keepAliveInterval;
+        private TimeSpan _keepAliveInterval = TimeSpan.FromSeconds(30); // Same as WebSocket.DefaultKeepAliveInterval.  TODO #11735: Switch to that when it's available.
+        private bool _useDefaultCredentials;
         private ICredentials _credentials;
         private IWebProxy _proxy;
         private X509CertificateCollection _clientCertificates;
         private CookieContainer _cookies;
+        private int _receiveBufferSize = 0x1000;
+        private int _sendBufferSize = 0x1000;
+        private ArraySegment<byte>? _buffer;
 
         internal ClientWebSocketOptions()
         {
@@ -43,6 +45,19 @@ namespace System.Net.WebSockets
         internal WebHeaderCollection RequestHeaders { get { return _requestHeaders; } }
 
         internal List<string> RequestedSubProtocols {  get { return _requestedSubProtocols;} }
+
+        public bool UseDefaultCredentials
+        {
+            get
+            {
+                return _useDefaultCredentials;
+            }
+            set
+            {
+                ThrowIfReadOnly();
+                _useDefaultCredentials = value;
+            }
+        }
 
         public ICredentials Credentials
         {
@@ -87,7 +102,7 @@ namespace System.Net.WebSockets
                 ThrowIfReadOnly();
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
                 _clientCertificates = value;
             }
@@ -120,8 +135,7 @@ namespace System.Net.WebSockets
             {
                 if (string.Equals(item, subProtocol, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new ArgumentException(SR.Format(SR.net_WebSockets_NoDuplicateProtocol, subProtocol),
-                        "subProtocol");
+                    throw new ArgumentException(SR.Format(SR.net_WebSockets_NoDuplicateProtocol, subProtocol), nameof(subProtocol));
                 }
             }
             _requestedSubProtocols.Add(subProtocol);
@@ -138,12 +152,58 @@ namespace System.Net.WebSockets
                 ThrowIfReadOnly();
                 if (value != Timeout.InfiniteTimeSpan && value < TimeSpan.Zero)
                 {
-                    throw new ArgumentOutOfRangeException("value", value,
+                    throw new ArgumentOutOfRangeException(nameof(value), value,
                         SR.Format(SR.net_WebSockets_ArgumentOutOfRange_TooSmall,
                         Timeout.InfiniteTimeSpan.ToString()));
                 }
                 _keepAliveInterval = value;
             }
+        }
+
+        internal int ReceiveBufferSize => _receiveBufferSize;
+        internal int SendBufferSize => _sendBufferSize;
+        internal ArraySegment<byte>? Buffer => _buffer;
+
+        public void SetBuffer(int receiveBufferSize, int sendBufferSize)
+        {
+            ThrowIfReadOnly();
+
+            if (receiveBufferSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(receiveBufferSize), receiveBufferSize, SR.Format(SR.net_WebSockets_ArgumentOutOfRange_TooSmall, 1));
+            }
+            if (sendBufferSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sendBufferSize), sendBufferSize, SR.Format(SR.net_WebSockets_ArgumentOutOfRange_TooSmall, 1));
+            }
+
+            _receiveBufferSize = receiveBufferSize;
+            _sendBufferSize = sendBufferSize;
+            _buffer = null;
+        }
+
+        public void SetBuffer(int receiveBufferSize, int sendBufferSize, ArraySegment<byte> buffer)
+        {
+            ThrowIfReadOnly();
+
+            if (receiveBufferSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(receiveBufferSize), receiveBufferSize, SR.Format(SR.net_WebSockets_ArgumentOutOfRange_TooSmall, 1));
+            }
+            if (sendBufferSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sendBufferSize), sendBufferSize, SR.Format(SR.net_WebSockets_ArgumentOutOfRange_TooSmall, 1));
+            }
+
+            WebSocketValidate.ValidateArraySegment(buffer, nameof(buffer));
+            if (buffer.Count == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(buffer));
+            }
+
+            _receiveBufferSize = receiveBufferSize;
+            _sendBufferSize = sendBufferSize;
+            _buffer = buffer;
         }
 
         #endregion WebSocket settings

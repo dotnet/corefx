@@ -1,42 +1,44 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Globalization;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class DateTimeFormatInfoReadOnly
     {
-        // PosTest1: Call ReadOnly on a writable DateTimeFormatInfo instance
-        [Fact]
-        public void TestWritable()
+        public static IEnumerable<object[]> ReadOnly_TestData()
         {
-            DateTimeFormatInfo info = new DateTimeFormatInfo();
-            DateTimeFormatInfo actual = DateTimeFormatInfo.ReadOnly(info);
-
-            Assert.True(actual.IsReadOnly);
+            yield return new object[] { DateTimeFormatInfo.InvariantInfo, true };
+            yield return new object[] { DateTimeFormatInfo.ReadOnly(new DateTimeFormatInfo()), true };
+            yield return new object[] { new DateTimeFormatInfo(), false };
+            yield return new object[] { new CultureInfo("en-US").DateTimeFormat, false };
         }
 
-        // PosTest2: Call ReadOnly on a read only DateTimeFormatInfo instance
-        [Fact]
-        public void TestReadOnly()
+        [Theory]
+        [MemberData(nameof(ReadOnly_TestData))]
+        public void ReadOnly(DateTimeFormatInfo format, bool originalFormatIsReadOnly)
         {
-            DateTimeFormatInfo info = DateTimeFormatInfo.InvariantInfo;
-            DateTimeFormatInfo actual = DateTimeFormatInfo.ReadOnly(info);
+            Assert.Equal(originalFormatIsReadOnly, format.IsReadOnly);
 
-            Assert.True(actual.IsReadOnly);
-        }
-
-        // NegTest1: ArgumentNullException should be thrown when dtfi is a null reference
-        [Fact]
-        public void TestNull()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
+            DateTimeFormatInfo readOnlyFormat = DateTimeFormatInfo.ReadOnly(format);
+            if (originalFormatIsReadOnly) 
             {
-                DateTimeFormatInfo.ReadOnly(null);
-            });
+            	Assert.Same(format, readOnlyFormat);
+            }
+            else 
+            {
+            	Assert.NotSame(format, readOnlyFormat);
+            }
+            Assert.True(readOnlyFormat.IsReadOnly);
+        }
+
+        [Fact]
+        public void ReadOnly_Null_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>("dtfi", () => DateTimeFormatInfo.ReadOnly(null)); // Dtfi is null
         }
     }
 }

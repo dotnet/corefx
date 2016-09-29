@@ -1,15 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics
 {
-#if PUBLIC_DEBUG
-    public static partial class Debug
-#else
-    internal static partial class Debug
-#endif
+    // Intentionally excluding visibility so it defaults to internal except for
+    // the one public version in System.Diagnostics.Debug which defines
+    // another version of this partial class with the public visibility 
+    static partial class Debug
     {
         // internal and not readonly so that the tests can swap this out.
         internal static IDebugLogger s_logger = new UnixDebugLogger();
@@ -33,7 +33,15 @@ namespace System.Diagnostics
                 else
                 {
                     // TODO: #3708 Determine if/how to put up a dialog instead.
-                    throw new DebugAssertException(message, detailMessage, stackTrace);
+                    var exc = new DebugAssertException(message, detailMessage, stackTrace);
+                    if (!s_shouldWriteToStdErr) 
+                    {
+                        // We always want to print out Debug.Assert failures to stderr, even if
+                        // !s_shouldWriteToStdErr, so if it wouldn't have been printed in
+                        // WriteCore (only when s_shouldWriteToStdErr), print it here.
+                        WriteToStderr(exc.Message);
+                    }
+                    throw exc;
                 }
             }
 
@@ -90,14 +98,9 @@ namespace System.Diagnostics
                             int totalBytesWritten = 0;
                             while (bufCount > 0)
                             {
-                                int bytesWritten = Interop.Sys.Write((int)fileHandle.DangerousGetHandle(), buf + totalBytesWritten, bufCount);
+                                int bytesWritten = Interop.Sys.Write(fileHandle, buf + totalBytesWritten, bufCount);
                                 if (bytesWritten < 0)
                                 {
-                                    if (Interop.Sys.GetLastErrorInfo().Error == Interop.Error.EINTR)
-                                    {
-                                        continue;
-                                    }
-
                                     // On error, simply stop writing the debug output.  This could commonly happen if stderr
                                     // was piped to a program that ended before this program did, resulting in EPIPE errors.
                                     return;

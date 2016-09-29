@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -99,13 +100,15 @@ namespace Internal.Cryptography.Pal
         {
             get
             {
-                SafeSharedAsn1IntegerHandle serialNumber = Interop.Crypto.X509GetSerialNumber(_cert);
-                byte[] serial = Interop.Crypto.GetAsn1IntegerBytes(serialNumber);
+                using (SafeSharedAsn1IntegerHandle serialNumber = Interop.Crypto.X509GetSerialNumber(_cert))
+                {
+                    byte[] serial = Interop.Crypto.GetAsn1IntegerBytes(serialNumber);
 
-                // Windows returns this in BigInteger Little-Endian,
-                // OpenSSL returns this in BigInteger Big-Endian.
-                Array.Reverse(serial);
-                return serial;
+                    // Windows returns this in BigInteger Little-Endian,
+                    // OpenSSL returns this in BigInteger Big-Endian.
+                    Array.Reverse(serial);
+                    return serial;
+                }
             }
         }
 
@@ -139,8 +142,8 @@ namespace Internal.Cryptography.Pal
             get
             {
                 return Interop.Crypto.OpenSslEncode(
-                    Interop.Crypto.GetX509DerSize,
-                    Interop.Crypto.EncodeX509,
+                    x => Interop.Crypto.GetX509DerSize(x),
+                    (x, buf) => Interop.Crypto.EncodeX509(x, buf),
                     _cert);
             }
         }
@@ -165,13 +168,21 @@ namespace Internal.Cryptography.Pal
         public bool Archived
         {
             get { return false; }
-            set { throw new NotImplementedException(); }
+            set
+            {
+                throw new PlatformNotSupportedException(
+                    SR.Format(SR.Cryptography_Unix_X509_PropertyNotSettable, "Archived"));
+            }
         }
 
         public string FriendlyName
         {
             get { return ""; }
-            set { throw new NotImplementedException(); }
+            set
+            {
+                throw new PlatformNotSupportedException(
+                  SR.Format(SR.Cryptography_Unix_X509_PropertyNotSettable, "FriendlyName"));
+            }
         }
 
         public X500DistinguishedName SubjectName
@@ -258,6 +269,8 @@ namespace Internal.Cryptography.Pal
         {
             using (SafeEvpPKeyHandle publicKeyHandle = Interop.Crypto.GetX509EvpPublicKey(_cert))
             {
+                Interop.Crypto.CheckValidOpenSslHandle(publicKeyHandle);
+
                 return new ECDsaOpenSsl(publicKeyHandle);
             }
         }
@@ -325,7 +338,7 @@ namespace Internal.Cryptography.Pal
 
         internal OpenSslX509CertificateReader DuplicateHandles()
         {
-            SafeX509Handle certHandle = Interop.Crypto.X509Duplicate(_cert);
+            SafeX509Handle certHandle = Interop.Crypto.X509UpRef(_cert);
             OpenSslX509CertificateReader duplicate = new OpenSslX509CertificateReader(certHandle);
 
             if (_privateKey != null)

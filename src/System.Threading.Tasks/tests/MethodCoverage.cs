@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Threading.Tasks;
@@ -14,10 +15,9 @@ namespace TaskCoverage
     {
         // Regression test: Validates that tasks can wait on int.MaxValue without assertion.
         [Fact]
-        [OuterLoop]
         public static void TaskWait_MaxInt32()
         {
-            Task t = Task.Delay(10000);
+            Task t = Task.Delay(1);
             Debug.WriteLine("Wait with int.Maxvalue");
             Task.WaitAll(new Task[] { t }, int.MaxValue);
         }

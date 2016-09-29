@@ -1,9 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Composition.Convention;
 using System.Composition.Hosting;
-using System.Composition.Runtime;
 using System.Composition.TypedParts;
 using System.Composition.TypedParts.ActivationFeatures;
 using System.Composition.TypedParts.Util;
@@ -45,9 +45,9 @@ namespace System.Composition
 
         private static void SatisfyImportsInternal(this CompositionContext exportProvider, object objectWithLooseImports, AttributedModelProvider conventions)
         {
-            if (exportProvider == null) throw new ArgumentNullException("exportProvider");
-            if (objectWithLooseImports == null) throw new ArgumentNullException("objectWithLooseImports");
-            if (conventions == null) throw new ArgumentNullException("conventions");
+            if (exportProvider == null) throw new ArgumentNullException(nameof(exportProvider));
+            if (objectWithLooseImports == null) throw new ArgumentNullException(nameof(objectWithLooseImports));
+            if (conventions == null) throw new ArgumentNullException(nameof(conventions));
 
             var objType = objectWithLooseImports.GetType();
 

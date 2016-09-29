@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 
@@ -53,6 +54,28 @@ namespace System.Linq.Parallel.Tests
         }
     }
 
+    internal sealed class CancelingEqualityComparer<T> : IEqualityComparer<T>
+    {
+        private readonly Action _canceler;
+
+        public CancelingEqualityComparer(Action canceler)
+        {
+            _canceler = canceler;
+        }
+
+        public bool Equals(T x, T y)
+        {
+            _canceler();
+            return EqualityComparer<T>.Default.Equals(x, y);
+        }
+
+        public int GetHashCode(T obj)
+        {
+            _canceler();
+            return obj.GetHashCode();
+        }
+    }
+
     internal class ReverseComparer : IComparer<int>
     {
         public static readonly ReverseComparer Instance = new ReverseComparer();
@@ -89,6 +112,22 @@ namespace System.Linq.Parallel.Tests
         }
     }
 
+    internal sealed class CancelingComparer : IComparer<int>
+    {
+        private readonly Action _canceler;
+
+        public CancelingComparer(Action canceler)
+        {
+            _canceler = canceler;
+        }
+
+        public int Compare(int x, int y)
+        {
+            _canceler();
+            return Comparer<int>.Default.Compare(x, y);
+        }
+    }
+
     internal static class DelgatedComparable
     {
         public static DelegatedComparable<T> Delegate<T>(T value, IComparer<T> comparer) where T : IComparable<T>
@@ -119,6 +158,59 @@ namespace System.Linq.Parallel.Tests
         public int CompareTo(DelegatedComparable<T> other)
         {
             return _comparer.Compare(Value, other.Value);
+        }
+    }
+
+    /// <summary>
+    /// All funcs to be used as comparers by wrapping and delegating.
+    /// </summary>
+    internal static class DelegatingComparer
+    {
+        public static IComparer<T> Create<T>(Func<T, T, int> comparer)
+        {
+            return new DelegatingOrderingComparer<T>(comparer);
+        }
+
+        public static IEqualityComparer<T> Create<T>(Func<T, T, bool> comparer, Func<T, int> hashcode)
+        {
+            return new DelegatingEqualityComparer<T>(comparer, hashcode);
+        }
+
+        private class DelegatingOrderingComparer<T> : IComparer<T>
+        {
+            private readonly Func<T, T, int> _comparer;
+
+            public DelegatingOrderingComparer(Func<T, T, int> comparer)
+            {
+                _comparer = comparer;
+            }
+
+            public int Compare(T left, T right)
+            {
+                return _comparer(left, right);
+            }
+        }
+
+        private class DelegatingEqualityComparer<T> : IEqualityComparer<T>
+        {
+            private readonly Func<T, T, bool> _comparer;
+            private readonly Func<T, int> _hashcode;
+
+            public DelegatingEqualityComparer(Func<T, T, bool> comparer, Func<T, int> hashcode)
+            {
+                _comparer = comparer;
+                _hashcode = hashcode;
+            }
+
+            public bool Equals(T left, T right)
+            {
+                return _comparer(left, right);
+            }
+
+            public int GetHashCode(T item)
+            {
+                return _hashcode(item);
+            }
         }
     }
 

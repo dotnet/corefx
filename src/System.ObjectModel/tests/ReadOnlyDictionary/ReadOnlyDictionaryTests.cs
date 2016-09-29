@@ -1,17 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit;
 using Tests.Collections;
+using System.Reflection;
+using System.Linq;
 
 namespace System.Collections.ObjectModel.Tests
 {
-    /// <summary>
-    /// Tests the public methods in ReadOnlyDictionary<TKey, Value>.
-    /// properly.
-    /// </summary>
     public class ReadOnlyDictionaryTests
     {
         /// <summary>
@@ -50,6 +49,10 @@ namespace System.Collections.ObjectModel.Tests
 
             IDictionary<int, string> dictAsIDictionary = dictionary;
             Assert.True(dictAsIDictionary.IsReadOnly, "ReadonlyDictionary Should be readonly");
+
+            IDictionary dictAsNonGenericIDictionary = dictionary;
+            Assert.True(dictAsNonGenericIDictionary.IsFixedSize);
+            Assert.True(dictAsNonGenericIDictionary.IsReadOnly);
         }
 
         /// <summary>
@@ -215,6 +218,22 @@ namespace System.Collections.ObjectModel.Tests
 
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ReadOnlyDictionary<int, int>(new Dictionary<int, int>()).Keys);
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ReadOnlyDictionary<int, int>(new Dictionary<int, int>()).Values);
+        }
+
+        [Fact]
+        public static void DebuggerAttribute_NullDictionary_ThrowsArgumentNullException()
+        {
+            TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() =>   DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyDictionary<int, int>), null));
+            ArgumentNullException argumentNullException = Assert.IsType<ArgumentNullException>(ex.InnerException);
+            Assert.Equal("dictionary", argumentNullException.ParamName);
+        }
+        
+        [Fact]
+        public static void DebuggerAttribute_NullDictionaryKeys_ThrowsArgumentNullException()
+        {
+            TargetInvocationException ex = Assert.Throws<TargetInvocationException>(() => DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(ReadOnlyDictionary<int, int>.KeyCollection), new Type[] { typeof(int) }, null));
+            ArgumentNullException argumentNullException = Assert.IsType<ArgumentNullException>(ex.InnerException);
+            Assert.Equal("collection", argumentNullException.ParamName);
         }
     }
 
@@ -605,7 +624,7 @@ namespace System.Collections.ObjectModel.Tests
 
                 // Verify we have not gotten more items then we expected                
                 Assert.True(iterations < expectedCount,
-                    "Err_9844awpa More items have been returned fromt the enumerator(" + iterations + " items) then are in the expectedElements(" + expectedCount + " items)");
+                    "Err_9844awpa More items have been returned from the enumerator(" + iterations + " items) then are in the expectedElements(" + expectedCount + " items)");
 
                 // Verify Current returned the correct value
                 itemFound = false;
@@ -666,7 +685,7 @@ namespace System.Collections.ObjectModel.Tests
 
                 // Verify we have not gotten more items then we expected                
                 Assert.True(iterations < expectedCount,
-                    "Err_9844awpa More items have been returned fromt the enumerator(" + iterations + " items) then are in the expectedElements(" + expectedCount + " items)");
+                    "Err_9844awpa More items have been returned from the enumerator(" + iterations + " items) then are in the expectedElements(" + expectedCount + " items)");
 
                 // Verify Current returned the correct value
                 itemFound = false;

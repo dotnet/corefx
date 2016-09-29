@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -17,7 +18,7 @@ namespace Microsoft.Win32.SafeHandles
     /// <remarks>
     ///     Since NCrypt handles do not have a native DuplicateHandle type call, we need to do manual 
     ///     reference counting in managed code whenever we hand out an extra reference to one of these handles.
-    ///     This class wraps up the logic to correctly duplicate and free these handles to simluate a native
+    ///     This class wraps up the logic to correctly duplicate and free these handles to simulate a native
     ///     duplication.
     /// 
     ///     Each open handle object can be thought of as being in one of three states:
@@ -30,7 +31,7 @@ namespace Microsoft.Win32.SafeHandles
     ///                       When all duplicate handles are closed, the holder handle releases the native
     ///                       handle. A holder handle will never be finalized, since this results in a race
     ///                       between the finalizers of the duplicate handles and the holder handle. Instead,
-    ///                       it relies upon all of the duplicate handles to be finalized and decriment the
+    ///                       it relies upon all of the duplicate handles to be finalized and decrement the
     ///                       ref count to zero.  Instances of a holder handle should never be referenced by
     ///                       anything but a duplicate handle.
     /// </remarks>
@@ -62,9 +63,36 @@ namespace Microsoft.Win32.SafeHandles
         /// </summary>
         private SafeNCryptHandle _holder;
 
+        private SafeHandle _parentHandle;
+
         protected SafeNCryptHandle() : base(IntPtr.Zero, true)
         {
             return;
+        }
+
+        protected SafeNCryptHandle(IntPtr handle, SafeHandle parentHandle)
+            : base(IntPtr.Zero, true)
+        {
+            if (parentHandle == null)
+                throw new ArgumentNullException(nameof(parentHandle));
+            if (parentHandle.IsClosed || parentHandle.IsInvalid)
+                throw new ArgumentException(SR.Argument_Invalid_SafeHandleInvalidOrClosed, nameof(parentHandle));
+
+            bool success = false;
+            parentHandle.DangerousAddRef(ref success);
+            _parentHandle = parentHandle;
+
+            // Don't set the handle value until after parentHandle has been validated and persisted to a field,
+            // otherwise Dispose will try to call the underlying Free function.
+            SetHandle(handle);
+
+            // But if this handle value IsInvalid then we'll never call ReleaseHandle, which leaves the parent open
+            // forever.  Instead, release such a parent now.
+            if (IsInvalid)
+            {
+                _parentHandle.DangerousRelease();
+                _parentHandle = null;
+            }
         }
 
         /// <summary>
@@ -109,7 +137,8 @@ namespace Microsoft.Win32.SafeHandles
                     case OwnershipState.Owner:
                         return Holder == null && !IsInvalid && !IsClosed;
 
-                    // Duplicate handles have valid open holders with the same raw handle value
+                    // Duplicate handles have valid open holders with the same raw handle value,
+                    // and should not be tracking a distinct parent.
                     case OwnershipState.Duplicate:
                         bool acquiredHolder = false;
 
@@ -128,7 +157,8 @@ namespace Microsoft.Win32.SafeHandles
                                                !Holder.IsInvalid &&
                                                !Holder.IsClosed &&
                                                holderRawHandle != IntPtr.Zero &&
-                                               holderRawHandle == handle;
+                                               holderRawHandle == handle &&
+                                               _parentHandle == null;
 
                             return holderValid && !IsInvalid && !IsClosed;
                         }
@@ -253,6 +283,14 @@ namespace Microsoft.Win32.SafeHandles
                 holder.SetHandle(DangerousGetHandle());
                 GC.SuppressFinalize(holder);
 
+
+                // Move the parent handle to the Holder
+                if (_parentHandle != null)
+                {
+                    holder._parentHandle = _parentHandle;
+                    _parentHandle = null;
+                }
+
                 // Transition into the duplicate state, referencing the holder. The initial reference count
                 // on the holder will refer to the original handle so there is no need to AddRef here.
                 Holder = holder;        // Transitions to OwnershipState.Duplicate
@@ -278,6 +316,9 @@ namespace Microsoft.Win32.SafeHandles
         ///     Similar to duplication, releasing a handle performs different operations based upon the state
         ///     of the handle.
         /// 
+        ///     An instance which was constructed with a parentHandle value will only call DangerousRelease on
+        ///     the parentHandle object. Otherwise the behavior is dictated by the ownership state.
+        /// 
         ///     * Owner     - Simply call the release P/Invoke method
         ///     * Duplicate - Decrement the reference count of the current holder
         ///     * Holder    - Call the release P/Invoke. Note that ReleaseHandle on a holder implies a reference
@@ -288,6 +329,11 @@ namespace Microsoft.Win32.SafeHandles
             if (_ownershipState == OwnershipState.Duplicate)
             {
                 Holder.DangerousRelease();
+                return true;
+            }
+            else if (_parentHandle != null)
+            {
+                _parentHandle.DangerousRelease();
                 return true;
             }
             else
@@ -318,6 +364,15 @@ namespace Microsoft.Win32.SafeHandles
     /// </summary>
     public sealed class SafeNCryptKeyHandle : SafeNCryptHandle
     {
+        public SafeNCryptKeyHandle()
+        {
+        }
+
+        public SafeNCryptKeyHandle(IntPtr handle, SafeHandle parentHandle)
+            : base(handle, parentHandle)
+        {
+        }
+
         internal SafeNCryptKeyHandle Duplicate()
         {
             return Duplicate<SafeNCryptKeyHandle>();

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -11,6 +11,7 @@
     <RootNamespace>System.Linq.Parallel.Tests</RootNamespace>
     <AssemblyName>System.Linq.Parallel.Tests</AssemblyName>
     <NuGetPackageImportStamp>8be98411</NuGetPackageImportStamp>
+    <NugetTargetMoniker>.NETStandard,Version=v1.6</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -22,12 +23,18 @@
     <Compile Include="$(CommonTestPath)\System\Diagnostics\Tracing\TestEventListener.cs">
       <Link>Common\System\Diagnostics\Tracing\TestEventListener.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
+      <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Threading\ThreadPoolHelpers.cs">
+      <Link>CommonTest\System\Threading\ThreadPoolHelpers.cs</Link>
+    </Compile>
     <Compile Include="Combinatorial\CancellationParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\FailingParallelQueryCombinationTests.cs" />
-    <Compile Include="Combinatorial\LabeledOperation.cs" />
     <Compile Include="Combinatorial\ParallelQueryCombinationTests.cs" />
     <Compile Include="Combinatorial\SourcesAndOperators.cs" />
     <Compile Include="Combinatorial\UnorderedParallelQueryCombinationTests.cs" />
+    <Compile Include="Helpers\AssertThrows.cs" />
     <Compile Include="Helpers\Comparers.cs" />
     <Compile Include="Helpers\DeliberateTestException.cs" />
     <Compile Include="Helpers\Enumerables.cs" />
@@ -36,7 +43,7 @@
     <Compile Include="Helpers\Labeled.cs" />
     <Compile Include="Helpers\KeyValuePair.cs" />
     <Compile Include="Helpers\Sources.cs" />
-    <Compile Include="Helpers\StrictPartitioner.cs" />
+    <Compile Include="Helpers\CustomPartitioners.cs" />
     <Compile Include="Helpers\UnorderedSources.cs" />
     <Compile Include="QueryOperators\AggregateTests.cs" />
     <Compile Include="QueryOperators\AllTests.cs" />
@@ -88,10 +95,9 @@
   </ItemGroup>
   <!-- Common or Common-branched source files -->
   <ItemGroup>
-    <ProjectReference Include="..\src\System.Linq.Parallel.csproj">
+    <ProjectReference Include="..\pkg\System.Linq.Parallel.pkgproj">
       <Project>{be28323e-327a-4e0f-b7f9-16ab7eab59dd}</Project>
       <Name>System.Linq.Parallel</Name>
-      <Private>true</Private>
     </ProjectReference>
   </ItemGroup>
   <!-- Automatically added by VS -->

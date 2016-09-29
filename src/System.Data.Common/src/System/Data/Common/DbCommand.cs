@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -12,11 +13,16 @@ using System.Threading;
 
 namespace System.Data.Common
 {
-    public abstract class DbCommand :
+    public abstract class DbCommand : IDbCommand,
         IDisposable
     {
         protected DbCommand() : base()
         {
+        }
+
+        ~DbCommand()
+        {
+            Dispose(disposing: false);
         }
 
         abstract public string CommandText
@@ -99,6 +105,38 @@ namespace System.Data.Common
             set;
         }
 
+        IDbConnection IDbCommand.Connection
+        {
+            get
+            {
+                return DbConnection;
+            }
+            set
+            {
+                DbConnection = (DbConnection)value;
+            }
+        }
+
+        IDbTransaction IDbCommand.Transaction
+        {
+            get
+            {
+                return DbTransaction;
+            }
+            set
+            {
+                DbTransaction = (DbTransaction)value;
+            }
+        }
+
+        IDataParameterCollection IDbCommand.Parameters
+        {
+            get
+            {
+                return (DbParameterCollection)DbParameterCollection;
+            }
+        }
+
         internal void CancelIgnoreFailure()
         {
             // This method is used to route CancellationTokens to the Cancel method.
@@ -150,7 +188,7 @@ namespace System.Data.Common
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<int>(cancellationToken);
+                return TaskHelpers.FromCancellation<int>(cancellationToken);
             }
             else
             {
@@ -166,7 +204,7 @@ namespace System.Data.Common
                 }
                 catch (Exception e)
                 {
-                    return Task.FromException<int>(e);
+                    return TaskHelpers.FromException<int>(e);
                 }
                 finally
                 {
@@ -199,7 +237,7 @@ namespace System.Data.Common
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<DbDataReader>(cancellationToken);
+                return TaskHelpers.FromCancellation<DbDataReader>(cancellationToken);
             }
             else
             {
@@ -215,7 +253,7 @@ namespace System.Data.Common
                 }
                 catch (Exception e)
                 {
-                    return Task.FromException<DbDataReader>(e);
+                    return TaskHelpers.FromException<DbDataReader>(e);
                 }
                 finally
                 {
@@ -233,7 +271,7 @@ namespace System.Data.Common
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<object>(cancellationToken);
+                return TaskHelpers.FromCancellation<object>(cancellationToken);
             }
             else
             {
@@ -249,7 +287,7 @@ namespace System.Data.Common
                 }
                 catch (Exception e)
                 {
-                    return Task.FromException<object>(e);
+                    return TaskHelpers.FromException<object>(e);
                 }
                 finally
                 {
@@ -264,10 +302,26 @@ namespace System.Data.Common
         public void Dispose()
         {
             Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
+        }
+
+        IDbDataParameter IDbCommand.CreateParameter()
+        {
+            return CreateDbParameter();
+        }
+
+        IDataReader IDbCommand.ExecuteReader()
+        {
+            return (DbDataReader)ExecuteDbDataReader(CommandBehavior.Default);
+        }
+
+        IDataReader IDbCommand.ExecuteReader(CommandBehavior behavior)
+        {
+            return (DbDataReader)ExecuteDbDataReader(behavior);
         }
     }
 }

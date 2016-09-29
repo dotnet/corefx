@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -17,6 +18,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         BIND_METHODNOTOK = 0x0800, // naked methods are not ok to be returned
         BIND_DECLNOTOK = 0x1000, // var decls are not ok to be returned
         BIND_NOPARAMS = 0x2000, // Do not do params expansion during overload resolution 
-        BIND_SPECULATIVELY = 0x4000, // We're doing a speculative bind.  Dont' make any stateful changes that might affect the actual compilation
+        BIND_SPECULATIVELY = 0x4000, // We're doing a speculative bind.  Don't make any stateful changes that might affect the actual compilation
     }
 }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -219,7 +220,7 @@ namespace System.Collections.Immutable.Tests
             // Now check where collisions have conflicting values.
             builder = ImmutableSortedDictionary.Create<string, string>()
                 .Add("a", "1").Add("A", "2").Add("b", "3").ToBuilder();
-            Assert.Throws<ArgumentException>(() => builder.KeyComparer = StringComparer.OrdinalIgnoreCase);
+            Assert.Throws<ArgumentException>(null, () => builder.KeyComparer = StringComparer.OrdinalIgnoreCase);
 
             // Force all values to be considered equal.
             builder.ValueComparer = EverythingEqual<string>.Default;

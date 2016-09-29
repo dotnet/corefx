@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //------------------------------------------------------------------------------
@@ -202,7 +203,7 @@ namespace Microsoft.SqlServer.Server
                     x_defaultColumnSortOrder, x_defaultSortOrdinal);
         }
 
-        // Most general constructor, should be able to intialize all SqlMetaData fields.(Used by SqlParameter)
+        // Most general constructor, should be able to initialize all SqlMetaData fields.(Used by SqlParameter)
         internal SqlMetaData(String name,
                               SqlDbType sqlDBType,
                               long maxLength,
@@ -407,7 +408,7 @@ namespace Microsoft.SqlServer.Server
 
             ValidateSortOrder(columnSortOrder, sortOrdinal);
 
-            // Check for absense of explicitly-allowed types to avoid unexpected additions when new types are added
+            // Check for absence of explicitly-allowed types to avoid unexpected additions when new types are added
             if (!(SqlDbType.BigInt == dbType ||
                     SqlDbType.Bit == dbType ||
                     SqlDbType.DateTime == dbType ||
@@ -439,7 +440,7 @@ namespace Microsoft.SqlServer.Server
 
             if (SqlDbType.NText == dbType || SqlDbType.Text == dbType)
             {
-                _lLocale = LocaleInterop.GetCurrentCultureLcid();
+                _lLocale = Locale.GetCurrentCultureLcid();
             }
 
 
@@ -462,49 +463,49 @@ namespace Microsoft.SqlServer.Server
             if (SqlDbType.Char == dbType)
             {
                 if (maxLength > x_lServerMaxANSI || maxLength < 0)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
-                lLocale = LocaleInterop.GetCurrentCultureLcid();
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
+                lLocale = Locale.GetCurrentCultureLcid();
             }
             else if (SqlDbType.VarChar == dbType)
             {
                 if ((maxLength > x_lServerMaxANSI || maxLength < 0) && maxLength != Max)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
-                lLocale = LocaleInterop.GetCurrentCultureLcid();
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
+                lLocale = Locale.GetCurrentCultureLcid();
             }
             else if (SqlDbType.NChar == dbType)
             {
                 if (maxLength > x_lServerMaxUnicode || maxLength < 0)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
-                lLocale = LocaleInterop.GetCurrentCultureLcid();
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
+                lLocale = Locale.GetCurrentCultureLcid();
             }
             else if (SqlDbType.NVarChar == dbType)
             {
                 if ((maxLength > x_lServerMaxUnicode || maxLength < 0) && maxLength != Max)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
-                lLocale = LocaleInterop.GetCurrentCultureLcid();
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
+                lLocale = Locale.GetCurrentCultureLcid();
             }
             else if (SqlDbType.NText == dbType || SqlDbType.Text == dbType)
             {
                 // old-style lobs only allowed with Max length
                 if (SqlMetaData.Max != maxLength)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
-                lLocale = LocaleInterop.GetCurrentCultureLcid();
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
+                lLocale = Locale.GetCurrentCultureLcid();
             }
             else if (SqlDbType.Binary == dbType)
             {
                 if (maxLength > x_lServerMaxBinary || maxLength < 0)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
             }
             else if (SqlDbType.VarBinary == dbType)
             {
                 if ((maxLength > x_lServerMaxBinary || maxLength < 0) && maxLength != Max)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
             }
             else if (SqlDbType.Image == dbType)
             {
                 // old-style lobs only allowed with Max length
                 if (SqlMetaData.Max != maxLength)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
             }
             else
                 throw SQL.InvalidSqlDbTypeForConstructor(dbType);
@@ -539,28 +540,28 @@ namespace Microsoft.SqlServer.Server
             if (SqlDbType.Char == dbType)
             {
                 if (maxLength > x_lServerMaxANSI || maxLength < 0)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
             }
             else if (SqlDbType.VarChar == dbType)
             {
                 if ((maxLength > x_lServerMaxANSI || maxLength < 0) && maxLength != Max)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
             }
             else if (SqlDbType.NChar == dbType)
             {
                 if (maxLength > x_lServerMaxUnicode || maxLength < 0)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
             }
             else if (SqlDbType.NVarChar == dbType)
             {
                 if ((maxLength > x_lServerMaxUnicode || maxLength < 0) && maxLength != Max)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
             }
             else if (SqlDbType.NText == dbType || SqlDbType.Text == dbType)
             {
                 // old-style lobs only allowed with Max length
                 if (SqlMetaData.Max != maxLength)
-                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), "maxLength");
+                    throw ADP.Argument(Res.GetString(Res.ADP_InvalidDataLength2, maxLength.ToString(CultureInfo.InvariantCulture)), nameof(maxLength));
             }
             else
                 throw SQL.InvalidSqlDbTypeForConstructor(dbType);
@@ -659,7 +660,7 @@ namespace Microsoft.SqlServer.Server
             {
                 if (null == objectName)
                 {
-                    throw ADP.ArgumentNull("objectName");
+                    throw ADP.ArgumentNull(nameof(objectName));
                 }
             }
 
@@ -678,10 +679,10 @@ namespace Microsoft.SqlServer.Server
         private void AssertNameIsValid(string name)
         {
             if (null == name)
-                throw ADP.ArgumentNull("name");
+                throw ADP.ArgumentNull(nameof(name));
 
             if (Microsoft.SqlServer.Server.SmiMetaData.MaxNameLength < name.Length)
-                throw SQL.NameTooLong("name");
+                throw SQL.NameTooLong(nameof(name));
         }
 
         private void ValidateSortOrder(SortOrder columnSortOrder, int sortOrdinal)
@@ -941,7 +942,7 @@ namespace Microsoft.SqlServer.Server
                     {
                         byte[] rgbValue = value.Value;
                         byte[] rgbNewValue = new byte[MaxLength];
-                        Array.Copy(rgbValue, 0, rgbNewValue, 0, rgbValue.Length);
+                        Buffer.BlockCopy(rgbValue, 0, rgbNewValue, 0, rgbValue.Length);
                         Array.Clear(rgbNewValue, rgbValue.Length, rgbNewValue.Length - rgbValue.Length);
                         return new SqlBinary(rgbNewValue);
                     }
@@ -962,7 +963,7 @@ namespace Microsoft.SqlServer.Server
             {
                 byte[] rgbValue = value.Value;
                 byte[] rgbNewValue = new byte[MaxLength];
-                Array.Copy(rgbValue, 0, rgbNewValue, 0, (int)MaxLength);
+                Buffer.BlockCopy(rgbValue, 0, rgbNewValue, 0, (int)MaxLength);
                 value = new SqlBinary(rgbNewValue);
             }
 
@@ -1039,7 +1040,7 @@ namespace Microsoft.SqlServer.Server
                         if (value.MaxLength < MaxLength)
                         {
                             byte[] rgbNew = new byte[MaxLength];
-                            Array.Copy(value.Buffer, 0, rgbNew, 0, (int)oldLength);
+                            Buffer.BlockCopy(value.Buffer, 0, rgbNew, 0, (int)oldLength);
                             value = new SqlBytes(rgbNew);
                         }
 
@@ -1117,17 +1118,17 @@ namespace Microsoft.SqlServer.Server
             else if (value is long)
                 value = this.Adjust((Int64)value);
             else if (value is sbyte)
-                throw ADP.InvalidDataType("SByte");
+                throw ADP.InvalidDataType(nameof(SByte));
             else if (value is float)
                 value = this.Adjust((Single)value);
             else if (value is string)
                 value = this.Adjust((String)value);
             else if (value is ushort)
-                throw ADP.InvalidDataType("UInt16");
+                throw ADP.InvalidDataType(nameof(UInt16));
             else if (value is uint)
-                throw ADP.InvalidDataType("UInt32");
+                throw ADP.InvalidDataType(nameof(UInt32));
             else if (value is ulong)
-                throw ADP.InvalidDataType("UInt64");
+                throw ADP.InvalidDataType(nameof(UInt64));
             else if (value is byte[])
                 value = this.Adjust((System.Byte[])value);
             else if (value is char[])
@@ -1179,7 +1180,7 @@ namespace Microsoft.SqlServer.Server
         public static SqlMetaData InferFromValue(object value, String name)
         {
             if (value == null)
-                throw ADP.ArgumentNull("value");
+                throw ADP.ArgumentNull(nameof(value));
 
             SqlMetaData smd;
 
@@ -1187,7 +1188,7 @@ namespace Microsoft.SqlServer.Server
             else if (value is Byte) smd = new SqlMetaData(name, SqlDbType.TinyInt);
             else if (value is Char) smd = new SqlMetaData(name, SqlDbType.NVarChar, 1);
             else if (value is DateTime) smd = new SqlMetaData(name, SqlDbType.DateTime);
-            else if (value is DBNull) throw ADP.InvalidDataType("DBNull");
+            else if (value is DBNull) throw ADP.InvalidDataType(nameof(DBNull));
             else if (value is Decimal)
             {
                 // use logic inside SqlDecimal to infer precision and scale.
@@ -1198,7 +1199,7 @@ namespace Microsoft.SqlServer.Server
             else if (value is Int16) smd = new SqlMetaData(name, SqlDbType.SmallInt);
             else if (value is Int32) smd = new SqlMetaData(name, SqlDbType.Int);
             else if (value is Int64) smd = new SqlMetaData(name, SqlDbType.BigInt);
-            else if (value is SByte) throw ADP.InvalidDataType("SByte");
+            else if (value is SByte) throw ADP.InvalidDataType(nameof(SByte));
             else if (value is Single) smd = new SqlMetaData(name, SqlDbType.Real);
             else if (value is String)
             {
@@ -1210,9 +1211,9 @@ namespace Microsoft.SqlServer.Server
 
                 smd = new SqlMetaData(name, SqlDbType.NVarChar, maxLen);
             }
-            else if (value is UInt16) throw ADP.InvalidDataType("UInt16");
-            else if (value is UInt32) throw ADP.InvalidDataType("UInt32");
-            else if (value is UInt64) throw ADP.InvalidDataType("UInt64");
+            else if (value is UInt16) throw ADP.InvalidDataType(nameof(UInt16));
+            else if (value is UInt32) throw ADP.InvalidDataType(nameof(UInt32));
+            else if (value is UInt64) throw ADP.InvalidDataType(nameof(UInt64));
             else if (value is System.Byte[])
             {
                 long maxLen = ((System.Byte[])value).Length;
@@ -1379,7 +1380,7 @@ namespace Microsoft.SqlServer.Server
                     if (value.Length < MaxLength)
                     {
                         byte[] rgbNewValue = new byte[MaxLength];
-                        Array.Copy(value, 0, rgbNewValue, 0, value.Length);
+                        Buffer.BlockCopy(value, 0, rgbNewValue, 0, value.Length);
                         Array.Clear(rgbNewValue, value.Length, (int)rgbNewValue.Length - value.Length);
                         return rgbNewValue;
                     }
@@ -1399,7 +1400,7 @@ namespace Microsoft.SqlServer.Server
             if (value.Length > MaxLength && Max != MaxLength)
             {
                 byte[] rgbNewValue = new byte[MaxLength];
-                Array.Copy(value, 0, rgbNewValue, 0, (int)MaxLength);
+                Buffer.BlockCopy(value, 0, rgbNewValue, 0, (int)MaxLength);
                 value = rgbNewValue;
             }
 
@@ -1564,44 +1565,6 @@ namespace Microsoft.SqlServer.Server
             }
             return MaxTimeScale;
         }
-
-        private static DbType[] s_sxm_rgSqlDbTypeToDbType = {
-            DbType.Int64,           // SqlDbType.BigInt
-            DbType.Binary,          // SqlDbType.Binary
-            DbType.Boolean,         // SqlDbType.Bit
-            DbType.AnsiString,      // SqlDbType.Char
-            DbType.DateTime,        // SqlDbType.DateTime
-            DbType.Decimal,         // SqlDbType.Decimal
-            DbType.Double,          // SqlDbType.Float
-            DbType.Binary,          // SqlDbType.Image
-            DbType.Int32,           // SqlDbType.Int
-            DbType.Currency,        // SqlDbType.Money
-            DbType.String,          // SqlDbType.NChar
-            DbType.String,          // SqlDbType.NText
-            DbType.String,          // SqlDbType.NVarChar
-            DbType.Single,          // SqlDbType.Real
-            DbType.Guid,            // SqlDbType.UniqueIdentifier
-            DbType.DateTime,        // SqlDbType.SmallDateTime
-            DbType.Int16,           // SqlDbType.SmallInt
-            DbType.Currency,        // SqlDbType.SmallMoney
-            DbType.AnsiString,      // SqlDbType.Text
-            DbType.Binary,          // SqlDbType.Timestamp
-            DbType.Byte,            // SqlDbType.TinyInt
-            DbType.Binary,          // SqlDbType.VarBinary
-            DbType.AnsiString,      // SqlDbType.VarChar
-            DbType.Object,          // SqlDbType.Variant
-            DbType.Object,          // SqlDbType.Row
-            DbType.Xml,             // SqlDbType.Xml
-            DbType.String,          // SqlDbType.NVarChar, place holder
-            DbType.String,          // SqlDbType.NVarChar, place holder
-            DbType.String,          // SqlDbType.NVarChar, place holder
-            DbType.Object,          // SqlDbType.Udt
-            DbType.Object,          // SqlDbType.Structured
-            DbType.Date,            // SqlDbType.Date
-            DbType.Time,            // SqlDbType.Time
-            DbType.DateTime2,       // SqlDbType.DateTime2
-            DbType.DateTimeOffset   // SqlDbType.DateTimeOffset
-        };
 
         private void SetDefaultsForType(SqlDbType dbType)
         {

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*=============================================================================
 **
@@ -9,12 +10,12 @@
 **
 =============================================================================*/
 
-using System;
 using System.Diagnostics.Contracts;
 
 namespace System.Collections
 {
     // Useful base class for typed read/write collections where items derive from object
+    [Serializable]
     public abstract class CollectionBase : IList
     {
         private ArrayList _list;
@@ -34,8 +35,6 @@ namespace System.Collections
         {
             get
             {
-                if (_list == null)
-                    _list = new ArrayList();
                 return _list;
             }
         }
@@ -62,7 +61,7 @@ namespace System.Collections
         {
             get
             {
-                return _list == null ? 0 : _list.Count;
+                return _list.Count;
             }
         }
 
@@ -76,7 +75,7 @@ namespace System.Collections
         public void RemoveAt(int index)
         {
             if (index < 0 || index >= Count)
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             Object temp = InnerList[index];
             OnValidate(temp);
@@ -123,14 +122,14 @@ namespace System.Collections
             get
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                    throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
                 return InnerList[index];
             }
             set
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                    throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
                 Contract.EndContractBlock();
                 OnValidate(value);
                 Object temp = InnerList[index];
@@ -197,7 +196,7 @@ namespace System.Collections
         void IList.Insert(int index, Object value)
         {
             if (index < 0 || index > Count)
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_Index);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
             Contract.EndContractBlock();
             OnValidate(value);
             OnInsert(index, value);
@@ -236,7 +235,7 @@ namespace System.Collections
 
         protected virtual void OnValidate(Object value)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
             Contract.EndContractBlock();
         }
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -28,7 +29,7 @@ namespace System.Security.Cryptography
         int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset);
 
         // Special function for transforming the last block or partial block in the stream.  The
-        // return value is an array containting the remaining transformed bytes.
+        // return value is an array containing the remaining transformed bytes.
         // We return a new array here because the amount of information we send back at the end could 
         // be larger than a single block once padding is accounted for.
         byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount);

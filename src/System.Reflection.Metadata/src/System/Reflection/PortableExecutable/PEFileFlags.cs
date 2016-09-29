@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Reflection.PortableExecutable
 {
@@ -48,18 +49,66 @@ namespace System.Reflection.PortableExecutable
     [Flags]
     public enum DllCharacteristics : ushort
     {
-        ProcessInit = 0x0001,   // Reserved.
-        ProcessTerm = 0x0002,   // Reserved.
-        ThreadInit = 0x0004,    // Reserved.
-        ThreadTerm = 0x0008,    // Reserved.
-        DynamicBase = 0x0040,   //
-        NxCompatible = 0x0100,  //
-        NoIsolation = 0x0200,   // Image understands isolation and doesn't want it
-        NoSeh = 0x0400,         // Image does not use SEH.  No SE handler may reside in this image
-        NoBind = 0x0800,        // Do not bind this image.
-        AppContainer = 0x1000,  // The image must run inside an AppContainer
-        WdmDriver = 0x2000,    // Driver uses WDM model
-        //                     0x4000     // Reserved.
+        /// <summary>
+        /// Reserved.
+        /// </summary>
+        ProcessInit = 0x0001,
+
+        /// <summary>
+        /// Reserved.
+        /// </summary>
+        ProcessTerm = 0x0002,
+
+        /// <summary>
+        /// Reserved.
+        /// </summary>
+        ThreadInit = 0x0004,
+
+        /// <summary>
+        /// Reserved.
+        /// </summary>
+        ThreadTerm = 0x0008, 
+
+        /// <summary>
+        /// Image can handle a high entropy 64-bit virtual address space.
+        /// </summary>
+        HighEntropyVirtualAddressSpace = 0x0020,
+
+        /// <summary>
+        /// DLL can move.
+        /// </summary>
+        DynamicBase = 0x0040,
+
+        /// <summary>
+        /// Image is NX compatible.
+        /// </summary>
+        NxCompatible = 0x0100,
+
+        /// <summary>
+        /// Image understands isolation and doesn't want it.
+        /// </summary>
+        NoIsolation = 0x0200,
+
+        /// <summary>
+        /// Image does not use SEH.  No SE handler may reside in this image.
+        /// </summary>
+        NoSeh = 0x0400,
+
+        /// <summary>
+        /// Do not bind this image.
+        /// </summary>
+        NoBind = 0x0800,
+
+        /// <summary>
+        /// The image must run inside an AppContainer.
+        /// </summary>
+        AppContainer = 0x1000,
+
+        /// <summary>
+        /// Driver uses WDM model.
+        /// </summary>
+        WdmDriver = 0x2000,
+
         TerminalServerAware = 0x8000,
     }
 
@@ -117,6 +166,6 @@ namespace System.Reflection.PortableExecutable
         MemShared = 0x10000000,          // Section is shareable.
         MemExecute = 0x20000000,         // Section is executable.
         MemRead = 0x40000000,            // Section is readable.
-        MemWrite = 0x80000000,           // Section is writeable.
+        MemWrite = 0x80000000,           // Section is writable.
     }
 }

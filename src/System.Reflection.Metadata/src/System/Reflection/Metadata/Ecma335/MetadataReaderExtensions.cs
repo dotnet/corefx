@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +9,7 @@ using System.Reflection.Internal;
 namespace System.Reflection.Metadata.Ecma335
 {
     /// <summary>
-    /// Provides extension methods for working with certain raw elements of the Ecma 335 metadata tables and heaps.
+    /// Provides extension methods for working with certain raw elements of the ECMA-335 metadata tables and heaps.
     /// </summary>
     public static class MetadataReaderExtensions
     {
@@ -21,10 +22,10 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                Throw.ArgumentNull(nameof(reader));
             }
 
-            if ((int)tableIndex >= TableIndexExtensions.Count)
+            if ((int)tableIndex >= MetadataTokens.TableCount)
             {
                 Throw.TableIndexOutOfRange();
             }
@@ -41,7 +42,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             switch (tableIndex)
@@ -103,7 +104,7 @@ namespace System.Reflection.Metadata.Ecma335
                 case TableIndex.CustomDebugInformation: return reader.CustomDebugInformationTable.RowSize;
 
                 default:
-                    throw new ArgumentOutOfRangeException("tableIndex");
+                    throw new ArgumentOutOfRangeException(nameof(tableIndex));
             }
         }
 
@@ -116,7 +117,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                Throw.ArgumentNull(nameof(reader));
             }
 
             return (int)(reader.GetTableMetadataBlock(tableIndex).Pointer - reader.Block.Pointer);
@@ -185,7 +186,7 @@ namespace System.Reflection.Metadata.Ecma335
                 case TableIndex.CustomDebugInformation: return reader.CustomDebugInformationTable.Block;
 
                 default:
-                    throw new ArgumentOutOfRangeException("tableIndex");
+                    throw new ArgumentOutOfRangeException(nameof(tableIndex));
             }
         }
 
@@ -198,7 +199,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                Throw.ArgumentNull(nameof(reader));
             }
 
             return reader.GetMetadataBlock(heapIndex).Length;
@@ -213,7 +214,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                Throw.ArgumentNull(nameof(reader));
             }
 
             return (int)(reader.GetMetadataBlock(heapIndex).Pointer - reader.Block.Pointer);
@@ -231,19 +232,19 @@ namespace System.Reflection.Metadata.Ecma335
             switch (heapIndex)
             {
                 case HeapIndex.UserString:
-                    return reader.UserStringStream.Block;
+                    return reader.UserStringHeap.Block;
 
                 case HeapIndex.String:
-                    return reader.StringStream.Block;
+                    return reader.StringHeap.Block;
 
                 case HeapIndex.Blob:
-                    return reader.BlobStream.Block;
+                    return reader.BlobHeap.Block;
 
                 case HeapIndex.Guid:
-                    return reader.GuidStream.Block;
+                    return reader.GuidHeap.Block;
 
                 default:
-                    throw new ArgumentOutOfRangeException("heapIndex");
+                    throw new ArgumentOutOfRangeException(nameof(heapIndex));
             }
         }
 
@@ -255,10 +256,10 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                Throw.ArgumentNull(nameof(reader));
             }
 
-            return reader.UserStringStream.GetNextHandle(handle);
+            return reader.UserStringHeap.GetNextHandle(handle);
         }
 
         /// <summary>
@@ -269,10 +270,10 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                Throw.ArgumentNull(nameof(reader));
             }
 
-            return reader.BlobStream.GetNextHandle(handle);
+            return reader.BlobHeap.GetNextHandle(handle);
         }
 
         /// <summary>
@@ -283,10 +284,10 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                Throw.ArgumentNull(nameof(reader));
             }
 
-            return reader.StringStream.GetNextHandle(handle);
+            return reader.StringHeap.GetNextHandle(handle);
         }
 
         /// <summary>
@@ -297,7 +298,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             for (int rid = 1; rid <= reader.EncLogTable.NumberOfRows; rid++)
@@ -316,7 +317,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             for (int rid = 1; rid <= reader.EncMapTable.NumberOfRows; rid++)
@@ -336,7 +337,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             for (int rid = 1; rid <= reader.PropertyMapTable.NumberOfRows; rid++)
@@ -356,12 +357,75 @@ namespace System.Reflection.Metadata.Ecma335
         {
             if (reader == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             for (int rid = 1; rid <= reader.EventMapTable.NumberOfRows; rid++)
             {
                 yield return reader.EventMapTable.GetParentType(rid);
+            }
+        }
+
+        /// <summary>
+        /// Given a type handle and a raw type kind found in a signature blob determines whether the target type is a value type or a reference type.
+        /// </summary>
+        public static SignatureTypeKind ResolveSignatureTypeKind(this MetadataReader reader, EntityHandle typeHandle, byte rawTypeKind)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            var typeKind = (SignatureTypeKind)rawTypeKind;
+
+            switch (typeKind)
+            {
+                case SignatureTypeKind.Unknown:
+                    return SignatureTypeKind.Unknown;
+
+                case SignatureTypeKind.Class:
+                case SignatureTypeKind.ValueType:
+                    break;
+
+                default:
+                    // If read from metadata by the decoder the value would have been checked already.
+                    // So it is the callers error to pass in an invalid value, not bad metadata.
+                    throw new ArgumentOutOfRangeException(nameof(rawTypeKind));
+            }
+
+            switch (typeHandle.Kind)
+            {
+                case HandleKind.TypeDefinition:
+                    // WinRT projections don't apply to TypeDefs
+                    return typeKind;
+
+                case HandleKind.TypeReference:
+                    var treatment = reader.GetTypeReference((TypeReferenceHandle)typeHandle).SignatureTreatment;
+                    switch (treatment)
+                    {
+                        case TypeRefSignatureTreatment.ProjectedToClass:
+                            return SignatureTypeKind.Class;
+
+                        case TypeRefSignatureTreatment.ProjectedToValueType:
+                            return SignatureTypeKind.ValueType;
+
+                        case TypeRefSignatureTreatment.None:
+                            return typeKind;
+
+                        default:
+                            throw ExceptionUtilities.UnexpectedValue(treatment);
+                    }
+
+                case HandleKind.TypeSpecification:
+                    // TODO: https://github.com/dotnet/corefx/issues/8139
+                    // We need more work here in differentiating case because instantiations can project class 
+                    // to value type as in IReference<T> -> Nullable<T>. Unblocking Roslyn work where the differentiation
+                    // feature is not used. Note that the use-case of custom-mods will not hit this because there is no
+                    // CLASS | VALUETYPE before the modifier token and so it always comes in unresolved.
+                    return SignatureTypeKind.Unknown;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(typeHandle), SR.UnexpectedHandleKind);
             }
         }
     }

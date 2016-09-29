@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Match is the result class for a regex search.
 // It returns the location, length, and substring for
@@ -63,8 +64,7 @@ namespace System.Text.RegularExpressions
         }
 
         internal Match(Regex regex, int capcount, String text, int begpos, int len, int startpos)
-
-        : base(text, new int[2], 0)
+            : base(text, new int[2], 0, "0")
         {
             _regex = regex;
             _matchcount = new int[capcount];
@@ -134,7 +134,7 @@ namespace System.Text.RegularExpressions
             RegexReplacement repl;
 
             if (replacement == null)
-                throw new ArgumentNullException("replacement");
+                throw new ArgumentNullException(nameof(replacement));
 
             if (_regex == null)
                 throw new NotSupportedException(SR.NoResultOnFailed);
@@ -143,7 +143,7 @@ namespace System.Text.RegularExpressions
 
             if (repl == null || !repl.Pattern.Equals(replacement))
             {
-                repl = RegexParser.ParseReplacement(replacement, _regex._caps, _regex._capsize, _regex._capnames, _regex._roptions);
+                repl = RegexParser.ParseReplacement(replacement, _regex.caps, _regex.capsize, _regex.capnames, _regex.roptions);
                 _regex._replref.Cache(repl);
             }
 
@@ -181,10 +181,10 @@ namespace System.Text.RegularExpressions
         /// between multiple threads.
         /// </summary>
 
-        static internal Match Synchronized(Match inner)
+        public static Match Synchronized(Match inner)
         {
             if (inner == null)
-                throw new ArgumentNullException("inner");
+                throw new ArgumentNullException(nameof(inner));
 
             int numgroups = inner._matchcount.Length;
 
@@ -404,12 +404,12 @@ namespace System.Text.RegularExpressions
     internal class MatchSparse : Match
     {
         // the lookup hashtable
-        new internal Dictionary<Int32, Int32> _caps;
+        new internal Hashtable _caps;
 
         /*
          * Nonpublic constructor
          */
-        internal MatchSparse(Regex regex, Dictionary<Int32, Int32> caps, int capcount,
+        internal MatchSparse(Regex regex, Hashtable caps, int capcount,
                              String text, int begpos, int len, int startpos)
 
         : base(regex, capcount, text, begpos, len, startpos)
@@ -433,7 +433,7 @@ namespace System.Text.RegularExpressions
         {
             if (_caps != null)
             {
-                foreach (KeyValuePair<int, int> kvp in _caps)
+                foreach (DictionaryEntry kvp in _caps)
                 {
                     System.Diagnostics.Debug.WriteLine("Slot " + kvp.Key.ToString() + " -> " + kvp.Value.ToString());
                 }

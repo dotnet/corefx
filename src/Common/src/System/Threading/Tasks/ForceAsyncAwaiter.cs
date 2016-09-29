@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
 
@@ -11,7 +12,7 @@ namespace System.Threading.Tasks
         /// Returns an awaitable/awaiter that will ensure the continuation is executed
         /// asynchronously on the thread pool, even if the task is already completed
         /// by the time the await occurs.  Effectively, it is equivalent to awaiting
-        /// with ConfigureAwait(false) and then queueing the continuation with Task.Run,
+        /// with ConfigureAwait(false) and then queuing the continuation with Task.Run,
         /// but it avoids the extra hop if the continuation already executed asynchronously.
         /// </summary>
         public static ForceAsyncAwaiter ForceAsync(this Task task)

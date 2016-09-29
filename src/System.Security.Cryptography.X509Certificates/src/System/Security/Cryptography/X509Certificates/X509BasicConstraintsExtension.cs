@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -73,7 +74,7 @@ namespace System.Security.Cryptography.X509Certificates
         private static byte[] EncodeExtension(bool certificateAuthority, bool hasPathLengthConstraint, int pathLengthConstraint)
         {
             if (hasPathLengthConstraint && pathLengthConstraint < 0)
-                throw new ArgumentOutOfRangeException("pathLengthConstraint", SR.Arg_OutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(pathLengthConstraint), SR.Arg_OutOfRange_NeedNonNegNum);
 
             return X509Pal.Instance.EncodeX509BasicConstraints2Extension(certificateAuthority, hasPathLengthConstraint, pathLengthConstraint);
         }

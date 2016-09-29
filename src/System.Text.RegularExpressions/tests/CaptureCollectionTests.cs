@@ -1,73 +1,117 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using Xunit;
-using System;
-using System.Text.RegularExpressions;
 using System.Collections;
+using Xunit;
 
-namespace Test
+namespace System.Text.RegularExpressions.Tests
 {
-    /// <summary>
-    /// Tests the CaptureCollection class.
-    /// </summary>
     public class CaptureCollectionTests
     {
         [Fact]
-        public static void CaptureCollection_GetEnumeratorTest_Negative()
+        public static void GetEnumerator()
         {
-            Regex rgx1 = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
-            String strInput = "aaabbccccccccccaaaabc";
-            Match mtch1 = rgx1.Match(strInput);
-            CaptureCollection captrc1 = mtch1.Captures;
+            Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
+            Match match = regex.Match("aaabbccccccccccaaaabc");
 
-            IEnumerator enmtr1 = captrc1.GetEnumerator();
-
-            Capture currentCapture;
-
-            Assert.Throws<InvalidOperationException>(() => currentCapture = (Capture)enmtr1.Current);
-
-
-            for (int i = 0; i < captrc1.Count; i++)
+            CaptureCollection captures = match.Captures;
+            IEnumerator enumerator = captures.GetEnumerator();
+            for (int i = 0; i < 2; i++)
             {
-                enmtr1.MoveNext();
+                int counter = 0;
+                while (enumerator.MoveNext())
+                {
+                    Assert.Equal(captures[counter], enumerator.Current);
+                    counter++;
+                }
+                Assert.False(enumerator.MoveNext());
+                Assert.Equal(captures.Count, counter);
+                enumerator.Reset();
             }
-
-            enmtr1.MoveNext();
-
-            Assert.Throws<InvalidOperationException>(() => currentCapture = (Capture)enmtr1.Current);
-            enmtr1.Reset();
-
-            Assert.Throws<InvalidOperationException>(() => currentCapture = (Capture)enmtr1.Current);
         }
 
         [Fact]
-        public static void CaptureCollection_GetEnumeratorTest()
+        public static void GetEnumerator_Invalid()
         {
-            Regex rgx1 = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
-            String strInput = "aaabbccccccccccaaaabc";
-            Match mtch1 = rgx1.Match(strInput);
-            CaptureCollection captrc1 = mtch1.Captures;
+            Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
+            Match match = regex.Match("aaabbccccccccccaaaabc");
+            IEnumerator enumerator = match.Captures.GetEnumerator();
 
-            IEnumerator enmtr1 = captrc1.GetEnumerator();
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
 
-            for (int i = 0; i < captrc1.Count; i++)
+            while (enumerator.MoveNext()) ;
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+
+            enumerator.Reset();
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current);
+        }
+
+        [Fact]
+        public static void Item_Get_InvalidIndex_ThrowsArgumentOutOfRangeException()
+        {
+            Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
+            CaptureCollection captures = regex.Match("aaabbccccccccccaaaabc").Captures;
+
+            Assert.Throws<ArgumentOutOfRangeException>("i", () => captures[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>("i", () => captures[captures.Count]);
+        }
+
+        [Fact]
+        public void ICollection_Properties()
+        {
+            Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
+            CaptureCollection captures = regex.Match("aaabbccccccccccaaaabc").Captures;
+            ICollection collection = captures;
+
+            Assert.False(collection.IsSynchronized);
+            Assert.Same(collection.SyncRoot, collection.SyncRoot);
+        }
+        
+        [Theory]
+        [InlineData(0)]
+        [InlineData(5)]
+        public void ICollection_CopyTo(int index)
+        {
+            Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
+            CaptureCollection captures = regex.Match("aaabbccccccccccaaaabc").Captures;
+            ICollection collection = captures;
+
+            RegularExpressions.Capture[] copy = new RegularExpressions.Capture[collection.Count + index];
+            collection.CopyTo(copy, index);
+
+            for (int i = 0; i < index; i++)
             {
-                enmtr1.MoveNext();
-
-                Assert.Equal(enmtr1.Current, captrc1[i]);
+                Assert.Null(copy[i]);
             }
-
-            Assert.False(enmtr1.MoveNext(), "Err_5! enmtr1.MoveNext returned true");
-
-            enmtr1.Reset();
-
-            for (int i = 0; i < captrc1.Count; i++)
+            for (int i = index; i < copy.Length; i++)
             {
-                enmtr1.MoveNext();
-
-                Assert.Equal(enmtr1.Current, captrc1[i]);
+                Assert.Same(captures[i - index], copy[i]);
             }
+        }
+
+        [Fact]
+        public void ICollection_CopyTo_Invalid()
+        {
+            Regex regex = new Regex(@"(?<A1>a*)(?<A2>b*)(?<A3>c*)");
+            ICollection collection = regex.Match("aaabbccccccccccaaaabc").Captures;
+
+            // Array is null
+            Assert.Throws<ArgumentNullException>("array", () => collection.CopyTo(null, 0));
+
+            // Array is multidimensional
+            Assert.Throws<ArgumentException>(null, () => collection.CopyTo(new object[10, 10], 0));
+
+            // Array has a non-zero lower bound
+            Array o = Array.CreateInstance(typeof(object), new int[] { 10 }, new int[] { 10 });
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(o, 0));
+
+            // Index < 0
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(new object[collection.Count], -1));
+
+            // Invalid index + length
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(new object[collection.Count], 1));
+            Assert.Throws<IndexOutOfRangeException>(() => collection.CopyTo(new object[collection.Count + 1], 2));
         }
     }
 }

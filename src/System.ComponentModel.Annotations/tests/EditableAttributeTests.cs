@@ -1,16 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
-namespace System.ComponentModel.DataAnnotations
+namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class EditableAttributeTests
     {
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Can_construct_and_both_AllowEdit_and_AllowInitialValue_are_set(bool value)
+        public void Ctor(bool value)
         {
             var attribute = new EditableAttribute(value);
             Assert.Equal(value, attribute.AllowEdit);
@@ -20,7 +21,7 @@ namespace System.ComponentModel.DataAnnotations
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Properties_are_independent(bool value)
+        public void Properties_ChangingOneProperty_DoesNotAffectTheOther(bool value)
         {
             var attribute = new EditableAttribute(value);
             Assert.Equal(value, attribute.AllowEdit);

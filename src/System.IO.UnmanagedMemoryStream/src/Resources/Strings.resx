@@ -153,6 +153,9 @@
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non negative number is required.</value>
   </data>
+  <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
+    <value>Positive number required.</value>
+  </data>
   <data name="ArgumentOutOfRange_PositionLessThanCapacityRequired" xml:space="preserve">
     <value>The position may not be greater or equal to the capacity of the accessor.</value>
   </data>
@@ -200,5 +203,8 @@
   </data>
   <data name="Arg_BadDecimal" xml:space="preserve">
     <value>Read an invalid decimal value from the buffer.</value>
+  </data>
+  <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
+    <value>Cannot access a closed Stream.</value>
   </data>
 </root>

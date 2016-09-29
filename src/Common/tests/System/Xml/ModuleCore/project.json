@@ -1,13 +1,26 @@
 {
   "dependencies": {
-    "System.Runtime": "4.0.20",
-    "System.Collections": "4.0.10",
-    "System.Text.Encoding": "4.0.10",
-    "System.IO": "4.0.10",
-    "System.Console": "4.0.0-beta-*",
-    "System.Diagnostics.Debug": "4.0.10"
+    "Microsoft.NETCore.Platforms": "1.0.2-beta-24522-03",
+    "System.Collections": "4.3.0-beta-24522-03",
+    "System.Console": "4.0.0",
+    "System.Diagnostics.Debug": "4.3.0-beta-24522-03",
+    "System.IO": "4.3.0-beta-24522-03",
+    "System.Runtime": "4.3.0-beta-24522-03",
+    "System.Text.Encoding": "4.3.0-beta-24522-03",
+    "test-runtime": {
+      "target": "project",
+      "exclude": "compile"
+    }
   },
   "frameworks": {
-    "dnxcore50": {}
+    "netstandard1.3": {}
+  },
+  "supports": {
+    "coreFx.Test.netcore50": {},
+    "coreFx.Test.netcoreapp1.0": {},
+    "coreFx.Test.net46": {},
+    "coreFx.Test.net461": {},
+    "coreFx.Test.net462": {},
+    "coreFx.Test.net463": {}
   }
 }

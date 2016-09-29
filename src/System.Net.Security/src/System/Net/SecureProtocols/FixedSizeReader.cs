@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
 
 namespace System.Net
@@ -13,8 +15,6 @@ namespace System.Net
     {
         private static readonly AsyncCallback s_readCallback = new AsyncCallback(ReadCallback);
 
-        // TODO (Issue #3114): Implement this using TPL instead of APM.
-        private readonly StreamAsyncHelper _transportAPM;
         private readonly Stream _transport;
         private AsyncProtocolRequest _request;
         private int _totalRead;
@@ -22,7 +22,6 @@ namespace System.Net
         public FixedSizeReader(Stream transport)
         {
             _transport = transport;
-            _transportAPM = new StreamAsyncHelper(transport);
         }
 
         //
@@ -63,6 +62,7 @@ namespace System.Net
             _totalRead = 0;
             StartReading();
         }
+
         //
         // Loops while subsequent completions are sync.
         //
@@ -70,7 +70,7 @@ namespace System.Net
         {
             while (true)
             {
-                IAsyncResult ar = _transportAPM.BeginRead(_request.Buffer, _request.Offset + _totalRead, _request.Count - _totalRead, s_readCallback, this);
+                IAsyncResult ar = _transport.BeginRead(_request.Buffer, _request.Offset + _totalRead, _request.Count - _totalRead, s_readCallback, this);
                 if (!ar.CompletedSynchronously)
                 {
 #if DEBUG
@@ -79,7 +79,7 @@ namespace System.Net
                     break;
                 }
 
-                int bytes = _transportAPM.EndRead(ar);
+                int bytes = _transport.EndRead(ar);
 
                 if (CheckCompletionBeforeNextRead(bytes))
                 {
@@ -103,7 +103,15 @@ namespace System.Net
                 throw new IOException(SR.net_io_eof);
             }
 
-            GlobalLog.Assert(_totalRead + bytes <= _request.Count, "FixedSizeReader::CheckCompletion()|State got out of range. Total:{0} Count:{1}", _totalRead + bytes, _request.Count);
+            if (_totalRead + bytes > _request.Count)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.AssertFormat("FixedSizeReader::CheckCompletion()|State got out of range. Total:{0} Count:{1}", _totalRead + bytes, _request.Count);
+                }
+
+                Debug.Fail("FixedSizeReader::CheckCompletion()|State got out of range. Total:" + (_totalRead + bytes) + " Count:" + _request.Count);
+            }
 
             if ((_totalRead += bytes) == _request.Count)
             {
@@ -116,7 +124,16 @@ namespace System.Net
 
         private static void ReadCallback(IAsyncResult transportResult)
         {
-            GlobalLog.Assert(transportResult.AsyncState is FixedSizeReader, "ReadCallback|State type is wrong, expected FixedSizeReader.");
+            if (!(transportResult.AsyncState is FixedSizeReader))
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("ReadCallback|State type is wrong, expected FixedSizeReader.");
+                }
+
+                Debug.Fail("ReadCallback|State type is wrong, expected FixedSizeReader.");
+            }
+
             if (transportResult.CompletedSynchronously)
             {
                 return;
@@ -128,7 +145,7 @@ namespace System.Net
             // Async completion.
             try
             {
-                int bytes = reader._transportAPM.EndRead(transportResult);
+                int bytes = reader._transport.EndRead(transportResult);
 
                 if (reader.CheckCompletionBeforeNextRead(bytes))
                 {

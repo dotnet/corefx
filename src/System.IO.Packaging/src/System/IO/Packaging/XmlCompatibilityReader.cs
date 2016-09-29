@@ -1,13 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-/***************************************************************************\
-*
-* File: XmlCompatibilityReader.cs
-*
-* Purpose:
-*
-\***************************************************************************/
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Xml;
@@ -117,7 +110,7 @@ namespace System.IO.Packaging
                 {
                     // if we are mapping what was used as a new namespace to a newer name,
                     // scan the _newNamespaces dictionary and update the entries. We collect
-                    // a list to avoid updating the dictonary during enumeration.
+                    // a list to avoid updating the dictionary during enumeration.
                     List<string> keysToUpdate = new List<string>();
 
                     foreach (KeyValuePair<string, string> pair in _namespaceMap)
@@ -445,7 +438,7 @@ namespace System.IO.Packaging
             }
             else if (i < 0 || i >= AttributeCount)
             {
-                throw new ArgumentOutOfRangeException("i");
+                throw new ArgumentOutOfRangeException(nameof(i));
             }
             else
             {
@@ -1325,7 +1318,7 @@ namespace System.IO.Packaging
             }
 
             // Just in case one of the namespaces that preceded the Ignorable declaration
-            // was an ignorable namespace, we have to recompute _ignoredAttributeCount :Þ .
+            // was an ignorable namespace, we have to recompute _ignoredAttributeCount.
             // No need to check if we haven't yet had any non-ignored attributes.
             if (_ignoredAttributeCount < _attributePosition)
             {

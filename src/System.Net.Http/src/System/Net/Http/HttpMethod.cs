@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -65,7 +66,7 @@ namespace System.Net.Http
         {
             if (string.IsNullOrEmpty(method))
             {
-                throw new ArgumentException(SR.net_http_argument_empty_string, "method");
+                throw new ArgumentException(SR.net_http_argument_empty_string, nameof(method));
             }
             if (HttpRuleParser.GetTokenLength(method, 0) != method.Length)
             {

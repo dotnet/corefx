@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "System.Runtime.InteropServices": "4.0.10"
-  },
-  "frameworks": {
-    "dotnet5.3": {}
-  }
-}

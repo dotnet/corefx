@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Dynamic.Utils;
 
@@ -7,6 +8,8 @@ namespace System.Linq.Expressions.Compiler
 {
     internal partial class StackSpiller
     {
+        private readonly StackGuard _guard = new StackGuard();
+
         /// <summary>
         /// Rewrite the expression
         /// </summary>
@@ -23,71 +26,78 @@ namespace System.Linq.Expressions.Compiler
                 return new Result(RewriteAction.None, null);
             }
 
+            // When compling deep trees, we run the risk of triggering a terminating StackOverflowException,
+            // so we use the StackGuard utility here to probe for sufficient stack and continue the work on
+            // another thread when we run out of stack space.
+            if (!_guard.TryEnterOnCurrentStack())
+            {
+                return _guard.RunOnEmptyStack((StackSpiller @this, Expression n, Stack s) => @this.RewriteExpression(n, s), this, node, stack);
+            }
+
             Result result;
             switch (node.NodeType)
             {
                 case ExpressionType.Add:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
                 case ExpressionType.AddChecked:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
                 case ExpressionType.And:
+                case ExpressionType.ArrayIndex:
+                case ExpressionType.Divide:
+                case ExpressionType.Equal:
+                case ExpressionType.ExclusiveOr:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.LeftShift:
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.Modulo:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.NotEqual:
+                case ExpressionType.Or:
+                case ExpressionType.Power:
+                case ExpressionType.RightShift:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
                     result = RewriteBinaryExpression(node, stack);
                     break;
                 case ExpressionType.AndAlso:
+                case ExpressionType.Coalesce:
+                case ExpressionType.OrElse:
                     result = RewriteLogicalBinaryExpression(node, stack);
                     break;
+                case ExpressionType.Assign:
+                    result = RewriteAssignBinaryExpression(node, stack);
+                    break;
                 case ExpressionType.ArrayLength:
+                case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
+                case ExpressionType.Decrement:
+                case ExpressionType.Increment:
+                case ExpressionType.IsFalse:
+                case ExpressionType.IsTrue:
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                case ExpressionType.Not:
+                case ExpressionType.OnesComplement:
+                case ExpressionType.TypeAs:
+                case ExpressionType.UnaryPlus:
+                case ExpressionType.Unbox:
                     result = RewriteUnaryExpression(node, stack);
                     break;
-                case ExpressionType.ArrayIndex:
-                    result = RewriteBinaryExpression(node, stack);
+                case ExpressionType.Throw:
+                    result = RewriteThrowUnaryExpression(node, stack);
                     break;
                 case ExpressionType.Call:
                     result = RewriteMethodCallExpression(node, stack);
                     break;
-                case ExpressionType.Coalesce:
-                    result = RewriteLogicalBinaryExpression(node, stack);
-                    break;
                 case ExpressionType.Conditional:
                     result = RewriteConditionalExpression(node, stack);
-                    break;
-                case ExpressionType.Convert:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
-                case ExpressionType.ConvertChecked:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
-                case ExpressionType.Divide:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.Equal:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.ExclusiveOr:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.GreaterThan:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    result = RewriteBinaryExpression(node, stack);
                     break;
                 case ExpressionType.Invoke:
                     result = RewriteInvocationExpression(node, stack);
                     break;
                 case ExpressionType.Lambda:
                     result = RewriteLambdaExpression(node, stack);
-                    break;
-                case ExpressionType.LeftShift:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.LessThan:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    result = RewriteBinaryExpression(node, stack);
                     break;
                 case ExpressionType.ListInit:
                     result = RewriteListInitExpression(node, stack);
@@ -98,71 +108,19 @@ namespace System.Linq.Expressions.Compiler
                 case ExpressionType.MemberInit:
                     result = RewriteMemberInitExpression(node, stack);
                     break;
-                case ExpressionType.Modulo:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.Multiply:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.MultiplyChecked:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.Negate:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
-                case ExpressionType.UnaryPlus:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
-                case ExpressionType.NegateChecked:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
                 case ExpressionType.New:
                     result = RewriteNewExpression(node, stack);
                     break;
                 case ExpressionType.NewArrayInit:
-                    result = RewriteNewArrayExpression(node, stack);
-                    break;
                 case ExpressionType.NewArrayBounds:
                     result = RewriteNewArrayExpression(node, stack);
                     break;
-                case ExpressionType.Not:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
-                case ExpressionType.NotEqual:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.Or:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.OrElse:
-                    result = RewriteLogicalBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.Power:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.RightShift:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.Subtract:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.SubtractChecked:
-                    result = RewriteBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.TypeAs:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
+                case ExpressionType.TypeEqual:
                 case ExpressionType.TypeIs:
                     result = RewriteTypeBinaryExpression(node, stack);
                     break;
-                case ExpressionType.Assign:
-                    result = RewriteAssignBinaryExpression(node, stack);
-                    break;
                 case ExpressionType.Block:
                     result = RewriteBlockExpression(node, stack);
-                    break;
-                case ExpressionType.Decrement:
-                    result = RewriteUnaryExpression(node, stack);
                     break;
                 case ExpressionType.Dynamic:
                     result = RewriteDynamicExpression(node, stack);
@@ -172,9 +130,6 @@ namespace System.Linq.Expressions.Compiler
                     break;
                 case ExpressionType.Goto:
                     result = RewriteGotoExpression(node, stack);
-                    break;
-                case ExpressionType.Increment:
-                    result = RewriteUnaryExpression(node, stack);
                     break;
                 case ExpressionType.Index:
                     result = RewriteIndexExpression(node, stack);
@@ -188,26 +143,8 @@ namespace System.Linq.Expressions.Compiler
                 case ExpressionType.Switch:
                     result = RewriteSwitchExpression(node, stack);
                     break;
-                case ExpressionType.Throw:
-                    result = RewriteThrowUnaryExpression(node, stack);
-                    break;
                 case ExpressionType.Try:
                     result = RewriteTryExpression(node, stack);
-                    break;
-                case ExpressionType.Unbox:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
-                case ExpressionType.TypeEqual:
-                    result = RewriteTypeBinaryExpression(node, stack);
-                    break;
-                case ExpressionType.OnesComplement:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
-                case ExpressionType.IsTrue:
-                    result = RewriteUnaryExpression(node, stack);
-                    break;
-                case ExpressionType.IsFalse:
-                    result = RewriteUnaryExpression(node, stack);
                     break;
                 case ExpressionType.AddAssign:
                 case ExpressionType.AndAssign:
@@ -235,10 +172,18 @@ namespace System.Linq.Expressions.Compiler
                 case ExpressionType.RuntimeVariables:
                 case ExpressionType.Default:
                 case ExpressionType.DebugInfo:
-                    return new Result(RewriteAction.None, node);
+                    result = new Result(RewriteAction.None, node);
+                    break;
 
                 default:
-                    throw ContractUtils.Unreachable;
+                    result = RewriteExpression(node.ReduceAndCheck(), stack);
+                    if (result.Action == RewriteAction.None)
+                    {
+                        // it's at least Copy because we reduced the node
+                        result = new Result(result.Action | RewriteAction.Copy, result.Node);
+                    }
+
+                    break;
             }
 
             VerifyRewrite(result, node);

@@ -4,6 +4,10 @@
     "System.Collections": "4.0.0"
   },
   "frameworks": {
-    "dotnet5.1": {}
+    "netstandard1.6": {
+      "imports": [
+        "dotnet5.7"
+      ]
+    }
   }
 }

@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
 using System.IO;
 using System.Diagnostics;
 using System.Data.Common;
+using System.Runtime.CompilerServices;
 using Res = System.SR;
-
 
 namespace System.Data.SqlTypes
 {
@@ -30,7 +31,7 @@ namespace System.Data.SqlTypes
         //      - m_stream must not be null
         //      - m_rgchBuf could be null or not. if not null, content is garbage, should never look into it.
         //		- m_lCurLen must be x_lNull.
-        // 5) SqlChars contains a Lazy Materialized Blob (ie, StorageState.Delayed)
+        // 5) SqlChars contains a Lazy Materialized Blob (i.e, StorageState.Delayed)
         //
         internal char[] m_rgchBuf;  // Data buffer
         private long _lCurLen; // Current data length
@@ -185,7 +186,7 @@ namespace System.Data.SqlTypes
 
                     default:
                         buffer = new char[_lCurLen];
-                        Array.Copy(m_rgchBuf, buffer, (int)_lCurLen);
+                        Array.Copy(m_rgchBuf, 0, buffer, 0, (int)_lCurLen);
                         break;
                 }
 
@@ -200,7 +201,7 @@ namespace System.Data.SqlTypes
             get
             {
                 if (offset < 0 || offset >= this.Length)
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
 
                 if (_rgchWorkBuf == null)
                     _rgchWorkBuf = new char[1];
@@ -272,7 +273,7 @@ namespace System.Data.SqlTypes
         public void SetLength(long value)
         {
             if (value < 0)
-                throw new ArgumentOutOfRangeException("value");
+                throw new ArgumentOutOfRangeException(nameof(value));
 
             if (FStream())
             {
@@ -288,7 +289,7 @@ namespace System.Data.SqlTypes
                     throw new SqlTypeException(Res.GetString(Res.SqlMisc_NoBufferMessage));
 
                 if (value > (long)m_rgchBuf.Length)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 else if (IsNull)
                     // At this point we know that value is small enough
@@ -310,16 +311,16 @@ namespace System.Data.SqlTypes
 
             // Validate the arguments
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
 
             if (offset > this.Length || offset < 0)
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
 
             if (offsetInBuffer > buffer.Length || offsetInBuffer < 0)
-                throw new ArgumentOutOfRangeException("offsetInBuffer");
+                throw new ArgumentOutOfRangeException(nameof(offsetInBuffer));
 
             if (count < 0 || count > buffer.Length - offsetInBuffer)
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             // Adjust count based on data length
             if (count > this.Length - offset)
@@ -359,21 +360,21 @@ namespace System.Data.SqlTypes
             {
                 // Validate the arguments
                 if (buffer == null)
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
 
                 if (m_rgchBuf == null)
                     throw new SqlTypeException(Res.GetString(Res.SqlMisc_NoBufferMessage));
 
                 if (offset < 0)
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
                 if (offset > m_rgchBuf.Length)
                     throw new SqlTypeException(Res.GetString(Res.SqlMisc_BufferInsufficientMessage));
 
                 if (offsetInBuffer < 0 || offsetInBuffer > buffer.Length)
-                    throw new ArgumentOutOfRangeException("offsetInBuffer");
+                    throw new ArgumentOutOfRangeException(nameof(offsetInBuffer));
 
                 if (count < 0 || count > buffer.Length - offsetInBuffer)
-                    throw new ArgumentOutOfRangeException("count");
+                    throw new ArgumentOutOfRangeException(nameof(count));
 
                 if (count > m_rgchBuf.Length - offset)
                     throw new SqlTypeException(Res.GetString(Res.SqlMisc_BufferInsufficientMessage));
@@ -490,17 +491,6 @@ namespace System.Data.SqlTypes
             AssertValid();
         }
 
-        private void SetBuffer(char[] buffer)
-        {
-            m_rgchBuf = buffer;
-            _lCurLen = (m_rgchBuf == null) ? x_lNull : (long)m_rgchBuf.Length;
-            m_stream = null;
-            _state = (m_rgchBuf == null) ? SqlBytesCharsState.Null : SqlBytesCharsState.Buffer;
-
-            AssertValid();
-        }
-
-
         // --------------------------------------------------------------
         //	  Static fields, properties
         // --------------------------------------------------------------
@@ -596,7 +586,7 @@ namespace System.Data.SqlTypes
             {
                 CheckIfStreamClosed("set_Position");
                 if (value < 0 || value > _sqlchars.Length)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 else
                     _lPosition = value;
             }
@@ -608,7 +598,7 @@ namespace System.Data.SqlTypes
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            CheckIfStreamClosed("Seek");
+            CheckIfStreamClosed();
 
             long lPosition = 0;
 
@@ -616,26 +606,26 @@ namespace System.Data.SqlTypes
             {
                 case SeekOrigin.Begin:
                     if (offset < 0 || offset > _sqlchars.Length)
-                        throw ADP.ArgumentOutOfRange("offset");
+                        throw ADP.ArgumentOutOfRange(nameof(offset));
                     _lPosition = offset;
                     break;
 
                 case SeekOrigin.Current:
                     lPosition = _lPosition + offset;
                     if (lPosition < 0 || lPosition > _sqlchars.Length)
-                        throw ADP.ArgumentOutOfRange("offset");
+                        throw ADP.ArgumentOutOfRange(nameof(offset));
                     _lPosition = lPosition;
                     break;
 
                 case SeekOrigin.End:
                     lPosition = _sqlchars.Length + offset;
                     if (lPosition < 0 || lPosition > _sqlchars.Length)
-                        throw ADP.ArgumentOutOfRange("offset");
+                        throw ADP.ArgumentOutOfRange(nameof(offset));
                     _lPosition = lPosition;
                     break;
 
                 default:
-                    throw ADP.ArgumentOutOfRange("offset"); ;
+                    throw ADP.ArgumentOutOfRange(nameof(offset)); ;
             }
 
             return _lPosition;
@@ -644,14 +634,14 @@ namespace System.Data.SqlTypes
         // The Read/Write/Readchar/Writechar simply delegates to SqlChars
         public override int Read(char[] buffer, int offset, int count)
         {
-            CheckIfStreamClosed("Read");
+            CheckIfStreamClosed();
 
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             if (offset < 0 || offset > buffer.Length)
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             if (count < 0 || count > buffer.Length - offset)
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             int icharsRead = (int)_sqlchars.Read(_lPosition, buffer, offset, count);
             _lPosition += icharsRead;
@@ -661,14 +651,14 @@ namespace System.Data.SqlTypes
 
         public override void Write(char[] buffer, int offset, int count)
         {
-            CheckIfStreamClosed("Write");
+            CheckIfStreamClosed();
 
             if (buffer == null)
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             if (offset < 0 || offset > buffer.Length)
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             if (count < 0 || count > buffer.Length - offset)
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             _sqlchars.Write(_lPosition, buffer, offset, count);
             _lPosition += count;
@@ -676,7 +666,7 @@ namespace System.Data.SqlTypes
 
         public override int ReadChar()
         {
-            CheckIfStreamClosed("ReadChar");
+            CheckIfStreamClosed();
 
             // If at the end of stream, return -1, rather than call SqlChars.Readchar,
             // which will throw exception. This is the behavior for Stream.
@@ -691,7 +681,7 @@ namespace System.Data.SqlTypes
 
         public override void WriteChar(char value)
         {
-            CheckIfStreamClosed("WriteChar");
+            CheckIfStreamClosed();
 
             _sqlchars[_lPosition] = value;
             _lPosition++;
@@ -699,7 +689,7 @@ namespace System.Data.SqlTypes
 
         public override void SetLength(long value)
         {
-            CheckIfStreamClosed("SetLength");
+            CheckIfStreamClosed();
 
             _sqlchars.SetLength(value);
             if (_lPosition > value)
@@ -730,7 +720,7 @@ namespace System.Data.SqlTypes
             return _sqlchars == null;
         }
 
-        private void CheckIfStreamClosed(string methodname)
+        private void CheckIfStreamClosed([CallerMemberName] string methodname = "")
         {
             if (FClosed())
                 throw ADP.StreamClosed(methodname);

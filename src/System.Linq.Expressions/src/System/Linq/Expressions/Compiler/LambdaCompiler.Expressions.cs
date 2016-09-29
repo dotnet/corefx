@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -135,7 +136,7 @@ namespace System.Linq.Expressions.Compiler
                 }
                 else
                 {
-                    // emit the with the flags and emit emit expression start
+                    // emit the node with the flags and emit expression start
                     EmitExpression(node, UpdateEmitExpressionStartFlag(flags, CompilationFlags.EmitExpressionStart));
                 }
             }
@@ -185,9 +186,8 @@ namespace System.Linq.Expressions.Compiler
                 // if the invoke target is a lambda expression tree, first compile it into a delegate
                 expr = Expression.Call(expr, expr.Type.GetMethod("Compile", Array.Empty<Type>()));
             }
-            expr = Expression.Call(expr, expr.Type.GetMethod("Invoke"), node.Arguments);
 
-            EmitExpression(expr);
+            EmitMethodCall(expr, expr.Type.GetMethod("Invoke"), node, CompilationFlags.EmitAsNoTail | CompilationFlags.EmitExpressionStart);
         }
 
         private void EmitInlinedInvoke(InvocationExpression invoke, CompilationFlags flags)
@@ -207,13 +207,14 @@ namespace System.Linq.Expressions.Compiler
             // 3. Emit the body
             // if the inlined lambda is the last expression of the whole lambda,
             // tail call can be applied.
-            if (wb.Count != 0)
+            if (wb != null)
             {
+                Debug.Assert(wb.Count > 0);
                 flags = UpdateEmitAsTailCallFlag(flags, CompilationFlags.EmitAsNoTail);
             }
             inner.EmitLambdaBody(_scope, true, flags);
 
-            // 4. Emit writebacks if needed
+            // 4. Emit write-backs if needed
             EmitWriteBack(wb);
         }
 
@@ -233,9 +234,10 @@ namespace System.Linq.Expressions.Compiler
             }
 
             // Emit indexes. We don't allow byref args, so no need to worry
-            // about writebacks or EmitAddress
-            foreach (var arg in node.Arguments)
+            // about write-backs or EmitAddress
+            for (int i = 0, n = node.ArgumentCount; i < n; i++)
             {
+                var arg = node.GetArgument(i);
                 EmitExpression(arg);
             }
 
@@ -256,9 +258,10 @@ namespace System.Linq.Expressions.Compiler
             }
 
             // Emit indexes. We don't allow byref args, so no need to worry
-            // about writebacks or EmitAddress
-            foreach (var arg in index.Arguments)
+            // about write-backs or EmitAddress
+            for (int i = 0, n = index.ArgumentCount; i < n; i++)
             {
+                var arg = index.GetArgument(i);
                 EmitExpression(arg);
             }
 
@@ -424,7 +427,7 @@ namespace System.Linq.Expressions.Compiler
                 _ilg.Emit(callOp, mi);
             }
 
-            // Emit writebacks for properties passed as "ref" arguments
+            // Emit write-backs for properties passed as "ref" arguments
             EmitWriteBack(wb);
         }
 
@@ -464,11 +467,11 @@ namespace System.Linq.Expressions.Compiler
             // static, ref:     call
             // static, value:   call
             // virtual, ref:    callvirt
-            // virtual, value:  call -- eg, double.ToString must be a non-virtual call to be verifiable.
+            // virtual, value:  call -- e.g. double.ToString must be a non-virtual call to be verifiable.
             // instance, ref:   callvirt -- this looks wrong, but is verifiable and gives us a free null check.
             // instance, value: call
             //
-            // We never need to generate a nonvirtual call to a virtual method on a reference type because
+            // We never need to generate a non-virtual call to a virtual method on a reference type because
             // expression trees do not support "base.Foo()" style calling.
             // 
             // We could do an optimization here for the case where we know that the object is a non-null
@@ -489,7 +492,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
         /// <summary>
-        /// Emits arguments to a call, and returns an array of writebacks that
+        /// Emits arguments to a call, and returns an array of write-backs that
         /// should happen after the call.
         /// </summary>
         private List<WriteBack> EmitArguments(MethodBase method, IArgumentProvider args)
@@ -498,7 +501,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
         /// <summary>
-        /// Emits arguments to a call, and returns an array of writebacks that
+        /// Emits arguments to a call, and returns an array of write-backs that
         /// should happen after the call. For emitting dynamic expressions, we
         /// need to skip the first parameter of the method (the call site).
         /// </summary>
@@ -507,7 +510,7 @@ namespace System.Linq.Expressions.Compiler
             ParameterInfo[] pis = method.GetParametersCached();
             Debug.Assert(args.ArgumentCount + skipParameters == pis.Length);
 
-            var writeBacks = new List<WriteBack>();
+            List<WriteBack> writeBacks = null;
             for (int i = skipParameters, n = pis.Length; i < n; i++)
             {
                 ParameterInfo parameter = pis[i];
@@ -521,6 +524,11 @@ namespace System.Linq.Expressions.Compiler
                     WriteBack wb = EmitAddressWriteBack(argument, type);
                     if (wb != null)
                     {
+                        if (writeBacks == null)
+                        {
+                            writeBacks = new List<WriteBack>();
+                        }
+
                         writeBacks.Add(wb);
                     }
                 }
@@ -532,11 +540,14 @@ namespace System.Linq.Expressions.Compiler
             return writeBacks;
         }
 
-        private static void EmitWriteBack(IList<WriteBack> writeBacks)
+        private void EmitWriteBack(List<WriteBack> writeBacks)
         {
-            foreach (WriteBack wb in writeBacks)
+            if (writeBacks != null)
             {
-                wb();
+                foreach (WriteBack wb in writeBacks)
+                {
+                    wb(this);
+                }
             }
         }
 
@@ -563,10 +574,14 @@ namespace System.Linq.Expressions.Compiler
 
         private void EmitDynamicExpression(Expression expr)
         {
+#if FEATURE_COMPILE_TO_METHODBUILDER
             if (!(_method is DynamicMethod))
             {
                 throw Error.CannotCompileDynamic();
             }
+#else
+            Debug.Assert(_method is DynamicMethod);
+#endif
 
             var node = (IDynamicExpression)expr;
 
@@ -606,7 +621,7 @@ namespace System.Linq.Expressions.Compiler
             }
             else
             {
-                Debug.Assert(node.Arguments.Count == 0, "Node with arguments must have a constructor.");
+                Debug.Assert(node.ArgumentCount == 0, "Node with arguments must have a constructor.");
                 Debug.Assert(node.Type.GetTypeInfo().IsValueType, "Only value type may have constructor not set.");
                 LocalBuilder temp = GetLocal(node.Type);
                 _ilg.Emit(OpCodes.Ldloca, temp);
@@ -689,7 +704,7 @@ namespace System.Linq.Expressions.Compiler
             {
                 // Note: the stloc/ldloc pattern is a bit suboptimal, but it
                 // saves us from having to spill stack when assigning to a
-                // byref parameter. We already make this same tradeoff for
+                // byref parameter. We already make this same trade-off for
                 // hoisted variables, see ElementStorage.EmitStore
 
                 LocalBuilder value = GetLocal(variable.Type);
@@ -880,23 +895,28 @@ namespace System.Linq.Expressions.Compiler
         {
             NewArrayExpression node = (NewArrayExpression)expr;
 
+            ReadOnlyCollection<Expression> expressions = node.Expressions;
+            int n = expressions.Count;
+
             if (node.NodeType == ExpressionType.NewArrayInit)
             {
-                _ilg.EmitArray(
-                    node.Type.GetElementType(),
-                    node.Expressions.Count,
-                    delegate (int index)
-                    {
-                        EmitExpression(node.Expressions[index]);
-                    }
-                );
+                Type elementType = node.Type.GetElementType();
+
+                _ilg.EmitArray(elementType, n);
+
+                for (int i = 0; i < n; i++)
+                {
+                    _ilg.Emit(OpCodes.Dup);
+                    _ilg.EmitInt(i);
+                    EmitExpression(expressions[i]);
+                    _ilg.EmitStoreElement(elementType);
+                }
             }
             else
             {
-                ReadOnlyCollection<Expression> bounds = node.Expressions;
-                for (int i = 0; i < bounds.Count; i++)
+                for (int i = 0; i < n; i++)
                 {
-                    Expression x = bounds[i];
+                    Expression x = expressions[i];
                     EmitExpression(x);
                     _ilg.EmitConvertToType(x.Type, typeof(int), true);
                 }
@@ -915,7 +935,7 @@ namespace System.Linq.Expressions.Compiler
             throw Error.ExtensionNotReduced();
         }
 
-        #region ListInit, MemberInit
+#region ListInit, MemberInit
 
         private void EmitListInitExpression(Expression expr)
         {
@@ -1102,12 +1122,12 @@ namespace System.Linq.Expressions.Compiler
             if (fi != null) return fi.FieldType;
             PropertyInfo pi = member as PropertyInfo;
             if (pi != null) return pi.PropertyType;
-            throw Error.MemberNotFieldOrProperty(member);
+            throw Error.MemberNotFieldOrProperty(member, nameof(member));
         }
 
-        #endregion
+#endregion
 
-        #region Expression helpers
+#region Expression helpers
 
         internal static void ValidateLift(IList<ParameterExpression> variables, IList<Expression> arguments)
         {
@@ -1304,6 +1324,6 @@ namespace System.Linq.Expressions.Compiler
             }
         }
 
-        #endregion
+#endregion
     }
 }

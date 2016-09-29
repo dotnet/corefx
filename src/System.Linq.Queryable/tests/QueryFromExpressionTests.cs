@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -408,7 +409,7 @@ namespace System.Linq.Tests
             public static IEnumerable<int> RunningTotals(IEnumerable<int> source)
             {
                 if (source == null)
-                    throw new ArgumentNullException("source");
+                    throw new ArgumentNullException(nameof(source));
                 return RunningTotalsIterator(source);
             }
 
@@ -609,6 +610,38 @@ namespace System.Linq.Tests
                 );
             IQueryable<int> q = _prov.CreateQuery<int>(block);
             Assert.Equal(new[] { 2, 1, 0 }, q);
+        }
+
+        [Fact]
+        public void ReturnNonQueryable()
+        {
+            LabelTarget target = Expression.Label(typeof(int));
+            Expression block = Expression.Block(
+                Expression.Condition(
+                    Expression.Constant(true),
+                    Expression.Return(target, Expression.Constant(3)),
+                    Expression.Return(target, Expression.Constant(1))
+                    ),
+                Expression.Return(target, Expression.Constant(2)),
+                Expression.Label(target, Expression.Default(typeof(int)))
+                );
+            Assert.Equal(3, _prov.Execute<int>(block));
+        }
+
+        [Fact]
+        public void ReturnNonQueryableUntyped()
+        {
+            LabelTarget target = Expression.Label(typeof(int));
+            Expression block = Expression.Block(
+                Expression.Condition(
+                    Expression.Constant(true),
+                    Expression.Return(target, Expression.Constant(3)),
+                    Expression.Return(target, Expression.Constant(1))
+                    ),
+                Expression.Return(target, Expression.Constant(2)),
+                Expression.Label(target, Expression.Default(typeof(int)))
+                );
+            Assert.Equal(3, _prov.Execute(block));
         }
     }
 }

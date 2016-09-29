@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -47,6 +48,10 @@ namespace System.Threading.Tasks.Dataflow
     ///         <term>NameFormat</term>
     ///         <description>"{0} Id={1}"</description>
     ///     </item>
+    ///     <item>
+    ///         <term>EnsureOrdered</term>
+    ///         <description>true</description>
+    ///     </item>
     /// </list>
     /// Dataflow blocks capture the state of the options at their construction.  Subsequent changes
     /// to the provided <see cref="DataflowBlockOptions"/> instance should not affect the behavior
@@ -71,6 +76,8 @@ namespace System.Threading.Tasks.Dataflow
         private Int32 _boundedCapacity = Unbounded;
         /// <summary>The name format to use for creating a name for a block.</summary>
         private string _nameFormat = "{0} Id={1}"; // see NameFormat property for a description of format items
+        /// <summary>Whether to force ordered processing of messages.</summary>
+        private bool _ensureOrdered = true;
 
         /// <summary>A default instance of <see cref="DataflowBlockOptions"/>.</summary>
         /// <remarks>
@@ -90,7 +97,8 @@ namespace System.Threading.Tasks.Dataflow
                     CancellationToken = this.CancellationToken,
                     MaxMessagesPerTask = this.MaxMessagesPerTask,
                     BoundedCapacity = this.BoundedCapacity,
-                    NameFormat = this.NameFormat
+                    NameFormat = this.NameFormat,
+                    EnsureOrdered = this.EnsureOrdered
                 };
         }
 
@@ -104,7 +112,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value == null) throw new ArgumentNullException("value");
+                if (value == null) throw new ArgumentNullException(nameof(value));
                 _taskScheduler = value;
             }
         }
@@ -127,7 +135,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _maxMessagesPerTask = value;
             }
         }
@@ -147,7 +155,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _boundedCapacity = value;
             }
         }
@@ -166,9 +174,26 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value == null) throw new ArgumentNullException("value");
+                if (value == null) throw new ArgumentNullException(nameof(value));
                 _nameFormat = value;
             }
+        }
+
+        /// <summary>Gets or sets whether ordered processing should be enforced on a block's handling of messages.</summary>
+        /// <remarks>
+        /// By default, dataflow blocks enforce ordering on the processing of messages. This means that a
+        /// block like <see cref="TransformBlock{TInput, TOutput}"/> will ensure that messages are output in the same
+        /// order they were input, even if parallelism is employed by the block and the processing of a message N finishes 
+        /// after the processing of a subsequent message N+1 (the block will reorder the results to maintain the input
+        /// ordering prior to making those results available to a consumer).  Some blocks may allow this to be relaxed,
+        /// however.  Setting <see cref="EnsureOrdered"/> to false tells a block that it may relax this ordering if
+        /// it's able to do so.  This can be beneficial if the immediacy of a processed result being made available
+        /// is more important than the input-to-output ordering being maintained.
+        /// </remarks>
+        public bool EnsureOrdered
+        {
+            get { return _ensureOrdered; }
+            set { _ensureOrdered = value; }
         }
     }
 
@@ -206,6 +231,10 @@ namespace System.Threading.Tasks.Dataflow
     ///         <description>"{0} Id={1}"</description>
     ///     </item>
     ///     <item>
+    ///         <term>EnsureOrdered</term>
+    ///         <description>true</description>
+    ///     </item>
+    ///     <item>
     ///         <term>MaxDegreeOfParallelism</term>
     ///         <description>1</description>
     ///     </item>
@@ -240,6 +269,7 @@ namespace System.Threading.Tasks.Dataflow
                     MaxMessagesPerTask = this.MaxMessagesPerTask,
                     BoundedCapacity = this.BoundedCapacity,
                     NameFormat = this.NameFormat,
+                    EnsureOrdered = this.EnsureOrdered,
                     MaxDegreeOfParallelism = this.MaxDegreeOfParallelism,
                     SingleProducerConstrained = this.SingleProducerConstrained
                 };
@@ -260,7 +290,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value < 1 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _maxDegreeOfParallelism = value;
             }
         }
@@ -333,6 +363,10 @@ namespace System.Threading.Tasks.Dataflow
     ///         <description>"{0} Id={1}"</description>
     ///     </item>
     ///     <item>
+    ///         <term>EnsureOrdered</term>
+    ///         <description>true</description>
+    ///     </item>
+    ///     <item>
     ///         <term>MaxNumberOfGroups</term>
     ///         <description>GroupingDataflowBlockOptions.Unbounded (-1)</description>
     ///     </item>
@@ -367,6 +401,7 @@ namespace System.Threading.Tasks.Dataflow
                     MaxMessagesPerTask = this.MaxMessagesPerTask,
                     BoundedCapacity = this.BoundedCapacity,
                     NameFormat = this.NameFormat,
+                    EnsureOrdered = this.EnsureOrdered,
                     Greedy = this.Greedy,
                     MaxNumberOfGroups = this.MaxNumberOfGroups
                 };
@@ -398,7 +433,7 @@ namespace System.Threading.Tasks.Dataflow
             set
             {
                 Debug.Assert(this != Default, "Default instance is supposed to be immutable.");
-                if (value <= 0 && value != Unbounded) throw new ArgumentOutOfRangeException("value");
+                if (value <= 0 && value != Unbounded) throw new ArgumentOutOfRangeException(nameof(value));
                 _maxNumberOfGroups = value;
             }
         }

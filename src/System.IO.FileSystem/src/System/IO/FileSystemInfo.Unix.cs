@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Runtime.InteropServices;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.IO
 {
@@ -9,6 +8,8 @@ namespace System.IO
     {
         /// <summary>The last cached stat information about the file.</summary>
         private Interop.Sys.FileStatus _fileStatus;
+        /// <summary>true if <see cref="_fileStatus"/> represents a symlink and the target of that symlink is a directory.</summary>
+        private bool _targetOfSymlinkIsDirectory;
 
         /// <summary>
         /// Whether we've successfully cached a stat structure.
@@ -36,7 +37,7 @@ namespace System.IO
 
                 FileAttributes attrs = default(FileAttributes);
 
-                if (IsDirectoryAssumesInitialized)
+                if (IsDirectoryAssumesInitialized) // this is the one attribute where we follow symlinks
                 {
                     attrs |= FileAttributes.Directory;
                 }
@@ -44,7 +45,7 @@ namespace System.IO
                 {
                     attrs |= FileAttributes.ReadOnly;
                 }
-                if (IsLink)
+                if (IsSymlinkAssumesInitialized)
                 {
                     attrs |= FileAttributes.ReparsePoint;
                 }
@@ -70,7 +71,7 @@ namespace System.IO
                     FileAttributes.System | FileAttributes.Temporary;
                 if ((value & ~allValidFlags) != 0)
                 {
-                    throw new ArgumentException(SR.Arg_InvalidFileAttrs, "value");
+                    throw new ArgumentException(SR.Arg_InvalidFileAttrs, nameof(value));
                 }
 
                 // The only thing we can reasonably change is whether the file object is readonly,
@@ -82,21 +83,13 @@ namespace System.IO
         }
 
         /// <summary>Gets whether stat reported this system object as a directory.</summary>
-        private bool IsDirectoryAssumesInitialized
-        {
-            get
-            {
-                return (_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR;
-            }
-        }
+        private bool IsDirectoryAssumesInitialized =>
+            (_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR ||
+            (IsSymlinkAssumesInitialized && _targetOfSymlinkIsDirectory);
 
-        private bool IsLink
-        {
-            get
-            {
-                return (_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFLNK;
-            }
-        }
+        /// <summary>Gets whether stat reported this system object as a symlink.</summary>
+        private bool IsSymlinkAssumesInitialized =>
+            (_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFLNK;
 
         /// <summary>
         /// Gets or sets whether the file is read-only.  This is based on the read/write/execute
@@ -145,7 +138,7 @@ namespace System.IO
                 if (newMode != _fileStatus.Mode)
                 {
                     bool isDirectory = this is DirectoryInfo;
-                    while (Interop.CheckIo(Interop.Sys.ChMod(FullPath, newMode), FullPath, isDirectory)) ;
+                    Interop.CheckIo(Interop.Sys.ChMod(FullPath, newMode), FullPath, isDirectory);
                 }
             }
         }
@@ -158,6 +151,7 @@ namespace System.IO
                 {
                     Refresh();
                 }
+
                 return
                     _fileStatusInitialized == 0 && // avoid throwing if Refresh failed; instead just return false
                     (this is DirectoryInfo) == IsDirectoryAssumesInitialized;
@@ -211,7 +205,7 @@ namespace System.IO
             buf.AcTime = accessTime ?? _fileStatus.ATime;
             buf.ModTime = writeTime ?? _fileStatus.MTime;
             bool isDirectory = this is DirectoryInfo;
-            while (Interop.CheckIo(Interop.Sys.UTime(FullPath, ref buf), FullPath, isDirectory)) ;
+            Interop.CheckIo(Interop.Sys.UTime(FullPath, ref buf), FullPath, isDirectory);
             _fileStatusInitialized = -1;
         }
 
@@ -228,25 +222,28 @@ namespace System.IO
         {
             // This should not throw, instead we store the result so that we can throw it
             // when someone actually accesses a property.
-            int result;
-            while (true)
+
+            // Use lstat to get the details on the object, without following symlinks.
+            // If it is a symlink, then subsequently get details on the target of the symlink,
+            // storing those results separately.  We only report failure if the initial
+            // lstat fails, as a broken symlink should still report info on exists, attributes, etc.
+            _targetOfSymlinkIsDirectory = false;
+            int result = Interop.Sys.LStat(FullPath, out _fileStatus);
+            if (result < 0)
             {
-                result = Interop.Sys.Stat(FullPath, out _fileStatus);
-                if (result >= 0)
-                {
-                    _fileStatusInitialized = 0;
-                }
-                else
-                {
-                    var errorInfo = Interop.Sys.GetLastErrorInfo();
-                    if (errorInfo.Error == Interop.Error.EINTR)
-                    {
-                        continue;
-                    }
-                    _fileStatusInitialized = errorInfo.RawErrno;
-                }
-                break;
+                Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
+                _fileStatusInitialized = errorInfo.RawErrno;
+                return;
             }
+
+            Interop.Sys.FileStatus targetStatus;
+            if ((_fileStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFLNK &&
+                Interop.Sys.Stat(FullPath, out targetStatus) >= 0)
+            {
+                _targetOfSymlinkIsDirectory = (targetStatus.Mode & Interop.Sys.FileTypes.S_IFMT) == Interop.Sys.FileTypes.S_IFDIR;
+            }
+
+            _fileStatusInitialized = 0;
         }
 
         private void EnsureStatInitialized()

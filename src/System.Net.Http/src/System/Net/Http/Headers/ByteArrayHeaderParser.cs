@@ -1,13 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 
 namespace System.Net.Http.Headers
 {
     // Don't derive from BaseHeaderParser since parsing the Base64 string is delegated to Convert.FromBase64String() 
-    // which will remove leading, trailing, and whitespaces in the middle of the string.
+    // which will remove leading, trailing, and whitespace in the middle of the string.
     internal class ByteArrayHeaderParser : HttpHeaderParser
     {
         internal static readonly ByteArrayHeaderParser Parser = new ByteArrayHeaderParser();
@@ -49,7 +49,7 @@ namespace System.Net.Http.Headers
             }
             catch (FormatException e)
             {
-                if (Logging.On) Logging.PrintError(Logging.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_parser_invalid_base64_string, base64String, e.Message));
+                if (NetEventSource.Log.IsEnabled()) NetEventSource.PrintError(NetEventSource.ComponentType.Http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_parser_invalid_base64_string, base64String, e.Message));
             }
 
             return false;

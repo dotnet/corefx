@@ -1,38 +1,22 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-/*=============================================================================
-**
-**
-**
-** Purpose: Thrown when something goes wrong during serialization or 
-**          deserialization.
-**
-**
-=============================================================================*/
-
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Runtime.Serialization
 {
     public class SerializationException : Exception
     {
-        private static string s_nullMessage = SR.SerializationException;
+        private static string s_nullMessage = "Serialization error."; // TODO: SR.SerializationException;
 
-        // Creates a new SerializationException with its message 
-        // string set to a default message.
-        public SerializationException()
-            : base(s_nullMessage)
+        public SerializationException() : base(s_nullMessage)
         {
         }
 
-        public SerializationException(string message)
-            : base(message)
+        public SerializationException(string message) : base(message)
         {
         }
 
-        public SerializationException(string message, Exception innerException)
-            : base(message, innerException)
+        public SerializationException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }

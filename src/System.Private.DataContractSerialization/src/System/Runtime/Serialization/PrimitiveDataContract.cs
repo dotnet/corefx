@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -18,6 +19,8 @@ namespace System.Runtime.Serialization
     internal abstract class PrimitiveDataContract : DataContract
 #endif
     {
+        internal static readonly PrimitiveDataContract NullContract = new NullPrimitiveDataContract();
+
         [SecurityCritical]
         /// <SecurityNote>
         /// Critical - holds instance of CriticalHelper which keeps state that is cached statically for serialization. 
@@ -167,7 +170,7 @@ namespace System.Runtime.Serialization
         }
         [SecurityCritical]
         /// <SecurityNote>
-        /// Critical - holds all state used for for (de)serializing primitives.
+        /// Critical - holds all state used for (de)serializing primitives.
         ///            since the data is cached statically, we lock down access to it.
         /// </SecurityNote>
         private class PrimitiveDataContractCriticalHelper : DataContract.DataContractCriticalHelper
@@ -228,6 +231,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsChar()
                 : HandleReadValue(reader.ReadElementContentAsChar(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteChar((char)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -252,6 +260,11 @@ namespace System.Runtime.Serialization
         {
             return (context == null) ? reader.ReadElementContentAsBoolean()
                 : HandleReadValue(reader.ReadElementContentAsBoolean(), context);
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteBoolean((bool)obj, name, ns);
         }
     }
 
@@ -278,6 +291,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsSignedByte()
                 : HandleReadValue(reader.ReadElementContentAsSignedByte(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteSignedByte((sbyte)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -302,6 +320,11 @@ namespace System.Runtime.Serialization
         {
             return (context == null) ? reader.ReadElementContentAsUnsignedByte()
                 : HandleReadValue(reader.ReadElementContentAsUnsignedByte(), context);
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteUnsignedByte((byte)obj, name, ns);
         }
     }
 
@@ -328,6 +351,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsShort()
                 : HandleReadValue(reader.ReadElementContentAsShort(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteShort((short)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -352,6 +380,50 @@ namespace System.Runtime.Serialization
         {
             return (context == null) ? reader.ReadElementContentAsUnsignedShort()
                 : HandleReadValue(reader.ReadElementContentAsUnsignedShort(), context);
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteUnsignedShort((ushort)obj, name, ns);
+        }
+    }
+
+    internal class NullPrimitiveDataContract : PrimitiveDataContract
+    {
+        public NullPrimitiveDataContract() : base(typeof(NullPrimitiveDataContract), DictionaryGlobals.EmptyString, DictionaryGlobals.EmptyString)
+        {
+
+        }
+
+        internal override string ReadMethodName
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        internal override string WriteMethodName
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public override void WriteXmlValue(XmlWriterDelegator writer, object obj, XmlObjectSerializerWriteContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ReadXmlValue(XmlReaderDelegator reader, XmlObjectSerializerReadContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -378,6 +450,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsInt()
                 : HandleReadValue(reader.ReadElementContentAsInt(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteInt((int)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -402,6 +479,11 @@ namespace System.Runtime.Serialization
         {
             return (context == null) ? reader.ReadElementContentAsUnsignedInt()
                 : HandleReadValue(reader.ReadElementContentAsUnsignedInt(), context);
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteUnsignedInt((uint)obj, name, ns);
         }
     }
 
@@ -432,6 +514,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsLong()
                 : HandleReadValue(reader.ReadElementContentAsLong(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteLong((long)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -456,6 +543,11 @@ namespace System.Runtime.Serialization
         {
             return (context == null) ? reader.ReadElementContentAsUnsignedLong()
                 : HandleReadValue(reader.ReadElementContentAsUnsignedLong(), context);
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteUnsignedLong((ulong)obj, name, ns);
         }
     }
 
@@ -482,6 +574,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsFloat()
                 : HandleReadValue(reader.ReadElementContentAsFloat(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteFloat((float)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -506,6 +603,11 @@ namespace System.Runtime.Serialization
         {
             return (context == null) ? reader.ReadElementContentAsDouble()
                 : HandleReadValue(reader.ReadElementContentAsDouble(), context);
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteDouble((double)obj, name, ns);
         }
     }
 
@@ -532,6 +634,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsDecimal()
                 : HandleReadValue(reader.ReadElementContentAsDecimal(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteDecimal((decimal)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -556,6 +663,11 @@ namespace System.Runtime.Serialization
         {
             return (context == null) ? reader.ReadElementContentAsDateTime()
                 : HandleReadValue(reader.ReadElementContentAsDateTime(), context);
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteDateTime((DateTime)obj, name, ns);
         }
     }
 
@@ -592,6 +704,11 @@ namespace System.Runtime.Serialization
                 return HandleReadValue(reader.ReadElementContentAsString(), context);
             }
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            context.WriteString(xmlWriter, (string)obj, name, ns);
+        }
     }
     internal class HexBinaryDataContract : StringDataContract
     {
@@ -626,6 +743,13 @@ namespace System.Runtime.Serialization
             {
                 return HandleReadValue(reader.ReadElementContentAsBase64(), context);
             }
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteStartElement(name, ns);
+            xmlWriter.WriteBase64((byte[])obj);
+            xmlWriter.WriteEndElement();
         }
     }
 
@@ -711,6 +835,11 @@ namespace System.Runtime.Serialization
             return (context == null) ? reader.ReadElementContentAsTimeSpan()
                 : HandleReadValue(reader.ReadElementContentAsTimeSpan(), context);
         }
+
+        public override void WriteXmlElement(XmlWriterDelegator writer, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            writer.WriteTimeSpan((TimeSpan)obj, name, ns);
+        }
     }
 
 #if NET_NATIVE
@@ -739,6 +868,11 @@ namespace System.Runtime.Serialization
         {
             return (context == null) ? reader.ReadElementContentAsGuid()
                 : HandleReadValue(reader.ReadElementContentAsGuid(), context);
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            xmlWriter.WriteGuid((Guid)obj, name, ns);
         }
     }
 
@@ -770,6 +904,11 @@ namespace System.Runtime.Serialization
             {
                 return HandleReadValue(reader.ReadElementContentAsUri(), context);
             }
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator writer, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            writer.WriteUri((Uri)obj, name, ns);
         }
     }
 
@@ -806,6 +945,11 @@ namespace System.Runtime.Serialization
             {
                 return HandleReadValue(reader.ReadElementContentAsQName(), context);
             }
+        }
+
+        public override void WriteXmlElement(XmlWriterDelegator writer, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            context.WriteQName(writer, (XmlQualifiedName)obj, name, ns);
         }
 
         internal override void WriteRootElement(XmlWriterDelegator writer, XmlDictionaryString name, XmlDictionaryString ns)

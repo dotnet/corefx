@@ -9,50 +9,39 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>System.Text.RegularExpressions.Tests</AssemblyName>
+    <NugetTargetMoniker Condition=" '$(TargetGroup)' == ''">.NETStandard,Version=v1.6</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Debug|AnyCPU' ">
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Release|AnyCPU' ">
   </PropertyGroup>
   <!-- Compiled Source Files -->
   <ItemGroup>
     <Compile Include="CaptureCollectionTests.cs" />
-    <Compile Include="CaptureTests.cs" />
-    <Compile Include="EscapeUnescapeTests.cs" />
-    <Compile Include="GroupNamesAndNumbers.cs" />
-    <Compile Include="IsMatchMatchSplitTests.cs" />
+    <Compile Include="GroupCollectionTests.cs" />
     <Compile Include="MatchCollectionTests.cs" />
-    <Compile Include="R2LGetGroupNamesMatchTests.cs" />
-    <Compile Include="RegexComponentsSplitTests.cs" />
-    <Compile Include="RegexConstructorTests.cs" />
-    <Compile Include="RegexMatchTests0.cs" />
-    <Compile Include="RegexMatchTests1.cs" />
-    <Compile Include="RegexMatchTests2.cs" />
-    <Compile Include="RegexMatchTests3.cs" />
-    <Compile Include="RegexMatchTests4.cs" />
-    <Compile Include="RegexMatchTests5.cs" />
-    <Compile Include="RegexMatchTests6.cs" />
-    <Compile Include="RegexMatchTests7.cs" />
-    <Compile Include="RegexMatchTests8.cs" />
-    <Compile Include="RegexMatchTests9.cs" />
-    <Compile Include="RegexMatchTests10.cs" />
-    <Compile Include="RegexMatchTests11.cs" />
-    <Compile Include="RegexMatchValueTests.cs" />
-    <Compile Include="RegexReplaceStringTests0.cs" />
-    <Compile Include="RegexReplaceStringTests1.cs" />
-    <Compile Include="RegexSplitTests.cs" />
-    <Compile Include="ReturnValueChecks.cs" />
-    <Compile Include="RightToLeft.cs" />
-    <Compile Include="RightToLeftMatchStartAtTests.cs" />
-    <Compile Include="SplitMatchIsMatchTests.cs" />
-    <Compile Include="RegexUnicodeCharTests.cs" />
-    <Compile Include="RegexLangElementsCoverageTests.cs" />
-    <Compile Include="CharacterClassSubtractionSimple.cs" />
-    <Compile Include="Support.cs" />
+    <Compile Include="Regex.EscapeUnescape.Tests.cs" />
+    <Compile Include="Regex.GetGroupNames.Tests.cs" />
+    <Compile Include="Regex.Ctor.Tests.cs" />
+    <Compile Include="Regex.MultipleMatches.Tests.cs" />
+    <Compile Include="Regex.UnicodeChar.Tests.cs" />
+    <Compile Include="Regex.Groups.Tests.cs" />
+    <Compile Include="Regex.Replace.Tests.cs" />
+    <Compile Include="Regex.Split.Tests.cs" />
+    <Compile Include="Regex.Match.Tests.cs" />
+    <Compile Include="Regex.Tests.Common.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetGroup)' == 'netstandard1.7'">
+    <Compile Include="PrecompiledRegexScenarioTest.cs" />
+    <Compile Include="RegexGroupNameTests.cs" />
+    <Compile Include="Regex.Serialization.cs" />
+    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
+      <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\System.Text.RegularExpressions.csproj">
+    <ProjectReference Include="..\pkg\System.Text.RegularExpressions.pkgproj">
       <Project>{be28323e-327a-4e0f-b7f9-16ab7eab59dd}</Project>
       <Name>System.Text.RegularExpressions</Name>
     </ProjectReference>

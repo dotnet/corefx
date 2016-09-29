@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 
@@ -72,9 +73,9 @@ namespace System.Net.NetworkInformation
             }
             catch (NetworkInformationException nie)
             {
-                if (Logging.On)
+                if (NetEventSource.Log.IsEnabled())
                 {
-                    Logging.Exception(Logging.Web, "SystemNetworkInterface", "InternalGetIsNetworkAvailable", nie);
+                    NetEventSource.Exception(NetEventSource.ComponentType.NetworkInformation, "SystemNetworkInterface", "InternalGetIsNetworkAvailable", nie);
                 }
             }
 
@@ -88,7 +89,6 @@ namespace System.Net.NetworkInformation
             uint bufferSize = 0;
             SafeLocalAllocHandle buffer = null;
 
-            // TODO: #2485: This will probably require changes in the PAL for HostInformation.
             Interop.IpHlpApi.FIXED_INFO fixedInfo = HostInformationPal.GetFixedInfo();
             List<SystemNetworkInterface> interfaceList = new List<SystemNetworkInterface>();
 
@@ -172,9 +172,9 @@ namespace System.Net.NetworkInformation
         {
             byte[] newAddr = new byte[_addressLength];
 
-            // Array.Copy only supports int and long while addressLength is uint (see IpAdapterAddresses).
+            // Buffer.BlockCopy only supports int while addressLength is uint (see IpAdapterAddresses).
             // Will throw OverflowException if addressLength > Int32.MaxValue.
-            Array.Copy(_physicalAddress, 0, newAddr, 0, checked((int)_addressLength));
+            Buffer.BlockCopy(_physicalAddress, 0, newAddr, 0, checked((int)_addressLength));
             return new PhysicalAddress(newAddr);
         }
 
@@ -183,6 +183,11 @@ namespace System.Net.NetworkInformation
         public override IPInterfaceProperties GetIPProperties()
         {
             return _interfaceProperties;
+        }
+
+        public override IPv4InterfaceStatistics GetIPv4Statistics()
+        {
+            return new SystemIPv4InterfaceStatistics(_index);
         }
 
         public override IPInterfaceStatistics GetIPStatistics()

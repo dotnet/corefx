@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ internal static partial class Interop
             internal ulong rsslim;
             //internal ulong startcode;
             //internal ulong endcode;
-            internal ulong startstack;
+            //internal ulong startstack;
             //internal ulong kstkesp;
             //internal ulong kstkeip;
             //internal ulong signal;
@@ -190,7 +191,10 @@ internal static partial class Interop
         internal static bool TryReadStatFile(int pid, int tid, out ParsedStat result, ReusableTextReader reusableReader)
         {
             bool b = TryParseStatFile(GetStatFilePathForThread(pid, tid), out result, reusableReader);
-            Debug.Assert(!b || result.pid == tid, "Expected thread ID from stat file to match supplied tid");
+            //
+            // This assert currently fails in the Windows Subsystem For Linux.  See https://github.com/Microsoft/BashOnWindows/issues/967.
+            //
+            //Debug.Assert(!b || result.pid == tid, "Expected thread ID from stat file to match supplied tid");
             return b;
         }
 
@@ -253,25 +257,32 @@ internal static partial class Interop
             results.vsize = parser.ParseNextUInt64();
             results.rss = parser.ParseNextInt64();
             results.rsslim = parser.ParseNextUInt64();
-            parser.MoveNextOrFail(); // startcode
-            parser.MoveNextOrFail(); // endcode
-            results.startstack = parser.ParseNextUInt64();
-            parser.MoveNextOrFail(); // kstkesp
-            parser.MoveNextOrFail(); // kstkeip
-            parser.MoveNextOrFail(); // signal
-            parser.MoveNextOrFail(); // blocked
-            parser.MoveNextOrFail(); // sigignore
-            parser.MoveNextOrFail(); // sigcatch
-            parser.MoveNextOrFail(); // wchan
-            parser.MoveNextOrFail(); // nswap
-            parser.MoveNextOrFail(); // cnswap
-            parser.MoveNextOrFail(); // exit_signal
-            parser.MoveNextOrFail(); // processor
-            parser.MoveNextOrFail(); // rt_priority
-            parser.MoveNextOrFail(); // policy
-            parser.MoveNextOrFail(); // delayacct_blkio_ticks
-            parser.MoveNextOrFail(); // guest_time
-            parser.MoveNextOrFail(); // cguest_time
+
+            // The following lines are commented out as there's no need to parse through
+            // the rest of the entry (we've gotten all of the data we need).  Should any
+            // of these fields be needed in the future, uncomment all of the lines up
+            // through and including the one that's needed.  For now, these are being left 
+            // commented to document what's available in the remainder of the entry.
+
+            //parser.MoveNextOrFail(); // startcode
+            //parser.MoveNextOrFail(); // endcode
+            //parser.MoveNextOrFail(); // startstack
+            //parser.MoveNextOrFail(); // kstkesp
+            //parser.MoveNextOrFail(); // kstkeip
+            //parser.MoveNextOrFail(); // signal
+            //parser.MoveNextOrFail(); // blocked
+            //parser.MoveNextOrFail(); // sigignore
+            //parser.MoveNextOrFail(); // sigcatch
+            //parser.MoveNextOrFail(); // wchan
+            //parser.MoveNextOrFail(); // nswap
+            //parser.MoveNextOrFail(); // cnswap
+            //parser.MoveNextOrFail(); // exit_signal
+            //parser.MoveNextOrFail(); // processor
+            //parser.MoveNextOrFail(); // rt_priority
+            //parser.MoveNextOrFail(); // policy
+            //parser.MoveNextOrFail(); // delayacct_blkio_ticks
+            //parser.MoveNextOrFail(); // guest_time
+            //parser.MoveNextOrFail(); // cguest_time
 
             result = results;
             return true;

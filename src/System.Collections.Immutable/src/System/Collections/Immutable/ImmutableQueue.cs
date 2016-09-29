@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -45,7 +46,7 @@ namespace System.Collections.Immutable
         [Pure]
         public static ImmutableQueue<T> CreateRange<T>(IEnumerable<T> items)
         {
-            Requires.NotNull(items, "items");
+            Requires.NotNull(items, nameof(items));
 
             var queue = ImmutableQueue<T>.Empty;
             foreach (var item in items)
@@ -65,7 +66,7 @@ namespace System.Collections.Immutable
         [Pure]
         public static ImmutableQueue<T> Create<T>(params T[] items)
         {
-            Requires.NotNull(items, "items");
+            Requires.NotNull(items, nameof(items));
 
             var queue = ImmutableQueue<T>.Empty;
             foreach (var item in items)
@@ -88,7 +89,7 @@ namespace System.Collections.Immutable
         [Pure]
         public static IImmutableQueue<T> Dequeue<T>(this IImmutableQueue<T> queue, out T value)
         {
-            Requires.NotNull(queue, "queue");
+            Requires.NotNull(queue, nameof(queue));
 
             value = queue.Peek();
             return queue.Dequeue();

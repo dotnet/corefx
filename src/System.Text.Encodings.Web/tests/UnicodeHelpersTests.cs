@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -160,7 +161,7 @@ namespace Microsoft.Framework.WebEncoders
             HashSet<string> seenCategories = new HashSet<string>();
 
             bool[] retVal = new bool[0x10000];
-            string[] allLines = new StreamReader(typeof(UnicodeHelpersTests).GetTypeInfo().Assembly.GetManifestResourceStream("System.Text.Encodings.Web.Tests.UnicodeData.txt")).ReadAllLines();
+            string[] allLines = new StreamReader(typeof(UnicodeHelpersTests).GetTypeInfo().Assembly.GetManifestResourceStream("UnicodeData.8.0.txt")).ReadAllLines();
 
             uint startSpanCodepoint = 0;
             foreach (string line in allLines)

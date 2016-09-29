@@ -1,7 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace System.Net.Sockets
@@ -9,171 +10,82 @@ namespace System.Net.Sockets
     // The System.Net.Sockets.TcpClient class provide TCP services at a higher level
     // of abstraction than the System.Net.Sockets.Socket class. System.Net.Sockets.TcpClient
     // is used to create a Client connection to a remote host.
-    public class TcpClient : IDisposable
+    public partial class TcpClient : IDisposable
     {
+        private readonly AddressFamily _family;
         private Socket _clientSocket;
-        private bool _active;
         private NetworkStream _dataStream;
-
-        // IPv6: Maintain address family for the client.
-        private AddressFamily _family = AddressFamily.InterNetwork;
-
+        private bool _cleanedUp = false;
+        private bool _active;
 
         // Initializes a new instance of the System.Net.Sockets.TcpClient class.
-        public TcpClient()
-            : this(AddressFamily.InterNetwork)
+        public TcpClient() : this(AddressFamily.InterNetwork)
         {
-            if (Logging.On)
-            {
-                Logging.Enter(Logging.Sockets, this, "TcpClient", null);
-            }
-
-            if (Logging.On)
-            {
-                Logging.Exit(Logging.Sockets, this, "TcpClient", null);
-            }
         }
 
         // Initializes a new instance of the System.Net.Sockets.TcpClient class.
         public TcpClient(AddressFamily family)
         {
-            if (Logging.On)
+            if (NetEventSource.Log.IsEnabled())
             {
-                Logging.Enter(Logging.Sockets, this, "TcpClient", family);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "TcpClient", family);
             }
 
             // Validate parameter
             if (family != AddressFamily.InterNetwork && family != AddressFamily.InterNetworkV6)
             {
-                throw new ArgumentException(SR.Format(SR.net_protocol_invalid_family, "TCP"), "family");
+                throw new ArgumentException(SR.Format(SR.net_protocol_invalid_family, "TCP"), nameof(family));
             }
 
             _family = family;
+            InitializeClientSocket();
 
-            initialize();
-            if (Logging.On)
+            if (NetEventSource.Log.IsEnabled())
             {
-                Logging.Exit(Logging.Sockets, this, "TcpClient", null);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "TcpClient", null);
             }
         }
 
         // Used by TcpListener.Accept().
         internal TcpClient(Socket acceptedSocket)
         {
-            if (Logging.On)
+            if (NetEventSource.Log.IsEnabled())
             {
-                Logging.Enter(Logging.Sockets, this, "TcpClient", acceptedSocket);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "TcpClient", acceptedSocket);
             }
 
-            Client = acceptedSocket;
+            _clientSocket = acceptedSocket;
             _active = true;
-            if (Logging.On)
-            {
-                Logging.Exit(Logging.Sockets, this, "TcpClient", null);
-            }
-        }
 
-        // Used by the class to provide the underlying network socket.
-        public Socket Client
-        {
-            get
+            if (NetEventSource.Log.IsEnabled())
             {
-                return _clientSocket;
-            }
-            set
-            {
-                _clientSocket = value;
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "TcpClient", null);
             }
         }
 
         // Used by the class to indicate that a connection has been made.
         protected bool Active
         {
-            get
-            {
-                return _active;
-            }
-            set
-            {
-                _active = value;
-            }
+            get { return _active; }
+            set { _active = value; }
         }
 
-        public int Available { get { return _clientSocket.Available; } }
-        public bool Connected { get { return _clientSocket.Connected; } }
+        public int Available { get { return AvailableCore; } }
+
+        // Used by the class to provide the underlying network socket.
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)] // TODO: Remove once https://github.com/dotnet/corefx/issues/5868 is addressed.
+        public Socket Client
+        {
+            get { return ClientCore; }
+            set { ClientCore = value; }
+        }
+
+        public bool Connected { get { return ConnectedCore; } }
+
         public bool ExclusiveAddressUse
         {
-            get
-            {
-                return _clientSocket.ExclusiveAddressUse;
-            }
-            set
-            {
-                _clientSocket.ExclusiveAddressUse = value;
-            }
-        }
-
-        internal IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state)
-        {
-            if (Logging.On)
-            {
-                Logging.Enter(Logging.Sockets, this, "BeginConnect", host);
-            }
-
-            IAsyncResult result = Client.BeginConnect(host, port, requestCallback, state);
-            if (Logging.On)
-            {
-                Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
-            }
-
-            return result;
-        }
-
-        internal IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
-        {
-            if (Logging.On)
-            {
-                Logging.Enter(Logging.Sockets, this, "BeginConnect", address);
-            }
-
-            IAsyncResult result = Client.BeginConnect(address, port, requestCallback, state);
-            if (Logging.On)
-            {
-                Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
-            }
-
-            return result;
-        }
-
-        internal IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state)
-        {
-            if (Logging.On)
-            {
-                Logging.Enter(Logging.Sockets, this, "BeginConnect", addresses);
-            }
-
-            IAsyncResult result = Client.BeginConnect(addresses, port, requestCallback, state);
-            if (Logging.On)
-            {
-                Logging.Exit(Logging.Sockets, this, "BeginConnect", null);
-            }
-
-            return result;
-        }
-
-        internal void EndConnect(IAsyncResult asyncResult)
-        {
-            if (Logging.On)
-            {
-                Logging.Enter(Logging.Sockets, this, "EndConnect", asyncResult);
-            }
-
-            Client.EndConnect(asyncResult);
-            _active = true;
-            if (Logging.On)
-            {
-                Logging.Exit(Logging.Sockets, this, "EndConnect", null);
-            }
+            get { return ExclusiveAddressUseCore; }
+            set { ExclusiveAddressUseCore = value; }
         }
 
         public Task ConnectAsync(IPAddress address, int port)
@@ -188,37 +100,65 @@ namespace System.Net.Sockets
 
         public Task ConnectAsync(string host, int port)
         {
-            return Task.Factory.FromAsync(
-                (targetHost, targetPort, callback, state) => ((TcpClient)state).BeginConnect(targetHost, targetPort, callback, state),
-                asyncResult => ((TcpClient)asyncResult.AsyncState).EndConnect(asyncResult),
-                host,
-                port,
-                state: this);
+            return ConnectAsyncCore(host, port);
         }
 
         public Task ConnectAsync(IPAddress[] addresses, int port)
         {
-            return Task.Factory.FromAsync(
-                (targetAddresses, targetPort, callback, state) => ((TcpClient)state).BeginConnect(targetAddresses, targetPort, callback, state),
-                asyncResult => ((TcpClient)asyncResult.AsyncState).EndConnect(asyncResult),
-                addresses,
-                port,
-                state: this);
+            return ConnectAsyncCore(addresses, port);
+        }
+
+        private IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
+        {
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "BeginConnect", address);
+            }
+
+            IAsyncResult result = Client.BeginConnect(address, port, requestCallback, state);
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "BeginConnect", null);
+            }
+
+            return result;
+        }
+
+        private void EndConnect(IAsyncResult asyncResult)
+        {
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "EndConnect", asyncResult);
+            }
+
+            Socket s = Client;
+            if (s == null)
+            {
+                // Dispose nulls out the client socket field.
+                throw new ObjectDisposedException(GetType().Name);
+            }
+            s.EndConnect(asyncResult);
+
+            _active = true;
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "EndConnect", null);
+            }
         }
 
         // Returns the stream used to read and write data to the remote host.
         public NetworkStream GetStream()
         {
-            if (Logging.On)
+            if (NetEventSource.Log.IsEnabled())
             {
-                Logging.Enter(Logging.Sockets, this, "GetStream", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "GetStream", "");
             }
 
             if (_cleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
-            if (!Client.Connected)
+            if (!Connected)
             {
                 throw new InvalidOperationException(SR.net_notconnected);
             }
@@ -228,29 +168,27 @@ namespace System.Net.Sockets
                 _dataStream = new NetworkStream(Client, true);
             }
 
-            if (Logging.On)
+            if (NetEventSource.Log.IsEnabled())
             {
-                Logging.Exit(Logging.Sockets, this, "GetStream", _dataStream);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "GetStream", _dataStream);
             }
 
             return _dataStream;
         }
 
-        private bool _cleanedUp = false;
-
         // Disposes the Tcp connection.
         protected virtual void Dispose(bool disposing)
         {
-            if (Logging.On)
+            if (NetEventSource.Log.IsEnabled())
             {
-                Logging.Enter(Logging.Sockets, this, "Dispose", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, "Dispose", "");
             }
 
             if (_cleanedUp)
             {
-                if (Logging.On)
+                if (NetEventSource.Log.IsEnabled())
                 {
-                    Logging.Exit(Logging.Sockets, this, "Dispose", "");
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "Dispose", "");
                 }
 
                 return;
@@ -269,7 +207,7 @@ namespace System.Net.Sockets
                     // still be there and needs to be closed. In the case in which
                     // we are bound to a local IPEndPoint this will remove the
                     // binding and free up the IPEndPoint for later uses.
-                    Socket chkClientSocket = Client;
+                    Socket chkClientSocket = _clientSocket;
                     if (chkClientSocket != null)
                     {
                         try
@@ -279,18 +217,20 @@ namespace System.Net.Sockets
                         finally
                         {
                             chkClientSocket.Dispose();
-                            Client = null;
+                            _clientSocket = null;
                         }
                     }
                 }
+
+                DisposeCore(); // platform-specific disposal work
 
                 GC.SuppressFinalize(this);
             }
 
             _cleanedUp = true;
-            if (Logging.On)
+            if (NetEventSource.Log.IsEnabled())
             {
-                Logging.Exit(Logging.Sockets, this, "Dispose", "");
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, "Dispose", "");
             }
         }
 
@@ -315,96 +255,48 @@ namespace System.Net.Sockets
         // Gets or sets the size of the receive buffer in bytes.
         public int ReceiveBufferSize
         {
-            get
-            {
-                return numericOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer);
-            }
-            set
-            {
-                Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, value);
-            }
+            get { return ReceiveBufferSizeCore; }
+            set { ReceiveBufferSizeCore = value; }
         }
 
         // Gets or sets the size of the send buffer in bytes.
         public int SendBufferSize
         {
-            get
-            {
-                return numericOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer);
-            }
-
-            set
-            {
-                Client.SetSocketOption(SocketOptionLevel.Socket,
-                                  SocketOptionName.SendBuffer, value);
-            }
+            get { return SendBufferSizeCore; }
+            set { SendBufferSizeCore = value; }
         }
 
         // Gets or sets the receive time out value of the connection in milliseconds.
         public int ReceiveTimeout
         {
-            get
-            {
-                return numericOption(SocketOptionLevel.Socket,
-                                     SocketOptionName.ReceiveTimeout);
-            }
-            set
-            {
-                Client.SetSocketOption(SocketOptionLevel.Socket,
-                                  SocketOptionName.ReceiveTimeout, value);
-            }
+            get { return ReceiveTimeoutCore; }
+            set { ReceiveTimeoutCore = value; }
         }
 
         // Gets or sets the send time out value of the connection in milliseconds.
         public int SendTimeout
         {
-            get
-            {
-                return numericOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout);
-            }
-
-            set
-            {
-                Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, value);
-            }
+            get { return SendTimeoutCore; }
+            set { SendTimeoutCore = value; }
         }
 
         // Gets or sets the value of the connection's linger option.
         public LingerOption LingerState
         {
-            get
-            {
-                return (LingerOption)Client.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger);
-            }
-            set
-            {
-                Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, value);
-            }
+            get { return LingerStateCore; }
+            set { LingerStateCore = value; }
         }
 
         // Enables or disables delay when send or receive buffers are full.
         public bool NoDelay
         {
-            get
-            {
-                return numericOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay) != 0 ? true : false;
-            }
-            set
-            {
-                Client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, value ? 1 : 0);
-            }
+            get { return NoDelayCore; }
+            set { NoDelayCore = value; }
         }
 
-        private void initialize()
+        private Socket CreateSocket()
         {
-            // IPv6: Use the address family from the constructor (or Connect method).
-            Client = new Socket(_family, SocketType.Stream, ProtocolType.Tcp);
-            _active = false;
-        }
-
-        private int numericOption(SocketOptionLevel optionLevel, SocketOptionName optionName)
-        {
-            return (int)Client.GetSocketOption(optionLevel, optionName);
+            return new Socket(_family, SocketType.Stream, ProtocolType.Tcp);
         }
     }
 }

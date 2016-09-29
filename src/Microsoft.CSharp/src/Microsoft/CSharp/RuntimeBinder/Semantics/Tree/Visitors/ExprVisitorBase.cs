@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -555,7 +556,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     must be a type or a namespace. This EXPR encapsulates that fact. The lhs member is the EXPR 
                     tree that was bound to resolve the type or namespace.
 
-                  TYPEORNAMESPACEERROR - This is the error class for the type or namespace exprs when we dont know
+                  TYPEORNAMESPACEERROR - This is the error class for the type or namespace exprs when we don't know
                     what to bind it to.
 
                   The following three exprs all have a TYPEORNAMESPACE child, which is their fundamental type:

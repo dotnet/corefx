@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -50,7 +51,10 @@ namespace System.Net
             if (Host.h_name != IntPtr.Zero)
             {
                 HostEntry.HostName = Marshal.PtrToStringAnsi(Host.h_name);
-                GlobalLog.Print("HostEntry.HostName: " + HostEntry.HostName);
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("HostEntry.HostName: " + HostEntry.HostName);
+                }
             }
 
             // decode h_addr_list to ArrayList of IP addresses.
@@ -87,7 +91,10 @@ namespace System.Net
                                         ((uint)IPAddressToAdd >> 24));
 #endif
 
-                GlobalLog.Print("currentArrayElement: " + currentArrayElement.ToString() + " nativePointer: " + nativePointer.ToString() + " IPAddressToAdd:" + IPAddressToAdd.ToString());
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("currentArrayElement: " + currentArrayElement.ToString() + " nativePointer: " + nativePointer.ToString() + " IPAddressToAdd:" + IPAddressToAdd.ToString());
+                }
 
                 //
                 // ...and add it to the list
@@ -114,7 +121,10 @@ namespace System.Net
 
             while (nativePointer != IntPtr.Zero)
             {
-                GlobalLog.Print("currentArrayElement: " + ((long)currentArrayElement).ToString() + "nativePointer: " + ((long)nativePointer).ToString());
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("currentArrayElement: " + ((long)currentArrayElement).ToString() + "nativePointer: " + ((long)nativePointer).ToString());
+                }
 
                 //
                 // if it's not null it points to an Alias,
@@ -157,12 +167,13 @@ namespace System.Net
                 if (IPAddress.TryParse(hostName, out address))
                 {
                     IPHostEntry ipHostEntry = NameResolutionUtilities.GetUnresolvedAnswer(address);
-                    if (Logging.On) Logging.Exit(Logging.Sockets, "DNS", "GetHostByName", ipHostEntry);
+                    if (NetEventSource.Log.IsEnabled()) NetEventSource.Exit(NetEventSource.ComponentType.Socket, "DNS", "GetHostByName", ipHostEntry);
                     return ipHostEntry;
                 }
 
                 throw socketException;
             }
+
             return NativeToHostEntry(nativePointer);
         }
 
@@ -183,8 +194,7 @@ namespace System.Net
                     ref addressAsInt,
                     Marshal.SizeOf<int>(),
                     ProtocolFamily.InterNetwork);
-
-
+            
             if (nativePointer != IntPtr.Zero)
             {
                 return NativeToHostEntry(nativePointer);
@@ -340,7 +350,6 @@ namespace System.Net
             // execution, but this might still happen and we would want to
             // react to that change.
             //
-            EnsureSocketsAreInitialized();
 
             StringBuilder sb = new StringBuilder(HostNameBufferLength);
             SocketError errorCode =

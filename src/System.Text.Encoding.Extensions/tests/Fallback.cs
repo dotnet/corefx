@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -13,7 +14,6 @@ namespace EncodingTests
         private static readonly string s_asciiInputStringWinNoFallback = "abc";
 
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void TestEncoderReplacementFallback()
         {
             Encoding asciiEncoding = Encoding.GetEncoding("us-ascii", new EncoderReplacementFallback("(unknown)"), new DecoderReplacementFallback(""));
@@ -37,7 +37,6 @@ namespace EncodingTests
         }
 
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void TestDecoderReplacementFallback()
         {
             Encoding asciiEncoding = Encoding.GetEncoding("us-ascii", new EncoderReplacementFallback("(unknown)"), new DecoderReplacementFallback("Error"));
@@ -45,7 +44,6 @@ namespace EncodingTests
         }
 
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void TestEncoderExceptionFallback()
         {
             Encoding asciiEncoding = Encoding.GetEncoding("us-ascii", new EncoderExceptionFallback(), new DecoderExceptionFallback());
@@ -53,7 +51,6 @@ namespace EncodingTests
         }
 
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void TestDecoderExceptionFallback()
         {
             Encoding asciiEncoding = Encoding.GetEncoding("us-ascii", new EncoderExceptionFallback(), new DecoderExceptionFallback());
@@ -61,7 +58,6 @@ namespace EncodingTests
         }
 
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void TestCustomFallback()
         {
             Encoding asciiEncoding = Encoding.GetEncoding("us-ascii", new EncoderCustomFallback(), new DecoderReplacementFallback(""));

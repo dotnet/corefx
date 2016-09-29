@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -99,9 +100,9 @@ namespace Internal.Cryptography.Pal
 
         public static IChainPal BuildChain(
             X509Certificate2 leaf,
-            List<X509Certificate2> candidates,
-            List<X509Certificate2> downloaded,
-            List<X509Certificate2> systemTrusted,
+            HashSet<X509Certificate2> candidates,
+            HashSet<X509Certificate2> downloaded,
+            HashSet<X509Certificate2> systemTrusted,
             OidCollection applicationPolicy,
             OidCollection certificatePolicy,
             X509RevocationMode revocationMode,
@@ -266,7 +267,7 @@ namespace Internal.Cryptography.Pal
 
                     X509ChainStatus chainStatus = new X509ChainStatus
                     {
-                        Status = X509ChainStatusFlags.InvalidPolicyConstraints,
+                        Status = X509ChainStatusFlags.NotValidForUsage,
                         StatusInformation = SR.Chain_NoPolicyMatch,
                     };
 
@@ -470,15 +471,15 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        internal static List<X509Certificate2> FindCandidates(
+        internal static HashSet<X509Certificate2> FindCandidates(
             X509Certificate2 leaf,
             X509Certificate2Collection extraStore,
-            List<X509Certificate2> downloaded,
-            List<X509Certificate2> systemTrusted,
+            HashSet<X509Certificate2> downloaded,
+            HashSet<X509Certificate2> systemTrusted,
             ref TimeSpan remainingDownloadTime)
         {
-            List<X509Certificate2> candidates = new List<X509Certificate2>();
-            Queue<X509Certificate2> toProcess = new Queue<X509Certificate2>();
+            var candidates = new HashSet<X509Certificate2>();
+            var toProcess = new Queue<X509Certificate2>();
             toProcess.Enqueue(leaf);
 
             using (var systemRootStore = new X509Store(StoreName.Root, StoreLocation.LocalMachine))
@@ -497,13 +498,25 @@ namespace Internal.Cryptography.Pal
                 X509Certificate2Collection userIntermediateCerts = userIntermediateStore.Certificates;
 
                 // fill the system trusted collection
-                foreach (X509Certificate2 systemRootCert in systemRootCerts)
-                {
-                    systemTrusted.Add(systemRootCert);
-                }
                 foreach (X509Certificate2 userRootCert in userRootCerts)
                 {
-                    systemTrusted.Add(userRootCert);
+                    if (!systemTrusted.Add(userRootCert))
+                    {
+                        // If we have already (effectively) added another instance of this certificate,
+                        // then this one provides no value. A Disposed cert won't harm the matching logic.
+                        userRootCert.Dispose();
+                    }
+                }
+
+                foreach (X509Certificate2 systemRootCert in systemRootCerts)
+                {
+                    if (!systemTrusted.Add(systemRootCert))
+                    {
+                        // If we have already (effectively) added another instance of this certificate,
+                        // (for example, because another copy of it was in the user store)
+                        // then this one provides no value. A Disposed cert won't harm the matching logic.
+                        systemRootCert.Dispose();
+                    }
                 }
 
                 X509Certificate2Collection[] storesToCheck =
@@ -519,12 +532,9 @@ namespace Internal.Cryptography.Pal
                 {
                     X509Certificate2 current = toProcess.Dequeue();
 
-                    if (!candidates.Contains(current))
-                    {
-                        candidates.Add(current);
-                    }
+                    candidates.Add(current);
 
-                    List<X509Certificate2> results = FindIssuer(
+                    HashSet<X509Certificate2> results = FindIssuer(
                         current,
                         storesToCheck,
                         downloaded,
@@ -541,15 +551,48 @@ namespace Internal.Cryptography.Pal
                         }
                     }
                 }
+
+                // Avoid sending unused certs into the finalizer queue by doing only a ref check
+
+                var candidatesByReference = new HashSet<X509Certificate2>(
+                    candidates,
+                    ReferenceEqualityComparer<X509Certificate2>.Instance);
+
+                // Certificates come from 5 sources:
+                //  1) extraStore.
+                //     These are cert objects that are provided by the user, we shouldn't dispose them.
+                //  2) the machine root store
+                //     These certs are moving on to the "was I a system trust?" test, and we shouldn't dispose them.
+                //  3) the user root store
+                //     These certs are moving on to the "was I a system trust?" test, and we shouldn't dispose them.
+                //  4) the machine intermediate store
+                //     These certs were either path candidates, or not. If they were, don't dispose them. Otherwise do.
+                //  5) the user intermediate store
+                //     These certs were either path candidates, or not. If they were, don't dispose them. Otherwise do.
+                DisposeUnreferenced(candidatesByReference, systemIntermediateCerts);
+                DisposeUnreferenced(candidatesByReference, userIntermediateCerts);
             }
 
             return candidates;
         }
 
-        private static List<X509Certificate2> FindIssuer(
+        private static void DisposeUnreferenced(
+            ISet<X509Certificate2> referencedSet,
+            X509Certificate2Collection storeCerts)
+        {
+            foreach (X509Certificate2 cert in storeCerts)
+            {
+                if (!referencedSet.Contains(cert))
+                {
+                    cert.Dispose();
+                }
+            }
+        }
+
+        private static HashSet<X509Certificate2> FindIssuer(
             X509Certificate2 cert,
             X509Certificate2Collection[] stores,
-            List<X509Certificate2> downloadedCerts,
+            HashSet<X509Certificate2> downloadedCerts,
             ref TimeSpan remainingDownloadTime)
         {
             if (IsSelfSigned(cert))
@@ -562,11 +605,18 @@ namespace Internal.Cryptography.Pal
 
             foreach (X509Certificate2Collection store in stores)
             {
-                List<X509Certificate2> fromStore = null;
+                HashSet<X509Certificate2> fromStore = null;
 
                 foreach (X509Certificate2 candidate in store)
                 {
-                    SafeX509Handle candidateHandle = ((OpenSslX509CertificateReader)candidate.Pal).SafeHandle;
+                    var certPal = (OpenSslX509CertificateReader)candidate.Pal;
+
+                    if (certPal == null)
+                    {
+                        continue;
+                    }
+
+                    SafeX509Handle candidateHandle = certPal.SafeHandle;
 
                     int issuerError = Interop.Crypto.X509CheckIssued(candidateHandle, certHandle);
 
@@ -574,13 +624,10 @@ namespace Internal.Cryptography.Pal
                     {
                         if (fromStore == null)
                         {
-                            fromStore = new List<X509Certificate2>();
+                            fromStore = new HashSet<X509Certificate2>();
                         }
 
-                        if (!fromStore.Contains(candidate))
-                        {
-                            fromStore.Add(candidate);
-                        }
+                        fromStore.Add(candidate);
                     }
                 }
 
@@ -613,7 +660,7 @@ namespace Internal.Cryptography.Pal
                 {
                     downloadedCerts.Add(downloaded);
 
-                    return new List<X509Certificate2>(1) { downloaded };
+                    return new HashSet<X509Certificate2>() { downloaded };
                 }
             }
 
@@ -702,7 +749,10 @@ namespace Internal.Cryptography.Pal
                         Interop.Crypto.X509VerifyStatusCode errorCode = Interop.Crypto.X509StoreCtxGetError(storeCtx);
                         int errorDepth = Interop.Crypto.X509StoreCtxGetErrorDepth(storeCtx);
 
-                        if (errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
+                        // We don't report "OK" as an error.
+                        // For compatibility with Windows / .NET Framework, do not report X509_V_CRL_NOT_YET_VALID.
+                        if (errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_OK &&
+                            errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_NOT_YET_VALID)
                         {
                             while (Errors.Count <= errorDepth)
                             {

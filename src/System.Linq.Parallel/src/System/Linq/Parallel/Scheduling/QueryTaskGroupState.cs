@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -115,7 +116,7 @@ namespace System.Linq.Parallel
 
                         // we only let it pass through iff:
                         // it is not null, not default, and matches the exact token we were given as being the external token
-                        // and the external Token is actually canceled (ie not a spoof OCE(extCT) for a non-canceled extCT)
+                        // and the external Token is actually canceled (i.e. not a spoof OCE(extCT) for a non-canceled extCT)
                         if (oce == null ||
                             !oce.CancellationToken.IsCancellationRequested ||
                             oce.CancellationToken != _cancellationState.ExternalCancellationToken)
@@ -145,7 +146,7 @@ namespace System.Linq.Parallel
                     // NOTE: it is important that we see other state variables correctly here, and that
                     // read-reordering hasn't played havoc. 
                     // This is OK because 
-                    //   1. all the state writes (eg in the Initiate* methods) are volatile writes (standard .NET MM)
+                    //   1. all the state writes (e,g. in the Initiate* methods) are volatile writes (standard .NET MM)
                     //   2. tokenCancellationRequested is backed by a volatile field, hence the reads below
                     //   won't get reordered about the read of token.IsCancellationRequested.
 

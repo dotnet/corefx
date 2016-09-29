@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -77,15 +78,18 @@ namespace System.Reflection.Metadata.Ecma335
           | EventPtr
           | PropertyPtr,
 
-        V2_0_TablesMask =
-            Module
+        EncTables =
+            EnCLog
+          | EnCMap,
+
+        TypeSystemTables =
+            PtrTables 
+          | EncTables
+          | Module
           | TypeRef
           | TypeDef
-          | FieldPtr
           | Field
-          | MethodPtr
           | MethodDef
-          | ParamPtr
           | Param
           | InterfaceImpl
           | MemberRef
@@ -97,10 +101,8 @@ namespace System.Reflection.Metadata.Ecma335
           | FieldLayout
           | StandAloneSig
           | EventMap
-          | EventPtr
           | Event
           | PropertyMap
-          | PropertyPtr
           | Property
           | MethodSemantics
           | MethodImpl
@@ -108,8 +110,6 @@ namespace System.Reflection.Metadata.Ecma335
           | TypeSpec
           | ImplMap
           | FieldRva
-          | EnCLog
-          | EnCMap
           | Assembly
           | AssemblyRef
           | File
@@ -120,7 +120,7 @@ namespace System.Reflection.Metadata.Ecma335
           | MethodSpec
           | GenericParamConstraint,
 
-        PortablePdb_TablesMask =
+        DebugTables =
             Document
           | MethodDebugInformation
           | LocalScope
@@ -130,9 +130,12 @@ namespace System.Reflection.Metadata.Ecma335
           | StateMachineMethod
           | CustomDebugInformation,
 
-        V3_0_TablesMask =
-            V2_0_TablesMask
-          | PortablePdb_TablesMask,
+        AllTables = 
+            TypeSystemTables |
+            DebugTables,
+
+        ValidPortablePdbExternalTables =
+            TypeSystemTables & ~PtrTables & ~EncTables
     }
 
     internal enum HeapSizes : byte
@@ -194,7 +197,7 @@ namespace System.Reflection.Metadata.Ecma335
     }
 
     /// <summary>
-    /// These contants are all in the byte range and apply to the interpretation of <see cref="Handle.VType"/>,
+    /// These constants are all in the byte range and apply to the interpretation of <see cref="Handle.VType"/>,
     /// </summary>
     internal static class HandleType
     {

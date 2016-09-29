@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -122,7 +123,7 @@ namespace System.Linq.Tests
         public void NullSource()
         {
             string[] source = null;
-            
+
             Assert.Throws<ArgumentNullException>("source", () => source.Distinct());
         }
 
@@ -143,7 +144,7 @@ namespace System.Linq.Tests
             Assert.Equal(expected, source.Distinct(new AnagramEqualityComparer()), new AnagramEqualityComparer());
         }
 
-        [Theory, MemberData("SequencesWithDuplicates")]
+        [Theory, MemberData(nameof(SequencesWithDuplicates))]
         public void FindDistinctAndValidate<T>(T unusedArgumentToForceTypeInference, IEnumerable<T> original)
         {
             // Convert to list to avoid repeated enumerations of the enumerables.
@@ -194,9 +195,44 @@ namespace System.Linq.Tests
         public void ForcedToEnumeratorDoesntEnumerate()
         {
             var iterator = NumberRangeGuaranteedNotCollectionType(0, 3).Distinct();
-            // Don't insist on this behaviour, but check its correct if it happens
+            // Don't insist on this behaviour, but check it's correct if it happens
             var en = iterator as IEnumerator<int>;
             Assert.False(en != null && en.MoveNext());
+        }
+
+        [Fact]
+        public void ToArray()
+        {
+            int?[] source = { 1, 1, 1, 2, 2, 2, null, null };
+            int?[] expected = { 1, 2, null };
+
+            Assert.Equal(expected, source.Distinct().ToArray());
+        }
+
+        [Fact]
+        public void ToList()
+        {
+            int?[] source = { 1, 1, 1, 2, 2, 2, null, null };
+            int?[] expected = { 1, 2, null };
+
+            Assert.Equal(expected, source.Distinct().ToList());
+        }
+
+        [Fact]
+        public void Count()
+        {
+            int?[] source = { 1, 1, 1, 2, 2, 2, null, null };
+            Assert.Equal(3, source.Distinct().Count());
+        }
+
+        [Fact]
+        public void RepeatEnumerating()
+        {
+            int?[] source = { 1, 1, 1, 2, 2, 2, null, null };
+
+            var result = source.Distinct();
+
+            Assert.Equal(result, result);
         }
     }
 }

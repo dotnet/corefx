@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Text;
@@ -455,7 +456,7 @@ namespace System.ServiceProcess
                 Interop.mincore.EnumServicesStatusEx(
                     databaseHandle,
                     Interop.mincore.ServiceControllerOptions.SC_ENUM_PROCESS_INFO,
-                    Interop.mincore.ServiceTypeOptions.SERVICE_TYPE_WIN32,
+                    Interop.mincore.ServiceTypeOptions.SERVICE_TYPE_WIN32 | Interop.mincore.ServiceTypeOptions.SERVICE_TYPE_DRIVER,
                     Interop.mincore.StatusOptions.STATUS_ALL,
                     IntPtr.Zero,
                     0,
@@ -469,7 +470,7 @@ namespace System.ServiceProcess
                 Interop.mincore.EnumServicesStatusEx(
                     databaseHandle,
                     Interop.mincore.ServiceControllerOptions.SC_ENUM_PROCESS_INFO,
-                    Interop.mincore.ServiceTypeOptions.SERVICE_TYPE_WIN32,
+                    Interop.mincore.ServiceTypeOptions.SERVICE_TYPE_WIN32 | Interop.mincore.ServiceTypeOptions.SERVICE_TYPE_DRIVER,
                     Interop.mincore.StatusOptions.STATUS_ALL,
                     memory,
                     bytesNeeded,
@@ -741,7 +742,7 @@ namespace System.ServiceProcess
         public void Start(string[] args)
         {
             if (args == null)
-                throw new ArgumentNullException("args");
+                throw new ArgumentNullException(nameof(args));
 
             IntPtr serviceHandle = GetServiceHandle(Interop.mincore.ServiceOptions.SERVICE_START);
 
@@ -754,7 +755,7 @@ namespace System.ServiceProcess
                     for (i = 0; i < args.Length; i++)
                     {
                         if (args[i] == null)
-                            throw new ArgumentNullException(SR.ArgsCantBeNull, "args");
+                            throw new ArgumentNullException($"{nameof(args)}[{i}]", SR.ArgsCantBeNull);
 
                         argPtrs[i] = Marshal.StringToHGlobalUni(args[i]);
                     }

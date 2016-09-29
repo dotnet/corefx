@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Group represents the substring or substrings that
 // are captured by a single capturing group after one
@@ -15,19 +16,21 @@ namespace System.Text.RegularExpressions
     public class Group : Capture
     {
         // the empty group object
-        internal static Group _emptygroup = new Group(String.Empty, Array.Empty<int>(), 0);
+        internal static Group _emptygroup = new Group(String.Empty, Array.Empty<int>(), 0, string.Empty);
 
-        internal int[] _caps;
+        internal readonly int[] _caps;
         internal int _capcount;
         internal CaptureCollection _capcoll;
+        internal readonly string _name;
 
-        internal Group(String text, int[] caps, int capcount)
+        internal Group(String text, int[] caps, int capcount, string name)
 
         : base(text, capcount == 0 ? 0 : caps[(capcount - 1) * 2],
                capcount == 0 ? 0 : caps[(capcount * 2) - 1])
         {
             _caps = caps;
             _capcount = capcount;
+            _name = name;
         }
 
         /// <summary>
@@ -38,6 +41,14 @@ namespace System.Text.RegularExpressions
             get
             {
                 return _capcount != 0;
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return _name;
             }
         }
 
@@ -67,10 +78,10 @@ namespace System.Text.RegularExpressions
         /// Returns a Group object equivalent to the one supplied that is safe to share between
         /// multiple threads.
         /// </summary>
-        static internal Group Synchronized(Group inner)
+        public static Group Synchronized(Group inner)
         {
             if (inner == null)
-                throw new ArgumentNullException("inner");
+                throw new ArgumentNullException(nameof(inner));
 
             // force Captures to be computed.
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -10,7 +11,7 @@ using Internal.Cryptography;
 namespace System.Security.Cryptography
 {
     /// <summary>
-    ///     Wrapper represeting an arbitrary property of a CNG key or provider
+    ///     Wrapper representing an arbitrary property of a CNG key or provider
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]  // The [StructLayout] is here to prevent a spurious ApiReviewer alert. We do not actually depend on the layout of this struct.
     public struct CngProperty : IEquatable<CngProperty>
@@ -19,7 +20,7 @@ namespace System.Security.Cryptography
             : this()
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             Name = name;
             Options = options;
@@ -48,10 +49,7 @@ namespace System.Security.Cryptography
 
         public override bool Equals(object obj)
         {
-            if (obj == null || !(obj is CngProperty))
-                return false;
-
-            return Equals((CngProperty)obj);
+            return obj is CngProperty && Equals((CngProperty)obj);
         }
 
         public bool Equals(CngProperty other)

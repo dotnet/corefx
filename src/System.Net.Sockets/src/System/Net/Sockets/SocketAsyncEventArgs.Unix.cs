@@ -1,16 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 
 namespace System.Net.Sockets
 {
     public partial class SocketAsyncEventArgs : EventArgs, IDisposable
     {
-        private int _acceptedFileDescriptor;
+        private IntPtr _acceptedFileDescriptor;
         private int _socketAddressSize;
         private SocketFlags _receivedFlags;
+        private Action<int, byte[], int, SocketFlags, SocketError> _transferCompletionCallback;
 
         internal int? SendPacketsDescriptorCount { get { return null; } }
 
@@ -46,15 +47,13 @@ namespace System.Net.Sockets
 
         private void InnerStartOperationAccept(bool userSuppliedBuffer)
         {
-            _acceptedFileDescriptor = -1;
+            _acceptedFileDescriptor = (IntPtr)(-1);
         }
 
-        private void AcceptCompletionCallback(int acceptedFileDescriptor, byte[] socketAddress, int socketAddressSize, SocketError socketError)
+        private void AcceptCompletionCallback(IntPtr acceptedFileDescriptor, byte[] socketAddress, int socketAddressSize, SocketError socketError)
         {
-            // TODO: receive bytes on socket if requested
-
             _acceptedFileDescriptor = acceptedFileDescriptor;
-            Debug.Assert(socketAddress == null || socketAddress == _acceptBuffer);
+            Debug.Assert(socketAddress == null || socketAddress == _acceptBuffer, $"Unexpected socketAddress: {socketAddress}");
             _acceptAddressBufferCount = socketAddressSize;
 
             CompletionCallback(0, socketError);
@@ -62,11 +61,16 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationAccept(Socket socket, SafeCloseSocket handle, SafeCloseSocket acceptHandle, out int bytesTransferred)
         {
-            Debug.Assert(acceptHandle == null);
+            if (_buffer != null)
+            {
+                throw new PlatformNotSupportedException(SR.net_sockets_accept_receive_notsupported);
+            }
+
+            Debug.Assert(acceptHandle == null, $"Unexpected acceptHandle: {acceptHandle}");
 
             bytesTransferred = 0;
 
-            return handle.AsyncContext.AcceptAsync(_buffer ?? _acceptBuffer, _acceptAddressBufferCount / 2, AcceptCompletionCallback);
+            return handle.AsyncContext.AcceptAsync(_acceptBuffer, _acceptAddressBufferCount / 2, AcceptCompletionCallback);
         }
 
         private void InnerStartOperationConnect()
@@ -86,14 +90,22 @@ namespace System.Net.Sockets
             return handle.AsyncContext.ConnectAsync(_socketAddress.Buffer, _socketAddress.Size, ConnectCompletionCallback);
         }
 
-        private void InnerStartOperationDisconnect()
+        internal SocketError DoOperationDisconnect(Socket socket, SafeCloseSocket handle)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.net_sockets_disconnect_notsupported);
         }
 
-        private void TransferCompletionCallback(int bytesTransferred, byte[] socketAddress, int socketAddressSize, SocketFlags receivedFlags, SocketError socketError)
+        private void InnerStartOperationDisconnect()
         {
-            Debug.Assert(socketAddress == null || socketAddress == _socketAddress.Buffer);
+            throw new PlatformNotSupportedException(SR.net_sockets_disconnect_notsupported);
+        }
+
+        private Action<int, byte[], int, SocketFlags, SocketError> TransferCompletionCallback =>
+            _transferCompletionCallback ?? (_transferCompletionCallback = TransferCompletionCallbackCore);
+
+        private void TransferCompletionCallbackCore(int bytesTransferred, byte[] socketAddress, int socketAddressSize, SocketFlags receivedFlags, SocketError socketError)
+        {
+            Debug.Assert(socketAddress == null || socketAddress == _socketAddress.Buffer, $"Unexpected socketAddress: {socketAddress}");
             _socketAddressSize = socketAddressSize;
             _receivedFlags = receivedFlags;
 
@@ -155,8 +167,8 @@ namespace System.Net.Sockets
 
         private void ReceiveMessageFromCompletionCallback(int bytesTransferred, byte[] socketAddress, int socketAddressSize, SocketFlags receivedFlags, IPPacketInformation ipPacketInformation, SocketError errorCode)
         {
-            Debug.Assert(_socketAddress != null);
-            Debug.Assert(socketAddress == null || _socketAddress.Buffer == socketAddress);
+            Debug.Assert(_socketAddress != null, "Expected non-null _socketAddress");
+            Debug.Assert(socketAddress == null || _socketAddress.Buffer == socketAddress, $"Unexpected socketAddress: {socketAddress}");
 
             _socketAddressSize = socketAddressSize;
             _receivedFlags = receivedFlags;
@@ -230,7 +242,14 @@ namespace System.Net.Sockets
 
         internal void LogBuffer(int size)
         {
-            // TODO: implement?
+            if (_buffer != null)
+            {
+                SocketsEventSource.Dump(_buffer, _offset, size);
+            }
+            else if (_acceptBuffer != null)
+            {
+                SocketsEventSource.Dump(_acceptBuffer, 0, size);
+            }
         }
 
         internal void LogSendPacketsBuffers(int size)
@@ -270,7 +289,6 @@ namespace System.Net.Sockets
 
         private void CompletionCallback(int bytesTransferred, SocketError socketError)
         {
-            // TODO: plumb SocketFlags through TransferOperation
             if (socketError == SocketError.Success)
             {
                 FinishOperationSuccess(socketError, bytesTransferred, _receivedFlags);

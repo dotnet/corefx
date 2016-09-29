@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -173,23 +174,23 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="TryExpression"/>.</returns>
         public static TryExpression MakeTry(Type type, Expression body, Expression @finally, Expression fault, IEnumerable<CatchBlock> handlers)
         {
-            RequiresCanRead(body, "body");
+            RequiresCanRead(body, nameof(body));
 
             var @catch = handlers.ToReadOnly();
-            ContractUtils.RequiresNotNullItems(@catch, "handlers");
+            ContractUtils.RequiresNotNullItems(@catch, nameof(handlers));
             ValidateTryAndCatchHaveSameType(type, body, @catch);
 
             if (fault != null)
             {
                 if (@finally != null || @catch.Count > 0)
                 {
-                    throw Error.FaultCannotHaveCatchOrFinally();
+                    throw Error.FaultCannotHaveCatchOrFinally(nameof(fault));
                 }
-                RequiresCanRead(fault, "fault");
+                RequiresCanRead(fault, nameof(fault));
             }
             else if (@finally != null)
             {
-                RequiresCanRead(@finally, "finally");
+                RequiresCanRead(@finally, nameof(@finally));
             }
             else if (@catch.Count == 0)
             {
@@ -202,6 +203,7 @@ namespace System.Linq.Expressions
         //Validate that the body of the try expression must have the same type as the body of every try block.
         private static void ValidateTryAndCatchHaveSameType(Type type, Expression tryBody, ReadOnlyCollection<CatchBlock> handlers)
         {
+            Debug.Assert(tryBody != null);
             // Type unification ... all parts must be reference assignable to "type"
             if (type != null)
             {
@@ -220,12 +222,13 @@ namespace System.Linq.Expressions
                     }
                 }
             }
-            else if (tryBody == null || tryBody.Type == typeof(void))
+            else if (tryBody.Type == typeof(void))
             {
                 //The body of every try block must be null or have void type.
                 foreach (CatchBlock cb in handlers)
                 {
-                    if (cb.Body != null && cb.Body.Type != typeof(void))
+                    Debug.Assert(cb.Body != null);
+                    if (cb.Body.Type != typeof(void))
                     {
                         throw Error.BodyOfCatchMustHaveSameTypeAsBodyOfTry();
                     }
@@ -237,7 +240,8 @@ namespace System.Linq.Expressions
                 type = tryBody.Type;
                 foreach (CatchBlock cb in handlers)
                 {
-                    if (cb.Body == null || !TypeUtils.AreEquivalent(cb.Body.Type, type))
+                    Debug.Assert(cb.Body != null);
+                    if (!TypeUtils.AreEquivalent(cb.Body.Type, type))
                     {
                         throw Error.BodyOfCatchMustHaveSameTypeAsBodyOfTry();
                     }

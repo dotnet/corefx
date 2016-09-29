@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Test.Common;
 using System.Threading;
@@ -24,17 +25,21 @@ namespace System.Net.Sockets.Tests
             complete.Set();
         }
 
-        [Fact]
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
         [Trait("IPv4", "true")]
         [Trait("IPv6", "true")]
-        public void ConnectEx_Success()
+        public void ConnectEx_Success(SocketImplementationType type)
         {
             Assert.True(Capability.IPv4Support() && Capability.IPv6Support());
 
             int port;
-            SocketTestServer server = SocketTestServer.SocketTestServerFactory(IPAddress.Loopback, out port);
+            SocketTestServer server = SocketTestServer.SocketTestServerFactory(type, IPAddress.Loopback, out port);
 
-            SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(new IPEndPoint(IPAddress.IPv6Loopback, port));
+            int port6;
+            SocketTestServer server6 = SocketTestServer.SocketTestServerFactory(type, IPAddress.IPv6Loopback, out port6);
 
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -48,17 +53,17 @@ namespace System.Net.Sockets.Tests
                 args.UserToken = complete;
 
                 Assert.True(sock.ConnectAsync(args));
-                Assert.True(complete.WaitOne(5000), "IPv4: Timed out while waiting for connection");
+                Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "IPv4: Timed out while waiting for connection");
                 Assert.True(args.SocketError == SocketError.Success);
 
                 sock.Dispose();
 
                 sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-                args.RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, port);
+                args.RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, port6);
                 complete.Reset();
 
                 Assert.True(sock.ConnectAsync(args));
-                Assert.True(complete.WaitOne(5000), "IPv6: Timed out while waiting for connection");
+                Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "IPv6: Timed out while waiting for connection");
                 Assert.True(args.SocketError == SocketError.Success);
             }
             finally
@@ -72,7 +77,8 @@ namespace System.Net.Sockets.Tests
 
         #region GC Finalizer test
         // This test assumes sequential execution of tests and that it is going to be executed after other tests
-        // that used Sockets. 
+        // that used Sockets.
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void TestFinalizers()
         {

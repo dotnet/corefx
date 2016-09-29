@@ -1,34 +1,27 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Globalization;
-using System.Text;
 
 namespace System.Runtime.Versioning
 {
     public sealed class FrameworkName : IEquatable<FrameworkName>
     {
-        // ---- SECTION:  members supporting exposed properties -------------*
-        #region members supporting exposed properties
-        private readonly String _identifier = null;
-        private readonly Version _version = null;
-        private readonly String _profile = null;
-        private String _fullName = null;
+        private readonly string _identifier;
+        private readonly Version _version;
+        private readonly string _profile;
+        private string _fullName;
 
-        private const Char c_componentSeparator = ',';
-        private const Char c_keyValueSeparator = '=';
-        private const Char c_versionValuePrefix = 'v';
-        private const String c_versionKey = "Version";
-        private const String c_profileKey = "Profile";
-        #endregion members supporting exposed properties
+        private const char ComponentSeparator = ',';
+        private const char KeyValueSeparator = '=';
+        private const char VersionValuePrefix = 'v';
+        private const string VersionKey = "Version";
+        private const string ProfileKey = "Profile";
 
+        private static readonly char[] s_componentSplitSeparator = { ComponentSeparator };
 
-        // ---- SECTION: public properties --------------*
-        #region public properties
-        public String Identifier
+        public string Identifier
         {
             get
             {
@@ -46,7 +39,7 @@ namespace System.Runtime.Versioning
             }
         }
 
-        public String Profile
+        public string Profile
         {
             get
             {
@@ -55,44 +48,42 @@ namespace System.Runtime.Versioning
             }
         }
 
-        public String FullName
+        public string FullName
         {
             get
             {
                 if (_fullName == null)
                 {
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append(Identifier);
-                    sb.Append(c_componentSeparator);
-                    sb.Append(c_versionKey).Append(c_keyValueSeparator);
-                    sb.Append(c_versionValuePrefix);
-                    sb.Append(Version);
-                    if (!String.IsNullOrEmpty(Profile))
+                    if (string.IsNullOrEmpty(Profile))
                     {
-                        sb.Append(c_componentSeparator);
-                        sb.Append(c_profileKey).Append(c_keyValueSeparator);
-                        sb.Append(Profile);
+                        _fullName =
+                            Identifier +
+                            ComponentSeparator + VersionKey + KeyValueSeparator + VersionValuePrefix +
+                            Version.ToString();
                     }
-                    _fullName = sb.ToString();
+                    else
+                    {
+                        _fullName =
+                            Identifier +
+                            ComponentSeparator + VersionKey + KeyValueSeparator + VersionValuePrefix +
+                            Version.ToString() +
+                            ComponentSeparator + ProfileKey + KeyValueSeparator +
+                            Profile;
+                    }
                 }
                 Debug.Assert(_fullName != null);
                 return _fullName;
             }
         }
-        #endregion public properties
 
-
-        // ---- SECTION: public instance methods --------------*
-        #region public instance methods
-
-        public override Boolean Equals(Object obj)
+        public override bool Equals(object obj)
         {
             return Equals(obj as FrameworkName);
         }
 
-        public Boolean Equals(FrameworkName other)
+        public bool Equals(FrameworkName other)
         {
-            if (Object.ReferenceEquals(other, null))
+            if (object.ReferenceEquals(other, null))
             {
                 return false;
             }
@@ -102,85 +93,64 @@ namespace System.Runtime.Versioning
                 Profile == other.Profile;
         }
 
-        public override Int32 GetHashCode()
+        public override int GetHashCode()
         {
             return Identifier.GetHashCode() ^ Version.GetHashCode() ^ Profile.GetHashCode();
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             return FullName;
         }
-        #endregion public instance methods
 
-
-        // -------- SECTION: constructors -----------------*
-        #region constructors
-
-        public FrameworkName(String identifier, Version version)
+        public FrameworkName(string identifier, Version version)
             : this(identifier, version, null)
-        { }
+        {
+        }
 
-        public FrameworkName(String identifier, Version version, String profile)
+        public FrameworkName(string identifier, Version version, string profile)
         {
             if (identifier == null)
             {
-                throw new ArgumentNullException("identifier");
+                throw new ArgumentNullException(nameof(identifier));
             }
 
             identifier = identifier.Trim();
             if (identifier.Length == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_emptystringcall, "identifier"), "identifier");
+                throw new ArgumentException(SR.Format(SR.net_emptystringcall, nameof(identifier)), nameof(identifier));
             }
             if (version == null)
             {
-                throw new ArgumentNullException("version");
+                throw new ArgumentNullException(nameof(version));
             }
 
             _identifier = identifier;
-
-            // Ensure we call the correct Version constructor to clone the Version
-            if (version.Revision < 0)
-            {
-                if (version.Build < 0)
-                {
-                    _version = new Version(version.Major, version.Minor);
-                }
-                else
-                {
-                    _version = new Version(version.Major, version.Minor, version.Build);
-                }
-            }
-            else
-            {
-                _version = new Version(version.Major, version.Minor, version.Build, version.Revision);
-            }
-
-            _profile = (profile == null) ? String.Empty : profile.Trim();
+            _version = version;
+            _profile = (profile == null) ? string.Empty : profile.Trim();
         }
 
         // Parses strings in the following format: "<identifier>, Version=[v|V]<version>, Profile=<profile>"
         //  - The identifier and version is required, profile is optional
         //  - Only three components are allowed.
         //  - The version string must be in the System.Version format; an optional "v" or "V" prefix is allowed
-        public FrameworkName(String frameworkName)
+        public FrameworkName(string frameworkName)
         {
             if (frameworkName == null)
             {
-                throw new ArgumentNullException("frameworkName");
+                throw new ArgumentNullException(nameof(frameworkName));
             }
             if (frameworkName.Length == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_emptystringcall, "frameworkName"), "frameworkName");
+                throw new ArgumentException(SR.Format(SR.net_emptystringcall, nameof(frameworkName)), nameof(frameworkName));
             }
 
-            string[] components = frameworkName.Split(c_componentSeparator);
+            string[] components = frameworkName.Split(s_componentSplitSeparator);
 
-            // Identifer and Version are required, Profile is optional.
+            // Identifier and Version are required, Profile is optional.
             if (components.Length < 2 || components.Length > 3)
             {
-                throw new ArgumentException(SR.Argument_FrameworkNameTooShort, "frameworkName");
+                throw new ArgumentException(SR.Argument_FrameworkNameTooShort, nameof(frameworkName));
             }
 
             //
@@ -190,38 +160,39 @@ namespace System.Runtime.Versioning
 
             if (_identifier.Length == 0)
             {
-                throw new ArgumentException(SR.Argument_FrameworkNameInvalid, "frameworkName");
+                throw new ArgumentException(SR.Argument_FrameworkNameInvalid, nameof(frameworkName));
             }
 
             bool versionFound = false;
-            _profile = String.Empty;
+            _profile = string.Empty;
 
-            // 
+            //
             // The required "Version" and optional "Profile" component can be in any order
             //
             for (int i = 1; i < components.Length; i++)
             {
                 // Get the key/value pair separated by '='
-                string[] keyValuePair = components[i].Split(c_keyValueSeparator);
+                string component = components[i];
+                int separatorIndex = component.IndexOf(KeyValueSeparator);
 
-                if (keyValuePair.Length != 2)
+                if (separatorIndex == -1 || separatorIndex != component.LastIndexOf(KeyValueSeparator))
                 {
-                    throw new ArgumentException(SR.Argument_FrameworkNameInvalid, "frameworkName");
+                    throw new ArgumentException(SR.Argument_FrameworkNameInvalid, nameof(frameworkName));
                 }
 
                 // Get the key and value, trimming any whitespace
-                string key = keyValuePair[0].Trim();
-                string value = keyValuePair[1].Trim();
+                string key = component.Substring(0, separatorIndex).Trim();
+                string value = component.Substring(separatorIndex + 1).Trim();
 
                 //
                 // 2) Parse the required "Version" key value
                 //
-                if (key.Equals(c_versionKey, StringComparison.OrdinalIgnoreCase))
+                if (key.Equals(VersionKey, StringComparison.OrdinalIgnoreCase))
                 {
                     versionFound = true;
 
                     // Allow the version to include a 'v' or 'V' prefix...
-                    if (value.Length > 0 && (value[0] == c_versionValuePrefix || value[0] == 'V'))
+                    if (value.Length > 0 && (value[0] == VersionValuePrefix || value[0] == 'V'))
                     {
                         value = value.Substring(1);
                     }
@@ -231,48 +202,43 @@ namespace System.Runtime.Versioning
                     }
                     catch (Exception e)
                     {
-                        throw new ArgumentException(SR.Argument_FrameworkNameInvalidVersion, "frameworkName", e);
+                        throw new ArgumentException(SR.Argument_FrameworkNameInvalidVersion, nameof(frameworkName), e);
                     }
                 }
                 //
                 // 3) Parse the optional "Profile" key value
                 //
-                else if (key.Equals(c_profileKey, StringComparison.OrdinalIgnoreCase))
+                else if (key.Equals(ProfileKey, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!String.IsNullOrEmpty(value))
+                    if (!string.IsNullOrEmpty(value))
                     {
                         _profile = value;
                     }
                 }
                 else
                 {
-                    throw new ArgumentException(SR.Argument_FrameworkNameInvalid, "frameworkName");
+                    throw new ArgumentException(SR.Argument_FrameworkNameInvalid, nameof(frameworkName));
                 }
             }
 
             if (!versionFound)
             {
-                throw new ArgumentException(SR.Argument_FrameworkNameMissingVersion, "frameworkName");
+                throw new ArgumentException(SR.Argument_FrameworkNameMissingVersion, nameof(frameworkName));
             }
         }
-        #endregion constructors
 
-
-        // -------- SECTION: public static methods -----------------*
-        #region public static methods
-        public static Boolean operator ==(FrameworkName left, FrameworkName right)
+        public static bool operator ==(FrameworkName left, FrameworkName right)
         {
-            if (Object.ReferenceEquals(left, null))
+            if (object.ReferenceEquals(left, null))
             {
-                return Object.ReferenceEquals(right, null);
+                return object.ReferenceEquals(right, null);
             }
             return left.Equals(right);
         }
 
-        public static Boolean operator !=(FrameworkName left, FrameworkName right)
+        public static bool operator !=(FrameworkName left, FrameworkName right)
         {
             return !(left == right);
         }
-        #endregion public static methods
     }
 }

@@ -1,3 +1,8 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -19,11 +24,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             {
                 store.Open(OpenFlags.ReadOnly);
-                int certCount = store.Certificates.Count;
 
-                // This assert is just so certCount appears to be used, the test really
-                // is that store.get_Certificates didn't throw.
-                Assert.True(certCount >= 0);
+                using (var coll = new ImportedCollection(store.Certificates))
+                {
+                    int certCount = coll.Collection.Count;
+
+                    // This assert is just so certCount appears to be used, the test really
+                    // is that store.get_Certificates didn't throw.
+                    Assert.True(certCount >= 0);
+                }
             }
         }
 
@@ -44,12 +53,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 store.Open(OpenFlags.ReadOnly);
 
-                // Add only throws when it has to do work.  If, for some reason, this certificate
-                // is already present in the CurrentUser\My store, we can't really test this
-                // functionality.
-                if (!store.Certificates.Contains(cert))
+                using (var coll = new ImportedCollection(store.Certificates))
                 {
-                    Assert.ThrowsAny<CryptographicException>(() => store.Add(cert));
+                    // Add only throws when it has to do work.  If, for some reason, this certificate
+                    // is already present in the CurrentUser\My store, we can't really test this
+                    // functionality.
+                    if (!coll.Collection.Contains(cert))
+                    {
+                        Assert.ThrowsAny<CryptographicException>(() => store.Add(cert));
+                    }
                 }
             }
         }
@@ -66,12 +78,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // Look through the certificates to find one with no private key to call add on.
                 // (The private key restriction is so that in the event of an "accidental success"
                 // that no potential permissions would be modified)
-                foreach (X509Certificate2 cert in store.Certificates)
+                using (var coll = new ImportedCollection(store.Certificates))
                 {
-                    if (!cert.HasPrivateKey)
+                    foreach (X509Certificate2 cert in coll.Collection)
                     {
-                        toAdd = cert;
-                        break;
+                        if (!cert.HasPrivateKey)
+                        {
+                            toAdd = cert;
+                            break;
+                        }
                     }
                 }
 
@@ -99,9 +114,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 store.Open(OpenFlags.ReadOnly);
 
-                if (store.Certificates.Contains(cert))
+                using (var coll = new ImportedCollection(store.Certificates))
                 {
-                    Assert.ThrowsAny<CryptographicException>(() => store.Remove(cert));
+                    if (coll.Collection.Contains(cert))
+                    {
+                        Assert.ThrowsAny<CryptographicException>(() => store.Remove(cert));
+                    }
                 }
             }
         }
@@ -173,6 +191,30 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 {
                     // Assert.DoesNotThrow
                     store.Open(permissions);
+                }
+            }
+        }
+
+        [Fact]
+        public static void MachineRootStore_NonEmpty()
+        {
+            // This test will fail on systems where the administrator has gone out of their
+            // way to prune the trusted CA list down below this threshold.
+            //
+            // As of 2016-01-25, Ubuntu 14.04 has 169, and CentOS 7.1 has 175, so that'd be
+            // quite a lot of pruning.
+            //
+            // And as of 2016-01-29 we understand the Homebrew-installed root store, with 180.
+            const int MinimumThreshold = 5;
+
+            using (X509Store store = new X509Store(StoreName.Root, StoreLocation.LocalMachine))
+            {
+                store.Open(OpenFlags.ReadOnly);
+
+                using (var storeCerts = new ImportedCollection(store.Certificates))
+                {
+                    int certCount = storeCerts.Collection.Count;
+                    Assert.InRange(certCount, MinimumThreshold, int.MaxValue);
                 }
             }
         }

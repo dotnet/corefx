@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 
@@ -9,8 +10,6 @@ namespace System
     // The idea is to stay with static helper methods and strings
     internal class DomainNameHelper
     {
-        private const char c_DummyChar = (char)0xFFFF;     //An Invalid Unicode character used as a dummy char passed into the parameter
-
         private DomainNameHelper()
         {
         }
@@ -64,8 +63,8 @@ namespace System
         // Returns:
         //  bool
         //
-        //  Remarks: Optimized for speed as a most comon case,
-        //           MUST NOT be used unless all input indexes are are verified and trusted.
+        //  Remarks: Optimized for speed as a most common case,
+        //           MUST NOT be used unless all input indexes are verified and trusted.
         //
 
         internal unsafe static bool IsValid(char* name, ushort pos, ref int returnedEnd, ref bool notCanonical, bool notImplicitFile)
@@ -325,13 +324,13 @@ namespace System
             {
                 // just lowercase for ascii
                 string unescapedHostname = new string(hostname, start, end - start);
-                return ((unescapedHostname != null) ? unescapedHostname.ToLowerInvariant() : null);
+                return unescapedHostname.ToLowerInvariant();
             }
             else
             {
                 IdnMapping map = new IdnMapping();
                 string asciiForm;
-                bidiStrippedHost = Uri.StripBidiControlCharacter(hostname, start, end - start);
+                bidiStrippedHost = UriHelper.StripBidiControlCharacter(hostname, start, end - start);
                 try
                 {
                     asciiForm = map.GetAscii(bidiStrippedHost);
@@ -373,7 +372,7 @@ namespace System
         {
             IdnMapping map = new IdnMapping();
 
-            // Test comon scenario first for perf
+            // Test common scenario first for perf
             // try to get unicode equivalent 
             try
             {
@@ -400,7 +399,7 @@ namespace System
             if (end <= start)
                 return idn;
 
-            string unescapedHostname = Uri.StripBidiControlCharacter(hostname, start, (end - start));
+            string unescapedHostname = UriHelper.StripBidiControlCharacter(hostname, start, (end - start));
 
             string unicodeEqvlHost = null;
             int curPos = 0;

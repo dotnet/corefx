@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // This RegexWriter class is internal to the Regex package.
 // It builds a block of regular expression codes (RegexCode)
@@ -11,6 +12,7 @@
 // sequences of codes.
 //
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -27,7 +29,7 @@ namespace System.Text.RegularExpressions
         private bool _counting;
         private int _count;
         private int _trackcount;
-        private Dictionary<Int32, Int32> _caps;
+        private Hashtable _caps;
 
         private const int BeforeChild = 64;
         private const int AfterChild = 128;
@@ -195,7 +197,7 @@ namespace System.Text.RegularExpressions
                 return -1;
 
             if (_caps != null)
-                return _caps[capnum];
+                return (int)_caps[capnum];
             else
                 return capnum;
         }

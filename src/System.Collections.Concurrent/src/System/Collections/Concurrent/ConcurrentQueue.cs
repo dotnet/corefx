@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -12,6 +13,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -26,16 +28,20 @@ namespace System.Collections.Concurrent
     /// </remarks>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
+    [Serializable]
     public class ConcurrentQueue<T> : IProducerConsumerCollection<T>, IReadOnlyCollection<T>
     {
-        //fields of ConcurrentQueue
+        [NonSerialized]
         private volatile Segment _head;
-
+        [NonSerialized]
         private volatile Segment _tail;
+
+        private T[] _serializationArray; // Used for custom serialization.
 
         private const int SEGMENT_SIZE = 32;
 
         //number of snapshot takers, GetEnumerator(), ToList() and ToArray() operations take snapshot.
+        [NonSerialized]
         internal volatile int _numSnapshotTakers = 0;
 
         /// <summary>
@@ -44,6 +50,31 @@ namespace System.Collections.Concurrent
         public ConcurrentQueue()
         {
             _head = _tail = new Segment(0, this);
+        }
+
+        /// <summary>Get the data array to be serialized.</summary>
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            // save the data into the serialization array to be saved
+            _serializationArray = ToArray();
+        }
+
+        [OnSerialized]
+        private void OnSerialized(StreamingContext context)
+        {
+            _serializationArray = null;
+        }
+
+        /// <summary>
+        /// Construct the queue from a previously seiralized one
+        /// </summary>
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            Debug.Assert(_serializationArray != null);
+            InitializeFromCollection(_serializationArray);
+            _serializationArray = null;
         }
 
         /// <summary>
@@ -84,7 +115,7 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
 
             InitializeFromCollection(collection);
@@ -120,7 +151,7 @@ namespace System.Collections.Concurrent
             // Validate arguments.
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             // We must be careful not to corrupt the array, so we will first accumulate an
@@ -257,6 +288,7 @@ namespace System.Collections.Concurrent
         {
             return ToList().ToArray();
         }
+
 #pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
         /// <summary>
         /// Copies the <see cref="ConcurrentQueue{T}"/> elements to a new <see
@@ -401,7 +433,7 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             // We must be careful not to corrupt the array, so we will first accumulate an
@@ -745,7 +777,7 @@ namespace System.Collections.Concurrent
                 int newhigh = SEGMENT_SIZE; //initial value set to be over the boundary
 
                 //We need do Interlocked.Increment and value/state update in a finally block to ensure that they run
-                //without interuption. This is to prevent anything from happening between them, and another dequeue
+                //without interruption. This is to prevent anything from happening between them, and another dequeue
                 //thread maybe spinning forever to wait for _state[] to be true;
                 try
                 { }
@@ -890,7 +922,7 @@ namespace System.Collections.Concurrent
 
             /// <summary>
             /// return the logical position of the tail of the current segment      
-            /// Value range [-1, SEGMENT_SIZE-1]. When it's -1, it means this is a new segment and has no elemnet yet
+            /// Value range [-1, SEGMENT_SIZE-1]. When it's -1, it means this is a new segment and has no element yet
             /// </summary>
             internal int High
             {

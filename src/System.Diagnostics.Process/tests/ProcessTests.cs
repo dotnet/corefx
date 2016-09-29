@@ -1,16 +1,40 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace System.Diagnostics.Tests
 {
     public class ProcessTests : ProcessTestBase
     {
+        private class FinalizingProcess : Process
+        {
+            public static volatile bool WasFinalized;
+
+            public static void CreateAndRelease()
+            {
+                new FinalizingProcess();
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (!disposing)
+                {
+                    WasFinalized = true;
+                }
+
+                base.Dispose(disposing);
+            }
+        }
+
         private void SetAndCheckBasePriority(ProcessPriorityClass exPriorityClass, int priority)
         {
             _process.PriorityClass = exPriorityClass;
@@ -30,7 +54,8 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact, PlatformSpecific(PlatformID.Windows)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [PlatformSpecific(PlatformID.Windows)]
         public void TestBasePriorityOnWindows()
         {
             ProcessPriorityClass originalPriority = _process.PriorityClass;
@@ -54,7 +79,10 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact, PlatformSpecific(PlatformID.AnyUnix), OuterLoop] // This test requires admin elevation on Unix
+        [Fact] 
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [OuterLoop]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void TestBasePriorityOnUnix()
         {
             ProcessPriorityClass originalPriority = _process.PriorityClass;
@@ -121,6 +149,17 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [Fact]
+        public void TestUseShellExecute_Unix_Succeeds()
+        {
+            using (var p = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = "exit", Arguments = "42" }))
+            {
+                Assert.True(p.WaitForExit(WaitInMS));
+                Assert.Equal(42, p.ExitCode);
+            }
+        }
+
         [Fact]
         public void TestExitTime()
         {
@@ -181,7 +220,7 @@ namespace System.Diagnostics.Tests
             Assert.NotNull(_process.MachineName);
         }
 
-        [Fact, PlatformSpecific(~PlatformID.OSX)]
+        [Fact]
         public void TestMainModuleOnNonOSX()
         {
             string fileName = "corerun";
@@ -273,12 +312,12 @@ namespace System.Diagnostics.Tests
             {
                 // Validated that we can get a value for each of the following.
                 Assert.NotNull(pModule);
-                Assert.NotEqual(IntPtr.Zero, pModule.BaseAddress);
                 Assert.NotNull(pModule.FileName);
                 Assert.NotNull(pModule.ModuleName);
 
                 // Just make sure these don't throw
-                IntPtr addr = pModule.EntryPointAddress;
+                IntPtr baseAddr = pModule.BaseAddress;
+                IntPtr entryAddr = pModule.EntryPointAddress;
                 int memSize = pModule.ModuleMemorySize;
             }
         }
@@ -334,6 +373,13 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestWorkingSet64()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // resident memory can be 0 on OSX.
+                Assert.True(_process.WorkingSet64 >= 0);
+                return;
+            }
+
             Assert.True(_process.WorkingSet64 > 0);
         }
 
@@ -357,48 +403,21 @@ namespace System.Diagnostics.Tests
             Assert.InRange(processorTimeAtHalfSpin, processorTimeBeforeSpin, Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds);
         }
 
-        [Fact, ActiveIssue(3037)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/974
         public void TestProcessStartTime()
         {
-            DateTime timeBeforeCreatingProcess = DateTime.UtcNow;
-            Process p = CreateProcessLong();
-
-            Assert.Throws<InvalidOperationException>(() => p.StartTime);
-            try
+            TimeSpan allowedWindow = TimeSpan.FromSeconds(3);
+            DateTime testStartTime = DateTime.UtcNow;
+            using (var remote = RemoteInvoke(() => { Console.Write(Process.GetCurrentProcess().StartTime.ToUniversalTime()); return SuccessExitCode; },
+                new RemoteInvokeOptions { StartInfo = new ProcessStartInfo { RedirectStandardOutput = true } }))
             {
-                p.Start();
-
-                // Time in unix, is measured in jiffies, which is incremented by one for every timer interrupt since the boot time.
-                // Thus, because there are HZ timer interrupts in a second, there are HZ jiffies in a second. Hence 1\HZ, will
-                // be the resolution of system timer. The lowest value of HZ on unix is 100, hence the timer resolution is 10 ms.
-                // On Windows, timer resolution is 15 ms from MSDN DateTime.Now. Hence, allowing error in 15ms [max(10,15)].
-
-                long intervalTicks = new TimeSpan(0, 0, 0, 0, 15).Ticks;
-                long beforeTicks = timeBeforeCreatingProcess.Ticks - intervalTicks;
-
-                try
-                {
-                    // Ensure the process has started, p.id throws InvalidOperationException, if the process has not yet started.
-                    Assert.Equal(p.Id, Process.GetProcessById(p.Id).Id);
-                    long startTicks = p.StartTime.ToUniversalTime().Ticks;
-                    long afterTicks = DateTime.UtcNow.Ticks + intervalTicks;
-                    Assert.InRange(startTicks, beforeTicks, afterTicks);
-                }
-                catch (InvalidOperationException)
-                {
-                    Assert.True(p.StartTime.ToUniversalTime().Ticks > beforeTicks);
-                }
-            }
-            finally
-            {
-                if (!p.HasExited)
-                    p.Kill();
-
-                Assert.True(p.WaitForExit(WaitInMS));
+                DateTime remoteStartTime = DateTime.Parse(remote.Process.StandardOutput.ReadToEnd());
+                DateTime curTime = DateTime.UtcNow;
+                Assert.InRange(remoteStartTime, testStartTime - allowedWindow, curTime + allowedWindow);
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/968
         [PlatformSpecific(~PlatformID.OSX)] // getting/setting affinity not supported on OSX
         public void TestProcessorAffinity()
         {
@@ -433,7 +452,10 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact, PlatformSpecific(PlatformID.AnyUnix), OuterLoop] // This test requires admin elevation on Unix
+        [Fact] 
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [OuterLoop]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void TestPriorityClassUnix()
         {
             ProcessPriorityClass priorityClass = _process.PriorityClass;
@@ -479,7 +501,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestProcessName()
         {
-            Assert.Equal(_process.ProcessName, HostRunner, StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(Path.GetFileNameWithoutExtension(_process.ProcessName), Path.GetFileNameWithoutExtension(HostRunner), StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -561,8 +583,24 @@ namespace System.Diagnostics.Tests
             yield return new object[] { currentProcess, Process.GetProcessesByName(currentProcess.ProcessName, "127.0.0.1").Where(p => p.Id == currentProcess.Id).Single() };
         }
 
-        [Theory, PlatformSpecific(PlatformID.Windows)]
-        [MemberData("GetTestProcess")]
+        private static bool ProcessPeformanceCounterEnabled()
+        {
+            try
+            {
+                int? value = (int?)Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfProc\Performance", "Disable Performance Counters", null);
+                return !value.HasValue || value.Value == 0;
+            }
+            catch (Exception)
+            {
+                // Ignore exceptions, and just assume the counter is enabled.
+            }
+
+            return true;
+        }
+
+        [PlatformSpecific(PlatformID.Windows)]
+        [ConditionalTheory(nameof(ProcessPeformanceCounterEnabled))]
+        [MemberData(nameof(GetTestProcess))]
         public void TestProcessOnRemoteMachineWindows(Process currentProcess, Process remoteProcess)
         {
             Assert.Equal(currentProcess.Id, remoteProcess.Id);
@@ -621,7 +659,32 @@ namespace System.Diagnostics.Tests
                 Assert.Throws<System.InvalidOperationException>(() => process.StartInfo);
             }
         }
+        [Theory]
+        [InlineData(@"""abc"" d e", @"abc,d,e")]
+        [InlineData(@"""abc""      d e", @"abc,d,e")]
+        [InlineData("\"abc\"\t\td\te", @"abc,d,e")]
+        [InlineData(@"a\\b d""e f""g h", @"a\\b,de fg,h")]
+        [InlineData(@"\ \\ \\\", @"\,\\,\\\")]
+        [InlineData(@"a\\\""b c d", @"a\""b,c,d")]
+        [InlineData(@"a\\\\""b c"" d e", @"a\\b c,d,e")]
+        [InlineData(@"a""b c""d e""f g""h i""j k""l", @"ab cd,ef gh,ij kl")]
+        [InlineData(@"a b c""def", @"a,b,cdef")]
+        [InlineData(@"""\a\"" \\""\\\ b c", @"\a"" \\\\,b,c")]
+        public void TestArgumentParsing(string inputArguments, string expectedArgv)
+        {
+            using (var handle = RemoteInvokeRaw((Func<string, string, string, int>)ConcatThreeArguments,
+                inputArguments,
+                new RemoteInvokeOptions { Start = true, StartInfo = new ProcessStartInfo { RedirectStandardOutput = true } }))
+            {
+                Assert.Equal(expectedArgv, handle.Process.StandardOutput.ReadToEnd());
+            }
+        }
 
+        private static int ConcatThreeArguments(string one, string two, string three)
+        {
+            Console.Write(string.Join(",", one, two, three));
+            return SuccessExitCode;
+        }
 
         // [Fact] // uncomment for diagnostic purposes to list processes to console
         public void TestDiagnosticsWithConsoleWriteLine()
@@ -632,5 +695,77 @@ namespace System.Diagnostics.Tests
                 p.Dispose();
             }
         }
+
+        [Fact]
+        public void CanBeFinalized()
+        {
+            FinalizingProcess.CreateAndRelease();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Assert.True(FinalizingProcess.WasFinalized);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TestStartWithMissingFile(bool fullPath)
+        {
+            string path = Guid.NewGuid().ToString("N");
+            if (fullPath)
+            {
+                path = Path.GetFullPath(path);
+                Assert.True(Path.IsPathRooted(path));
+            }
+            else
+            {
+                Assert.False(Path.IsPathRooted(path));
+            }
+            Assert.False(File.Exists(path));
+
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
+            Assert.NotEqual(0, e.NativeErrorCode);
+        }
+
+        [PlatformSpecific(PlatformID.Windows)]
+        // NativeErrorCode not 193 on Windows Nano for ERROR_BAD_EXE_FORMAT, issue #10290
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void TestStartOnWindowsWithBadFileFormat()
+        {
+            string path = GetTestFilePath();
+            File.Create(path).Dispose();
+
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
+            Assert.NotEqual(0, e.NativeErrorCode);
+        }
+
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [Fact]
+        public void TestStartOnUnixWithBadPermissions()
+        {
+            string path = GetTestFilePath();
+            File.Create(path).Dispose();
+            Assert.Equal(0, chmod(path, 644)); // no execute permissions
+
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
+            Assert.NotEqual(0, e.NativeErrorCode);
+        }
+
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [Fact]
+        public void TestStartOnUnixWithBadFormat()
+        {
+            string path = GetTestFilePath();
+            File.Create(path).Dispose();
+            Assert.Equal(0, chmod(path, 744)); // execute permissions
+
+            using (Process p = Process.Start(path))
+            {
+                p.WaitForExit();
+                Assert.NotEqual(0, p.ExitCode);
+            }
+        }
+
+        [DllImport("libc")]
+        private static extern int chmod(string path, int mode);
     }
 }

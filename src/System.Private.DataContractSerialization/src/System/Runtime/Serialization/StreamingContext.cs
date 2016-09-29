@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*============================================================
 **
@@ -40,12 +41,8 @@ namespace System.Runtime.Serialization
             {
                 return false;
             }
-            if (((StreamingContext)obj).m_additionalContext == m_additionalContext &&
-                ((StreamingContext)obj).m_state == m_state)
-            {
-                return true;
-            }
-            return false;
+            StreamingContext ctx = (StreamingContext)obj;
+            return ctx.m_additionalContext == m_additionalContext && ctx.m_state == m_state;
         }
 
         public override int GetHashCode()

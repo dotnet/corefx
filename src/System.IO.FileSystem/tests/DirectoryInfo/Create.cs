@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
+using XunitPlatformID = Xunit.PlatformID;
 
 namespace System.IO.Tests
 {
@@ -19,7 +21,7 @@ namespace System.IO.Tests
         #endregion
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // UNC shares for constructor
+        [PlatformSpecific(XunitPlatformID.Windows)] // UNC shares for constructor
         public void NetworkShare()
         {
             string dirName = new string(Path.DirectorySeparatorChar, 2) + Path.Combine("contoso", "amusement", "device");
@@ -41,7 +43,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".")]
         [InlineData("............")]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(XunitPlatformID.Windows)]
         public void WindowsInvalidExtensionsAreRemoved(string extension)
         {
             string testDir = GetTestFilePath();
@@ -52,7 +54,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".s", ".")]
         [InlineData(".s", ".s....")]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(XunitPlatformID.Windows)]
         public void WindowsCurtailTrailingDots(string extension, string trailing)
         {
             string testDir = GetTestFilePath();
@@ -64,7 +66,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".s", ".")]
         [InlineData(".s.s....", ".ls")]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(XunitPlatformID.AnyUnix)]
         public void UnixLastDotIsExtension(string extension, string trailing)
         {
             string testDir = GetTestFilePath();

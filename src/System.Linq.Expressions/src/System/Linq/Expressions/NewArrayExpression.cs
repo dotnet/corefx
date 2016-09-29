@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ namespace System.Linq.Expressions
 
         internal static NewArrayExpression Make(ExpressionType nodeType, Type type, ReadOnlyCollection<Expression> expressions)
         {
+            Debug.Assert(type.IsArray);
             if (nodeType == ExpressionType.NewArrayInit)
             {
                 return new NewArrayInitExpression(type, expressions);
@@ -142,11 +144,22 @@ namespace System.Linq.Expressions
         /// <returns>An instance of the <see cref="NewArrayExpression"/>.</returns>
         public static NewArrayExpression NewArrayInit(Type type, IEnumerable<Expression> initializers)
         {
-            ContractUtils.RequiresNotNull(type, "type");
-            ContractUtils.RequiresNotNull(initializers, "initializers");
-            if (type.Equals(typeof(void)))
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            ContractUtils.RequiresNotNull(initializers, nameof(initializers));
+            if (type == typeof(void))
             {
-                throw Error.ArgumentCannotBeOfTypeVoid();
+                throw Error.ArgumentCannotBeOfTypeVoid(nameof(type));
+            }
+
+            TypeUtils.ValidateType(type, nameof(type));
+            if (type.IsByRef)
+            {
+                throw Error.TypeMustNotBeByRef(nameof(type));
+            }
+
+            if (type.IsPointer)
+            {
+                throw Error.TypeMustNotBePointer(nameof(type));
             }
 
             ReadOnlyCollection<Expression> initializerList = initializers.ToReadOnly();
@@ -155,7 +168,7 @@ namespace System.Linq.Expressions
             for (int i = 0, n = initializerList.Count; i < n; i++)
             {
                 Expression expr = initializerList[i];
-                RequiresCanRead(expr, "initializers");
+                RequiresCanRead(expr, nameof(initializers), i);
 
                 if (!TypeUtils.AreReferenceAssignable(type, expr.Type))
                 {
@@ -210,26 +223,37 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="NewArrayExpression"/> that has the <see cref="P:NodeType"/> property equal to type and the <see cref="P:Expressions"/> property set to the specified value.</returns>
         public static NewArrayExpression NewArrayBounds(Type type, IEnumerable<Expression> bounds)
         {
-            ContractUtils.RequiresNotNull(type, "type");
-            ContractUtils.RequiresNotNull(bounds, "bounds");
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            ContractUtils.RequiresNotNull(bounds, nameof(bounds));
 
-            if (type.Equals(typeof(void)))
+            if (type == typeof(void))
             {
-                throw Error.ArgumentCannotBeOfTypeVoid();
+                throw Error.ArgumentCannotBeOfTypeVoid(nameof(type));
+            }
+
+            TypeUtils.ValidateType(type, nameof(type));
+            if (type.IsByRef)
+            {
+                throw Error.TypeMustNotBeByRef(nameof(type));
+            }
+
+            if (type.IsPointer)
+            {
+                throw Error.TypeMustNotBePointer(nameof(type));
             }
 
             ReadOnlyCollection<Expression> boundsList = bounds.ToReadOnly();
 
             int dimensions = boundsList.Count;
-            if (dimensions <= 0) throw Error.BoundsCannotBeLessThanOne();
+            if (dimensions <= 0) throw Error.BoundsCannotBeLessThanOne(nameof(bounds));
 
             for (int i = 0; i < dimensions; i++)
             {
                 Expression expr = boundsList[i];
-                RequiresCanRead(expr, "bounds");
+                RequiresCanRead(expr, nameof(bounds), i);
                 if (!TypeUtils.IsInteger(expr.Type))
                 {
-                    throw Error.ArgumentMustBeInteger();
+                    throw Error.ArgumentMustBeInteger(nameof(bounds), i);
                 }
             }
 

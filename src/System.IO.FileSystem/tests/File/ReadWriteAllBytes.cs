@@ -1,6 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 
@@ -59,24 +61,11 @@ namespace System.IO.Tests
         public void ReadFileOver2GB()
         {
             string path = GetTestFilePath();
-            int split = 10;
-            string toWrite = new string('a', Int32.MaxValue / split);
-            using (var writer = new StreamWriter(File.Create(path)))
+            using (FileStream fs = File.Create(path))
             {
-                for (int i = 0; i < (split + 1); i++)
-                {
-                    try
-                    {
-                        writer.Write(toWrite);
-                        writer.Flush();
-                    }
-                    catch (OutOfMemoryException)
-                    {
-                        split /= 2;
-                        toWrite = new string('a', Int32.MaxValue / split);
-                    }
-                }
+                fs.SetLength(int.MaxValue + 1L);
             }
+
             // File is too large for ReadAllBytes at once
             Assert.Throws<IOException>(() => File.ReadAllBytes(path));
         }
@@ -104,15 +93,32 @@ namespace System.IO.Tests
             }
         }
 
-        [ActiveIssue(4605, PlatformID.OSX)]
+        /// <summary>
+        /// On Unix, modifying a file that is ReadOnly will fail under normal permissions.
+        /// If the test is being run under the superuser, however, modification of a ReadOnly
+        /// file is allowed.
+        /// </summary>
         [Fact]
-        public void WriteToReadOnlyFile_UnauthException()
+        public void WriteToReadOnlyFile()
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
             File.SetAttributes(path, FileAttributes.ReadOnly);
-            Assert.Throws<UnauthorizedAccessException>(() => File.WriteAllBytes(path, Encoding.UTF8.GetBytes("text")));
-            File.SetAttributes(path, FileAttributes.Normal);
+            try
+            {
+                // Operation succeeds when being run by the Unix superuser
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && geteuid() == 0)
+                {
+                    File.WriteAllBytes(path, Encoding.UTF8.GetBytes("text"));
+                    Assert.Equal(Encoding.UTF8.GetBytes("text"), File.ReadAllBytes(path));
+                }
+                else
+                    Assert.Throws<UnauthorizedAccessException>(() => File.WriteAllBytes(path, Encoding.UTF8.GetBytes("text")));
+            }
+            finally
+            {
+                File.SetAttributes(path, FileAttributes.Normal);
+            }
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
 using System.Reflection.Emit;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions.Compiler
 {
@@ -112,7 +114,7 @@ namespace System.Linq.Expressions.Compiler
                         case ExpressionType.GreaterThanOrEqual:
                             if (mc.Type != typeof(bool))
                             {
-                                throw Error.ArgumentMustBeBoolean();
+                                throw Error.ArgumentMustBeBoolean(nameof(b));
                             }
                             resultType = typeof(bool);
                             break;
@@ -344,7 +346,7 @@ namespace System.Linq.Expressions.Compiler
                     }
                     break;
                 default:
-                    throw Error.UnhandledBinary(op);
+                    throw Error.UnhandledBinary(op, nameof(op));
             }
         }
 
@@ -707,7 +709,7 @@ namespace System.Linq.Expressions.Compiler
             _ilg.Emit(OpCodes.Br_S, labReturnValue);
 
             _ilg.MarkLabel(labReturnValue);
-            ConstructorInfo ci = type.GetConstructor(new Type[] { typeof(bool) });
+            ConstructorInfo ci = type.GetConstructor(ArrayOfType_Bool);
             _ilg.Emit(OpCodes.Newobj, ci);
             _ilg.Emit(OpCodes.Stloc, locLeft);
             _ilg.Emit(OpCodes.Br, labExit);
@@ -780,7 +782,7 @@ namespace System.Linq.Expressions.Compiler
             _ilg.Emit(OpCodes.Br_S, labReturnValue);
 
             _ilg.MarkLabel(labReturnValue);
-            ConstructorInfo ci = type.GetConstructor(new Type[] { typeof(bool) });
+            ConstructorInfo ci = type.GetConstructor(ArrayOfType_Bool);
             _ilg.Emit(OpCodes.Newobj, ci);
             _ilg.Emit(OpCodes.Stloc, locLeft);
             _ilg.Emit(OpCodes.Br, labExit);

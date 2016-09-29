@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 //
 // This file is one of a group of files (AesCng.cs, TripleDESCng.cs) that are almost identical except
@@ -8,21 +9,17 @@
 // that each of these derive from a different class, it can't be helped.
 // 
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-
 using Internal.Cryptography;
+using Internal.NativeCrypto;
 
 namespace System.Security.Cryptography
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350")] // We are providing the implementation for 3DES not consuming it
     public sealed class TripleDESCng : TripleDES, ICngSymmetricAlgorithm
     {
-        private const string s_Algorithm = Interop.NCrypt.NCRYPT_3DES_ALGORITHM;
-
         public TripleDESCng()
         {
-            _core = new CngSymmetricAlgorithmCore(s_Algorithm, this);
+            _core = new CngSymmetricAlgorithmCore(this);
         }
 
         public TripleDESCng(string keyName)
@@ -31,13 +28,13 @@ namespace System.Security.Cryptography
         }
 
         public TripleDESCng(string keyName, CngProvider provider)
-            : this(keyName, CngProvider.MicrosoftSoftwareKeyStorageProvider, CngKeyOpenOptions.None)
+            : this(keyName, provider, CngKeyOpenOptions.None)
         {
         }
 
         public TripleDESCng(string keyName, CngProvider provider, CngKeyOpenOptions openOptions)
         {
-            _core = new CngSymmetricAlgorithmCore(s_Algorithm, this, keyName, provider, openOptions);
+            _core = new CngSymmetricAlgorithmCore(this, keyName, provider, openOptions);
         }
 
         public override byte[] Key
@@ -117,6 +114,16 @@ namespace System.Security.Cryptography
         bool ICngSymmetricAlgorithm.IsWeakKey(byte[] key)
         {
             return TripleDES.IsWeakKey(key);
+        }
+
+        SafeAlgorithmHandle ICngSymmetricAlgorithm.GetEphemeralModeHandle()
+        {
+            return TripleDesBCryptModes.GetSharedHandle(Mode);
+        }
+
+        string ICngSymmetricAlgorithm.GetNCryptAlgorithmIdentifier()
+        {
+            return Interop.NCrypt.NCRYPT_3DES_ALGORITHM;
         }
 
         private CngSymmetricAlgorithmCore _core;

@@ -1,70 +1,55 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Globalization;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class StringInfoParseCombiningCharacters
     {
-        // PosTest1: The mothod should return the indexes of each base character
+        public static IEnumerable<object[]> ParseCombiningCharacters_TestData()
+        {
+            yield return new object[] { "\u4f00\u302a\ud800\udc00\u4f01", new int[] { 0, 2, 4 } };
+            yield return new object[] { "abcdefgh", new int[] { 0, 1, 2, 3, 4, 5, 6, 7 } };
+            yield return new object[] { "!@#$%^&", new int[] { 0, 1, 2, 3, 4, 5, 6 } };
+            yield return new object[] { "!\u20D1bo\uFE22\u20D1\u20EB|", new int[] { 0, 2, 3, 7 } };
+            yield return new object[] { "1\uDBFF\uDFFF@\uFE22\u20D1\u20EB9", new int[] { 0, 1, 3, 7 } };
+            yield return new object[] { "a\u0300", new int[] { 0 } };
+            yield return new object[] { "\u0300\u0300", new int[] { 0, 1 } };
+            yield return new object[] { "   ", new int[] { 0, 1, 2 } };
+            yield return new object[] { "", new int[0] };
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseCombiningCharacters_TestData))]
+        public void ParseCombiningCharacters(string str, int[] expected)
+        {
+            Assert.Equal(expected, StringInfo.ParseCombiningCharacters(str));
+        }
+
         [Fact]
-        public void PosTest()
+        public void ParseCombiningCharacters_InvalidUnicodeChars()
         {
-            VerificationHelper("\u4f00\u302a\ud800\udc00\u4f01", new int[] { 0, 2, 4 });
-            VerificationHelper("abcdefgh", new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
-            VerificationHelper("zj\uDBFF\uDFFFlk", new int[] { 0, 1, 2, 4, 5 });
-            VerificationHelper("!@#$%^&", new int[] { 0, 1, 2, 3, 4, 5, 6 });
-            VerificationHelper("!\u20D1bo\uFE22\u20D1\u20EB|", new int[] { 0, 2, 3, 7 });
-            VerificationHelper("1\uDBFF\uDFFF@\uFE22\u20D1\u20EB9", new int[] { 0, 1, 3, 7 });
-            VerificationHelper("   ", new int[] { 0, 1, 2 });
-        }
+            // TODO: move into ParseCombiningCharacters_TestData once #7166 is fixed 
+            ParseCombiningCharacters("\u0000\uFFFFa", new int[] { 0, 1, 2 }); // Control chars
+            ParseCombiningCharacters("\uD800a", new int[] { 0, 1 }); // Unmatched high surrogate
+            ParseCombiningCharacters("\uDC00a", new int[] { 0, 1 }); // Unmatched low surrogate
+            ParseCombiningCharacters("\u00ADa", new int[] { 0, 1 }); // Format character
 
-        // PosTest2: The argument string is an empty string
+            ParseCombiningCharacters("\u0000\u0300\uFFFF\u0300", new int[] { 0, 1, 2, 3 }); // Control chars + combining char
+            ParseCombiningCharacters("\uD800\u0300", new int[] { 0, 1 }); // Unmatched high surrogate + combining char
+            ParseCombiningCharacters("\uDC00\u0300", new int[] { 0, 1 }); // Unmatched low surrogate + combing char
+            ParseCombiningCharacters("\u00AD\u0300", new int[] { 0, 1 }); // Format character + combining char
+
+            ParseCombiningCharacters("\u0300\u0300", new int[] { 0, 1 }); // Two combining chars
+        }
+        
         [Fact]
-        public void TestEmptyString()
+        public void ParseCombiningCharacters_Null_ThrowsArgumentNullException()
         {
-            int[] result = StringInfo.ParseCombiningCharacters(string.Empty);
-            Assert.NotNull(result);
-            Assert.Equal(0, result.Length);
-        }
-
-        // NegTest1: The argument string is a null reference
-        [Fact]
-        public void TestNullReference()
-        {
-            string str = null;
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                int[] result = StringInfo.ParseCombiningCharacters(str);
-            });
-        }
-
-        private void VerificationHelper(string str, int[] expected)
-        {
-            int[] result = StringInfo.ParseCombiningCharacters(str);
-            Assert.True(compare<int>(result, expected));
-        }
-
-        private bool compare<T>(T[] a, T[] b)
-        {
-            if (a.Length != b.Length)
-            {
-                return false;
-            }
-            else
-            {
-                for (int i = 0; i < a.Length; i++)
-                {
-                    if (!a[i].Equals(b[i]))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
+            Assert.Throws<ArgumentNullException>("str", () => StringInfo.ParseCombiningCharacters(null)); // Str is null
         }
     }
 }

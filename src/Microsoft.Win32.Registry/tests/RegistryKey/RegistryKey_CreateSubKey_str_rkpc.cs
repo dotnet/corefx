@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -8,7 +9,7 @@ using Xunit;
 
 namespace Microsoft.Win32.RegistryTests
 {
-    public class RegistryKey_CreateSubKey_str_rkpc : RegistryTestsBase
+    public class RegistryKey_CreateSubKey_str_rkpc : RegistryKeyCreateSubKeyTestsBase
     {
         [Fact]
         public void CreateWriteableSubkeyAndWrite()
@@ -48,11 +49,6 @@ namespace Microsoft.Win32.RegistryTests
             const int maxValueNameLength = 255;
             Assert.Throws<ArgumentException>(() => TestRegistryKey.CreateSubKey(new string('a', maxValueNameLength + 1)));
 
-            //According to msdn documetation max nesting level exceeds is 510 but actual is 508
-            const int maxNestedLevel = 508;
-            string exceedsNestedSubkeyName = string.Join(@"\", Enumerable.Repeat("a", maxNestedLevel));
-            Assert.Throws<IOException>(() => TestRegistryKey.CreateSubKey(exceedsNestedSubkeyName, true));
-
             // Should throw if RegistryKey is readonly
             const string name = "FooBar";
             TestRegistryKey.SetValue(name, 42);
@@ -71,6 +67,16 @@ namespace Microsoft.Win32.RegistryTests
                 TestRegistryKey.Dispose();
                 TestRegistryKey.CreateSubKey(TestRegistryKeyName, true);
             });
+        }
+
+        [ActiveIssue(10546)]
+        [Fact]
+        public void NegativeTest_DeeplyNestedKey()
+        {
+            //According to msdn documentation max nesting level exceeds is 510 but actual is 508
+            const int maxNestedLevel = 508;
+            string exceedsNestedSubkeyName = string.Join(@"\", Enumerable.Repeat("a", maxNestedLevel));
+            Assert.Throws<IOException>(() => TestRegistryKey.CreateSubKey(exceedsNestedSubkeyName, true));
         }
 
         [Fact]
@@ -99,5 +105,25 @@ namespace Microsoft.Win32.RegistryTests
 
             Assert.NotNull(TestRegistryKey.CreateSubKey(subkey));
         }
+
+        [Theory]
+        [MemberData(nameof(TestRegistrySubKeyNames))]
+        public void CreateSubKey_Writable_KeyExists_OpensKeyWithFixedUpName(string expected, string subKeyName) =>
+            Verify_CreateSubKey_KeyExists_OpensKeyWithFixedUpName(expected, () => TestRegistryKey.CreateSubKey(subKeyName, writable: true));
+
+        [Theory]
+        [MemberData(nameof(TestRegistrySubKeyNames))]
+        public void CreateSubKey_NonWritable_KeyExists_OpensKeyWithFixedUpName(string expected, string subKeyName) =>
+            Verify_CreateSubKey_KeyExists_OpensKeyWithFixedUpName(expected, () => TestRegistryKey.CreateSubKey(subKeyName, writable: false));
+
+        [Theory]
+        [MemberData(nameof(TestRegistrySubKeyNames))]
+        public void CreateSubKey_Writable_KeyDoesNotExist_CreatesKeyWithFixedUpName(string expected, string subKeyName) =>
+            Verify_CreateSubKey_KeyDoesNotExist_CreatesKeyWithFixedUpName(expected, () => TestRegistryKey.CreateSubKey(subKeyName, writable: true));
+
+        [Theory]
+        [MemberData(nameof(TestRegistrySubKeyNames))]
+        public void CreateSubKey_NonWritable_KeyDoesNotExist_CreatesKeyWithFixedUpName(string expected, string subKeyName) =>
+            Verify_CreateSubKey_KeyDoesNotExist_CreatesKeyWithFixedUpName(expected, () => TestRegistryKey.CreateSubKey(subKeyName, writable: false));
     }
 }

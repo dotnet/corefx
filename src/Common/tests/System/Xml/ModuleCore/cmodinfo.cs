@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Text;
@@ -45,9 +46,9 @@ namespace OLEDB.Test.ModuleCore
         static internal void Dispose()
         {
             //Reset the info.  
-            //Since this is a static class, (to make it simplier to access from anywhere in your code)
+            //Since this is a static class, (to make it simpler to access from anywhere in your code)
             //we need to reset this info everytime a test is run - so if you don't select an alias
-            //the next time it doesn't use the previous alias setting - ie: ProviderInfo doesn't 
+            //the next time it doesn't use the previous alias setting - i.e.: ProviderInfo doesn't 
             //get called when no alias is selected...
             s_strCommandLine = null;
             s_hashOptions = null;

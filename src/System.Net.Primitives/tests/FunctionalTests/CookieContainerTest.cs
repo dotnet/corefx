@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Xunit;
 
@@ -9,44 +11,30 @@ namespace System.Net.Primitives.Functional.Tests
 {
     public partial class CookieContainerTest
     {
+        private const string u1 = ".url1.com"; // Basic domain
+        private const string u2 = "127.0.0.1"; // Local domain
+        private const string u3 = "url3.com"; // Basic domain without a leading dot
+        private static readonly Uri u4 = new Uri("http://url4.com"); // Basic uri
+        private static readonly Uri u5 = new Uri("http://url5.com/path"); // Set explicit path
+        private static readonly Uri u6 = new Uri("http://url6.com"); // No cookies should be added with this uri
+
+        private static readonly Cookie c1 = new Cookie("name1", "value", "", u1);
+        private static readonly Cookie c2 = new Cookie("name2", "value", "", u1) { Secure = true };
+        private static readonly Cookie c3 = new Cookie("name3", "value", "", u1) { Port = "\"80, 90, 100, 443\"" };
+        private static readonly Cookie c4 = new Cookie("name4", "value", "", u2);
+        private static readonly Cookie c5 = new Cookie("name5", "value", "/path", u2);
+        private static readonly Cookie c6 = new Cookie("name6", "value", "", "." + u3);
+        private static readonly Cookie c7 = new Cookie("name7", "value", "", "." + u3);
+        private static readonly Cookie c8 = new Cookie("name8", "value");
+        private static readonly Cookie c9 = new Cookie("name9", "value");
+        private static readonly Cookie c10 = new Cookie("name10", "value");
+        private static readonly Cookie c11 = new Cookie("name11", "value") { Port = "\"80, 90, 100\"" };
+
         [Fact]
         public static void Ctor_Empty_Success()
         {
             CookieContainer cc = new CookieContainer();
-        }
-
-        [Fact]
-        public static void Ctor_Capacity_Success()
-        {
-            CookieContainer cc = new CookieContainer(5);
-            Assert.Equal(5, cc.Capacity);
-        }
-
-        [Fact]
-        public static void Ctor_Capacity_Invalid()
-        {
-            Assert.Throws<ArgumentException>(() => new CookieContainer(0)); //Capacity <= 0
-        }
-
-        [Fact]
-        public static void Ctor_CapacityPerDomainCapacityMaxCookieSize_Success()
-        {
-            CookieContainer cc = new CookieContainer(5, 4, 3);
-            Assert.Equal(5, cc.Capacity);
-            Assert.Equal(4, cc.PerDomainCapacity);
-            Assert.Equal(3, cc.MaxCookieSize);
-
-            cc = new CookieContainer(10, int.MaxValue, 4); //Even though PerDomainCapacity > Capacity, this shouldn't throw
-        }
-
-        [Fact]
-        public static void Ctor_CapacityPerDomainCapacityMaxCookieSize_Invalid()
-        {
-            Assert.Throws<ArgumentException>(() => new CookieContainer(0, 10, 5)); //Capacity <= 0
-            Assert.Throws<ArgumentOutOfRangeException>(() => new CookieContainer(5, 0, 5)); //Per domain capacity <= 0
-            Assert.Throws<ArgumentOutOfRangeException>(() => new CookieContainer(5, 10, 5)); //Per domain capacity > Capacity
-
-            Assert.Throws<ArgumentException>(() => new CookieContainer(15, 10, 0)); //Max cookie size <= 0
+            Assert.Equal(0, cc.Count);
         }
 
         [Fact]
@@ -58,7 +46,7 @@ namespace System.Net.Primitives.Functional.Tests
             cc.Capacity = 900;
             Assert.Equal(900, cc.Capacity);
 
-            cc.Capacity = 40; //Shrink
+            cc.Capacity = 40; // Shrink
             Assert.Equal(40, cc.Capacity);
         }
 
@@ -85,7 +73,7 @@ namespace System.Net.Primitives.Functional.Tests
         public static void MaxCookieSize_Set_Invalid()
         {
             CookieContainer cc = new CookieContainer();
-            Assert.Throws<ArgumentOutOfRangeException>(() => cc.MaxCookieSize = 0); // <= 0
+            Assert.Throws<ArgumentOutOfRangeException>(() => cc.MaxCookieSize = 0); // Max cookie size <= 0
         }
 
         [Fact]
@@ -97,8 +85,13 @@ namespace System.Net.Primitives.Functional.Tests
             cc.PerDomainCapacity = 50;
             Assert.Equal(50, cc.PerDomainCapacity);
 
-            cc.PerDomainCapacity = 40; //Shrink
+            cc.PerDomainCapacity = 40; // Shrink
             Assert.Equal(40, cc.PerDomainCapacity);
+
+            // Shrink to one - this should get rid of all cookies since there are no possible cookies that can be expired
+            cc.PerDomainCapacity = 1;
+            Assert.Equal(1, cc.PerDomainCapacity);
+            Assert.Equal(0, cc.Count);
         }
 
         [Fact]
@@ -106,103 +99,22 @@ namespace System.Net.Primitives.Functional.Tests
         {
             CookieContainer cc = new CookieContainer();
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => cc.PerDomainCapacity = 0); // <= 0
-            Assert.Throws<ArgumentOutOfRangeException>(() => cc.PerDomainCapacity = cc.Capacity + 1); // >= Capacity
+            Assert.Throws<ArgumentOutOfRangeException>(() => cc.PerDomainCapacity = 0); // Per domain capacity <= 0
+            Assert.Throws<ArgumentOutOfRangeException>(() => cc.PerDomainCapacity = cc.Capacity + 1); // Per domain capacity >= Capacity
         }
 
-        [Fact]
-        public static void Add_Cookie_Success()
-        {
-            Cookie c1 = new Cookie("name1", "value", "", "contoso.com");
-            Cookie c2 = new Cookie("name2", "", "", "contoso.com") { Secure = true };
-            Cookie c3 = new Cookie("name3", "value", "", "contoso.com") { Port = "\"80, 90, 100\"" };
-            Cookie c4 = new Cookie("name4", "value", "", ".contoso.com");
-            Cookie c5 = new Cookie("name5", "value", "", "127.0.0.1");
-
-            CookieContainer cc1 = new CookieContainer();
-            Assert.Equal(0, cc1.Count);
-
-            cc1.Add(c1);
-            cc1.Add(c2);
-            cc1.Add(c3);
-            cc1.Add(c4);
-            cc1.Add(c5);
-
-            Assert.Equal(5, cc1.Count);
-        }
-
-        [Fact]
-        public static void Add_Cookie_Invalid()
-        {
-            CookieContainer cc = new CookieContainer();
-
-            Assert.Throws<ArgumentNullException>(() => cc.Add((Cookie)null)); //Null cookie
-
-            cc.MaxCookieSize = 1;
-            Assert.Throws<CookieException>(() => cc.Add(new Cookie("name", "long-text", "", "contoso.com"))); //Value.Length > MaxCookieSize
-        }
-        
-        [Fact]
-        public static void Add_VerificationFailedCookie_Throws()
-        {
-            CookieContainer cc = new CookieContainer();
-            
-            foreach (Cookie c in CookieTest.InvalidCookies())
-            {
-                Assert.Throws<CookieException>(() => cc.Add(c));
-            }
-        }
-
-        [Fact]
-        public static void Add_CookieCollection_Success()
-        {
-            CookieContainer cc1 = new CookieContainer();
-            CookieCollection cc2 = new CookieCollection();
-
-            cc2.Add(new Cookie("name1", "value", "", "contoso.com"));
-            cc2.Add(new Cookie("name2", "value", "", "contoso.com"));
-
-            cc1.Add(cc2);
-            Assert.Equal(2, cc1.Count);
-        }
-
-        [Fact]
-        public static void Add_CookieCollection_Invalid()
-        {
-            CookieContainer cc = new CookieContainer();
-
-            Assert.Throws<ArgumentNullException>(() => cc.Add((CookieCollection)null)); //Null cookie
-        }        
-        
         [Fact]
         public static void Add_CookieUri_Invalid()
         {
             CookieContainer cc = new CookieContainer();
-
-            Assert.Throws<ArgumentNullException>(() => cc.Add(null, new Cookie("name", "value"))); //Null uri
-            Assert.Throws<ArgumentNullException>(() => cc.Add(new Uri("http://contoso.com"), (Cookie)null)); //Null cookie
+            Assert.Throws<ArgumentNullException>(() => cc.Add(null, new Cookie("name", "value"))); // Null uri
+            Assert.Throws<ArgumentNullException>(() => cc.Add(new Uri("http://contoso.com"), (Cookie)null)); // Null cookie
         }
 
         [Fact]
-        public static void AddCookieCollectionUri_Success()
-        {
-            Uri uri = new Uri("http://contoso.com");
-            String domain = "contoso.com";
-
-            CookieContainer cc1 = new CookieContainer();
-            CookieCollection cc2 = new CookieCollection();
-            cc2.Add(new Cookie("name1", "value") { Domain = domain });
-            cc2.Add(new Cookie("name2", "value") { Domain = domain });
-
-            cc1.Add(uri, cc2);
-            Assert.Equal(2, cc1.Count);
-        }
-
-        [Fact]
-        public static void AddCookieCollectionUri_Invalid()
+        public static void Add_CookieCollectionUri_Invalid()
         {
             CookieContainer cc = new CookieContainer();
-
             Assert.Throws<ArgumentNullException>(() => cc.Add(null, new CookieCollection())); //Null uri
             Assert.Throws<ArgumentNullException>(() => cc.Add(new Uri("http://contoso.com"), (CookieCollection)null)); //Null collection
         }
@@ -211,7 +123,6 @@ namespace System.Net.Primitives.Functional.Tests
         public static void GetCookies_Invalid()
         {
             CookieContainer cc = new CookieContainer();
-
             Assert.Throws<ArgumentNullException>(() => cc.GetCookies(null));
         }
 
@@ -219,17 +130,39 @@ namespace System.Net.Primitives.Functional.Tests
         public static void GetCookieHeader_Invalid()
         {
             CookieContainer cc = new CookieContainer();
-
             Assert.Throws<ArgumentNullException>(() => cc.GetCookieHeader(null));
         }
 
-        [Fact]
-        public static void SetCookies_Invalid()
+        private static IEnumerable<object[]> SetCookiesInvalidData()
+        {
+            yield return new object[] { u5, "=value" }; // No name
+            yield return new object[] { u5, "$=value" }; // Invalid name
+            yield return new object[] { new Uri("http://url.com"), "na\tme=value; domain=.domain.com" }; // Invalid name
+            yield return new object[] { new Uri("http://url.com"), "name=value; domain=.domain.com" }; // Domain not the same
+            yield return new object[] { new Uri("http://url.com/path"), "name=value; domain=.url.com; path=/root" }; // Path not the same
+            yield return new object[] { new Uri("http://url.com:90"), "name=value; port=\"80\"" }; // Port not the same
+            yield return new object[] { new Uri("http://url.com"), "name=value; domain=" }; // Empty domain
+            yield return new object[] { u6, "name11=value11; version=invalidversion" }; // Invalid version
+            yield return new object[] { u6, "name11=value11; expires=invaliddate" }; // Invalid date
+            yield return new object[] { u6, "name11=value11; max-age=invalidmaxage" }; // Invalid max age
+            yield return new object[] { u6, "name11=value11; domain=invaliddomain" }; // Invalid domain
+            yield return new object[] { u6, "name11=value11; port=invalidport" }; // Invalid port
+        }
+
+        [Theory]
+        [MemberData(nameof(SetCookiesInvalidData))]
+        public static void SetCookies_InvalidData_Throws(Uri uri, string cookieHeader)
         {
             CookieContainer cc = new CookieContainer();
+            Assert.Throws<CookieException>(() => cc.SetCookies(uri, cookieHeader));
+        }
 
-            Assert.Throws<ArgumentNullException>(() => cc.SetCookies(null, "")); //Null uri
-            Assert.Throws<ArgumentNullException>(() => cc.SetCookies(new Uri("http://contoso.com"), null)); //Null header
+        [Fact]
+        public static void SetCookies_InvalidInput_Throws()
+        {
+            CookieContainer cc = new CookieContainer();
+            Assert.Throws<ArgumentNullException>(() => cc.SetCookies(null, "")); // Null uri
+            Assert.Throws<ArgumentNullException>(() => cc.SetCookies(u5, null)); // Null header
         }
     }
 }

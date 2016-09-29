@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Authentication.ExtendedProtection;
 
@@ -16,8 +18,25 @@ namespace System.Net.Security
 
         public SecurityBuffer(byte[] data, int offset, int size, SecurityBufferType tokentype)
         {
-            GlobalLog.Assert(offset >= 0 && offset <= (data == null ? 0 : data.Length), "SecurityBuffer::.ctor", "'offset' out of range.  [" + offset + "]");
-            GlobalLog.Assert(size >= 0 && size <= (data == null ? 0 : data.Length - offset), "SecurityBuffer::.ctor", "'size' out of range.  [" + size + "]");
+            if (offset < 0 || offset > (data == null ? 0 : data.Length))
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SecurityBuffer::.ctor", "'offset' out of range.  [" + offset + "]");
+                }
+
+                Debug.Fail("SecurityBuffer::.ctor", "'offset' out of range.  [" + offset + "]");
+            }
+
+            if (size < 0 || size > (data == null ? 0 : data.Length - offset))
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SecurityBuffer::.ctor", "'size' out of range.  [" + size + "]");
+                }
+
+                Debug.Fail("SecurityBuffer::.ctor", "'size' out of range.  [" + size + "]");
+            }
 
             this.offset = data == null || offset < 0 ? 0 : Math.Min(offset, data.Length);
             this.size = data == null || size < 0 ? 0 : Math.Min(size, data.Length - this.offset);
@@ -34,7 +53,15 @@ namespace System.Net.Security
 
         public SecurityBuffer(int size, SecurityBufferType tokentype)
         {
-            GlobalLog.Assert(size >= 0, "SecurityBuffer::.ctor", "'size' out of range.  [" + size + "]");
+            if (size < 0)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SecurityBuffer::.ctor", "'size' out of range.  [" + size + "]");
+                }
+
+                Debug.Fail("SecurityBuffer::.ctor", "'size' out of range.  [" + size + "]");
+            }
 
             this.size = size;
             this.type = tokentype;

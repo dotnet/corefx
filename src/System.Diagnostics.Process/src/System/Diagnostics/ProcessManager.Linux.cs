@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -66,14 +67,17 @@ namespace System.Diagnostics
                 }
 
                 // It's not a continuation of a previous entry but a new one: add it.
-                modules.Add(new ModuleInfo()
+                unsafe
                 {
-                    _fileName = entry.FileName,
-                    _baseName = Path.GetFileName(entry.FileName),
-                    _baseOfDll = new IntPtr(entry.AddressRange.Key),
-                    _sizeOfImage = sizeOfImage,
-                    _entryPoint = IntPtr.Zero // unknown
-                });
+                    modules.Add(new ModuleInfo()
+                    {
+                        _fileName = entry.FileName,
+                        _baseName = Path.GetFileName(entry.FileName),
+                        _baseOfDll = new IntPtr((void *)entry.AddressRange.Key),
+                        _sizeOfImage = sizeOfImage,
+                        _entryPoint = IntPtr.Zero // unknown
+                    });
+                }
             }
 
             // Return the set of modules found
@@ -124,26 +128,37 @@ namespace System.Diagnostics
 
             // Then read through /proc/pid/task/ to find each thread in the process...
             string tasksDir = Interop.procfs.GetTaskDirectoryPathForProcess(pid);
-            foreach (string taskDir in Directory.EnumerateDirectories(tasksDir))
+            try
             {
-                // ...and read its associated /proc/pid/task/tid/stat file to create a ThreadInfo
-                string dirName = Path.GetFileName(taskDir);
-                int tid;
-                Interop.procfs.ParsedStat stat;
-                if (int.TryParse(dirName, NumberStyles.Integer, CultureInfo.InvariantCulture, out tid) &&
-                    Interop.procfs.TryReadStatFile(pid, tid, out stat, reusableReader))
+                foreach (string taskDir in Directory.EnumerateDirectories(tasksDir))
                 {
-                    pi._threadInfoList.Add(new ThreadInfo()
+                    // ...and read its associated /proc/pid/task/tid/stat file to create a ThreadInfo
+                    string dirName = Path.GetFileName(taskDir);
+                    int tid;
+                    Interop.procfs.ParsedStat stat;
+                    if (int.TryParse(dirName, NumberStyles.Integer, CultureInfo.InvariantCulture, out tid) &&
+                        Interop.procfs.TryReadStatFile(pid, tid, out stat, reusableReader))
                     {
-                        _processId = pid,
-                        _threadId = (ulong)tid,
-                        _basePriority = pi.BasePriority,
-                        _currentPriority = (int)stat.nice,
-                        _startAddress = (IntPtr)stat.startstack,
-                        _threadState = ProcFsStateToThreadState(stat.state),
-                        _threadWaitReason = ThreadWaitReason.Unknown
-                    });
+                        unsafe
+                        {
+                            pi._threadInfoList.Add(new ThreadInfo()
+                            {
+                                _processId = pid,
+                                _threadId = (ulong)tid,
+                                _basePriority = pi.BasePriority,
+                                _currentPriority = (int)stat.nice,
+                                _startAddress = IntPtr.Zero,
+                                _threadState = ProcFsStateToThreadState(stat.state),
+                                _threadWaitReason = ThreadWaitReason.Unknown
+                            });
+                        }
+                    }
                 }
+            }
+            catch (IOException)
+            {
+                // Between the time that we get an ID and the time that we try to read the associated 
+                // directories and files in procfs, the process could be gone.
             }
 
             // Finally return what we've built up

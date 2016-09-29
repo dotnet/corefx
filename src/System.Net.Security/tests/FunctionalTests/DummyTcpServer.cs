@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Net.Sockets;
@@ -95,8 +96,7 @@ namespace System.Net.Security.Tests
             try
             {
                 result.GetAwaiter().GetResult();
-                _log.WriteLine("Server({0}) authenticated to client({1}) with encryption cipher: {2} {3}-bit strength",
-                    state.TcpClient.Client.LocalEndPoint, state.TcpClient.Client.RemoteEndPoint,
+                _log.WriteLine("Server authenticated to client with encryption cipher: {0} {1}-bit strength",
                     sslStream.CipherAlgorithm, sslStream.CipherStrength);
 
                 // Start listening for data from the client connection.
@@ -105,15 +105,13 @@ namespace System.Net.Security.Tests
             catch (AuthenticationException authEx)
             {
                 _log.WriteLine(
-                    "Server({0}) disconnecting from client({1}) during authentication.  No shared SSL/TLS algorithm. ({2})",
-                    state.TcpClient.Client.LocalEndPoint,
-                    state.TcpClient.Client.RemoteEndPoint,
+                    "Server disconnecting from client during authentication.  No shared SSL/TLS algorithm. ({0})",
                     authEx);
             }
             catch (Exception ex)
             {
-                _log.WriteLine("Server({0}) disconnecting from client({1}) during authentication.  Exception: {2}",
-                    state.TcpClient.Client.LocalEndPoint, state.TcpClient.Client.RemoteEndPoint, ex.Message);
+                _log.WriteLine("Server disconnecting from client during authentication.  Exception: {0}",
+                    ex.Message);
             }
             finally
             {
@@ -149,19 +147,23 @@ namespace System.Net.Security.Tests
 
 
                     SslStream sslStream = null;
-                    X509Certificate2 certificate = TestConfiguration.GetServerCertificate();
+                    X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate();
 
                     try
                     {
                         sslStream = (SslStream)state.Stream;
 
                         _log.WriteLine("Server: attempting to open SslStream.");
-                        sslStream.AuthenticateAsServerAsync(certificate, false, _sslProtocols, false).ContinueWith(t => OnAuthenticate(t, state), TaskScheduler.Default);
+                        sslStream.AuthenticateAsServerAsync(certificate, false, _sslProtocols, false).ContinueWith(t =>
+                        {
+                            certificate.Dispose();
+                            OnAuthenticate(t, state);
+                        }, TaskScheduler.Default);
                     }
                     catch (Exception ex)
                     {
                         _log.WriteLine("Server: Exception: {0}", ex);
-
+                        certificate.Dispose();
                         state.Dispose(); // close connection to client
                     }
                 }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Text;
@@ -14,7 +15,7 @@ namespace System.IO
 
         private const string DirectorySeparatorCharAsString = "\\";
 
-        private static readonly char[] InvalidFileNameChars = 
+        public static char[] GetInvalidFileNameChars() => new char[]
         { 
             '\"', '<', '>', '|', '\0', 
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10, 
@@ -26,140 +27,42 @@ namespace System.IO
         // The max total path is 260, and the max individual component length is 255. 
         // For example, D:\<256 char file name> isn't legal, even though it's under 260 chars.
         internal static readonly int MaxPath = 260;
-        internal static readonly int MaxComponentLength = 255;
         internal static readonly int MaxLongPath = short.MaxValue;
 
-        private static bool IsDirectoryOrVolumeSeparator(char c)
-        {
-            return PathInternal.IsDirectorySeparator(c) || VolumeSeparatorChar == c;
-        }
-
         // Expands the given path to a fully qualified path. 
-        [System.Security.SecuritySafeCritical]
         public static string GetFullPath(string path)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
 
-            string fullPath = NormalizePath(path, fullCheck: true);
+            // Embedded null characters are the only invalid character case we want to check up front.
+            // This is because the nulls will signal the end of the string to Win32 and therefore have
+            // unpredictable results. Other invalid characters we give a chance to be normalized out.
+            if (path.IndexOf('\0') != -1)
+                throw new ArgumentException(SR.Argument_InvalidPathChars, nameof(path));
 
-            // Emulate FileIOPermissions checks, retained for compatibility (normal invalid characters have already been checked)
-            if (PathInternal.HasAdditionalIllegalCharacters(fullPath))
-                throw new ArgumentException(SR.Argument_InvalidPathChars, "path");
-
-            return fullPath;
-        }
-
-        /// <summary>
-        /// Checks for known bad extended paths (paths that start with \\?\)
-        /// </summary>
-        /// <param name="fullCheck">Check for invalid characters if true.</param>
-        /// <returns>'true' if the path passes validity checks.</returns>
-        private static bool ValidateExtendedPath(string path, bool fullCheck)
-        {
-            if (path.Length == PathInternal.ExtendedPathPrefix.Length)
+            if (PathInternal.IsExtended(path))
             {
-                // Effectively empty and therefore invalid
-                return false;
+                // We can't really know what is valid for all cases of extended paths.
+                //
+                //  - object names can include other characters as well (':', '/', etc.)
+                //  - even file objects have different rules (pipe names can contain most characters)
+                //
+                // As such we will do no further analysis of extended paths to avoid blocking known and unknown
+                // scenarios as well as minimizing compat breaks should we block now and need to unblock later.
+                return path;
             }
 
-            if (path.StartsWith(PathInternal.UncExtendedPathPrefix, StringComparison.Ordinal))
+            bool isDevice = PathInternal.IsDevice(path);
+            if (!isDevice)
             {
-                // UNC specific checks
-                if (path.Length == PathInternal.UncExtendedPathPrefix.Length || path[PathInternal.UncExtendedPathPrefix.Length] == DirectorySeparatorChar)
-                {
-                    // Effectively empty and therefore invalid (\\?\UNC\ or \\?\UNC\\)
-                    return false;
-                }
-
-                int serverShareSeparator = path.IndexOf(DirectorySeparatorChar, PathInternal.UncExtendedPathPrefix.Length);
-                if (serverShareSeparator == -1 || serverShareSeparator == path.Length - 1)
-                {
-                    // Need at least a Server\Share
-                    return false;
-                }
-            }
-
-            // Segments can't be empty "\\" or contain *just* "." or ".."
-            char twoBack = '?';
-            char oneBack = DirectorySeparatorChar;
-            char currentCharacter;
-            bool periodSegment = false;
-            for (int i = PathInternal.ExtendedPathPrefix.Length; i < path.Length; i++)
-            {
-                currentCharacter = path[i];
-                switch (currentCharacter)
-                {
-                    case '\\':
-                        if (oneBack == DirectorySeparatorChar || periodSegment)
-                            throw new ArgumentException(SR.Arg_PathIllegal);
-                        periodSegment = false;
-                        break;
-                    case '.':
-                        periodSegment = (oneBack == DirectorySeparatorChar || (twoBack == DirectorySeparatorChar && oneBack == '.'));
-                        break;
-                    default:
-                        periodSegment = false;
-                        break;
-                }
-
-                twoBack = oneBack;
-                oneBack = currentCharacter;
-            }
-
-            if (periodSegment)
-            {
-                return false;
-            }
-
-            if (fullCheck)
-            {
-                // Look for illegal path characters.
-                PathInternal.CheckInvalidPathChars(path);
-            }
-
-            return true;
-        }
-
-        private static string NormalizeExtendedPath(string path, bool fullCheck)
-        {
-            // If the path is in extended syntax, we don't need to normalize, but we still do some basic validity checks
-            if (!ValidateExtendedPath(path, fullCheck))
-            {
-                throw new ArgumentException(SR.Arg_PathIllegal);
-            }
-
-            // \\?\GLOBALROOT gives access to devices out of the scope of the current user, we
-            // don't want to allow this for security reasons.
-            // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx#nt_namespaces
-            if (path.StartsWith(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException(SR.Arg_PathGlobalRoot);
-
-            return path;
-        }
-
-        private static string NormalizePath(string path, bool fullCheck = true, bool expandShortPaths = true)
-        {
-            Debug.Assert(path != null, "path can't be null");
-
-            bool isExtended = PathInternal.IsExtended(path);
-
-            if (fullCheck)
-            {
-                // Embedded null characters are the only invalid character case we want to check up front.
-                // This is because the nulls will signal the end of the string to Win32 and therefore have
-                // unpredictable results. Other invalid characters we give a chance to be normalized out.
-                if (path.IndexOf('\0') != -1)
-                    throw new ArgumentException(SR.Argument_InvalidPathChars, "path");
-
                 // Toss out paths with colons that aren't a valid drive specifier.
-                // Cannot start with a colon and can only be of the form "C:" or "\\?\C:".
+                // Cannot start with a colon and can only be of the form "C:".
                 // (Note that we used to explicitly check "http:" and "file:"- these are caught by this check now.)
-                int startIndex = PathInternal.PathStartSkip(path) + 2;
-                if (isExtended)
-                {
-                    startIndex += PathInternal.ExtendedPathPrefix.Length;
-                }
+                int startIndex = PathInternal.PathStartSkip(path);
+
+                // Move past the colon
+                startIndex += 2;
 
                 if ((path.Length > 0 && path[0] == VolumeSeparatorChar)
                     || (path.Length >= startIndex && path[startIndex - 1] == VolumeSeparatorChar && !PathInternal.IsValidDriveChar(path[startIndex - 2]))
@@ -169,21 +72,23 @@ namespace System.IO
                 }
             }
 
-            if (isExtended)
-            {
-                return NormalizeExtendedPath(path, fullCheck);
-            }
-            else
-            {
-                // Technically this doesn't matter but we used to throw for this case
-                if (String.IsNullOrWhiteSpace(path))
-                    throw new ArgumentException(SR.Arg_PathIllegal);
+            // Technically this doesn't matter but we used to throw for this case
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException(SR.Arg_PathIllegal);
 
-                return PathHelper.Normalize(path, fullCheck, expandShortPaths);
+            // We don't want to check invalid characters for device format- see comments for extended above
+            string fullPath = PathHelper.Normalize(path, checkInvalidCharacters: !isDevice, expandShortPaths: true);
+
+            if (!isDevice)
+            {
+                // Emulate FileIOPermissions checks, retained for compatibility (normal invalid characters have already been checked)
+                if (PathInternal.HasWildCardCharacters(fullPath))
+                    throw new ArgumentException(SR.Argument_InvalidPathChars, nameof(path));
             }
+
+            return fullPath;
         }
 
-        [System.Security.SecuritySafeCritical]
         public static string GetTempPath()
         {
             StringBuilder sb = StringBuilderCache.Acquire(MaxPath);
@@ -193,11 +98,10 @@ namespace System.IO
             return GetFullPath(StringBuilderCache.GetStringAndRelease(sb));
         }
 
-        [System.Security.SecurityCritical]
-        private static string InternalGetTempFileName(bool checkHost)
+        // Returns a unique temporary file name, and creates a 0-byte file by that
+        // name on disk.
+        public static string GetTempFileName()
         {
-            // checkHost was originally intended for file security checks, but is ignored.
-
             string path = GetTempPath();
 
             StringBuilder sb = StringBuilderCache.Acquire(MaxPath);
@@ -235,10 +139,15 @@ namespace System.IO
         {
             if (path == null) return null;
             PathInternal.CheckInvalidPathChars(path);
-            int pathRoot = PathInternal.GetRootLength(path);
 
             // Need to return the normalized directory separator
-            return pathRoot <= 0 ? string.Empty : path.Substring(0, pathRoot).Replace(AltDirectorySeparatorChar, DirectorySeparatorChar);
+            path = PathInternal.NormalizeDirectorySeparators(path);
+
+            int pathRoot = PathInternal.GetRootLength(path);
+            return pathRoot <= 0 ? string.Empty : path.Substring(0, pathRoot);
         }
+
+        /// <summary>Gets whether the system is case-sensitive.</summary>
+        internal static bool IsCaseSensitive { get { return false; } }
     }
 }

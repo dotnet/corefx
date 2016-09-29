@@ -1,12 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq.Expressions;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -18,13 +17,7 @@ namespace System.Linq.Expressions.Interpreter
         // the offset to jump to (relative to this instruction):
         protected int _offset = Unknown;
 
-        public int Offset { get { return _offset; } }
         public abstract Instruction[] Cache { get; }
-
-        public override string InstructionName
-        {
-            get { return "Offset"; }
-        }
 
         public Instruction Fixup(int offset)
         {
@@ -224,10 +217,6 @@ namespace System.Linq.Expressions.Interpreter
     internal abstract class IndexedBranchInstruction : Instruction
     {
         protected const int CacheSize = 32;
-        public override string InstructionName
-        {
-            get { return "IndexedBranch"; }
-        }
         internal readonly int _labelIndex;
 
         public IndexedBranchInstruction(int labelIndex)
@@ -261,7 +250,7 @@ namespace System.Linq.Expressions.Interpreter
     /// the goto expression and the target label node pushed and not consumed yet. 
     /// A goto expression can jump into a node that evaluates arguments only if it carries 
     /// a value and jumps right after the first argument (the carried value will be used as the first argument). 
-    /// Goto can jump into an arbitrary child of a BlockExpression since the block doesn�t accumulate values 
+    /// Goto can jump into an arbitrary child of a BlockExpression since the block doesn't accumulate values 
     /// on evaluation stack as its child expressions are being evaluated.
     /// 
     /// Goto needs to execute any finally blocks on the way to the target label.
@@ -384,6 +373,7 @@ namespace System.Linq.Expressions.Interpreter
 
             // Start to run the try/catch/finally blocks
             var instructions = frame.Interpreter.Instructions.Instructions;
+            ExceptionHandler exHandler;
             try
             {
                 // run the try block
@@ -398,25 +388,14 @@ namespace System.Linq.Expressions.Interpreter
                 if (index == _tryHandler.GotoEndTargetIndex)
                 {
                     // run the 'Goto' that jumps out of the try/catch/finally blocks
-                    Debug.Assert(instructions[index] is GotoInstruction, "should be the 'Goto' instruction that jumpes out the try/catch/finally");
+                    Debug.Assert(instructions[index] is GotoInstruction, "should be the 'Goto' instruction that jumps out the try/catch/finally");
                     frame.InstructionIndex += instructions[index].Run(frame);
                 }
             }
-            catch (RethrowException)
+            catch (Exception exception) when (_tryHandler.HasHandler(frame, ref exception, out exHandler))
             {
-                // a rethrow instruction in the try handler gets to run
-                throw;
-            }
-            catch (Exception exception)
-            {
-                frame.SaveTraceToException(exception);
-                // rethrow if there is no catch blocks defined for this try block
-                if (!_tryHandler.IsCatchBlockExist) { throw; }
-
-                // Search for the best handler in the TryCatchFianlly block. If no suitable handler is found, rethrow
-                ExceptionHandler exHandler;
-                frame.InstructionIndex += _tryHandler.GotoHandler(frame, exception, out exHandler);
-                if (exHandler == null) { throw; }
+                Debug.Assert(!(exception is RethrowException));
+                frame.InstructionIndex += frame.Goto(exHandler.LabelIndex, exception, gotoExceptionHandler: true);
 
 #if FEATURE_THREAD_ABORT
                 // stay in the current catch so that ThreadAbortException is not rethrown by CLR:
@@ -443,7 +422,7 @@ namespace System.Linq.Expressions.Interpreter
                     if (index == _tryHandler.GotoEndTargetIndex)
                     {
                         // run the 'Goto' that jumps out of the try/catch/finally blocks
-                        Debug.Assert(instructions[index] is GotoInstruction, "should be the 'Goto' instruction that jumpes out the try/catch/finally");
+                        Debug.Assert(instructions[index] is GotoInstruction, "should be the 'Goto' instruction that jumps out the try/catch/finally");
                         frame.InstructionIndex += instructions[index].Run(frame);
                     }
                 }
@@ -495,6 +474,84 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
+    internal sealed class EnterTryFaultInstruction : IndexedBranchInstruction
+    {
+        private TryFaultHandler _tryHandler;
+
+        internal void SetTryHandler(TryFaultHandler tryHandler)
+        {
+            Debug.Assert(tryHandler != null);
+            Debug.Assert(_tryHandler == null, "the tryHandler can be set only once");
+            _tryHandler = tryHandler;
+        }
+
+        public override int ProducedContinuations => 1;
+
+        internal EnterTryFaultInstruction(int targetIndex)
+            : base(targetIndex)
+        {
+        }
+
+        public override int Run(InterpretedFrame frame)
+        {
+            Debug.Assert(_tryHandler != null, "the tryHandler must be set already");
+
+            // Push fault. 
+            frame.PushContinuation(_labelIndex);
+
+            int prevInstrIndex = frame.InstructionIndex;
+            frame.InstructionIndex++;
+
+            // Start to run the try/fault blocks
+            var instructions = frame.Interpreter.Instructions.Instructions;
+
+            // C# 6 has no direct support for fault blocks, but they can be faked or coerced out of the compiler
+            // in several ways. Catch-and-rethrow can work in specific cases, but not generally as the double-pass
+            // will not work correctly with filters higher up the call stack. Iterators can be used to produce real
+            // fault blocks, but it depends on an implementation detail rather than a guarantee, and is rather
+            // indirect. This leaves using a finally block and not doing anything in it if the body ran to
+            // completion, which is the approach used here.
+            bool ranWithoutFault = false;
+            try
+            {
+                // run the try block
+                int index = frame.InstructionIndex;
+                while (index >= _tryHandler.TryStartIndex && index < _tryHandler.TryEndIndex)
+                {
+                    index += instructions[index].Run(frame);
+                    frame.InstructionIndex = index;
+                }
+
+                // run the 'Goto' that jumps out of the try/fault blocks
+                Debug.Assert(instructions[index] is GotoInstruction, "should be the 'Goto' instruction that jumps out the try/fault");
+
+                // if we've arrived here there was no exception thrown. As the fault block won't run, we need to
+                // pop the continuation for it here, before Gotoing the end of the try/fault.
+                ranWithoutFault = true;
+                frame.RemoveContinuation();
+                frame.InstructionIndex += instructions[index].Run(frame);
+            }
+            finally
+            {
+                if (!ranWithoutFault)
+                {
+                    // run the fault block
+                    // we cannot jump out of the finally block, and we cannot have an immediate rethrow in it
+                    int index = frame.InstructionIndex = _tryHandler.FinallyStartIndex;
+                    while (index >= _tryHandler.FinallyStartIndex && index < _tryHandler.FinallyEndIndex)
+                    {
+                        index += instructions[index].Run(frame);
+                        frame.InstructionIndex = index;
+                    }
+                }
+            }
+
+            return frame.InstructionIndex - prevInstrIndex;
+        }
+
+        public override string InstructionName => "EnterTryFault";
+    }
+    
     /// <summary>
     /// The first instruction of finally block.
     /// </summary>
@@ -527,7 +584,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             // If _pendingContinuation == -1 then we were getting into the finally block because an exception was thrown
             //      in this case we need to set the stack depth
-            // Else we were getting into this finnaly block from a 'Goto' jump, and the stack depth is alreayd set properly
+            // Else we were getting into this finally block from a 'Goto' jump, and the stack depth is already set properly
             if (!frame.IsJumpHappened())
             {
                 frame.SetStackDepth(GetLabel(frame).StackDepth);
@@ -560,11 +617,109 @@ namespace System.Linq.Expressions.Interpreter
             frame.PopPendingContinuation();
 
             // If _pendingContinuation == -1 then we were getting into the finally block because an exception was thrown
-            // In this case we just return 1, and the the real instruction index will be calculated by GotoHandler later
+            // In this case we just return 1, and the real instruction index will be calculated by GotoHandler later
             if (!frame.IsJumpHappened()) { return 1; }
             // jump to goto target or to the next finally:
             return frame.YieldToPendingContinuation();
         }
+    }
+
+    internal sealed class EnterFaultInstruction : IndexedBranchInstruction
+    {
+        private readonly static EnterFaultInstruction[] s_cache = new EnterFaultInstruction[CacheSize];
+
+        public override string InstructionName => "EnterFault";
+
+        public override int ProducedStack => 2;
+
+        private EnterFaultInstruction(int labelIndex)
+            : base(labelIndex)
+        {
+        }
+
+        internal static EnterFaultInstruction Create(int labelIndex)
+        {
+            if (labelIndex < CacheSize)
+            {
+                return s_cache[labelIndex] ?? (s_cache[labelIndex] = new EnterFaultInstruction(labelIndex));
+            }
+
+            return new EnterFaultInstruction(labelIndex);
+        }
+
+        public override int Run(InterpretedFrame frame)
+        {
+            Debug.Assert(!frame.IsJumpHappened());
+
+            frame.SetStackDepth(GetLabel(frame).StackDepth);
+            frame.PushPendingContinuation();
+            frame.RemoveContinuation();
+            return 1;
+        }
+    }
+
+    internal sealed class LeaveFaultInstruction : Instruction
+    {
+        internal static readonly Instruction Instance = new LeaveFaultInstruction();
+
+        public override int ConsumedStack => 2;
+
+        public override int ConsumedContinuations => 1;
+
+        public override string InstructionName => "LeaveFault";
+
+        private LeaveFaultInstruction()
+        {
+        }
+
+        public override int Run(InterpretedFrame frame)
+        {
+            frame.PopPendingContinuation();
+
+            Debug.Assert(!frame.IsJumpHappened());
+            // Just return 1, and the real instruction index will be calculated by GotoHandler later
+            return 1;
+        }
+    }
+
+    // no-op: we need this just to balance the stack depth and aid debugging of the instruction list.
+    internal sealed class EnterExceptionFilterInstruction : Instruction
+    {
+        internal static readonly EnterExceptionFilterInstruction Instance = new EnterExceptionFilterInstruction();
+
+        private EnterExceptionFilterInstruction()
+        {
+        }
+
+        public override string InstructionName => "EnterExceptionFilter";
+
+        public override int ConsumedStack => 0;
+
+        // The exception is pushed onto the stack in the filter runner.
+        public override int ProducedStack => 1;
+
+        [ExcludeFromCodeCoverage] // Known to be a no-op, this instruction is skipped on execution.
+        public override int Run(InterpretedFrame frame) => 1;
+    }
+
+    // no-op: we need this just to balance the stack depth and aid debugging of the instruction list.
+    internal sealed class LeaveExceptionFilterInstruction : Instruction
+    {
+        internal static readonly LeaveExceptionFilterInstruction Instance = new LeaveExceptionFilterInstruction();
+
+        private LeaveExceptionFilterInstruction()
+        {
+        }
+
+        public override string InstructionName => "LeaveExceptionFilter";
+
+        // The boolean result is popped from the stack in the filter runner.
+        public override int ConsumedStack => 1;
+
+        public override int ProducedStack => 0;
+
+        [ExcludeFromCodeCoverage] // Known to be a no-op, this instruction is skipped on execution.
+        public override int Run(InterpretedFrame frame) => 1;
     }
 
     // no-op: we need this just to balance the stack depth.
@@ -593,9 +748,9 @@ namespace System.Linq.Expressions.Interpreter
 
         // A variable storing the current exception is pushed to the stack by exception handling.
         // Catch handlers: The value is immediately popped and stored into a local.
-        // Fault handlers: The value is kept on stack during fault handler evaluation.
         public override int ProducedStack { get { return 1; } }
 
+        [ExcludeFromCodeCoverage] // Known to be a no-op, this instruction is skipped on execution.
         public override int Run(InterpretedFrame frame)
         {
             // nop (the exception value is pushed by the interpreter in HandleCatch)
@@ -651,49 +806,6 @@ namespace System.Linq.Expressions.Interpreter
             return GetLabel(frame).Index - frame.InstructionIndex;
         }
     }
-
-    /// <summary>
-    /// The last instruction of a fault exception handler.
-    /// </summary>
-    internal sealed class LeaveFaultInstruction : Instruction
-    {
-        internal static readonly Instruction NonVoid = new LeaveFaultInstruction(true);
-        internal static readonly Instruction Void = new LeaveFaultInstruction(false);
-
-        private readonly bool _hasValue;
-
-        public override string InstructionName
-        {
-            get { return "LeaveFault"; }
-        }
-
-        // The fault block has a value if the body is non-void, but the value is never used.
-        // We compile the body of a fault block as void.
-        // However, we keep the exception object that was pushed upon entering the fault block on the stack during execution of the block
-        // and pop it at the end.
-        public override int ConsumedStack
-        {
-            get { return 1; }
-        }
-
-        // While emitting instructions a non-void try-fault expression is expected to produce a value. 
-        public override int ProducedStack
-        {
-            get { return _hasValue ? 1 : 0; }
-        }
-
-        private LeaveFaultInstruction(bool hasValue)
-        {
-            _hasValue = hasValue;
-        }
-
-        public override int Run(InterpretedFrame frame)
-        {
-            object exception = frame.Pop();
-            throw new RethrowException();
-        }
-    }
-
 
     internal sealed class ThrowInstruction : Instruction
     {
@@ -792,47 +904,6 @@ namespace System.Linq.Expressions.Interpreter
 
             int target;
             return _cases.TryGetValue((string)value, out target) ? target : 1;
-        }
-    }
-
-    internal sealed class EnterLoopInstruction : Instruction
-    {
-        private readonly int _instructionIndex;
-        private Dictionary<ParameterExpression, LocalVariable> _variables;
-        private Dictionary<ParameterExpression, LocalVariable> _closureVariables;
-        private LoopExpression _loop;
-        private int _loopEnd;
-
-        public override string InstructionName
-        {
-            get { return "EnterLoop"; }
-        }
-
-        internal EnterLoopInstruction(LoopExpression loop, LocalVariables locals, int instructionIndex)
-        {
-            _loop = loop;
-            _variables = locals.CopyLocals();
-            _closureVariables = locals.ClosureVariables;
-            _instructionIndex = instructionIndex;
-        }
-
-        internal void FinishLoop(int loopEnd)
-        {
-            _loopEnd = loopEnd;
-        }
-
-        public override int Run(InterpretedFrame frame)
-        {
-            return 1;
-        }
-
-        private bool Compiled
-        {
-            get { return _loop == null; }
-        }
-
-        private void Compile(object frameObj)
-        {
         }
     }
 }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -13,13 +14,19 @@ using System.Threading.Tasks;
 
 namespace System.Data.Common
 {
-    public abstract class DbConnection :
+    public abstract class DbConnection : 
+        IDbConnection,
         IDisposable
     {
         private StateChangeEventHandler _stateChangeEventHandler;
 
         protected DbConnection() : base()
         {
+        }
+
+        ~DbConnection()
+        {
+            Dispose(disposing: false);
         }
 
         abstract public string ConnectionString
@@ -117,18 +124,18 @@ namespace System.Data.Common
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled(cancellationToken);
+                return TaskHelpers.FromCancellation(cancellationToken);
             }
             else
             {
                 try
                 {
                     Open();
-                    return Task.CompletedTask;
+                    return TaskHelpers.CompletedTask();
                 }
                 catch (Exception e)
                 {
-                    return Task.FromException(e);
+                    return TaskHelpers.FromException(e);
                 }
             }
         }
@@ -136,6 +143,7 @@ namespace System.Data.Common
         public void Dispose()
         {
             Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -144,6 +152,21 @@ namespace System.Data.Common
             {
                 Close();
             }
+        }
+
+        IDbTransaction IDbConnection.BeginTransaction()
+        {
+            return BeginDbTransaction(IsolationLevel.Unspecified);
+        }
+
+        IDbTransaction IDbConnection.BeginTransaction(IsolationLevel isolationLevel)
+        {
+            return BeginDbTransaction(isolationLevel);
+        }
+
+        IDbCommand IDbConnection.CreateCommand()
+        {
+            return CreateDbCommand();
         }
     }
 }

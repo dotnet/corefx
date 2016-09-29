@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.IO;
@@ -25,8 +26,9 @@ namespace System.Globalization.Tests
         /// </summary>
         private static Stream GetIdnaTestTxt()
         {
+            string fileName = PlatformDetection.IsWindows7 ? "IdnaTest_Win7.txt" : "IdnaTest_6.txt";
             // test file 'IdnaTest.txt' is included as an embedded resource
-            var name = typeof(Factory).GetTypeInfo().Assembly.GetManifestResourceNames().First(n => n.EndsWith("IdnaTest.txt", StringComparison.Ordinal));
+            var name = typeof(Factory).GetTypeInfo().Assembly.GetManifestResourceNames().First(n => n.EndsWith(fileName, StringComparison.Ordinal));
             return typeof(Factory).GetTypeInfo().Assembly.GetManifestResourceStream(name);
         }
 
@@ -61,7 +63,10 @@ namespace System.Globalization.Tests
         /// <returns></returns>
         public static IEnumerable<IConformanceIdnaTest> GetDataset()
         {
-            foreach (var entry in ParseFile(GetIdnaTestTxt(), (line, lineCount) => new Unicode_6_0_IdnaTest(line, lineCount)))
+            foreach (var entry in ParseFile(GetIdnaTestTxt(), (line, lineCount) => PlatformDetection.IsWindows7 ?
+                                                                                     (IConformanceIdnaTest) new Unicode_Win7_IdnaTest(line, lineCount) : 
+                                                                                     (IConformanceIdnaTest) new Unicode_6_0_IdnaTest(line, lineCount))
+                                                                                     )
             {
                 if (entry.Type != IdnType.Nontransitional && entry.Source != String.Empty)
                     yield return entry;

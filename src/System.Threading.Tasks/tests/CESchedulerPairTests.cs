@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -137,10 +138,10 @@ namespace System.Threading.Tasks.Tests
                 //In the current design, when there are no more tasks to execute, the Task used by concurrentexclusive scheduler dies
                 //by sleeping we simulate some non trival work that takes time and causes the concurrentexclusive scheduler Task 
                 //to stay around for addition work.
-                taskList.Add(readers.StartNew(() => { new ManualResetEvent(false).WaitOne(10); }));
+                taskList.Add(readers.StartNew(() => { var sw = new SpinWait(); while (!sw.NextSpinWillYield) sw.SpinOnce() ; }));
             }
             // Schedule work where each item must be run when no other items are running
-            for (int i = 0; i < 10; i++) taskList.Add(writers.StartNew(() => { new ManualResetEvent(false).WaitOne(5); }));
+            for (int i = 0; i < 10; i++) taskList.Add(writers.StartNew(() => { var sw = new SpinWait(); while (!sw.NextSpinWillYield) sw.SpinOnce(); }));
 
             //Wait on the tasks to finish to ensure that the ConcurrentExclusiveSchedulerPair created can schedule and execute tasks without issues
             foreach (var item in taskList)
@@ -220,14 +221,14 @@ namespace System.Threading.Tasks.Tests
                         itemsExecutedCount, maxItemsPerTask, id));
                 }
                 else
-                { //Since ids dont match, this is the first Task being executed in the CEScheduler Task
+                { //Since ids don't match, this is the first Task being executed in the CEScheduler Task
                     schedulerIDInsideTask.Value = id; //cache the scheduler ID seen by the thread, so other tasks running in same thread can see this
                     itemsExecutedCount.Value = 1;
                 }
                 //Give enough time for a Task to stay around, so that other tasks will be executed by the same CEScheduler Task
                 //or else the CESchedulerTask will die and each Task might get executed by a different CEScheduler Task. This does not affect the 
                 //verifications, but its increases the chance of finding a bug if the maxItemPerTask is not respected
-                new ManualResetEvent(false).WaitOne(20);
+                new ManualResetEvent(false).WaitOne(1);
             };
 
             List<Task> taskList = new List<Task>();
@@ -335,7 +336,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Theory]
-        [MemberData("ApiType")]
+        [MemberData(nameof(ApiType))]
         public static void TestIntegration(String apiType, bool useReader)
         {
             Debug.WriteLine(string.Format(" Running apiType:{0} useReader:{1}", apiType, useReader));
@@ -469,7 +470,8 @@ namespace System.Threading.Tasks.Tests
                     {
                         Action work = () =>
                         {
-                            new ManualResetEvent(false).WaitOne(1);
+                            var sw = new SpinWait();
+                            while (!sw.NextSpinWillYield) sw.SpinOnce();
                             recursiveWork(depth - 1);
                         };
 

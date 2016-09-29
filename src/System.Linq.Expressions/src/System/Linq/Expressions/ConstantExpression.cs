@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
@@ -11,28 +11,14 @@ namespace System.Linq.Expressions
     /// <summary>
     /// Represents an expression that has a constant value.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.ConstantExpressionProxy))]
+    [DebuggerTypeProxy(typeof(ConstantExpressionProxy))]
     public class ConstantExpression : Expression
     {
-        // Possible optimization: we could have a Constant<T> subclass that
-        // stores the unboxed value.
         private readonly object _value;
 
         internal ConstantExpression(object value)
         {
             _value = value;
-        }
-
-        internal static ConstantExpression Make(object value, Type type)
-        {
-            if ((value == null && type == typeof(object)) || (value != null && value.GetType() == type))
-            {
-                return new ConstantExpression(value);
-            }
-            else
-            {
-                return new TypedConstantExpression(value, type);
-            }
         }
 
         /// <summary>
@@ -47,6 +33,7 @@ namespace System.Linq.Expressions
                 {
                     return typeof(object);
                 }
+
                 return _value.GetType();
             }
         }
@@ -60,6 +47,7 @@ namespace System.Linq.Expressions
         {
             get { return ExpressionType.Constant; }
         }
+
         /// <summary>
         /// Gets the value of the constant expression.
         /// </summary>
@@ -105,9 +93,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static ConstantExpression Constant(object value)
         {
-            return ConstantExpression.Make(value, value == null ? typeof(object) : value.GetType());
+            return new ConstantExpression(value);
         }
-
 
         /// <summary>
         /// Creates a <see cref="ConstantExpression"/> that has the <see cref="P:ConstantExpression.Value"/> 
@@ -122,16 +109,45 @@ namespace System.Linq.Expressions
         /// </returns>
         public static ConstantExpression Constant(object value, Type type)
         {
-            ContractUtils.RequiresNotNull(type, "type");
-            if (value == null && type.GetTypeInfo().IsValueType && !TypeUtils.IsNullableType(type))
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            TypeUtils.ValidateType(type, nameof(type));
+            if (type.IsByRef)
             {
-                throw Error.ArgumentTypesMustMatch();
+                throw Error.TypeMustNotBeByRef(nameof(type));
             }
-            if (value != null && !type.IsAssignableFrom(value.GetType()))
+
+            if (type.IsPointer)
             {
-                throw Error.ArgumentTypesMustMatch();
+                throw Error.TypeMustNotBePointer(nameof(type));
             }
-            return ConstantExpression.Make(value, type);
+
+            if (value == null)
+            {
+                if (type == typeof(object))
+                {
+                    return new ConstantExpression(null);
+                }
+
+                if (!type.GetTypeInfo().IsValueType || type.IsNullableType())
+                {
+                    return new TypedConstantExpression(null, type);
+                }
+            }
+            else
+            {
+                Type valueType = value.GetType();
+                if (type == valueType)
+                {
+                    return new ConstantExpression(value);
+                }
+
+                if (type.IsAssignableFrom(valueType))
+                {
+                    return new TypedConstantExpression(value, type);
+                }
+            }
+
+            throw Error.ArgumentTypesMustMatch();
         }
     }
 }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /**
 This is meant to contain useful utilities for IO related work in ReparsePoints
@@ -27,6 +28,36 @@ public static class MountHelper
     private static extern bool SetVolumeMountPoint(String mountPoint, String uniqueVolumeName);
     [DllImport("api-ms-win-core-file-l1-1-0.dll", EntryPoint = "DeleteVolumeMountPointW", CharSet = CharSet.Unicode, BestFitMapping = false, SetLastError = true)]
     private static extern bool DeleteVolumeMountPoint(String mountPoint);
+
+    /// <summary>Creates a symbolic link using command line tools</summary>
+    /// <param name="linkPath">The existing file</param>
+    /// <param name="targetPath"></param>
+    public static bool CreateSymbolicLink(string linkPath, string targetPath, bool isDirectory)
+    {
+        Process symLinkProcess = new Process();
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            symLinkProcess.StartInfo.FileName = "cmd";
+            symLinkProcess.StartInfo.Arguments = string.Format("/c mklink{0} \"{1}\" \"{2}\"", isDirectory ? " /D" : "", linkPath, targetPath);
+        }
+        else
+        {
+            symLinkProcess.StartInfo.FileName = "/bin/ln";
+            symLinkProcess.StartInfo.Arguments = string.Format("-s \"{0}\" \"{1}\"", targetPath, linkPath);
+        }
+        symLinkProcess.StartInfo.RedirectStandardOutput = true;
+        symLinkProcess.Start();
+
+        if (symLinkProcess != null)
+        {
+            symLinkProcess.WaitForExit();
+            return (0 == symLinkProcess.ExitCode);
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     public static void Mount(String volumeName, String mountPoint)
     {

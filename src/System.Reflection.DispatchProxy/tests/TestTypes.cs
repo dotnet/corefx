@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,18 @@ public interface TestType_IOneWay
 public interface TestType_IPropertyService
 {
     string ReadWrite { get; set; }
+}
+
+// Demonstrates proxies can be made for events.
+public interface TestType_IEventService
+{
+    event EventHandler AddRemove;
+}
+
+// Demonstrates proxies can be made for indexed properties.
+public interface TestType_IIndexerService
+{
+    string this[string key] { get; set; }
 }
 
 // Demonstrates proxies can be made for internal types

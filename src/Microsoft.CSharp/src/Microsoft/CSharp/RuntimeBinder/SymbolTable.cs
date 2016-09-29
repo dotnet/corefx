@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -1057,7 +1058,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // If its nested, we may have other accessibility options.
                 if (type.GetTypeInfo().IsNestedAssembly || type.GetTypeInfo().IsNestedFamANDAssem)
                 {
-                    // Note that we dont directly support NestedFamANDAssem, but we're just
+                    // Note that we don't directly support NestedFamANDAssem, but we're just
                     // going to default to internal.
                     access = ACCESS.ACC_INTERNAL;
                 }
@@ -1174,7 +1175,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // Ifaces and IfacesAll, so theres no way to differentiate.
             //
             // This actually doesn't matter though - for conversions and methodcalls,
-            // we dont really care where they've come from as long as we know the overall
+            // we don't really care where they've come from as long as we know the overall
             // set of IfacesAll.
 
             aggregate.SetIfaces(_bsymmgr.AllocParams(interfaces.Length, GetCTypeArrayFromTypes(interfaces)));
@@ -1409,7 +1410,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
 
-            // If we already had a property but its associated info doesnt match,
+            // If we already had a property but its associated info doesn't match,
             // then we repurpose the property that we've found. This can happen
             // in the case of generic instantiations. 
             //
@@ -1640,7 +1641,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             methodSymbol.SetAccess(access);
 
-            methodSymbol.isExtension = false; // We dont support extension methods.
+            methodSymbol.isExtension = false; // We don't support extension methods.
             methodSymbol.isExternal = false;
 
             if (method != null)
@@ -1971,7 +1972,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 MethodInfo baseMethodInfo = method.GetRuntimeBaseDefinition();
                 if (baseMethodInfo == method)
                 {
-                    // We just found ourselves, so we dont care here.
+                    // We just found ourselves, so we don't care here.
                     return null;
                 }
 

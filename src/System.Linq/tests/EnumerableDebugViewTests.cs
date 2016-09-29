@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace System.Linq.Tests
             object debugView = CreateSystemCore_EnumerableDebugView(source);
             Exception exc = Assert.Throws<TargetInvocationException>(() => GetItems<object>(debugView));
             Assert.NotNull(exc.InnerException);
+            Assert.Equal("System.Linq.SystemCore_EnumerableDebugViewEmptyException", exc.InnerException.GetType().FullName);
             Assert.False(string.IsNullOrEmpty(GetEmptyProperty(exc.InnerException)));
         }
 
@@ -55,6 +57,7 @@ namespace System.Linq.Tests
             object debugView = CreateSystemCore_EnumerableDebugView(source);
             Exception exc = Assert.Throws<TargetInvocationException>(() => GetItems<int>(debugView));
             Assert.NotNull(exc.InnerException);
+            Assert.Equal("System.Linq.SystemCore_EnumerableDebugViewEmptyException", exc.InnerException.GetType().FullName);
             Assert.False(string.IsNullOrEmpty(GetEmptyProperty(exc.InnerException)));
         }
 

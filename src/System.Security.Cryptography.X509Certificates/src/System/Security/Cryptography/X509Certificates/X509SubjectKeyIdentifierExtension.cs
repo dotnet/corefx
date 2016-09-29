@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -71,16 +72,16 @@ namespace System.Security.Cryptography.X509Certificates
         private static byte[] EncodeExtension(byte[] subjectKeyIdentifier)
         {
             if (subjectKeyIdentifier == null)
-                throw new ArgumentNullException("subjectKeyIdentifier");
+                throw new ArgumentNullException(nameof(subjectKeyIdentifier));
             if (subjectKeyIdentifier.Length == 0)
-                throw new ArgumentException("subjectKeyIdentifier");
+                throw new ArgumentException(SR.Arg_EmptyOrNullArray, nameof(subjectKeyIdentifier));
             return X509Pal.Instance.EncodeX509SubjectKeyIdentifierExtension(subjectKeyIdentifier);
         }
 
         private static byte[] EncodeExtension(string subjectKeyIdentifier)
         {
             if (subjectKeyIdentifier == null)
-                throw new ArgumentNullException("subjectKeyIdentifier");
+                throw new ArgumentNullException(nameof(subjectKeyIdentifier));
 
             byte[] subjectKeyIdentifiedBytes = subjectKeyIdentifier.DecodeHexString();
             return EncodeExtension(subjectKeyIdentifiedBytes);
@@ -89,7 +90,7 @@ namespace System.Security.Cryptography.X509Certificates
         private static byte[] EncodeExtension(PublicKey key, X509SubjectKeyIdentifierHashAlgorithm algorithm)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             byte[] subjectKeyIdentifier = GenerateSubjectKeyIdentifierFromPublicKey(key, algorithm);
             return EncodeExtension(subjectKeyIdentifier);
@@ -111,7 +112,7 @@ namespace System.Security.Cryptography.X509Certificates
                         //  SHA-1 hash of the value of the BIT STRING subjectPublicKey 
                         // (excluding the tag, length, and number of unused bit string bits)
                         byte[] shortSha1 = new byte[8];
-                        Array.Copy(sha1, sha1.Length - 8, shortSha1, 0, shortSha1.Length);
+                        Buffer.BlockCopy(sha1, sha1.Length - 8, shortSha1, 0, shortSha1.Length);
                         shortSha1[0] &= 0x0f;
                         shortSha1[0] |= 0x40;
                         return shortSha1;
@@ -121,7 +122,7 @@ namespace System.Security.Cryptography.X509Certificates
                     return X509Pal.Instance.ComputeCapiSha1OfPublicKey(key);
 
                 default:
-                    throw new ArgumentException("algorithm");
+                    throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, algorithm), nameof(algorithm));
             }
         }
 

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections;
@@ -31,7 +32,7 @@ namespace System.Net.Sockets
         private bool _isConnected;
         private bool _isDisconnected;
 
-        // Wwhen the socket is created it will be in blocking mode. We'll only be able to Accept or Connect,
+        // When the socket is created it will be in blocking mode. We'll only be able to Accept or Connect,
         // so we need to handle one of these cases at a time.
         private bool _willBlock = true; // Desired state of the socket from the user.
         private bool _willBlockInternal = true; // Actual win32 state of the socket.
@@ -86,10 +87,10 @@ namespace System.Net.Sockets
         // Initializes a new instance of the Sockets.Socket class.
         public Socket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
-            s_loggingEnabled = Logging.On;
+            s_loggingEnabled = SocketsEventSource.Log.IsEnabled();
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Socket", addressFamily);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Socket), addressFamily);
             }
 
             InitializeSockets();
@@ -114,17 +115,26 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Socket", null);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Socket), null);
             }
+        }
+
+        public Socket(SocketInformation socketInformation)
+        {
+            //
+            // This constructor works in conjunction with DuplicateAndClose, which is not supported.
+            // See comments in DuplicateAndClose.
+            //
+            throw new PlatformNotSupportedException(SR.net_sockets_duplicateandclose_notsupported);
         }
 
         // Called by the class to create a socket to accept an incoming request.
         private Socket(SafeCloseSocket fd)
         {
-            s_loggingEnabled = Logging.On;
+            s_loggingEnabled = NetEventSource.Log.IsEnabled();
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Socket", null);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Socket), null);
             }
             InitializeSockets();
 
@@ -144,12 +154,20 @@ namespace System.Net.Sockets
             _protocolType = Sockets.ProtocolType.Unknown;
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Socket", null);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Socket), null);
             }
         }
         #endregion
 
         #region Properties
+
+        // The CLR allows configuration of these properties, separately from whether the OS supports IPv4/6.  We
+        // do not provide these config options, so SupportsIPvX === OSSupportsIPvX.
+        [Obsolete("SupportsIPv4 is obsoleted for this type, please use OSSupportsIPv4 instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        public static bool SupportsIPv4 => OSSupportsIPv4;
+        [Obsolete("SupportsIPv6 is obsoleted for this type, please use OSSupportsIPv6 instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        public static bool SupportsIPv6 => OSSupportsIPv6;
+
         public static bool OSSupportsIPv4
         {
             get
@@ -184,7 +202,10 @@ namespace System.Net.Sockets
                 // This may throw ObjectDisposedException.
                 SocketError errorCode = SocketPal.GetAvailable(_handle, out argp);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Available_get() Interop.Winsock.ioctlsocket returns errorCode:" + errorCode);
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Available_get() Interop.Winsock.ioctlsocket returns errorCode:" + errorCode);
+                }
 
                 // Throw an appropriate SocketException if the native call fails.
                 if (errorCode != SocketError.Success)
@@ -194,7 +215,7 @@ namespace System.Net.Sockets
                     UpdateStatusAfterSocketError(socketException);
                     if (s_loggingEnabled)
                     {
-                        Logging.Exception(Logging.Sockets, this, "Available", socketException);
+                        NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Available), socketException);
                     }
                     throw socketException;
                 }
@@ -241,7 +262,7 @@ namespace System.Net.Sockets
                     UpdateStatusAfterSocketError(socketException);
                     if (s_loggingEnabled)
                     {
-                        Logging.Exception(Logging.Sockets, this, "LocalEndPoint", socketException);
+                        NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(LocalEndPoint), socketException);
                     }
                     throw socketException;
                 }
@@ -290,7 +311,7 @@ namespace System.Net.Sockets
                         UpdateStatusAfterSocketError(socketException);
                         if (s_loggingEnabled)
                         {
-                            Logging.Exception(Logging.Sockets, this, "RemoteEndPoint", socketException);
+                            NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(RemoteEndPoint), socketException);
                         }
                         throw socketException;
                     }
@@ -305,6 +326,14 @@ namespace System.Net.Sockets
                 }
 
                 return _remoteEndPoint;
+            }
+        }
+
+        public IntPtr Handle
+        {
+            get
+            {
+                return _handle.DangerousGetHandle();
             }
         }
 
@@ -331,7 +360,10 @@ namespace System.Net.Sockets
                     throw new ObjectDisposedException(this.GetType().FullName);
                 }
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::set_Blocking() value:" + value.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::set_Blocking() value:" + value.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+                }
 
                 bool current;
 
@@ -344,13 +376,31 @@ namespace System.Net.Sockets
                     UpdateStatusAfterSocketError(socketException);
                     if (s_loggingEnabled)
                     {
-                        Logging.Exception(Logging.Sockets, this, "Blocking", socketException);
+                        NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Blocking), socketException);
                     }
                     throw socketException;
                 }
 
                 // The native call succeeded, update the user's desired state.
                 _willBlock = current;
+            }
+        }
+
+        public bool UseOnlyOverlappedIO
+        {
+            get
+            {
+                return false;
+            }
+            set
+            {
+                //
+                // This implementation does not support non-IOCP-based async I/O on Windows, and this concept is 
+                // not even meaningful on other platforms.  This option is really only functionally meaningful
+                // if the user calls DuplicateAndClose.  Since we also don't support DuplicateAndClose,
+                // we can safely ignore the caller's choice here, rather than breaking compat further with something
+                // like PlatformNotSupportedException.
+                //
             }
         }
 
@@ -362,7 +412,10 @@ namespace System.Net.Sockets
         {
             get
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Connected() _isConnected:" + _isConnected);
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Connected() _isConnected:" + _isConnected);
+                }
 
                 if (_nonBlockingConnectInProgress && Poll(0, SelectMode.SelectWrite))
                 {
@@ -437,7 +490,7 @@ namespace System.Net.Sockets
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, value);
@@ -455,7 +508,7 @@ namespace System.Net.Sockets
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer, value);
@@ -472,7 +525,7 @@ namespace System.Net.Sockets
             {
                 if (value < -1)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 if (value == -1)
                 {
@@ -494,7 +547,7 @@ namespace System.Net.Sockets
             {
                 if (value < -1)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
                 if (value == -1)
                 {
@@ -552,7 +605,7 @@ namespace System.Net.Sockets
                 // Valid values are from 0 to 255 since TTL is really just a byte value on the wire.
                 if (value < 0 || value > 255)
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 if (_addressFamily == AddressFamily.InterNetwork)
@@ -691,7 +744,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Bind", localEP);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Bind), localEP);
             }
 
             if (CleanedUp)
@@ -702,16 +755,19 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (localEP == null)
             {
-                throw new ArgumentNullException("localEP");
+                throw new ArgumentNullException(nameof(localEP));
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Bind() localEP:" + localEP.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Bind() localEP:" + localEP.ToString());
+            }
 
             EndPoint endPointSnapshot = localEP;
             IPEndPoint ipSnapshot = localEP as IPEndPoint;
 
             // For now security is implemented only on IPEndPoint.
-            // If EndPoint is of any other type, unmanaged code permisison is demanded.
+            // If EndPoint is of any other type, unmanaged code permission is demanded.
             if (ipSnapshot != null)
             {
                 // Take a snapshot that will make it immutable and not derived.
@@ -727,7 +783,7 @@ namespace System.Net.Sockets
             DoBind(endPointSnapshot, socketAddress);
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Bind", "");
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Bind), "");
             }
         }
 
@@ -735,7 +791,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "InternalBind", localEP);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(InternalBind), localEP);
             }
 
             if (CleanedUp)
@@ -743,8 +799,19 @@ namespace System.Net.Sockets
                 throw new ObjectDisposedException(GetType().FullName);
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::InternalBind() localEP:" + localEP.ToString());
-            GlobalLog.Assert(!(localEP is DnsEndPoint), "Calling InternalBind with a DnsEndPoint, about to get NotImplementedException");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::InternalBind() localEP:" + localEP.ToString());
+            }
+
+            if (localEP is DnsEndPoint)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("Calling InternalBind with a DnsEndPoint, about to get NotImplementedException");
+                }
+                Debug.Fail("Calling InternalBind with a DnsEndPoint, about to get NotImplementedException");
+            }
 
             // Ask the EndPoint to generate a SocketAddress that we can pass down to native code.
             EndPoint endPointSnapshot = localEP;
@@ -753,7 +820,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "InternalBind", "");
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(InternalBind), "");
             }
         }
 
@@ -767,7 +834,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "DoBind", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(DoBind), socketException);
                 }
                 throw socketException;
             }
@@ -779,11 +846,14 @@ namespace System.Net.Sockets
                 socketAddress.Size);
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Bind() SRC:" + Logging.ObjectToString(LocalEndPoint) + " Interop.Winsock.bind returns errorCode:" + errorCode);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Bind() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " Interop.Winsock.bind returns errorCode:" + errorCode);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             // Throw an appropriate SocketException if the native call fails.
@@ -794,7 +864,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "DoBind", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(DoBind), socketException);
                 }
                 throw socketException;
             }
@@ -817,7 +887,7 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (remoteEP == null)
             {
-                throw new ArgumentNullException("remoteEP");
+                throw new ArgumentNullException(nameof(remoteEP));
             }
 
             if (_isDisconnected)
@@ -831,7 +901,10 @@ namespace System.Net.Sockets
             }
 
             ValidateBlockingMode();
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Connect() DST:" + Logging.ObjectToString(remoteEP));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Connect() DST:" + LoggingHash.ObjectToString(remoteEP));
+            }
 
             DnsEndPoint dnsEP = remoteEP as DnsEndPoint;
             if (dnsEP != null)
@@ -862,7 +935,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Connect", address);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Connect), address);
             }
 
             if (CleanedUp)
@@ -871,12 +944,12 @@ namespace System.Net.Sockets
             }
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
 
             if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
             if (!CanTryAddressFamily(address.AddressFamily))
             {
@@ -887,7 +960,7 @@ namespace System.Net.Sockets
             Connect(remoteEP);
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Connect", null);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Connect), null);
             }
         }
 
@@ -895,7 +968,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Connect", host);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Connect), host);
             }
 
             if (CleanedUp)
@@ -904,22 +977,31 @@ namespace System.Net.Sockets
             }
             if (host == null)
             {
-                throw new ArgumentNullException("host");
+                throw new ArgumentNullException(nameof(host));
             }
             if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
             if (_addressFamily != AddressFamily.InterNetwork && _addressFamily != AddressFamily.InterNetworkV6)
             {
                 throw new NotSupportedException(SR.net_invalidversion);
             }
 
-            IPAddress[] addresses = Dns.GetHostAddressesAsync(host).GetAwaiter().GetResult();
-            Connect(addresses, port);
+            IPAddress parsedAddress;
+            if (IPAddress.TryParse(host, out parsedAddress))
+            {
+                Connect(parsedAddress, port);
+            }
+            else
+            {
+                IPAddress[] addresses = Dns.GetHostAddressesAsync(host).GetAwaiter().GetResult();
+                Connect(addresses, port);
+            }
+
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Connect", null);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Connect), null);
             }
         }
 
@@ -927,7 +1009,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Connect", addresses);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Connect), addresses);
             }
 
             if (CleanedUp)
@@ -936,91 +1018,32 @@ namespace System.Net.Sockets
             }
             if (addresses == null)
             {
-                throw new ArgumentNullException("addresses");
+                throw new ArgumentNullException(nameof(addresses));
             }
             if (addresses.Length == 0)
             {
-                throw new ArgumentException(SR.net_sockets_invalid_ipaddress_length, "addresses");
+                throw new ArgumentException(SR.net_sockets_invalid_ipaddress_length, nameof(addresses));
             }
             if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
             if (_addressFamily != AddressFamily.InterNetwork && _addressFamily != AddressFamily.InterNetworkV6)
             {
                 throw new NotSupportedException(SR.net_invalidversion);
             }
+            ThrowIfNotSupportsMultipleConnectAttempts();
 
-            // Disable CS0162: Unreachable code detected
-            //
-            // SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162.
-#pragma warning disable 162
             Exception lastex = null;
-            if (SocketPal.SupportsMultipleConnectAttempts)
+            foreach (IPAddress address in addresses)
             {
-                foreach (IPAddress address in addresses)
-                {
-                    if (CanTryAddressFamily(address.AddressFamily))
-                    {
-                        try
-                        {
-                            Connect(new IPEndPoint(address, port));
-                            lastex = null;
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            if (ExceptionCheck.IsFatal(ex))
-                            {
-                                throw;
-                            }
-                            lastex = ex;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                EndPoint endpoint = null;
-                foreach (IPAddress address in addresses)
-                {
-                    if (CanTryAddressFamily(address.AddressFamily))
-                    {
-                        Socket attemptSocket = null;
-                        try
-                        {
-                            attemptSocket = new Socket(_addressFamily, _socketType, _protocolType);
-                            if (IsDualMode)
-                            {
-                                attemptSocket.DualMode = true;
-                            }
-
-                            var attemptEndpoint = new IPEndPoint(address, port);
-                            attemptSocket.Connect(attemptEndpoint);
-                            endpoint = attemptEndpoint;
-                            lastex = null;
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            lastex = ex;
-                        }
-                        finally
-                        {
-                            if (attemptSocket != null)
-                            {
-                                attemptSocket.Dispose();
-                            }
-                        }
-                    }
-                }
-
-                if (endpoint != null)
+                if (CanTryAddressFamily(address.AddressFamily))
                 {
                     try
                     {
-                        Connect(endpoint);
+                        Connect(new IPEndPoint(address, port));
                         lastex = null;
+                        break;
                     }
                     catch (Exception ex)
                     {
@@ -1032,7 +1055,6 @@ namespace System.Net.Sockets
                     }
                 }
             }
-#pragma warning restore
 
             if (lastex != null)
             {
@@ -1042,12 +1064,57 @@ namespace System.Net.Sockets
             // If we're not connected, then we didn't get a valid ipaddress in the list.
             if (!Connected)
             {
-                throw new ArgumentException(SR.net_invalidAddressList, "addresses");
+                throw new ArgumentException(SR.net_invalidAddressList, nameof(addresses));
             }
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Connect", null);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Connect), null);
+            }
+        }
+
+        public void Close()
+        {
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Close), null);
+            }
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Close() timeout = " + _closeTimeout);
+            }
+
+            Dispose();
+
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Close), null);
+            }
+        }
+
+        public void Close(int timeout)
+        {
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Close), timeout);
+            }
+            if (timeout < -1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeout));
+            }
+
+            _closeTimeout = timeout;
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Close() timeout = " + _closeTimeout);
+            }
+
+            Dispose();
+
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Close), timeout);
             }
         }
 
@@ -1056,14 +1123,17 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Listen", backlog);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Listen), backlog);
             }
             if (CleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Listen() backlog:" + backlog.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Listen() backlog:" + backlog.ToString());
+            }
 
             // No access permissions are necessary here because the verification is done for Bind.
 
@@ -1073,11 +1143,14 @@ namespace System.Net.Sockets
                 backlog);
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Listen() SRC:" + Logging.ObjectToString(LocalEndPoint) + " Interop.Winsock.listen returns errorCode:" + errorCode);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Listen() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " Interop.Winsock.listen returns errorCode:" + errorCode);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             // Throw an appropriate SocketException if the native call fails.
@@ -1088,14 +1161,14 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Listen", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Listen), socketException);
                 }
                 throw socketException;
             }
             _isListening = true;
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Listen", "");
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Listen), "");
             }
         }
 
@@ -1104,7 +1177,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Accept", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Accept), "");
             }
 
             // Validate input parameters.
@@ -1130,7 +1203,10 @@ namespace System.Net.Sockets
             }
 
             ValidateBlockingMode();
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Accept() SRC:" + Logging.ObjectToString(LocalEndPoint));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Accept() SRC:" + LoggingHash.ObjectToString(LocalEndPoint));
+            }
 
             Internals.SocketAddress socketAddress = IPEndPointExtensions.Serialize(_rightEndPoint);
 
@@ -1152,7 +1228,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Accept", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Accept), socketException);
                 }
                 throw socketException;
             }
@@ -1162,8 +1238,8 @@ namespace System.Net.Sockets
             Socket socket = CreateAcceptSocket(acceptedSocketHandle, _rightEndPoint.Create(socketAddress));
             if (s_loggingEnabled)
             {
-                Logging.PrintInfo(Logging.Sockets, socket, SR.Format(SR.net_log_socket_accepted, socket.RemoteEndPoint, socket.LocalEndPoint));
-                Logging.Exit(Logging.Sockets, this, "Accept", socket);
+                SocketsEventSource.Accepted(socket, socket.RemoteEndPoint, socket.LocalEndPoint);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Accept), socket);
             }
             return socket;
         }
@@ -1204,7 +1280,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Send", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Send), "");
             }
             if (CleanedUp)
             {
@@ -1212,26 +1288,32 @@ namespace System.Net.Sockets
             }
             if (buffers == null)
             {
-                throw new ArgumentNullException("buffers");
+                throw new ArgumentNullException(nameof(buffers));
             }
 
             if (buffers.Count == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, "buffers"), "buffers");
+                throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, "buffers"), nameof(buffers));
             }
 
             ValidateBlockingMode();
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Send() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint));
+            }
 
             int bytesTransferred;
             errorCode = SocketPal.Send(_handle, buffers, socketFlags, out bytesTransferred);
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Send() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             if (errorCode != SocketError.Success)
@@ -1240,8 +1322,8 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Send", new SocketException((int)errorCode));
-                    Logging.Exit(Logging.Sockets, this, "Send", 0);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Send), new SocketException((int)errorCode));
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Send), 0);
                 }
                 return 0;
             }
@@ -1259,7 +1341,7 @@ namespace System.Net.Sockets
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Send", bytesTransferred);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Send), bytesTransferred);
             }
             return bytesTransferred;
         }
@@ -1280,7 +1362,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Send", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Send), "");
             }
 
             if (CleanedUp)
@@ -1291,20 +1373,23 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
 
             errorCode = SocketError.Success;
             ValidateBlockingMode();
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " size:" + size);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Send() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " size:" + size);
+            }
 
             // This can throw ObjectDisposedException.
             int bytesTransferred;
@@ -1317,8 +1402,8 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Send", new SocketException((int)errorCode));
-                    Logging.Exit(Logging.Sockets, this, "Send", 0);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Send), new SocketException((int)errorCode));
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Send), 0);
                 }
                 return 0;
             }
@@ -1335,15 +1420,15 @@ namespace System.Net.Sockets
                 }
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Send() Interop.Winsock.send returns:" + bytesTransferred.ToString());
-            GlobalLog.Dump(buffer, offset, bytesTransferred);
-            if (s_loggingEnabled)
+            if (GlobalLog.IsEnabled)
             {
-                Logging.Dump(Logging.Sockets, this, "Send", buffer, offset, size);
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Send() Interop.Winsock.send returns:" + bytesTransferred.ToString());
+                GlobalLog.Dump(buffer, offset, bytesTransferred);
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Send", bytesTransferred);
+                SocketsEventSource.Dump(buffer, offset, size);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Send), bytesTransferred);
             }
             return bytesTransferred;
         }
@@ -1353,7 +1438,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "SendTo", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(SendTo), "");
             }
             if (CleanedUp)
             {
@@ -1362,23 +1447,26 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (remoteEP == null)
             {
-                throw new ArgumentNullException("remoteEP");
+                throw new ArgumentNullException(nameof(remoteEP));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
 
             ValidateBlockingMode();
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SendTo() SRC:" + Logging.ObjectToString(LocalEndPoint) + " size:" + size + " remoteEP:" + Logging.ObjectToString(remoteEP));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SendTo() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " size:" + size + " remoteEP:" + LoggingHash.ObjectToString(remoteEP));
+            }
 
             // CheckCacheRemote will check ConnectPermission for remoteEP.
             EndPoint endPointSnapshot = remoteEP;
@@ -1396,7 +1484,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "SendTo", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(SendTo), socketException);
                 }
                 throw socketException;
             }
@@ -1419,15 +1507,15 @@ namespace System.Net.Sockets
                 }
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SendTo() returning bytesTransferred:" + bytesTransferred.ToString());
-            GlobalLog.Dump(buffer, offset, bytesTransferred);
-            if (s_loggingEnabled)
+            if (GlobalLog.IsEnabled)
             {
-                Logging.Dump(Logging.Sockets, this, "SendTo", buffer, offset, size);
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SendTo() returning bytesTransferred:" + bytesTransferred.ToString());
+                GlobalLog.Dump(buffer, offset, bytesTransferred);
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "SendTo", bytesTransferred);
+                SocketsEventSource.Dump(buffer, offset, size);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(SendTo), bytesTransferred);
             }
             return bytesTransferred;
         }
@@ -1480,7 +1568,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Receive", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Receive), "");
             }
             if (CleanedUp)
             {
@@ -1490,19 +1578,22 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
 
             ValidateBlockingMode();
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Receive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " size:" + size);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " size:" + size);
+            }
 
             int bytesTransferred;
             errorCode = SocketPal.Receive(_handle, buffer, offset, size, socketFlags, out bytesTransferred);
@@ -1513,8 +1604,8 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Receive", new SocketException((int)errorCode));
-                    Logging.Exit(Logging.Sockets, this, "Receive", 0);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Receive), new SocketException((int)errorCode));
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Receive), 0);
                 }
                 return 0;
             }
@@ -1533,22 +1624,24 @@ namespace System.Net.Sockets
                 }
             }
 
+            if (GlobalLog.IsEnabled)
+            {
 #if TRACE_VERBOSE
-            try
-            {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Receive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred);
-            }
-            catch (ObjectDisposedException) { }
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred);
+                }
+                catch (ObjectDisposedException) { }
 #endif
-            GlobalLog.Dump(buffer, offset, bytesTransferred);
-
-            if (s_loggingEnabled)
-            {
-                Logging.Dump(Logging.Sockets, this, "Receive", buffer, offset, bytesTransferred);
+                GlobalLog.Dump(buffer, offset, bytesTransferred);
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Receive", bytesTransferred);
+                SocketsEventSource.Dump(buffer, offset, bytesTransferred);
+            }
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Receive), bytesTransferred);
             }
 
             return bytesTransferred;
@@ -1574,7 +1667,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Receive", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Receive), "");
             }
             if (CleanedUp)
             {
@@ -1583,27 +1676,33 @@ namespace System.Net.Sockets
 
             if (buffers == null)
             {
-                throw new ArgumentNullException("buffers");
+                throw new ArgumentNullException(nameof(buffers));
             }
 
             if (buffers.Count == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, "buffers"), "buffers");
+                throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, "buffers"), nameof(buffers));
             }
 
 
             ValidateBlockingMode();
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Receive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint));
+            }
 
             int bytesTransferred;
             errorCode = SocketPal.Receive(_handle, buffers, ref socketFlags, out bytesTransferred);
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Receive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.send returns errorCode:" + errorCode + " bytesTransferred:" + bytesTransferred);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             if (errorCode != SocketError.Success)
@@ -1612,8 +1711,8 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Receive", new SocketException((int)errorCode));
-                    Logging.Exit(Logging.Sockets, this, "Receive", 0);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Receive), new SocketException((int)errorCode));
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Receive), 0);
                 }
                 return 0;
             }
@@ -1633,16 +1732,19 @@ namespace System.Net.Sockets
             }
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Receive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Receive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Receive", bytesTransferred);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Receive), bytesTransferred);
             }
 
             return bytesTransferred;
@@ -1654,7 +1756,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "ReceiveMessageFrom", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(ReceiveMessageFrom), "");
             }
 
             if (CleanedUp)
@@ -1663,29 +1765,30 @@ namespace System.Net.Sockets
             }
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (remoteEP == null)
             {
-                throw new ArgumentNullException("remoteEP");
+                throw new ArgumentNullException(nameof(remoteEP));
             }
             if (!CanTryAddressFamily(remoteEP.AddressFamily))
             {
-                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, remoteEP.AddressFamily, _addressFamily), "remoteEP");
+                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, remoteEP.AddressFamily, _addressFamily), nameof(remoteEP));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
             if (_rightEndPoint == null)
             {
                 throw new InvalidOperationException(SR.net_sockets_mustbind);
             }
 
+            SocketPal.CheckDualModeReceiveSupport(this);
             ValidateBlockingMode();
 
             // We don't do a CAS demand here because the contents of remoteEP aren't used by
@@ -1711,7 +1814,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "ReceiveMessageFrom", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(ReceiveMessageFrom), socketException);
                 }
                 throw socketException;
             }
@@ -1734,7 +1837,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "ReceiveMessageFrom", errorCode);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(ReceiveMessageFrom), errorCode);
             }
             return bytesTransferred;
         }
@@ -1745,7 +1848,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "ReceiveFrom", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(ReceiveFrom), "");
             }
             if (CleanedUp)
             {
@@ -1755,32 +1858,37 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (remoteEP == null)
             {
-                throw new ArgumentNullException("remoteEP");
+                throw new ArgumentNullException(nameof(remoteEP));
             }
             if (!CanTryAddressFamily(remoteEP.AddressFamily))
             {
                 throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily,
-                    remoteEP.AddressFamily, _addressFamily), "remoteEP");
+                    remoteEP.AddressFamily, _addressFamily), nameof(remoteEP));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
             if (_rightEndPoint == null)
             {
                 throw new InvalidOperationException(SR.net_sockets_mustbind);
             }
 
+            SocketPal.CheckDualModeReceiveSupport(this);
+
             ValidateBlockingMode();
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::ReceiveFrom() SRC:" + Logging.ObjectToString(LocalEndPoint) + " size:" + size + " remoteEP:" + remoteEP.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::ReceiveFrom() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " size:" + size + " remoteEP:" + remoteEP.ToString());
+            }
 
             // We don't do a CAS demand here because the contents of remoteEP aren't used by
             // WSARecvFrom; all that matters is that we generate a unique-to-this-call SocketAddress
@@ -1801,7 +1909,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "ReceiveFrom", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(ReceiveFrom), socketException);
                 }
 
                 if (socketException.SocketErrorCode != SocketError.MessageSize)
@@ -1843,15 +1951,17 @@ namespace System.Net.Sockets
                 }
             }
 
-            GlobalLog.Dump(buffer, offset, bytesTransferred);
-
-            if (s_loggingEnabled)
+            if (GlobalLog.IsEnabled)
             {
-                Logging.Dump(Logging.Sockets, this, "ReceiveFrom", buffer, offset, size);
+                GlobalLog.Dump(buffer, offset, bytesTransferred);
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "ReceiveFrom", bytesTransferred);
+                SocketsEventSource.Dump(buffer, offset, size);
+            }
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(ReceiveFrom), bytesTransferred);
             }
             return bytesTransferred;
         }
@@ -1881,10 +1991,19 @@ namespace System.Net.Sockets
 
             int realOptionLength = 0;
 
+            //
+            // IOControl is used for Windows-specific IOCTL operations.  If we need to add support for IOCTLs specific
+            // to other platforms, we will likely need to add a new API, as the control codes may overlap with those 
+            // from Windows.  Generally it would be preferable to add new methods/properties to abstract these across
+            // platforms, however.
+            //
             // This can throw ObjectDisposedException.
-            SocketError errorCode = SocketPal.Ioctl(_handle, ioControlCode, optionInValue, optionOutValue, out realOptionLength);
+            SocketError errorCode = SocketPal.WindowsIoctl(_handle, ioControlCode, optionInValue, optionOutValue, out realOptionLength);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::IOControl() Interop.Winsock.WSAIoctl returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::IOControl() Interop.Winsock.WSAIoctl returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -1894,7 +2013,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "IOControl", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(IOControl), socketException);
                 }
                 throw socketException;
             }
@@ -1907,36 +2026,6 @@ namespace System.Net.Sockets
             return IOControl(unchecked((int)ioControlCode), optionInValue, optionOutValue);
         }
 
-        internal int IOControl(IOControlCode ioControlCode, IntPtr optionInValue, int inValueSize, IntPtr optionOutValue, int outValueSize)
-        {
-            if (CleanedUp)
-            {
-                throw new ObjectDisposedException(this.GetType().FullName);
-            }
-
-            int realOptionLength = 0;
-
-            // This can throw ObjectDisposedException.
-            SocketError errorCode = SocketPal.IoctlInternal(_handle, ioControlCode, optionInValue, inValueSize, optionOutValue, outValueSize, out realOptionLength);
-
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::IOControl() Interop.Winsock.WSAIoctl returns errorCode:" + errorCode);
-
-            // Throw an appropriate SocketException if the native call fails.
-            if (errorCode != SocketError.Success)
-            {
-                // Update the internal state of this socket according to the error before throwing.
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (s_loggingEnabled)
-                {
-                    Logging.Exception(Logging.Sockets, this, "IOControl", socketException);
-                }
-                throw socketException;
-            }
-
-            return realOptionLength;
-        }
-
         // Sets the specified option to the specified value.
         public void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, int optionValue)
         {
@@ -1945,7 +2034,11 @@ namespace System.Net.Sockets
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
             CheckSetOptionPermissions(optionLevel, optionName);
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption(): optionLevel:" + optionLevel.ToString() + " optionName:" + optionName.ToString() + " optionValue:" + optionValue.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetSocketOption(): optionLevel:" + optionLevel.ToString() + " optionName:" + optionName.ToString() + " optionValue:" + optionValue.ToString());
+            }
+
             SetSocketOption(optionLevel, optionName, optionValue, false);
         }
 
@@ -1958,12 +2051,18 @@ namespace System.Net.Sockets
 
             CheckSetOptionPermissions(optionLevel, optionName);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption(): optionLevel:" + optionLevel.ToString() + " optionName:" + optionName.ToString() + " optionValue:" + optionValue.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetSocketOption(): optionLevel:" + optionLevel.ToString() + " optionName:" + optionName.ToString() + " optionValue:" + optionValue.ToString());
+            }
 
             // This can throw ObjectDisposedException.
             SocketError errorCode = SocketPal.SetSockOpt(_handle, optionLevel, optionName, optionValue);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetSocketOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -1973,7 +2072,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "SetSocketOption", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(SetSocketOption), socketException);
                 }
                 throw socketException;
             }
@@ -1996,19 +2095,22 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (optionValue == null)
             {
-                throw new ArgumentNullException("optionValue");
+                throw new ArgumentNullException(nameof(optionValue));
             }
 
             CheckSetOptionPermissions(optionLevel, optionName);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption(): optionLevel:" + optionLevel.ToString() + " optionName:" + optionName.ToString() + " optionValue:" + optionValue.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetSocketOption(): optionLevel:" + optionLevel.ToString() + " optionName:" + optionName.ToString() + " optionValue:" + optionValue.ToString());
+            }
 
             if (optionLevel == SocketOptionLevel.Socket && optionName == SocketOptionName.Linger)
             {
                 LingerOption lingerOption = optionValue as LingerOption;
                 if (lingerOption == null)
                 {
-                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "LingerOption"), "optionValue");
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "LingerOption"), nameof(optionValue));
                 }
                 if (lingerOption.LingerTime < 0 || lingerOption.LingerTime > (int)UInt16.MaxValue)
                 {
@@ -2021,7 +2123,7 @@ namespace System.Net.Sockets
                 MulticastOption multicastOption = optionValue as MulticastOption;
                 if (multicastOption == null)
                 {
-                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "MulticastOption"), "optionValue");
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "MulticastOption"), nameof(optionValue));
                 }
                 SetMulticastOption(optionName, multicastOption);
             }
@@ -2031,13 +2133,13 @@ namespace System.Net.Sockets
                 IPv6MulticastOption multicastOption = optionValue as IPv6MulticastOption;
                 if (multicastOption == null)
                 {
-                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "IPv6MulticastOption"), "optionValue");
+                    throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue, "IPv6MulticastOption"), nameof(optionValue));
                 }
                 SetIPv6MulticastOption(optionName, multicastOption);
             }
             else
             {
-                throw new ArgumentException(SR.net_sockets_invalid_optionValue_all, "optionValue");
+                throw new ArgumentException(SR.net_sockets_invalid_optionValue_all, nameof(optionValue));
             }
         }
 
@@ -2071,7 +2173,10 @@ namespace System.Net.Sockets
                 optionName,
                 out optionValue);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -2081,7 +2186,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "GetSocketOption", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(GetSocketOption), socketException);
                 }
                 throw socketException;
             }
@@ -2106,7 +2211,10 @@ namespace System.Net.Sockets
                 optionValue,
                 ref optionLength);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -2116,7 +2224,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "GetSocketOption", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(GetSocketOption), socketException);
                 }
                 throw socketException;
             }
@@ -2140,7 +2248,10 @@ namespace System.Net.Sockets
                 optionValue,
                 ref realOptionLength);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::GetSocketOption() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -2150,7 +2261,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "GetSocketOption", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(GetSocketOption), socketException);
                 }
                 throw socketException;
             }
@@ -2175,7 +2286,10 @@ namespace System.Net.Sockets
 
             bool status;
             SocketError errorCode = SocketPal.Poll(_handle, microSeconds, mode, out status);
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Poll() Interop.Winsock.select returns socketCount:" + (int)errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Poll() Interop.Winsock.select returns socketCount:" + (int)errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -2185,7 +2299,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Poll", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Poll), socketException);
                 }
                 throw socketException;
             }
@@ -2199,20 +2313,20 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if ((checkRead == null || checkRead.Count == 0) && (checkWrite == null || checkWrite.Count == 0) && (checkError == null || checkError.Count == 0))
             {
-                throw new ArgumentNullException(SR.net_sockets_empty_select);
+                throw new ArgumentNullException(null, SR.net_sockets_empty_select);
             }
             const int MaxSelect = 65536;
             if (checkRead != null && checkRead.Count > MaxSelect)
             {
-                throw new ArgumentOutOfRangeException("checkRead", SR.Format(SR.net_sockets_toolarge_select, "checkRead", MaxSelect.ToString(NumberFormatInfo.CurrentInfo)));
+                throw new ArgumentOutOfRangeException(nameof(checkRead), SR.Format(SR.net_sockets_toolarge_select, "checkRead", MaxSelect.ToString(NumberFormatInfo.CurrentInfo)));
             }
             if (checkWrite != null && checkWrite.Count > MaxSelect)
             {
-                throw new ArgumentOutOfRangeException("checkWrite", SR.Format(SR.net_sockets_toolarge_select, "checkWrite", MaxSelect.ToString(NumberFormatInfo.CurrentInfo)));
+                throw new ArgumentOutOfRangeException(nameof(checkWrite), SR.Format(SR.net_sockets_toolarge_select, "checkWrite", MaxSelect.ToString(NumberFormatInfo.CurrentInfo)));
             }
             if (checkError != null && checkError.Count > MaxSelect)
             {
-                throw new ArgumentOutOfRangeException("checkError", SR.Format(SR.net_sockets_toolarge_select, "checkError", MaxSelect.ToString(NumberFormatInfo.CurrentInfo)));
+                throw new ArgumentOutOfRangeException(nameof(checkError), SR.Format(SR.net_sockets_toolarge_select, "checkError", MaxSelect.ToString(NumberFormatInfo.CurrentInfo)));
             }
 
             SocketError errorCode = SocketPal.Select(checkRead, checkWrite, checkError, microSeconds);
@@ -2228,7 +2342,7 @@ namespace System.Net.Sockets
         // 
         //    BeginConnect - Does a async winsock connect, by calling
         //    WSAEventSelect to enable Connect Events to signal an event and
-        //    wake up a callback which involkes a callback.
+        //    wake up a callback which invokes a callback.
         // 
         //     So note: This routine may go pending at which time,
         //     but any case the callback Delegate will be called upon completion
@@ -2241,13 +2355,13 @@ namespace System.Net.Sockets
         // 
         // Return Value:
         // 
-        //    IAsyncResult - Async result used to retreive result
-        internal IAsyncResult BeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
+        //    IAsyncResult - Async result used to retrieve result
+        public IAsyncResult BeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
         {
             // Validate input parameters.
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginConnect", remoteEP);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), remoteEP);
             }
 
             if (CleanedUp)
@@ -2257,7 +2371,7 @@ namespace System.Net.Sockets
 
             if (remoteEP == null)
             {
-                throw new ArgumentNullException("remoteEP");
+                throw new ArgumentNullException(nameof(remoteEP));
             }
 
             if (_isListening)
@@ -2276,19 +2390,50 @@ namespace System.Net.Sockets
                 return BeginConnect(dnsEP.Host, dnsEP.Port, callback, state);
             }
 
-            return BeginConnectEx(remoteEP, true, callback, state);
+            return UnsafeBeginConnect(remoteEP, callback, state, flowContext:true);
         }
 
-        internal IAsyncResult UnsafeBeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
+        private bool CanUseConnectEx(EndPoint remoteEP)
         {
-            return BeginConnectEx(remoteEP, false, callback, state);
+            return (_socketType == SocketType.Stream) &&
+                (_rightEndPoint != null || remoteEP.GetType() == typeof(IPEndPoint));
         }
 
-        internal IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state)
+        public SocketInformation DuplicateAndClose(int targetProcessId)
+        {
+            //
+            // On Windows, we cannot duplicate a socket that is bound to an IOCP.  In this implementation, we *only*
+            // support IOCPs, so this will not work.  
+            //
+            // On Unix, duplication of a socket into an arbitrary process is not supported at all.
+            //
+            throw new PlatformNotSupportedException(SR.net_sockets_duplicateandclose_notsupported);
+        }
+
+        internal IAsyncResult UnsafeBeginConnect(EndPoint remoteEP, AsyncCallback callback, object state, bool flowContext = false)
+        {
+            if (CanUseConnectEx(remoteEP))
+            {
+                return BeginConnectEx(remoteEP, flowContext, callback, state);
+            }
+
+            EndPoint endPointSnapshot = remoteEP;
+            var asyncResult = new ConnectAsyncResult(this, endPointSnapshot, state, callback);
+
+            // For connectionless protocols, Connect is not an I/O call.
+            Connect(remoteEP);
+            asyncResult.FinishPostingAsyncOp();
+
+            // Synchronously complete the I/O and call the user's callback.
+            asyncResult.InvokeCallback();
+            return asyncResult;
+        }
+
+        public IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginConnect", host);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), host);
             }
 
             if (CleanedUp)
@@ -2298,11 +2443,11 @@ namespace System.Net.Sockets
 
             if (host == null)
             {
-                throw new ArgumentNullException("host");
+                throw new ArgumentNullException(nameof(host));
             }
             if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
             if (_addressFamily != AddressFamily.InterNetwork && _addressFamily != AddressFamily.InterNetworkV6)
             {
@@ -2313,6 +2458,19 @@ namespace System.Net.Sockets
             {
                 throw new InvalidOperationException(SR.net_sockets_mustnotlisten);
             }
+
+            IPAddress parsedAddress;
+            if (IPAddress.TryParse(host, out parsedAddress))
+            {
+                IAsyncResult r = BeginConnect(parsedAddress, port, requestCallback, state);
+                if (s_loggingEnabled)
+                {
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), r);
+                }
+                return r;
+            }
+
+            ThrowIfNotSupportsMultipleConnectAttempts();
 
             // Here, want to flow the context.  No need to lock.
             MultipleAddressConnectAsyncResult result = new MultipleAddressConnectAsyncResult(null, port, this, state, requestCallback);
@@ -2332,16 +2490,24 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginConnect", result);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), result);
             }
             return result;
         }
 
-        internal IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
+        private static void ThrowIfNotSupportsMultipleConnectAttempts()
+        {
+            if (!SocketPal.SupportsMultipleConnectAttempts)
+            {
+                throw new PlatformNotSupportedException(SR.net_sockets_connect_multiaddress_notsupported);
+            }
+        }
+
+        public IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginConnect", address);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), address);
             }
             if (CleanedUp)
             {
@@ -2350,11 +2516,11 @@ namespace System.Net.Sockets
 
             if (address == null)
             {
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
             }
             if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
             if (!CanTryAddressFamily(address.AddressFamily))
             {
@@ -2364,16 +2530,16 @@ namespace System.Net.Sockets
             IAsyncResult result = BeginConnect(new IPEndPoint(address, port), requestCallback, state);
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginConnect", result);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), result);
             }
             return result;
         }
 
-        internal IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state)
+        public IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginConnect", addresses);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), addresses);
             }
             if (CleanedUp)
             {
@@ -2382,15 +2548,15 @@ namespace System.Net.Sockets
 
             if (addresses == null)
             {
-                throw new ArgumentNullException("addresses");
+                throw new ArgumentNullException(nameof(addresses));
             }
             if (addresses.Length == 0)
             {
-                throw new ArgumentException(SR.net_invalidAddressList, "addresses");
+                throw new ArgumentException(SR.net_invalidAddressList, nameof(addresses));
             }
             if (!TcpValidationHelpers.ValidatePortNumber(port))
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
             if (_addressFamily != AddressFamily.InterNetwork && _addressFamily != AddressFamily.InterNetworkV6)
             {
@@ -2401,6 +2567,7 @@ namespace System.Net.Sockets
             {
                 throw new InvalidOperationException(SR.net_sockets_mustnotlisten);
             }
+            ThrowIfNotSupportsMultipleConnectAttempts();
 
             // Set up the result to capture the context.  No need for a lock.
             MultipleAddressConnectAsyncResult result = new MultipleAddressConnectAsyncResult(addresses, port, this, state, requestCallback);
@@ -2417,28 +2584,149 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginConnect", result);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginConnect), result);
             }
             return result;
+        }
+
+        public IAsyncResult BeginDisconnect(bool reuseSocket, AsyncCallback callback, object state)
+        {
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginDisconnect), null);
+            }
+
+            if (CleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+
+            // Start context-flowing op.  No need to lock - we don't use the context till the callback.
+            DisconnectOverlappedAsyncResult asyncResult = new DisconnectOverlappedAsyncResult(this, state, callback);
+            asyncResult.StartPostingAsyncOp(false);
+
+            // Post the disconnect.
+            DoBeginDisconnect(reuseSocket, asyncResult);
+
+            // Finish flowing (or call the callback), and return.
+            asyncResult.FinishPostingAsyncOp();
+            return asyncResult;
+        }
+
+        private void DoBeginDisconnect(bool reuseSocket, DisconnectOverlappedAsyncResult asyncResult)
+        {
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginDisconnect() ");
+            }
+
+
+            SocketError errorCode = SocketError.Success;
+
+            errorCode = SocketPal.DisconnectAsync(this, _handle, reuseSocket, asyncResult);
+
+            if (errorCode == SocketError.Success)
+            {
+                SetToDisconnected();
+                _remoteEndPoint = null;
+            }
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginDisconnect() UnsafeNclNativeMethods.OSSOCK.DisConnectEx returns:" + errorCode.ToString());
+            }
+
+            // if the asynchronous native call fails synchronously
+            // we'll throw a SocketException
+            errorCode = asyncResult.CheckAsyncCallOverlappedResult(errorCode);
+
+            if (errorCode != SocketError.Success)
+            {
+                // update our internal state after this socket error and throw
+                SocketException socketException = new SocketException((int)errorCode);
+                UpdateStatusAfterSocketError(socketException);
+                if (s_loggingEnabled)
+                {
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginDisconnect), socketException);
+                }
+                throw socketException;
+            }
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginDisconnect() returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+            }
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginDisconnect), asyncResult);
+            }
+        }
+
+        public void Disconnect(bool reuseSocket)
+        {
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Disconnect), null);
+            }
+
+            if (CleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Disconnect() ");
+            }
+
+            SocketError errorCode = SocketError.Success;
+
+            // This can throw ObjectDisposedException (handle, and retrieving the delegate).
+            errorCode = SocketPal.Disconnect(this, _handle, reuseSocket);
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Disconnect() UnsafeNclNativeMethods.OSSOCK.DisConnectEx returns:" + errorCode.ToString());
+            }
+
+            if (errorCode != SocketError.Success)
+            {
+                // update our internal state after this socket error and throw
+                SocketException socketException = new SocketException((int)errorCode);
+                UpdateStatusAfterSocketError(socketException);
+                if (s_loggingEnabled)
+                {
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Disconnect), socketException);
+                }
+                throw socketException;
+            }
+
+            SetToDisconnected();
+            _remoteEndPoint = null;
+
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Disconnect), null);
+            }
         }
 
         // Routine Description:
         // 
         //    EndConnect - Called after receiving callback from BeginConnect,
-        //     in order to retrive the result of async call
+        //     in order to retrieve the result of async call
         // 
         // Arguments:
         // 
-        //    AsyncResult - the AsyncResult Returned fron BeginConnect call
+        //    AsyncResult - the AsyncResult Returned from BeginConnect call
         // 
         // Return Value:
         // 
-        //    int - Return code from aync Connect, 0 for success, SocketError.NotConnected otherwise
-        internal void EndConnect(IAsyncResult asyncResult)
+        //    int - Return code from async Connect, 0 for success, SocketError.NotConnected otherwise
+        public void EndConnect(IAsyncResult asyncResult)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "EndConnect", asyncResult);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(EndConnect), asyncResult);
             }
             if (CleanedUp)
             {
@@ -2448,19 +2736,29 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             LazyAsyncResult castedAsyncResult = null;
             EndPoint remoteEndPoint = null;
             ConnectOverlappedAsyncResult coar;
             MultipleAddressConnectAsyncResult macar;
+            ConnectAsyncResult car;
 
             coar = asyncResult as ConnectOverlappedAsyncResult;
             if (coar == null)
             {
                 macar = asyncResult as MultipleAddressConnectAsyncResult;
-                if (macar != null)
+                if (macar == null)
+                {
+                    car = asyncResult as ConnectAsyncResult;
+                    if (car != null)
+                    {
+                        remoteEndPoint = car.RemoteEndPoint;
+                        castedAsyncResult = car;
+                    }
+                }
+                else
                 {
                     remoteEndPoint = macar.RemoteEndPoint;
                     castedAsyncResult = macar;
@@ -2474,7 +2772,7 @@ namespace System.Net.Sockets
 
             if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
             if (castedAsyncResult.EndCalled)
             {
@@ -2484,13 +2782,16 @@ namespace System.Net.Sockets
             castedAsyncResult.InternalWaitForCompletion();
             castedAsyncResult.EndCalled = true;
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::EndConnect() asyncResult:" + Logging.HashString(asyncResult));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndConnect() asyncResult:" + LoggingHash.HashString(asyncResult));
+            }
 
             if (castedAsyncResult.Result is Exception)
             {
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndConnect", (Exception)castedAsyncResult.Result);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndConnect), (Exception)castedAsyncResult.Result);
                 }
                 throw (Exception)castedAsyncResult.Result;
             }
@@ -2501,20 +2802,88 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndConnect", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndConnect), socketException);
                 }
                 throw socketException;
             }
             if (s_loggingEnabled)
             {
-                Logging.PrintInfo(Logging.Sockets, this, SR.Format(SR.net_log_socket_connected, LocalEndPoint, RemoteEndPoint));
-                Logging.Exit(Logging.Sockets, this, "EndConnect", "");
+                SocketsEventSource.Connected(this, LocalEndPoint, RemoteEndPoint);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndConnect), "");
             }
+        }
+
+        public void EndDisconnect(IAsyncResult asyncResult)
+        {
+
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(EndDisconnect), asyncResult);
+            }
+
+            if (CleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+
+#if FEATURE_PAL
+            throw new PlatformNotSupportedException(SR.GetString(SR.WinNTRequired));
+#endif // FEATURE_PAL
+
+            if (asyncResult == null)
+            {
+                throw new ArgumentNullException("asyncResult");
+            }
+
+
+            //get async result and check for errors
+            LazyAsyncResult castedAsyncResult = asyncResult as LazyAsyncResult;
+            if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
+            {
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
+            }
+            if (castedAsyncResult.EndCalled)
+            {
+                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndDisconnect)));
+            }
+
+            //wait for completion if it hasn't occured
+            castedAsyncResult.InternalWaitForCompletion();
+            castedAsyncResult.EndCalled = true;
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndDisconnect()");
+            }
+
+            //
+            // if the asynchronous native call failed asynchronously
+            // we'll throw a SocketException
+            //
+            if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
+            {
+                //
+                // update our internal state after this socket error and throw
+                //
+                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode);
+                UpdateStatusAfterSocketError(socketException);
+                if (s_loggingEnabled)
+                {
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndDisconnect), socketException);
+                }
+                throw socketException;
+            }
+
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndDisconnect), null);
+            }
+            return;
         }
 
         // Routine Description:
         // 
-        //    BeginSend - Async implimentation of Send call, mirrored after BeginReceive
+        //    BeginSend - Async implementation of Send call, mirrored after BeginReceive
         //    This routine may go pending at which time,
         //    but any case the callback Delegate will be called upon completion
         // 
@@ -2523,13 +2892,13 @@ namespace System.Net.Sockets
         //    WriteBuffer - status line that we wish to parse
         //    Index - Offset into WriteBuffer to begin sending from
         //    Size - Size of Buffer to transmit
-        //    Callback - Delegate function that holds callback, called on completeion of I/O
+        //    Callback - Delegate function that holds callback, called on completion of I/O
         //    State - State used to track callback, set by caller, not required
         // 
         // Return Value:
         // 
-        //    IAsyncResult - Async result used to retreive result
-        internal IAsyncResult BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback, object state)
+        //    IAsyncResult - Async result used to retrieve result
+        public IAsyncResult BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback, object state)
         {
             SocketError errorCode;
             IAsyncResult result = BeginSend(buffer, offset, size, socketFlags, out errorCode, callback, state);
@@ -2540,11 +2909,11 @@ namespace System.Net.Sockets
             return result;
         }
 
-        internal IAsyncResult BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, out SocketError errorCode, AsyncCallback callback, object state)
+        public IAsyncResult BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, out SocketError errorCode, AsyncCallback callback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginSend", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginSend), "");
             }
 
             if (CleanedUp)
@@ -2555,15 +2924,15 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
 
             // We need to flow the context here.  But we don't need to lock the context - we don't use it until the callback.
@@ -2586,7 +2955,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginSend", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginSend), asyncResult);
             }
             return asyncResult;
         }
@@ -2595,7 +2964,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "UnsafeBeginSend", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(UnsafeBeginSend), "");
             }
 
             if (CleanedUp)
@@ -2614,14 +2983,17 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "UnsafeBeginSend", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(UnsafeBeginSend), asyncResult);
             }
             return asyncResult;
         }
 
         private SocketError DoBeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginSend() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " size:" + size.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginSend() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " size:" + size.ToString());
+            }
 
             // Guarantee to call CheckAsyncCallOverlappedResult if we call SetUnamangedStructures with a cache in order to
             // avoid a Socket leak in case of error.
@@ -2629,11 +3001,17 @@ namespace System.Net.Sockets
             try
             {
                 // Get the Send going.
-                GlobalLog.Print("BeginSend: asyncResult:" + Logging.HashString(asyncResult) + " size:" + size.ToString());
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("BeginSend: asyncResult:" + LoggingHash.HashString(asyncResult) + " size:" + size.ToString());
+                }
 
                 errorCode = SocketPal.SendAsync(_handle, buffer, offset, size, socketFlags, asyncResult);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+                }
             }
             finally
             {
@@ -2646,13 +3024,13 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginSend", new SocketException((int)errorCode));
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginSend), new SocketException((int)errorCode));
                 }
             }
             return errorCode;
         }
 
-        internal IAsyncResult BeginSend(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
+        public IAsyncResult BeginSend(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
         {
             SocketError errorCode;
             IAsyncResult result = BeginSend(buffers, socketFlags, out errorCode, callback, state);
@@ -2663,11 +3041,11 @@ namespace System.Net.Sockets
             return result;
         }
 
-        internal IAsyncResult BeginSend(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, out SocketError errorCode, AsyncCallback callback, object state)
+        public IAsyncResult BeginSend(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, out SocketError errorCode, AsyncCallback callback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginSend", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginSend), "");
             }
 
             if (CleanedUp)
@@ -2678,12 +3056,12 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffers == null)
             {
-                throw new ArgumentNullException("buffers");
+                throw new ArgumentNullException(nameof(buffers));
             }
 
             if (buffers.Count == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, "buffers"), "buffers");
+                throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, "buffers"), nameof(buffers));
             }
 
             // We need to flow the context here.  But we don't need to lock the context - we don't use it until the callback.
@@ -2704,25 +3082,34 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginSend", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginSend), asyncResult);
             }
             return asyncResult;
         }
 
         private SocketError DoBeginSend(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginSend() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " buffers:" + buffers);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginSend() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " buffers:" + buffers);
+            }
 
             // Guarantee to call CheckAsyncCallOverlappedResult if we call SetUnamangedStructures with a cache in order to
             // avoid a Socket leak in case of error.
             SocketError errorCode = SocketError.SocketError;
             try
             {
-                GlobalLog.Print("BeginSend: asyncResult:" + Logging.HashString(asyncResult));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("BeginSend: asyncResult:" + LoggingHash.HashString(asyncResult));
+                }
 
                 errorCode = SocketPal.SendAsync(_handle, buffers, socketFlags, asyncResult);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginSend() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+                }
             }
             finally
             {
@@ -2735,7 +3122,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginSend", new SocketException((int)errorCode));
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginSend), new SocketException((int)errorCode));
                 }
             }
             return errorCode;
@@ -2748,12 +3135,12 @@ namespace System.Net.Sockets
         // 
         // Arguments:
         // 
-        //    AsyncResult - the AsyncResult Returned fron BeginSend call
+        //    AsyncResult - the AsyncResult Returned from BeginSend call
         // 
         // Return Value:
         // 
         //    int - Number of bytes transferred
-        internal int EndSend(IAsyncResult asyncResult)
+        public int EndSend(IAsyncResult asyncResult)
         {
             SocketError errorCode;
             int bytesTransferred = EndSend(asyncResult, out errorCode);
@@ -2764,11 +3151,11 @@ namespace System.Net.Sockets
             return bytesTransferred;
         }
 
-        internal int EndSend(IAsyncResult asyncResult, out SocketError errorCode)
+        public int EndSend(IAsyncResult asyncResult, out SocketError errorCode)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "EndSend", asyncResult);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(EndSend), asyncResult);
             }
             if (CleanedUp)
             {
@@ -2778,13 +3165,13 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             OverlappedAsyncResult castedAsyncResult = asyncResult as OverlappedAsyncResult;
             if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
             if (castedAsyncResult.EndCalled)
             {
@@ -2806,7 +3193,10 @@ namespace System.Net.Sockets
                 }
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::EndSend() bytesTransferred:" + bytesTransferred.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndSend() bytesTransferred:" + bytesTransferred.ToString());
+            }
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
             errorCode = (SocketError)castedAsyncResult.ErrorCode;
@@ -2816,21 +3206,21 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndSend", new SocketException((int)errorCode));
-                    Logging.Exit(Logging.Sockets, this, "EndSend", 0);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndSend), new SocketException((int)errorCode));
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndSend), 0);
                 }
                 return 0;
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "EndSend", bytesTransferred);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndSend), bytesTransferred);
             }
             return bytesTransferred;
         }
 
         // Routine Description:
         // 
-        //    BeginSendTo - Async implimentation of SendTo,
+        //    BeginSendTo - Async implementation of SendTo,
         // 
         //    This routine may go pending at which time,
         //    but any case the callback Delegate will be called upon completion
@@ -2842,17 +3232,17 @@ namespace System.Net.Sockets
         //    Size - Size of Buffer to transmit
         //    Flags - Specific Socket flags to pass to winsock
         //    remoteEP - EndPoint to transmit To
-        //    Callback - Delegate function that holds callback, called on completeion of I/O
+        //    Callback - Delegate function that holds callback, called on completion of I/O
         //    State - State used to track callback, set by caller, not required
         // 
         // Return Value:
         // 
-        //    IAsyncResult - Async result used to retreive result
-        internal IAsyncResult BeginSendTo(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint remoteEP, AsyncCallback callback, object state)
+        //    IAsyncResult - Async result used to retrieve result
+        public IAsyncResult BeginSendTo(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint remoteEP, AsyncCallback callback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginSendTo", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginSendTo), "");
             }
 
             if (CleanedUp)
@@ -2863,19 +3253,19 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (remoteEP == null)
             {
-                throw new ArgumentNullException("remoteEP");
+                throw new ArgumentNullException(nameof(remoteEP));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
 
             // This will check the permissions for connect.
@@ -2894,14 +3284,18 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginSendTo", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginSendTo), asyncResult);
             }
             return asyncResult;
         }
 
         private void DoBeginSendTo(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint endPointSnapshot, Internals.SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
         {
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginSendTo() size:" + size.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginSendTo() size:" + size.ToString());
+            }
+
             EndPoint oldEndPoint = _rightEndPoint;
 
             // Guarantee to call CheckAsyncCallOverlappedResult if we call SetUnamangedStructures with a cache in order to
@@ -2916,7 +3310,10 @@ namespace System.Net.Sockets
 
                 errorCode = SocketPal.SendToAsync(_handle, buffer, offset, size, socketFlags, socketAddress, asyncResult);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginSendTo() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + size + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginSendTo() Interop.Winsock.WSASend returns:" + errorCode.ToString() + " size:" + size + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+                }
             }
             catch (ObjectDisposedException)
             {
@@ -2937,12 +3334,15 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginSendTo", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginSendTo), socketException);
                 }
                 throw socketException;
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginSendTo() size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginSendTo() size:" + size.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+            }
         }
 
         // Routine Description:
@@ -2952,16 +3352,16 @@ namespace System.Net.Sockets
         // 
         // Arguments:
         // 
-        //    AsyncResult - the AsyncResult Returned fron BeginSend call
+        //    AsyncResult - the AsyncResult Returned from BeginSend call
         // 
         // Return Value:
         // 
         //    int - Number of bytes transferred
-        internal int EndSendTo(IAsyncResult asyncResult)
+        public int EndSendTo(IAsyncResult asyncResult)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "EndSendTo", asyncResult);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(EndSendTo), asyncResult);
             }
             if (CleanedUp)
             {
@@ -2971,13 +3371,13 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             OverlappedAsyncResult castedAsyncResult = asyncResult as OverlappedAsyncResult;
             if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
             if (castedAsyncResult.EndCalled)
             {
@@ -2999,7 +3399,10 @@ namespace System.Net.Sockets
                 }
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::EndSendTo() bytesTransferred:" + bytesTransferred.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndSendTo() bytesTransferred:" + bytesTransferred.ToString());
+            }
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
@@ -3009,20 +3412,20 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndSendTo", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndSendTo), socketException);
                 }
                 throw socketException;
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "EndSendTo", bytesTransferred);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndSendTo), bytesTransferred);
             }
             return bytesTransferred;
         }
 
         // Routine Description:
         // 
-        //    BeginReceive - Async implimentation of Recv call,
+        //    BeginReceive - Async implementation of Recv call,
         // 
         //    Called when we want to start an async receive.
         //    We kick off the receive, and if it completes synchronously we'll
@@ -3036,13 +3439,13 @@ namespace System.Net.Sockets
         //    ReadBuffer - status line that we wish to parse
         //    Index - Offset into ReadBuffer to begin reading from
         //    Size - Size of Buffer to recv
-        //    Callback - Delegate function that holds callback, called on completeion of I/O
+        //    Callback - Delegate function that holds callback, called on completion of I/O
         //    State - State used to track callback, set by caller, not required
         // 
         // Return Value:
         // 
-        //    IAsyncResult - Async result used to retreive result
-        internal IAsyncResult BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback, object state)
+        //    IAsyncResult - Async result used to retrieve result
+        public IAsyncResult BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback, object state)
         {
             SocketError errorCode;
             IAsyncResult result = BeginReceive(buffer, offset, size, socketFlags, out errorCode, callback, state);
@@ -3053,11 +3456,11 @@ namespace System.Net.Sockets
             return result;
         }
 
-        internal IAsyncResult BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, out SocketError errorCode, AsyncCallback callback, object state)
+        public IAsyncResult BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, out SocketError errorCode, AsyncCallback callback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginReceive", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginReceive), "");
             }
 
             if (CleanedUp)
@@ -3068,15 +3471,15 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
 
             // We need to flow the context here.  But we don't need to lock the context - we don't use it until the callback.
@@ -3099,7 +3502,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginReceive", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginReceive), asyncResult);
             }
             return asyncResult;
         }
@@ -3108,7 +3511,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "UnsafeBeginReceive", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(UnsafeBeginReceive), "");
             }
 
             if (CleanedUp)
@@ -3122,14 +3525,17 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "UnsafeBeginReceive", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(UnsafeBeginReceive), asyncResult);
             }
             return asyncResult;
         }
 
         private SocketError DoBeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, OverlappedAsyncResult asyncResult)
         {
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceive() size:" + size.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginReceive() size:" + size.ToString());
+            }
 
 #if DEBUG
             IntPtr lastHandle = _handle.DangerousGetHandle();
@@ -3141,7 +3547,10 @@ namespace System.Net.Sockets
             {
                 errorCode = SocketPal.ReceiveAsync(_handle, buffer, offset, size, socketFlags, asyncResult);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceive() Interop.Winsock.WSARecv returns:" + errorCode.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginReceive() Interop.Winsock.WSARecv returns:" + errorCode.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+                }
             }
             finally
             {
@@ -3151,13 +3560,17 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails synchronously.
             if (errorCode != SocketError.Success)
             {
-                GlobalLog.Assert(errorCode != SocketError.Success, "Socket#{0}::DoBeginReceive()|GetLastWin32Error() returned zero.", Logging.HashString(this));
+                // TODO: https://github.com/dotnet/corefx/issues/5426
+                //if (GlobalLog.IsEnabled)
+                //{
+                //    GlobalLog.AssertFormat("Socket#{0}::DoBeginReceive()|GetLastWin32Error() returned zero.", LoggingHash.HashString(this));
+                //}
 
                 // Update the internal state of this socket according to the error before throwing.
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginReceive", new SocketException((int)errorCode));
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginReceive), new SocketException((int)errorCode));
                 }
                 asyncResult.InvokeCallback(new SocketException((int)errorCode));
             }
@@ -3173,7 +3586,7 @@ namespace System.Net.Sockets
             return errorCode;
         }
 
-        internal IAsyncResult BeginReceive(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
+        public IAsyncResult BeginReceive(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
         {
             SocketError errorCode;
             IAsyncResult result = BeginReceive(buffers, socketFlags, out errorCode, callback, state);
@@ -3184,11 +3597,11 @@ namespace System.Net.Sockets
             return result;
         }
 
-        internal IAsyncResult BeginReceive(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, out SocketError errorCode, AsyncCallback callback, object state)
+        public IAsyncResult BeginReceive(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, out SocketError errorCode, AsyncCallback callback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginReceive", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginReceive), "");
             }
 
             if (CleanedUp)
@@ -3199,12 +3612,12 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffers == null)
             {
-                throw new ArgumentNullException("buffers");
+                throw new ArgumentNullException(nameof(buffers));
             }
 
             if (buffers.Count == 0)
             {
-                throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, "buffers"), "buffers");
+                throw new ArgumentException(SR.Format(SR.net_sockets_zerolist, "buffers"), nameof(buffers));
             }
 
             // We need to flow the context here.  But we don't need to lock the context - we don't use it until the callback.
@@ -3227,7 +3640,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginReceive", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginReceive), asyncResult);
             }
             return asyncResult;
         }
@@ -3244,7 +3657,10 @@ namespace System.Net.Sockets
             {
                 errorCode = SocketPal.ReceiveAsync(_handle, buffers, socketFlags, asyncResult);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceive() Interop.Winsock.WSARecv returns:" + errorCode.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginReceive() Interop.Winsock.WSARecv returns:" + errorCode.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+                }
             }
             finally
             {
@@ -3258,7 +3674,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginReceive", new SocketException((int)errorCode));
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginReceive), new SocketException((int)errorCode));
                 }
             }
 #if DEBUG
@@ -3287,12 +3703,12 @@ namespace System.Net.Sockets
         // 
         // Arguments:
         // 
-        //    AsyncResult - the AsyncResult Returned fron BeginSend call
+        //    AsyncResult - the AsyncResult Returned from BeginSend call
         // 
         // Return Value:
         // 
         //    int - Number of bytes transferred
-        internal int EndReceive(IAsyncResult asyncResult)
+        public int EndReceive(IAsyncResult asyncResult)
         {
             SocketError errorCode;
             int bytesTransferred = EndReceive(asyncResult, out errorCode);
@@ -3303,11 +3719,11 @@ namespace System.Net.Sockets
             return bytesTransferred;
         }
 
-        internal int EndReceive(IAsyncResult asyncResult, out SocketError errorCode)
+        public int EndReceive(IAsyncResult asyncResult, out SocketError errorCode)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "EndReceive", asyncResult);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(EndReceive), asyncResult);
             }
             if (CleanedUp)
             {
@@ -3317,13 +3733,13 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             OverlappedAsyncResult castedAsyncResult = asyncResult as OverlappedAsyncResult;
             if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
             if (castedAsyncResult.EndCalled)
             {
@@ -3346,11 +3762,14 @@ namespace System.Net.Sockets
             }
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::EndReceive() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred.ToString());
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndReceive() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " bytesTransferred:" + bytesTransferred.ToString());
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
@@ -3361,25 +3780,29 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(errorCode);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndReceive", new SocketException((int)errorCode));
-                    Logging.Exit(Logging.Sockets, this, "EndReceive", 0);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndReceive), new SocketException((int)errorCode));
+                    NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndReceive), 0);
                 }
                 return 0;
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "EndReceive", bytesTransferred);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndReceive), bytesTransferred);
             }
             return bytesTransferred;
         }
 
-        internal IAsyncResult BeginReceiveMessageFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, ref EndPoint remoteEP, AsyncCallback callback, object state)
+        public IAsyncResult BeginReceiveMessageFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, ref EndPoint remoteEP, AsyncCallback callback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginReceiveMessageFrom", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginReceiveMessageFrom), "");
             }
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceiveMessageFrom() size:" + size.ToString());
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginReceiveMessageFrom() size:" + size.ToString());
+            }
 
             if (CleanedUp)
             {
@@ -3387,29 +3810,30 @@ namespace System.Net.Sockets
             }
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (remoteEP == null)
             {
-                throw new ArgumentNullException("remoteEP");
+                throw new ArgumentNullException(nameof(remoteEP));
             }
             if (!CanTryAddressFamily(remoteEP.AddressFamily))
             {
-                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, remoteEP.AddressFamily, _addressFamily), "remoteEP");
+                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, remoteEP.AddressFamily, _addressFamily), nameof(remoteEP));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
             if (_rightEndPoint == null)
             {
                 throw new InvalidOperationException(SR.net_sockets_mustbind);
             }
 
+            SocketPal.CheckDualModeReceiveSupport(this);
 
             // Set up the result and set it to collect the context.
             ReceiveMessageOverlappedAsyncResult asyncResult = new ReceiveMessageOverlappedAsyncResult(this, state, callback);
@@ -3448,12 +3872,20 @@ namespace System.Net.Sockets
                     // That same map is implemented here just in case.
                     if (errorCode == SocketError.MessageSize)
                     {
-                        GlobalLog.Assert("Socket#" + Logging.HashString(this) + "::BeginReceiveMessageFrom()|Returned WSAEMSGSIZE!");
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.Assert("Socket#" + LoggingHash.HashString(this) + "::BeginReceiveMessageFrom()|Returned WSAEMSGSIZE!");
+                        }
+                        Debug.Fail("Socket#" + LoggingHash.HashString(this) + "::BeginReceiveMessageFrom()|Returned WSAEMSGSIZE!");
+
                         errorCode = SocketError.IOPending;
                     }
                 }
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceiveMessageFrom() Interop.Winsock.WSARecvMsg returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginReceiveMessageFrom() Interop.Winsock.WSARecvMsg returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+                }
             }
             catch (ObjectDisposedException)
             {
@@ -3474,7 +3906,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginReceiveMessageFrom", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginReceiveMessageFrom), socketException);
                 }
                 throw socketException;
             }
@@ -3493,19 +3925,23 @@ namespace System.Net.Sockets
                 }
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginReceiveMessageFrom() size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginReceiveMessageFrom() size:" + size.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+            }
+
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginReceiveMessageFrom", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginReceiveMessageFrom), asyncResult);
             }
             return asyncResult;
         }
 
-        internal int EndReceiveMessageFrom(IAsyncResult asyncResult, ref SocketFlags socketFlags, ref EndPoint endPoint, out IPPacketInformation ipPacketInformation)
+        public int EndReceiveMessageFrom(IAsyncResult asyncResult, ref SocketFlags socketFlags, ref EndPoint endPoint, out IPPacketInformation ipPacketInformation)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "EndReceiveMessageFrom", asyncResult);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(EndReceiveMessageFrom), asyncResult);
             }
             if (CleanedUp)
             {
@@ -3513,21 +3949,21 @@ namespace System.Net.Sockets
             }
             if (endPoint == null)
             {
-                throw new ArgumentNullException("endPoint");
+                throw new ArgumentNullException(nameof(endPoint));
             }
             if (!CanTryAddressFamily(endPoint.AddressFamily))
             {
-                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, endPoint.AddressFamily, _addressFamily), "endPoint");
+                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, endPoint.AddressFamily, _addressFamily), nameof(endPoint));
             }
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             ReceiveMessageOverlappedAsyncResult castedAsyncResult = asyncResult as ReceiveMessageOverlappedAsyncResult;
             if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
             if (castedAsyncResult.EndCalled)
             {
@@ -3565,7 +4001,10 @@ namespace System.Net.Sockets
                 }
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::EndReceiveMessageFrom() bytesTransferred:" + bytesTransferred.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndReceiveMessageFrom() bytesTransferred:" + bytesTransferred.ToString());
+            }
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success && (SocketError)castedAsyncResult.ErrorCode != SocketError.MessageSize)
@@ -3575,7 +4014,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndReceiveMessageFrom", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndReceiveMessageFrom), socketException);
                 }
                 throw socketException;
             }
@@ -3585,14 +4024,14 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "EndReceiveMessageFrom", bytesTransferred);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndReceiveMessageFrom), bytesTransferred);
             }
             return bytesTransferred;
         }
 
         // Routine Description:
         // 
-        //    BeginReceiveFrom - Async implimentation of RecvFrom call,
+        //    BeginReceiveFrom - Async implementation of RecvFrom call,
         // 
         //    Called when we want to start an async receive.
         //    We kick off the receive, and if it completes synchronously we'll
@@ -3606,19 +4045,19 @@ namespace System.Net.Sockets
         //    ReadBuffer - status line that we wish to parse
         //    Index - Offset into ReadBuffer to begin reading from
         //    Request - Size of Buffer to recv
-        //    Flags - Additonal Flags that may be passed to the underlying winsock call
+        //    Flags - Additional Flags that may be passed to the underlying winsock call
         //    remoteEP - EndPoint that are to receive from
-        //    Callback - Delegate function that holds callback, called on completeion of I/O
+        //    Callback - Delegate function that holds callback, called on completion of I/O
         //    State - State used to track callback, set by caller, not required
         // 
         // Return Value:
         // 
-        //    IAsyncResult - Async result used to retreive result
-        internal IAsyncResult BeginReceiveFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, ref EndPoint remoteEP, AsyncCallback callback, object state)
+        //    IAsyncResult - Async result used to retrieve result
+        public IAsyncResult BeginReceiveFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, ref EndPoint remoteEP, AsyncCallback callback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginReceiveFrom", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginReceiveFrom), "");
             }
 
             if (CleanedUp)
@@ -3629,28 +4068,30 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if (remoteEP == null)
             {
-                throw new ArgumentNullException("remoteEP");
+                throw new ArgumentNullException(nameof(remoteEP));
             }
             if (!CanTryAddressFamily(remoteEP.AddressFamily))
             {
-                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, remoteEP.AddressFamily, _addressFamily), "remoteEP");
+                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, remoteEP.AddressFamily, _addressFamily), nameof(remoteEP));
             }
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
             if (size < 0 || size > buffer.Length - offset)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(size));
             }
             if (_rightEndPoint == null)
             {
                 throw new InvalidOperationException(SR.net_sockets_mustbind);
             }
+
+            SocketPal.CheckDualModeReceiveSupport(this);
 
             // We don't do a CAS demand here because the contents of remoteEP aren't used by
             // WSARecvFrom; all that matters is that we generate a unique-to-this-call SocketAddress
@@ -3681,7 +4122,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginReceiveFrom", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginReceiveFrom), asyncResult);
             }
             return asyncResult;
         }
@@ -3689,7 +4130,11 @@ namespace System.Net.Sockets
         private void DoBeginReceiveFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint endPointSnapshot, Internals.SocketAddress socketAddress, OverlappedAsyncResult asyncResult)
         {
             EndPoint oldEndPoint = _rightEndPoint;
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceiveFrom() size:" + size.ToString());
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginReceiveFrom() size:" + size.ToString());
+            }
 
             // Guarantee to call CheckAsyncCallOverlappedResult if we call SetUnamangedStructures with a cache in order to
             // avoid a Socket leak in case of error.
@@ -3706,7 +4151,10 @@ namespace System.Net.Sockets
 
                 errorCode = SocketPal.ReceiveFromAsync(_handle, buffer, offset, size, socketFlags, socketAddress, asyncResult);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceiveFrom() Interop.Winsock.WSARecvFrom returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginReceiveFrom() Interop.Winsock.WSARecvFrom returns:" + errorCode.ToString() + " size:" + size.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+                }
             }
             catch (ObjectDisposedException)
             {
@@ -3727,12 +4175,15 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginReceiveFrom", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginReceiveFrom), socketException);
                 }
                 throw socketException;
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginReceiveFrom() size:" + size.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginReceiveFrom() size:" + size.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+            }
         }
 
         // Routine Description:
@@ -3743,16 +4194,16 @@ namespace System.Net.Sockets
         // 
         // Arguments:
         // 
-        //    AsyncResult - the AsyncResult Returned fron BeginReceiveFrom call
+        //    AsyncResult - the AsyncResult Returned from BeginReceiveFrom call
         // 
         // Return Value:
         // 
         //    int - Number of bytes transferred
-        internal int EndReceiveFrom(IAsyncResult asyncResult, ref EndPoint endPoint)
+        public int EndReceiveFrom(IAsyncResult asyncResult, ref EndPoint endPoint)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "EndReceiveFrom", asyncResult);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(EndReceiveFrom), asyncResult);
             }
             if (CleanedUp)
             {
@@ -3762,21 +4213,21 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (endPoint == null)
             {
-                throw new ArgumentNullException("endPoint");
+                throw new ArgumentNullException(nameof(endPoint));
             }
             if (!CanTryAddressFamily(endPoint.AddressFamily))
             {
-                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, endPoint.AddressFamily, _addressFamily), "endPoint");
+                throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, endPoint.AddressFamily, _addressFamily), nameof(endPoint));
             }
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
 
             OverlappedAsyncResult castedAsyncResult = asyncResult as OverlappedAsyncResult;
             if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
             if (castedAsyncResult.EndCalled)
             {
@@ -3814,7 +4265,10 @@ namespace System.Net.Sockets
                 }
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::EndReceiveFrom() bytesTransferred:" + bytesTransferred.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndReceiveFrom() bytesTransferred:" + bytesTransferred.ToString());
+            }
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
@@ -3824,13 +4278,13 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndReceiveFrom", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndReceiveFrom), socketException);
                 }
                 throw socketException;
             }
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "EndReceiveFrom", bytesTransferred);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndReceiveFrom), bytesTransferred);
             }
             return bytesTransferred;
         }
@@ -3852,8 +4306,8 @@ namespace System.Net.Sockets
         // 
         // Return Value:
         // 
-        //    IAsyncResult - Async result used to retreive resultant new socket
-        internal IAsyncResult BeginAccept(AsyncCallback callback, object state)
+        //    IAsyncResult - Async result used to retrieve resultant new socket
+        public IAsyncResult BeginAccept(AsyncCallback callback, object state)
         {
             if (!_isDisconnected)
             {
@@ -3862,24 +4316,24 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginAccept", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginAccept), "");
             }
 
             Debug.Assert(CleanedUp);
             throw new ObjectDisposedException(this.GetType().FullName);
         }
 
-        internal IAsyncResult BeginAccept(int receiveSize, AsyncCallback callback, object state)
+        public IAsyncResult BeginAccept(int receiveSize, AsyncCallback callback, object state)
         {
             return BeginAccept(null, receiveSize, callback, state);
         }
 
         // This is the truly async version that uses AcceptEx.
-        internal IAsyncResult BeginAccept(Socket acceptSocket, int receiveSize, AsyncCallback callback, object state)
+        public IAsyncResult BeginAccept(Socket acceptSocket, int receiveSize, AsyncCallback callback, object state)
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginAccept", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginAccept), "");
             }
             if (CleanedUp)
             {
@@ -3889,7 +4343,7 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (receiveSize < 0)
             {
-                throw new ArgumentOutOfRangeException("size");
+                throw new ArgumentOutOfRangeException(nameof(receiveSize));
             }
 
             // Set up the async result with flowing.
@@ -3904,7 +4358,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginAccept", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginAccept), asyncResult);
             }
             return asyncResult;
         }
@@ -3924,14 +4378,20 @@ namespace System.Net.Sockets
             SafeCloseSocket acceptHandle;
             asyncResult.AcceptSocket = GetOrCreateAcceptSocket(acceptSocket, false, "acceptSocket", out acceptHandle);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginAccept() AcceptSocket:" + Logging.HashString(acceptSocket));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginAccept() AcceptSocket:" + LoggingHash.HashString(acceptSocket));
+            }
 
             int socketAddressSize = _rightEndPoint.Serialize().Size;
             SocketError errorCode = SocketPal.AcceptAsync(this, _handle, acceptHandle, receiveSize, socketAddressSize, asyncResult);
 
             errorCode = asyncResult.CheckAsyncCallOverlappedResult(errorCode);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoBeginAccept() Interop.Winsock.AcceptEx returns:" + errorCode.ToString() + Logging.HashString(asyncResult));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoBeginAccept() Interop.Winsock.AcceptEx returns:" + errorCode.ToString() + LoggingHash.HashString(asyncResult));
+            }
 
             // Throw an appropriate SocketException if the native call fails synchronously.
             if (errorCode != SocketError.Success)
@@ -3940,7 +4400,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginAccept", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginAccept), socketException);
                 }
                 throw socketException;
             }
@@ -3949,17 +4409,17 @@ namespace System.Net.Sockets
         // Routine Description:
         // 
         //    EndAccept -  Called by user code after I/O is done or the user wants to wait.
-        //                 until Async completion, so it provides End handling for aync Accept calls,
+        //                 until Async completion, so it provides End handling for async Accept calls,
         //                 and retrieves new Socket object
         // 
         // Arguments:
         // 
-        //    AsyncResult - the AsyncResult Returned fron BeginAccept call
+        //    AsyncResult - the AsyncResult Returned from BeginAccept call
         // 
         // Return Value:
         // 
         //    Socket - a valid socket if successful
-        internal Socket EndAccept(IAsyncResult asyncResult)
+        public Socket EndAccept(IAsyncResult asyncResult)
         {
             int bytesTransferred;
             byte[] buffer;
@@ -3973,7 +4433,7 @@ namespace System.Net.Sockets
 
             Socket socket = EndAccept(out innerBuffer, out bytesTransferred, asyncResult);
             buffer = new byte[bytesTransferred];
-            Array.Copy(innerBuffer, 0, buffer, 0, bytesTransferred);
+            Buffer.BlockCopy(innerBuffer, 0, buffer, 0, bytesTransferred);
             return socket;
         }
 
@@ -3981,7 +4441,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "EndAccept", asyncResult);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(EndAccept), asyncResult);
             }
             if (CleanedUp)
             {
@@ -3991,12 +4451,12 @@ namespace System.Net.Sockets
             // Validate input parameters.
             if (asyncResult == null)
             {
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
             }
             AcceptOverlappedAsyncResult castedAsyncResult = asyncResult as AcceptOverlappedAsyncResult;
             if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
             {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, "asyncResult");
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
             }
             if (castedAsyncResult.EndCalled)
             {
@@ -4025,23 +4485,26 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "EndAccept", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(EndAccept), socketException);
                 }
                 throw socketException;
             }
 
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::EndAccept() SRC:" + Logging.ObjectToString(LocalEndPoint) + " acceptedSocket:" + Logging.HashString(socket) + " acceptedSocket.SRC:" + Logging.ObjectToString(socket.LocalEndPoint) + " acceptedSocket.DST:" + Logging.ObjectToString(socket.RemoteEndPoint) + " bytesTransferred:" + bytesTransferred.ToString());
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::EndAccept() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " acceptedSocket:" + LoggingHash.HashString(socket) + " acceptedSocket.SRC:" + LoggingHash.ObjectToString(socket.LocalEndPoint) + " acceptedSocket.DST:" + LoggingHash.ObjectToString(socket.RemoteEndPoint) + " bytesTransferred:" + bytesTransferred.ToString());
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             if (s_loggingEnabled)
             {
-                Logging.PrintInfo(Logging.Sockets, socket, SR.Format(SR.net_log_socket_accepted, socket.RemoteEndPoint, socket.LocalEndPoint));
-                Logging.Exit(Logging.Sockets, this, "EndAccept", socket);
+                SocketsEventSource.Accepted(socket, socket.RemoteEndPoint, socket.LocalEndPoint);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(EndAccept), socket);
             }
             return socket;
         }
@@ -4051,19 +4514,25 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Shutdown", how);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Shutdown), how);
             }
             if (CleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Shutdown() how:" + how.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Shutdown() how:" + how.ToString());
+            }
 
             // This can throw ObjectDisposedException.
             SocketError errorCode = SocketPal.Shutdown(_handle, _isConnected, _isDisconnected, how);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Shutdown() Interop.Winsock.shutdown returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Shutdown() Interop.Winsock.shutdown returns errorCode:" + errorCode);
+            }
 
             // Skip good cases: success, socket already closed.
             if (errorCode != SocketError.Success && errorCode != SocketError.NotSocket)
@@ -4073,7 +4542,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Shutdown", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Shutdown), socketException);
                 }
                 throw socketException;
             }
@@ -4082,7 +4551,7 @@ namespace System.Net.Sockets
             InternalSetBlocking(_willBlockInternal);
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Shutdown", "");
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Shutdown), "");
             }
         }
 
@@ -4093,7 +4562,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "AcceptAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(AcceptAsync), "");
             }
 
             if (CleanedUp)
@@ -4103,7 +4572,7 @@ namespace System.Net.Sockets
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
             if (e._bufferList != null)
             {
@@ -4155,7 +4624,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "AcceptAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(AcceptAsync), retval);
             }
             return retval;
         }
@@ -4166,7 +4635,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "ConnectAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(ConnectAsync), "");
             }
 
             if (CleanedUp)
@@ -4176,7 +4645,7 @@ namespace System.Net.Sockets
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
             if (e._bufferList != null)
             {
@@ -4199,13 +4668,15 @@ namespace System.Net.Sockets
             {
                 if (s_loggingEnabled)
                 {
-                    Logging.PrintInfo(Logging.Sockets, "Socket#" + Logging.HashString(this) + "::ConnectAsync " + SR.net_log_socket_connect_dnsendpoint);
+                    SocketsEventSource.Log.ConnectedAsyncDns(LoggingHash.HashInt(this));
                 }
 
                 if (dnsEP.AddressFamily != AddressFamily.Unspecified && !CanTryAddressFamily(dnsEP.AddressFamily))
                 {
                     throw new NotSupportedException(SR.net_invalidversion);
                 }
+
+                ThrowIfNotSupportsMultipleConnectAttempts();
 
                 MultipleConnectAsync multipleConnectAsync = new SingleSocketMultipleConnectAsync(this, true);
 
@@ -4231,7 +4702,7 @@ namespace System.Net.Sockets
                     {
                         InternalBind(new IPEndPoint(IPAddress.Any, 0));
                     }
-                    else
+                    else if (endPointSnapshot.AddressFamily != AddressFamily.Unix)
                     {
                         InternalBind(new IPEndPoint(IPAddress.IPv6Any, 0));
                     }
@@ -4278,7 +4749,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "ConnectAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(ConnectAsync), retval);
             }
             return retval;
         }
@@ -4289,12 +4760,12 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, null, "ConnectAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, null, nameof(ConnectAsync), "");
             }
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
             if (e._bufferList != null)
             {
@@ -4317,6 +4788,10 @@ namespace System.Net.Sockets
                     // Disable CS0162 and CS0429: Unreachable code detected
                     //
                     // SuportsMultipleConnectAttempts is a constant; when false, the following lines will trigger CS0162 or CS0429.
+                    //
+                    // This is the only *Connect* API that actually supports multiple endpoint attempts, as it's responsible 
+                    // for creating each Socket instance and can create one per attempt (with the instance methods, once a 
+                    // connect fails, on unix systems that socket can't be used for subsequent connect attempts).
 #pragma warning disable 162, 429
                     multipleConnectAsync = SocketPal.SupportsMultipleConnectAttempts ?
                         (MultipleConnectAsync)(new DualSocketMultipleConnectAsync(socketType, protocolType)) :
@@ -4342,7 +4817,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, null, "ConnectAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, null, nameof(ConnectAsync), retval);
             }
             return retval;
         }
@@ -4351,9 +4826,60 @@ namespace System.Net.Sockets
         {
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
             e.CancelConnectAsync();
+        }
+
+        public bool DisconnectAsync(SocketAsyncEventArgs e)
+        {
+
+            bool retval;
+
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(DisconnectAsync), "");
+            }
+
+            // Throw if socket disposed
+            if (CleanedUp)
+            {
+                throw new ObjectDisposedException(GetType().FullName);
+            }
+
+            // Prepare for the native call.
+            e.StartOperationCommon(this);
+            e.StartOperationDisconnect();
+
+            SocketError socketError = SocketError.Success;
+            try
+            {
+                socketError = e.DoOperationDisconnect(this, _handle);
+            }
+            catch (Exception ex)
+            {
+                // clear in-use on event arg object 
+                e.Complete();
+                throw ex;
+            }
+
+            // Handle completion when completion port is not posted.
+            if (socketError != SocketError.Success && socketError != SocketError.IOPending)
+            {
+                e.FinishOperationSyncFailure(socketError, 0, SocketFlags.None);
+                retval = false;
+            }
+            else
+            {
+                retval = true;
+            }
+
+            if (s_loggingEnabled)
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(DisconnectAsync), retval);
+            }
+
+            return retval;
         }
 
         public bool ReceiveAsync(SocketAsyncEventArgs e)
@@ -4362,7 +4888,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "ReceiveAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(ReceiveAsync), "");
             }
 
             if (CleanedUp)
@@ -4372,7 +4898,7 @@ namespace System.Net.Sockets
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
 
             // Prepare for the native call.
@@ -4409,7 +4935,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "ReceiveAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(ReceiveAsync), retval);
             }
             return retval;
         }
@@ -4420,7 +4946,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "ReceiveFromAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(ReceiveFromAsync), "");
             }
 
             if (CleanedUp)
@@ -4430,7 +4956,7 @@ namespace System.Net.Sockets
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
             if (e.RemoteEndPoint == null)
             {
@@ -4440,6 +4966,8 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, e.RemoteEndPoint.AddressFamily, _addressFamily), "RemoteEndPoint");
             }
+
+            SocketPal.CheckDualModeReceiveSupport(this);
 
             // We don't do a CAS demand here because the contents of remoteEP aren't used by
             // WSARecvFrom; all that matters is that we generate a unique-to-this-call SocketAddress
@@ -4484,7 +5012,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "ReceiveFromAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(ReceiveFromAsync), retval);
             }
             return retval;
         }
@@ -4495,7 +5023,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "ReceiveMessageFromAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(ReceiveMessageFromAsync), "");
             }
 
             if (CleanedUp)
@@ -4505,7 +5033,7 @@ namespace System.Net.Sockets
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
             if (e.RemoteEndPoint == null)
             {
@@ -4515,6 +5043,8 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentException(SR.Format(SR.net_InvalidEndPointAddressFamily, e.RemoteEndPoint.AddressFamily, _addressFamily), "RemoteEndPoint");
             }
+
+            SocketPal.CheckDualModeReceiveSupport(this);
 
             // We don't do a CAS demand here because the contents of remoteEP aren't used by
             // WSARecvMsg; all that matters is that we generate a unique-to-this-call SocketAddress
@@ -4560,7 +5090,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "ReceiveMessageFromAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(ReceiveMessageFromAsync), retval);
             }
 
             return retval;
@@ -4572,7 +5102,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "SendAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(SendAsync), "");
             }
 
             if (CleanedUp)
@@ -4582,7 +5112,7 @@ namespace System.Net.Sockets
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
 
             // Prepare for the native call.
@@ -4618,7 +5148,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "SendAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(SendAsync), retval);
             }
 
             return retval;
@@ -4630,7 +5160,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "SendPacketsAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(SendPacketsAsync), "");
             }
 
             // Throw if socket disposed
@@ -4641,7 +5171,7 @@ namespace System.Net.Sockets
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
             if (e.SendPacketsElements == null)
             {
@@ -4694,7 +5224,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "SendPacketsAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(SendPacketsAsync), retval);
             }
 
             return retval;
@@ -4706,7 +5236,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "SendToAsync", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(SendToAsync), "");
             }
 
             if (CleanedUp)
@@ -4716,7 +5246,7 @@ namespace System.Net.Sockets
 
             if (e == null)
             {
-                throw new ArgumentNullException("e");
+                throw new ArgumentNullException(nameof(e));
             }
             if (e.RemoteEndPoint == null)
             {
@@ -4760,7 +5290,7 @@ namespace System.Net.Sockets
 
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "SendToAsync", retval);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(SendToAsync), retval);
             }
 
             return retval;
@@ -4871,7 +5401,7 @@ namespace System.Net.Sockets
         {
             if (remoteEP is DnsEndPoint)
             {
-                throw new ArgumentException(SR.Format(SR.net_sockets_invalid_dnsendpoint, "remoteEP"), "remoteEP");
+                throw new ArgumentException(SR.Format(SR.net_sockets_invalid_dnsendpoint, "remoteEP"), nameof(remoteEP));
             }
 
             return IPEndPointExtensions.Serialize(remoteEP);
@@ -4929,11 +5459,7 @@ namespace System.Net.Sockets
                 {
                     if (!s_initialized)
                     {
-                        // TODO: Note for PAL implementation: this call is not required for *NIX and should be avoided during PAL design.
-
-                        // Ensure that WSAStartup has been called once per process.  
-                        // The System.Net.NameResolution contract is responsible with the initialization.
-                        Dns.GetHostName();
+                        SocketPal.Initialize();
 
                         // Cache some settings locally.
                         s_perfCountersEnabled = SocketPerfCounter.Instance.Enabled;
@@ -4954,17 +5480,20 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Connect", endPointSnapshot);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Connect), endPointSnapshot);
             }
 
             // This can throw ObjectDisposedException.
             SocketError errorCode = SocketPal.Connect(_handle, socketAddress.Buffer, socketAddress.Size);
 #if TRACE_VERBOSE
-            try
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::InternalConnect() SRC:" + Logging.ObjectToString(LocalEndPoint) + " DST:" + Logging.ObjectToString(RemoteEndPoint) + " Interop.Winsock.WSAConnect returns errorCode:" + errorCode);
+                try
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::InternalConnect() SRC:" + LoggingHash.ObjectToString(LocalEndPoint) + " DST:" + LoggingHash.ObjectToString(RemoteEndPoint) + " Interop.Winsock.WSAConnect returns errorCode:" + errorCode);
+                }
+                catch (ObjectDisposedException) { }
             }
-            catch (ObjectDisposedException) { }
 #endif
 
             // Throw an appropriate SocketException if the native call fails.
@@ -4975,7 +5504,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "Connect", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(Connect), socketException);
                 }
                 throw socketException;
             }
@@ -4986,14 +5515,17 @@ namespace System.Net.Sockets
                 _rightEndPoint = endPointSnapshot;
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::DoConnect() connection to:" + endPointSnapshot.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::DoConnect() connection to:" + endPointSnapshot.ToString());
+            }
 
             // Update state and performance counters.
             SetToConnected();
             if (s_loggingEnabled)
             {
-                Logging.PrintInfo(Logging.Sockets, this, SR.Format(SR.net_log_socket_connected, LocalEndPoint, RemoteEndPoint));
-                Logging.Exit(Logging.Sockets, this, "Connect", "");
+                SocketsEventSource.Connected(this, LocalEndPoint, RemoteEndPoint);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Connect), "");
             }
         }
 
@@ -5006,10 +5538,14 @@ namespace System.Net.Sockets
 
             try
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Dispose() disposing:true CleanedUp:" + CleanedUp.ToString());
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Dispose() disposing:true CleanedUp:" + CleanedUp.ToString());
+                }
+
                 if (s_loggingEnabled)
                 {
-                    Logging.Enter(Logging.Sockets, this, "Dispose", null);
+                    NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Dispose), null);
                 }
             }
             catch (Exception exception)
@@ -5034,7 +5570,7 @@ namespace System.Net.Sockets
                 {
                     if (s_loggingEnabled)
                     {
-                        Logging.Exit(Logging.Sockets, this, "Dispose", null);
+                        NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Dispose), null);
                     }
                 }
                 catch (Exception exception)
@@ -5057,7 +5593,11 @@ namespace System.Net.Sockets
                 if (timeout == 0)
                 {
                     // Abortive.
-                    GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Dispose() Calling _handle.Dispose()");
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Dispose() Calling _handle.Dispose()");
+                    }
+
                     _handle.Dispose();
                 }
                 else
@@ -5069,20 +5609,30 @@ namespace System.Net.Sockets
                     {
                         bool willBlock;
                         errorCode = SocketPal.SetBlocking(_handle, false, out willBlock);
-                        GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") ioctlsocket(FIONBIO):" + errorCode.ToString());
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") ioctlsocket(FIONBIO):" + errorCode.ToString());
+                        }
                     }
 
                     if (timeout < 0)
                     {
                         // Close with existing user-specified linger option.
-                        GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Dispose() Calling _handle.CloseAsIs()");
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Dispose() Calling _handle.CloseAsIs()");
+                        }
+
                         _handle.CloseAsIs();
                     }
                     else
                     {
                         // Since our timeout is in ms and linger is in seconds, implement our own sortof linger here.
                         errorCode = SocketPal.Shutdown(_handle, _isConnected, _isDisconnected, SocketShutdown.Send);
-                        GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") shutdown():" + errorCode.ToString());
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") shutdown():" + errorCode.ToString());
+                        }
 
                         // This should give us a timeout in milliseconds.
                         errorCode = SocketPal.SetSockOpt(
@@ -5090,7 +5640,10 @@ namespace System.Net.Sockets
                             SocketOptionLevel.Socket,
                             SocketOptionName.ReceiveTimeout,
                             timeout);
-                        GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") setsockopt():" + errorCode.ToString());
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") setsockopt():" + errorCode.ToString());
+                        }
 
                         if (errorCode != SocketError.Success)
                         {
@@ -5100,7 +5653,10 @@ namespace System.Net.Sockets
                         {
                             int unused;
                             errorCode = SocketPal.Receive(_handle, null, 0, 0, SocketFlags.None, out unused);
-                            GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") recv():" + errorCode.ToString());
+                            if (GlobalLog.IsEnabled)
+                            {
+                                GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") recv():" + errorCode.ToString());
+                            }
 
                             if (errorCode != (SocketError)0)
                             {
@@ -5112,7 +5668,10 @@ namespace System.Net.Sockets
                                 // We got a FIN or data.  Use ioctlsocket to find out which.
                                 int dataAvailable = 0;
                                 errorCode = SocketPal.GetAvailable(_handle, out dataAvailable);
-                                GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") ioctlsocket(FIONREAD):" + errorCode.ToString());
+                                if (GlobalLog.IsEnabled)
+                                {
+                                    GlobalLog.Print("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ") ioctlsocket(FIONREAD):" + errorCode.ToString());
+                                }
 
                                 if (errorCode != SocketError.Success || dataAvailable != 0)
                                 {
@@ -5121,7 +5680,7 @@ namespace System.Net.Sockets
                                 }
                                 else
                                 {
-                                    // We got a FIN.  It'd be nice to block for the remainder of the timeout for the handshake to finsh.
+                                    // We got a FIN.  It'd be nice to block for the remainder of the timeout for the handshake to finish.
                                     // Since there's no real way to do that, close the socket with the user's preferences.  This lets
                                     // the user decide how best to handle this case via the linger options.
                                     _handle.CloseAsIs();
@@ -5133,22 +5692,30 @@ namespace System.Net.Sockets
             }
             catch (ObjectDisposedException)
             {
-                GlobalLog.Assert("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ")", "Closing the handle threw ObjectDisposedException.");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ")", "Closing the handle threw ObjectDisposedException.");
+                }
+                Debug.Fail("SafeCloseSocket::Dispose(handle:" + _handle.DangerousGetHandle().ToString("x") + ")", "Closing the handle threw ObjectDisposedException.");
             }
         }
 
         public void Dispose()
         {
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::Dispose() timeout = " + _closeTimeout);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::Dispose() timeout = " + _closeTimeout);
+            }
+
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "Dispose", null);
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(Dispose), null);
             }
             Dispose(true);
             GC.SuppressFinalize(this);
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "Dispose", null);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Dispose), null);
             }
         }
 
@@ -5160,7 +5727,10 @@ namespace System.Net.Sockets
         // This version does not throw.
         internal void InternalShutdown(SocketShutdown how)
         {
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::InternalShutdown() how:" + how.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::InternalShutdown() how:" + how.ToString());
+            }
 
             if (CleanedUp || _handle.IsInvalid)
             {
@@ -5207,10 +5777,17 @@ namespace System.Net.Sockets
 
         internal unsafe void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, int optionValue, bool silent)
         {
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption() optionLevel:" + optionLevel + " optionName:" + optionName + " optionValue:" + optionValue + " silent:" + silent);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetSocketOption() optionLevel:" + optionLevel + " optionName:" + optionName + " optionValue:" + optionValue + " silent:" + silent);
+            }
+
             if (silent && (CleanedUp || _handle.IsInvalid))
             {
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption() skipping the call");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetSocketOption() skipping the call");
+                }
                 return;
             }
             SocketError errorCode = SocketError.Success;
@@ -5218,7 +5795,10 @@ namespace System.Net.Sockets
             {
                 errorCode = SocketPal.SetSockOpt(_handle, optionLevel, optionName, optionValue);
 
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetSocketOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetSocketOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+                }
             }
             catch
             {
@@ -5249,7 +5829,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "SetSocketOption", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(SetSocketOption), socketException);
                 }
                 throw socketException;
             }
@@ -5259,7 +5839,10 @@ namespace System.Net.Sockets
         {
             SocketError errorCode = SocketPal.SetMulticastOption(_handle, optionName, MR);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setMulticastOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetMulticastOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -5269,7 +5852,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "setMulticastOption", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(SetMulticastOption), socketException);
                 }
                 throw socketException;
             }
@@ -5280,7 +5863,10 @@ namespace System.Net.Sockets
         {
             SocketError errorCode = SocketPal.SetIPv6MulticastOption(_handle, optionName, MR);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setIPv6MulticastOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetIPv6MulticastOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -5290,7 +5876,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "setIPv6MulticastOption", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(SetIPv6MulticastOption), socketException);
                 }
                 throw socketException;
             }
@@ -5300,7 +5886,10 @@ namespace System.Net.Sockets
         {
             SocketError errorCode = SocketPal.SetLingerOption(_handle, lref);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::setLingerOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetLingerOption() Interop.Winsock.setsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -5310,7 +5899,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "setLingerOption", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(SetLingerOption), socketException);
                 }
                 throw socketException;
             }
@@ -5321,7 +5910,10 @@ namespace System.Net.Sockets
             LingerOption lingerOption;
             SocketError errorCode = SocketPal.GetLingerOption(_handle, out lingerOption);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getLingerOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::GetLingerOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -5331,7 +5923,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "getLingerOpt", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(GetLingerOpt), socketException);
                 }
                 throw socketException;
             }
@@ -5344,8 +5936,10 @@ namespace System.Net.Sockets
             MulticastOption multicastOption;
             SocketError errorCode = SocketPal.GetMulticastOption(_handle, optionName, out multicastOption);
 
-
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getMulticastOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::GetMulticastOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -5355,7 +5949,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "getMulticastOpt", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(GetMulticastOpt), socketException);
                 }
                 throw socketException;
             }
@@ -5369,7 +5963,10 @@ namespace System.Net.Sockets
             IPv6MulticastOption multicastOption;
             SocketError errorCode = SocketPal.GetIPv6MulticastOption(_handle, optionName, out multicastOption);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::getIPv6MulticastOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::GetIPv6MulticastOpt() Interop.Winsock.getsockopt returns errorCode:" + errorCode);
+            }
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
@@ -5379,7 +5976,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "getIPv6MulticastOpt", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(GetIPv6MulticastOpt), socketException);
                 }
                 throw socketException;
             }
@@ -5391,11 +5988,18 @@ namespace System.Net.Sockets
         // error code, and will update internal state on success.
         private SocketError InternalSetBlocking(bool desired, out bool current)
         {
-            GlobalLog.Enter("Socket#" + Logging.HashString(this) + "::InternalSetBlocking", "desired:" + desired.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "desired:" + desired.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+            }
 
             if (CleanedUp)
             {
-                GlobalLog.Leave("Socket#" + Logging.HashString(this) + "::InternalSetBlocking", "ObjectDisposed");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Leave("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "ObjectDisposed");
+                }
+
                 current = _willBlock;
                 return SocketError.Success;
             }
@@ -5412,7 +6016,10 @@ namespace System.Net.Sockets
                 errorCode = SocketError.NotSocket;
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::InternalSetBlocking() Interop.Winsock.ioctlsocket returns errorCode:" + errorCode);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking() Interop.Winsock.ioctlsocket returns errorCode:" + errorCode);
+            }
 
             // We will update only internal state but only on successfull win32 call
             // so if the native call fails, the state will remain the same.
@@ -5421,7 +6028,11 @@ namespace System.Net.Sockets
                 _willBlockInternal = willBlock;
             }
 
-            GlobalLog.Leave("Socket#" + Logging.HashString(this) + "::InternalSetBlocking", "errorCode:" + errorCode.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("Socket#" + LoggingHash.HashString(this) + "::InternalSetBlocking", "errorCode:" + errorCode.ToString() + " willBlock:" + _willBlock.ToString() + " willBlockInternal:" + _willBlockInternal.ToString());
+            }
+
             current = _willBlockInternal;
             return errorCode;
         }
@@ -5439,7 +6050,7 @@ namespace System.Net.Sockets
         {
             if (s_loggingEnabled)
             {
-                Logging.Enter(Logging.Sockets, this, "BeginConnectEx", "");
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, this, nameof(BeginConnectEx), "");
             }
 
             // This will check the permissions for connect.
@@ -5451,12 +6062,11 @@ namespace System.Net.Sockets
             // called if _rightEndPoint is not null, of that the endpoint is an IPEndPoint.
             if (_rightEndPoint == null)
             {
-                GlobalLog.Assert(endPointSnapshot.GetType() == typeof(IPEndPoint), "Socket#{0}::BeginConnectEx()|Socket not bound and endpoint not IPEndPoint.", Logging.HashString(this));
                 if (endPointSnapshot.AddressFamily == AddressFamily.InterNetwork)
                 {
                     InternalBind(new IPEndPoint(IPAddress.Any, 0));
                 }
-                else
+                else if (endPointSnapshot.AddressFamily != AddressFamily.Unix)
                 {
                     InternalBind(new IPEndPoint(IPAddress.IPv6Any, 0));
                 }
@@ -5497,7 +6107,10 @@ namespace System.Net.Sockets
                 SetToConnected();
             }
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginConnectEx() Interop.Winsock.connect returns:" + errorCode.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginConnectEx() Interop.Winsock.connect returns:" + errorCode.ToString());
+            }
 
             errorCode = asyncResult.CheckAsyncCallOverlappedResult(errorCode);
 
@@ -5510,7 +6123,7 @@ namespace System.Net.Sockets
                 UpdateStatusAfterSocketError(socketException);
                 if (s_loggingEnabled)
                 {
-                    Logging.Exception(Logging.Sockets, this, "BeginConnectEx", socketException);
+                    NetEventSource.Exception(NetEventSource.ComponentType.Socket, this, nameof(BeginConnectEx), socketException);
                 }
                 throw socketException;
             }
@@ -5519,10 +6132,14 @@ namespace System.Net.Sockets
             // This is a nop if the context isn't being flowed.
             asyncResult.FinishPostingAsyncOp(ref Caches.ConnectClosureCache);
 
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::BeginConnectEx() to:" + endPointSnapshot.ToString() + " returning AsyncResult:" + Logging.HashString(asyncResult));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::BeginConnectEx() to:" + endPointSnapshot.ToString() + " returning AsyncResult:" + LoggingHash.HashString(asyncResult));
+            }
+
             if (s_loggingEnabled)
             {
-                Logging.Exit(Logging.Sockets, this, "BeginConnectEx", asyncResult);
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(BeginConnectEx), asyncResult);
             }
             return asyncResult;
         }
@@ -5558,6 +6175,22 @@ namespace System.Net.Sockets
             IPAddress[] addresses = DnsAPMExtensions.EndGetHostAddresses(result);
             context._addresses = addresses;
             return DoMultipleAddressConnectCallback(PostOneBeginConnect(context), context);
+        }
+
+        private sealed class ConnectAsyncResult : ContextAwareResult
+        {
+            private EndPoint _endPoint;
+
+            internal ConnectAsyncResult(object myObject, EndPoint endPoint, object myState, AsyncCallback myCallBack) : 
+                base(myObject, myState, myCallBack)
+            {
+                _endPoint = endPoint;
+            }
+
+            internal EndPoint RemoteEndPoint
+            {
+                get { return _endPoint; }
+            }
         }
 
         private sealed class MultipleAddressConnectAsyncResult : ContextAwareResult
@@ -5617,7 +6250,7 @@ namespace System.Net.Sockets
 
             if (!context._socket.CanTryAddressFamily(currentAddressSnapshot.AddressFamily))
             {
-                return context._lastException != null ? context._lastException : new ArgumentException(SR.net_invalidAddressList, "context");
+                return context._lastException != null ? context._lastException : new ArgumentException(SR.net_invalidAddressList, nameof(context));
             }
 
             try
@@ -5772,7 +6405,7 @@ namespace System.Net.Sockets
             // inherited the WSAEventSelect() call from the accepting socket.
             // we need to cancel this otherwise the socket will be in non-blocking
             // mode and we cannot force blocking mode using the ioctlsocket() in
-            // Socket.set_Blocking(), since it fails returing 10022 as documented in MSDN.
+            // Socket.set_Blocking(), since it fails returning 10022 as documented in MSDN.
             // (note that the m_AsyncEvent event will not be created in this case.
 
             socket._willBlock = _willBlock;
@@ -5796,7 +6429,10 @@ namespace System.Net.Sockets
             // some point in time update the perf counter as well.
             _isConnected = true;
             _isDisconnected = false;
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetToConnected() now connected.");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetToConnected() now connected.");
+            }
             if (s_perfCountersEnabled)
             {
                 SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketConnectionsEstablished);
@@ -5805,7 +6441,11 @@ namespace System.Net.Sockets
 
         internal void SetToDisconnected()
         {
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetToDisconnected()");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetToDisconnected()");
+            }
+
             if (!_isConnected)
             {
                 // Socket was already disconnected.
@@ -5817,10 +6457,10 @@ namespace System.Net.Sockets
             _isConnected = false;
             _isDisconnected = true;
 
-            if (!CleanedUp)
+            if (!CleanedUp && GlobalLog.IsEnabled)
             {
                 // If socket is still alive cancel WSAEventSelect().
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::SetToDisconnected()");
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::SetToDisconnected()");
             }
         }
 
@@ -5836,10 +6476,14 @@ namespace System.Net.Sockets
         {
             // If we already know the socket is disconnected
             // we don't need to do anything else.
-            GlobalLog.Print("Socket#" + Logging.HashString(this) + "::UpdateStatusAfterSocketError(socketException)");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::UpdateStatusAfterSocketError(socketException)");
+            }
+
             if (s_loggingEnabled)
             {
-                Logging.PrintError(Logging.Sockets, this, "UpdateStatusAfterSocketError", errorCode.ToString());
+                NetEventSource.PrintError(NetEventSource.ComponentType.Socket, this, nameof(UpdateStatusAfterSocketError), errorCode.ToString());
             }
 
             if (_isConnected && (_handle.IsInvalid || (errorCode != SocketError.WouldBlock &&
@@ -5847,7 +6491,11 @@ namespace System.Net.Sockets
                     errorCode != SocketError.TimedOut)))
             {
                 // The socket is no longer a valid socket.
-                GlobalLog.Print("Socket#" + Logging.HashString(this) + "::UpdateStatusAfterSocketError(socketException) Invalidating socket.");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Socket#" + LoggingHash.HashString(this) + "::UpdateStatusAfterSocketError(socketException) Invalidating socket.");
+                }
+
                 SetToDisconnected();
             }
         }
@@ -5866,9 +6514,13 @@ namespace System.Net.Sockets
         #endregion
 
         [System.Diagnostics.Conditional("TRACE_VERBOSE")]
-        internal void DebugMembers() {
-            GlobalLog.Print("_handle:" + _handle.DangerousGetHandle().ToString("x") );
-            GlobalLog.Print("_isConnected: " + _isConnected);
+        internal void DebugMembers()
+        {
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("_handle:" + _handle.DangerousGetHandle().ToString("x"));
+                GlobalLog.Print("_isConnected: " + _isConnected);
+            }
         }
     }
 }

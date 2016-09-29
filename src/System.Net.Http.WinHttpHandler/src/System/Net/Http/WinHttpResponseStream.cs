@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -14,13 +16,12 @@ namespace System.Net.Http
     {
         private volatile bool _disposed;
         private readonly WinHttpRequestState _state;
+        private SafeWinHttpHandle _requestHandle;
         
-        // TODO (Issue 2505): temporary pinned buffer caches of 1 item. Will be replaced by PinnableBufferCache.
-        private GCHandle _cachedReceivePinnedBuffer = new GCHandle();
-
-        internal WinHttpResponseStream(WinHttpRequestState state)
+        internal WinHttpResponseStream(SafeWinHttpHandle requestHandle, WinHttpRequestState state)
         {
             _state = state;
+            _requestHandle = requestHandle;
         }
 
         public override bool CanRead
@@ -87,22 +88,22 @@ namespace System.Net.Http
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             if (count > buffer.Length - offset)
             {
-                throw new ArgumentException("buffer");
+                throw new ArgumentException(SR.net_http_buffer_insufficient_length, nameof(buffer));
             }
 
             if (token.IsCancellationRequested)
@@ -117,16 +118,7 @@ namespace System.Net.Http
                 throw new InvalidOperationException(SR.net_http_no_concurrent_io_allowed);
             }
 
-            // TODO (Issue 2505): replace with PinnableBufferCache.
-            if (!_cachedReceivePinnedBuffer.IsAllocated || _cachedReceivePinnedBuffer.Target != buffer)
-            {
-                if (_cachedReceivePinnedBuffer.IsAllocated)
-                {
-                    _cachedReceivePinnedBuffer.Free();
-                }
-
-                _cachedReceivePinnedBuffer = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            }
+            _state.PinReceiveBuffer(buffer);
 
             _state.TcsReadFromResponseStream =
                 new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -137,11 +129,13 @@ namespace System.Net.Http
                 {
                     if (previousTask.IsFaulted)
                     {
+                        _state.DisposeCtrReadFromResponseStream();
                         _state.TcsReadFromResponseStream.TrySetException(previousTask.Exception.InnerException);
                     }
-                    else if (previousTask.IsCanceled)
+                    else if (previousTask.IsCanceled || token.IsCancellationRequested)
                     {
-                        _state.TcsReadFromResponseStream.TrySetCanceled();
+                        _state.DisposeCtrReadFromResponseStream();
+                        _state.TcsReadFromResponseStream.TrySetCanceled(token);
                     }
                     else
                     {
@@ -158,28 +152,42 @@ namespace System.Net.Http
                         
                         lock (_state.Lock)
                         {
+                            Debug.Assert(!_requestHandle.IsInvalid);
                             if (!Interop.WinHttp.WinHttpReadData(
-                                _state.RequestHandle,
+                                _requestHandle,
                                 Marshal.UnsafeAddrOfPinnedArrayElement(buffer, offset),
                                 (uint)bytesToRead,
                                 IntPtr.Zero))
                             {
+                                _state.DisposeCtrReadFromResponseStream();
                                 _state.TcsReadFromResponseStream.TrySetException(
-                                    new IOException(SR.net_http_io_read, WinHttpException.CreateExceptionUsingLastError()));
+                                    new IOException(SR.net_http_io_read, WinHttpException.CreateExceptionUsingLastError().InitializeStackTrace()));
                             }
                         }
                     }
                 }, 
-                token, TaskContinuationOptions.None, TaskScheduler.Default);
+                CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
 
-            // TODO: Issue #2165. Register callback on cancellation token to cancel WinHTTP operation.
-                
+            // Register callback on cancellation token to cancel any pending WinHTTP operation.
+            if (token.CanBeCanceled)
+            {
+                WinHttpTraceHelper.Trace("WinHttpResponseStream.ReadAsync: registering for cancellation token request");
+                _state.CtrReadFromResponseStream =
+                    token.Register(s => ((WinHttpResponseStream)s).CancelPendingResponseStreamReadOperation(), this);
+            }
+            else
+            {
+                WinHttpTraceHelper.Trace("WinHttpResponseStream.ReadAsync: received no cancellation token");
+            }
+
             lock (_state.Lock)
             {
-                if (!Interop.WinHttp.WinHttpQueryDataAvailable(_state.RequestHandle, IntPtr.Zero))
+                Debug.Assert(!_requestHandle.IsInvalid);
+                if (!Interop.WinHttp.WinHttpQueryDataAvailable(_requestHandle, IntPtr.Zero))
                 {
+                    _state.DisposeCtrReadFromResponseStream();
                     _state.TcsReadFromResponseStream.TrySetException(
-                        new IOException(SR.net_http_io_read, WinHttpException.CreateExceptionUsingLastError()));
+                        new IOException(SR.net_http_io_read, WinHttpException.CreateExceptionUsingLastError().InitializeStackTrace()));
                 }
             }
 
@@ -217,17 +225,10 @@ namespace System.Net.Http
 
                 if (disposing)
                 {
-                    // TODO (Issue 2508): Pinned buffers must be released in the callback, when it is guaranteed no further
-                    // operations will be made to the send/receive buffers.
-                    if (_cachedReceivePinnedBuffer.IsAllocated)
+                    if (_requestHandle != null)
                     {
-                        _cachedReceivePinnedBuffer.Free();
-                    }
-
-                    if (_state.RequestHandle != null)
-                    {
-                        _state.RequestHandle.Dispose();
-                        _state.RequestHandle = null;
+                        _requestHandle.Dispose();
+                        _requestHandle = null;
                     }
                 }
             }
@@ -242,5 +243,32 @@ namespace System.Net.Http
                 throw new ObjectDisposedException(this.GetType().FullName);
             }
         }
+        
+        // The only way to abort pending async operations in WinHTTP is to close the request handle.
+        // This causes WinHTTP to cancel any pending I/O and accelerating its callbacks on the handle.
+        // This causes our related TaskCompletionSource objects to move to a terminal state.
+        //
+        // We only want to dispose the handle if we are actually waiting for a pending WinHTTP I/O to complete,
+        // meaning that we are await'ing for a Task to complete. While we could simply call dispose without
+        // a pending operation, it would cause random failures in the other threads when we expect a valid handle.
+        private void CancelPendingResponseStreamReadOperation()
+        {
+            WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation");
+            lock (_state.Lock)
+            {
+                WinHttpTraceHelper.Trace(
+                    string.Format("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: {0} {1}",
+                    (int)_state.TcsQueryDataAvailable.Task.Status, (int)_state.TcsReadFromResponseStream.Task.Status));
+                if (!_state.TcsQueryDataAvailable.Task.IsCompleted)
+                {
+                    Debug.Assert(_requestHandle != null);
+                    Debug.Assert(!_requestHandle.IsInvalid);
+                    
+                    WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: before dispose");
+                    _requestHandle.Dispose();
+                    WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: after dispose");
+                }
+            }
+        }        
     }
 }

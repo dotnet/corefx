@@ -1,43 +1,27 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Reflection.Metadata.Ecma335
 {
     public struct EditAndContinueLogEntry : IEquatable<EditAndContinueLogEntry>
     {
-        private readonly EntityHandle _handle;
-        private readonly EditAndContinueOperation _operation;
+        public EntityHandle Handle { get; }
+        public EditAndContinueOperation Operation { get; }
 
         public EditAndContinueLogEntry(EntityHandle handle, EditAndContinueOperation operation)
         {
-            _handle = handle;
-            _operation = operation;
+            Handle = handle;
+            Operation = operation;
         }
 
-        public EntityHandle Handle
-        {
-            get { return _handle; }
-        }
+        public override bool Equals(object obj) => 
+            obj is EditAndContinueLogEntry && Equals((EditAndContinueLogEntry)obj);
 
-        public EditAndContinueOperation Operation
-        {
-            get { return _operation; }
-        }
+        public bool Equals(EditAndContinueLogEntry other) => 
+            Operation == other.Operation && Handle == other.Handle;
 
-        public override bool Equals(object obj)
-        {
-            return obj is EditAndContinueLogEntry && Equals((EditAndContinueLogEntry)obj);
-        }
-
-        public bool Equals(EditAndContinueLogEntry other)
-        {
-            return this.Operation == other.Operation &&
-                   this.Handle == other.Handle;
-        }
-
-        public override int GetHashCode()
-        {
-            return (int)Operation ^ Handle.GetHashCode();
-        }
+        public override int GetHashCode() => 
+            (int)Operation ^ Handle.GetHashCode();
     }
 }

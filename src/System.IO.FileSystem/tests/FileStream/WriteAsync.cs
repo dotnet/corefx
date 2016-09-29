@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -204,29 +205,15 @@ namespace System.IO.Tests
                 Assert.Equal(0, fs.Position);
             }
         }
-        
+
         [Fact]
-        [ActiveIssue("Buffering needs to be fixed")]
         public void WriteAsyncBufferedCompletesSynchronously()
         {
-            // It doesn't make sense to spin up a background thread just to do a memcpy.
-
-            // This isn't working now for useAsync:true since we always have a usercallback 
-            // that get's run on the threadpool (see Win32FileStream.EndWriteTask)
-
-            // This isn't working now for useAsync:false since we always call
-            // Stream.WriteAsync that queues Read on a background thread
-            foreach (bool useAsync in new[] { true, false })
+            using (FileStream fs = new FileStream(
+                GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete, 
+                TestBuffer.Length * 2, useAsync: true))
             {
-                using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete, TestBuffer.Length * 2, useAsync))
-                {
-                    byte[] buffer = new byte[TestBuffer.Length];
-
-                    // Existing issue: FileStreamAsyncResult doesn't set CompletedSynchronously correctly.
-
-                    // write should now complete synchronously since it is just copying to the write buffer
-                    FSAssert.CompletesSynchronously(fs.WriteAsync(buffer, 0, buffer.Length));
-                }
+                FSAssert.CompletesSynchronously(fs.WriteAsync(new byte[TestBuffer.Length], 0, TestBuffer.Length));
             }
         }
 
@@ -306,7 +293,6 @@ namespace System.IO.Tests
             {
                 if (useAsync && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // [ActiveIssue(812, PlatformID.AnyUnix)]
                     // We don't have a special async I/O implementation in FileStream on Unix.
                     continue;
                 }
@@ -340,7 +326,7 @@ namespace System.IO.Tests
         }
 
         [Theory]
-        [MemberData("MemberData_FileStreamAsyncWriting")]
+        [MemberData(nameof(MemberData_FileStreamAsyncWriting))]
         [OuterLoop] // many combinations: we test just one in inner loop and the rest outer
         public async Task ManyConcurrentWriteAsyncs(
             bool useAsync, bool presize, bool exposeHandle, bool cancelable, int bufferSize, int writeSize, int numWrites)
@@ -378,46 +364,10 @@ namespace System.IO.Tests
 
             byte[] actualData = File.ReadAllBytes(path);
             Assert.Equal(expectedData.Length, actualData.Length);
-            Assert.Equal<byte>(expectedData, actualData);
-        }
-
-        [Fact]
-        public Task CopyToAsyncBetweenFileStreams()
-        {
-            // For inner loop, just test one case
-            return CopyToAsyncBetweenFileStreams(
-                useAsync: RuntimeInformation.IsOSPlatform(OSPlatform.Windows),
-                preSize: false,
-                exposeHandle: false,
-                cancelable: true,
-                bufferSize: 4096,
-                writeSize: 1024,
-                numWrites: 10);
-        }
-
-        [Theory]
-        [MemberData("MemberData_FileStreamAsyncWriting")]
-        [OuterLoop] // many combinations: we test just one in inner loop and the rest outer
-        public async Task CopyToAsyncBetweenFileStreams(
-            bool useAsync, bool preSize, bool exposeHandle, bool cancelable, int bufferSize, int writeSize, int numWrites)
-        {
-            long totalLength = writeSize * numWrites;
-            var expectedData = new byte[totalLength];
-            new Random(42).NextBytes(expectedData);
-
-            string srcPath = GetTestFilePath();
-            File.WriteAllBytes(srcPath, expectedData);
-
-            string dstPath = GetTestFilePath();
-            using (FileStream src = new FileStream(srcPath, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, useAsync))
-            using (FileStream dst = new FileStream(dstPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, useAsync))
+            if (useAsync)
             {
-                await src.CopyToAsync(dst, writeSize, cancelable ? new CancellationTokenSource().Token : CancellationToken.None);
+                Assert.Equal<byte>(expectedData, actualData);
             }
-
-            byte[] actualData = File.ReadAllBytes(dstPath);
-            Assert.Equal(expectedData.Length, actualData.Length);
-            Assert.Equal<byte>(expectedData, actualData);
         }
 
         [Theory]
@@ -456,7 +406,7 @@ namespace System.IO.Tests
         [Fact, OuterLoop]
         public async Task WriteAsyncMiniStress()
         {
-            TimeSpan testRunTime = TimeSpan.FromSeconds(30);
+            TimeSpan testRunTime = TimeSpan.FromSeconds(10);
             const int MaximumWriteSize = 16 * 1024;
             const int NormalWriteSize = 4 * 1024;
 

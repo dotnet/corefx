@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,8 +8,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using Microsoft.Win32.SafeHandles;
-
-using CURLcode = Interop.Http.CURLcode;
 
 namespace System.Net.Http
 {
@@ -18,39 +17,66 @@ namespace System.Net.Http
         {
             internal readonly GCHandle _gcHandle;
             internal readonly Interop.Ssl.ClientCertCallback _callback;
-            private SafeEvpPKeyHandle _privateKeyHandle = null;
-            private SafeX509Handle _certHandle = null;
+            private readonly X509Certificate2Collection _clientCertificates;
 
-            internal ClientCertificateProvider ()
+            internal ClientCertificateProvider(X509Certificate2Collection clientCertificates)
             {
                 _gcHandle = GCHandle.Alloc(this);
                 _callback = TlsClientCertCallback;
+                _clientCertificates = clientCertificates;
             }
 
             private int TlsClientCertCallback(IntPtr ssl, out IntPtr certHandle, out IntPtr privateKeyHandle)
             {
-                Interop.Crypto.CheckValidOpenSslHandle(ssl);
-                using (SafeSslHandle sslHandle = new SafeSslHandle(ssl, false))
+                const int CertificateSet = 1, NoCertificateSet = 0, SuspendHandshake = -1;
+
+                certHandle = IntPtr.Zero;
+                privateKeyHandle = IntPtr.Zero;
+
+                if (ssl == IntPtr.Zero)
                 {
-                    certHandle = IntPtr.Zero;
-                    privateKeyHandle = IntPtr.Zero;
-                    VerboseTrace("libssl's client certificate callback");
+                    Debug.Fail("Expected valid SSL pointer");
+                    EventSourceTrace("Invalid SSL pointer in callback");
+                    return NoCertificateSet;
+                }
+
+                SafeSslHandle sslHandle = null;
+                X509Chain chain = null;
+                X509Certificate2 certificate = null;
+                try
+                {
+                    sslHandle = new SafeSslHandle(ssl, ownsHandle: false);
 
                     ISet<string> issuerNames = GetRequestCertificateAuthorities(sslHandle);
-                    X509Certificate2 certificate;
-                    X509Chain chain;
-                    if (!GetClientCertificate(issuerNames, out certificate, out chain))
+
+                    if (_clientCertificates != null) // manual mode
                     {
-                        VerboseTrace("no cert or chain");
-                        return 0;
+                        // If there's one certificate, just use it. Otherwise, try to find the best one.
+                        if (_clientCertificates.Count == 1)
+                        {
+                            certificate = _clientCertificates[0];
+                            chain = TLSCertificateExtensions.BuildNewChain(certificate, includeClientApplicationPolicy: false);
+                        }
+                        else if (!_clientCertificates.TryFindClientCertificate(issuerNames, out certificate, out chain))
+                        {
+                            EventSourceTrace("No manual certificate or chain.");
+                            return NoCertificateSet;
+                        }
+                    }
+                    else if (!GetAutomaticClientCertificate(issuerNames, out certificate, out chain)) // automatic mode
+                    {
+                        EventSourceTrace("No automatic certificate or chain.");
+                        return NoCertificateSet;
                     }
 
+                    SafeEvpPKeyHandle privateKeySafeHandle = null;
                     Interop.Crypto.CheckValidOpenSslHandle(certificate.Handle);
                     using (RSAOpenSsl rsa = certificate.GetRSAPrivateKey() as RSAOpenSsl)
                     {
                         if (rsa != null)
                         {
-                            _privateKeyHandle = rsa.DuplicateKeyHandle();
+                            privateKeySafeHandle = rsa.DuplicateKeyHandle();
+                            EventSourceTrace("RSA key");
                         }
                         else
                         {
@@ -58,78 +84,71 @@ namespace System.Net.Http
                             {
                                 if (ecdsa != null)
                                 {
-                                    _privateKeyHandle = ecdsa.DuplicateKeyHandle();
+                                    privateKeySafeHandle = ecdsa.DuplicateKeyHandle();
+                                    EventSourceTrace("ECDsa key");
                                 }
                             }
                         }
                     }
 
-                    if (_privateKeyHandle == null || _privateKeyHandle.IsInvalid)
+                    if (privateKeySafeHandle == null || privateKeySafeHandle.IsInvalid)
                     {
-                        VerboseTrace("invalid private key");
-                        return 0;
+                        EventSourceTrace("Invalid private key");
+                        return NoCertificateSet;
                     }
 
-                    _certHandle = Interop.Crypto.X509Duplicate(certificate.Handle);
-                    Interop.Crypto.CheckValidOpenSslHandle(_certHandle);
+                    SafeX509Handle certSafeHandle = Interop.Crypto.X509UpRef(certificate.Handle);
+                    Interop.Crypto.CheckValidOpenSslHandle(certSafeHandle);
                     if (chain != null)
                     {
-                        for (int i = chain.ChainElements.Count - 2; i > 0; i--)
+                        if (!Interop.Ssl.AddExtraChainCertificates(sslHandle, chain))
                         {
-                            SafeX509Handle dupCertHandle = Interop.Crypto.X509Duplicate(chain.ChainElements[i].Certificate.Handle);
-                            Interop.Crypto.CheckValidOpenSslHandle(dupCertHandle);
-                            if (!Interop.Ssl.SslAddExtraChainCert(sslHandle, dupCertHandle))
-                            {
-                                VerboseTrace("failed to add extra chain cert");
-                                return -1;
-                            }
+                            EventSourceTrace("Failed to add extra chain certificate");
+                            return SuspendHandshake;
                         }
                     }
 
-                    certHandle = _certHandle.DangerousGetHandle();
-                    privateKeyHandle = _privateKeyHandle.DangerousGetHandle();
-                    return 1;
+                    certHandle = certSafeHandle.DangerousGetHandle();
+                    privateKeyHandle = privateKeySafeHandle.DangerousGetHandle();
+                    EventSourceTrace("Client certificate set: {0}", certificate);
+
+                    // Ownership has been transferred to OpenSSL; do not free these handles
+                    certSafeHandle.SetHandleAsInvalid();
+                    privateKeySafeHandle.SetHandleAsInvalid();
+
+                    return CertificateSet;
+                }
+                finally
+                {
+                    if (_clientCertificates == null) certificate?.Dispose(); // only dispose cert if it's automatic / newly created
+                    chain?.Dispose();
+                    sslHandle?.Dispose();
                 }
             }
 
             public void Dispose()
             {
                 _gcHandle.Free();
-                if (_privateKeyHandle != null)
-                {
-                    _privateKeyHandle.Dispose();
-                }
-
-                if (_certHandle != null)
-                {
-                    _certHandle.Dispose();
-                }
-                VerboseTrace("Disposed client cert provider");
             }
 
             private static ISet<string> GetRequestCertificateAuthorities(SafeSslHandle sslHandle)
             {
-                HashSet<string> clientAuthorityNames = new HashSet<string>();
                 using (SafeSharedX509NameStackHandle names = Interop.Ssl.SslGetClientCAList(sslHandle))
                 {
-                    if (names.IsInvalid)
-                    {
-                        return clientAuthorityNames;
-                    }
+                    // TODO: When https://github.com/dotnet/corefx/pull/2862 is available for use, 
+                    // size this appropriately based on nameCount.
+                    var clientAuthorityNames = new HashSet<string>();
 
-                    int nameCount = Interop.Crypto.GetX509NameStackFieldCount(names);
-
-                    if (nameCount == 0)
+                    if (!names.IsInvalid)
                     {
-                        return clientAuthorityNames;
-                    }
-
-                    for (int i = 0; i < nameCount; i++)
-                    {
-                        using (SafeSharedX509NameHandle nameHandle = Interop.Crypto.GetX509NameStackField(names, i))
+                        int nameCount = Interop.Crypto.GetX509NameStackFieldCount(names);
+                        for (int i = 0; i < nameCount; i++)
                         {
-                            X500DistinguishedName dn = Interop.Crypto.LoadX500Name(nameHandle);
-                            clientAuthorityNames.Add(dn.Name);
+                            using (SafeSharedX509NameHandle nameHandle = Interop.Crypto.GetX509NameStackField(names, i))
+                            {
+                                X500DistinguishedName dn = Interop.Crypto.LoadX500Name(nameHandle);
+                                clientAuthorityNames.Add(dn.Name);
+                            }
                         }
                     }
 
@@ -137,12 +156,29 @@ namespace System.Net.Http
                 }
             }
 
-            private static bool GetClientCertificate(ISet<string> allowedIssuers, out X509Certificate2 certificate, out X509Chain chain)
+            private static bool GetAutomaticClientCertificate(ISet<string> allowedIssuers, out X509Certificate2 certificate, out X509Chain chain)
             {
                 using (X509Store myStore = new X509Store(StoreName.My, StoreLocation.CurrentUser))
                 {
+                    // Get the certs from the store.
                     myStore.Open(OpenFlags.ReadOnly);
-                    return myStore.Certificates.TryFindClientCertificate(allowedIssuers, out certificate, out chain);
+                    X509Certificate2Collection certs = myStore.Certificates;
+
+                    // Find a matching one.
+                    bool gotCert = certs.TryFindClientCertificate(allowedIssuers, out certificate, out chain);
+
+                    // Dispose all but the matching cert.
+                    for (int i = 0; i < certs.Count; i++)
+                    {
+                        X509Certificate2 cert = certs[i];
+                        if (cert != certificate)
+                        {
+                            cert.Dispose();
+                        }
+                    }
+
+                    // Return whether we got one.
+                    return gotCert;
                 }
             }
         }

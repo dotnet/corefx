@@ -1,4 +1,4 @@
-Performance Tests
+﻿Performance Tests
 ======================
 
 This document contains instructions for building, running, and adding Performance tests. 
@@ -13,7 +13,7 @@ To run performance tests on Windows, .NET portable v5.0 is required. This librar
 ### Linux
 Performance tests on Linux require all of the same steps as they do for regular xunit tests - see the linux instructions [here](https://github.com/dotnet/corefx/blob/master/Documentation/building/unix-instructions.md). Once you can have a directory on your Linux machine with a working corerun and xunit.console.netcore.exe (as well as the test dll containing your perf tests!), you only need to run the following command:
 
-`dnu commands install Microsoft.DotNet.xunit.performance.runner.dnx 1.0.0-alpha-build0021 -f https://www.myget.org/F/dotnet-buildtools/`
+`dnu commands install Microsoft.DotNet.xunit.performance.runner.dnx 1.0.0-alpha-build0021 -f https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json`
 
 Be careful that your mscorlib, libcoreclr, and test dlls were compiled using the "/p:Configuration=Release" property. Otherwise you may get skewed results.
 
@@ -22,11 +22,11 @@ Running the tests
 ### Windows
 Performance test files (if present) are stored within a library's ```tests/Performance``` directory and contain test methods that are all marked with a perf-specific *Benchmark* attribute. The performance tests will only be run if the ```performance``` property is set to ```true```.
 
-To build and run the tests using msbuild for a project, run ```msbuild /t:BuildAndTest /p:Performance=true /p:Configuration=Release``` from the tests directory. If the v5.0 assemblies aren't installed on your system, an error will be raised and no tests will be run.
+To build and run the tests using msbuild for a project, run ```msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:OSGroup=Windows_NT``` from the tests directory. If the v5.0 assemblies aren't installed on your system, an error will be raised and no tests will be run.
 
 Note: Because build.cmd runs tests concurrently, it's not recommended that you execute the perf tests using it.
 
-results will be in: corefx/bin/tests/Windows_NT.AnyCPU.Release/TESTNAME/dnxcore50
+results will be in: corefx/bin/tests/Windows_NT.AnyCPU.Release/TESTNAME/netcoreapp1.0
 ### Linux
 From your tests directory, run:
 ```

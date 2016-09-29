@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -243,7 +244,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.method.regmetho
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.method.regmethod.genclass.genclassregmeth.genclassregmeth;
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.method.regmethod.genclass.genclass002.genclass002;
-    // <Title> Tests generic class regular method used in argements of method invocation.</Title>
+    // <Title> Tests generic class regular method used in arguments of method invocation.</Title>
     // <Description>
     // </Description>
     // <RelatedBugs></RelatedBugs>

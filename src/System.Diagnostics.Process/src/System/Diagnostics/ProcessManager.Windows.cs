@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -100,10 +100,10 @@ namespace System.Diagnostics
         public static bool IsRemoteMachine(string machineName)
         {
             if (machineName == null)
-                throw new ArgumentNullException("machineName");
+                throw new ArgumentNullException(nameof(machineName));
 
             if (machineName.Length == 0)
-                throw new ArgumentException(SR.Format(SR.InvalidParameter, "machineName", machineName));
+                throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
 
             string baseName;
 
@@ -224,31 +224,28 @@ namespace System.Diagnostics
         private const string PerfCounterQueryString = "230 232";
         internal const int IdleProcessID = 0;
 
-        private static Dictionary<String, ValueId> s_valueIds;
-
-        static NtProcessManager()
+        private static readonly Dictionary<String, ValueId> s_valueIds = new Dictionary<string, ValueId>(19)
         {
-            s_valueIds = new Dictionary<String, ValueId>();
-            s_valueIds.Add("Pool Paged Bytes", ValueId.PoolPagedBytes);
-            s_valueIds.Add("Pool Nonpaged Bytes", ValueId.PoolNonpagedBytes);
-            s_valueIds.Add("Elapsed Time", ValueId.ElapsedTime);
-            s_valueIds.Add("Virtual Bytes Peak", ValueId.VirtualBytesPeak);
-            s_valueIds.Add("Virtual Bytes", ValueId.VirtualBytes);
-            s_valueIds.Add("Private Bytes", ValueId.PrivateBytes);
-            s_valueIds.Add("Page File Bytes", ValueId.PageFileBytes);
-            s_valueIds.Add("Page File Bytes Peak", ValueId.PageFileBytesPeak);
-            s_valueIds.Add("Working Set Peak", ValueId.WorkingSetPeak);
-            s_valueIds.Add("Working Set", ValueId.WorkingSet);
-            s_valueIds.Add("ID Thread", ValueId.ThreadId);
-            s_valueIds.Add("ID Process", ValueId.ProcessId);
-            s_valueIds.Add("Priority Base", ValueId.BasePriority);
-            s_valueIds.Add("Priority Current", ValueId.CurrentPriority);
-            s_valueIds.Add("% User Time", ValueId.UserTime);
-            s_valueIds.Add("% Privileged Time", ValueId.PrivilegedTime);
-            s_valueIds.Add("Start Address", ValueId.StartAddress);
-            s_valueIds.Add("Thread State", ValueId.ThreadState);
-            s_valueIds.Add("Thread Wait Reason", ValueId.ThreadWaitReason);
-        }
+            { "Pool Paged Bytes", ValueId.PoolPagedBytes },
+            { "Pool Nonpaged Bytes", ValueId.PoolNonpagedBytes },
+            { "Elapsed Time", ValueId.ElapsedTime },
+            { "Virtual Bytes Peak", ValueId.VirtualBytesPeak },
+            { "Virtual Bytes", ValueId.VirtualBytes },
+            { "Private Bytes", ValueId.PrivateBytes },
+            { "Page File Bytes", ValueId.PageFileBytes },
+            { "Page File Bytes Peak", ValueId.PageFileBytesPeak },
+            { "Working Set Peak", ValueId.WorkingSetPeak },
+            { "Working Set", ValueId.WorkingSet },
+            { "ID Thread", ValueId.ThreadId },
+            { "ID Process", ValueId.ProcessId },
+            { "Priority Base", ValueId.BasePriority },
+            { "Priority Current", ValueId.CurrentPriority },
+            { "% User Time", ValueId.UserTime },
+            { "% Privileged Time", ValueId.PrivilegedTime },
+            { "Start Address", ValueId.StartAddress },
+            { "Thread State", ValueId.ThreadState },
+            { "Thread Wait Reason", ValueId.ThreadWaitReason }
+        };
 
         internal static int SystemProcessID
         {
@@ -494,7 +491,7 @@ namespace System.Diagnostics
             {
                 case Interop.mincore.Errors.ERROR_INVALID_HANDLE:
                 case Interop.mincore.Errors.ERROR_PARTIAL_COPY:
-                    // It's possible that another thread casued this module to become
+                    // It's possible that another thread caused this module to become
                     // unloaded (e.g FreeLibrary was called on the module).  Ignore it and
                     // move on.
                     break;
@@ -633,7 +630,7 @@ namespace System.Diagnostics
                                 {
                                     // We've found two entries in the perfcounters that claim to be the
                                     // same process.  We throw an exception.  Is this really going to be
-                                    // helpfull to the user?  Should we just ignore?
+                                    // helpful to the user?  Should we just ignore?
 #if FEATURE_TRACESWITCH
                                     Debug.WriteLineIf(Process._processTracing.TraceVerbose, "GetProcessInfos() - found a duplicate process id");
 #endif

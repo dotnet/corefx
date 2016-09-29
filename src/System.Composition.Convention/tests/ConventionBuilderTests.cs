@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Composition;
@@ -87,14 +88,13 @@ namespace System.Composition.Convention.UnitTests
                 Export<IFoo>();
 
             builder.ForType<FooImplWithConstructors>()
-                .SelectConstructor(cis => cis.ElementAtOrDefault(1));
+                .SelectConstructor(cis => cis.Single(c => c.GetParameters().Length == 1));
 
             var fooImplWithConstructors = typeof(FooImplWithConstructors).GetTypeInfo();
 
             var constructor1 = fooImplWithConstructors.DeclaredConstructors.Where(c => c.GetParameters().Length == 0).Single();
             var constructor2 = fooImplWithConstructors.DeclaredConstructors.Where(c => c.GetParameters().Length == 1).Single();
             var constructor3 = fooImplWithConstructors.DeclaredConstructors.Where(c => c.GetParameters().Length == 2).Single();
-
 
             // necessary as BuildConventionConstructorAttributes is only called for type level query for attributes
             Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -325,7 +326,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.regpro
 {
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.regproperty.genclass.genclassregprop.genclassregprop;
     using ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.regproperty.genclass.genclass006.genclass006;
-    // <Title> Tests generic class regular property used in member initialzier of object initializer.</Title>
+    // <Title> Tests generic class regular property used in member initializer of object initializer.</Title>
     // <Description>
     // </Description>
     // <RelatedBugs></RelatedBugs>

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -23,6 +24,7 @@ namespace System.Net.Security.Tests
             return true;  // allow everything
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task TransportContext_ConnectToServerWithSsl_GetExpectedChannelBindings()
         {
@@ -34,7 +36,7 @@ namespace System.Net.Security.Tests
 
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.RequireEncryption))
                 {
-                    sslStream.AuthenticateAsClient("localhost", null, SslProtocols.Tls, false);
+                    await sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocols.Tls, false);
 
                     TransportContext context = sslStream.TransportContext;
                     CheckTransportContext(context);

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -10,15 +11,15 @@ namespace System.Security.Cryptography
     {
         protected SymmetricAlgorithm()
         {
-            Mode = CipherMode.CBC;
-            Padding = PaddingMode.PKCS7;
+            ModeValue = CipherMode.CBC;
+            PaddingValue = PaddingMode.PKCS7;
         }
 
         public virtual int BlockSize
         {
             get
             {
-                return _blockSize;
+                return BlockSizeValue;
             }
 
             set
@@ -27,11 +28,11 @@ namespace System.Security.Cryptography
                 if (!value.IsLegalSize(this.LegalBlockSizes, out validatedByZeroSkipSizeKeySizes))
                     throw new CryptographicException(SR.Cryptography_InvalidBlockSize);
 
-                if (_blockSize == value && !validatedByZeroSkipSizeKeySizes) // The !validatedByZeroSkipSizeKeySizes check preserves a very obscure back-compat behavior.
+                if (BlockSizeValue == value && !validatedByZeroSkipSizeKeySizes) // The !validatedByZeroSkipSizeKeySizes check preserves a very obscure back-compat behavior.
                     return;
 
-                _blockSize = value;
-                _iv = null;
+                BlockSizeValue = value;
+                IVValue = null;
                 return;
             }
         }
@@ -40,19 +41,19 @@ namespace System.Security.Cryptography
         {
             get
             {
-                if (_iv == null)
+                if (IVValue == null)
                     GenerateIV();
-                return _iv.CloneByteArray();
+                return IVValue.CloneByteArray();
             }
 
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 if (value.Length != this.BlockSize / 8)
                     throw new CryptographicException(SR.Cryptography_InvalidIVSize);
 
-                _iv = value.CloneByteArray();
+                IVValue = value.CloneByteArray();
             }
         }
 
@@ -60,15 +61,15 @@ namespace System.Security.Cryptography
         {
             get
             {
-                if (_key == null)
+                if (KeyValue == null)
                     GenerateKey();
-                return _key.CloneByteArray();
+                return KeyValue.CloneByteArray();
             }
 
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 long bitLength = value.Length * 8L;
                 if (bitLength > int.MaxValue || !ValidKeySize((int)bitLength))
@@ -76,7 +77,7 @@ namespace System.Security.Cryptography
 
                 // must convert bytes to bits
                 this.KeySize = (int)bitLength;
-                _key = value.CloneByteArray();
+                KeyValue = value.CloneByteArray();
             }
         }
 
@@ -84,7 +85,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                return _keySize;
+                return KeySizeValue;
             }
 
             set
@@ -92,8 +93,8 @@ namespace System.Security.Cryptography
                 if (!ValidKeySize(value))
                     throw new CryptographicException(SR.Cryptography_InvalidKeySize);
 
-                _keySize = value;
-                _key = null;
+                KeySizeValue = value;
+                KeyValue = null;
             }
         }
 
@@ -101,9 +102,8 @@ namespace System.Security.Cryptography
         {
             get
             {
-                // Desktop compat: Unless derived classes set the protected field "LegalBlockSizesValue" to a non-null value, a NullReferenceException is what you get.
-                // In the Win8P profile, the "LegalBlockSizesValue" field has been removed. So derived classes must override this property for the class to be any of any use.
-                throw new NullReferenceException();
+                // Desktop compat: No null check is performed.
+                return (KeySizes[])LegalBlockSizesValue.Clone();
             }
         }
 
@@ -111,9 +111,8 @@ namespace System.Security.Cryptography
         {
             get
             {
-                // Desktop compat: Unless derived classes set the protected field "LegalKeySizesValue" to a non-null value, a NullReferenceException is what you get.
-                // In the Win8P profile, the "LegalKeySizesValue" field has been removed. So derived classes must override this property for the class to be any of any use.
-                throw new NullReferenceException();
+                // Desktop compat: No null check is performed.
+                return (KeySizes[])LegalKeySizesValue.Clone();
             }
         }
 
@@ -121,7 +120,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                return _cipherMode;
+                return ModeValue;
             }
 
             set
@@ -129,7 +128,7 @@ namespace System.Security.Cryptography
                 if (!(value == CipherMode.CBC || value == CipherMode.ECB))
                     throw new CryptographicException(SR.Cryptography_InvalidCipherMode);
 
-                _cipherMode = value;
+                ModeValue = value;
             }
         }
 
@@ -137,20 +136,20 @@ namespace System.Security.Cryptography
         {
             get
             {
-                return _paddingMode;
+                return PaddingValue;
             }
 
             set
             {
                 if (!(value == PaddingMode.None || value == PaddingMode.PKCS7 || value == PaddingMode.Zeros))
                     throw new CryptographicException(SR.Cryptography_InvalidPaddingMode);
-                _paddingMode = value;
+                PaddingValue = value;
             }
         }
 
         public virtual ICryptoTransform CreateDecryptor()
         {
-            return CreateDecryptor(this.Key, this.IV);
+            return CreateDecryptor(Key, IV);
         }
 
         public abstract ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV);
@@ -172,15 +171,15 @@ namespace System.Security.Cryptography
         {
             if (disposing)
             {
-                if (_key != null)
+                if (KeyValue != null)
                 {
-                    Array.Clear(_key, 0, _key.Length);
-                    _key = null;
+                    Array.Clear(KeyValue, 0, KeyValue.Length);
+                    KeyValue = null;
                 }
-                if (_iv != null)
+                if (IVValue != null)
                 {
-                    Array.Clear(_iv, 0, _iv.Length);
-                    _iv = null;
+                    Array.Clear(IVValue, 0, IVValue.Length);
+                    IVValue = null;
                 }
             }
         }
@@ -196,13 +195,14 @@ namespace System.Security.Cryptography
                 return false;
             return bitLength.IsLegalSize(validSizes);
         }
-
-
-        private CipherMode _cipherMode;
-        private PaddingMode _paddingMode;
-        private byte[] _key;
-        private byte[] _iv;
-        private int _blockSize;
-        private int _keySize;
+        
+        protected CipherMode ModeValue;
+        protected PaddingMode PaddingValue;
+        protected byte[] KeyValue;
+        protected byte[] IVValue;
+        protected int BlockSizeValue;
+        protected int KeySizeValue;
+        protected KeySizes[] LegalBlockSizesValue;
+        protected KeySizes[] LegalKeySizesValue;
     }
 }

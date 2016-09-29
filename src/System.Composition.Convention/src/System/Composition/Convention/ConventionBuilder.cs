@@ -1,13 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Internal;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 
 namespace System.Composition.Convention
 {
@@ -18,7 +17,7 @@ namespace System.Composition.Convention
     {
         private static readonly List<object> s_emptyList = new List<object>();
 
-        private readonly Lock _lock = new Lock();
+        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         private readonly List<PartConventionBuilder> _conventions = new List<PartConventionBuilder>();
 
         private readonly Dictionary<MemberInfo, List<Attribute>> _memberInfos = new Dictionary<MemberInfo, List<Attribute>>();
@@ -52,7 +51,7 @@ namespace System.Composition.Convention
         /// <returns>A <see cref="PartConventionBuilder"/> that must be used to specify the rule.</returns>
         public PartConventionBuilder ForTypesDerivedFrom(Type type)
         {
-            Requires.NotNull(type, "type");
+            Requires.NotNull(type, nameof(type));
 
             var partBuilder = new PartConventionBuilder((t) => IsDescendentOf(t, type));
             _conventions.Add(partBuilder);
@@ -78,7 +77,7 @@ namespace System.Composition.Convention
         /// <returns>A <see cref="PartConventionBuilder"/> that must be used to specify the rule.</returns>
         public PartConventionBuilder ForType(Type type)
         {
-            Requires.NotNull(type, "type");
+            Requires.NotNull(type, nameof(type));
 
             var partBuilder = new PartConventionBuilder((t) => t == type);
             _conventions.Add(partBuilder);
@@ -94,7 +93,7 @@ namespace System.Composition.Convention
         /// <returns>A <see cref="PartConventionBuilder{T}"/> that must be used to specify the rule.</returns>
         public PartConventionBuilder<T> ForTypesMatching<T>(Predicate<Type> typeFilter)
         {
-            Requires.NotNull(typeFilter, "typeFilter");
+            Requires.NotNull(typeFilter, nameof(typeFilter));
 
             var partBuilder = new PartConventionBuilder<T>(typeFilter);
             _conventions.Add(partBuilder);
@@ -109,7 +108,7 @@ namespace System.Composition.Convention
         /// <returns>A <see cref="PartConventionBuilder{T}"/> that must be used to specify the rule.</returns>
         public PartConventionBuilder ForTypesMatching(Predicate<Type> typeFilter)
         {
-            Requires.NotNull(typeFilter, "typeFilter");
+            Requires.NotNull(typeFilter, nameof(typeFilter));
 
             var partBuilder = new PartConventionBuilder(typeFilter);
             _conventions.Add(partBuilder);
@@ -152,7 +151,7 @@ namespace System.Composition.Convention
         /// <returns>The list of applied attributes.</returns>
         public override IEnumerable<Attribute> GetCustomAttributes(Type reflectedType, System.Reflection.MemberInfo member)
         {
-            Requires.NotNull(member, "member");
+            Requires.NotNull(member, nameof(member));
 
             // Now edit the attributes returned from the base type
             List<Attribute> cachedAttributes = null;
@@ -160,13 +159,19 @@ namespace System.Composition.Convention
             if (typeInfo != null)
             {
                 var memberInfo = typeInfo as MemberInfo;
-                using (new ReadLock(_lock))
+                _lock.EnterReadLock();
+                try
                 {
                     _memberInfos.TryGetValue(memberInfo, out cachedAttributes);
                 }
+                finally
+                {
+                    _lock.ExitReadLock();
+                }
                 if (cachedAttributes == null)
                 {
-                    using (new WriteLock(_lock))
+                    _lock.EnterWriteLock();
+                    try
                     {
                         //Double check locking another thread may have inserted one while we were away.
                         if (!_memberInfos.TryGetValue(memberInfo, out cachedAttributes))
@@ -206,8 +211,12 @@ namespace System.Composition.Convention
                             }
                         }
 
-                        // We will have updated all of the MemberInfos by now so lets reload cachedAttributes wiuth the current store
+                        // We will have updated all of the MemberInfos by now so lets reload cachedAttributes with the current store
                         _memberInfos.TryGetValue(memberInfo, out cachedAttributes);
+                    }
+                    finally
+                    {
+                        _lock.ExitWriteLock();
                     }
                 }
             }
@@ -231,7 +240,8 @@ namespace System.Composition.Convention
             bool getMemberAttributes = false;
 
             // Now edit the attributes returned from the base type
-            using (new ReadLock(_lock))
+            _lock.EnterReadLock();
+            try
             {
                 if (!_memberInfos.TryGetValue(member, out cachedAttributes))
                 {
@@ -246,15 +256,24 @@ namespace System.Composition.Convention
                     cachedAttributes = null;
                 }
             }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
 
             if (getMemberAttributes)
             {
                 GetCustomAttributes(null, reflectedType.GetTypeInfo() as MemberInfo);
 
                 // We should have run the rules for the enclosing parameter so we can again
-                using (new ReadLock(_lock))
+                _lock.EnterReadLock();
+                try
                 {
                     _memberInfos.TryGetValue(member, out cachedAttributes);
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
                 }
             }
 
@@ -269,8 +288,7 @@ namespace System.Composition.Convention
         /// <returns>The list of applied attributes.</returns>
         public override IEnumerable<Attribute> GetCustomAttributes(Type reflectedType, System.Reflection.ParameterInfo parameter)
         {
-            Requires.NotNull(parameter, "reflectedType");
-            Requires.NotNull(parameter, "parameter");
+            Requires.NotNull(parameter, nameof(parameter));
             var attributes = parameter.GetCustomAttributes<Attribute>(false);
             List<Attribute> cachedAttributes = ReadParameterCustomAttributes(reflectedType, parameter);
             return cachedAttributes == null ? attributes : attributes.Concat(cachedAttributes);
@@ -282,7 +300,8 @@ namespace System.Composition.Convention
             bool getMemberAttributes = false;
 
             // Now edit the attributes returned from the base type
-            using (new ReadLock(_lock))
+            _lock.EnterReadLock();
+            try
             {
                 if (!_parameters.TryGetValue(parameter, out cachedAttributes))
                 {
@@ -297,15 +316,24 @@ namespace System.Composition.Convention
                     cachedAttributes = null;
                 }
             }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
 
             if (getMemberAttributes)
             {
                 GetCustomAttributes(null, reflectedType.GetTypeInfo() as MemberInfo);
 
                 // We should have run the rules for the enclosing parameter so we can again
-                using (new ReadLock(_lock))
+                _lock.EnterReadLock();
+                try
                 {
                     _parameters.TryGetValue(parameter, out cachedAttributes);
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
                 }
             }
 

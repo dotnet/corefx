@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace Microsoft.Win32.RegistryTests
         public static IEnumerable<object[]> TestObjects { get { return TestData.TestObjects; } }
 
         [Theory]
-        [MemberData("TestObjects")]
+        [MemberData(nameof(TestObjects))]
         public void SetValueWithUnknownValueKind(int testIndex, object testValue, RegistryValueKind expectedValueKind)
         {
             string valueName = "Testing_" + testIndex.ToString();
@@ -24,7 +25,7 @@ namespace Microsoft.Win32.RegistryTests
         }
 
         [Theory]
-        [MemberData("TestObjects")]
+        [MemberData(nameof(TestObjects))]
         public void SetValueWithStringValueKind(int testIndex, object testValue, RegistryValueKind expectedValueKind)
         {
             string valueName = "Testing_" + testIndex.ToString();
@@ -37,7 +38,7 @@ namespace Microsoft.Win32.RegistryTests
         }
 
         [Theory]
-        [MemberData("TestObjects")]
+        [MemberData(nameof(TestObjects))]
         public void SetValueWithExpandStringValueKind(int testIndex, object testValue, RegistryValueKind expectedValueKind)
         {
             string valueName = "Testing_" + testIndex.ToString();
@@ -50,7 +51,7 @@ namespace Microsoft.Win32.RegistryTests
         }
 
         [Theory]
-        [MemberData("TestObjects")]
+        [MemberData(nameof(TestObjects))]
         public void SetValueWithMultiStringValeKind(int testIndex, object testValue, RegistryValueKind expectedValueKind)
         {
             try
@@ -70,7 +71,7 @@ namespace Microsoft.Win32.RegistryTests
         }
 
         [Theory]
-        [MemberData("TestObjects")]
+        [MemberData(nameof(TestObjects))]
         public void SetValueWithBinaryValueKind(int testIndex, object testValue, RegistryValueKind expectedValueKind)
         {
             try
@@ -90,7 +91,7 @@ namespace Microsoft.Win32.RegistryTests
         }
 
         [Theory]
-        [MemberData("TestObjects")]
+        [MemberData(nameof(TestObjects))]
         public void SetValueWithDWordValueKind(int testIndex, object testValue, RegistryValueKind expectedValueKind)
         {
             try
@@ -111,7 +112,7 @@ namespace Microsoft.Win32.RegistryTests
         }
 
         [Theory]
-        [MemberData("TestObjects")]
+        [MemberData(nameof(TestObjects))]
         public void SetValueWithQWordValueKind(int testIndex, object testValue, RegistryValueKind expectedValueKind)
         {
             try
@@ -154,7 +155,7 @@ namespace Microsoft.Win32.RegistryTests
         public static IEnumerable<object[]> TestValueNames { get { return TestData.TestValueNames; } }
 
         [Theory]
-        [MemberData("TestValueNames")]
+        [MemberData(nameof(TestValueNames))]
         public void SetValueWithNameTest(string valueName)
         {
             const long expectedValue = long.MaxValue;

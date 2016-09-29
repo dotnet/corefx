@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -12,7 +13,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 namespace System.Threading.Tasks.Dataflow.Internal
 {
@@ -31,7 +31,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <returns>The created disposable.</returns>
         internal static IDisposable Create<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg2)
         {
-            Contract.Requires(action != null, "Non-null disposer action required.");
+            Debug.Assert(action != null, "Non-null disposer action required.");
             return new Disposable<T1, T2>(action, arg1, arg2);
         }
 
@@ -46,7 +46,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <returns>The created disposable.</returns>
         internal static IDisposable Create<T1, T2, T3>(Action<T1, T2, T3> action, T1 arg1, T2 arg2, T3 arg3)
         {
-            Contract.Requires(action != null, "Non-null disposer action required.");
+            Debug.Assert(action != null, "Non-null disposer action required.");
             return new Disposable<T1, T2, T3>(action, arg1, arg2, arg3);
         }
 
@@ -74,7 +74,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             /// <param name="arg2">The second argument.</param>
             internal Disposable(Action<T1, T2> action, T1 arg1, T2 arg2)
             {
-                Contract.Requires(action != null, "Non-null action needed for disposable");
+                Debug.Assert(action != null, "Non-null action needed for disposable");
                 _action = action;
                 _arg1 = arg1;
                 _arg2 = arg2;
@@ -116,7 +116,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             /// <param name="arg3">The third argument.</param>
             internal Disposable(Action<T1, T2, T3> action, T1 arg1, T2 arg2, T3 arg3)
             {
-                Contract.Requires(action != null, "Non-null action needed for disposable");
+                Debug.Assert(action != null, "Non-null action needed for disposable");
                 _action = action;
                 _arg1 = arg1;
                 _arg2 = arg2;

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -23,6 +24,10 @@ namespace System.IO.Tests
                 yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                     ((testFile, time) => { testFile.CreationTimeUtc = time; }),
                     ((testFile) => testFile.CreationTimeUtc),
+                    DateTimeKind.Unspecified);
+                yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
+                    ((testFile, time) => { testFile.CreationTimeUtc = time; }),
+                    ((testFile) => testFile.CreationTimeUtc),
                     DateTimeKind.Utc);
             }
             yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
@@ -32,11 +37,19 @@ namespace System.IO.Tests
             yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                 ((testFile, time) => { testFile.LastAccessTimeUtc = time; }),
                 ((testFile) => testFile.LastAccessTimeUtc),
+                DateTimeKind.Unspecified);
+            yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
+                ((testFile, time) => { testFile.LastAccessTimeUtc = time; }),
+                ((testFile) => testFile.LastAccessTimeUtc),
                 DateTimeKind.Utc);
             yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                 ((testFile, time) => { testFile.LastWriteTime = time; }),
                 ((testFile) => testFile.LastWriteTime),
                 DateTimeKind.Local);
+            yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
+                ((testFile, time) => { testFile.LastWriteTimeUtc = time; }),
+                ((testFile) => testFile.LastWriteTimeUtc),
+                DateTimeKind.Unspecified);
             yield return Tuple.Create<SetTime, GetTime, DateTimeKind>(
                 ((testFile, time) => { testFile.LastWriteTimeUtc = time; }),
                 ((testFile) => testFile.LastWriteTimeUtc),
@@ -56,7 +69,17 @@ namespace System.IO.Tests
                 var result = tuple.Item2(testFile);
                 Assert.Equal(dt, result);
                 Assert.Equal(dt.ToLocalTime(), result.ToLocalTime());
-                Assert.Equal(dt.ToUniversalTime(), result.ToUniversalTime());
+
+                // File and Directory UTC APIs treat a DateTimeKind.Unspecified as UTC whereas
+                // ToUniversalTime treats it as local.
+                if (tuple.Item3 == DateTimeKind.Unspecified)
+                {
+                    Assert.Equal(dt, result.ToUniversalTime());
+                }
+                else
+                {
+                    Assert.Equal(dt.ToUniversalTime(), result.ToUniversalTime());
+                }
             });
         }
 
@@ -74,10 +97,10 @@ namespace System.IO.Tests
             Assert.All(TimeFunctions(), (tuple) =>
             {
                 // We want to test all possible DateTimeKind conversions to ensure they function as expected
-                if (tuple.Item3 == DateTimeKind.Utc)
-                    Assert.InRange(tuple.Item2(testFile).Ticks, beforeTime.Ticks, afterTime.Ticks);
-                else
+                if (tuple.Item3 == DateTimeKind.Local)
                     Assert.InRange(tuple.Item2(testFile).Ticks, beforeTime.ToLocalTime().Ticks, afterTime.ToLocalTime().Ticks);
+                else
+                    Assert.InRange(tuple.Item2(testFile).Ticks, beforeTime.Ticks, afterTime.Ticks);
                 Assert.InRange(tuple.Item2(testFile).ToLocalTime().Ticks, beforeTime.ToLocalTime().Ticks, afterTime.ToLocalTime().Ticks);
                 Assert.InRange(tuple.Item2(testFile).ToUniversalTime().Ticks, beforeTime.Ticks, afterTime.Ticks);
             });

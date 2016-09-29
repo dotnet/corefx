@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 using System;
@@ -19,7 +20,6 @@ namespace XPathTests.FunctionalTests
         /// </summary>
         [Fact]
         [OuterLoop]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void GlobalizationTest566()
         {
             var xml = "Surrogates_1.xml";
@@ -148,7 +148,6 @@ namespace XPathTests.FunctionalTests
         /// Thai Risky : xpath testing, returns 4 nodes
         /// </summary>
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void GlobalizationTest568()
         {
             var xml = "Thai_risky_chars.xml";
@@ -201,7 +200,6 @@ namespace XPathTests.FunctionalTests
         /// Japanese 1: xpath testing problem char, returns 19 nodes
         /// </summary>
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void GlobalizationTest569()
         {
             var xml = "JPN_problem_chars_1.xml";
@@ -388,7 +386,6 @@ namespace XPathTests.FunctionalTests
         /// Japanese 2: xpath testing problem char, returns 7 nodes
         /// </summary>
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void GlobalizationTest5610()
         {
             var xml = "JPN_problem_chars_2.xml";
@@ -467,7 +464,6 @@ namespace XPathTests.FunctionalTests
         /// Korean: xpath testing problem char, return 6 nodes
         /// </summary>
         [Fact]
-        [ActiveIssue(846, PlatformID.AnyUnix)]
         public static void GlobalizationTest5613()
         {
             var xml = "KOR_problem_chars_b.xml";

@@ -1,7 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,7 +12,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        internal static unsafe int ForkAndExecProcess(
+        internal static unsafe void ForkAndExecProcess(
             string filename, string[] argv, string[] envp, string cwd,
             bool redirectStdin, bool redirectStdout, bool redirectStderr,
             out int lpChildPid, out int stdinFd, out int stdoutFd, out int stderrFd)
@@ -20,10 +22,24 @@ internal static partial class Interop
             {
                 AllocNullTerminatedArray(argv, ref argvPtr);
                 AllocNullTerminatedArray(envp, ref envpPtr);
-                return ForkAndExecProcess(
+                int result = ForkAndExecProcess(
                     filename, argvPtr, envpPtr, cwd,
                     redirectStdin ? 1 : 0, redirectStdout ? 1 : 0, redirectStderr ? 1 :0,
                     out lpChildPid, out stdinFd, out stdoutFd, out stderrFd);
+                if (result != 0)
+                {
+                    // Normally we'd simply make this method return the result of the native
+                    // call and allow the caller to use GetLastWin32Error.  However, we need
+                    // to free the native arrays after calling the function, and doing so
+                    // stomps on the runtime's captured last error.  So we need to access the
+                    // error here, and without SetLastWin32Error available, we can't propagate
+                    // the error to the caller via the normal GetLastWin32Error mechanism.  We could
+                    // return 0 on success or the GetLastWin32Error value on failure, but that's
+                    // technically ambiguous, in the case of a failure with a 0 errno.  Simplest
+                    // solution then is just to throw here the same exception the Process caller
+                    // would have.  This can be revisited if we ever have another call site.
+                    throw new Win32Exception();
+                }
             }
             finally
             {
@@ -32,7 +48,7 @@ internal static partial class Interop
             }
         }
 
-        [DllImport(Libraries.SystemNative, SetLastError = true)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ForkAndExecProcess", SetLastError = true)]
         private static extern unsafe int ForkAndExecProcess(
             string filename, byte** argv, byte** envp, string cwd,
             int redirectStdin, int redirectStdout, int redirectStderr,

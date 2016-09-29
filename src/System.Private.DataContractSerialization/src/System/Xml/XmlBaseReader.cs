@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------
-//------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -70,7 +69,7 @@ namespace System.Xml
         {
             _bufferReader = new XmlBufferReader(this);
             _nsMgr = new NamespaceManager(_bufferReader);
-            _quotas = XmlDictionaryReaderQuotas.Max;
+            _quotas = new XmlDictionaryReaderQuotas();
             _rootElementNode = new XmlElementNode(_bufferReader);
             _atomicTextNode = new XmlAtomicTextNode(_bufferReader);
             _node = s_closedNode;
@@ -95,6 +94,14 @@ namespace System.Xml
             }
         }
 
+        public override XmlDictionaryReaderQuotas Quotas
+        {
+            get
+            {
+                return _quotas;
+            }
+        }
+
         protected XmlNode Node
         {
             get
@@ -114,6 +121,11 @@ namespace System.Xml
 
         protected void MoveToInitial(XmlDictionaryReaderQuotas quotas)
         {
+            if (quotas == null)
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("quotas");
+
+            quotas.InternalCopyTo(_quotas);
+            _quotas.MakeReadOnly();
             _nsMgr.Clear();
             _depth = 0;
             _attributeCount = 0;
@@ -276,6 +288,8 @@ namespace System.Xml
             }
             _nsMgr.EnterScope();
             _depth++;
+            if (_depth > _quotas.MaxDepth)
+                XmlExceptionHelper.ThrowMaxDepthExceeded(this, _quotas.MaxDepth);
             if (_elementNodes == null)
             {
                 _elementNodes = new XmlElementNode[4];
@@ -507,18 +521,18 @@ namespace System.Xml
         private XmlAttributeNode GetAttributeNode(int index)
         {
             if (!_node.CanGetAttribute)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("index", SR.Format(SR.XmlElementAttributes)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(index), SR.Format(SR.XmlElementAttributes)));
             if (index < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("index", SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(index), SR.Format(SR.ValueMustBeNonNegative)));
             if (index >= _attributeCount)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("index", SR.Format(SR.OffsetExceedsBufferSize, _attributeCount)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(index), SR.Format(SR.OffsetExceedsBufferSize, _attributeCount)));
             return _attributeNodes[index];
         }
 
         private XmlAttributeNode GetAttributeNode(string name)
         {
             if (name == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("name"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(name)));
             if (!_node.CanGetAttribute)
                 return null;
             int index = name.IndexOf(':');
@@ -566,7 +580,7 @@ namespace System.Xml
         private XmlAttributeNode GetAttributeNode(string localName, string namespaceUri)
         {
             if (localName == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("localName"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(localName)));
             if (namespaceUri == null)
                 namespaceUri = string.Empty;
             if (!_node.CanGetAttribute)
@@ -593,7 +607,7 @@ namespace System.Xml
         private XmlAttributeNode GetAttributeNode(XmlDictionaryString localName, XmlDictionaryString namespaceUri)
         {
             if (localName == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("localName"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(localName)));
             if (namespaceUri == null)
                 namespaceUri = XmlDictionaryString.Empty;
             if (!_node.CanGetAttribute)
@@ -965,14 +979,14 @@ namespace System.Xml
         public override bool IsLocalName(string localName)
         {
             if (localName == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("localName"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(localName)));
             return _node.IsLocalName(localName);
         }
 
         public override bool IsLocalName(XmlDictionaryString localName)
         {
             if (localName == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("localName"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(localName)));
             return _node.IsLocalName(localName);
         }
         public override bool IsNamespaceUri(string namespaceUri)
@@ -1129,15 +1143,15 @@ namespace System.Xml
         public override int ReadValueChunk(char[] chars, int offset, int count)
         {
             if (chars == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("chars"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(chars)));
             if (offset < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("offset", SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.ValueMustBeNonNegative)));
             if (offset > chars.Length)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("offset", SR.Format(SR.OffsetExceedsBufferSize, chars.Length)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.OffsetExceedsBufferSize, chars.Length)));
             if (count < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("count", SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.ValueMustBeNonNegative)));
             if (count > chars.Length - offset)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("count", SR.Format(SR.SizeExceedsRemainingBufferSpace, chars.Length - offset)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.SizeExceedsRemainingBufferSpace, chars.Length - offset)));
             int actual;
 
             if (_value == null)
@@ -1159,15 +1173,15 @@ namespace System.Xml
         public override int ReadValueAsBase64(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("buffer"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(buffer)));
             if (offset < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("offset", SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.ValueMustBeNonNegative)));
             if (offset > buffer.Length)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("offset", SR.Format(SR.OffsetExceedsBufferSize, buffer.Length)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.OffsetExceedsBufferSize, buffer.Length)));
             if (count < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("count", SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.ValueMustBeNonNegative)));
             if (count > buffer.Length - offset)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("count", SR.Format(SR.SizeExceedsRemainingBufferSpace, buffer.Length - offset)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.SizeExceedsRemainingBufferSpace, buffer.Length - offset)));
             if (count == 0)
                 return 0;
             int actual;
@@ -1319,15 +1333,15 @@ namespace System.Xml
         public override int ReadContentAsBase64(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("buffer"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(buffer)));
             if (offset < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("offset", SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.ValueMustBeNonNegative)));
             if (offset > buffer.Length)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("offset", SR.Format(SR.OffsetExceedsBufferSize, buffer.Length)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(offset), SR.Format(SR.OffsetExceedsBufferSize, buffer.Length)));
             if (count < 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("count", SR.Format(SR.ValueMustBeNonNegative)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.ValueMustBeNonNegative)));
             if (count > buffer.Length - offset)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("count", SR.Format(SR.SizeExceedsRemainingBufferSpace, buffer.Length - offset)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(count), SR.Format(SR.SizeExceedsRemainingBufferSpace, buffer.Length - offset)));
             if (count == 0)
                 return 0;
             int actual;
@@ -1356,9 +1370,9 @@ namespace System.Xml
             if (_trailByteCount > 0)
             {
                 int actual = Math.Min(_trailByteCount, byteCount);
-                Array.Copy(_trailBytes, 0, buffer, offset, actual);
+                Buffer.BlockCopy(_trailBytes, 0, buffer, offset, actual);
                 _trailByteCount -= actual;
-                Array.Copy(_trailBytes, actual, _trailBytes, 0, _trailByteCount);
+                Buffer.BlockCopy(_trailBytes, actual, _trailBytes, 0, _trailByteCount);
                 return actual;
             }
             XmlNodeType nodeType = _node.NodeType;
@@ -1426,9 +1440,9 @@ namespace System.Xml
                             _trailBytes = new byte[3];
                         _trailByteCount = encoding.GetBytes(chars, 0, charCount, _trailBytes, 0);
                         int actual = Math.Min(_trailByteCount, byteCount);
-                        Array.Copy(_trailBytes, 0, buffer, offset, actual);
+                        Buffer.BlockCopy(_trailBytes, 0, buffer, offset, actual);
                         _trailByteCount -= actual;
-                        Array.Copy(_trailBytes, actual, _trailBytes, 0, _trailByteCount);
+                        Buffer.BlockCopy(_trailBytes, actual, _trailBytes, 0, _trailByteCount);
                         return actual;
                     }
                     else
@@ -1474,6 +1488,8 @@ namespace System.Xml
                 {
                     value = node.Value.GetString();
                     SkipValue(node);
+                    if (value.Length > _quotas.MaxStringContentLength)
+                        XmlExceptionHelper.ThrowMaxStringContentLengthExceeded(this, _quotas.MaxStringContentLength);
                 }
                 return value;
             }

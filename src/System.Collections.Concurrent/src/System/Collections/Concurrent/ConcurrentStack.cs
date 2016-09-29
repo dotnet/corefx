@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -11,6 +12,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -35,11 +37,13 @@ namespace System.Collections.Concurrent
     /// </remarks>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
+    [Serializable]
     public class ConcurrentStack<T> : IProducerConsumerCollection<T>, IReadOnlyCollection<T>
     {
         /// <summary>
         /// A simple (internal) node type used to store elements of concurrent stacks and queues.
         /// </summary>
+        [Serializable]
         private class Node
         {
             internal readonly T _value; // Value of the node.
@@ -56,9 +60,12 @@ namespace System.Collections.Concurrent
             }
         }
 
+        [NonSerialized]
         private volatile Node _head; // The stack is a singly linked list, and only remembers the head.
 
         private const int BACKOFF_MAX_YIELDS = 8; // Arbitrary number to cap backoff.
+
+        private T[] _serializationArray; // Used for custom serialization
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentStack{T}"/>
@@ -80,9 +87,48 @@ namespace System.Collections.Concurrent
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
             InitializeFromCollection(collection);
+        }
+
+        /// <summary>Get the data array to be serialized.</summary>
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            // save the data into the serialization array to be saved
+            _serializationArray = ToArray();
+        }
+
+        /// <summary>
+        /// Construct the stack from a previously seiralized one
+        /// </summary>
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            Debug.Assert(_serializationArray != null);
+
+            // Add the elements to our stack.  We need to add them from head-to-tail, to
+            // preserve the original ordering of the stack before serialization.
+            Node prevNode = null, head = null;
+            for (int i = 0; i < _serializationArray.Length; i++)
+            {
+                Node currNode = new Node(_serializationArray[i]);
+
+                if (prevNode == null)
+                {
+                    head = currNode;
+                }
+                else
+                {
+                    prevNode._next = currNode;
+                }
+
+                prevNode = currNode;
+            }
+
+            _head = head;
+            _serializationArray = null;
         }
 
         /// <summary>
@@ -229,7 +275,7 @@ namespace System.Collections.Concurrent
             // Validate arguments.
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             // We must be careful not to corrupt the array, so we will first accumulate an
@@ -263,7 +309,7 @@ namespace System.Collections.Concurrent
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
 
             // We must be careful not to corrupt the array, so we will first accumulate an
@@ -315,7 +361,7 @@ namespace System.Collections.Concurrent
         {
             if (items == null)
             {
-                throw new ArgumentNullException("items");
+                throw new ArgumentNullException(nameof(items));
             }
             PushRange(items, 0, items.Length);
         }
@@ -406,16 +452,16 @@ namespace System.Collections.Concurrent
         {
             if (items == null)
             {
-                throw new ArgumentNullException("items");
+                throw new ArgumentNullException(nameof(items));
             }
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ConcurrentStack_PushPopRange_CountOutOfRange);
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ConcurrentStack_PushPopRange_CountOutOfRange);
             }
             int length = items.Length;
             if (startIndex >= length || startIndex < 0)
             {
-                throw new ArgumentOutOfRangeException("startIndex", SR.ConcurrentStack_PushPopRange_StartOutOfRange);
+                throw new ArgumentOutOfRangeException(nameof(startIndex), SR.ConcurrentStack_PushPopRange_StartOutOfRange);
             }
             if (length - count < startIndex) //instead of (startIndex + count > items.Length) to prevent overflow
             {
@@ -519,7 +565,7 @@ namespace System.Collections.Concurrent
         {
             if (items == null)
             {
-                throw new ArgumentNullException("items");
+                throw new ArgumentNullException(nameof(items));
             }
 
             return TryPopRange(items, 0, items.Length);
@@ -658,7 +704,7 @@ namespace System.Collections.Concurrent
 #pragma warning restore 0420
 
         /// <summary>
-        /// Local helper function to copy the poped elements into a given collection
+        /// Local helper function to copy the popped elements into a given collection
         /// </summary>
         /// <param name="head">The head of the list to be copied</param>
         /// <param name="collection">The collection to place the popped items in</param>
@@ -698,19 +744,30 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentStack{T}"/>.</returns>
         public T[] ToArray()
         {
-            return ToList().ToArray();
+            Node curr = _head;
+            return curr == null ?
+                Array.Empty<T>() :
+                ToList(curr).ToArray();
         }
 
         /// <summary>
         /// Returns an array containing a snapshot of the list's contents, using
         /// the target list node as the head of a region in the list.
         /// </summary>
-        /// <returns>An array of the list's contents.</returns>
+        /// <returns>A list of the stack's contents.</returns>
         private List<T> ToList()
+        {
+            return ToList(_head);
+        }
+
+        /// <summary>
+        /// Returns an array containing a snapshot of the list's contents starting at the specified node.
+        /// </summary>
+        /// <returns>A list of the stack's contents starting at the specified node.</returns>
+        private List<T> ToList(Node curr)
         {
             List<T> list = new List<T>();
 
-            Node curr = _head;
             while (curr != null)
             {
                 list.Add(curr._value);

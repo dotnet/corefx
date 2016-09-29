@@ -1,5 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections;
 
 using Xunit;
 
@@ -106,51 +109,55 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Fact]
-        public static void IndexSubscript_Get_Success()
-        {
-            CookieCollection cc = CreateCookieCollection1();
-
-            Assert.Equal(cc[0], c1);
-            Assert.Equal(cc[1], c2);
-            Assert.Equal(cc[2], c3);
-            Assert.Equal(cc[3], c4);
-            Assert.Equal(cc[4], c5);
-
-            Assert.Equal(cc["name1"], c1);
-            Assert.Equal(cc["name2"], c2);
-            Assert.Equal(cc["name3"], c4);
-        }
-
-        [Fact]
-        public static void IndexSubscript_Get_Invalid()
-        {
-            CookieCollection cc = CreateCookieCollection1();
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => cc[-1]); //Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>(() => cc[cc.Count]); //Index >= Count
-
-            Assert.Null(cc["invalidname"]);
-        }
-
-        [Fact]
-        public static void IsReadOnly_Get_Success()
-        {
-            CookieCollection cc = new CookieCollection();
-            Assert.True(cc.IsReadOnly);
-        }
-
-        [Fact]
         public static void IsSynchronized_Get_Success()
         {
-            CookieCollection cc = new CookieCollection();
+            ICollection cc = new CookieCollection();
             Assert.False(cc.IsSynchronized);
         }
 
         [Fact]
         public static void SyncRoot_Get_Success()
         {
-            CookieCollection cc = new CookieCollection();
+            ICollection cc = new CookieCollection();
             Assert.Equal(cc, cc.SyncRoot);
+        }
+        
+        [Fact]
+        public static void CopyTo_Success()
+        {
+            ICollection cc = CreateCookieCollection1();
+            Array cookies = new object[cc.Count];
+            cc.CopyTo(cookies, 0);
+            Assert.Equal(cc.Count, cookies.Length);
+        }
+
+        [Fact]
+        public static void Enumerator_Index_Invalid()
+        {
+            CookieCollection cc = CreateCookieCollection1();
+            IEnumerator enumerator = cc.GetEnumerator();
+
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Index < 0
+
+            enumerator.MoveNext(); enumerator.MoveNext(); enumerator.MoveNext();
+            enumerator.MoveNext(); enumerator.MoveNext(); enumerator.MoveNext();
+
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Index >= count
+
+            enumerator.Reset();
+            Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Index should be -1
+        }
+
+        [Fact]
+        public static void Enumerator_Version_Invalid()
+        {
+            CookieCollection cc = CreateCookieCollection1();
+            IEnumerator enumerator = cc.GetEnumerator();
+            enumerator.MoveNext();
+
+            cc.Add(new Cookie("name5", "value"));
+            Assert.NotNull(enumerator.Current);
+            Assert.Throws<InvalidOperationException>(() => enumerator.MoveNext()); // Enumerator out of sync
         }
     }
 }

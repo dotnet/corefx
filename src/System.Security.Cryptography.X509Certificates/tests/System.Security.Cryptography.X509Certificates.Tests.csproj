@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
@@ -9,21 +12,22 @@
     <AssemblyName>System.Security.Cryptography.X509Certificates.Tests</AssemblyName>
     <RootNamespace>System.Security.Cryptography.X509Certificates.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NugetTargetMoniker>.NETStandard,Version=v1.4</NugetTargetMoniker>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
   <ItemGroup>
-    <ProjectReference Include="..\src\System.Security.Cryptography.X509Certificates.csproj">
+    <ProjectReference Include="..\pkg\System.Security.Cryptography.X509Certificates.pkgproj">
       <Project>{6f8576c2-6cd0-4df3-8394-00b002d82e40}</Project>
       <Name>System.Security.Cryptography.X509Certificates</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cert.cs" />
     <Compile Include="CertTests.cs" />
+    <Compile Include="ChainHolder.cs" />
     <Compile Include="ChainTests.cs" />
     <Compile Include="CollectionImportTests.cs" />
     <Compile Include="CollectionTests.cs" />
@@ -39,10 +43,14 @@
     <Compile Include="PropsTests.cs" />
     <Compile Include="PublicKeyTests.cs" />
     <Compile Include="TestData.cs" />
+    <Compile Include="X500DistinguishedNameEncodingTests.cs" />
     <Compile Include="X500DistinguishedNameTests.cs" />
     <Compile Include="X509StoreTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
       <Link>CommonTest\System\Security\Cryptography\ByteUtils.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>CommonTest\System\PlatformDetection.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
@@ -69,20 +77,8 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
+  <ItemGroup>
+    <SupplementalTestData Include="$(PackagesDir)System.Security.Cryptography.X509Certificates.TestData\1.0.2-prerelease\content\**\*.*" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
-  <!-- Temporary until we have new work in build tools to
-       deploy content from nuget packages -->
-  <Target Name="CopyX509TestDataToTestDirectory" AfterTargets="CopyTestToTestDirectory" Inputs="$(PackagesDir)$(X509TestPackage)\content" Outputs="$(TestPath)%(TestTargetFramework.Folder)\*.*">
-    <PropertyGroup>
-      <X509TestPackage>System.Security.Cryptography.X509Certificates.TestData\1.0.0-prerelease</X509TestPackage>
-      <TestTargetFrameworkFolder>%(TestTargetFramework.Folder)</TestTargetFrameworkFolder>
-    </PropertyGroup>
-    <ItemGroup>
-      <X509TestDataSrc Include="$(PackagesDir)$(X509TestPackage)\content\**\*.*" />
-      <X509TestDataDest Include="@(X509TestDataSrc->'$(TestPath)$(TestTargetFrameworkFolder)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    </ItemGroup>
-    <Copy SourceFiles="@(X509TestDataSrc)" DestinationFiles="@(X509TestDataDest)" SkipUnchangedFiles="$(SkipCopyUnchangedFiles)" OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)" Retries="$(CopyRetryCount)" RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)" UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)">
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
-    </Copy>
-  </Target>
 </Project>

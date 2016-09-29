@@ -1,5 +1,6 @@
-﻿// Copyright (c) Jon Hanna. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -10,35 +11,35 @@ namespace System.Linq.Expressions.Tests
     public class UnboxTests
     {
         [Theory]
-        [MemberData("UnboxableFromObject")]
-        [MemberData("NullableUnboxableFromObject")]
-        [MemberData("UnboxableFromIComparable")]
-        [MemberData("NullableUnboxableFromIComparable")]
-        [MemberData("UnboxableFromIComparableT")]
-        [MemberData("NullableUnboxableFromIComparableT")]
-        public void CanUnbox(object value, Type type, Type boxedType)
+        [PerCompilationType(nameof(UnboxableFromObject))]
+        [PerCompilationType(nameof(NullableUnboxableFromObject))]
+        [PerCompilationType(nameof(UnboxableFromIComparable))]
+        [PerCompilationType(nameof(NullableUnboxableFromIComparable))]
+        [PerCompilationType(nameof(UnboxableFromIComparableT))]
+        [PerCompilationType(nameof(NullableUnboxableFromIComparableT))]
+        public void CanUnbox(object value, Type type, Type boxedType, bool useInterpreter)
         {
             Expression expression = Expression.Constant(value, boxedType);
             UnaryExpression unbox = Expression.Unbox(expression, type);
             Assert.Equal(type, unbox.Type);
             BinaryExpression isEqual = Expression.Equal(Expression.Constant(value, type), unbox);
-            Assert.True(Expression.Lambda<Func<bool>>(isEqual).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(isEqual).Compile(useInterpreter)());
         }
 
         [Theory]
-        [MemberData("UnboxableFromObject")]
-        [MemberData("NullableUnboxableFromObject")]
-        [MemberData("UnboxableFromIComparable")]
-        [MemberData("NullableUnboxableFromIComparable")]
-        [MemberData("UnboxableFromIComparableT")]
-        [MemberData("NullableUnboxableFromIComparableT")]
-        public void CanUnboxFromMake(object value, Type type, Type boxedType)
+        [PerCompilationType(nameof(UnboxableFromObject))]
+        [PerCompilationType(nameof(NullableUnboxableFromObject))]
+        [PerCompilationType(nameof(UnboxableFromIComparable))]
+        [PerCompilationType(nameof(NullableUnboxableFromIComparable))]
+        [PerCompilationType(nameof(UnboxableFromIComparableT))]
+        [PerCompilationType(nameof(NullableUnboxableFromIComparableT))]
+        public void CanUnboxFromMake(object value, Type type, Type boxedType, bool useInterpreter)
         {
             Expression expression = Expression.Constant(value, boxedType);
             UnaryExpression unbox = Expression.MakeUnary(ExpressionType.Unbox, expression, type);
             Assert.Equal(type, unbox.Type);
             BinaryExpression isEqual = Expression.Equal(Expression.Constant(value, type), unbox);
-            Assert.True(Expression.Lambda<Func<bool>>(isEqual).Compile()());
+            Assert.True(Expression.Lambda<Func<bool>>(isEqual).Compile(useInterpreter)());
         }
 
         public static IEnumerable<object[]> UnboxableFromObject()
@@ -116,11 +117,11 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory]
-        [MemberData("NullableTypes")]
-        public void NullNullable(Type type)
+        [PerCompilationType(nameof(NullableTypes))]
+        public void NullNullable(Type type, bool useInterpreter)
         {
             UnaryExpression unbox = Expression.Unbox(Expression.Default(typeof(object)), type);
-            Func<bool> isNull = Expression.Lambda<Func<bool>>(Expression.Equal(Expression.Default(type), unbox)).Compile();
+            Func<bool> isNull = Expression.Lambda<Func<bool>>(Expression.Equal(Expression.Default(type), unbox)).Compile(useInterpreter);
             Assert.True(isNull());
         }
 
@@ -128,14 +129,14 @@ namespace System.Linq.Expressions.Tests
         public void CannotUnboxToNonInterfaceExceptObject()
         {
             Expression value = Expression.Constant(0);
-            Assert.Throws<ArgumentException>(() => Expression.Unbox(value, typeof(int)));
+            Assert.Throws<ArgumentException>("expression", () => Expression.Unbox(value, typeof(int)));
         }
 
         [Fact]
         public void CannotUnboxReferenceType()
         {
             Expression value = Expression.Constant("", typeof(IComparable<string>));
-            Assert.Throws<ArgumentException>(() => Expression.Unbox(value, typeof(string)));
+            Assert.Throws<ArgumentException>("type", () => Expression.Unbox(value, typeof(string)));
         }
 
         private static class Unreadable
@@ -166,11 +167,12 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<ArgumentNullException>("type", () => Expression.Unbox(value, null));
         }
 
-        [Fact]
-        public void MistmatchFailsOnRuntime()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void MistmatchFailsOnRuntime(bool useInterpreter)
         {
             Expression unbox = Expression.Unbox(Expression.Constant(0, typeof(object)), typeof(long));
-            Func<long> del = Expression.Lambda<Func<long>>(unbox).Compile();
+            Func<long> del = Expression.Lambda<Func<long>>(unbox).Compile(useInterpreter);
             Assert.Throws<InvalidCastException>(() => del());
         }
 
@@ -180,7 +182,7 @@ namespace System.Linq.Expressions.Tests
             Expression unbox = Expression.Unbox(Expression.Constant(0, typeof(object)), typeof(int));
             Assert.False(unbox.CanReduce);
             Assert.Same(unbox, unbox.Reduce());
-            Assert.Throws<ArgumentException>(() => unbox.ReduceAndCheck());
+            Assert.Throws<ArgumentException>(null, () => unbox.ReduceAndCheck());
         }
     }
 }

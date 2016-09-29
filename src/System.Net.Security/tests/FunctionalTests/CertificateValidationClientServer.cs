@@ -1,39 +1,65 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using Xunit;
-using Xunit.Abstractions;
 
 namespace System.Net.Security.Tests
 {
-    public class CertificateValidationClientServer
+    public class CertificateValidationClientServer : IDisposable
     {
         private readonly X509Certificate2 _clientCertificate;
         private readonly X509Certificate2Collection _clientCertificateCollection;
         private readonly X509Certificate2 _serverCertificate;
         private readonly X509Certificate2Collection _serverCertificateCollection;
-        
+        private bool _clientCertificateRemovedByFilter;
+
         public CertificateValidationClientServer()
         {
-            _serverCertificateCollection = TestConfiguration.GetServerCertificateCollection();
-            _serverCertificate = TestConfiguration.GetServerCertificate();
+            _serverCertificateCollection = Configuration.Certificates.GetServerCertificateCollection();
+            _serverCertificate = Configuration.Certificates.GetServerCertificate();
 
-            _clientCertificateCollection = TestConfiguration.GetClientCertificateCollection();
-            _clientCertificate = TestConfiguration.GetClientCertificate();
+            _clientCertificateCollection = Configuration.Certificates.GetClientCertificateCollection();
+            _clientCertificate = Configuration.Certificates.GetClientCertificate();
         }
 
-        [Fact]
-        public async Task CertificateValidationClientServer_EndToEnd_Ok()
+        public void Dispose()
+        {
+            _serverCertificate.Dispose();
+            _clientCertificate.Dispose();
+            foreach (X509Certificate2 cert in _serverCertificateCollection) cert.Dispose();
+            foreach (X509Certificate2 cert in _clientCertificateCollection) cert.Dispose();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task CertificateValidationClientServer_EndToEnd_Ok(bool useClientSelectionCallback)
         {
             IPEndPoint endPoint = new IPEndPoint(IPAddress.IPv6Loopback, 0);
             var server = new TcpListener(endPoint);
             server.Start();
+
+            _clientCertificateRemovedByFilter = false;
+
+            if (PlatformDetection.IsWindows7 && 
+                !useClientSelectionCallback && 
+                !Capability.IsTrustedRootCertificateInstalled())
+            {
+                // https://technet.microsoft.com/en-us/library/hh831771.aspx#BKMK_Changes2012R2
+                // Starting with Windows 8, the "Management of trusted issuers for client authentication" has changed:
+                // The behavior to send the Trusted Issuers List by default is off.
+                //
+                // In Windows 7 the Trusted Issuers List is sent within the Server Hello TLS record. This list is built
+                // by the server using certificates from the Trusted Root Authorities certificate store.
+                // The client side will use the Trusted Issuers List, if not empty, to filter proposed certificates.
+                _clientCertificateRemovedByFilter = true;
+            }
 
             using (var clientConnection = new TcpClient(AddressFamily.InterNetworkV6))
             {
@@ -44,15 +70,23 @@ namespace System.Net.Security.Tests
 
                 Assert.True(
                     Task.WaitAll(
-                        new Task[] { clientConnect, serverAccept }, 
+                        new Task[] { clientConnect, serverAccept },
                         TestConfiguration.PassingTestTimeoutMilliseconds),
                     "Client/Server TCP Connect timed out.");
+
+                LocalCertificateSelectionCallback clientCertCallback = null;
+
+                if (useClientSelectionCallback)
+                {
+                    clientCertCallback = ClientCertSelectionCallback;
+                }
 
                 using (TcpClient serverConnection = await serverAccept)
                 using (SslStream sslClientStream = new SslStream(
                     clientConnection.GetStream(),
                     false,
-                    ClientSideRemoteServerCertificateValidation))
+                    ClientSideRemoteServerCertificateValidation,
+                    clientCertCallback))
                 using (SslStream sslServerStream = new SslStream(
                     serverConnection.GetStream(),
                     false,
@@ -60,10 +94,12 @@ namespace System.Net.Security.Tests
 
                 {
                     string serverName = _serverCertificate.GetNameInfo(X509NameType.SimpleName, false);
-                    string clientName = _clientCertificate.GetNameInfo(X509NameType.SimpleName, false);
-
                     var clientCerts = new X509CertificateCollection();
-                    clientCerts.Add(_clientCertificate);
+
+                    if (!useClientSelectionCallback)
+                    {
+                        clientCerts.Add(_clientCertificate);
+                    }
 
                     Task clientAuthentication = sslClientStream.AuthenticateAsClientAsync(
                         serverName,
@@ -79,11 +115,38 @@ namespace System.Net.Security.Tests
 
                     Assert.True(
                         Task.WaitAll(
-                            new Task[] { clientAuthentication, serverAuthentication }, 
+                            new Task[] { clientAuthentication, serverAuthentication },
                             TestConfiguration.PassingTestTimeoutMilliseconds),
                         "Client/Server Authentication timed out.");
+
+                    if (!_clientCertificateRemovedByFilter)
+                    {
+                        Assert.True(sslClientStream.IsMutuallyAuthenticated, "sslClientStream.IsMutuallyAuthenticated");
+                        Assert.True(sslServerStream.IsMutuallyAuthenticated, "sslServerStream.IsMutuallyAuthenticated");
+
+                        Assert.Equal(sslServerStream.RemoteCertificate.Subject, _clientCertificate.Subject);
+                    }
+                    else
+                    {
+                        Assert.False(sslClientStream.IsMutuallyAuthenticated, "sslClientStream.IsMutuallyAuthenticated");
+                        Assert.False(sslServerStream.IsMutuallyAuthenticated, "sslServerStream.IsMutuallyAuthenticated");
+
+                        Assert.Null(sslServerStream.RemoteCertificate);
+                    }
+
+                    Assert.Equal(sslClientStream.RemoteCertificate.Subject, _serverCertificate.Subject);
                 }
             }
+        }
+
+        private X509Certificate ClientCertSelectionCallback(
+            object sender,
+            string targetHost,
+            X509CertificateCollection localCertificates,
+            X509Certificate remoteCertificate,
+            string[] acceptableIssuers)
+        {
+            return _clientCertificate;
         }
 
         private bool ServerSideRemoteClientCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
@@ -92,7 +155,14 @@ namespace System.Net.Security.Tests
 
             if (!Capability.IsTrustedRootCertificateInstalled())
             {
-                expectedSslPolicyErrors = SslPolicyErrors.RemoteCertificateChainErrors;
+                if (!_clientCertificateRemovedByFilter)
+                {
+                    expectedSslPolicyErrors = SslPolicyErrors.RemoteCertificateChainErrors;
+                }
+                else
+                {
+                    expectedSslPolicyErrors = SslPolicyErrors.RemoteCertificateNotAvailable;
+                }
             }
             else
             {
@@ -101,7 +171,10 @@ namespace System.Net.Security.Tests
             }
 
             Assert.Equal(expectedSslPolicyErrors, sslPolicyErrors);
-            Assert.Equal(_clientCertificate, certificate);
+            if (!_clientCertificateRemovedByFilter)
+            {
+                Assert.Equal(_clientCertificate, certificate);
+            }
 
             return true;
         }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Internal.Cryptography
 {
     //
     // Error codes for specific throw sites. Defined outside of Internal.Crytography.Pal.Native as some non-Pal code uses these.
-    // Since these error codes are publically surfaced through the Exception class, these hresults are effectively managed exchange values despite
+    // Since these error codes are publicly surfaced through the Exception class, these hresults are effectively managed exchange values despite
     // their Win32 origin.
     //
     internal static class ErrorCode

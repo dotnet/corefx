@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -86,7 +87,7 @@ namespace System.Linq.Parallel
 
 
         //---------------------------------------------------------------------------------------
-        // Implementation of QueryResults for an unary operator. The results will not be indexible
+        // Implementation of QueryResults for an unary operator. The results will not be indexable
         // unless a derived class provides that functionality.
         //
 
@@ -95,7 +96,7 @@ namespace System.Linq.Parallel
             protected QueryResults<TInput> _childQueryResults; // Results of the child query
             private UnaryQueryOperator<TInput, TOutput> _op; // Operator that generated these results
             private QuerySettings _settings; // Settings collected from the query
-            private bool _preferStriping; // If the results are indexible, should we use striping when partitioning them
+            private bool _preferStriping; // If the results are indexable, should we use striping when partitioning them
 
             internal UnaryQueryOperatorResults(QueryResults<TInput> childQueryResults, UnaryQueryOperator<TInput, TOutput> op, QuerySettings settings, bool preferStriping)
             {
@@ -107,7 +108,7 @@ namespace System.Linq.Parallel
 
             internal override void GivePartitionedStream(IPartitionedStreamRecipient<TOutput> recipient)
             {
-                Debug.Assert(IsIndexible == (_op.OrdinalIndexState == OrdinalIndexState.Indexible));
+                Debug.Assert(IsIndexible == (_op.OrdinalIndexState == OrdinalIndexState.Indexable));
 
                 if (_settings.ExecutionMode.Value == ParallelExecutionMode.Default && _op.LimitsParallelism)
                 {
@@ -119,7 +120,7 @@ namespace System.Linq.Parallel
                 }
                 else if (IsIndexible)
                 {
-                    // The output of this operator is indexible. Pass the partitioned output into the IPartitionedStreamRecipient.
+                    // The output of this operator is indexable. Pass the partitioned output into the IPartitionedStreamRecipient.
                     PartitionedStream<TOutput, int> result = ExchangeUtilities.PartitionDataSource(this, _settings.DegreeOfParallelism.Value, _preferStriping);
                     recipient.Receive<int>(result);
                 }

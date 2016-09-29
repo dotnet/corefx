@@ -1,19 +1,20 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Linq;
-using System.Linq.Expressions;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using Xunit;
 
-namespace Tests.ExpressionCompiler.Array
+namespace System.Linq.Expressions.Tests
 {
     public static class NewArrayListTests
     {
         #region Tests
 
-        [Fact]
-        public static void CheckBoolArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckBoolArrayListTest(bool useInterpreter)
         {
             bool[][] array = new bool[][]
                 {
@@ -34,12 +35,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyBoolArrayList(array[i], exprs[i]);
+                VerifyBoolArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckByteArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckByteArrayListTest(bool useInterpreter)
         {
             byte[][] array = new byte[][]
                 {
@@ -60,12 +61,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyByteArrayList(array[i], exprs[i]);
+                VerifyByteArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckCustomArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckCustomArrayListTest(bool useInterpreter)
         {
             C[][] array = new C[][]
                 {
@@ -86,12 +87,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyCustomArrayList(array[i], exprs[i]);
+                VerifyCustomArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckCharArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckCharArrayListTest(bool useInterpreter)
         {
             char[][] array = new char[][]
                 {
@@ -112,12 +113,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyCharArrayList(array[i], exprs[i]);
+                VerifyCharArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckCustom2ArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckCustom2ArrayListTest(bool useInterpreter)
         {
             D[][] array = new D[][]
                 {
@@ -138,12 +139,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyCustom2ArrayList(array[i], exprs[i]);
+                VerifyCustom2ArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckDecimalArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckDecimalArrayListTest(bool useInterpreter)
         {
             decimal[][] array = new decimal[][]
                 {
@@ -164,12 +165,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyDecimalArrayList(array[i], exprs[i]);
+                VerifyDecimalArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckDelegateArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckDelegateArrayListTest(bool useInterpreter)
         {
             Delegate[][] array = new Delegate[][]
                 {
@@ -190,12 +191,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyDelegateArrayList(array[i], exprs[i]);
+                VerifyDelegateArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckDoubleArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckDoubleArrayListTest(bool useInterpreter)
         {
             double[][] array = new double[][]
                 {
@@ -216,12 +217,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyDoubleArrayList(array[i], exprs[i]);
+                VerifyDoubleArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckEnumArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckEnumArrayListTest(bool useInterpreter)
         {
             E[][] array = new E[][]
                 {
@@ -242,12 +243,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyEnumArrayList(array[i], exprs[i]);
+                VerifyEnumArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckEnumLongArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckEnumLongArrayListTest(bool useInterpreter)
         {
             El[][] array = new El[][]
                 {
@@ -268,12 +269,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyEnumLongArrayList(array[i], exprs[i]);
+                VerifyEnumLongArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckFloatArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckFloatArrayListTest(bool useInterpreter)
         {
             float[][] array = new float[][]
                 {
@@ -294,12 +295,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyFloatArrayList(array[i], exprs[i]);
+                VerifyFloatArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckFuncArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckFuncArrayListTest(bool useInterpreter)
         {
             Func<object>[][] array = new Func<object>[][]
                 {
@@ -320,12 +321,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyFuncArrayList(array[i], exprs[i]);
+                VerifyFuncArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckInterfaceArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckInterfaceArrayListTest(bool useInterpreter)
         {
             I[][] array = new I[][]
                 {
@@ -346,12 +347,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyInterfaceArrayList(array[i], exprs[i]);
+                VerifyInterfaceArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckIEquatableCustomArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckIEquatableCustomArrayListTest(bool useInterpreter)
         {
             IEquatable<C>[][] array = new IEquatable<C>[][]
                 {
@@ -372,12 +373,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyIEquatableCustomArrayList(array[i], exprs[i]);
+                VerifyIEquatableCustomArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckIEquatableCustom2ArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckIEquatableCustom2ArrayListTest(bool useInterpreter)
         {
             IEquatable<D>[][] array = new IEquatable<D>[][]
                 {
@@ -398,12 +399,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyIEquatableCustom2ArrayList(array[i], exprs[i]);
+                VerifyIEquatableCustom2ArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckIntArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckIntArrayListTest(bool useInterpreter)
         {
             int[][] array = new int[][]
                 {
@@ -424,12 +425,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyIntArrayList(array[i], exprs[i]);
+                VerifyIntArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckLongArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckLongArrayListTest(bool useInterpreter)
         {
             long[][] array = new long[][]
                 {
@@ -450,12 +451,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyLongArrayList(array[i], exprs[i]);
+                VerifyLongArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckObjectArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckObjectArrayListTest(bool useInterpreter)
         {
             object[][] array = new object[][]
                 {
@@ -476,12 +477,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyObjectArrayList(array[i], exprs[i]);
+                VerifyObjectArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckStructArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckStructArrayListTest(bool useInterpreter)
         {
             S[][] array = new S[][]
                 {
@@ -502,12 +503,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyStructArrayList(array[i], exprs[i]);
+                VerifyStructArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckSByteArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckSByteArrayListTest(bool useInterpreter)
         {
             sbyte[][] array = new sbyte[][]
                 {
@@ -528,12 +529,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifySByteArrayList(array[i], exprs[i]);
+                VerifySByteArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckStructWithStringArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckStructWithStringArrayListTest(bool useInterpreter)
         {
             Sc[][] array = new Sc[][]
                 {
@@ -554,12 +555,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyStructWithStringArrayList(array[i], exprs[i]);
+                VerifyStructWithStringArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckStructWithStringAndFieldArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckStructWithStringAndFieldArrayListTest(bool useInterpreter)
         {
             Scs[][] array = new Scs[][]
                 {
@@ -580,12 +581,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyStructWithStringAndFieldArrayList(array[i], exprs[i]);
+                VerifyStructWithStringAndFieldArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckShortArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckShortArrayListTest(bool useInterpreter)
         {
             short[][] array = new short[][]
                 {
@@ -606,12 +607,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyShortArrayList(array[i], exprs[i]);
+                VerifyShortArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckStructWithTwoValuesArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckStructWithTwoValuesArrayListTest(bool useInterpreter)
         {
             Sp[][] array = new Sp[][]
                 {
@@ -632,12 +633,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyStructWithTwoValuesArrayList(array[i], exprs[i]);
+                VerifyStructWithTwoValuesArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckStructWithValueArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckStructWithValueArrayListTest(bool useInterpreter)
         {
             Ss[][] array = new Ss[][]
                 {
@@ -658,12 +659,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyStructWithValueArrayList(array[i], exprs[i]);
+                VerifyStructWithValueArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckStringArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckStringArrayListTest(bool useInterpreter)
         {
             string[][] array = new string[][]
                 {
@@ -684,12 +685,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyStringArrayList(array[i], exprs[i]);
+                VerifyStringArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckUIntArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckUIntArrayListTest(bool useInterpreter)
         {
             uint[][] array = new uint[][]
                 {
@@ -710,12 +711,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyUIntArrayList(array[i], exprs[i]);
+                VerifyUIntArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckULongArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckULongArrayListTest(bool useInterpreter)
         {
             ulong[][] array = new ulong[][]
                 {
@@ -736,12 +737,12 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyULongArrayList(array[i], exprs[i]);
+                VerifyULongArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckUShortArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckUShortArrayListTest(bool useInterpreter)
         {
             ushort[][] array = new ushort[][]
                 {
@@ -762,99 +763,199 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyUShortArrayList(array[i], exprs[i]);
+                VerifyUShortArrayList(array[i], exprs[i], useInterpreter);
             }
         }
 
-        [Fact]
-        public static void CheckGenericCustomArrayListTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericCustomArrayListTest(bool useInterpreter)
         {
-            CheckGenericArrayListHelper<C>();
+            CheckGenericArrayListHelper<C>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericEnumArrayListTest(bool useInterpreter)
+        {
+            CheckGenericArrayListHelper<E>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericObjectArrayListTest(bool useInterpreter)
+        {
+            CheckGenericArrayListHelper<object>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericStructArrayListTest(bool useInterpreter)
+        {
+            CheckGenericArrayListHelper<S>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericStructWithStringAndFieldArrayListTest(bool useInterpreter)
+        {
+            CheckGenericArrayListHelper<Scs>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericCustomWithClassRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithClassRestrictionArrayListHelper<C>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericObjectWithClassRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithClassRestrictionArrayListHelper<object>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericCustomWithSubClassRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithSubClassRestrictionArrayListHelper<C>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericCustomWithClassAndNewRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithClassAndNewRestrictionArrayListHelper<C>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericObjectWithClassAndNewRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithClassAndNewRestrictionArrayListHelper<object>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericCustomWithSubClassAndNewRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithSubClassAndNewRestrictionArrayListHelper<C>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericEnumWithStructRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithStructRestrictionArrayListHelper<E>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericStructWithStructRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithStructRestrictionArrayListHelper<S>(useInterpreter);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckGenericStructWithStringAndFieldWithStructRestrictionArrayListTest(bool useInterpreter)
+        {
+            CheckGenericWithStructRestrictionArrayListHelper<Scs>(useInterpreter);
         }
 
         [Fact]
-        public static void CheckGenericEnumArrayListTest()
+        public static void ThrowOnNegativeSizedCollection()
         {
-            CheckGenericArrayListHelper<E>();
+            // This is an obscure case, and it doesn't much matter what is thrown, as long as is thrown before such
+            // an edge case could cause more obscure damage. A class derived from ReadOnlyCollection is used to catch
+            // assumptions that such a type is safe.
+            Assert.ThrowsAny<Exception>(() => Expression.NewArrayInit(typeof(int), new BogusReadOnlyCollection<Expression>()));
         }
 
         [Fact]
-        public static void CheckGenericObjectArrayListTest()
+        public static void ToStringTest()
         {
-            CheckGenericArrayListHelper<object>();
-        }
+            var e1 = Expression.NewArrayInit(typeof(int));
+            Assert.Equal("new [] {}", e1.ToString());
 
-        [Fact]
-        public static void CheckGenericStructArrayListTest()
-        {
-            CheckGenericArrayListHelper<S>();
-        }
+            var e2 = Expression.NewArrayInit(typeof(int), Expression.Parameter(typeof(int), "x"));
+            Assert.Equal("new [] {x}", e2.ToString());
 
-        [Fact]
-        public static void CheckGenericStructWithStringAndFieldArrayListTest()
-        {
-            CheckGenericArrayListHelper<Scs>();
-        }
-
-        [Fact]
-        public static void CheckGenericCustomWithClassRestrictionArrayListTest()
-        {
-            CheckGenericWithClassRestrictionArrayListHelper<C>();
-        }
-
-        [Fact]
-        public static void CheckGenericObjectWithClassRestrictionArrayListTest()
-        {
-            CheckGenericWithClassRestrictionArrayListHelper<object>();
-        }
-
-        [Fact]
-        public static void CheckGenericCustomWithSubClassRestrictionArrayListTest()
-        {
-            CheckGenericWithSubClassRestrictionArrayListHelper<C>();
-        }
-
-        [Fact]
-        public static void CheckGenericCustomWithClassAndNewRestrictionArrayListTest()
-        {
-            CheckGenericWithClassAndNewRestrictionArrayListHelper<C>();
-        }
-
-        [Fact]
-        public static void CheckGenericObjectWithClassAndNewRestrictionArrayListTest()
-        {
-            CheckGenericWithClassAndNewRestrictionArrayListHelper<object>();
-        }
-
-        [Fact]
-        public static void CheckGenericCustomWithSubClassAndNewRestrictionArrayListTest()
-        {
-            CheckGenericWithSubClassAndNewRestrictionArrayListHelper<C>();
-        }
-
-        [Fact]
-        public static void CheckGenericEnumWithStructRestrictionArrayListTest()
-        {
-            CheckGenericWithStructRestrictionArrayListHelper<E>();
-        }
-
-        [Fact]
-        public static void CheckGenericStructWithStructRestrictionArrayListTest()
-        {
-            CheckGenericWithStructRestrictionArrayListHelper<S>();
-        }
-
-        [Fact]
-        public static void CheckGenericStructWithStringAndFieldWithStructRestrictionArrayListTest()
-        {
-            CheckGenericWithStructRestrictionArrayListHelper<Scs>();
+            var e3 = Expression.NewArrayInit(typeof(int), Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y"));
+            Assert.Equal("new [] {x, y}", e3.ToString());
         }
 
         #endregion
 
         #region Helper methods
 
-        private static void CheckGenericArrayListHelper<T>()
+        private class BogusCollection<T> : IList<T>
+        {
+            public T this[int index]
+            {
+                get { return default(T); }
+
+                set { throw new NotSupportedException(); }
+            }
+
+            public int Count
+            {
+                get { return -1; }
+            }
+
+            public bool IsReadOnly
+            {
+                get { return true; }
+            }
+
+            public void Add(T item)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void Clear()
+            {
+                throw new NotSupportedException();
+            }
+
+            public bool Contains(T item)
+            {
+                return false;
+            }
+
+            public void CopyTo(T[] array, int arrayIndex)
+            {
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return Enumerable.Empty<T>().GetEnumerator();
+            }
+
+            public int IndexOf(T item)
+            {
+                return -1;
+            }
+
+            public void Insert(int index, T item)
+            {
+                throw new NotSupportedException();
+            }
+
+            public bool Remove(T item)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void RemoveAt(int index)
+            {
+                throw new NotSupportedException();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        private class BogusReadOnlyCollection<T> : ReadOnlyCollection<T>
+        {
+            public BogusReadOnlyCollection()
+                :base(new BogusCollection<T>())
+            {
+
+            }
+        }
+
+        private static void CheckGenericArrayListHelper<T>(bool useInterpreter)
         {
             T[][] array = new T[][]
                 {
@@ -875,11 +976,11 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyGenericArrayList<T>(array[i], exprs[i]);
+                VerifyGenericArrayList<T>(array[i], exprs[i], useInterpreter);
             }
         }
 
-        private static void CheckGenericWithClassRestrictionArrayListHelper<Tc>() where Tc : class
+        private static void CheckGenericWithClassRestrictionArrayListHelper<Tc>(bool useInterpreter) where Tc : class
         {
             Tc[][] array = new Tc[][]
                 {
@@ -900,11 +1001,11 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyGenericWithClassRestrictionArrayList<Tc>(array[i], exprs[i]);
+                VerifyGenericWithClassRestrictionArrayList<Tc>(array[i], exprs[i], useInterpreter);
             }
         }
 
-        private static void CheckGenericWithSubClassRestrictionArrayListHelper<TC>() where TC : C
+        private static void CheckGenericWithSubClassRestrictionArrayListHelper<TC>(bool useInterpreter) where TC : C
         {
             TC[][] array = new TC[][]
                 {
@@ -925,11 +1026,11 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyGenericWithSubClassRestrictionArrayList<TC>(array[i], exprs[i]);
+                VerifyGenericWithSubClassRestrictionArrayList<TC>(array[i], exprs[i], useInterpreter);
             }
         }
 
-        private static void CheckGenericWithClassAndNewRestrictionArrayListHelper<Tcn>() where Tcn : class, new()
+        private static void CheckGenericWithClassAndNewRestrictionArrayListHelper<Tcn>(bool useInterpreter) where Tcn : class, new()
         {
             Tcn[][] array = new Tcn[][]
                 {
@@ -950,11 +1051,11 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyGenericWithClassAndNewRestrictionArrayList<Tcn>(array[i], exprs[i]);
+                VerifyGenericWithClassAndNewRestrictionArrayList<Tcn>(array[i], exprs[i], useInterpreter);
             }
         }
 
-        private static void CheckGenericWithSubClassAndNewRestrictionArrayListHelper<TCn>() where TCn : C, new()
+        private static void CheckGenericWithSubClassAndNewRestrictionArrayListHelper<TCn>(bool useInterpreter) where TCn : C, new()
         {
             TCn[][] array = new TCn[][]
                 {
@@ -975,11 +1076,11 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyGenericWithSubClassAndNewRestrictionArrayList<TCn>(array[i], exprs[i]);
+                VerifyGenericWithSubClassAndNewRestrictionArrayList<TCn>(array[i], exprs[i], useInterpreter);
             }
         }
 
-        private static void CheckGenericWithStructRestrictionArrayListHelper<Ts>() where Ts : struct
+        private static void CheckGenericWithStructRestrictionArrayListHelper<Ts>(bool useInterpreter) where Ts : struct
         {
             Ts[][] array = new Ts[][]
                 {
@@ -1000,7 +1101,7 @@ namespace Tests.ExpressionCompiler.Array
 
             for (int i = 0; i < array.Length; i++)
             {
-                VerifyGenericWithStructRestrictionArrayList<Ts>(array[i], exprs[i]);
+                VerifyGenericWithStructRestrictionArrayList<Ts>(array[i], exprs[i], useInterpreter);
             }
         }
 
@@ -1008,13 +1109,13 @@ namespace Tests.ExpressionCompiler.Array
 
         #region  verifiers
 
-        private static void VerifyBoolArrayList(bool[] val, Expression[] exprs)
+        private static void VerifyBoolArrayList(bool[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<bool[]>> e =
                 Expression.Lambda<Func<bool[]>>(
                     Expression.NewArrayInit(typeof(bool), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool[]> f = e.Compile();
+            Func<bool[]> f = e.Compile(useInterpreter);
             bool[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1023,13 +1124,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyByteArrayList(byte[] val, Expression[] exprs)
+        private static void VerifyByteArrayList(byte[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<byte[]>> e =
                 Expression.Lambda<Func<byte[]>>(
                     Expression.NewArrayInit(typeof(byte), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<byte[]> f = e.Compile();
+            Func<byte[]> f = e.Compile(useInterpreter);
             byte[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1038,13 +1139,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyCustomArrayList(C[] val, Expression[] exprs)
+        private static void VerifyCustomArrayList(C[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<C[]>> e =
                 Expression.Lambda<Func<C[]>>(
                     Expression.NewArrayInit(typeof(C), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<C[]> f = e.Compile();
+            Func<C[]> f = e.Compile(useInterpreter);
             C[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1053,13 +1154,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyCharArrayList(char[] val, Expression[] exprs)
+        private static void VerifyCharArrayList(char[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<char[]>> e =
                 Expression.Lambda<Func<char[]>>(
                     Expression.NewArrayInit(typeof(char), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<char[]> f = e.Compile();
+            Func<char[]> f = e.Compile(useInterpreter);
             char[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1068,13 +1169,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyCustom2ArrayList(D[] val, Expression[] exprs)
+        private static void VerifyCustom2ArrayList(D[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<D[]>> e =
                 Expression.Lambda<Func<D[]>>(
                     Expression.NewArrayInit(typeof(D), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<D[]> f = e.Compile();
+            Func<D[]> f = e.Compile(useInterpreter);
             D[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1083,13 +1184,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyDecimalArrayList(decimal[] val, Expression[] exprs)
+        private static void VerifyDecimalArrayList(decimal[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<decimal[]>> e =
                 Expression.Lambda<Func<decimal[]>>(
                     Expression.NewArrayInit(typeof(decimal), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal[]> f = e.Compile();
+            Func<decimal[]> f = e.Compile(useInterpreter);
             decimal[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1098,13 +1199,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyDelegateArrayList(Delegate[] val, Expression[] exprs)
+        private static void VerifyDelegateArrayList(Delegate[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<Delegate[]>> e =
                 Expression.Lambda<Func<Delegate[]>>(
                     Expression.NewArrayInit(typeof(Delegate), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Delegate[]> f = e.Compile();
+            Func<Delegate[]> f = e.Compile(useInterpreter);
             Delegate[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1113,13 +1214,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyDoubleArrayList(double[] val, Expression[] exprs)
+        private static void VerifyDoubleArrayList(double[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<double[]>> e =
                 Expression.Lambda<Func<double[]>>(
                     Expression.NewArrayInit(typeof(double), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double[]> f = e.Compile();
+            Func<double[]> f = e.Compile(useInterpreter);
             double[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1128,13 +1229,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyEnumArrayList(E[] val, Expression[] exprs)
+        private static void VerifyEnumArrayList(E[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<E[]>> e =
                 Expression.Lambda<Func<E[]>>(
                     Expression.NewArrayInit(typeof(E), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<E[]> f = e.Compile();
+            Func<E[]> f = e.Compile(useInterpreter);
             E[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1143,13 +1244,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyEnumLongArrayList(El[] val, Expression[] exprs)
+        private static void VerifyEnumLongArrayList(El[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<El[]>> e =
                 Expression.Lambda<Func<El[]>>(
                     Expression.NewArrayInit(typeof(El), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<El[]> f = e.Compile();
+            Func<El[]> f = e.Compile(useInterpreter);
             El[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1158,13 +1259,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyFloatArrayList(float[] val, Expression[] exprs)
+        private static void VerifyFloatArrayList(float[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<float[]>> e =
                 Expression.Lambda<Func<float[]>>(
                     Expression.NewArrayInit(typeof(float), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float[]> f = e.Compile();
+            Func<float[]> f = e.Compile(useInterpreter);
             float[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1173,13 +1274,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyFuncArrayList(Func<object>[] val, Expression[] exprs)
+        private static void VerifyFuncArrayList(Func<object>[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<Func<object>[]>> e =
                 Expression.Lambda<Func<Func<object>[]>>(
                     Expression.NewArrayInit(typeof(Func<object>), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Func<object>[]> f = e.Compile();
+            Func<Func<object>[]> f = e.Compile(useInterpreter);
             Func<object>[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1188,13 +1289,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyInterfaceArrayList(I[] val, Expression[] exprs)
+        private static void VerifyInterfaceArrayList(I[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<I[]>> e =
                 Expression.Lambda<Func<I[]>>(
                     Expression.NewArrayInit(typeof(I), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<I[]> f = e.Compile();
+            Func<I[]> f = e.Compile(useInterpreter);
             I[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1203,13 +1304,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyIEquatableCustomArrayList(IEquatable<C>[] val, Expression[] exprs)
+        private static void VerifyIEquatableCustomArrayList(IEquatable<C>[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<IEquatable<C>[]>> e =
                 Expression.Lambda<Func<IEquatable<C>[]>>(
                     Expression.NewArrayInit(typeof(IEquatable<C>), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<C>[]> f = e.Compile();
+            Func<IEquatable<C>[]> f = e.Compile(useInterpreter);
             IEquatable<C>[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1218,13 +1319,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyIEquatableCustom2ArrayList(IEquatable<D>[] val, Expression[] exprs)
+        private static void VerifyIEquatableCustom2ArrayList(IEquatable<D>[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<IEquatable<D>[]>> e =
                 Expression.Lambda<Func<IEquatable<D>[]>>(
                     Expression.NewArrayInit(typeof(IEquatable<D>), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<IEquatable<D>[]> f = e.Compile();
+            Func<IEquatable<D>[]> f = e.Compile(useInterpreter);
             IEquatable<D>[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1233,13 +1334,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyIntArrayList(int[] val, Expression[] exprs)
+        private static void VerifyIntArrayList(int[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<int[]>> e =
                 Expression.Lambda<Func<int[]>>(
                     Expression.NewArrayInit(typeof(int), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int[]> f = e.Compile();
+            Func<int[]> f = e.Compile(useInterpreter);
             int[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1248,13 +1349,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyLongArrayList(long[] val, Expression[] exprs)
+        private static void VerifyLongArrayList(long[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<long[]>> e =
                 Expression.Lambda<Func<long[]>>(
                     Expression.NewArrayInit(typeof(long), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long[]> f = e.Compile();
+            Func<long[]> f = e.Compile(useInterpreter);
             long[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1263,13 +1364,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyObjectArrayList(object[] val, Expression[] exprs)
+        private static void VerifyObjectArrayList(object[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<object[]>> e =
                 Expression.Lambda<Func<object[]>>(
                     Expression.NewArrayInit(typeof(object), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<object[]> f = e.Compile();
+            Func<object[]> f = e.Compile(useInterpreter);
             object[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1278,13 +1379,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyStructArrayList(S[] val, Expression[] exprs)
+        private static void VerifyStructArrayList(S[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<S[]>> e =
                 Expression.Lambda<Func<S[]>>(
                     Expression.NewArrayInit(typeof(S), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<S[]> f = e.Compile();
+            Func<S[]> f = e.Compile(useInterpreter);
             S[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1293,13 +1394,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifySByteArrayList(sbyte[] val, Expression[] exprs)
+        private static void VerifySByteArrayList(sbyte[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<sbyte[]>> e =
                 Expression.Lambda<Func<sbyte[]>>(
                     Expression.NewArrayInit(typeof(sbyte), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<sbyte[]> f = e.Compile();
+            Func<sbyte[]> f = e.Compile(useInterpreter);
             sbyte[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1308,13 +1409,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyStructWithStringArrayList(Sc[] val, Expression[] exprs)
+        private static void VerifyStructWithStringArrayList(Sc[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<Sc[]>> e =
                 Expression.Lambda<Func<Sc[]>>(
                     Expression.NewArrayInit(typeof(Sc), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sc[]> f = e.Compile();
+            Func<Sc[]> f = e.Compile(useInterpreter);
             Sc[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1323,13 +1424,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyStructWithStringAndFieldArrayList(Scs[] val, Expression[] exprs)
+        private static void VerifyStructWithStringAndFieldArrayList(Scs[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<Scs[]>> e =
                 Expression.Lambda<Func<Scs[]>>(
                     Expression.NewArrayInit(typeof(Scs), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Scs[]> f = e.Compile();
+            Func<Scs[]> f = e.Compile(useInterpreter);
             Scs[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1338,13 +1439,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyShortArrayList(short[] val, Expression[] exprs)
+        private static void VerifyShortArrayList(short[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<short[]>> e =
                 Expression.Lambda<Func<short[]>>(
                     Expression.NewArrayInit(typeof(short), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short[]> f = e.Compile();
+            Func<short[]> f = e.Compile(useInterpreter);
             short[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1353,13 +1454,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyStructWithTwoValuesArrayList(Sp[] val, Expression[] exprs)
+        private static void VerifyStructWithTwoValuesArrayList(Sp[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<Sp[]>> e =
                 Expression.Lambda<Func<Sp[]>>(
                     Expression.NewArrayInit(typeof(Sp), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Sp[]> f = e.Compile();
+            Func<Sp[]> f = e.Compile(useInterpreter);
             Sp[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1368,13 +1469,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyStructWithValueArrayList(Ss[] val, Expression[] exprs)
+        private static void VerifyStructWithValueArrayList(Ss[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<Ss[]>> e =
                 Expression.Lambda<Func<Ss[]>>(
                     Expression.NewArrayInit(typeof(Ss), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ss[]> f = e.Compile();
+            Func<Ss[]> f = e.Compile(useInterpreter);
             Ss[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1383,13 +1484,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyStringArrayList(string[] val, Expression[] exprs)
+        private static void VerifyStringArrayList(string[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<string[]>> e =
                 Expression.Lambda<Func<string[]>>(
                     Expression.NewArrayInit(typeof(string), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<string[]> f = e.Compile();
+            Func<string[]> f = e.Compile(useInterpreter);
             string[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1398,13 +1499,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyUIntArrayList(uint[] val, Expression[] exprs)
+        private static void VerifyUIntArrayList(uint[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<uint[]>> e =
                 Expression.Lambda<Func<uint[]>>(
                     Expression.NewArrayInit(typeof(uint), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint[]> f = e.Compile();
+            Func<uint[]> f = e.Compile(useInterpreter);
             uint[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1413,13 +1514,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyULongArrayList(ulong[] val, Expression[] exprs)
+        private static void VerifyULongArrayList(ulong[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<ulong[]>> e =
                 Expression.Lambda<Func<ulong[]>>(
                     Expression.NewArrayInit(typeof(ulong), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong[]> f = e.Compile();
+            Func<ulong[]> f = e.Compile(useInterpreter);
             ulong[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1428,13 +1529,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyUShortArrayList(ushort[] val, Expression[] exprs)
+        private static void VerifyUShortArrayList(ushort[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<ushort[]>> e =
                 Expression.Lambda<Func<ushort[]>>(
                     Expression.NewArrayInit(typeof(ushort), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort[]> f = e.Compile();
+            Func<ushort[]> f = e.Compile(useInterpreter);
             ushort[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1443,13 +1544,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyGenericArrayList<T>(T[] val, Expression[] exprs)
+        private static void VerifyGenericArrayList<T>(T[] val, Expression[] exprs, bool useInterpreter)
         {
             Expression<Func<T[]>> e =
                 Expression.Lambda<Func<T[]>>(
                     Expression.NewArrayInit(typeof(T), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<T[]> f = e.Compile();
+            Func<T[]> f = e.Compile(useInterpreter);
             T[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1458,13 +1559,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyGenericWithClassRestrictionArrayList<Tc>(Tc[] val, Expression[] exprs) where Tc : class
+        private static void VerifyGenericWithClassRestrictionArrayList<Tc>(Tc[] val, Expression[] exprs, bool useInterpreter) where Tc : class
         {
             Expression<Func<Tc[]>> e =
                 Expression.Lambda<Func<Tc[]>>(
                     Expression.NewArrayInit(typeof(Tc), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tc[]> f = e.Compile();
+            Func<Tc[]> f = e.Compile(useInterpreter);
             Tc[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1473,13 +1574,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyGenericWithSubClassRestrictionArrayList<TC>(TC[] val, Expression[] exprs) where TC : C
+        private static void VerifyGenericWithSubClassRestrictionArrayList<TC>(TC[] val, Expression[] exprs, bool useInterpreter) where TC : C
         {
             Expression<Func<TC[]>> e =
                 Expression.Lambda<Func<TC[]>>(
                     Expression.NewArrayInit(typeof(TC), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<TC[]> f = e.Compile();
+            Func<TC[]> f = e.Compile(useInterpreter);
             TC[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1488,13 +1589,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyGenericWithClassAndNewRestrictionArrayList<Tcn>(Tcn[] val, Expression[] exprs) where Tcn : class, new()
+        private static void VerifyGenericWithClassAndNewRestrictionArrayList<Tcn>(Tcn[] val, Expression[] exprs, bool useInterpreter) where Tcn : class, new()
         {
             Expression<Func<Tcn[]>> e =
                 Expression.Lambda<Func<Tcn[]>>(
                     Expression.NewArrayInit(typeof(Tcn), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Tcn[]> f = e.Compile();
+            Func<Tcn[]> f = e.Compile(useInterpreter);
             Tcn[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1503,13 +1604,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyGenericWithSubClassAndNewRestrictionArrayList<TCn>(TCn[] val, Expression[] exprs) where TCn : C, new()
+        private static void VerifyGenericWithSubClassAndNewRestrictionArrayList<TCn>(TCn[] val, Expression[] exprs, bool useInterpreter) where TCn : C, new()
         {
             Expression<Func<TCn[]>> e =
                 Expression.Lambda<Func<TCn[]>>(
                     Expression.NewArrayInit(typeof(TCn), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<TCn[]> f = e.Compile();
+            Func<TCn[]> f = e.Compile(useInterpreter);
             TCn[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1518,13 +1619,13 @@ namespace Tests.ExpressionCompiler.Array
             }
         }
 
-        private static void VerifyGenericWithStructRestrictionArrayList<Ts>(Ts[] val, Expression[] exprs) where Ts : struct
+        private static void VerifyGenericWithStructRestrictionArrayList<Ts>(Ts[] val, Expression[] exprs, bool useInterpreter) where Ts : struct
         {
             Expression<Func<Ts[]>> e =
                 Expression.Lambda<Func<Ts[]>>(
                     Expression.NewArrayInit(typeof(Ts), exprs),
                     Enumerable.Empty<ParameterExpression>());
-            Func<Ts[]> f = e.Compile();
+            Func<Ts[]> f = e.Compile(useInterpreter);
             Ts[] result = f();
             Assert.Equal(val.Length, result.Length);
             for (int i = 0; i < result.Length; i++)
@@ -1534,5 +1635,103 @@ namespace Tests.ExpressionCompiler.Array
         }
 
         #endregion
+
+        [Fact]
+        public static void NullType()
+        {
+            Assert.Throws<ArgumentNullException>("type", () => Expression.NewArrayInit(null));
+        }
+
+        [Fact]
+        public static void VoidType()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(void)));
+        }
+
+        [Fact]
+        public static void NullInitializers()
+        {
+            Assert.Throws<ArgumentNullException>("initializers", () => Expression.NewArrayInit(typeof(int), default(Expression[])));
+            Assert.Throws<ArgumentNullException>("initializers", () => Expression.NewArrayInit(typeof(int), default(IEnumerable<Expression>)));
+        }
+
+        [Fact]
+        public static void NullInitializer()
+        {
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.NewArrayInit(typeof(int), new Expression[] { null, null }));
+            Assert.Throws<ArgumentNullException>("initializers[0]", () => Expression.NewArrayInit(typeof(int), new List<Expression> { null, null }));
+        }
+
+        [Fact]
+        public static void ByRefType()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(int).MakeByRefType()));
+        }
+
+        [Fact]
+        public static void PointerType()
+        {
+            Assert.Throws<ArgumentException>("type", () => Expression.NewArrayInit(typeof(int).MakePointerType()));
+        }
+
+        [Fact]
+        public static void GenericType()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(List<>)));
+        }
+
+        [Fact]
+        public static void TypeContainsGenericParameters()
+        {
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(List<>.Enumerator)));
+            Assert.Throws<ArgumentException>(() => Expression.NewArrayInit(typeof(List<>).MakeGenericType(typeof(List<>))));
+        }
+
+        [Fact]
+        public static void NotAssignable()
+        {
+            Assert.Throws<InvalidOperationException>(() => Expression.NewArrayInit(typeof(string), Expression.Constant(2)));
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void AutoQuote(bool useInterpreter)
+        {
+            Expression<Func<int, int>> doubleIt = x => x * 2;
+            var quoted = Expression.Lambda<Func<Expression<Func<int, int>>[]>>(
+                Expression.NewArrayInit(
+                    typeof(Expression<Func<int, int>>),
+                    doubleIt
+                    )
+                );
+            var del = quoted.Compile(useInterpreter);
+            Assert.Equal(new [] {doubleIt}, del());
+
+            quoted = Expression.Lambda<Func<Expression<Func<int, int>>[]>>(
+                Expression.NewArrayInit(
+                    typeof(Expression<Func<int, int>>),
+                    Expression.Constant(doubleIt),
+                    doubleIt,
+                    Expression.Constant(doubleIt)
+                    )
+                );
+            del = quoted.Compile(useInterpreter);
+            Assert.Equal(new [] {doubleIt, doubleIt, doubleIt}, del());
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void NestedCompile(bool useInterpreter)
+        {
+            Expression<Func<int, int>> doubleIt = x => x * 2;
+            var unquoted = Expression.Lambda<Func<Func<int, int>[]>>(
+                Expression.NewArrayInit(
+                    typeof(Func<int, int>),
+                    doubleIt
+                    )
+                );
+            var del = unquoted.Compile(useInterpreter);
+            var arr = del();
+            Assert.Equal(1, arr.Length);
+            Assert.Equal(26, arr[0](13));
+        }
     }
 }

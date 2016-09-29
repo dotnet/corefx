@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -185,7 +186,7 @@ namespace System.Runtime.Serialization
                     return;
                 dataContract = GetDataContract(declaredTypeHandle, declaredType);
 #else
-            DataContract dataContract = DataContract.GetDataContractFromGeneratedAssembly(declaredType);
+            DataContract dataContract = DataContract.GetDataContract(declaredType);
             if (dataContract.TypeIsInterface && dataContract.TypeIsCollectionInterface)
             {
                 if (OnHandleIsReference(xmlWriter, dataContract, obj))
@@ -231,7 +232,7 @@ namespace System.Runtime.Serialization
 
         internal bool OnHandleIsReference(XmlWriterDelegator xmlWriter, DataContract contract, object obj)
         {
-            if (!contract.IsReference || _isGetOnlyCollection)
+            if (preserveObjectReferences || !contract.IsReference || _isGetOnlyCollection)
             {
                 return false;
             }
@@ -555,6 +556,21 @@ namespace System.Runtime.Serialization
             IXmlSerializable xmlSerializable = obj as IXmlSerializable;
             if (xmlSerializable != null)
                 xmlSerializable.WriteXml(xmlSerializableWriter);
+            else
+            {
+                XmlElement xmlElement = obj as XmlElement;
+                if (xmlElement != null)
+                    xmlElement.WriteTo(xmlSerializableWriter);
+                else
+                {
+                    XmlNode[] xmlNodes = obj as XmlNode[];
+                    if (xmlNodes != null)
+                        foreach (XmlNode xmlNode in xmlNodes)
+                            xmlNode.WriteTo(xmlSerializableWriter);
+                    else
+                        throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.UnknownXmlType, DataContract.GetClrTypeFullName(obj.GetType()))));
+                }
+            }
             xmlSerializableWriter.EndWrite();
         }
 
@@ -605,20 +621,20 @@ namespace System.Runtime.Serialization
 
         protected virtual bool WriteTypeInfo(XmlWriterDelegator writer, DataContract contract, DataContract declaredContract)
         {
-            if (XmlObjectSerializer.IsContractDeclared(contract, declaredContract))
+            if (!XmlObjectSerializer.IsContractDeclared(contract, declaredContract))
             {
-                return false;
+                if (DataContractResolver == null)
+                {
+                    WriteTypeInfo(writer, contract.Name, contract.Namespace);
+                    return true;
+                }
+                else
+                {
+                    WriteResolvedTypeInfo(writer, contract.OriginalUnderlyingType, declaredContract.OriginalUnderlyingType);
+                    return false;
+                }
             }
-            bool hasResolver = DataContractResolver != null;
-            if (hasResolver)
-            {
-                WriteResolvedTypeInfo(writer, contract.UnderlyingType, declaredContract.UnderlyingType);
-            }
-            else
-            {
-                WriteTypeInfo(writer, contract.Name, contract.Namespace);
-            }
-            return hasResolver;
+            return false;
         }
 
         protected virtual void WriteTypeInfo(XmlWriterDelegator writer, string dataContractName, string dataContractNamespace)

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -8,10 +9,11 @@
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
-using System.Threading;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Data.SqlClient
 {
@@ -90,27 +92,13 @@ namespace System.Data.SqlClient
                     }
                     else
                     {
-                        if (connectionToDoom != null || connectionToAbort != null)
+                        try
                         {
-                            try
-                            {
-                                onSuccess();
-                            }
-                            catch (Exception e)
-                            {
-                                completion.SetException(e);
-                            }
+                            onSuccess();
                         }
-                        else
-                        { // no connection to doom - reliability section not required
-                            try
-                            {
-                                onSuccess();
-                            }
-                            catch (Exception e)
-                            {
-                                completion.SetException(e);
-                            }
+                        catch (Exception e)
+                        {
+                            completion.SetException(e);
                         }
                     }
                 }, TaskScheduler.Default
@@ -225,7 +213,7 @@ namespace System.Data.SqlClient
             return ADP.InvalidOperation(Res.GetString(Res.SQL_MarsUnsupportedOnConnection));
         }
 
-        static internal Exception CannotModifyPropertyAsyncOperationInProgress(string property)
+        static internal Exception CannotModifyPropertyAsyncOperationInProgress([CallerMemberName] string property = "")
         {
             return ADP.InvalidOperation(Res.GetString(Res.SQL_CannotModifyPropertyAsyncOperationInProgress, property));
         }
@@ -579,7 +567,7 @@ namespace System.Data.SqlClient
         /// <summary>
         /// used to block two scenarios if MultiSubnetFailover is true: 
         /// * server-provided failover partner - raising SqlException in this case
-        /// * connection string with failover partner and MultiSubnetFailover=true - rasing argument one in this case with the same message
+        /// * connection string with failover partner and MultiSubnetFailover=true - raising argument one in this case with the same message
         /// </summary>
         static internal Exception MultiSubnetFailoverWithFailoverPartner(bool serverProvidedFailoverPartner, SqlInternalConnectionTds internalConnection)
         {
@@ -797,19 +785,11 @@ namespace System.Data.SqlClient
             string errorMessageId = String.Format((IFormatProvider)null, "SNI_ERROR_{0}", sniError);
             return SR.GetResourceString(errorMessageId, errorMessageId);
         }
-
-        // BulkLoad
-        internal const string WriteToServer = "WriteToServer";
-
-
-        // constant strings
-        internal const string Transaction = "Transaction";
-        internal const string Connection = "Connection";
     }
 
     sealed internal class SQLMessage
     {
-        private SQLMessage() { /* prevent utility class from being insantiated*/ }
+        private SQLMessage() { /* prevent utility class from being instantiated*/ }
 
         // The class SQLMessage defines the error messages that are specific to the SqlDataAdapter
         // that are caused by a netlib error.  The functions will be called and then return the
@@ -946,7 +926,7 @@ namespace System.Data.SqlClient
         /// <returns>escapes the name with [], also escapes the last close bracket with double-bracket</returns>
         static internal string EscapeIdentifier(string name)
         {
-            Debug.Assert(!ADP.IsEmpty(name), "null or empty identifiers are not allowed");
+            Debug.Assert(!string.IsNullOrEmpty(name), "null or empty identifiers are not allowed");
             return "[" + name.Replace("]", "]]") + "]";
         }
 
@@ -956,7 +936,7 @@ namespace System.Data.SqlClient
         static internal void EscapeIdentifier(StringBuilder builder, string name)
         {
             Debug.Assert(builder != null, "builder cannot be null");
-            Debug.Assert(!ADP.IsEmpty(name), "null or empty identifiers are not allowed");
+            Debug.Assert(!string.IsNullOrEmpty(name), "null or empty identifiers are not allowed");
 
             builder.Append("[");
             builder.Append(name.Replace("]", "]]"));

@@ -1,8 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
@@ -163,7 +164,7 @@ namespace System.Net.Http.Headers
 
         private CacheControlHeaderValue(CacheControlHeaderValue source)
         {
-            Contract.Requires(source != null);
+            Debug.Assert(source != null);
 
             _noCache = source._noCache;
             _noStore = source._noStore;
@@ -379,7 +380,7 @@ namespace System.Net.Http.Headers
         internal static int GetCacheControlLength(string input, int startIndex, CacheControlHeaderValue storeValue,
             out CacheControlHeaderValue parsedValue)
         {
-            Contract.Requires(startIndex >= 0);
+            Debug.Assert(startIndex >= 0);
 
             parsedValue = null;
 
@@ -522,7 +523,7 @@ namespace System.Net.Http.Headers
         private static bool TrySetOptionalTokenList(NameValueHeaderValue nameValue, ref bool boolField,
             ref ObjectCollection<string> destination)
         {
-            Contract.Requires(nameValue != null);
+            Debug.Assert(nameValue != null);
 
             if (nameValue.Value == null)
             {
@@ -531,7 +532,7 @@ namespace System.Net.Http.Headers
             }
 
             // We need the string to be at least 3 chars long: 2x quotes and at least 1 character. Also make sure we
-            // have a quoted string. Note that NameValueHeaderValue will never have leading/trailing whitespaces.
+            // have a quoted string. Note that NameValueHeaderValue will never have leading/trailing whitespace.
             string valueString = nameValue.Value;
             if ((valueString.Length < 3) || (valueString[0] != '\"') || (valueString[valueString.Length - 1] != '\"'))
             {
@@ -557,7 +558,7 @@ namespace System.Net.Http.Headers
 
                 if (tokenLength == 0)
                 {
-                    // We already skipped whitespaces and separators. If we don't have a token it must be an invalid
+                    // We already skipped whitespace and separators. If we don't have a token it must be an invalid
                     // character.
                     return false;
                 }
@@ -584,7 +585,7 @@ namespace System.Net.Http.Headers
 
         private static bool TrySetTimeSpan(NameValueHeaderValue nameValue, ref TimeSpan? timeSpan)
         {
-            Contract.Requires(nameValue != null);
+            Debug.Assert(nameValue != null);
 
             if (nameValue.Value == null)
             {

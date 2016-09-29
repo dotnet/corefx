@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -31,6 +32,16 @@ namespace System.Threading.Tasks.Dataflow
         private readonly ReorderingBuffer<TOutput> _reorderingBuffer;
         /// <summary>The source side.</summary>
         private readonly SourceCore<TOutput> _source;
+
+        /// <summary>Gets the object to use for writing to the source when multiple threads may be involved.</summary>
+        /// <remarks>
+        /// If a reordering buffer is used, it is safe for multiple threads to write to concurrently and handles safe 
+        /// access to the source. If there's no reordering buffer because no parallelism is used, then only one thread at
+        /// a time will try to access the source, anyway.  But, if there's no reordering buffer and parallelism is being
+        /// employed, then multiple threads may try to access the source concurrently, in which case we need to manually
+        /// synchronize all such access, and this lock is used for that purpose.
+        /// </remarks>
+        private object ParallelSourceLock { get { return _source; } }
 
         /// <summary>Initializes the <see cref="TransformBlock{TInput,TOutput}"/> with the specified <see cref="System.Func{TInput,TOutput}"/>.</summary>
         /// <param name="transform">The function to invoke with each data element received.</param>
@@ -84,9 +95,9 @@ namespace System.Threading.Tasks.Dataflow
         private TransformBlock(Func<TInput, TOutput> transformSync, Func<TInput, Task<TOutput>> transformAsync, ExecutionDataflowBlockOptions dataflowBlockOptions)
         {
             if (transformSync == null && transformAsync == null) throw new ArgumentNullException("transform");
-            if (dataflowBlockOptions == null) throw new ArgumentNullException("dataflowBlockOptions");
+            if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
 
-            Contract.Requires(transformSync == null ^ transformAsync == null, "Exactly one of transformSync and transformAsync must be null.");
+            Debug.Assert(transformSync == null ^ transformAsync == null, "Exactly one of transformSync and transformAsync must be null.");
             Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
@@ -102,8 +113,9 @@ namespace System.Threading.Tasks.Dataflow
                 owningSource => ((TransformBlock<TInput, TOutput>)owningSource)._target.Complete(exception: null, dropPendingMessages: true),
                 onItemsRemoved);
 
-            // If parallelism is employed, we will need to support reordering messages that complete out-of-order
-            if (dataflowBlockOptions.SupportsParallelExecution)
+            // If parallelism is employed, we will need to support reordering messages that complete out-of-order.
+            // However, a developer can override this with EnsureOrdered == false.
+            if (dataflowBlockOptions.SupportsParallelExecution && dataflowBlockOptions.EnsureOrdered)
             {
                 _reorderingBuffer = new ReorderingBuffer<TOutput>(this, (owningSource, message) => ((TransformBlock<TInput, TOutput>)owningSource)._source.AddMessage(message));
             }
@@ -182,7 +194,7 @@ namespace System.Threading.Tasks.Dataflow
                 // count to reflect that we're done with this input item.
                 if (!itemIsValid) _target.ChangeBoundingCount(-1);
 
-                // If there's no reordering buffer (because we're running sequentially),
+                // If there's no reordering buffer (because we're running sequentially or ordering was disabled),
                 // simply pass the output message through. Otherwise, there's a reordering buffer, 
                 // so add to it instead (if a reordering buffer is used, we always need
                 // to output the message to it, even if the operation failed and outputMessage
@@ -191,7 +203,20 @@ namespace System.Threading.Tasks.Dataflow
                 // null messages accordingly.)
                 if (_reorderingBuffer == null)
                 {
-                    if (itemIsValid) _source.AddMessage(outputItem);
+                    if (itemIsValid)
+                    {
+                        if (_target.DataflowBlockOptions.MaxDegreeOfParallelism == 1)
+                        {
+                            _source.AddMessage(outputItem);
+                        }
+                        else
+                        {
+                            lock (ParallelSourceLock)
+                            {
+                                _source.AddMessage(outputItem);
+                            }
+                        }
+                    }
                 }
                 else _reorderingBuffer.AddItem(messageWithId.Value, outputItem, itemIsValid);
             }
@@ -203,7 +228,7 @@ namespace System.Threading.Tasks.Dataflow
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ProcessMessageWithTask(Func<TInput, Task<TOutput>> transform, KeyValuePair<TInput, long> messageWithId)
         {
-            Contract.Requires(transform != null, "Function to invoke is required.");
+            Debug.Assert(transform != null, "Function to invoke is required.");
 
             // Run the transform function to get the task that represents the operation's completion
             Task<TOutput> task = null;
@@ -248,8 +273,8 @@ namespace System.Threading.Tasks.Dataflow
         /// <param name="messageWithId">The originating message</param>
         private void AsyncCompleteProcessMessageWithTask(Task<TOutput> completed, KeyValuePair<TInput, long> messageWithId)
         {
-            Contract.Requires(completed != null, "Completed task is required.");
-            Contract.Requires(completed.IsCompleted, "Task must be completed to be here.");
+            Debug.Assert(completed != null, "Completed task is required.");
+            Debug.Assert(completed.IsCompleted, "Task must be completed to be here.");
 
             bool isBounded = _target.IsBounded;
             bool gotOutputItem = false;
@@ -279,11 +304,24 @@ namespace System.Threading.Tasks.Dataflow
             // appropriately incremented before it's decremented.
             if (!gotOutputItem && isBounded) _target.ChangeBoundingCount(-1);
 
-            // If there's no reordering buffer (because we're running sequentially),
+            // If there's no reordering buffer (because we're running sequentially or ordering is disabled),
             // and we got a message, simply pass the output message through.
             if (_reorderingBuffer == null)
             {
-                if (gotOutputItem) _source.AddMessage(outputItem);
+                if (gotOutputItem)
+                {
+                    if (_target.DataflowBlockOptions.MaxDegreeOfParallelism == 1)
+                    {
+                        _source.AddMessage(outputItem);
+                    }
+                    else
+                    {
+                        lock (ParallelSourceLock)
+                        {
+                            _source.AddMessage(outputItem);
+                        }
+                    }
+                }
             }
             // Otherwise, there's a reordering buffer, so add to it instead.  
             // Even if something goes wrong, we need to update the 
@@ -300,7 +338,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             _target.Complete(exception, dropPendingMessages: true);
@@ -391,7 +429,7 @@ namespace System.Threading.Tasks.Dataflow
             /// <param name="transformBlock">The transform being viewed.</param>
             public DebugView(TransformBlock<TInput, TOutput> transformBlock)
             {
-                Contract.Requires(transformBlock != null, "Need a block with which to construct the debug view.");
+                Debug.Assert(transformBlock != null, "Need a block with which to construct the debug view.");
                 _transformBlock = transformBlock;
                 _targetDebuggingInformation = transformBlock._target.GetDebuggingInformation();
                 _sourceDebuggingInformation = transformBlock._source.GetDebuggingInformation();

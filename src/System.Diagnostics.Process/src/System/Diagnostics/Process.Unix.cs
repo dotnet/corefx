@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
@@ -14,6 +15,9 @@ namespace System.Diagnostics
 {
     public partial class Process : IDisposable
     {
+        private static readonly UTF8Encoding s_utf8NoBom =
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
         /// special mode by enabling the native property SeDebugPrivilege on the current thread.
@@ -57,6 +61,14 @@ namespace System.Diagnostics
                 _waitStateHolder.Dispose();
                 _waitStateHolder = null;
             }
+        }
+
+        /// <summary>Additional configuration when a process ID is set.</summary>
+        partial void ConfigureAfterProcessIdSet()
+        {
+            // Make sure that we configure the wait state holder for this process object, which we can only do once we have a process ID.
+            Debug.Assert(_haveProcessId, $"{nameof(ConfigureAfterProcessIdSet)} should only be called once a process ID is set");
+            GetWaitState(); // lazily initializes the wait state
         }
 
         /// <summary>
@@ -198,11 +210,27 @@ namespace System.Diagnostics
         /// <param name="startInfo">The start info with which to start the process.</param>
         private bool StartCore(ProcessStartInfo startInfo)
         {
-            // Resolve the path to the specified file name
-            string filename = ResolvePath(startInfo.FileName);
+            string filename;
+            string[] argv;
 
-            // Parse argv, envp, and cwd out of the ProcessStartInfo
-            string[] argv = CreateArgv(startInfo);
+            if (startInfo.UseShellExecute)
+            {
+                if (startInfo.RedirectStandardInput || startInfo.RedirectStandardOutput || startInfo.RedirectStandardError)
+                {
+                    throw new InvalidOperationException(SR.CantRedirectStreams);
+                }
+
+                const string ShellPath = "/bin/sh";
+
+                filename = ShellPath;
+                argv = new string[3] { ShellPath, "-c", startInfo.FileName + " " + startInfo.Arguments};
+            }
+            else
+            {
+                filename = ResolvePath(startInfo.FileName);
+                argv = ParseArgv(startInfo);
+            }
+
             string[] envp = CreateEnvp(startInfo);
             string cwd = !string.IsNullOrWhiteSpace(startInfo.WorkingDirectory) ? startInfo.WorkingDirectory : null;
 
@@ -212,38 +240,38 @@ namespace System.Diagnostics
             // is used to fork/execve as executing managed code in a forked process is not safe (only
             // the calling thread will transfer, thread IDs aren't stable across the fork, etc.)
             int childPid, stdinFd, stdoutFd, stderrFd;
-            if (Interop.Sys.ForkAndExecProcess(
+            Interop.Sys.ForkAndExecProcess(
                 filename, argv, envp, cwd,
                 startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                out childPid, 
-                out stdinFd, out stdoutFd, out stderrFd) != 0)
-            {
-                throw new Win32Exception();
-            }
+                out childPid,
+                out stdinFd, out stdoutFd, out stderrFd);
 
             // Store the child's information into this Process object.
             Debug.Assert(childPid >= 0);
-            SetProcessHandle(new SafeProcessHandle(childPid));
             SetProcessId(childPid);
+            SetProcessHandle(new SafeProcessHandle(childPid));
 
             // Configure the parent's ends of the redirection streams.
+            // We use UTF8 encoding without BOM by-default(instead of Console encoding as on Windows)
+            // as there is no good way to get this information from the native layer
+            // and we do not want to take dependency on Console contract.
             if (startInfo.RedirectStandardInput)
             {
                 Debug.Assert(stdinFd >= 0);
                 _standardInput = new StreamWriter(OpenStream(stdinFd, FileAccess.Write),
-                    new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), StreamBufferSize) { AutoFlush = true };
+                    s_utf8NoBom, StreamBufferSize) { AutoFlush = true };
             }
             if (startInfo.RedirectStandardOutput)
             {
                 Debug.Assert(stdoutFd >= 0);
                 _standardOutput = new StreamReader(OpenStream(stdoutFd, FileAccess.Read),
-                    startInfo.StandardOutputEncoding ?? Encoding.UTF8, true, StreamBufferSize);
+                    startInfo.StandardOutputEncoding ?? s_utf8NoBom, true, StreamBufferSize);
             }
             if (startInfo.RedirectStandardError)
             {
                 Debug.Assert(stderrFd >= 0);
                 _standardError = new StreamReader(OpenStream(stderrFd, FileAccess.Read),
-                    startInfo.StandardErrorEncoding ?? Encoding.UTF8, true, StreamBufferSize);
+                    startInfo.StandardErrorEncoding ?? s_utf8NoBom, true, StreamBufferSize);
             }
 
             return true;
@@ -262,7 +290,7 @@ namespace System.Diagnostics
         /// <summary>Converts the filename and arguments information from a ProcessStartInfo into an argv array.</summary>
         /// <param name="psi">The ProcessStartInfo.</param>
         /// <returns>The argv array.</returns>
-        private static string[] CreateArgv(ProcessStartInfo psi)
+        private static string[] ParseArgv(ProcessStartInfo psi)
         {
             string argv0 = psi.FileName; // pass filename (instead of resolved path) as argv[0], to match what caller supplied
             if (string.IsNullOrEmpty(psi.Arguments))
@@ -370,6 +398,23 @@ namespace System.Diagnostics
             return TimeSpan.FromSeconds(ticks / (double)ticksPerSecond);
         }
 
+        /// <summary>Computes a time based on a number of ticks since boot.</summary>
+        /// <param name="timespanAfterBoot">The timespan since boot.</param>
+        /// <returns>The converted time.</returns>
+        internal static DateTime BootTimeToDateTime(TimeSpan timespanAfterBoot)
+        {
+            // Use the uptime and the current time to determine the absolute boot time. This implementation is relying on the 
+            // implementation detail that Stopwatch.GetTimestamp() uses a value based on time since boot.
+            DateTime bootTime = DateTime.UtcNow - TimeSpan.FromSeconds(Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency);
+
+            // And use that to determine the absolute time for timespan.
+            DateTime dt = bootTime + timespanAfterBoot;
+
+            // The return value is expected to be in the local time zone.
+            // It is converted here (rather than starting with DateTime.Now) to avoid DST issues.
+            return dt.ToLocalTime();
+        }
+
         /// <summary>Opens a stream around the specified file descriptor and with the specified access.</summary>
         /// <param name="fd">The file descriptor.</param>
         /// <param name="access">The access mode.</param>
@@ -385,24 +430,49 @@ namespace System.Diagnostics
         /// <summary>Parses a command-line argument string into a list of arguments.</summary>
         /// <param name="arguments">The argument string.</param>
         /// <param name="results">The list into which the component arguments should be stored.</param>
+        /// <remarks>
+        /// This follows the rules outlined in "Parsing C++ Command-Line Arguments" at 
+        /// https://msdn.microsoft.com/en-us/library/17w5ykft.aspx.
+        /// </remarks>
         private static void ParseArgumentsIntoList(string arguments, List<string> results)
         {
             var currentArgument = new StringBuilder();
             bool inQuotes = false;
 
-            // Iterate through all of the characters in the argument string
+            // Iterate through all of the characters in the argument string.
             for (int i = 0; i < arguments.Length; i++)
             {
-                char c = arguments[i];
-
-                // If this is an escaped double-quote, just add a '"' to the current
-                // argument and then skip past it in the input.
-                if (c == '\\' && i < arguments.Length - 1 && arguments[i + 1] == '"')
+                // From the current position, iterate through contiguous backslashes.
+                int backslashCount = 0;
+                for (; i < arguments.Length && arguments[i] == '\\'; i++, backslashCount++) ;
+                if (backslashCount > 0)
                 {
-                    currentArgument.Append('"');
-                    i++;
+                    if (i >= arguments.Length || arguments[i] != '"')
+                    {
+                        // Backslashes not followed by a double quote:
+                        // they should all be treated as literal backslashes.
+                        currentArgument.Append('\\', backslashCount);
+                        i--;
+                    }
+                    else
+                    {
+                        // Backslashes followed by a double quote:
+                        // - Output a literal slash for each complete pair of slashes
+                        // - If one remains, use it to make the subsequent quote a literal.
+                        currentArgument.Append('\\', backslashCount / 2);
+                        if (backslashCount % 2 == 0)
+                        {
+                            i--;
+                        }
+                        else
+                        {
+                            currentArgument.Append('"');
+                        }
+                    }
                     continue;
                 }
+
+                char c = arguments[i];
 
                 // If this is a double quote, track whether we're inside of quotes or not.
                 // Anything within quotes will be treated as a single argument, even if
@@ -413,10 +483,10 @@ namespace System.Diagnostics
                     continue;
                 }
 
-                // If this is a space and we're not in quotes, we're done with the current
+                // If this is a space/tab and we're not in quotes, we're done with the current
                 // argument, and if we've built up any characters in the current argument,
                 // it should be added to the results and then reset for the next one.
-                if (c == ' ' && !inQuotes)
+                if ((c == ' ' || c == '\t') && !inQuotes)
                 {
                     if (currentArgument.Length > 0)
                     {

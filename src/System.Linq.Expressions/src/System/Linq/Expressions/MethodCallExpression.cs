@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -58,7 +59,7 @@ namespace System.Linq.Expressions
 
         /// <summary>
         /// Gets the <see cref="Expression" /> that represents the instance 
-        /// for instance method calls or null for static method cals.
+        /// for instance method calls or null for static method calls.
         /// </summary>
         public Expression Object
         {
@@ -705,7 +706,7 @@ namespace System.Linq.Expressions
         {
             // NB: Keeping this method as internal to avoid public API changes; it's internal for MethodCallExpression0.Rewrite.
 
-            ContractUtils.RequiresNotNull(method, "method");
+            ContractUtils.RequiresNotNull(method, nameof(method));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(null, method);
 
@@ -722,14 +723,14 @@ namespace System.Linq.Expressions
         ///<paramref name="method" /> is null.</exception>
         public static MethodCallExpression Call(MethodInfo method, Expression arg0)
         {
-            ContractUtils.RequiresNotNull(method, "method");
-            ContractUtils.RequiresNotNull(arg0, "arg0");
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.RequiresNotNull(arg0, nameof(arg0));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(null, method);
 
             ValidateArgumentCount(method, ExpressionType.Call, 1, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0], nameof(method), nameof(arg0));
 
             return new MethodCallExpression1(method, arg0);
         }
@@ -743,16 +744,16 @@ namespace System.Linq.Expressions
         ///<paramref name="method" /> is null.</exception>
         public static MethodCallExpression Call(MethodInfo method, Expression arg0, Expression arg1)
         {
-            ContractUtils.RequiresNotNull(method, "method");
-            ContractUtils.RequiresNotNull(arg0, "arg0");
-            ContractUtils.RequiresNotNull(arg1, "arg1");
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.RequiresNotNull(arg0, nameof(arg0));
+            ContractUtils.RequiresNotNull(arg1, nameof(arg1));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(null, method);
 
             ValidateArgumentCount(method, ExpressionType.Call, 2, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0], nameof(method), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1], nameof(method), nameof(arg1));
 
             return new MethodCallExpression2(method, arg0, arg1);
         }
@@ -767,18 +768,18 @@ namespace System.Linq.Expressions
         ///<paramref name="method" /> is null.</exception>
         public static MethodCallExpression Call(MethodInfo method, Expression arg0, Expression arg1, Expression arg2)
         {
-            ContractUtils.RequiresNotNull(method, "method");
-            ContractUtils.RequiresNotNull(arg0, "arg0");
-            ContractUtils.RequiresNotNull(arg1, "arg1");
-            ContractUtils.RequiresNotNull(arg2, "arg2");
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.RequiresNotNull(arg0, nameof(arg0));
+            ContractUtils.RequiresNotNull(arg1, nameof(arg1));
+            ContractUtils.RequiresNotNull(arg2, nameof(arg2));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(null, method);
 
             ValidateArgumentCount(method, ExpressionType.Call, 3, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1]);
-            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0], nameof(method), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1], nameof(method), nameof(arg1));
+            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2], nameof(method), nameof(arg2));
 
             return new MethodCallExpression3(method, arg0, arg1, arg2);
         }
@@ -794,20 +795,20 @@ namespace System.Linq.Expressions
         ///<paramref name="method" /> is null.</exception>
         public static MethodCallExpression Call(MethodInfo method, Expression arg0, Expression arg1, Expression arg2, Expression arg3)
         {
-            ContractUtils.RequiresNotNull(method, "method");
-            ContractUtils.RequiresNotNull(arg0, "arg0");
-            ContractUtils.RequiresNotNull(arg1, "arg1");
-            ContractUtils.RequiresNotNull(arg2, "arg2");
-            ContractUtils.RequiresNotNull(arg3, "arg3");
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.RequiresNotNull(arg0, nameof(arg0));
+            ContractUtils.RequiresNotNull(arg1, nameof(arg1));
+            ContractUtils.RequiresNotNull(arg2, nameof(arg2));
+            ContractUtils.RequiresNotNull(arg3, nameof(arg3));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(null, method);
 
             ValidateArgumentCount(method, ExpressionType.Call, 4, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1]);
-            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2]);
-            arg3 = ValidateOneArgument(method, ExpressionType.Call, arg3, pis[3]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0], nameof(method), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1], nameof(method), nameof(arg1));
+            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2], nameof(method), nameof(arg2));
+            arg3 = ValidateOneArgument(method, ExpressionType.Call, arg3, pis[3], nameof(method), nameof(arg3));
 
             return new MethodCallExpression4(method, arg0, arg1, arg2, arg3);
         }
@@ -825,22 +826,22 @@ namespace System.Linq.Expressions
         ///<returns>A <see cref="T:System.Linq.Expressions.MethodCallExpression" /> that has the <see cref="P:System.Linq.Expressions.Expression.NodeType" /> property equal to <see cref="F:System.Linq.Expressions.ExpressionType.Call" /> and the <see cref="P:System.Linq.Expressions.MethodCallExpression.Object" /> and <see cref="P:System.Linq.Expressions.MethodCallExpression.Method" /> properties set to the specified values.</returns>
         public static MethodCallExpression Call(MethodInfo method, Expression arg0, Expression arg1, Expression arg2, Expression arg3, Expression arg4)
         {
-            ContractUtils.RequiresNotNull(method, "method");
-            ContractUtils.RequiresNotNull(arg0, "arg0");
-            ContractUtils.RequiresNotNull(arg1, "arg1");
-            ContractUtils.RequiresNotNull(arg2, "arg2");
-            ContractUtils.RequiresNotNull(arg3, "arg3");
-            ContractUtils.RequiresNotNull(arg4, "arg4");
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.RequiresNotNull(arg0, nameof(arg0));
+            ContractUtils.RequiresNotNull(arg1, nameof(arg1));
+            ContractUtils.RequiresNotNull(arg2, nameof(arg2));
+            ContractUtils.RequiresNotNull(arg3, nameof(arg3));
+            ContractUtils.RequiresNotNull(arg4, nameof(arg4));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(null, method);
 
             ValidateArgumentCount(method, ExpressionType.Call, 5, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1]);
-            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2]);
-            arg3 = ValidateOneArgument(method, ExpressionType.Call, arg3, pis[3]);
-            arg4 = ValidateOneArgument(method, ExpressionType.Call, arg4, pis[4]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0], nameof(method), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1], nameof(method), nameof(arg1));
+            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2], nameof(method), nameof(arg2));
+            arg3 = ValidateOneArgument(method, ExpressionType.Call, arg3, pis[3], nameof(method), nameof(arg3));
+            arg4 = ValidateOneArgument(method, ExpressionType.Call, arg4, pis[4], nameof(method), nameof(arg4));
 
             return new MethodCallExpression5(method, arg0, arg1, arg2, arg3, arg4);
         }
@@ -875,7 +876,7 @@ namespace System.Linq.Expressions
         ///<returns>A <see cref="T:System.Linq.Expressions.MethodCallExpression" /> that has the <see cref="P:System.Linq.Expressions.Expression.NodeType" /> property equal to <see cref="F:System.Linq.Expressions.ExpressionType.Call" /> and the <see cref="P:System.Linq.Expressions.MethodCallExpression.Object" /> and <see cref="P:System.Linq.Expressions.MethodCallExpression.Method" /> properties set to the specified values.</returns>
         public static MethodCallExpression Call(Expression instance, MethodInfo method)
         {
-            ContractUtils.RequiresNotNull(method, "method");
+            ContractUtils.RequiresNotNull(method, nameof(method));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(instance, method);
 
@@ -912,14 +913,14 @@ namespace System.Linq.Expressions
         {
             // COMPAT: This method is marked as non-public to ensure compile-time compatibility for Expression.Call(e, m, null).
 
-            ContractUtils.RequiresNotNull(method, "method");
-            ContractUtils.RequiresNotNull(arg0, "arg0");
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.RequiresNotNull(arg0, nameof(arg0));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(instance, method);
 
             ValidateArgumentCount(method, ExpressionType.Call, 1, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0], nameof(method), nameof(arg0));
 
             if (instance != null)
             {
@@ -939,16 +940,16 @@ namespace System.Linq.Expressions
         ///<returns>A <see cref="T:System.Linq.Expressions.MethodCallExpression" /> that has the <see cref="P:System.Linq.Expressions.Expression.NodeType" /> property equal to <see cref="F:System.Linq.Expressions.ExpressionType.Call" /> and the <see cref="P:System.Linq.Expressions.MethodCallExpression.Object" /> and <see cref="P:System.Linq.Expressions.MethodCallExpression.Method" /> properties set to the specified values.</returns>
         public static MethodCallExpression Call(Expression instance, MethodInfo method, Expression arg0, Expression arg1)
         {
-            ContractUtils.RequiresNotNull(method, "method");
-            ContractUtils.RequiresNotNull(arg0, "arg0");
-            ContractUtils.RequiresNotNull(arg1, "arg1");
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.RequiresNotNull(arg0, nameof(arg0));
+            ContractUtils.RequiresNotNull(arg1, nameof(arg1));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(instance, method);
 
             ValidateArgumentCount(method, ExpressionType.Call, 2, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0], nameof(method), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1], nameof(method), nameof(arg1));
 
             if (instance != null)
             {
@@ -969,18 +970,18 @@ namespace System.Linq.Expressions
         ///<returns>A <see cref="T:System.Linq.Expressions.MethodCallExpression" /> that has the <see cref="P:System.Linq.Expressions.Expression.NodeType" /> property equal to <see cref="F:System.Linq.Expressions.ExpressionType.Call" /> and the <see cref="P:System.Linq.Expressions.MethodCallExpression.Object" /> and <see cref="P:System.Linq.Expressions.MethodCallExpression.Method" /> properties set to the specified values.</returns>
         public static MethodCallExpression Call(Expression instance, MethodInfo method, Expression arg0, Expression arg1, Expression arg2)
         {
-            ContractUtils.RequiresNotNull(method, "method");
-            ContractUtils.RequiresNotNull(arg0, "arg0");
-            ContractUtils.RequiresNotNull(arg1, "arg1");
-            ContractUtils.RequiresNotNull(arg2, "arg2");
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.RequiresNotNull(arg0, nameof(arg0));
+            ContractUtils.RequiresNotNull(arg1, nameof(arg1));
+            ContractUtils.RequiresNotNull(arg2, nameof(arg2));
 
             ParameterInfo[] pis = ValidateMethodAndGetParameters(instance, method);
 
             ValidateArgumentCount(method, ExpressionType.Call, 3, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1]);
-            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Call, arg0, pis[0], nameof(method), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Call, arg1, pis[1], nameof(method), nameof(arg1));
+            arg2 = ValidateOneArgument(method, ExpressionType.Call, arg2, pis[2], nameof(method), nameof(arg2));
 
             if (instance != null)
             {
@@ -1003,8 +1004,8 @@ namespace System.Linq.Expressions
         ///<exception cref="T:System.InvalidOperationException">No method whose name is <paramref name="methodName" />, whose type parameters match <paramref name="typeArguments" />, and whose parameter types match <paramref name="arguments" /> is found in <paramref name="instance" />.Type or its base types.-or-More than one method whose name is <paramref name="methodName" />, whose type parameters match <paramref name="typeArguments" />, and whose parameter types match <paramref name="arguments" /> is found in <paramref name="instance" />.Type or its base types.</exception>
         public static MethodCallExpression Call(Expression instance, string methodName, Type[] typeArguments, params Expression[] arguments)
         {
-            ContractUtils.RequiresNotNull(instance, "instance");
-            ContractUtils.RequiresNotNull(methodName, "methodName");
+            ContractUtils.RequiresNotNull(instance, nameof(instance));
+            ContractUtils.RequiresNotNull(methodName, nameof(methodName));
             if (arguments == null)
             {
                 arguments = Array.Empty<Expression>();
@@ -1028,8 +1029,8 @@ namespace System.Linq.Expressions
         ///<exception cref="T:System.InvalidOperationException">No method whose name is <paramref name="methodName" />, whose type parameters match <paramref name="typeArguments" />, and whose parameter types match <paramref name="arguments" /> is found in <paramref name="type" /> or its base types.-or-More than one method whose name is <paramref name="methodName" />, whose type parameters match <paramref name="typeArguments" />, and whose parameter types match <paramref name="arguments" /> is found in <paramref name="type" /> or its base types.</exception>
         public static MethodCallExpression Call(Type type, string methodName, Type[] typeArguments, params Expression[] arguments)
         {
-            ContractUtils.RequiresNotNull(type, "type");
-            ContractUtils.RequiresNotNull(methodName, "methodName");
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            ContractUtils.RequiresNotNull(methodName, nameof(methodName));
 
             if (arguments == null) arguments = Array.Empty<Expression>();
             BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
@@ -1077,13 +1078,13 @@ namespace System.Linq.Expressions
                 }
             }
 
-            ContractUtils.RequiresNotNull(method, "method");
+            ContractUtils.RequiresNotNull(method, nameof(method));
 
             ReadOnlyCollection<Expression> argList = arguments.ToReadOnly();
 
-            ValidateMethodInfo(method);
+            ValidateMethodInfo(method, nameof(method));
             ValidateStaticOrInstanceMethod(instance, method);
-            ValidateArgumentTypes(method, ExpressionType.Call, ref argList);
+            ValidateArgumentTypes(method, ExpressionType.Call, ref argList, nameof(method));
 
             if (instance == null)
             {
@@ -1097,7 +1098,7 @@ namespace System.Linq.Expressions
 
         private static ParameterInfo[] ValidateMethodAndGetParameters(Expression instance, MethodInfo method)
         {
-            ValidateMethodInfo(method);
+            ValidateMethodInfo(method, nameof(method));
             ValidateStaticOrInstanceMethod(instance, method);
 
             return GetParametersForValidation(method, ExpressionType.Call);
@@ -1107,12 +1108,12 @@ namespace System.Linq.Expressions
         {
             if (method.IsStatic)
             {
-                if (instance != null) throw new ArgumentException(Strings.OnlyStaticMethodsHaveNullInstance, "instance");
+                if (instance != null) throw new ArgumentException(Strings.OnlyStaticMethodsHaveNullInstance, nameof(instance));
             }
             else
             {
-                if (instance == null) throw new ArgumentException(Strings.OnlyStaticMethodsHaveNullInstance, "method");
-                RequiresCanRead(instance, "instance");
+                if (instance == null) throw new ArgumentException(Strings.OnlyStaticMethodsHaveNullInstance, nameof(method));
+                RequiresCanRead(instance, nameof(instance));
                 ValidateCallInstanceType(instance.Type, method);
             }
         }
@@ -1125,9 +1126,9 @@ namespace System.Linq.Expressions
             }
         }
 
-        public static void ValidateArgumentTypes(MethodBase method, ExpressionType nodeKind, ref ReadOnlyCollection<Expression> arguments)
+        public static void ValidateArgumentTypes(MethodBase method, ExpressionType nodeKind, ref ReadOnlyCollection<Expression> arguments, string methodParamName)
         {
-            ExpressionUtils.ValidateArgumentTypes(method, nodeKind, ref arguments);
+            ExpressionUtils.ValidateArgumentTypes(method, nodeKind, ref arguments, methodParamName);
         }
 
         private static ParameterInfo[] GetParametersForValidation(MethodBase method, ExpressionType nodeKind)
@@ -1140,9 +1141,9 @@ namespace System.Linq.Expressions
             ExpressionUtils.ValidateArgumentCount(method, nodeKind, count, pis);
         }
 
-        public static Expression ValidateOneArgument(MethodBase method, ExpressionType nodeKind, Expression arg, ParameterInfo pi)
+        public static Expression ValidateOneArgument(MethodBase method, ExpressionType nodeKind, Expression arg, ParameterInfo pi, string methodParamName, string argumentParamName)
         {
-            return ExpressionUtils.ValidateOneArgument(method, nodeKind, arg, pi);
+            return ExpressionUtils.ValidateOneArgument(method, nodeKind, arg, pi, methodParamName, argumentParamName);
         }
 
         // Attempts to auto-quote the expression tree. Returns true if it succeeded, false otherwise.
@@ -1153,14 +1154,30 @@ namespace System.Linq.Expressions
 
         private static MethodInfo FindMethod(Type type, string methodName, Type[] typeArgs, Expression[] args, BindingFlags flags)
         {
-            MemberInfo[] members = type.GetMethodsIgnoreCase(flags, methodName);
-            if (members == null || members.Length == 0)
-                throw Error.MethodDoesNotExistOnType(methodName, type);
+            int count = 0;
+            MethodInfo method = null;
 
-            MethodInfo method;
-
-            var methodInfos = members.Map(t => (MethodInfo)t);
-            int count = FindBestMethod(methodInfos, typeArgs, args, out method);
+            foreach (var mi in type.GetMethods(flags))
+            {
+                if (mi.Name.Equals(methodName, StringComparison.OrdinalIgnoreCase))
+                {
+                    MethodInfo moo = ApplyTypeArgs(mi, typeArgs);
+                    if (moo != null && IsCompatible(moo, args))
+                    {
+                        // favor public over non-public methods
+                        if (method == null || (!method.IsPublic && moo.IsPublic))
+                        {
+                            method = moo;
+                            count = 1;
+                        }
+                        // only count it as additional method if they both public or both non-public
+                        else if (method.IsPublic == moo.IsPublic)
+                        {
+                            count++;
+                        }
+                    }
+                }
+            }
 
             if (count == 0)
             {
@@ -1173,45 +1190,22 @@ namespace System.Linq.Expressions
                     throw Error.MethodWithArgsDoesNotExistOnType(methodName, type);
                 }
             }
+
             if (count > 1)
                 throw Error.MethodWithMoreThanOneMatch(methodName, type);
+
             return method;
         }
 
-        private static int FindBestMethod(IEnumerable<MethodInfo> methods, Type[] typeArgs, Expression[] args, out MethodInfo method)
-        {
-            int count = 0;
-            method = null;
-            foreach (MethodInfo mi in methods)
-            {
-                MethodInfo moo = ApplyTypeArgs(mi, typeArgs);
-                if (moo != null && IsCompatible(moo, args))
-                {
-                    // favor public over non-public methods
-                    if (method == null || (!method.IsPublic && moo.IsPublic))
-                    {
-                        method = moo;
-                        count = 1;
-                    }
-                    // only count it as additional method if they both public or both non-public
-                    else if (method.IsPublic == moo.IsPublic)
-                    {
-                        count++;
-                    }
-                }
-            }
-            return count;
-        }
-
-        private static bool IsCompatible(MethodBase m, Expression[] args)
+        private static bool IsCompatible(MethodBase m, Expression[] arguments)
         {
             ParameterInfo[] parms = m.GetParametersCached();
-            if (parms.Length != args.Length)
+            if (parms.Length != arguments.Length)
                 return false;
-            for (int i = 0; i < args.Length; i++)
+            for (int i = 0; i < arguments.Length; i++)
             {
-                Expression arg = args[i];
-                ContractUtils.RequiresNotNull(arg, "argument");
+                Expression arg = arguments[i];
+                ContractUtils.RequiresNotNull(arg, nameof(arguments));
                 Type argType = arg.Type;
                 Type pType = parms[i].ParameterType;
                 if (pType.IsByRef)
@@ -1266,13 +1260,13 @@ namespace System.Linq.Expressions
         ///<paramref name="array" />.Type does not represent an array type.-or-The rank of <paramref name="array" />.Type does not match the number of elements in <paramref name="indexes" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of one or more elements of <paramref name="indexes" /> does not represent the <see cref="T:System.Int32" /> type.</exception>
         public static MethodCallExpression ArrayIndex(Expression array, IEnumerable<Expression> indexes)
         {
-            RequiresCanRead(array, "array");
-            ContractUtils.RequiresNotNull(indexes, "indexes");
+            RequiresCanRead(array, nameof(array));
+            ContractUtils.RequiresNotNull(indexes, nameof(indexes));
 
             Type arrayType = array.Type;
             if (!arrayType.IsArray)
             {
-                throw Error.ArgumentMustBeArray();
+                throw Error.ArgumentMustBeArray(nameof(array));
             }
 
             ReadOnlyCollection<Expression> indexList = indexes.ToReadOnly();
@@ -1281,12 +1275,14 @@ namespace System.Linq.Expressions
                 throw Error.IncorrectNumberOfIndexes();
             }
 
-            foreach (Expression e in indexList)
+            for (int i = 0, n = indexList.Count; i < n; i++)
             {
-                RequiresCanRead(e, "indexes");
+                Expression e = indexList[i];
+
+                RequiresCanRead(e, nameof(indexes), i);
                 if (e.Type != typeof(int))
                 {
-                    throw Error.ArgumentMustBeArrayIndexType();
+                    throw Error.ArgumentMustBeArrayIndexType(nameof(indexes), i);
                 }
             }
 

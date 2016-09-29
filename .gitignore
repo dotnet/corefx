@@ -2,6 +2,9 @@ syntax: glob
 
 ### VisualStudio ###
 
+# Tool Runtime Dir
+/[Tt]ools/
+
 # User-specific files
 *.suo
 *.user
@@ -20,6 +23,11 @@ bld/
 [Bb]in/
 [Oo]bj/
 msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Cross building rootfs
+cross/rootfs/
 
 # Visual Studio 2015
 .vs/
@@ -73,9 +81,11 @@ _Chutzpah*
 ipch/
 *.aps
 *.ncb
+*.opendb
 *.opensdf
 *.sdf
 *.cachefile
+*.VC.db
 
 # Visual Studio profiler
 *.psess
@@ -137,8 +147,12 @@ publish/
 
 # NuGet Packages
 *.nuget.props
+*.nuget.targets
 *.nupkg
 **/packages/*
+
+# NuGet package restore lockfiles
+project.lock.json
 
 # Windows Azure Build Output
 csx/
@@ -246,3 +260,10 @@ Temporary Items
 Session.vim
 .netrwhist
 *~
+
+# Visual Studio Code
+.vscode/
+
+# Private test configuration and binaries.
+config.ps1
+**/IISApplications

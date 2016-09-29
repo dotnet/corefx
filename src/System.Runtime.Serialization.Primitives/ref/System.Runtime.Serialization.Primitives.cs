@@ -1,9 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.OnDeserializedAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.OnDeserializingAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.OnSerializedAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.OnSerializingAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.SerializationException))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.StreamingContext))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.StreamingContextStates))]
 
 namespace System.Runtime.Serialization
 {
@@ -64,11 +72,13 @@ namespace System.Runtime.Serialization
     {
         public IgnoreDataMemberAttribute() { }
     }
+    [Serializable]
     public partial class InvalidDataContractException : System.Exception
     {
         public InvalidDataContractException() { }
         public InvalidDataContractException(string message) { }
         public InvalidDataContractException(string message, System.Exception innerException) { }
+        protected InvalidDataContractException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
     public partial interface ISerializationSurrogateProvider
     {
@@ -83,37 +93,5 @@ namespace System.Runtime.Serialization
         public KnownTypeAttribute(System.Type type) { }
         public string MethodName { get { return default(string); } }
         public System.Type Type { get { return default(System.Type); } }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited = false)]
-    public sealed partial class OnDeserializedAttribute : System.Attribute
-    {
-        public OnDeserializedAttribute() { }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited = false)]
-    public sealed partial class OnDeserializingAttribute : System.Attribute
-    {
-        public OnDeserializingAttribute() { }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited = false)]
-    public sealed partial class OnSerializedAttribute : System.Attribute
-    {
-        public OnSerializedAttribute() { }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited = false)]
-    public sealed partial class OnSerializingAttribute : System.Attribute
-    {
-        public OnSerializingAttribute() { }
-    }
-    public partial class SerializationException : System.Exception
-    {
-        public SerializationException() { }
-        public SerializationException(string message) { }
-        public SerializationException(string message, System.Exception innerException) { }
-    }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct StreamingContext
-    {
-        public override bool Equals(object obj) { return default(bool); }
-        public override int GetHashCode() { return default(int); }
     }
 }

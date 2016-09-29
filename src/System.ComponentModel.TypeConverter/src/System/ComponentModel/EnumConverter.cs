@@ -1,43 +1,53 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
 namespace System.ComponentModel
 {
-    /// <devdoc>
+    /// <summary>
     /// <para>Provides a type converter to convert <see cref='System.Enum'/>
     /// objects to and from various
     /// other representations.</para>
-    /// </devdoc>
+    /// </summary>
     public class EnumConverter : TypeConverter
     {
-        /// <devdoc>
+        /// <summary>
+        ///    <para>
+        ///       Provides a <see cref='System.ComponentModel.TypeConverter.StandardValuesCollection'/> that specifies the
+        ///       possible values for the enumeration.
+        ///    </para>
+        /// </summary>
+        private StandardValuesCollection _values;
+
+        /// <summary>
         ///    <para>
         ///       Specifies
         ///       the
         ///       type of the enumerator this converter is
         ///       associated with.
         ///    </para>
-        /// </devdoc>
-        private Type _type;
+        /// </summary>
+        private readonly Type _type;
 
-        /// <devdoc>
+        /// <summary>
         ///    <para>
         ///       Initializes a new instance of the <see cref='System.ComponentModel.EnumConverter'/> class for the given
         ///       type.
         ///    </para>
-        /// </devdoc>
+        /// </summary>
         public EnumConverter(Type type)
         {
             _type = type;
         }
 
-        /// <devdoc>
+        /// <summary>
         ///    <para>[To be supplied.]</para>
-        /// </devdoc>
+        /// </summary>
         protected Type EnumType
         {
             get
@@ -46,12 +56,27 @@ namespace System.ComponentModel
             }
         }
 
+        /// <summary>
+        ///    <para>[To be supplied.]</para>
+        /// </summary>
+        protected StandardValuesCollection Values
+        {
+            get
+            {
+                return _values;
+            }
+            set
+            {
+                _values = value;
+            }
+        }
+
         /// <internalonly/>
-        /// <devdoc>
+        /// <summary>
         ///    <para>Gets a value indicating whether this converter
         ///       can convert an object in the given source type to an enumeration object using
         ///       the specified context.</para>
-        /// </devdoc>
+        /// </summary>
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
             if (sourceType == typeof(string) || sourceType == typeof(Enum[]))
@@ -61,10 +86,10 @@ namespace System.ComponentModel
             return base.CanConvertFrom(context, sourceType);
         }
 
-        /// <devdoc>
+        /// <summary>
         ///    <para>Gets a value indicating whether this converter can
         ///       convert an object to the given destination type using the context.</para>
-        /// </devdoc>
+        /// </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
             if (destinationType == typeof(Enum[]))
@@ -74,10 +99,24 @@ namespace System.ComponentModel
             return base.CanConvertTo(context, destinationType);
         }
 
+        /// <summary>
+        ///     <para>
+        ///         Gets an <see cref='System.Collections.IComparer'/> interface that can
+        ///         be used to sort the values of the enumerator.
+        ///     </para>
+        /// </summary>
+        protected virtual IComparer Comparer
+        {
+            get
+            {
+                return InvariantComparer.Default;
+            }
+        }
+
         /// <internalonly/>
-        /// <devdoc>
+        /// <summary>
         ///    <para>Converts the specified value object to an enumeration object.</para>
-        /// </devdoc>
+        /// </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             string strValue = value as string;
@@ -118,17 +157,16 @@ namespace System.ComponentModel
         }
 
         /// <internalonly/>
-        /// <devdoc>
+        /// <summary>
         ///    <para>Converts the given
         ///       value object to the
         ///       specified destination type.</para>
-        /// </devdoc>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1803:AvoidCostlyCallsWherePossible")]  // Keep call to Enum.IsDefined
+        /// </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
             {
-                throw new ArgumentNullException("destinationType");
+                throw new ArgumentNullException(nameof(destinationType));
             }
 
             if (destinationType == typeof(string) && value != null)
@@ -193,6 +231,111 @@ namespace System.ComponentModel
             }
 
             return base.ConvertTo(context, culture, value, destinationType);
+        }
+
+        /// <internalonly/>
+        /// <summary>
+        ///    <para>Gets a collection of standard values for the data type this validator is
+        ///       designed for.</para>
+        /// </summary>
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        {
+            if (_values == null)
+            {
+                // We need to get the enum values in this rather round-about way so we can filter
+                // out fields marked Browsable(false). Note that if multiple fields have the same value,
+                // the behavior is undefined, since what we return are just enum values, not names.
+
+                Type reflectType = TypeDescriptor.GetReflectionType(_type);
+                if (reflectType == null)
+                {
+                    reflectType = _type;
+                }
+
+                FieldInfo[] fields = reflectType.GetFields(BindingFlags.Public | BindingFlags.Static);
+                ArrayList objValues = null;
+
+                if (fields != null && fields.Length > 0)
+                {
+                    objValues = new ArrayList(fields.Length);
+                }
+
+                if (objValues != null)
+                {
+                    foreach (FieldInfo field in fields)
+                    {
+                        BrowsableAttribute browsableAttr = null;
+                        foreach (Attribute attr in field.GetCustomAttributes(typeof(BrowsableAttribute), false))
+                        {
+                            browsableAttr = attr as BrowsableAttribute;
+                        }
+
+                        if (browsableAttr == null || browsableAttr.Browsable)
+                        {
+                            object value = null;
+
+                            try
+                            {
+                                if (field.Name != null)
+                                {
+                                    value = Enum.Parse(_type, field.Name);
+                                }
+                            }
+                            catch (ArgumentException)
+                            {
+                                // Hmm, for some reason, the parse threw. Let us ignore this value.
+                            }
+
+                            if (value != null)
+                            {
+                                objValues.Add(value);
+                            }
+                        }
+                    }
+
+                    IComparer comparer = Comparer;
+                    if (comparer != null)
+                    {
+                        objValues.Sort(comparer);
+                    }
+                }
+
+                Array arr = (objValues != null) ? objValues.ToArray() : null;
+                _values = new StandardValuesCollection(arr);
+            }
+            return _values;
+        }
+
+        /// <internalonly/>
+        /// <summary>
+        ///    <para>Gets a value indicating whether the list of standard values returned from
+        ///    <see cref='System.ComponentModel.TypeConverter.GetStandardValues'/> 
+        ///    is an exclusive list using the specified context.</para>
+        /// </summary>
+        public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
+        {
+            return !_type.GetTypeInfo().IsDefined(typeof(FlagsAttribute), false);
+        }
+
+        /// <internalonly/>
+        /// <summary>
+        ///    <para>Gets a value indicating
+        ///       whether this object
+        ///       supports a standard set of values that can be picked
+        ///       from a list using the specified context.</para>
+        /// </summary>
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        {
+            return true;
+        }
+
+        /// <internalonly/>
+        /// <summary>
+        ///    <para>Gets a value indicating whether the given object value is valid for this type.</para>
+        /// </summary>
+        public override bool IsValid(ITypeDescriptorContext context, object value)
+        {
+            return Enum.IsDefined(_type, value);
         }
     }
 }

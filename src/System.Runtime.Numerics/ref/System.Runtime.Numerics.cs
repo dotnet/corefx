@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -33,6 +34,7 @@ namespace System.Numerics
         public static System.Numerics.BigInteger Add(System.Numerics.BigInteger left, System.Numerics.BigInteger right) { return default(System.Numerics.BigInteger); }
         public static int Compare(System.Numerics.BigInteger left, System.Numerics.BigInteger right) { return default(int); }
         public int CompareTo(long other) { return default(int); }
+        public int CompareTo(object obj) { return default(int); }
         public int CompareTo(System.Numerics.BigInteger other) { return default(int); }
         [System.CLSCompliantAttribute(false)]
         public int CompareTo(ulong other) { return default(int); }
@@ -147,7 +149,6 @@ namespace System.Numerics
         public static System.Numerics.BigInteger Pow(System.Numerics.BigInteger value, int exponent) { return default(System.Numerics.BigInteger); }
         public static System.Numerics.BigInteger Remainder(System.Numerics.BigInteger dividend, System.Numerics.BigInteger divisor) { return default(System.Numerics.BigInteger); }
         public static System.Numerics.BigInteger Subtract(System.Numerics.BigInteger left, System.Numerics.BigInteger right) { return default(System.Numerics.BigInteger); }
-        int System.IComparable.CompareTo(object obj) { return default(int); }
         public byte[] ToByteArray() { return default(byte[]); }
         public override string ToString() { return default(string); }
         public string ToString(System.IFormatProvider provider) { return default(string); }

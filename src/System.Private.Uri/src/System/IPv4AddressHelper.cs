@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -82,7 +83,7 @@ namespace System
         //  Nothing
         //
 
-        //Remark: MUST NOT be used unless all input indexes are are verified and trusted.
+        //Remark: MUST NOT be used unless all input indexes are verified and trusted.
         internal unsafe static bool IsValid(char* name, int start, ref int end, bool allowIPv6, bool notImplicitFile, bool unknownScheme)
         {
             // IPv6 can only have canonical IPv4 embedded. Unknown schemes will not attempt parsing of non-canonical IPv4 addresses.
@@ -175,7 +176,7 @@ namespace System
             return res;
         }
 
-        // Parse any canonical or noncanonical IPv4 formats and return a long between 0 and MaxIPv4Value.
+        // Parse any canonical or non-canonical IPv4 formats and return a long between 0 and MaxIPv4Value.
         // Return Invalid (-1) for failures.
         // If the address has less than three dots, only the rightmost section is assumed to contain the combined value for
         // the missing sections: 0xFF00FFFF == 0xFF.0x00.0xFF.0xFF == 0xFF.0xFFFF
@@ -254,7 +255,7 @@ namespace System
                 if (current < end && name[current] == '.')
                 {
                     if (dotCount >= 3 // Max of 3 dots and 4 segments
-                        || !atLeastOneChar // No empty segmets: 1...1
+                        || !atLeastOneChar // No empty segments: 1...1
                                            // Only the last segment can be more than 255 (if there are less than 3 dots)
                         || currentValue > 0xFF)
                     {

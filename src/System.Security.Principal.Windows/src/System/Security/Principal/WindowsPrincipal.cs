@@ -1,10 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
-using System.Runtime.InteropServices;
 using System.Security.Claims;
 
 namespace System.Security.Principal
@@ -36,7 +37,7 @@ namespace System.Security.Principal
             : base(ntIdentity)
         {
             if (ntIdentity == null)
-                throw new ArgumentNullException("ntIdentity");
+                throw new ArgumentNullException(nameof(ntIdentity));
             Contract.EndContractBlock();
 
             _identity = ntIdentity;
@@ -129,7 +130,7 @@ namespace System.Security.Principal
         public virtual bool IsInRole(WindowsBuiltInRole role)
         {
             if (role < WindowsBuiltInRole.Administrator || role > WindowsBuiltInRole.Replicator)
-                throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, (int)role), "role");
+                throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, (int)role), nameof(role));
             Contract.EndContractBlock();
 
             return IsInRole((int)role);
@@ -151,7 +152,7 @@ namespace System.Security.Principal
         public virtual bool IsInRole(SecurityIdentifier sid)
         {
             if (sid == null)
-                throw new ArgumentNullException("sid");
+                throw new ArgumentNullException(nameof(sid));
             Contract.EndContractBlock();
 
             // special case the anonymous identity.
@@ -168,7 +169,7 @@ namespace System.Security.Principal
                                                   (uint)TokenImpersonationLevel.Identification,
                                                   (uint)TokenType.TokenImpersonation,
                                                   ref token))
-                    throw new SecurityException(Interop.mincore.GetMessage(Marshal.GetLastWin32Error()));
+                    throw new SecurityException(new Win32Exception().Message);
             }
 
             bool isMember = false;
@@ -176,7 +177,7 @@ namespace System.Security.Principal
             if (!Interop.mincore.CheckTokenMembership((_identity.ImpersonationLevel != TokenImpersonationLevel.None ? _identity.AccessToken : token),
                                                   sid.BinaryForm,
                                                   ref isMember))
-                throw new SecurityException(Interop.mincore.GetMessage(Marshal.GetLastWin32Error()));
+                throw new SecurityException(new Win32Exception().Message);
 
             token.Dispose();
             return isMember;

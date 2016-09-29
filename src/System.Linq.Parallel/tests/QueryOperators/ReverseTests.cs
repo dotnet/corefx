@@ -1,35 +1,37 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ReverseTests
+    public static class ReverseTests
     {
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
-        public static void Reverse_Unordered(Labeled<ParallelQuery<int>> labeled, int count)
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(16)]
+        public static void Reverse_Unordered(int count)
         {
-            ParallelQuery<int> query = labeled.Item;
             IntegerRangeSet seen = new IntegerRangeSet(0, count);
-            foreach (int i in query.Reverse())
+            foreach (int i in UnorderedSources.Default(count).Reverse())
             {
                 seen.Add(i);
             }
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 512 }), MemberType = typeof(UnorderedSources))]
-        public static void Reverse_Unordered_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
+        public static void Reverse_Unordered_Longrunning()
         {
-            Reverse_Unordered(labeled, count);
+            Reverse_Unordered(Sources.OuterLoopCount);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Reverse(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -43,32 +45,33 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 512 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.OuterLoopRanges), MemberType = typeof(Sources))]
         public static void Reverse_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Reverse(labeled, count);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(UnorderedSources))]
-        public static void Reverse_Unordered_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(16)]
+        public static void Reverse_Unordered_NotPipelined(int count)
         {
-            ParallelQuery<int> query = labeled.Item;
             IntegerRangeSet seen = new IntegerRangeSet(0, count);
-            Assert.All(query.Reverse().ToList(), x => seen.Add(x));
+            Assert.All(UnorderedSources.Default(count).Reverse().ToList(), x => seen.Add(x));
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 512 }), MemberType = typeof(UnorderedSources))]
-        public static void Reverse_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
+        public static void Reverse_Unordered_NotPipelined_Longrunning()
         {
-            Reverse_Unordered_NotPipelined(labeled, count);
+            Reverse_Unordered_NotPipelined(Sources.OuterLoopCount);
         }
 
         [Theory]
-        [MemberData("Ranges", (object)(new int[] { 0, 1, 2, 16 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.Ranges), new[] { 0, 1, 2, 16 }, MemberType = typeof(Sources))]
         public static void Reverse_NotPipelined(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
@@ -79,7 +82,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("Ranges", (object)(new int[] { 1024 * 4, 1024 * 512 }), MemberType = typeof(Sources))]
+        [MemberData(nameof(Sources.OuterLoopRanges), MemberType = typeof(Sources))]
         public static void Reverse_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> labeled, int count)
         {
             Reverse_NotPipelined(labeled, count);
@@ -88,7 +91,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Reverse_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<object>)null).Reverse());
+            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<object>)null).Reverse());
         }
     }
 }

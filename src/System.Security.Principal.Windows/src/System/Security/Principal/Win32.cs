@@ -1,8 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -29,7 +30,6 @@ namespace System.Security.Principal
     internal static class Win32
     {
         internal const int FALSE = 0;
-        internal const int TRUE = 1;
 
         //
         // Wrapper around advapi32.LsaOpenPolicy
@@ -68,7 +68,7 @@ namespace System.Security.Principal
             {
                 int win32ErrorCode = Interop.mincore.RtlNtStatusToDosError(unchecked((int)ReturnCode));
 
-                throw new Exception(Interop.mincore.GetMessage(win32ErrorCode));
+                throw new Win32Exception(win32ErrorCode);
             }
         }
 
@@ -85,7 +85,7 @@ namespace System.Security.Principal
 
             if (Revision != SecurityIdentifier.Revision)
             {
-                throw new ArgumentException(SR.IdentityReference_InvalidSidRevision, "binaryForm");
+                throw new ArgumentException(SR.IdentityReference_InvalidSidRevision, nameof(binaryForm));
             }
 
             //
@@ -97,7 +97,7 @@ namespace System.Security.Principal
             if (SubAuthorityCount < 0 ||
                 SubAuthorityCount > SecurityIdentifier.MaxSubAuthorities)
             {
-                throw new ArgumentException(SR.Format(SR.IdentityReference_InvalidNumberOfSubauthorities, SecurityIdentifier.MaxSubAuthorities), "binaryForm");
+                throw new ArgumentException(SR.Format(SR.IdentityReference_InvalidNumberOfSubauthorities, SecurityIdentifier.MaxSubAuthorities), nameof(binaryForm));
             }
 
             //
@@ -131,7 +131,7 @@ namespace System.Security.Principal
 
             try
             {
-                if (TRUE != Interop.mincore.ConvertStringSidToSid(stringSid, out ByteArray))
+                if (FALSE == Interop.mincore.ConvertStringSidToSid(stringSid, out ByteArray))
                 {
                     ErrorCode = Marshal.GetLastWin32Error();
                     goto Error;

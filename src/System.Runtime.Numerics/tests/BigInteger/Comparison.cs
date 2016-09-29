@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -105,7 +106,7 @@ namespace System.Numerics.Tests
             VerifyComparison(BigInteger.One, (Int32)(1), 0);
 
 
-            //1 Inputs Arround the boundry of UInt32
+            //1 Inputs Around the boundary of UInt32
             // -1 * UInt32.MaxValue, -1 * UInt32.MaxValue
             VerifyComparison(-1L * (BigInteger)UInt32.MaxValue - 1, -1L * (BigInteger)UInt32.MaxValue - 1, 0);
 
@@ -185,7 +186,6 @@ namespace System.Numerics.Tests
             // (BigInteger UInt32.MaxValue, UInt32.MaxValue
             VerifyComparison((BigInteger)UInt32.MaxValue, UInt32.MaxValue, 0);
 
-
             //BigInteger vs. UInt64
             // One Larger (BigInteger), UInt64.MaxValue
             VerifyComparison((BigInteger)UInt64.MaxValue + 1, UInt64.MaxValue, 1);
@@ -195,6 +195,8 @@ namespace System.Numerics.Tests
 
             // Smaller BigInteger, UInt64.MaxValue
             VerifyComparison((BigInteger)Int16.MinValue - 1, UInt64.MaxValue, -1);
+            VerifyComparison((BigInteger)Int16.MaxValue - 1, UInt64.MaxValue, -1);
+            VerifyComparison((BigInteger)Int32.MaxValue + 1, UInt64.MaxValue, -1);
 
             // One Smaller (BigInteger), UInt64.MaxValue
             VerifyComparison((BigInteger)UInt64.MaxValue - 1, UInt64.MaxValue, -1);
@@ -357,6 +359,14 @@ namespace System.Numerics.Tests
             Assert.Equal(false, BigInteger.Zero.Equals((Object)"0"));
         }
 
+        [Fact]
+        public static void IComparable_Invalid()
+        {
+            IComparable comparable = new BigInteger();
+            Assert.Equal(1, comparable.CompareTo(null));
+            Assert.Throws<ArgumentException>("obj", () => comparable.CompareTo(0)); // Obj is not a BigInteger
+        }
+
         private static void VerifyComparison(BigInteger x, BigInteger y, int expectedResult)
         {
             bool expectedEquals = 0 == expectedResult;
@@ -377,6 +387,11 @@ namespace System.Numerics.Tests
 
             VerifyCompareResult(expectedResult, x.CompareTo(y), "x.CompareTo(y)");
             VerifyCompareResult(-expectedResult, y.CompareTo(x), "y.CompareTo(x)");
+
+            IComparable comparableX = x;
+            IComparable comparableY = y;
+            VerifyCompareResult(expectedResult, comparableX.CompareTo(y), "comparableX.CompareTo(y)");
+            VerifyCompareResult(-expectedResult, comparableY.CompareTo(x), "comparableY.CompareTo(x)");
 
             VerifyCompareResult(expectedResult, BigInteger.Compare(x, y), "Compare(x,y)");
             VerifyCompareResult(-expectedResult, BigInteger.Compare(y, x), "Compare(y,x)");
@@ -539,6 +554,11 @@ namespace System.Numerics.Tests
                 Assert.Equal(x.GetHashCode(), ((BigInteger)y).GetHashCode());
                 Assert.Equal(x.ToString(), ((BigInteger)y).ToString());
             }
+            else
+            {
+                Assert.NotEqual(x.GetHashCode(), ((BigInteger)y).GetHashCode());
+                Assert.NotEqual(x.ToString(), ((BigInteger)y).ToString());
+            }
 
             Assert.Equal(x.GetHashCode(), x.GetHashCode());
             Assert.Equal(((BigInteger)y).GetHashCode(), ((BigInteger)y).GetHashCode());
@@ -590,6 +610,11 @@ namespace System.Numerics.Tests
             {
                 Assert.Equal(x.GetHashCode(), y.GetHashCode());
                 Assert.Equal(x.ToString(), y.ToString());
+            }
+            else
+            {
+                Assert.NotEqual(x.GetHashCode(), y.GetHashCode());
+                Assert.NotEqual(x.ToString(), y.ToString());
             }
 
             Assert.Equal(x.GetHashCode(), x.GetHashCode());

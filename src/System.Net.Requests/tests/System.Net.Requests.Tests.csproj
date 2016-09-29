@@ -6,18 +6,16 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{851A40FE-7F07-415D-8592-5FE2096E84D3}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <StringResourcesPath>..\src\Resources\Strings.resx</StringResourcesPath>
+    <StringResourcesPath>../src/Resources/Strings.resx</StringResourcesPath>
+    <DefineConstants Condition="'$(TargetGroup)'=='netstandard1.7'">$(DefineConstants);netstandard17</DefineConstants>
+    <NugetTargetMoniker Condition="'$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />  
   
   <ItemGroup>
     <Compile Include="HttpWebRequestTest.cs" />
@@ -25,13 +23,31 @@
     <Compile Include="RequestStreamTest.cs" />
     <Compile Include="WebRequestTest.cs" />
 
-    <Compile Include="$(CommonTestPath)\System\Net\HttpTestServers.cs">
-      <Link>Common\System\Net\HttpTestServers.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
+      <Link>Common\System\Net\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Certificates.cs">
+      <Link>Common\System\Net\Configuration.Certificates.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Configuration.Http.cs">
+      <Link>Common\System\Net\Configuration.Http.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
+      <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
     </Compile>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.7'">
+    <Compile Include="AuthorizationTest.cs" />
+    <Compile Include="AuthenticationManagerTest.cs" />
+    <Compile Include="FileWebRequestTest.cs" />
+    <Compile Include="HttpRequestCachePolicyTest.cs" />
+    <Compile Include="RequestCachePolicyTest.cs" />
+    <Compile Include="ServicePointManagerTest.cs" />
+  </ItemGroup>
+  
   <ItemGroup>
-    <ProjectReference Include="..\src\System.Net.Requests.csproj">
+    <ProjectReference Include="..\pkg\System.Net.Requests.pkgproj">
       <Name>System.Net.Requests</Name>
       <Project>{5EE76DCC-9FD5-47FD-AB45-BD0F0857740F}</Project>
     </ProjectReference>
@@ -40,5 +56,6 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

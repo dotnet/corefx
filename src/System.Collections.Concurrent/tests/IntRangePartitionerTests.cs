@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -378,7 +379,7 @@ namespace System.Collections.Concurrent.Tests
         }
 
         /// <summary>
-        /// Helper function to validate the the range size of the partitioners match what the user specified 
+        /// Helper function to validate the range size of the partitioners match what the user specified 
         /// (desiredRangeSize).
         /// </summary>
         /// <param name="desiredRangeSize"></param>

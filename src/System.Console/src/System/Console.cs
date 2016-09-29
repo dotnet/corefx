@@ -1,8 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,8 +15,12 @@ namespace System
     {
         private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
         private static readonly object InternalSyncObject = new object(); // for synchronizing changing of Console's static fields
-        private static TextReader _in;
-        private static TextWriter _out, _error;
+        private static TextReader s_in;
+        private static TextWriter s_out, s_error;
+        private static Encoding s_inputEncoding;
+        private static Encoding s_outputEncoding;
+        private static bool s_isOutTextWriterRedirected = false;
+        private static bool s_isErrorTextWriterRedirected = false;
 
         private static ConsoleCancelEventHandler _cancelCallbacks;
         private static ConsolePal.ControlCHandlerRegistrar _registrar;
@@ -37,10 +43,65 @@ namespace System
         {
             get
             {
-                return Volatile.Read(ref _in) ?? EnsureInitialized(ref _in, () =>
+                return Volatile.Read(ref s_in) ?? EnsureInitialized(ref s_in, () => ConsolePal.GetOrCreateReader());
+            }
+        }
+
+        public static Encoding InputEncoding
+        {
+            get
+            {
+                return Volatile.Read(ref s_inputEncoding) ?? EnsureInitialized(ref s_inputEncoding, () => ConsolePal.InputEncoding);
+            }
+            set
+            {
+                CheckNonNull(value, "value");
+                lock (InternalSyncObject)
                 {
-                    return ConsolePal.GetOrCreateReader();
-                });
+                    // Set the terminal console encoding.
+                    ConsolePal.SetConsoleInputEncoding(value);
+
+                    Volatile.Write(ref s_inputEncoding, (Encoding)value.Clone());
+
+                    // We need to reinitialize Console.In in the next call to s_in
+                    // This will discard the current StreamReader, potentially 
+                    // losing buffered data.
+                    Volatile.Write(ref s_in, null);
+                }
+            }
+        }
+
+        public static Encoding OutputEncoding
+        {
+            get
+            {
+                return Volatile.Read(ref s_outputEncoding) ?? EnsureInitialized(ref s_outputEncoding, () => ConsolePal.OutputEncoding);
+            }
+            set
+            {
+                CheckNonNull(value, "value");
+
+                lock (InternalSyncObject)
+                {
+                    // Set the terminal console encoding.
+                    ConsolePal.SetConsoleOutputEncoding(value);
+
+                    // Before changing the code page we need to flush the data 
+                    // if Out hasn't been redirected. Also, have the next call to  
+                    // s_out reinitialize the console code page.
+                    if (Volatile.Read(ref s_out) != null && !s_isOutTextWriterRedirected)
+                    {
+                        s_out.Flush();
+                        Volatile.Write(ref s_out, null);
+                    }
+                    if (Volatile.Read(ref s_error) != null && !s_isErrorTextWriterRedirected)
+                    {
+                        s_error.Flush();
+                        Volatile.Write(ref s_error, null);
+                    }
+
+                    Volatile.Write(ref s_outputEncoding, (Encoding)value.Clone());
+                }
             }
         }
 
@@ -69,12 +130,12 @@ namespace System
 
         public static TextWriter Out
         {
-            get { return Volatile.Read(ref _out) ?? EnsureInitialized(ref _out, () => CreateOutputWriter(OpenStandardOutput())); }
+            get { return Volatile.Read(ref s_out) ?? EnsureInitialized(ref s_out, () => CreateOutputWriter(OpenStandardOutput())); }
         }
 
         public static TextWriter Error
         {
-            get { return Volatile.Read(ref _error) ?? EnsureInitialized(ref _error, () => CreateOutputWriter(OpenStandardError())); }
+            get { return Volatile.Read(ref s_error) ?? EnsureInitialized(ref s_error, () => CreateOutputWriter(OpenStandardError())); }
         }
 
         private static TextWriter CreateOutputWriter(Stream outputStream)
@@ -83,7 +144,7 @@ namespace System
                 StreamWriter.Null :
                 new StreamWriter(
                     stream: outputStream,
-                    encoding: ConsolePal.OutputEncoding,
+                    encoding: new ConsoleEncoding(OutputEncoding), // This ensures no prefix is written to the stream.
                     bufferSize: DefaultConsoleBufferSize,
                     leaveOpen: true) { AutoFlush = true });
         }
@@ -122,6 +183,18 @@ namespace System
             }
         }
 
+        public static int CursorSize
+        {
+            get { return ConsolePal.CursorSize; }
+            set { ConsolePal.CursorSize = value; }
+        }
+
+        public static bool NumberLock { get { return ConsolePal.NumberLock; } }
+
+        public static bool CapsLock { get { return ConsolePal.CapsLock; } }
+
+        internal const ConsoleColor UnknownColor = (ConsoleColor)(-1);
+
         public static ConsoleColor BackgroundColor
         {
             get { return ConsolePal.BackgroundColor; }
@@ -151,6 +224,11 @@ namespace System
             set { ConsolePal.BufferHeight = value; }
         }
 
+        public static void SetBufferSize(int width, int height)
+        {
+            ConsolePal.SetBufferSize(width, height);
+        }
+
         public static int WindowLeft
         {
             get { return ConsolePal.WindowLeft; }
@@ -173,7 +251,7 @@ namespace System
             {
                 if (value <= 0)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, SR.ArgumentOutOfRange_NeedPosNum);
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.ArgumentOutOfRange_NeedPosNum);
                 }
                 ConsolePal.WindowWidth = value;
             }
@@ -189,10 +267,30 @@ namespace System
             {
                 if (value <= 0)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, SR.ArgumentOutOfRange_NeedPosNum);
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.ArgumentOutOfRange_NeedPosNum);
                 }
                 ConsolePal.WindowHeight = value;
             }
+        }
+
+        public static void SetWindowPosition(int left, int top)
+        {
+            ConsolePal.SetWindowPosition(left, top);
+        }
+
+        public static void SetWindowSize(int width, int height)
+        {
+            ConsolePal.SetWindowSize(width, height);
+        }
+
+        public static int LargestWindowWidth
+        {
+            get { return ConsolePal.LargestWindowWidth; }
+        }
+
+        public static int LargestWindowHeight
+        {
+            get { return ConsolePal.LargestWindowHeight; }
         }
 
         public static bool CursorVisible
@@ -222,12 +320,12 @@ namespace System
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
 
                 if (value.Length > MaxConsoleTitleLength)
                 {
-                    throw new ArgumentOutOfRangeException("value", SR.ArgumentOutOfRange_ConsoleTitleTooLong);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_ConsoleTitleTooLong);
                 }
 
                 ConsolePal.Title = value;
@@ -239,6 +337,21 @@ namespace System
             ConsolePal.Beep();
         }
 
+        public static void Beep(int frequency, int duration)
+        {
+            ConsolePal.Beep(frequency, duration);
+        }
+
+        public static void MoveBufferArea(int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
+        {
+            ConsolePal.MoveBufferArea(sourceLeft, sourceTop, sourceWidth, sourceHeight, targetLeft, targetTop, ' ', ConsoleColor.Black, BackgroundColor);
+        }
+
+        public static void MoveBufferArea(int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop, char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
+        {
+            ConsolePal.MoveBufferArea(sourceLeft, sourceTop, sourceWidth, sourceHeight, targetLeft, targetTop, sourceChar, sourceForeColor, sourceBackColor);
+        }
+
         public static void Clear()
         {
             ConsolePal.Clear();
@@ -248,9 +361,9 @@ namespace System
         {
             // Basic argument validation.  The PAL implementation may provide further validation.
             if (left < 0 || left >= short.MaxValue)
-                throw new ArgumentOutOfRangeException("left", left, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
+                throw new ArgumentOutOfRangeException(nameof(left), left, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
             if (top < 0 || top >= short.MaxValue)
-                throw new ArgumentOutOfRangeException("top", top, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
+                throw new ArgumentOutOfRangeException(nameof(top), top, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
 
             ConsolePal.SetCursorPosition(left, top);
         }
@@ -285,9 +398,25 @@ namespace System
             }
         }
 
+        public static bool TreatControlCAsInput
+        {
+            get { return ConsolePal.TreatControlCAsInput; }
+            set { ConsolePal.TreatControlCAsInput = value; }
+        }
+
         public static Stream OpenStandardInput()
         {
             return ConsolePal.OpenStandardInput();
+        }
+
+        public static Stream OpenStandardInput(int bufferSize)
+        {
+            // bufferSize is ignored, other than in argument validation, even in the .NET Framework
+            if (bufferSize < 0)
+            {
+                throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+            return OpenStandardInput();
         }
 
         public static Stream OpenStandardOutput()
@@ -295,30 +424,63 @@ namespace System
             return ConsolePal.OpenStandardOutput();
         }
 
+        public static Stream OpenStandardOutput(int bufferSize)
+        {
+            // bufferSize is ignored, other than in argument validation, even in the .NET Framework
+            if (bufferSize < 0)
+            {
+                throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+            return OpenStandardOutput();
+        }
+
         public static Stream OpenStandardError()
         {
             return ConsolePal.OpenStandardError();
+        }
+
+        public static Stream OpenStandardError(int bufferSize)
+        {
+            // bufferSize is ignored, other than in argument validation, even in the .NET Framework
+            if (bufferSize < 0)
+            {
+                throw new ArgumentOutOfRangeException("bufferSize", SR.ArgumentOutOfRange_NeedNonNegNum);
+            }
+            return OpenStandardError();
         }
 
         public static void SetIn(TextReader newIn)
         {
             CheckNonNull(newIn, "newIn");
             newIn = SyncTextReader.GetSynchronizedTextReader(newIn);
-            lock (InternalSyncObject) { _in = newIn; }
+            lock (InternalSyncObject)
+            {
+                Volatile.Write(ref s_in, newIn);
+            }
         }
 
         public static void SetOut(TextWriter newOut)
         {
             CheckNonNull(newOut, "newOut");
             newOut = SyncTextWriter.GetSynchronizedTextWriter(newOut);
-            lock (InternalSyncObject) { _out = newOut; }
+            Volatile.Write(ref s_isOutTextWriterRedirected, true);
+
+            lock (InternalSyncObject)
+            {
+                Volatile.Write(ref s_out, newOut);
+            }
         }
 
         public static void SetError(TextWriter newError)
         {
             CheckNonNull(newError, "newError");
             newError = SyncTextWriter.GetSynchronizedTextWriter(newError);
-            lock (InternalSyncObject) { _error = newError; }
+            Volatile.Write(ref s_isErrorTextWriterRedirected, true);
+
+            lock (InternalSyncObject)
+            {
+                Volatile.Write(ref s_error, newError);
+            }
         }
 
         private static void CheckNonNull(object obj, string paramName)
@@ -566,6 +728,32 @@ namespace System
             Out.Write(value);
         }
 
+        // TODO: Uncomment when ArgIterator and friends are available in System.Runtime.dll
+        //
+        //[CLSCompliant(false)]
+        //[MethodImplAttribute(MethodImplOptions.NoInlining)]
+        //public static void WriteLine(string format, object arg0, object arg1, object arg2, object arg3, __arglist)
+        //{
+        //    Out.WriteLine(format, ToObjectArgs(arg0, arg1, arg2, arg3, new ArgIterator(__arglist));
+        //}
+        //
+        //[CLSCompliant(false)]
+        //[MethodImplAttribute(MethodImplOptions.NoInlining)]
+        //public static void Write(string format, object arg0, object arg1, object arg2, object arg3, __arglist)
+        //{
+        //    Out.Write(format, ToObjectArgs(arg0, arg1, arg2, arg3, new ArgIterator(__arglist));
+        //}
+        //
+        //private static object[] ToObjectArgs(object arg0, object arg1, object arg2, object arg3, ArgIterator args)
+        //{
+        //    var objArgs = new object[4 + args.GetRemainingCount()] { arg0, arg1, arg2, arg3 };
+        //    for (int i = 4; i < objArgs.Length; i++)
+        //    {
+        //        objArgs[i] = TypedReference.ToObject(args.GetNextArg());
+        //    }
+        //    return objArgs;
+        //}
+
         private sealed class ControlCDelegateData
         {
             private readonly ConsoleSpecialKey _controlKey;
@@ -616,7 +804,7 @@ namespace System
             // Block until the delegate is done. We need to be robust in the face of the task not executing
             // but we also want to get control back immediately after it is done and we don't want to give the
             // handler a fixed time limit in case it needs to display UI. Wait on the task twice, once with a
-            // timout and a second time without if we are sure that the handler actually started.
+            // timeout and a second time without if we are sure that the handler actually started.
             TimeSpan controlCWaitTime = new TimeSpan(0, 0, 30); // 30 seconds
             callBackTask.Wait(controlCWaitTime);
             

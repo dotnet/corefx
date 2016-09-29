@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -27,7 +28,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <param name="id">The ID of the message. Must be unique within the originating source block. Need not be globally unique.</param>
         public DataflowMessageHeader(Int64 id)
         {
-            if (id == default(long)) throw new ArgumentException(SR.Argument_InvalidMessageId, "id");
+            if (id == default(long)) throw new ArgumentException(SR.Argument_InvalidMessageId, nameof(id));
             Contract.EndContractBlock();
 
             _id = id;

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Security.Principal;
@@ -57,6 +58,13 @@ public class WindowsIdentityTests
 
         CheckDispose(winId);
         CheckDispose(cloneWinId);        
+    }
+
+    [Fact]
+    public static void GetTokenHandle()
+    {
+        WindowsIdentity id = WindowsIdentity.GetCurrent();
+        Assert.Equal(id.AccessToken.DangerousGetHandle(), id.Token);
     }
 
     private static void CheckDispose(WindowsIdentity identity, bool anonymous = false)

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -7,7 +8,7 @@ namespace System.Net.NetworkInformation.Tests
 {
     public class NetworkChangeTest
     {
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void NetworkAddressChanged_AddRemove_Success()
         {
             NetworkAddressChangedEventHandler handler = NetworkChange_NetworkAddressChanged;
@@ -24,7 +25,25 @@ namespace System.Net.NetworkInformation.Tests
 
         private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        public void NetworkAvailabilityChanged_AddRemove_Success()
+        {
+            NetworkAvailabilityChangedEventHandler handler = NetworkChange_NetworkAvailabilityChanged;
+            NetworkChange.NetworkAvailabilityChanged += handler;
+            NetworkChange.NetworkAvailabilityChanged -= handler;
+        }
+
+        [Fact]
+        public void NetworkAvailabilityChanged_JustRemove_Success()
+        {
+            NetworkAvailabilityChangedEventHandler handler = NetworkChange_NetworkAvailabilityChanged;
+            NetworkChange.NetworkAvailabilityChanged -= handler;
+        }
+
+        private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
+        {
         }
     }
 }

@@ -126,6 +126,12 @@
   <data name="InvalidHandle" xml:space="preserve">
     <value>Invalid handle.</value>
   </data>
+  <data name="UnexpectedHandleKind" xml:space="preserve">
+    <value>Unexpected handle kind: {0}.</value>
+  </data>
+  <data name="UnexpectedOpCode" xml:space="preserve">
+    <value>Unexpected op-code: {0}.</value>
+  </data>
   <data name="InvalidLocalSignatureToken" xml:space="preserve">
     <value>Invalid local signature token: 0x{0:X8}</value>
   </data>
@@ -162,9 +168,6 @@
   <data name="NotMetadataHeapHandle" xml:space="preserve">
     <value>Specified handle is not a valid metadata heap handle.</value>
   </data>
-  <data name="NotMetadataTableHandle" xml:space="preserve">
-    <value>Specified handle is not a valid metadata table handle.</value>
-  </data>
   <data name="NotMetadataTableOrUserStringHandle" xml:space="preserve">
     <value>Specified handle is not a valid metadata table or UserString heap handle.</value>
   </data>
@@ -181,7 +184,7 @@
     <value>Unknown PE Magic value.</value>
   </data>
   <data name="MetadataTableNotSorted" xml:space="preserve">
-    <value>Metadata table 0x{0:x2} not sorted.</value>
+    <value>Metadata table {0} not sorted.</value>
   </data>
   <data name="AssemblyTableInvalidNumberOfRows" xml:space="preserve">
     <value>Invalid number of rows of Assembly table: {0}.</value>
@@ -200,6 +203,9 @@
   </data>
   <data name="OutOfBoundsRead" xml:space="preserve">
     <value>Read out of bounds.</value>
+  </data>
+  <data name="OutOfBoundsWrite" xml:space="preserve">
+    <value>Write out of bounds.</value>
   </data>
   <data name="MetadataHeaderTooSmall" xml:space="preserve">
     <value>Metadata header too small.</value>
@@ -300,11 +306,17 @@
   <data name="InvalidConstantValue" xml:space="preserve">
     <value>Invalid constant value.</value>
   </data>
+  <data name="InvalidConstantValueOfType" xml:space="preserve">
+    <value>Value of type '{0}' is not a constant.</value>
+  </data>
   <data name="InvalidImportDefinitionKind" xml:space="preserve">
     <value>Invalid import definition kind: {0}.</value>
   </data>
   <data name="ValueTooLarge" xml:space="preserve">
     <value>Value is too large.</value>
+  </data>
+  <data name="BlobTooLarge" xml:space="preserve">
+    <value>Blob is to large.</value>
   </data>
   <data name="InvalidTypeSize" xml:space="preserve">
     <value>Invalid type size.</value>
@@ -321,7 +333,139 @@
   <data name="TooManySubnamespaces" xml:space="preserve">
     <value>There are too many subnamespaces.</value>
   </data>
+  <data name="TooManyExceptionRegions" xml:space="preserve">
+    <value>There are too many exception regions.</value>
+  </data>
   <data name="SequencePointValueOutOfRange" xml:space="preserve">
     <value>Sequence point value is out of range.</value>
+  </data>
+  <data name="InvalidDirectoryRVA" xml:space="preserve">
+    <value>Invalid directory relative virtual address.</value>
+  </data>
+  <data name="InvalidDirectorySize" xml:space="preserve">
+    <value>Invalid directory size.</value>
+  </data>
+  <data name="InvalidDebugDirectoryEntryCharacteristics" xml:space="preserve">
+    <value>The value of field Characteristics in debug directory entry must be zero.</value>
+  </data>
+  <data name="UnexpectedCodeViewDataSignature" xml:space="preserve">
+    <value>Unexpected CodeView data signature value.</value>
+  </data>
+  <data name="UnexpectedEmbeddedPortablePdbDataSignature" xml:space="preserve">
+    <value>Unexpected Embedded Portable PDB data signature value.</value>
+  </data>
+  <data name="UnexpectedSignatureHeader" xml:space="preserve">
+    <value>Expected signature header for '{0}', but found '{1}' (0x{2:x2}).</value>
+  </data>
+  <data name="UnexpectedSignatureHeader2" xml:space="preserve">
+    <value>Expected signature header for '{0}' or '{1}', but found '{2}' (0x{3:x2}).</value>
+  </data>
+  <data name="NotTypeDefOrRefHandle" xml:space="preserve">
+    <value>Specified handle is not a TypeDefinitionHandle or TypeRefererenceHandle.</value>
+  </data>
+  <data name="UnexpectedSignatureTypeCode" xml:space="preserve">
+    <value>Unexpected SignatureTypeCode: (0x{0:x}).</value>
+  </data>
+  <data name="SignatureTypeSequenceMustHaveAtLeastOneElement" xml:space="preserve">
+    <value>Signature type sequence must have at least one element.</value>
+  </data>
+  <data name="NotTypeDefOrRefOrSpecHandle" xml:space="preserve">
+    <value>Specified handle is not a TypeDefinitionHandle, TypeRefererenceHandle, or TypeSpecificationHandle.</value>
+  </data>
+  <data name="UnexpectedDebugDirectoryType" xml:space="preserve">
+    <value>The Debug directory was not of type {0}.</value>
+  </data>
+  <data name="HeapSizeLimitExceeded" xml:space="preserve">
+    <value>The limit on the size of {0} heap has been exceeded.</value>
+  </data>
+  <data name="BuilderMustAligned" xml:space="preserve">
+    <value>Builder must be aligned to 4 byte boundary.</value>
+  </data>
+  <data name="BuilderAlreadyLinked" xml:space="preserve">
+    <value>The operation is not valid on this builder as it has been linked with another one.</value>
+  </data>
+  <data name="ReturnedBuilderSizeTooSmall" xml:space="preserve">
+    <value>The size of the builder returned by {0}.{1} is smaller than requested.</value>
+  </data>
+  <data name="SignatureNotVarArg" xml:space="preserve">
+    <value>Can't add vararg parameters to non-vararg signature.</value>
+  </data>
+  <data name="LabelDoesntBelongToBuilder" xml:space="preserve">
+    <value>Specified label doesn't belong to the current builder.</value>
+  </data>
+  <data name="ControlFlowBuilderNotAvailable" xml:space="preserve">
+    <value>Can't emit a branch or exception region, the current encoder not created with a control flow builder.</value>
+  </data>
+  <data name="BaseReaderMustBeFullMetadataReader" xml:space="preserve">
+    <value>Base reader must be a full metadata reader.</value>
+  </data>
+  <data name="ModuleAlreadyAdded" xml:space="preserve">
+    <value>Module already added.</value>
+  </data>
+  <data name="AssemblyAlreadyAdded" xml:space="preserve">
+    <value>Assembly already added.</value>
+  </data>
+  <data name="ExpectedListOfSize" xml:space="preserve">
+    <value>Expected list of size {0}.</value>
+  </data>
+  <data name="ExpectedArrayOfSize" xml:space="preserve">
+    <value>Expected array of size {0}.</value>
+  </data>
+  <data name="ExpectedNonEmptyList" xml:space="preserve">
+    <value>Expected non-empty list.</value>
+  </data>
+  <data name="ExpectedNonEmptyString" xml:space="preserve">
+    <value>Expected non-empty string.</value>
+  </data>
+  <data name="ReadersMustBeDeltaReaders" xml:space="preserve">
+    <value>Specified readers must be minimal delta metadata readers.</value>
+  </data>
+  <data name="SignatureProviderReturnedInvalidSignature" xml:space="preserve">
+    <value>Signature provider returned invalid signature.</value>
+  </data>
+  <data name="UnknownSectionName" xml:space="preserve">
+    <value>Unknown section name: '{0}'.</value>
+  </data>
+  <data name="HashTooShort" xml:space="preserve">
+    <value>Hash must be at least {0}B long.</value>
+  </data>
+  <data name="UnexpectedArrayLength" xml:space="preserve">
+    <value>Expected array of length {0}.</value>
+  </data>
+  <data name="ValueMustBeMultiple" xml:space="preserve">
+    <value>Value must be multiple of {0}.</value>
+  </data>
+  <data name="MustNotReturnNull" xml:space="preserve">
+    <value>{0} must not return null.</value>
+  </data>
+  <data name="MetadataVersionTooLong" xml:space="preserve">
+    <value>Metadata version too long.</value>
+  </data>
+  <data name="RowCountMustBeZero" xml:space="preserve">
+    <value>Row count must be zero for table #{0}.</value>
+  </data>
+  <data name="RowCountOutOfRange" xml:space="preserve">
+    <value>Row count specified for table index {0} is out of allowed range.</value>
+  </data>
+  <data name="SizeMismatch" xml:space="preserve">
+    <value>Declared size doesn't correspond to the actual size.</value>
+  </data>
+  <data name="DataTooBig" xml:space="preserve">
+    <value>Data too big to fit in memory.</value>
+  </data>
+  <data name="UnsupportedFormatVersion" xml:space="preserve">
+    <value>Unsupported format version: {0}</value>
+  </data>
+  <data name="DistanceBetweenInstructionAndLabelTooBig" xml:space="preserve">
+    <value>The distance between the instruction {0} (offset {1}) and the target label doesn't fit the operand size: {2}</value>
+  </data>
+  <data name="LabelNotMarked" xml:space="preserve">
+    <value>Label {0} has not been marked.</value>
+  </data>
+  <data name="MethodHasNoExceptionRegions" xml:space="preserve">
+    <value>Method body was created with no exception regions.</value>
+  </data>
+  <data name="InvalidExceptionRegionBounds" xml:space="preserve">
+    <value>Invalid exception region bounds: start offset ({0}) is greater than end offset ({1}).</value>
   </data>
 </root>

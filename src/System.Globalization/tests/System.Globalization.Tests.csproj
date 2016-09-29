@@ -8,59 +8,72 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.Globalization.Tests</RootNamespace>
     <AssemblyName>System.Globalization.Tests</AssemblyName>
-    <RestorePackages>true</RestorePackages>
-    <IncludePerformanceTests>true</IncludePerformanceTests>
+    <DefineConstants Condition="'$(TargetGroup)' == 'net46'">$(DefineConstants);net46</DefineConstants>
+    <NugetTargetMoniker Condition="'$(TargetGroup)'=='netstandard1.7' AND '$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.7</NugetTargetMoniker>
+    <NugetTargetMoniker Condition="'$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="CompareInfo.cs" />
-    <Compile Include="CompareInfo.TestData.cs" />
+    <Compile Include="CharUnicodeInfo\CharUnicodeInfoTestData.cs" />
+    <Compile Include="CharUnicodeInfo\CharUnicodeInfoTests.cs" />
+    <Compile Include="CompareInfo\CompareInfoTests.cs" />
+    <Compile Include="CompareInfo\CompareInfoTests.IndexOf.cs" />
+    <Compile Include="CompareInfo\CompareInfoTests.IsPrefix.cs" />
+    <Compile Include="CompareInfo\CompareInfoTests.Compare.cs" />
+    <Compile Include="CompareInfo\CompareInfoTests.IsSuffix.cs" />
+    <Compile Include="CompareInfo\CompareInfoTests.LastIndexOf.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoCurrentInfo.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoValidateParseStyle.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoData.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoCurrencySymbol.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoNaNSymbol.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoPercentGroupSeparator.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoPercentDecimalSeparator.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoPercentDecimalDigits.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoPerMilleSymbol.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoPercentSymbol.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoPositiveSign.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoPositiveInfinitySymbol.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoNegativeSign.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoNegativeInfinitySymbol.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoNumberGroupSeparator.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoNumberDecimalSeparator.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoNumberDecimalDigits.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoNumberGroupSizes.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoNumberNegativePattern.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoPercentNegativePattern.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoPercentGroupSizes.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoPercentPositivePattern.cs" />
-    <Compile Include="TextInfo.cs" />
-    <Compile Include="CompareInfo\compareinfo.cs" />
-    <Compile Include="CompareInfo\CompareInfoCompare.cs" />
-    <Compile Include="CompareInfo\CompareInfoCompare2.cs" />
-    <Compile Include="CompareInfo\CompareInfoIndexOf.cs" />
-    <Compile Include="CompareInfo\CompareInfoIndexOf2.cs" />
-    <Compile Include="CompareInfo\CompareInfoIsPrefix.cs" />
-    <Compile Include="CompareInfo\CompareInfoIsSuffix.cs" />
-    <Compile Include="CompareInfo\CompareInfoLastIndexOf.cs" />
+    <Compile Include="RegionInfo\RegionInfoTests.Methods.cs" />
+    <Compile Include="RegionInfo\RegionInfoTests.Properties.cs" />
     <Compile Include="CultureInfo\CultureInfoAll.cs" />
+    <!-- async current cultures feature is supported on 4.6.1 and up on Windows desktop framework -->
+    <Compile Include="CultureInfo\CultureInfoAsync.cs" Condition="'$(TargetGroup)' != 'net46'" />
     <Compile Include="CultureInfo\CultureInfoCalendar.cs" />
     <Compile Include="CultureInfo\CultureInfoClone.cs" />
     <Compile Include="CultureInfo\CultureInfoCompareInfo.cs" />
-    <Compile Include="CultureInfo\CultureInfoConstructor2.cs" />
+    <Compile Include="CultureInfo\CultureInfoCtor.cs" />
     <Compile Include="CultureInfo\CultureInfoDateTimeFormat.cs" />
     <Compile Include="CultureInfo\CultureInfoEnglishName.cs" />
     <Compile Include="CultureInfo\CultureInfoEquals.cs" />
     <Compile Include="CultureInfo\CultureInfoGetFormat.cs" />
     <Compile Include="CultureInfo\CultureInfoGetHashCode.cs" />
-    <Compile Include="CultureInfo\CultureInfoInvariantCulture.cs" />
     <Compile Include="CultureInfo\CultureInfoIsNeutralCulture.cs" />
-    <Compile Include="CultureInfo\CultureInfoIsReadOnly.cs" />
-    <Compile Include="CultureInfo\CultureInfoName.cs" />
     <Compile Include="CultureInfo\CultureInfoNativeName.cs" />
     <Compile Include="CultureInfo\CultureInfoParent.cs" />
     <Compile Include="CultureInfo\CultureInfoReadOnly.cs" />
-    <Compile Include="CultureInfo\CultureInfoToString.cs" />
     <Compile Include="CultureInfo\CultureInfoTwoLetterISOLanguageName.cs" />
-    <Compile Include="CultureInfo\CurrentCulture.cs" />
+    <Compile Include="CultureInfo\CultureInfoCurrentCulture.cs" />
     <Compile Include="CultureNotFoundException\CultureNotFoundExceptionTests.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoAbbreviatedDayNames.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoAbbreviatedMonthGenitiveNames.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoAbbreviatedMonthNames.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoAMDesignator.cs" />
+    <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoCalendar.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoCalendarWeekRule.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoClone.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoData.cs" />
@@ -76,8 +89,6 @@
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoGetFormat.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoGetInstance.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoGetMonthName.cs" />
-    <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoInvariantInfo.cs" />
-    <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoIsReadOnly.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoLongDatePattern.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoLongTimePattern.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoMonthDayPattern.cs" />
@@ -92,18 +103,8 @@
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoSortableDateTimePattern.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoUniversalSortableDateTimePattern.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoYearMonthPattern.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStyleAllowInnerWhite.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesAdjustToUniversal.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesAllowLeadingWhite.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesAllowTrailingWhite.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesAllowWhiteSpaces.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesAssumeLocal.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesAssumeUniversal.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesNoCurrentDateDefault.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesNone.cs" />
-    <Compile Include="DateTimeStyles\DateTimeStylesRoundTripKind.cs" />
+    <Compile Include="DateTimeStyles\DateTimeStylesTests.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoClone.cs" />
-    <Compile Include="NumberFormatInfo\NumberFormatInfoCtor.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoCurrencyDecimalDigits.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoCurrencyDecimalSeparator.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoCurrencyGroupSeparator.cs" />
@@ -113,74 +114,75 @@
     <Compile Include="NumberFormatInfo\NumberFormatInfoGetFormat.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoGetInstance.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoReadOnly.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowCurrencySymbol.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowDecimalPoint.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowExponent.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowHexSpecifier.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowLeadingSign.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowLeadingWhite.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowParentheses.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowThousands.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowTrailingSign.cs" />
-    <Compile Include="NumberStyles\NumberStylesAllowTrailingWhite.cs" />
-    <Compile Include="NumberStyles\NumberStylesAny.cs" />
-    <Compile Include="NumberStyles\NumberStylesCurrency.cs" />
-    <Compile Include="NumberStyles\NumberStylesFloat.cs" />
-    <Compile Include="NumberStyles\NumberStylesHexNumber.cs" />
-    <Compile Include="NumberStyles\NumberStylesInteger.cs" />
-    <Compile Include="NumberStyles\NumberStylesNone.cs" />
-    <Compile Include="NumberStyles\NumberStylesNumber.cs" />
-    <Compile Include="RegionInfo\regioninfo.cs" />
-    <Compile Include="RegionInfo\RegionInfoConstruction.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoCtor1.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoCtor2.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoCurrencySymbol.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoEnglishName.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoEquals.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoGetHashCode.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoIsMetric.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoISOCurrencySymbol.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoName.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoToString.cs" />
-    <Compile Include="RegionInfo\regioninfo\RegionInfoTwoLetterISORegionName.cs" />
-    <Compile Include="StringInfo\StringInfoCtor1.cs" />
-    <Compile Include="StringInfo\StringInfoCtor2.cs" />
+    <Compile Include="NumberStyles\NumberStylesTests.cs" />
+    <Compile Include="StringInfo\StringInfoCtor.cs" />
     <Compile Include="StringInfo\StringInfoEquals.cs" />
-    <Compile Include="StringInfo\StringInfoGetHashCode.cs" />
-    <Compile Include="StringInfo\StringInfoGetNextTextElement1.cs" />
-    <Compile Include="StringInfo\StringInfoGetNextTextElement2.cs" />
-    <Compile Include="StringInfo\StringInfoGetTextElementEnumerator1.cs" />
-    <Compile Include="StringInfo\StringInfoGetTextElementEnumerator2.cs" />
-    <Compile Include="StringInfo\StringInfoLengthInTextElements.cs" />
+    <Compile Include="StringInfo\StringInfoGetNextTextElement.cs" />
+    <Compile Include="StringInfo\StringInfoGetTextElementEnumerator.cs" />
     <Compile Include="StringInfo\StringInfoParseCombiningCharacters.cs" />
     <Compile Include="StringInfo\StringInfoString.cs" />
-    <Compile Include="TextElementEnumerator\TextElementEnumeratorCurrent.cs" />
-    <Compile Include="TextElementEnumerator\TextElementEnumeratorElementIndex.cs" />
-    <Compile Include="TextElementEnumerator\TextElementEnumeratorGetTextElement.cs" />
-    <Compile Include="TextElementEnumerator\TextElementEnumeratorMoveNext.cs" />
-    <Compile Include="TextElementEnumerator\TextElementEnumeratorReset.cs" />
-    <Compile Include="TextInfo\TestInfoIsRightToLeft.cs" />
+    <Compile Include="TextElementEnumerator\TextElementEnumeratorTests.cs" />
     <Compile Include="TextInfo\TextInfoCultureName.cs" />
     <Compile Include="TextInfo\TextInfoEquals.cs" />
-    <Compile Include="TextInfo\TextInfoGetHashCode.cs" />
+    <Compile Include="TextInfo\TextInfoIsRightToLeft.cs" />
     <Compile Include="TextInfo\TextInfoIsReadOnly.cs" />
     <Compile Include="TextInfo\TextInfoListSeparator.cs" />
     <Compile Include="TextInfo\TextInfoToLower.cs" />
     <Compile Include="TextInfo\TextInfoToString.cs" />
-    <Compile Include="TextInfo\TextInfoToUpper1.cs" />
-    <Compile Include="TextInfo\TextInfoToUpper2.cs" />
+    <Compile Include="TextInfo\TextInfoToUpper.cs" />
     <Compile Include="UnicodeCategory\UnicodeCategoryTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs" />
-    <!-- Performance Tests -->
-    <Compile Include="Performance\Perf.CultureInfo.cs" />
-    <Compile Include="Performance\Perf.DateTimeCultureInfo.cs" />
-    <Compile Include="Performance\Perf.NumberCultureInfo.cs" />
-    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
-      <Link>Common\System\PerfUtils.cs</Link>
+    <!-- Helpers -->
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
+      <Link>Common\System\RandomDataGenerator.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
+      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
+      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
+    </Compile>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
+    <!-- ToDo: Remove this reference to the live package of System.Globalization once prerelease gets updated again -->
+    <ProjectReference Include="..\pkg\System.Globalization.pkgproj">
+      <Name>System.Globalization</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.7'">
+    <Compile Include="CharUnicodeInfo\CharUnicodeInfoTests.netstandard1.7.cs" />
+    <Compile Include="CompareInfo\CompareInfoTests.netstandard1.7.cs" />
+    <Compile Include="CultureInfo\CultureInfoTests.netstandard1.7.cs" />
+    <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoTests.netstandard1.7.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoTests.netstandard1.7.cs" />
+    <Compile Include="RegionInfo\RegionInfoTests.netstandard1.7.cs" />
+    <Compile Include="TextInfo\TextInfoTests.netstandard1.7.cs" />
+    <Compile Include="StringInfo\StringInfoTests.netstandard1.7.cs" />
+    <Compile Include="SortVersion\SortVersionTests.netstandard1.7.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj">
+      <Name>System.Runtime</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <TargetingPackReference Include="System" />
+    <TargetingPackReference Include="System.Threading.Tasks" />
+    <TargetingPackReference Include="System.Core" />
+    <TargetingPackReference Include="System.Runtime" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.8.0.txt">
+      <Link>CharUnicodeInfo\UnicodeData8.0.txt</Link>
+      <LogicalName>UnicodeData.8.0.txt</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

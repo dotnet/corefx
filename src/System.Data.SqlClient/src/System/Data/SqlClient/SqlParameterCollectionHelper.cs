@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // In the desktop version of the framework, this file is generated from ProviderBase\DbParameterCollectionHelper.cs
@@ -63,7 +64,7 @@ namespace System.Data.SqlClient
             OnChange();
             if (null == values)
             {
-                throw ADP.ArgumentNull("values");
+                throw ADP.ArgumentNull(nameof(values));
             }
             foreach (object value in values)
             {
@@ -276,7 +277,7 @@ namespace System.Data.SqlClient
         {
             if (null == value)
             {
-                throw ADP.ParameterNull("value", this, s_itemType);
+                throw ADP.ParameterNull(nameof(value), this, s_itemType);
             }
 
             object parent = ((SqlParameter)value).CompareExchangeParent(this, null);
@@ -309,7 +310,7 @@ namespace System.Data.SqlClient
         {
             if (null == value)
             {
-                throw ADP.ParameterNull("value", this, s_itemType);
+                throw ADP.ParameterNull(nameof(value), this, s_itemType);
             }
             else if (!s_itemType.IsInstanceOfType(value))
             {

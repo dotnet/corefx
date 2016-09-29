@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -61,7 +62,7 @@ internal static partial class Interop
         }
 
         /// <summary>
-        /// Creates a pointer to an unmanaged CFArray containing the input values. Folows the "Create Rule" where if you create it, you delete it.
+        /// Creates a pointer to an unmanaged CFArray containing the input values. Follows the "Create Rule" where if you create it, you delete it.
         /// </summary>
         /// <param name="allocator">Should be IntPtr.Zero</param>
         /// <param name="values">The values to put in the array</param>
@@ -77,7 +78,7 @@ internal static partial class Interop
             IntPtr callbacks);
 
         /// <summary>
-        /// Creates a pointer to an unmanaged CFArray containing the input values. Folows the "Create Rule" where if you create it, you delete it.
+        /// Creates a pointer to an unmanaged CFArray containing the input values. Follows the "Create Rule" where if you create it, you delete it.
         /// </summary>
         /// <param name="values">The values to put in the array</param>
         /// <param name="numValues">The number of values in the array</param>
@@ -86,6 +87,16 @@ internal static partial class Interop
         {
             return CFArrayCreate(IntPtr.Zero, values, numValues, IntPtr.Zero);
         }
+
+        /// <summary>
+        /// You should retain a Core Foundation object when you receive it from elsewhere
+        /// (that is, you did not create or copy it) and you want it to persist. If you 
+        /// retain a Core Foundation object you are responsible for releasing it
+        /// </summary>
+        /// <param name="ptr">The CFType object to retain. This value must not be NULL</param>
+        /// <returns>The input value</param>
+        [DllImport(Interop.Libraries.CoreFoundationLibrary)]
+        internal extern static IntPtr CFRetain(IntPtr ptr);
 
         /// <summary>
         /// Decrements the reference count on the specified object and, if the ref count hits 0, cleans up the object.

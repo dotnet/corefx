@@ -1,8 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -180,7 +181,7 @@ namespace System.Security.Principal
         {
             if (subAuthorities == null)
             {
-                throw new ArgumentNullException("subAuthorities");
+                throw new ArgumentNullException(nameof(subAuthorities));
             }
 
             Contract.EndContractBlock();
@@ -205,7 +206,7 @@ namespace System.Security.Principal
                 (long)identifierAuthority > MaxIdentifierAuthority)
             {
                 throw new ArgumentOutOfRangeException(
-                    "identifierAuthority",
+nameof(identifierAuthority),
                     identifierAuthority,
                     SR.IdentityReference_IdentifierAuthorityTooLarge);
             }
@@ -270,7 +271,7 @@ namespace System.Security.Principal
 
             if (binaryForm == null)
             {
-                throw new ArgumentNullException("binaryForm");
+                throw new ArgumentNullException(nameof(binaryForm));
             }
 
             //
@@ -280,7 +281,7 @@ namespace System.Security.Principal
             if (offset < 0)
             {
                 throw new ArgumentOutOfRangeException(
-                    "offset",
+nameof(offset),
                     offset,
                     SR.ArgumentOutOfRange_NeedNonNegNum);
             }
@@ -292,7 +293,7 @@ namespace System.Security.Principal
             if (binaryForm.Length - offset < SecurityIdentifier.MinBinaryLength)
             {
                 throw new ArgumentOutOfRangeException(
-                    "binaryForm",
+nameof(binaryForm),
                     SR.ArgumentOutOfRange_ArrayTooSmall);
             }
             Contract.EndContractBlock();
@@ -312,7 +313,7 @@ namespace System.Security.Principal
 
                 throw new ArgumentException(
                     SR.IdentityReference_InvalidSidRevision,
-                    "binaryForm");
+nameof(binaryForm));
             }
 
             //
@@ -323,7 +324,7 @@ namespace System.Security.Principal
             {
                 throw new ArgumentException(
                     SR.Format(SR.IdentityReference_InvalidNumberOfSubauthorities, MaxSubAuthorities),
-                    "binaryForm");
+nameof(binaryForm));
             }
 
             //
@@ -336,7 +337,7 @@ namespace System.Security.Principal
             {
                 throw new ArgumentException(
                     SR.ArgumentOutOfRange_ArrayTooSmall,
-                    "binaryForm");
+nameof(binaryForm));
             }
 
             Authority =
@@ -387,7 +388,7 @@ namespace System.Security.Principal
 
             if (sddlForm == null)
             {
-                throw new ArgumentNullException("sddlForm");
+                throw new ArgumentNullException(nameof(sddlForm));
             }
             Contract.EndContractBlock();
 
@@ -399,7 +400,7 @@ namespace System.Security.Principal
 
             if (Error == Interop.mincore.Errors.ERROR_INVALID_SID)
             {
-                throw new ArgumentException(SR.Argument_InvalidValue, "sddlForm");
+                throw new ArgumentException(SR.Argument_InvalidValue, nameof(sddlForm));
             }
             else if (Error == Interop.mincore.Errors.ERROR_NOT_ENOUGH_MEMORY)
             {
@@ -408,7 +409,7 @@ namespace System.Security.Principal
             else if (Error != Interop.mincore.Errors.ERROR_SUCCESS)
             {
                 Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Win32.CreateSidFromString returned unrecognized error {0}", Error));
-                throw new Exception(Interop.mincore.GetMessage(Error));
+                throw new Win32Exception(Error);
             }
 
             CreateFromBinaryForm(resultSid, 0);
@@ -455,7 +456,7 @@ namespace System.Security.Principal
 
             if (sidType == WellKnownSidType.LogonIdsSid)
             {
-                throw new ArgumentException(SR.IdentityReference_CannotCreateLogonIdsSid, "sidType");
+                throw new ArgumentException(SR.IdentityReference_CannotCreateLogonIdsSid, nameof(sidType));
             }
             Contract.EndContractBlock();
 
@@ -468,7 +469,7 @@ namespace System.Security.Principal
 
             if ((sidType < WellKnownSidType.NullSid) || (sidType > WellKnownSidType.MaxDefined))
             {
-                throw new ArgumentException(SR.Argument_InvalidValue, "sidType");
+                throw new ArgumentException(SR.Argument_InvalidValue, nameof(sidType));
             }
 
             //
@@ -479,7 +480,7 @@ namespace System.Security.Principal
             {
                 if (domainSid == null)
                 {
-                    throw new ArgumentNullException("domainSid", SR.Format(SR.IdentityReference_DomainSidRequired, sidType));
+                    throw new ArgumentNullException(nameof(domainSid), SR.Format(SR.IdentityReference_DomainSidRequired, sidType));
                 }
 
                 //
@@ -499,12 +500,12 @@ namespace System.Security.Principal
                 else if (ErrorCode == Interop.mincore.Errors.ERROR_NON_ACCOUNT_SID)
                 {
                     // this means that the domain sid is not valid
-                    throw new ArgumentException(SR.IdentityReference_NotAWindowsDomain, "domainSid");
+                    throw new ArgumentException(SR.IdentityReference_NotAWindowsDomain, nameof(domainSid));
                 }
                 else if (ErrorCode != Interop.mincore.Errors.ERROR_SUCCESS)
                 {
                     Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Win32.GetWindowsAccountDomainSid returned unrecognized error {0}", ErrorCode));
-                    throw new Exception(Interop.mincore.GetMessage(ErrorCode));
+                    throw new Win32Exception(ErrorCode);
                 }
 
                 //
@@ -513,7 +514,7 @@ namespace System.Security.Principal
                 //
                 if (resultDomainSid != domainSid)
                 {
-                    throw new ArgumentException(SR.IdentityReference_NotAWindowsDomain, "domainSid");
+                    throw new ArgumentException(SR.IdentityReference_NotAWindowsDomain, nameof(domainSid));
                 }
             }
 
@@ -522,12 +523,12 @@ namespace System.Security.Principal
 
             if (Error == Interop.mincore.Errors.ERROR_INVALID_PARAMETER)
             {
-                throw new ArgumentException(Interop.mincore.GetMessage(Error), "sidType/domainSid");
+                throw new ArgumentException(new Win32Exception(Error).Message, "sidType/domainSid");
             }
             else if (Error != Interop.mincore.Errors.ERROR_SUCCESS)
             {
                 Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Win32.CreateWellKnownSid returned unrecognized error {0}", Error));
-                throw new Exception(Interop.mincore.GetMessage(Error));
+                throw new Win32Exception(Error);
             }
 
             CreateFromBinaryForm(resultSid, 0);
@@ -638,28 +639,11 @@ namespace System.Security.Principal
 
         public override bool Equals(object o)
         {
-            if (o == null)
-            {
-                return false;
-            }
-
-            SecurityIdentifier sid = o as SecurityIdentifier;
-
-            if (sid == null)
-            {
-                return false;
-            }
-
-            return (this == sid); // invokes operator==
+            return (this == o as SecurityIdentifier); // invokes operator==
         }
 
         public bool Equals(SecurityIdentifier sid)
         {
-            if (sid == null)
-            {
-                return false;
-            }
-
             return (this == sid); // invokes operator==
         }
 
@@ -745,7 +729,7 @@ namespace System.Security.Principal
             else if (Error != Interop.mincore.Errors.ERROR_SUCCESS)
             {
                 Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Win32.GetWindowsAccountDomainSid returned unrecognized error {0}", Error));
-                throw new Exception(Interop.mincore.GetMessage(Error));
+                throw new Win32Exception(Error);
             }
             return ResultSid;
         }
@@ -772,7 +756,7 @@ namespace System.Security.Principal
         {
             if (targetType == null)
             {
-                throw new ArgumentNullException("targetType");
+                throw new ArgumentNullException(nameof(targetType));
             }
             Contract.EndContractBlock();
 
@@ -792,7 +776,7 @@ namespace System.Security.Principal
             }
             else
             {
-                throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, "targetType");
+                throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, nameof(targetType));
             }
         }
 
@@ -805,7 +789,7 @@ namespace System.Security.Principal
             object l = left;
             object r = right;
 
-            if (l == null && r == null)
+            if (l == r)
             {
                 return true;
             }
@@ -832,7 +816,7 @@ namespace System.Security.Principal
         {
             if (sid == null)
             {
-                throw new ArgumentNullException("sid");
+                throw new ArgumentNullException(nameof(sid));
             }
             Contract.EndContractBlock();
 
@@ -912,12 +896,12 @@ namespace System.Security.Principal
         {
             if (sourceSids == null)
             {
-                throw new ArgumentNullException("sourceSids");
+                throw new ArgumentNullException(nameof(sourceSids));
             }
 
             if (sourceSids.Count == 0)
             {
-                throw new ArgumentException(SR.Arg_EmptyCollection, "sourceSids");
+                throw new ArgumentException(SR.Arg_EmptyCollection, nameof(sourceSids));
             }
             Contract.EndContractBlock();
 
@@ -940,7 +924,7 @@ namespace System.Security.Principal
 
                     if (sid == null)
                     {
-                        throw new ArgumentException(SR.Argument_ImproperType, "sourceSids");
+                        throw new ArgumentException(SR.Argument_ImproperType, nameof(sourceSids));
                     }
 
                     HandleArray[currentSid] = GCHandle.Alloc(sid.BinaryForm, GCHandleType.Pinned);
@@ -986,7 +970,7 @@ namespace System.Security.Principal
                     int win32ErrorCode = Interop.mincore.RtlNtStatusToDosError(unchecked((int)ReturnCode));
 
                     Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Interop.LsaLookupSids returned {0}", win32ErrorCode));
-                    throw new Exception(Interop.mincore.GetMessage(win32ErrorCode));
+                    throw new Win32Exception(win32ErrorCode);
                 }
 
 
@@ -1098,7 +1082,7 @@ namespace System.Security.Principal
         {
             if (sourceSids == null)
             {
-                throw new ArgumentNullException("sourceSids");
+                throw new ArgumentNullException(nameof(sourceSids));
             }
             Contract.EndContractBlock();
 
@@ -1107,7 +1091,7 @@ namespace System.Security.Principal
                 return TranslateToNTAccounts(sourceSids, out someFailed);
             }
 
-            throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, "targetType");
+            throw new ArgumentException(SR.IdentityReference_MustBeIdentityReference, nameof(targetType));
         }
         #endregion
     }

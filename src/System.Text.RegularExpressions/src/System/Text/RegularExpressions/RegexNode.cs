@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // This RegexNode class is internal to the Regex package.
 // It is built into a parsed tree for a regular expression.
@@ -35,7 +36,7 @@
 //
 // Finally, some of the different kinds of nodes have data.
 // Two integers (for the looping constructs) are stored in
-// _operands, an an object (either a string or a set)
+// _operands, an object (either a string or a set)
 // is stored in _data
 
 using System.Collections.Generic;
@@ -230,7 +231,7 @@ namespace System.Text.RegularExpressions
         }
 
         /// <summary>
-        /// Simple optimization. Once parsed into a tree, noncapturing groups
+        /// Simple optimization. Once parsed into a tree, non-capturing groups
         /// serve no function, so strip them out.
         /// </summary>
         internal RegexNode ReduceGroup()

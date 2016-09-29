@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -13,7 +14,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security;
@@ -75,9 +75,9 @@ namespace System.Threading.Tasks.Dataflow.Internal
         internal SpscTargetCore(
             ITargetBlock<TInput> owningTarget, Action<TInput> action, ExecutionDataflowBlockOptions dataflowBlockOptions)
         {
-            Contract.Requires(owningTarget != null, "Expected non-null owningTarget");
-            Contract.Requires(action != null, "Expected non-null action");
-            Contract.Requires(dataflowBlockOptions != null, "Expected non-null dataflowBlockOptions");
+            Debug.Assert(owningTarget != null, "Expected non-null owningTarget");
+            Debug.Assert(action != null, "Expected non-null action");
+            Debug.Assert(dataflowBlockOptions != null, "Expected non-null dataflowBlockOptions");
 
             _owningTarget = owningTarget;
             _action = action;
@@ -134,13 +134,13 @@ namespace System.Threading.Tasks.Dataflow.Internal
             // If the message header is invalid, throw.
             if (!messageHeader.IsValid)
             {
-                throw new ArgumentException(SR.Argument_InvalidMessageHeader, "messageHeader");
+                throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
             }
 
             // If the caller has requested we consume the message using ConsumeMessage, do so.
             if (consumeToAccept)
             {
-                if (source == null) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, "consumeToAccept");
+                if (source == null) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, nameof(consumeToAccept));
                 bool consumed;
                 messageValue = source.ConsumeMessage(messageHeader, _owningTarget, out consumed);
                 if (!consumed) return DataflowMessageStatus.NotAvailable;

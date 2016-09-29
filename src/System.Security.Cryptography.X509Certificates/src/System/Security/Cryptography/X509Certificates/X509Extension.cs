@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -28,7 +29,7 @@ namespace System.Security.Cryptography.X509Certificates
             : base(oid, rawData)
         {
             if (base.Oid == null || base.Oid.Value == null)
-                throw new ArgumentNullException("oid");
+                throw new ArgumentNullException(nameof(oid));
             if (base.Oid.Value.Length == 0)
                 throw new ArgumentException(SR.Arg_EmptyOrNullString, "oid.Value");
             Critical = critical;
@@ -44,7 +45,7 @@ namespace System.Security.Cryptography.X509Certificates
         public override void CopyFrom(AsnEncodedData asnEncodedData)
         {
             if (asnEncodedData == null)
-                throw new ArgumentNullException("asnEncodedData");
+                throw new ArgumentNullException(nameof(asnEncodedData));
 
             X509Extension extension = asnEncodedData as X509Extension;
             if (extension == null)

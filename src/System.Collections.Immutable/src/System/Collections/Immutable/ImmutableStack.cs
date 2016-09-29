@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -45,7 +46,7 @@ namespace System.Collections.Immutable
         [Pure]
         public static ImmutableStack<T> CreateRange<T>(IEnumerable<T> items)
         {
-            Requires.NotNull(items, "items");
+            Requires.NotNull(items, nameof(items));
 
             var stack = ImmutableStack<T>.Empty;
             foreach (var item in items)
@@ -65,7 +66,7 @@ namespace System.Collections.Immutable
         [Pure]
         public static ImmutableStack<T> Create<T>(params T[] items)
         {
-            Requires.NotNull(items, "items");
+            Requires.NotNull(items, nameof(items));
 
             var stack = ImmutableStack<T>.Empty;
             foreach (var item in items)
@@ -90,7 +91,7 @@ namespace System.Collections.Immutable
         [Pure]
         public static IImmutableStack<T> Pop<T>(this IImmutableStack<T> stack, out T value)
         {
-            Requires.NotNull(stack, "stack");
+            Requires.NotNull(stack, nameof(stack));
             Contract.Ensures(Contract.Result<IImmutableStack<T>>() != null);
 
             value = stack.Peek();

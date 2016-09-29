@@ -1,6 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.IO.Tests
@@ -42,7 +44,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows | PlatformID.OSX)] // testing case-insensitivity
+        [PlatformSpecific(CaseInsensitivePlatforms)]
         public void CaseInsensitivity()
         {
             string path = GetTestFilePath();
@@ -52,7 +54,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux | PlatformID.FreeBSD)] // testing case-Sensitivity
+        [PlatformSpecific(CaseSensitivePlatforms)]
         public void CaseSensitivity()
         {
             string path = GetTestFilePath();
@@ -78,6 +80,47 @@ namespace System.IO.Tests
             Directory.CreateDirectory(fileName);
             FileInfo di = new FileInfo(fileName);
             Assert.False(di.Exists);
+        }
+
+        [Fact]
+        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        public void TrueForNonRegularFile()
+        {
+            string fileName = GetTestFilePath();
+            Assert.Equal(0, mkfifo(fileName, 0));
+            FileInfo fi = new FileInfo(fileName);
+            Assert.True(fi.Exists);
+        }
+
+        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
+        public void SymLinksMayExistIndependentlyOfTarget()
+        {
+            var path = GetTestFilePath();
+            var linkPath = GetTestFilePath();
+
+            var pathFI = new FileInfo(path);
+            var linkPathFI = new FileInfo(linkPath);
+
+            pathFI.Create().Dispose();
+            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: false));
+
+            // Both the symlink and the target exist
+            pathFI.Refresh();
+            linkPathFI.Refresh();
+            Assert.True(pathFI.Exists, "path should exist");
+            Assert.True(linkPathFI.Exists, "linkPath should exist");
+
+            // Delete the target.  The symlink should still exist
+            pathFI.Delete();
+            pathFI.Refresh();
+            linkPathFI.Refresh();
+            Assert.False(pathFI.Exists, "path should now not exist");
+            Assert.True(linkPathFI.Exists, "linkPath should still exist");
+
+            // Now delete the symlink.
+            linkPathFI.Delete();
+            linkPathFI.Refresh();
+            Assert.False(linkPathFI.Exists, "linkPath should no longer exist");
         }
     }
 }

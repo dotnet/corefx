@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -14,6 +15,8 @@ namespace System.Security.Cryptography
         public virtual System.Security.Cryptography.KeySizes[] LegalKeySizes { get { return default(System.Security.Cryptography.KeySizes[]); } }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        protected int KeySizeValue;
+        protected KeySizes[] LegalKeySizesValue;
     }
     public enum CipherMode
     {
@@ -141,5 +144,13 @@ namespace System.Security.Cryptography
         protected virtual void Dispose(bool disposing) { }
         public abstract void GenerateIV();
         public abstract void GenerateKey();
+        protected CipherMode ModeValue;
+        protected PaddingMode PaddingValue;
+        protected byte[] KeyValue;
+        protected byte[] IVValue;
+        protected int BlockSizeValue;
+        protected int KeySizeValue;
+        protected KeySizes[] LegalBlockSizesValue;
+        protected KeySizes[] LegalKeySizesValue;
     }
 }

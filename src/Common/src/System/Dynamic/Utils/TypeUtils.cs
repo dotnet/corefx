@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Reflection;
 
@@ -36,18 +37,19 @@ namespace System.Dynamic.Utils
             return AreEquivalent(type, subType) || subType.GetTypeInfo().IsSubclassOf(type);
         }
 
-        public static void ValidateType(Type type)
+        public static void ValidateType(Type type, string paramName)
+        {
+            ValidateType(type, paramName, -1);
+        }
+
+        public static void ValidateType(Type type, string paramName, int index)
         {
             if (type != typeof(void))
             {
                 // A check to avoid a bunch of reflection (currently not supported) during cctor
-                if (type.GetTypeInfo().IsGenericTypeDefinition)
-                {
-                    throw Error.TypeIsGeneric(type);
-                }
                 if (type.GetTypeInfo().ContainsGenericParameters)
                 {
-                    throw Error.TypeContainsGenericParameters(type);
+                    throw type.GetTypeInfo().IsGenericTypeDefinition ? Error.TypeIsGeneric(type, paramName, index) : Error.TypeContainsGenericParameters(type, paramName, index);
                 }
             }
         }
@@ -69,7 +71,7 @@ namespace System.Dynamic.Utils
 
         /// <summary>
         /// We can cache references to types, as long as they aren't in
-        /// collectable assemblies. Unfortunately, we can't really distinguish
+        /// collectible assemblies. Unfortunately, we can't really distinguish
         /// between different flavors of assemblies. But, we can at least
         /// create a cache for types in mscorlib (so we get the primitives, etc).
         /// </summary>

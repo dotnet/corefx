@@ -1,8 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit;
+using XunitPlatformID = Xunit.PlatformID;
 
 namespace System.IO.Tests
 {
@@ -113,12 +116,72 @@ namespace System.IO.Tests
             });
         }
 
+        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
+        public void SymLinksMayExistIndependentlyOfTarget()
+        {
+            var path = GetTestFilePath();
+            var linkPath = GetTestFilePath();
+
+            Directory.CreateDirectory(path);
+            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: true));
+
+            // Both the symlink and the target exist
+            Assert.True(Directory.Exists(path), "path should exist");
+            Assert.True(Directory.Exists(linkPath), "linkPath should exist");
+            Assert.False(File.Exists(linkPath));
+
+            // Delete the target.  The symlink should still exist.  On Unix, the symlink will now be
+            // considered a file (since it's broken and we don't know what it'll eventually point to).
+            Directory.Delete(path);
+            Assert.False(Directory.Exists(path), "path should now not exist");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.True(Directory.Exists(linkPath), "linkPath should still exist as a directory");
+                Assert.False(File.Exists(linkPath), "linkPath should not be a file");
+            }
+            else
+            {
+                Assert.False(Directory.Exists(linkPath), "linkPath should no longer be a directory");
+                Assert.True(File.Exists(linkPath), "linkPath should now be a file");
+            }
+
+            // Now delete the symlink.
+            // On Unix, deleting the symlink should fail, because it's not a directory, it's a file.
+            // On Windows, it should succeed.
+            try
+            {
+                Directory.Delete(linkPath);
+                Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Should only succeed on Windows");
+            }
+            catch (IOException)
+            {
+                Assert.False(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Should only fail on Unix");
+                File.Delete(linkPath);
+            }
+
+            Assert.False(Directory.Exists(linkPath), "linkPath should no longer exist as a directory");
+            Assert.False(File.Exists(linkPath), "linkPath should no longer exist as a file");
+        }
+
+        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
+        public void SymlinkToNewDirectory()
+        {
+            string path = GetTestFilePath();
+            Directory.CreateDirectory(path);
+
+            string linkPath = GetTestFilePath();
+            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: true));
+
+            Assert.True(Directory.Exists(path));
+            Assert.True(Directory.Exists(linkPath));
+        }
+
         #endregion
 
         #region PlatformSpecific
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(XunitPlatformID.Windows)]
         public void ValidExtendedPathExists_ReturnsTrue()
         {
             Assert.All((IOInputs.GetValidPathComponentNames()), (component) =>
@@ -130,7 +193,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(XunitPlatformID.Windows)]
         public void ExtendedPathAlreadyExistsAsFile()
         {
             string path = IOInputs.ExtendedPrefix + GetTestFilePath();
@@ -142,7 +205,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(XunitPlatformID.Windows)]
         public void ExtendedPathAlreadyExistsAsDirectory()
         {
             string path = IOInputs.ExtendedPrefix + GetTestFilePath();
@@ -154,7 +217,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(XunitPlatformID.Windows)]
         public void DirectoryLongerThanMaxDirectoryAsPath_DoesntThrow()
         {
             Assert.All((IOInputs.GetPathsLongerThanMaxDirectory(GetTestFilePath())), (path) =>
@@ -164,7 +227,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // Unix equivalent tested already in CreateDirectory
+        [PlatformSpecific(XunitPlatformID.Windows)] // Unix equivalent tested already in CreateDirectory
         public void WindowsWhiteSpaceAsPath_ReturnsFalse()
         {
             // Checks that errors aren't thrown when calling Exists() on impossible paths
@@ -175,7 +238,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows | PlatformID.OSX)]
+        [PlatformSpecific(CaseInsensitivePlatforms)]
         public void DoesCaseInsensitiveInvariantComparisons()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -185,7 +248,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux | PlatformID.FreeBSD)]
+        [PlatformSpecific(CaseSensitivePlatforms)]
         public void DoesCaseSensitiveComparisons()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -195,7 +258,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // In Windows, trailing whitespace in a path is trimmed appropriately
+        [PlatformSpecific(XunitPlatformID.Windows)] // In Windows, trailing whitespace in a path is trimmed appropriately
         public void TrailingWhitespaceExistence()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -216,7 +279,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // alternate data stream
+        [PlatformSpecific(XunitPlatformID.Windows)] // alternate data stream
         public void PathWithAlternateDataStreams_ReturnsFalse()
         {
             Assert.All(IOInputs.GetWhiteSpace(), (component) =>
@@ -227,7 +290,7 @@ namespace System.IO.Tests
 
         [Fact]
         [OuterLoop]
-        [PlatformSpecific(PlatformID.Windows)] // device names
+        [PlatformSpecific(XunitPlatformID.Windows)] // device names
         public void PathWithReservedDeviceNameAsPath_ReturnsFalse()
         {
             Assert.All((IOInputs.GetPathsWithReservedDeviceNames()), (component) =>
@@ -237,7 +300,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // UNC paths
+        [PlatformSpecific(XunitPlatformID.Windows)] // UNC paths
         public void UncPathWithoutShareNameAsPath_ReturnsFalse()
         {
             Assert.All((IOInputs.GetUncPathsWithoutShareName()), (component) =>
@@ -247,7 +310,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // max directory length not fixed on Unix
+        [PlatformSpecific(XunitPlatformID.Windows)] // max directory length not fixed on Unix
         public void DirectoryEqualToMaxDirectory_ReturnsTrue()
         {
             // Creates directories up to the maximum directory length all at once
@@ -258,7 +321,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // max directory length not fixed on Unix
+        [PlatformSpecific(XunitPlatformID.Windows)] // max directory length not fixed on Unix
         public void DirectoryWithComponentLongerThanMaxComponentAsPath_ReturnsFalse()
         {
             Assert.All((IOInputs.GetPathsWithComponentLongerThanMaxComponent()), (component) =>
@@ -269,7 +332,7 @@ namespace System.IO.Tests
 
         [Fact]
         [ActiveIssue(1221)]
-        [PlatformSpecific(PlatformID.Windows)] // drive labels
+        [PlatformSpecific(XunitPlatformID.Windows)] // drive labels
         public void NotReadyDriveAsPath_ReturnsFalse()
         {
             var drive = IOServices.GetNotReadyDrive();
@@ -286,7 +349,7 @@ namespace System.IO.Tests
 
         [Fact]
         [ActiveIssue(1221)]
-        [PlatformSpecific(PlatformID.Windows)] // drive labels
+        [PlatformSpecific(XunitPlatformID.Windows)] // drive labels
         public void SubdirectoryOnNotReadyDriveAsPath_ReturnsFalse()
         {
             var drive = IOServices.GetNotReadyDrive();
@@ -302,17 +365,26 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // drive labels
+        [PlatformSpecific(XunitPlatformID.Windows)] // drive labels
         public void NonExistentDriveAsPath_ReturnsFalse()
         {
             Assert.False(Exists(IOServices.GetNonExistentDrive()));
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // drive labels
+        [PlatformSpecific(XunitPlatformID.Windows)] // drive labels
         public void SubdirectoryOnNonExistentDriveAsPath_ReturnsFalse()
         {
             Assert.False(Exists(Path.Combine(IOServices.GetNonExistentDrive(), "nonexistentsubdir")));
+        }
+
+        [Fact]
+        [PlatformSpecific(XunitPlatformID.AnyUnix)]
+        public void FalseForNonRegularFile()
+        {
+            string fileName = GetTestFilePath();
+            Assert.Equal(0, mkfifo(fileName, 0));
+            Assert.False(Directory.Exists(fileName));
         }
 
         #endregion

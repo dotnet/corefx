@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Internal.Cryptography.Pal;
 
@@ -41,7 +42,7 @@ namespace System.Security.Cryptography.X509Certificates
         public int Add(X509Certificate2 certificate)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw new ArgumentNullException(nameof(certificate));
 
             return base.Add(certificate);
         }
@@ -49,7 +50,7 @@ namespace System.Security.Cryptography.X509Certificates
         public void AddRange(X509Certificate2[] certificates)
         {
             if (certificates == null)
-                throw new ArgumentNullException("certificates");
+                throw new ArgumentNullException(nameof(certificates));
 
             int i = 0;
             try
@@ -72,7 +73,7 @@ namespace System.Security.Cryptography.X509Certificates
         public void AddRange(X509Certificate2Collection certificates)
         {
             if (certificates == null)
-                throw new ArgumentNullException("certificates");
+                throw new ArgumentNullException(nameof(certificates));
 
             int i = 0;
             try
@@ -108,7 +109,7 @@ namespace System.Security.Cryptography.X509Certificates
 
         public byte[] Export(X509ContentType contentType, string password)
         {
-            using (IStorePal storePal = StorePal.LinkFromCertificateCollection(this))
+            using (IExportPal storePal = StorePal.LinkFromCertificateCollection(this))
             {
                 return storePal.Export(contentType, password);
             }
@@ -117,7 +118,7 @@ namespace System.Security.Cryptography.X509Certificates
         public X509Certificate2Collection Find(X509FindType findType, object findValue, bool validOnly)
         {
             if (findValue == null)
-                throw new ArgumentNullException("findValue");
+                throw new ArgumentNullException(nameof(findValue));
 
             return FindPal.FindFromCollection(this, findType, findValue, validOnly);
         }
@@ -135,11 +136,11 @@ namespace System.Security.Cryptography.X509Certificates
         public void Import(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
         {
             if (rawData == null)
-                throw new ArgumentNullException("rawData");
+                throw new ArgumentNullException(nameof(rawData));
 
-            using (IStorePal storePal = StorePal.FromBlob(rawData, password, keyStorageFlags))
+            using (ILoaderPal storePal = StorePal.FromBlob(rawData, password, keyStorageFlags))
             {
-                storePal.CopyTo(this);
+                storePal.MoveTo(this);
             }
         }
 
@@ -151,18 +152,18 @@ namespace System.Security.Cryptography.X509Certificates
         public void Import(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
         {
             if (fileName == null)
-                throw new ArgumentNullException("fileName");
+                throw new ArgumentNullException(nameof(fileName));
 
-            using (IStorePal storePal = StorePal.FromFile(fileName, password, keyStorageFlags))
+            using (ILoaderPal storePal = StorePal.FromFile(fileName, password, keyStorageFlags))
             {
-                storePal.CopyTo(this);
+                storePal.MoveTo(this);
             }
         }
 
         public void Insert(int index, X509Certificate2 certificate)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw new ArgumentNullException(nameof(certificate));
 
             base.Insert(index, certificate);
         }
@@ -170,7 +171,7 @@ namespace System.Security.Cryptography.X509Certificates
         public void Remove(X509Certificate2 certificate)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw new ArgumentNullException(nameof(certificate));
 
             base.Remove(certificate);
         }
@@ -178,7 +179,7 @@ namespace System.Security.Cryptography.X509Certificates
         public void RemoveRange(X509Certificate2[] certificates)
         {
             if (certificates == null)
-                throw new ArgumentNullException("certificates");
+                throw new ArgumentNullException(nameof(certificates));
 
             int i = 0;
             try
@@ -201,7 +202,7 @@ namespace System.Security.Cryptography.X509Certificates
         public void RemoveRange(X509Certificate2Collection certificates)
         {
             if (certificates == null)
-                throw new ArgumentNullException("certificates");
+                throw new ArgumentNullException(nameof(certificates));
 
             int i = 0;
             try

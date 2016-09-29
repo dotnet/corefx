@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -9,7 +10,7 @@ namespace System.Threading
     //
     // Implementation of ThreadPoolBoundHandle that sits on top of the CLR's ThreadPool and Overlapped infrastructure
     //
-    
+
     /// <summary>
     ///     Represents an I/O handle that is bound to the system thread pool and enables low-level
     ///     components to receive notifications for asynchronous I/O operations.
@@ -77,10 +78,10 @@ namespace System.Threading
         public static ThreadPoolBoundHandle BindHandle(SafeHandle handle)
         {
             if (handle == null)
-                throw new ArgumentNullException("handle");
+                throw new ArgumentNullException(nameof(handle));
 
             if (handle.IsClosed || handle.IsInvalid)
-                throw new ArgumentException(SR.Argument_InvalidHandle, "handle");
+                throw new ArgumentException(SR.Argument_InvalidHandle, nameof(handle));
 
             try
             {
@@ -95,10 +96,10 @@ namespace System.Threading
                 // indicate that the specified handles are invalid.
 
                 if (ex.HResult == System.HResults.E_HANDLE)         // Bad handle
-                    throw new ArgumentException(SR.Argument_InvalidHandle, "handle");
+                    throw new ArgumentException(SR.Argument_InvalidHandle, nameof(handle));
 
                 if (ex.HResult == System.HResults.E_INVALIDARG)     // Handle already bound or sync handle
-                    throw new ArgumentException(SR.Argument_AlreadyBoundOrSyncHandle, "handle");
+                    throw new ArgumentException(SR.Argument_AlreadyBoundOrSyncHandle, nameof(handle));
 
                 throw;
             }
@@ -151,7 +152,7 @@ namespace System.Threading
         public unsafe NativeOverlapped* AllocateNativeOverlapped(IOCompletionCallback callback, object state, object pinData)
         {
             if (callback == null)
-                throw new ArgumentNullException("callback");
+                throw new ArgumentNullException(nameof(callback));
 
             EnsureNotDisposed();
 
@@ -192,7 +193,7 @@ namespace System.Threading
         public unsafe NativeOverlapped* AllocateNativeOverlapped(PreAllocatedOverlapped preAllocated)
         {
             if (preAllocated == null)
-                throw new ArgumentNullException("preAllocated");
+                throw new ArgumentNullException(nameof(preAllocated));
 
             EnsureNotDisposed();
 
@@ -202,7 +203,7 @@ namespace System.Threading
                 ThreadPoolBoundHandleOverlapped overlapped = preAllocated._overlapped;
 
                 if (overlapped._boundHandle != null)
-                    throw new ArgumentException(SR.Argument_PreAllocatedAlreadyAllocated, "preAllocated");
+                    throw new ArgumentException(SR.Argument_PreAllocatedAlreadyAllocated, nameof(preAllocated));
 
                 overlapped._boundHandle = this;
 
@@ -242,14 +243,14 @@ namespace System.Threading
         public unsafe void FreeNativeOverlapped(NativeOverlapped* overlapped)
         {
             if (overlapped == null)
-                throw new ArgumentNullException("overlapped");
+                throw new ArgumentNullException(nameof(overlapped));
 
             // Note: we explicitly allow FreeNativeOverlapped calls after the ThreadPoolBoundHandle has been Disposed.
 
             ThreadPoolBoundHandleOverlapped wrapper = GetOverlappedWrapper(overlapped, this);
 
             if (wrapper._boundHandle != this)
-                throw new ArgumentException(SR.Argument_NativeOverlappedWrongBoundHandle, "overlapped");
+                throw new ArgumentException(SR.Argument_NativeOverlappedWrongBoundHandle, nameof(overlapped));
 
             if (wrapper._preAllocated != null)
                 wrapper._preAllocated.Release();
@@ -277,7 +278,7 @@ namespace System.Threading
         public unsafe static object GetNativeOverlappedState(NativeOverlapped* overlapped)
         {
             if (overlapped == null)
-                throw new ArgumentNullException("overlapped");
+                throw new ArgumentNullException(nameof(overlapped));
 
             ThreadPoolBoundHandleOverlapped wrapper = GetOverlappedWrapper(overlapped, null);
             Debug.Assert(wrapper._boundHandle != null);
@@ -293,14 +294,14 @@ namespace System.Threading
             }
             catch (NullReferenceException ex)
             {
-                throw new ArgumentException(SR.Argument_NativeOverlappedAlreadyFree, "overlapped", ex);
+                throw new ArgumentException(SR.Argument_NativeOverlappedAlreadyFree, nameof(overlapped), ex);
             }
 
             return wrapper;
         }
 
         public void Dispose()
-        {   
+        {
             // .NET Native's version of ThreadPoolBoundHandle that wraps the Win32 ThreadPool holds onto
             // native resources so it needs to be disposable. To match the contract, we are also disposable.
             // We also implement a disposable state to mimic behavior between this implementation and 

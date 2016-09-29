@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.IO.Compression;
@@ -49,23 +50,6 @@ internal static partial class Interop
             {
                 byte* pBytes = (byte*)streamBytes;
                 return (ZLibNative.ErrorCode)deflateInit2_(pBytes, (int)level, (int)method, (int)windowBits, (int)memLevel, (int)strategy, versionString, sizeof(ZLibNative.ZStream));
-            }
-        }
-
-        internal static unsafe bool IsCrc32Available()
-        {
-            try
-            {
-                // Make a P/Invoke into zlib crc32 to ensure we're able to find and use it.
-                // If we are, then use zlib.
-                crc32(0, null, 0);
-                return true;
-            }
-            catch
-            {
-                // Otherwise, fallback to managed implementation if zlib isn't available
-                Debug.Write("zlib unavailable");
-                return false;
             }
         }
 

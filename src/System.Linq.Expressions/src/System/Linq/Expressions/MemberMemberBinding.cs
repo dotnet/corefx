@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -63,8 +64,6 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="MemberMemberBinding"/> that has the <see cref="P:MemberBinding.BindingType"/> property equal to <see cref="MemberBinding"/> and the <see cref="P:MemberBinding.Member"/> and <see cref="P:MemberMemberBindings.Bindings"/> properties set to the specified values.</returns>
         public static MemberMemberBinding MemberBind(MemberInfo member, params MemberBinding[] bindings)
         {
-            ContractUtils.RequiresNotNull(member, "member");
-            ContractUtils.RequiresNotNull(bindings, "bindings");
             return MemberBind(member, (IEnumerable<MemberBinding>)bindings);
         }
 
@@ -76,8 +75,8 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="MemberMemberBinding"/> that has the <see cref="P:MemberBinding.BindingType"/> property equal to <see cref="MemberBinding"/> and the <see cref="P:MemberBinding.Member"/> and <see cref="P:MemberMemberBindings.Bindings"/> properties set to the specified values.</returns>
         public static MemberMemberBinding MemberBind(MemberInfo member, IEnumerable<MemberBinding> bindings)
         {
-            ContractUtils.RequiresNotNull(member, "member");
-            ContractUtils.RequiresNotNull(bindings, "bindings");
+            ContractUtils.RequiresNotNull(member, nameof(member));
+            ContractUtils.RequiresNotNull(bindings, nameof(bindings));
             ReadOnlyCollection<MemberBinding> roBindings = bindings.ToReadOnly();
             Type memberType;
             ValidateGettableFieldOrPropertyMember(member, out memberType);
@@ -97,8 +96,7 @@ namespace System.Linq.Expressions
         /// </returns>
         public static MemberMemberBinding MemberBind(MethodInfo propertyAccessor, params MemberBinding[] bindings)
         {
-            ContractUtils.RequiresNotNull(propertyAccessor, "propertyAccessor");
-            return MemberBind(GetProperty(propertyAccessor), bindings);
+            return MemberBind(propertyAccessor, (IEnumerable<MemberBinding>)bindings);
         }
 
         /// <summary>
@@ -113,8 +111,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static MemberMemberBinding MemberBind(MethodInfo propertyAccessor, IEnumerable<MemberBinding> bindings)
         {
-            ContractUtils.RequiresNotNull(propertyAccessor, "propertyAccessor");
-            return MemberBind(GetProperty(propertyAccessor), bindings);
+            ContractUtils.RequiresNotNull(propertyAccessor, nameof(propertyAccessor));
+            return MemberBind(GetProperty(propertyAccessor, nameof(propertyAccessor)), bindings);
         }
 
         private static void ValidateGettableFieldOrPropertyMember(MemberInfo member, out Type memberType)
@@ -125,11 +123,11 @@ namespace System.Linq.Expressions
                 PropertyInfo pi = member as PropertyInfo;
                 if (pi == null)
                 {
-                    throw Error.ArgumentMustBeFieldInfoOrPropertInfo();
+                    throw Error.ArgumentMustBeFieldInfoOrPropertyInfo(nameof(member));
                 }
                 if (!pi.CanRead)
                 {
-                    throw Error.PropertyDoesNotHaveGetter(pi);
+                    throw Error.PropertyDoesNotHaveGetter(pi, nameof(member));
                 }
                 memberType = pi.PropertyType;
             }
@@ -144,10 +142,10 @@ namespace System.Linq.Expressions
             for (int i = 0, n = bindings.Count; i < n; i++)
             {
                 MemberBinding b = bindings[i];
-                ContractUtils.RequiresNotNull(b, "bindings");
+                ContractUtils.RequiresNotNull(b, nameof(bindings));
                 if (!b.Member.DeclaringType.IsAssignableFrom(type))
                 {
-                    throw Error.NotAMemberOfType(b.Member.Name, type);
+                    throw Error.NotAMemberOfType(b.Member.Name, type, nameof(bindings), i);
                 }
             }
         }

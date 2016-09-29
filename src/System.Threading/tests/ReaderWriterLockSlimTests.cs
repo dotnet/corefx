@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -379,5 +381,136 @@ namespace System.Threading.Tests
             }
         }
 
+        [Fact]
+        [OuterLoop]
+        public static void ReleaseReadersWhenWaitingWriterTimesOut()
+        {
+            using (var rwls = new ReaderWriterLockSlim())
+            {
+                // Enter the read lock
+                rwls.EnterReadLock();
+                // Typical order of execution: 0
+
+                Thread writeWaiterThread;
+                using (var beforeTryEnterWriteLock = new ManualResetEvent(false))
+                {
+                    writeWaiterThread =
+                        new Thread(() =>
+                        {
+                            // Typical order of execution: 1
+
+                            // Add a writer to the wait list for enough time to allow successive readers to enter the wait list while this
+                            // writer is waiting
+                            beforeTryEnterWriteLock.Set();
+                            if (rwls.TryEnterWriteLock(1000))
+                            {
+                                // The typical order of execution is not guaranteed, as sleep times are not guaranteed. For
+                                // instance, before this write lock is added to the wait list, the two new read locks may be
+                                // acquired. In that case, the test may complete before or while the write lock is taken.
+                                rwls.ExitWriteLock();
+                            }
+
+                            // Typical order of execution: 4
+                        });
+                    writeWaiterThread.IsBackground = true;
+                    writeWaiterThread.Start();
+                    beforeTryEnterWriteLock.WaitOne();
+                }
+                Thread.Sleep(500); // wait for TryEnterWriteLock to enter the wait list
+
+                // A writer should now be waiting, add readers to the wait list. Since a read lock is still acquired, the writer
+                // should time out waiting, then these readers should enter and exit the lock.
+                ThreadStart EnterAndExitReadLock = () =>
+                {
+                    // Typical order of execution: 2, 3
+                    rwls.EnterReadLock();
+                    // Typical order of execution: 5, 6
+                    rwls.ExitReadLock();
+                };
+                var readerThreads =
+                    new Thread[]
+                    {
+                        new Thread(EnterAndExitReadLock),
+                        new Thread(EnterAndExitReadLock)
+                    };
+                foreach (var readerThread in readerThreads)
+                {
+                    readerThread.IsBackground = true;
+                    readerThread.Start();
+                }
+                foreach (var readerThread in readerThreads)
+                {
+                    readerThread.Join();
+                }
+
+                rwls.ExitReadLock();
+                // Typical order of execution: 7
+
+                writeWaiterThread.Join();
+            }
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void DontReleaseWaitingReadersWhenThereAreWaitingWriters()
+        {
+            using(var rwls = new ReaderWriterLockSlim())
+            {
+                rwls.EnterUpgradeableReadLock();
+                rwls.EnterWriteLock();
+                // Typical order of execution: 0
+
+                // Add a waiting writer
+                var threads = new Thread[2];
+                using(var beforeEnterWriteLock = new ManualResetEvent(false))
+                {
+                    var thread =
+                        new Thread(() =>
+                        {
+                            beforeEnterWriteLock.Set();
+                            rwls.EnterWriteLock();
+                            // Typical order of execution: 3
+                            rwls.ExitWriteLock();
+                        });
+                    thread.IsBackground = true;
+                    thread.Start();
+                    threads[0] = thread;
+                    beforeEnterWriteLock.WaitOne();
+                }
+
+                // Add a waiting reader
+                using(var beforeEnterReadLock = new ManualResetEvent(false))
+                {
+                    var thread =
+                        new Thread(() =>
+                        {
+                            beforeEnterReadLock.Set();
+                            rwls.EnterReadLock();
+                            // Typical order of execution: 4
+                            rwls.ExitReadLock();
+                        });
+                    thread.IsBackground = true;
+                    thread.Start();
+                    threads[1] = thread;
+                    beforeEnterReadLock.WaitOne();
+                }
+
+                // Wait for the background threads to block waiting for their locks
+                Thread.Sleep(1000);
+
+                // Typical order of execution: 1
+                rwls.ExitWriteLock();
+                // At this point there is still one reader and one waiting writer, so the reader-writer lock should not try to
+                // release any of the threads waiting for a lock
+
+                // Typical order of execution: 2
+                rwls.ExitUpgradeableReadLock();
+                // At this point, the waiting writer should be released, and the waiting reader should not
+
+                foreach(var thread in threads)
+                    thread.Join();
+                // Typical order of execution: 5
+            }
+        }
     }
 }

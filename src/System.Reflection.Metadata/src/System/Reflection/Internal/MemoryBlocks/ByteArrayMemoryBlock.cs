@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -28,25 +29,12 @@ namespace System.Reflection.Internal
             _provider = null;
         }
 
-        public unsafe override byte* Pointer
-        {
-            get
-            {
-                return _provider.Pointer + _start;
-            }
-        }
+        public unsafe override byte* Pointer => _provider.Pointer + _start;
+        public override int Size => _size;
 
-        public override int Size
+        public override ImmutableArray<byte> GetContentUnchecked(int start, int length)
         {
-            get
-            {
-                return _size;
-            }
-        }
-
-        public override ImmutableArray<byte> GetContent(int offset)
-        {
-            return ImmutableArray.Create(_provider.array, _start + offset, _size - offset);
+            return ImmutableArray.Create(_provider.Array, _start + start, length);
         }
     }
 }

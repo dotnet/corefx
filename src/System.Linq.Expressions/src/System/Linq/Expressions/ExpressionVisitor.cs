@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.ObjectModel;
@@ -50,6 +51,7 @@ namespace System.Linq.Expressions
         /// otherwise, returns the original expression list.</returns>
         public ReadOnlyCollection<Expression> Visit(ReadOnlyCollection<Expression> nodes)
         {
+            ContractUtils.RequiresNotNull(nodes, nameof(nodes));
             Expression[] newNodes = null;
             for (int i = 0, n = nodes.Count; i < n; i++)
             {
@@ -92,6 +94,8 @@ namespace System.Linq.Expressions
         /// otherwise, returns the original node list.</returns>
         public static ReadOnlyCollection<T> Visit<T>(ReadOnlyCollection<T> nodes, Func<T, T> elementVisitor)
         {
+            ContractUtils.RequiresNotNull(nodes, nameof(nodes));
+            ContractUtils.RequiresNotNull(elementVisitor, nameof(elementVisitor));
             T[] newNodes = null;
             for (int i = 0, n = nodes.Count; i < n; i++)
             {
@@ -151,6 +155,7 @@ namespace System.Linq.Expressions
         /// <exception cref="InvalidOperationException">The visit method for this node returned a different type.</exception>
         public ReadOnlyCollection<T> VisitAndConvert<T>(ReadOnlyCollection<T> nodes, string callerName) where T : Expression
         {
+            ContractUtils.RequiresNotNull(nodes, nameof(nodes));
             T[] newNodes = null;
             for (int i = 0, n = nodes.Count; i < n; i++)
             {
@@ -194,7 +199,7 @@ namespace System.Linq.Expressions
                 node,
                 node.Update(
                     Visit(node.Left),
-                    VisitAndConvert(node.Conversion, "VisitBinary"),
+                    VisitAndConvert(node.Conversion, nameof(VisitBinary)),
                     Visit(node.Right)
                 )
             );
@@ -208,37 +213,12 @@ namespace System.Linq.Expressions
         /// otherwise, returns the original expression.</returns>
         protected internal virtual Expression VisitBlock(BlockExpression node)
         {
-            int count = node.ExpressionCount;
-            Expression[] nodes = null;
-            for (int i = 0; i < count; i++)
-            {
-                Expression oldNode = node.GetExpression(i);
-                Expression newNode = Visit(oldNode);
-
-                if (oldNode != newNode)
-                {
-                    if (nodes == null)
-                    {
-                        nodes = new Expression[count];
-                    }
-                    nodes[i] = newNode;
-                }
-            }
+            Expression[] nodes = ExpressionVisitorUtils.VisitBlockExpressions(this, node);
             var v = VisitAndConvert(node.Variables, "VisitBlock");
 
             if (v == node.Variables && nodes == null)
             {
                 return node;
-            }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    if (nodes[i] == null)
-                    {
-                        nodes[i] = node.GetExpression(i);
-                    }
-                }
             }
 
             return node.Rewrite(v, nodes);
@@ -365,7 +345,7 @@ namespace System.Linq.Expressions
         /// otherwise, returns the original expression.</returns>
         protected internal virtual Expression VisitLambda<T>(Expression<T> node)
         {
-            return node.Update(Visit(node.Body), VisitAndConvert(node.Parameters, "VisitLambda"));
+            return node.Update(Visit(node.Body), VisitAndConvert(node.Parameters, nameof(VisitLambda)));
         }
 
         /// <summary>
@@ -417,7 +397,7 @@ namespace System.Linq.Expressions
         protected internal virtual Expression VisitMethodCall(MethodCallExpression node)
         {
             Expression o = Visit(node.Object);
-            Expression[] a = VisitArguments((IArgumentProvider)node);
+            Expression[] a = VisitArguments(node);
             if (o == node.Object && a == null)
             {
                 return node;
@@ -446,7 +426,13 @@ namespace System.Linq.Expressions
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix")]
         protected internal virtual Expression VisitNew(NewExpression node)
         {
-            return node.Update(Visit(node.Arguments));
+            Expression[] a = VisitArguments(node);
+            if (a == null)
+            {
+                return node;
+            }
+
+            return node.Update(a);
         }
 
         /// <summary>
@@ -468,7 +454,7 @@ namespace System.Linq.Expressions
         /// otherwise, returns the original expression.</returns>
         protected internal virtual Expression VisitRuntimeVariables(RuntimeVariablesExpression node)
         {
-            return node.Update(VisitAndConvert(node.Variables, "VisitRuntimeVariables"));
+            return node.Update(VisitAndConvert(node.Variables, nameof(VisitRuntimeVariables)));
         }
 
         /// <summary>
@@ -508,7 +494,7 @@ namespace System.Linq.Expressions
         /// otherwise, returns the original expression.</returns>
         protected virtual CatchBlock VisitCatchBlock(CatchBlock node)
         {
-            return node.Update(VisitAndConvert(node.Variable, "VisitCatchBlock"), Visit(node.Filter), Visit(node.Body));
+            return node.Update(VisitAndConvert(node.Variable, nameof(VisitCatchBlock)), Visit(node.Filter), Visit(node.Body));
         }
 
         /// <summary>
@@ -558,7 +544,7 @@ namespace System.Linq.Expressions
         protected internal virtual Expression VisitMemberInit(MemberInitExpression node)
         {
             return node.Update(
-                VisitAndConvert(node.NewExpression, "VisitMemberInit"),
+                VisitAndConvert(node.NewExpression, nameof(VisitMemberInit)),
                 Visit(node.Bindings, VisitMemberBinding)
             );
         }
@@ -572,7 +558,7 @@ namespace System.Linq.Expressions
         protected internal virtual Expression VisitListInit(ListInitExpression node)
         {
             return node.Update(
-                VisitAndConvert(node.NewExpression, "VisitListInit"),
+                VisitAndConvert(node.NewExpression, nameof(VisitListInit)),
                 Visit(node.Initializers, VisitElementInit)
             );
         }
@@ -657,13 +643,13 @@ namespace System.Linq.Expressions
             {
                 if (after.Method != null)
                 {
-                    throw Error.MustRewriteWithoutMethod(after.Method, "VisitUnary");
+                    throw Error.MustRewriteWithoutMethod(after.Method, nameof(VisitUnary));
                 }
 
                 // rethrow has null operand
                 if (before.Operand != null && after.Operand != null)
                 {
-                    ValidateChildType(before.Operand.Type, after.Operand.Type, "VisitUnary");
+                    ValidateChildType(before.Operand.Type, after.Operand.Type, nameof(VisitUnary));
                 }
             }
             return after;
@@ -675,11 +661,11 @@ namespace System.Linq.Expressions
             {
                 if (after.Method != null)
                 {
-                    throw Error.MustRewriteWithoutMethod(after.Method, "VisitBinary");
+                    throw Error.MustRewriteWithoutMethod(after.Method, nameof(VisitBinary));
                 }
 
-                ValidateChildType(before.Left.Type, after.Left.Type, "VisitBinary");
-                ValidateChildType(before.Right.Type, after.Right.Type, "VisitBinary");
+                ValidateChildType(before.Left.Type, after.Left.Type, nameof(VisitBinary));
+                ValidateChildType(before.Right.Type, after.Right.Type, nameof(VisitBinary));
             }
             return after;
         }
@@ -691,7 +677,7 @@ namespace System.Linq.Expressions
             // it might not be the right thing.
             if (before.Comparison == null && after.Comparison != null)
             {
-                throw Error.MustRewriteWithoutMethod(after.Comparison, "VisitSwitch");
+                throw Error.MustRewriteWithoutMethod(after.Comparison, nameof(VisitSwitch));
             }
             return after;
         }

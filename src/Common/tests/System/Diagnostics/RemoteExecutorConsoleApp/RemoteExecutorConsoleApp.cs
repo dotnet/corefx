@@ -1,10 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Reflection;
-
-[assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+using System.Threading.Tasks;
 
 namespace RemoteExecutorConsoleApp
 {
@@ -40,12 +40,15 @@ namespace RemoteExecutorConsoleApp
             {
                 a = Assembly.Load(new AssemblyName(assemblyName));
                 t = a.GetType(typeName);
-                mi = t.GetMethod(methodName);
+                mi = t.GetTypeInfo().GetDeclaredMethod(methodName);
                 if (!mi.IsStatic)
                 {
                     instance = Activator.CreateInstance(t);
                 }
-                return (int)mi.Invoke(instance, additionalArgs);
+                object result = mi.Invoke(instance, additionalArgs);
+                return result is Task<int> ?
+                    ((Task<int>)result).GetAwaiter().GetResult() :
+                    (int)result;
             }
             catch (Exception exc)
             {

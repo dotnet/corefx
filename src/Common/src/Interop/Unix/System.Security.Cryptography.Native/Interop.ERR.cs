@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -11,16 +12,19 @@ internal static partial class Interop
 {
     internal static partial class Crypto
     {
-        [DllImport(Libraries.CryptoNative)]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrGetError")]
         internal static extern ulong ErrGetError();
 
-        [DllImport(Libraries.CryptoNative)]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrPeekError")]
+        internal static extern ulong ErrPeekError();
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrGetErrorAlloc")]
         private static extern ulong ErrGetErrorAlloc([MarshalAs(UnmanagedType.Bool)] out bool isAllocFailure);
 
-        [DllImport(Libraries.CryptoNative)]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrReasonErrorString")]
         internal static extern IntPtr ErrReasonErrorString(ulong error);
 
-        [DllImport(Libraries.CryptoNative)]
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrErrorStringN")]
         private static unsafe extern void ErrErrorStringN(ulong e, byte* buf, int len);
 
         private static unsafe string ErrErrorStringN(ulong error)

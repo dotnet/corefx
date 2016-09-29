@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -23,7 +24,7 @@ namespace System.Data.SqlClient
             // env change.
             _failoverPartner = connectionOptions.FailoverPartner;
 
-            if (ADP.IsEmpty(_failoverPartner))
+            if (string.IsNullOrEmpty(_failoverPartner))
             {
                 _failoverPartner = null;
             }
@@ -76,7 +77,7 @@ namespace System.Data.SqlClient
             // primary data source, not the failover partner.
             if (!_useFailoverPartner && _failoverPartner != actualFailoverPartner)
             {
-                // NOTE: we optimisitically generate the permission set to keep 
+                // NOTE: we optimistically generate the permission set to keep 
                 //       lock short, but we only do this when we get a new
                 //       failover partner.
 

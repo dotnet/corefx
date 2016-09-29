@@ -1,7 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace System.Net.Http.Headers
@@ -34,7 +35,7 @@ namespace System.Net.Http.Headers
 
             if ((quality < 0) || (quality > 1))
             {
-                throw new ArgumentOutOfRangeException("quality");
+                throw new ArgumentOutOfRangeException(nameof(quality));
             }
 
             _value = value;
@@ -43,7 +44,7 @@ namespace System.Net.Http.Headers
 
         private StringWithQualityHeaderValue(StringWithQualityHeaderValue source)
         {
-            Contract.Requires(source != null);
+            Debug.Assert(source != null);
 
             _value = source._value;
             _quality = source._quality;
@@ -126,7 +127,7 @@ namespace System.Net.Http.Headers
 
         internal static int GetStringWithQualityLength(string input, int startIndex, out object parsedValue)
         {
-            Contract.Requires(startIndex >= 0);
+            Debug.Assert(startIndex >= 0);
 
             parsedValue = null;
 

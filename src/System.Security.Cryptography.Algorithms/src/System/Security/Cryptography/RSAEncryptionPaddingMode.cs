@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Security.Cryptography
 {
@@ -12,7 +13,7 @@ namespace System.Security.Cryptography
         /// PKCS #1 v1.5.
         /// </summary>
         /// <remarks>
-        /// This mode correpsonds to the RSAES-PKCS1-v1_5 encryption scheme described in the PKCS #1 RSA Encryption Standard.
+        /// This mode corresponds to the RSAES-PKCS1-v1_5 encryption scheme described in the PKCS #1 RSA Encryption Standard.
         /// It is supported for compatibility with existing applications.
         /// </remarks>
         Pkcs1,

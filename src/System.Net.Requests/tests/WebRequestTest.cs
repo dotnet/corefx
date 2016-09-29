@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -7,18 +8,25 @@ namespace System.Net.Tests
 {
     public class WebRequestTest
     {
+        static WebRequestTest()
+        {
+            // Capture the value of DefaultWebProxy before any tests run.
+            // This lets us test the default value without imposing test
+            // ordering constraints which aren't natively supported by xunit.
+            initialDefaultWebProxy = WebRequest.DefaultWebProxy;
+            initialDefaultWebProxyCredentials = initialDefaultWebProxy.Credentials;
+        }
+        
         private readonly NetworkCredential _explicitCredentials = new NetworkCredential("user", "password", "domain");
+        private static IWebProxy initialDefaultWebProxy;
+        private static ICredentials initialDefaultWebProxyCredentials;
 
         [Fact]
         public void DefaultWebProxy_VerifyDefaults_Success()
         {
-            IWebProxy proxy = WebRequest.DefaultWebProxy;
-            Assert.NotNull(proxy);
+            Assert.NotNull(initialDefaultWebProxy);
 
-            // Since WebRequest.DefaultWebProxy is a static property, the initial default value for
-            // Credentials is only null iff. no other test method in the test process has changed
-            // the value in a prior test.
-            Assert.Null(proxy.Credentials);
+            Assert.Null(initialDefaultWebProxyCredentials);
         }
 
         [Fact]
@@ -54,5 +62,25 @@ namespace System.Net.Tests
                 proxy.Credentials = oldCreds;
             }
         }
+
+        [Theory]
+        [InlineData("http")]
+        [InlineData("https")]
+        public void Create_ValidWebRequestUriScheme_Success(string scheme)
+        {
+            var uri = new Uri($"{scheme}://example.com/folder/resource.txt");
+            WebRequest request = WebRequest.Create(uri);
+        }
+
+        [Theory]
+        [InlineData("ws")]
+        [InlineData("wss")]
+        [InlineData("ftp")]
+        [InlineData("custom")]
+        public void Create_InvalidWebRequestUriScheme_Throws(string scheme)
+        {
+            var uri = new Uri($"{scheme}://example.com/folder/resource.txt");
+            Assert.Throws<NotSupportedException>(() => WebRequest.Create(uri));
+        }        
     }
 }

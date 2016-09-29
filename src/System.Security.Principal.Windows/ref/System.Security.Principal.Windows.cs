@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -189,17 +190,24 @@ namespace System.Security.Principal
     }
     public partial class WindowsIdentity : System.Security.Claims.ClaimsIdentity, System.IDisposable
     {
+        public new const string DefaultIssuer = "AD AUTHORITY";
         public WindowsIdentity(System.IntPtr userToken) { }
         public WindowsIdentity(System.IntPtr userToken, string type) { }
         public WindowsIdentity(string sUserPrincipalName) { }
         public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle AccessToken {[System.Security.SecurityCriticalAttribute]get { return default(Microsoft.Win32.SafeHandles.SafeAccessTokenHandle); } }
+        public sealed override string AuthenticationType { get { return default(string); } }
+        public override System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> Claims { get { return default(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim>); } }
         public System.Security.Principal.IdentityReferenceCollection Groups { get { return default(System.Security.Principal.IdentityReferenceCollection); } }
         public System.Security.Principal.TokenImpersonationLevel ImpersonationLevel { get { return default(System.Security.Principal.TokenImpersonationLevel); } }
         public virtual bool IsAnonymous { get { return default(bool); } }
+        public override bool IsAuthenticated { get { return default(bool); } }
         public virtual bool IsGuest { get { return default(bool); } }
         public virtual bool IsSystem { get { return default(bool); } }
+        public override string Name { get { return default(string); } }
         public System.Security.Principal.SecurityIdentifier Owner { get { return default(System.Security.Principal.SecurityIdentifier); } }
+        public virtual IntPtr Token { get { return default(System.IntPtr); } }
         public System.Security.Principal.SecurityIdentifier User { get { return default(System.Security.Principal.SecurityIdentifier); } }
+        public override System.Security.Claims.ClaimsIdentity Clone() { return default(System.Security.Claims.ClaimsIdentity); }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public static System.Security.Principal.WindowsIdentity GetAnonymous() { return default(System.Security.Principal.WindowsIdentity); }
@@ -212,8 +220,10 @@ namespace System.Security.Principal
     public partial class WindowsPrincipal : System.Security.Claims.ClaimsPrincipal
     {
         public WindowsPrincipal(System.Security.Principal.WindowsIdentity ntIdentity) { }
+        public override System.Security.Principal.IIdentity Identity { get { return default(System.Security.Principal.IIdentity); } }
         public virtual bool IsInRole(int rid) { return default(bool); }
         public virtual bool IsInRole(System.Security.Principal.SecurityIdentifier sid) { return default(bool); }
         public virtual bool IsInRole(System.Security.Principal.WindowsBuiltInRole role) { return default(bool); }
+        public override bool IsInRole(string role) { return default(bool); }
     }
 }

@@ -1,19 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
-
-using System.Collections;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
-using System.Security.Authentication;
 
 namespace System.Net.Security
 {
@@ -55,17 +51,28 @@ namespace System.Net.Security
         internal SecureChannel(string hostname, bool serverMode, SslProtocols sslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertName,
                                                   bool checkCertRevocationStatus, EncryptionPolicy encryptionPolicy, LocalCertSelectionCallback certSelectionDelegate)
         {
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::.ctor", "hostname:" + hostname + " #clientCertificates=" + ((clientCertificates == null) ? "0" : clientCertificates.Count.ToString(NumberFormatInfo.InvariantInfo)));
-            if (Logging.On)
+            if (GlobalLog.IsEnabled)
             {
-                Logging.PrintInfo(Logging.Web, this, ".ctor", "hostname=" + hostname + ", #clientCertificates=" + ((clientCertificates == null) ? "0" : clientCertificates.Count.ToString(NumberFormatInfo.InvariantInfo)) + ", encryptionPolicy=" + encryptionPolicy);
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::.ctor", "hostname:" + hostname + " #clientCertificates=" + ((clientCertificates == null) ? "0" : clientCertificates.Count.ToString(NumberFormatInfo.InvariantInfo)));
+            }
+            if (SecurityEventSource.Log.IsEnabled())
+            {
+                SecurityEventSource.SecureChannelCtor(this, hostname, clientCertificates, encryptionPolicy);
             }
 
             SslStreamPal.VerifyPackageInfo();
 
             _destination = hostname;
 
-            GlobalLog.Assert(hostname != null, "SecureChannel#{0}::.ctor()|hostname == null", Logging.HashString(this));
+            if (hostname == null)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.AssertFormat("SecureChannel#{0}::.ctor()|hostname == null", LoggingHash.HashString(this));
+                }
+
+                Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::.ctor()|hostname == null");
+            }
             _hostName = hostname;
             _serverMode = serverMode;
 
@@ -80,7 +87,10 @@ namespace System.Net.Security
             _certSelectionDelegate = certSelectionDelegate;
             _refreshCredentialNeeded = true;
             _encryptionPolicy = encryptionPolicy;
-            GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::.ctor");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::.ctor");
+            }
         }
 
         //
@@ -118,7 +128,10 @@ namespace System.Net.Security
 
         internal ChannelBinding GetChannelBinding(ChannelBindingKind kind)
         {
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::GetChannelBindingToken", kind.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::GetChannelBindingToken", kind.ToString());
+            }
 
             ChannelBinding result = null;
             if (_securityContext != null)
@@ -126,7 +139,10 @@ namespace System.Net.Security
                 result = SslStreamPal.QueryContextChannelBinding(_securityContext, kind);
             }
 
-            GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::GetChannelBindingToken", Logging.HashString(result));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::GetChannelBindingToken", LoggingHash.HashString(result));
+            }
             return result;
         }
 
@@ -223,9 +239,9 @@ namespace System.Net.Security
                 return null;
             }
 
-            if (Logging.On)
+            if (SecurityEventSource.Log.IsEnabled())
             {
-                Logging.PrintInfo(Logging.Web, this, SR.Format(SR.net_log_locating_private_key_for_certificate, certificate.ToString(true)));
+                SecurityEventSource.Log.LocatingPrivateKey(certificate.ToString(true), LoggingHash.HashInt(this));
             }
 
             try
@@ -241,9 +257,9 @@ namespace System.Net.Security
                 {
                     if (certEx.HasPrivateKey)
                     {
-                        if (Logging.On)
+                        if (SecurityEventSource.Log.IsEnabled())
                         {
-                            Logging.PrintInfo(Logging.Web, this, SR.net_log_cert_is_of_type_2);
+                            SecurityEventSource.Log.CertIsType2(LoggingHash.HashInt(this));
                         }
 
                         return certEx;
@@ -265,9 +281,9 @@ namespace System.Net.Security
                     collectionEx = store.Certificates.Find(X509FindType.FindByThumbprint, certHash, false);
                     if (collectionEx.Count > 0 && collectionEx[0].HasPrivateKey)
                     {
-                        if (Logging.On)
+                        if (SecurityEventSource.Log.IsEnabled())
                         {
-                            Logging.PrintInfo(Logging.Web, this, SR.Format(SR.net_log_found_cert_in_store, (_serverMode ? "LocalMachine" : "CurrentUser")));
+                            SecurityEventSource.Log.FoundCertInStore((_serverMode ? "LocalMachine" : "CurrentUser"), LoggingHash.HashInt(this));
                         }
 
                         return collectionEx[0];
@@ -280,9 +296,9 @@ namespace System.Net.Security
                     collectionEx = store.Certificates.Find(X509FindType.FindByThumbprint, certHash, false);
                     if (collectionEx.Count > 0 && collectionEx[0].HasPrivateKey)
                     {
-                        if (Logging.On)
+                        if (SecurityEventSource.Log.IsEnabled())
                         {
-                            Logging.PrintInfo(Logging.Web, this, SR.Format(SR.net_log_found_cert_in_store, (_serverMode ? "CurrentUser" : "LocalMachine")));
+                            SecurityEventSource.Log.FoundCertInStore((_serverMode ? "LocalMachine" : "CurrentUser"), LoggingHash.HashInt(this));
                         }
 
                         return collectionEx[0];
@@ -293,9 +309,9 @@ namespace System.Net.Security
             {
             }
 
-            if (Logging.On)
+            if (SecurityEventSource.Log.IsEnabled())
             {
-                Logging.PrintInfo(Logging.Web, this, SR.net_log_did_not_find_cert_in_store);
+                SecurityEventSource.Log.NotFoundCertInStore(LoggingHash.HashInt(this));
             }
 
             return null;
@@ -378,12 +394,15 @@ namespace System.Net.Security
 
         private bool AcquireClientCredentials(ref byte[] thumbPrint)
         {
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::AcquireClientCredentials");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireClientCredentials");
+            }
 
             // Acquire possible Client Certificate information and set it on the handle.
-            X509Certificate clientCertificate = null;   // This is a candidate that can come from the user callback or be guessed when targeting a session restart.
-            ArrayList filteredCerts = new ArrayList();  // This is an intermediate client certs collection that try to use if no selectedCert is available yet.
-            string[] issuers = null;                    // This is a list of issuers sent by the server, only valid is we do know what the server cert is.
+            X509Certificate clientCertificate = null;        // This is a candidate that can come from the user callback or be guessed when targeting a session restart.
+            var filteredCerts = new List<X509Certificate>(); // This is an intermediate client certs collection that try to use if no selectedCert is available yet.
+            string[] issuers = null;                         // This is a list of issuers sent by the server, only valid is we do know what the server cert is.
 
             bool sessionRestartAttempt = false; // If true and no cached creds we will use anonymous creds.
 
@@ -391,7 +410,10 @@ namespace System.Net.Security
             {
                 issuers = GetRequestCertificateAuthorities();
 
-                GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::AcquireClientCredentials() calling CertificateSelectionCallback");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireClientCredentials() calling CertificateSelectionCallback");
+                }
 
                 X509Certificate2 remoteCert = null;
                 try
@@ -417,27 +439,27 @@ namespace System.Net.Security
                     }
 
                     filteredCerts.Add(clientCertificate);
-                    if (Logging.On)
+                    if (SecurityEventSource.Log.IsEnabled())
                     {
-                        Logging.PrintInfo(Logging.Web, this, SR.net_log_got_certificate_from_delegate);
+                        SecurityEventSource.Log.CertificateFromDelegate(LoggingHash.HashInt(this));
                     }
                 }
                 else
                 {
                     if (ClientCertificates.Count == 0)
                     {
-                        if (Logging.On)
+                        if (SecurityEventSource.Log.IsEnabled())
                         {
-                            Logging.PrintInfo(Logging.Web, this, SR.net_log_no_delegate_and_have_no_client_cert);
+                            SecurityEventSource.Log.NoDelegateNoClientCert(LoggingHash.HashInt(this));
                         }
 
                         sessionRestartAttempt = true;
                     }
                     else
                     {
-                        if (Logging.On)
+                        if (SecurityEventSource.Log.IsEnabled())
                         {
-                            Logging.PrintInfo(Logging.Web, this, SR.net_log_no_delegate_but_have_client_cert);
+                            SecurityEventSource.Log.NoDelegateButClientCert(LoggingHash.HashInt(this));
                         }
                     }
                 }
@@ -453,9 +475,9 @@ namespace System.Net.Security
                     filteredCerts.Add(clientCertificate);
                 }
 
-                if (Logging.On)
+                if (SecurityEventSource.Log.IsEnabled())
                 {
-                    Logging.PrintInfo(Logging.Web, this, SR.Format(SR.net_log_attempting_restart_using_cert, (clientCertificate == null ? "null" : clientCertificate.ToString(true))));
+                    SecurityEventSource.Log.AttemptingRestartUsingCert(clientCertificate == null ? "null" : clientCertificate.ToString(true), LoggingHash.HashInt(this));
                 }
             }
             else if (_clientCertificates != null && _clientCertificates.Count > 0)
@@ -465,15 +487,15 @@ namespace System.Net.Security
                 //
                 issuers = GetRequestCertificateAuthorities();
 
-                if (Logging.On)
+                if (SecurityEventSource.Log.IsEnabled())
                 {
                     if (issuers == null || issuers.Length == 0)
                     {
-                        Logging.PrintInfo(Logging.Web, this, SR.net_log_no_issuers_try_all_certs);
+                        SecurityEventSource.Log.NoIssuersTryAllCerts(LoggingHash.HashInt(this));
                     }
                     else
                     {
-                        Logging.PrintInfo(Logging.Web, this, SR.Format(SR.net_log_server_issuers_look_for_matching_certs, issuers.Length));
+                        SecurityEventSource.Log.LookForMatchingCerts(issuers.Length, LoggingHash.HashInt(this));
                     }
                 }
 
@@ -495,7 +517,11 @@ namespace System.Net.Security
                                 continue;
                             }
 
-                            GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::AcquireClientCredentials() root cert:" + certificateEx.Issuer);
+                            if (GlobalLog.IsEnabled)
+                            {
+                                GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireClientCredentials() root cert:" + certificateEx.Issuer);
+                            }
+
                             chain = new X509Chain();
 
                             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
@@ -514,10 +540,16 @@ namespace System.Net.Security
                                     found = Array.IndexOf(issuers, issuer) != -1;
                                     if (found)
                                     {
-                                        GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::AcquireClientCredentials() matched:" + issuer);
+                                        if (GlobalLog.IsEnabled)
+                                        {
+                                            GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireClientCredentials() matched:" + issuer);
+                                        }
                                         break;
                                     }
-                                    GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::AcquireClientCredentials() no match:" + issuer);
+                                    if (GlobalLog.IsEnabled)
+                                    {
+                                        GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireClientCredentials() no match:" + issuer);
+                                    }
                                 }
                             }
 
@@ -540,9 +572,9 @@ namespace System.Net.Security
                         }
                     }
 
-                    if (Logging.On)
+                    if (SecurityEventSource.Log.IsEnabled())
                     {
-                        Logging.PrintInfo(Logging.Web, this, SR.Format(SR.net_log_selected_cert, _clientCertificates[i].ToString(true)));
+                        SecurityEventSource.Log.SelectedCert(_clientCertificates[i].ToString(true), LoggingHash.HashInt(this));
                     }
 
                     filteredCerts.Add(_clientCertificates[i]);
@@ -554,12 +586,12 @@ namespace System.Net.Security
 
             clientCertificate = null;
 
-            if (Logging.On)
+            if (SecurityEventSource.Log.IsEnabled())
             {
-                Logging.PrintInfo(Logging.Web, this, SR.Format(SR.net_log_n_certs_after_filtering, filteredCerts.Count));
+                SecurityEventSource.Log.CertsAfterFiltering(filteredCerts.Count, LoggingHash.HashInt(this));
                 if (filteredCerts.Count != 0)
                 {
-                    Logging.PrintInfo(Logging.Web, this, SR.net_log_finding_matching_certs);
+                    SecurityEventSource.Log.FindingMatchingCerts(LoggingHash.HashInt(this));
                 }
             }
 
@@ -572,7 +604,7 @@ namespace System.Net.Security
             // EnsurePrivateKey should do the right demand for us.
             for (int i = 0; i < filteredCerts.Count; ++i)
             {
-                clientCertificate = filteredCerts[i] as X509Certificate;
+                clientCertificate = filteredCerts[i];
                 if ((selectedCert = EnsurePrivateKey(clientCertificate)) != null)
                 {
                     break;
@@ -582,9 +614,21 @@ namespace System.Net.Security
                 selectedCert = null;
             }
 
-            GlobalLog.Assert(((object)clientCertificate == (object)selectedCert) || clientCertificate.Equals(selectedCert), "AcquireClientCredentials()|'selectedCert' does not match 'clientCertificate'.");
+            if ((object)clientCertificate != (object)selectedCert && !clientCertificate.Equals(selectedCert))
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("AcquireClientCredentials()|'selectedCert' does not match 'clientCertificate'.");
+                }
 
-            GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::AcquireClientCredentials() Selected Cert = " + (selectedCert == null ? "null" : selectedCert.Subject));
+                Debug.Fail("AcquireClientCredentials()|'selectedCert' does not match 'clientCertificate'.");
+            }
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireClientCredentials() Selected Cert = " + (selectedCert == null ? "null" : selectedCert.Subject));
+            }
+
             try
             {
                 // Try to locate cached creds first.
@@ -597,9 +641,15 @@ namespace System.Net.Security
                 // We can probably do some optimization here. If the selectedCert is returned by the delegate
                 // we can always go ahead and use the certificate to create our credential
                 // (instead of going anonymous as we do here).
-                if (sessionRestartAttempt && cachedCredentialHandle == null && selectedCert != null)
+                if (sessionRestartAttempt &&
+                    cachedCredentialHandle == null &&
+                    selectedCert != null &&
+                    SslStreamPal.StartMutualAuthAsAnonymous)
                 {
-                    GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::AcquireClientCredentials() Reset to anonymous session.");
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireClientCredentials() Reset to anonymous session.");
+                    }
 
                     // IIS does not renegotiate a restarted session if client cert is needed.
                     // So we don't want to reuse **anonymous** cached credential for a new SSL connection if the client has passed some certificate.
@@ -617,9 +667,9 @@ namespace System.Net.Security
 
                 if (cachedCredentialHandle != null)
                 {
-                    if (Logging.On)
+                    if (SecurityEventSource.Log.IsEnabled())
                     {
-                        Logging.PrintInfo(Logging.Web, SR.net_log_using_cached_credential);
+                        SecurityEventSource.Log.UsingCachedCredential(LoggingHash.HashInt(this));
                     }
 
                     _credentialsHandle = cachedCredentialHandle;
@@ -643,7 +693,10 @@ namespace System.Net.Security
                 }
             }
 
-            GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::AcquireClientCredentials, cachedCreds = " + cachedCred.ToString(), Logging.ObjectToString(_credentialsHandle));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireClientCredentials, cachedCreds = " + cachedCred.ToString(), LoggingHash.ObjectToString(_credentialsHandle));
+            }
             return cachedCred;
         }
 
@@ -653,7 +706,10 @@ namespace System.Net.Security
         //
         private bool AcquireServerCredentials(ref byte[] thumbPrint)
         {
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::AcquireServerCredentials");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireServerCredentials");
+            }
 
             X509Certificate localCertificate = null;
             bool cachedCred = false;
@@ -663,7 +719,10 @@ namespace System.Net.Security
                 X509CertificateCollection tempCollection = new X509CertificateCollection();
                 tempCollection.Add(_serverCertificate);
                 localCertificate = _certSelectionDelegate(string.Empty, tempCollection, null, Array.Empty<string>());
-                GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::AcquireServerCredentials() Use delegate selected Cert");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireServerCredentials() Use delegate selected Cert");
+                }
             }
             else
             {
@@ -685,7 +744,15 @@ namespace System.Net.Security
                 throw new NotSupportedException(SR.net_ssl_io_no_server_cert);
             }
 
-            GlobalLog.Assert(localCertificate.Equals(selectedCert), "AcquireServerCredentials()|'selectedCert' does not match 'localCertificate'.");
+            if (!localCertificate.Equals(selectedCert))
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("AcquireServerCredentials()|'selectedCert' does not match 'localCertificate'.");
+                }
+
+                Debug.Fail("AcquireServerCredentials()|'selectedCert' does not match 'localCertificate'.");
+            }
 
             //
             // Note selectedCert is a safe ref possibly cloned from the user passed Cert object
@@ -717,26 +784,40 @@ namespace System.Net.Security
                 }
             }
 
-            GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::AcquireServerCredentials, cachedCreds = " + cachedCred.ToString(), Logging.ObjectToString(_credentialsHandle));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::AcquireServerCredentials, cachedCreds = " + cachedCred.ToString(), LoggingHash.ObjectToString(_credentialsHandle));
+            }
             return cachedCred;
         }
 
         //
         internal ProtocolToken NextMessage(byte[] incoming, int offset, int count)
         {
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::NextMessage");
-            byte[] nextmsg = null;
-            SecurityStatusPal errorCode = GenerateToken(incoming, offset, count, ref nextmsg);
-
-            if (!_serverMode && errorCode == SecurityStatusPal.CredentialsNeeded)
+            if (GlobalLog.IsEnabled)
             {
-                GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::NextMessage() returned SecurityStatusPal.CredentialsNeeded");
-                SetRefreshCredentialNeeded();
-                errorCode = GenerateToken(incoming, offset, count, ref nextmsg);
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage");
             }
 
-            ProtocolToken token = new ProtocolToken(nextmsg, errorCode);
-            GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::NextMessage", token.ToString());
+            byte[] nextmsg = null;
+            SecurityStatusPal status = GenerateToken(incoming, offset, count, ref nextmsg);
+
+            if (!_serverMode && status.ErrorCode == SecurityStatusPalErrorCode.CredentialsNeeded)
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage() returned SecurityStatusPal.CredentialsNeeded");
+                }
+
+                SetRefreshCredentialNeeded();
+                status = GenerateToken(incoming, offset, count, ref nextmsg);
+            }
+
+            ProtocolToken token = new ProtocolToken(nextmsg, status);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::NextMessage", token.ToString());
+            }
             return token;
         }
 
@@ -753,24 +834,37 @@ namespace System.Net.Security
                 output - ref to byte [], what we will send to the
                     server in response
             Return:
-                errorCode - an SSPI error code
+                status - error information
         --*/
         private SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
         {
 #if TRACE_VERBOSE
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::GenerateToken, _refreshCredentialNeeded = " + _refreshCredentialNeeded);
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken, _refreshCredentialNeeded = " + _refreshCredentialNeeded);
+            }
 #endif
 
             if (offset < 0 || offset > (input == null ? 0 : input.Length))
             {
-                GlobalLog.Assert(false, "SecureChannel#" + Logging.HashString(this) + "::GenerateToken", "Argument 'offset' out of range.");
-                throw new ArgumentOutOfRangeException("offset");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken", "Argument 'offset' out of range.");
+                }
+
+                Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken", "Argument 'offset' out of range.");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0 || count > (input == null ? 0 : input.Length - offset))
             {
-                GlobalLog.Assert(false, "SecureChannel#" + Logging.HashString(this) + "::GenerateToken", "Argument 'count' out of range.");
-                throw new ArgumentOutOfRangeException("count");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken", "Argument 'count' out of range.");
+                }
+
+                Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken", "Argument 'count' out of range.");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             SecurityBuffer incomingSecurity = null;
@@ -788,7 +882,7 @@ namespace System.Net.Security
 
             SecurityBuffer outgoingSecurity = new SecurityBuffer(null, SecurityBufferType.Token);
 
-            SecurityStatusPal errorCode = 0;
+            SecurityStatusPal status = default(SecurityStatusPal);
 
             bool cachedCreds = false;
             byte[] thumbPrint = null;
@@ -811,7 +905,7 @@ namespace System.Net.Security
 
                     if (_serverMode)
                     {
-                        errorCode = SslStreamPal.AcceptSecurityContext(
+                        status = SslStreamPal.AcceptSecurityContext(
                                       ref _credentialsHandle,
                                       ref _securityContext,
                                       incomingSecurity,
@@ -822,7 +916,7 @@ namespace System.Net.Security
                     {
                         if (incomingSecurity == null)
                         {
-                            errorCode = SslStreamPal.InitializeSecurityContext(
+                            status = SslStreamPal.InitializeSecurityContext(
                                            ref _credentialsHandle,
                                            ref _securityContext,
                                            _destination,
@@ -831,7 +925,7 @@ namespace System.Net.Security
                         }
                         else
                         {
-                            errorCode = SslStreamPal.InitializeSecurityContext(
+                            status = SslStreamPal.InitializeSecurityContext(
                                            _credentialsHandle,
                                            ref _securityContext,
                                            _destination,
@@ -870,9 +964,12 @@ namespace System.Net.Security
             output = outgoingSecurity.token;
 
 #if TRACE_VERBOSE
-            GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::GenerateToken()", Interop.MapSecurityStatus((uint)errorCode));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::GenerateToken()", Interop.MapSecurityStatus((uint)errorCode));
+            }
 #endif
-            return (SecurityStatusPal)errorCode;
+            return status;
         }
 
         /*++
@@ -884,7 +981,10 @@ namespace System.Net.Security
         --*/
         internal void ProcessHandshakeSuccess()
         {
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::ProcessHandshakeSuccess");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::ProcessHandshakeSuccess");
+            }
 
             StreamSizes streamSizes;
             SslStreamPal.QueryContextStreamSizes(_securityContext, out streamSizes);
@@ -901,7 +1001,12 @@ namespace System.Net.Security
                 {
                     if (!ExceptionCheck.IsFatal(e))
                     {
-                        GlobalLog.Assert(false, "SecureChannel#" + Logging.HashString(this) + "::ProcessHandshakeSuccess", "StreamSizes out of range.");
+                        if (GlobalLog.IsEnabled)
+                        {
+                            GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::ProcessHandshakeSuccess", "StreamSizes out of range.");
+                        }
+
+                        Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::ProcessHandshakeSuccess", "StreamSizes out of range.");
                     }
 
                     throw;
@@ -909,7 +1014,11 @@ namespace System.Net.Security
             }
 
             SslStreamPal.QueryContextConnectionInfo(_securityContext, out _connectionInfo);
-            GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::ProcessHandshakeSuccess");
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::ProcessHandshakeSuccess");
+            }
         }
 
         /*++
@@ -926,58 +1035,69 @@ namespace System.Net.Security
         --*/
         internal SecurityStatusPal Encrypt(byte[] buffer, int offset, int size, ref byte[] output, out int resultSize)
         {
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::Encrypt");
-            GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::Encrypt() - offset: " + offset.ToString() + " size: " + size.ToString() + " buffersize: " + buffer.Length.ToString());
-            GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::Encrypt() buffer:");
-            GlobalLog.Dump(buffer, Math.Min(buffer.Length, 128));
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt");
+                GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt() - offset: " + offset.ToString() + " size: " + size.ToString() + " buffersize: " + buffer.Length.ToString());
+                GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt() buffer:");
+                GlobalLog.Dump(buffer, Math.Min(buffer.Length, 128));
+            }
 
-            byte[] writeBuffer;
+            byte[] writeBuffer = output;
+
             try
             {
                 if (offset < 0 || offset > (buffer == null ? 0 : buffer.Length))
                 {
-                    throw new ArgumentOutOfRangeException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(offset));
                 }
 
                 if (size < 0 || size > (buffer == null ? 0 : buffer.Length - offset))
                 {
-                    throw new ArgumentOutOfRangeException("size");
+                    throw new ArgumentOutOfRangeException(nameof(size));
                 }
 
                 resultSize = 0;
-
-                int bufferSizeNeeded = checked(size + _headerSize + _trailerSize);
-                if (output != null && bufferSizeNeeded <= output.Length)
-                {
-                    writeBuffer = output;
-                }
-                else
-                {
-                    writeBuffer = new byte[bufferSizeNeeded];
-                }
-
-                Buffer.BlockCopy(buffer, offset, writeBuffer, _headerSize, size);
             }
             catch (Exception e)
             {
                 if (!ExceptionCheck.IsFatal(e))
                 {
-                    GlobalLog.Assert(false, "SecureChannel#" + Logging.HashString(this) + "::Encrypt", "Arguments out of range.");
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Arguments out of range.");
+                    }
+
+                    Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Arguments out of range.");
                 }
 
                 throw;
             }
 
-            SecurityStatusPal secStatus = SslStreamPal.EncryptMessage(_securityContext, writeBuffer, size, _headerSize, _trailerSize, out resultSize);
+            SecurityStatusPal secStatus = SslStreamPal.EncryptMessage(
+                _securityContext,
+                buffer,
+                offset,
+                size,
+                _headerSize,
+                _trailerSize,
+                ref writeBuffer,
+                out resultSize);
 
-            if (secStatus != SecurityStatusPal.OK)
+            if (secStatus.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
-                GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::Encrypt ERROR", secStatus.ToString());
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt ERROR", secStatus.ToString());
+                }
             }
             else
             {
                 output = writeBuffer;
-                GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::Encrypt OK", "data size:" + resultSize.ToString());
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt OK", "data size:" + resultSize.ToString());
+                }
             }
 
             return secStatus;
@@ -985,18 +1105,31 @@ namespace System.Net.Security
 
         internal SecurityStatusPal Decrypt(byte[] payload, ref int offset, ref int count)
         {
-            GlobalLog.Print("SecureChannel#" + Logging.HashString(this) + "::Decrypt() - offset: " + offset.ToString() + " size: " + count.ToString() + " buffersize: " + payload.Length.ToString());
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SecureChannel#" + LoggingHash.HashString(this) + "::Decrypt() - offset: " + offset.ToString() + " size: " + count.ToString() + " buffersize: " + payload.Length.ToString());
+            }
 
             if (offset < 0 || offset > (payload == null ? 0 : payload.Length))
             {
-                GlobalLog.Assert(false, "SecureChannel#" + Logging.HashString(this) + "::Encrypt", "Argument 'offset' out of range.");
-                throw new ArgumentOutOfRangeException("offset");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Argument 'offset' out of range.");
+                }
+
+                Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Argument 'offset' out of range.");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0 || count > (payload == null ? 0 : payload.Length - offset))
             {
-                GlobalLog.Assert(false, "SecureChannel#" + Logging.HashString(this) + "::Encrypt", "Argument 'count' out of range.");
-                throw new ArgumentOutOfRangeException("count");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Assert("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Argument 'count' out of range.");
+                }
+
+                Debug.Fail("SecureChannel#" + LoggingHash.HashString(this) + "::Encrypt", "Argument 'count' out of range.");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             SecurityStatusPal secStatus = SslStreamPal.DecryptMessage(_securityContext, payload, ref offset, ref count);
@@ -1017,7 +1150,11 @@ namespace System.Net.Security
         //
         internal bool VerifyRemoteCertificate(RemoteCertValidationCallback remoteCertValidationCallback)
         {
-            GlobalLog.Enter("SecureChannel#" + Logging.HashString(this) + "::VerifyRemoteCertificate");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Enter("SecureChannel#" + LoggingHash.HashString(this) + "::VerifyRemoteCertificate");
+            }
+
             SslPolicyErrors sslPolicyErrors = SslPolicyErrors.None;
 
             // We don't catch exceptions in this method, so it's safe for "accepted" be initialized with true.
@@ -1033,7 +1170,10 @@ namespace System.Net.Security
 
                 if (remoteCertificateEx == null)
                 {
-                    GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::VerifyRemoteCertificate (no remote cert)", (!_remoteCertRequired).ToString());
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::VerifyRemoteCertificate (no remote cert)", (!_remoteCertRequired).ToString());
+                    }
                     sslPolicyErrors |= SslPolicyErrors.RemoteCertificateNotAvailable;
                 }
                 else
@@ -1045,7 +1185,7 @@ namespace System.Net.Security
                     {
                         chain.ChainPolicy.ExtraStore.AddRange(remoteCertificateStore);
                     }
-                    
+
                     sslPolicyErrors |= CertificateValidationPal.VerifyCertificateProperties(
                         chain,
                         remoteCertificateEx,
@@ -1070,49 +1210,55 @@ namespace System.Net.Security
                     }
                 }
 
-                if (Logging.On)
+                if (SecurityEventSource.Log.IsEnabled())
                 {
                     if (sslPolicyErrors != SslPolicyErrors.None)
                     {
-                        Logging.PrintInfo(Logging.Web, this, SR.net_log_remote_cert_has_errors);
+                        SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_has_errors);
                         if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateNotAvailable) != 0)
                         {
-                            Logging.PrintInfo(Logging.Web, this, "\t" + SR.net_log_remote_cert_not_available);
+                            SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_not_available);
                         }
 
                         if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateNameMismatch) != 0)
                         {
-                            Logging.PrintInfo(Logging.Web, this, "\t" + SR.net_log_remote_cert_name_mismatch);
+                            SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), SR.net_log_remote_cert_name_mismatch);
                         }
 
                         if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateChainErrors) != 0)
                         {
+                            string chainStatusString = "ChainStatus: ";
                             foreach (X509ChainStatus chainStatus in chain.ChainStatus)
                             {
-                                Logging.PrintInfo(Logging.Web, this, "\t" + chainStatus.StatusInformation);
+                                chainStatusString += "\t" + chainStatus.StatusInformation;
                             }
+                            SecurityEventSource.Log.RemoteCertificateError(LoggingHash.HashInt(this), chainStatusString);
                         }
                     }
                     if (success)
                     {
                         if (remoteCertValidationCallback != null)
                         {
-                            Logging.PrintInfo(Logging.Web, this, SR.net_log_remote_cert_user_declared_valid);
+                            SecurityEventSource.Log.RemoteCertDeclaredValid(LoggingHash.HashInt(this));
                         }
                         else
                         {
-                            Logging.PrintInfo(Logging.Web, this, SR.net_log_remote_cert_has_no_errors);
+                            SecurityEventSource.Log.RemoteCertHasNoErrors(LoggingHash.HashInt(this));
                         }
                     }
                     else
                     {
                         if (remoteCertValidationCallback != null)
                         {
-                            Logging.PrintInfo(Logging.Web, this, SR.net_log_remote_cert_user_declared_invalid);
+                            SecurityEventSource.Log.RemoteCertUserDeclaredInvalid(LoggingHash.HashInt(this));
                         }
                     }
                 }
-                GlobalLog.Print("Cert Validation, remote cert = " + (remoteCertificateEx == null ? "<null>" : remoteCertificateEx.ToString(true)));
+
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("Cert Validation, remote cert = " + (remoteCertificateEx == null ? "<null>" : remoteCertificateEx.ToString(true)));
+                }
             }
             finally
             {
@@ -1128,7 +1274,11 @@ namespace System.Net.Security
                     remoteCertificateEx.Dispose();
                 }
             }
-            GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::VerifyRemoteCertificate", success.ToString());
+
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Leave("SecureChannel#" + LoggingHash.HashString(this) + "::VerifyRemoteCertificate", success.ToString());
+            }
             return success;
         }
     }
@@ -1144,7 +1294,7 @@ namespace System.Net.Security
         {
             get
             {
-                return ((Status != SecurityStatusPal.OK) && (Status != SecurityStatusPal.ContinueNeeded));
+                return ((Status.ErrorCode != SecurityStatusPalErrorCode.OK) && (Status.ErrorCode != SecurityStatusPalErrorCode.ContinueNeeded));
             }
         }
 
@@ -1152,7 +1302,7 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatusPal.OK);
+                return (Status.ErrorCode == SecurityStatusPalErrorCode.OK);
             }
         }
 
@@ -1160,7 +1310,7 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatusPal.Renegotiate);
+                return (Status.ErrorCode == SecurityStatusPalErrorCode.Renegotiate);
             }
         }
 
@@ -1168,13 +1318,13 @@ namespace System.Net.Security
         {
             get
             {
-                return (Status == SecurityStatusPal.ContextExpired);
+                return (Status.ErrorCode == SecurityStatusPalErrorCode.ContextExpired);
             }
         }
 
-        internal ProtocolToken(byte[] data, SecurityStatusPal errorCode)
+        internal ProtocolToken(byte[] data, SecurityStatusPal status)
         {
-            Status = errorCode;
+            Status = status;
             Payload = data;
             Size = data != null ? data.Length : 0;
         }

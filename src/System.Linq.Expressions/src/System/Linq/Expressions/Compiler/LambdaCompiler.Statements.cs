@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +8,7 @@ using System.Dynamic.Utils;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Globalization;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions.Compiler
 {
@@ -20,11 +22,17 @@ namespace System.Linq.Expressions.Compiler
 
         private void Emit(BlockExpression node, CompilationFlags flags)
         {
+            int count = node.ExpressionCount;
+
+            if (count == 0)
+            {
+                return;
+            }
+
             EnterScope(node);
 
             CompilationFlags emitAs = flags & CompilationFlags.EmitAsTypeMask;
 
-            int count = node.ExpressionCount;
             CompilationFlags tailCall = flags & CompilationFlags.EmitAsTailCallMask;
             for (int index = 0; index < count - 1; index++)
             {
@@ -153,6 +161,27 @@ namespace System.Linq.Expressions.Compiler
         {
             SwitchExpression node = (SwitchExpression)expr;
 
+            if (node.Cases.Count == 0)
+            {
+                // Emit the switch value in case it has side-effects, but as void
+                // since the value is ignored.
+                EmitExpressionAsVoid(node.SwitchValue);
+
+                // Now if there is a default body, it happens unconditionally.
+                if (node.DefaultBody != null)
+                {
+                    EmitExpressionAsType(node.DefaultBody, node.Type, flags);
+                }
+                else
+                {
+                    // If there are no cases and no default then the type must be void.
+                    // Assert that earlier validation caught any exceptions to that.
+                    Debug.Assert(node.Type == typeof(void));
+                }
+
+                return;
+            }
+
             // Try to emit it as an IL switch. Works for integer types.
             if (TryEmitSwitchInstruction(node, flags))
             {
@@ -204,7 +233,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
         /// <summary>
-        /// Gets the common test test value type of the SwitchExpression.
+        /// Gets the common test value type of the SwitchExpression.
         /// </summary>
         private static Type GetTestValueType(SwitchExpression node)
         {
@@ -363,7 +392,7 @@ namespace System.Linq.Expressions.Compiler
             var labels = new Label[node.Cases.Count];
             var isGoto = new bool[node.Cases.Count];
 
-            var uniqueKeys = new Set<decimal>();
+            var uniqueKeys = new HashSet<decimal>();
             var keys = new List<SwitchLabel>();
             for (int i = 0; i < node.Cases.Count; i++)
             {
@@ -371,7 +400,7 @@ namespace System.Linq.Expressions.Compiler
 
                 foreach (ConstantExpression test in node.Cases[i].TestValues)
                 {
-                    // Guarenteed to work thanks to CanOptimizeSwitchType.
+                    // Guaranteed to work thanks to CanOptimizeSwitchType.
                     //
                     // Use decimal because it can hold Int64 or UInt64 without
                     // precision loss or signed/unsigned conversions.
@@ -379,10 +408,9 @@ namespace System.Linq.Expressions.Compiler
 
                     // Only add each key once. If it appears twice, it's
                     // allowed, but can't be reached.
-                    if (!uniqueKeys.Contains(key))
+                    if (uniqueKeys.Add(key))
                     {
                         keys.Add(new SwitchLabel(key, test.Value, labels[i]));
-                        uniqueKeys.Add(key);
                     }
                 }
             }
@@ -604,8 +632,8 @@ namespace System.Linq.Expressions.Compiler
         private bool TryEmitHashtableSwitch(SwitchExpression node, CompilationFlags flags)
         {
             // If we have a comparison other than string equality, bail
-            MethodInfo equality = typeof(string).GetMethod("op_Equality", new[] { typeof(string), typeof(string) });
-            if (!equality.IsStatic)
+            MethodInfo equality = String_op_Equality_String_String;
+            if (equality != null && !equality.IsStatic)
             {
                 equality = null;
             }
@@ -642,7 +670,7 @@ namespace System.Linq.Expressions.Compiler
             var cases = new List<SwitchCase>(node.Cases.Count);
 
             int nullCase = -1;
-            MethodInfo add = typeof(Dictionary<string, int>).GetMethod("Add", new[] { typeof(string), typeof(int) });
+            MethodInfo add = DictionaryOfStringInt32_Add_String_Int32;
             for (int i = 0, n = node.Cases.Count; i < n; i++)
             {
                 foreach (ConstantExpression t in node.Cases[i].TestValues)
@@ -671,7 +699,7 @@ namespace System.Linq.Expressions.Compiler
                     dictField,
                     Expression.ListInit(
                         Expression.New(
-                            typeof(Dictionary<string, int>).GetConstructor(new[] { typeof(int) }),
+                            DictionaryOfStringInt32_Ctor_Int32,
                             Expression.Constant(initializers.Count)
                         ),
                         initializers
@@ -711,7 +739,7 @@ namespace System.Linq.Expressions.Compiler
                     Expression.Assign(switchIndex, Expression.Constant(nullCase)),
                     Expression.IfThenElse(
                         Expression.Call(dictInit, "TryGetValue", null, switchValue, switchIndex),
-                        Expression.Empty(),
+                        Utils.Empty(),
                         Expression.Assign(switchIndex, Expression.Constant(-1))
                     )
                 ),
@@ -790,7 +818,7 @@ namespace System.Linq.Expressions.Compiler
 
             EmitExpression(node.Body);
 
-            Type tryType = expr.Type;
+            Type tryType = node.Type;
             LocalBuilder value = null;
             if (tryType != typeof(void))
             {

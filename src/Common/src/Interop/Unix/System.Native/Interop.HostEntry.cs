@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -41,19 +42,19 @@ internal static partial class Interop
             private int _handleType;          // Opaque handle type information.
         }
 
-        [DllImport(Libraries.SystemNative)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostEntryForName")]
         internal static extern unsafe int GetHostEntryForName(string address, HostEntry* entry);
 
-        [DllImport(Libraries.SystemNative)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostByName")]
         internal static extern unsafe int GetHostByName(string address, HostEntry* entry);
 
-        [DllImport(Libraries.SystemNative)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostByAddress")]
         internal static extern unsafe int GetHostByAddress(IPAddress* address, HostEntry* entry);
 
-        [DllImport(Libraries.SystemNative)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNextIPAddress")]
         internal static extern unsafe int GetNextIPAddress(HostEntry* entry, void** addressListHandle, IPAddress* endPoint);
 
-        [DllImport(Libraries.SystemNative)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_FreeHostEntry")]
         internal static extern unsafe void FreeHostEntry(HostEntry* entry);
     }
 }

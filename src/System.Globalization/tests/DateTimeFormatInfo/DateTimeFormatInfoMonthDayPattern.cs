@@ -1,65 +1,46 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Globalization;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
     public class DateTimeFormatInfoMonthDayPattern
     {
-        private readonly RandomDataGenerator _generator = new RandomDataGenerator();
+        private static readonly RandomDataGenerator s_randomDataGenerator = new RandomDataGenerator();
 
-        // PosTest1: Call MonthDayPattern getter method should return correct value for InvariantInfo
-        [Fact]
-        public void PosTest1()
+        public void LongDayPattern_InvariantInfo()
         {
-            VerificationHelper(DateTimeFormatInfo.InvariantInfo, "MMMM dd", false);
+            Assert.Equal("MMMM dd", DateTimeFormatInfo.InvariantInfo.MonthDayPattern);
         }
 
-        // PosTest2: Call MonthDayPattern setter method should return correct value
-        [Fact]
-        public void PosTest2()
+        public static IEnumerable<object[]> MonthDayPattern_TestData()
         {
-            VerificationHelper(new DateTimeFormatInfo(), "MMMM", true);
-            VerificationHelper(new DateTimeFormatInfo(), "MMM dd", true);
-            VerificationHelper(new DateTimeFormatInfo(), "M", true);
-            VerificationHelper(new DateTimeFormatInfo(), "dd MMMM", true);
-            VerificationHelper(new DateTimeFormatInfo(), _generator.GetString(-55, false, 1, 256), true);
-            VerificationHelper(new DateTimeFormatInfo(), "MMMM dd", true);
-            VerificationHelper(new DateTimeFormatInfo(), "m", true);
+            yield return new object[] { "MMMM" };
+            yield return new object[] { "MMM dd" };
+            yield return new object[] { "M" };
+            yield return new object[] { "dd MMMM" };
+            yield return new object[] { s_randomDataGenerator.GetString(-55, false, 1, 256) };
+            yield return new object[] { "MMMM dd" };
+            yield return new object[] { "m" };
         }
 
-        // NegTest1: ArgumentNullException should be thrown when The property is being set to a null reference
-        [Fact]
-        public void TestNull()
+        [Theory]
+        [MemberData(nameof(MonthDayPattern_TestData))]
+        public void MonthDayPattern_Set(string newMonthDayPattern)
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                new DateTimeFormatInfo().MonthDayPattern = null;
-            });
+            var format = new DateTimeFormatInfo();
+            format.MonthDayPattern = newMonthDayPattern;
+            Assert.Equal(newMonthDayPattern, format.MonthDayPattern);
         }
 
-        // NegTest2: InvalidOperationException should be thrown when The property is being set and the DateTimeFormatInfo is read-only
         [Fact]
-        public void TestInvalid()
+        public void MonthDayPattern_Set_Invalid()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                DateTimeFormatInfo.InvariantInfo.MonthDayPattern = "MMMM dd";
-            });
-        }
-
-        private void VerificationHelper(DateTimeFormatInfo info, string expected, bool setter)
-        {
-            if (setter)
-            {
-                info.MonthDayPattern = expected;
-            }
-
-            string actual = info.MonthDayPattern;
-            Assert.Equal(expected, actual);
+            Assert.Throws<ArgumentNullException>("value", () => new DateTimeFormatInfo().MonthDayPattern = null); // Value is null
+            Assert.Throws<InvalidOperationException>(() => DateTimeFormatInfo.InvariantInfo.MonthDayPattern = "MMMM dd"); // DateTimeFormatInfo.InvariantInfo is read only
         }
     }
 }

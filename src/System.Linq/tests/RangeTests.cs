@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -140,6 +141,87 @@ namespace System.Linq.Tests
             int[] expected = { 12, 13, 14, 15, 16, 17 };
 
             Assert.Equal(expected, Enumerable.Range(start, count));
+        }
+
+        [Fact]
+        public void Take()
+        {
+            Assert.Equal(Enumerable.Range(0, 10), Enumerable.Range(0, 20).Take(10));
+        }
+
+        [Fact]
+        public void TakeExcessive()
+        {
+            Assert.Equal(Enumerable.Range(0, 10), Enumerable.Range(0, 10).Take(int.MaxValue));
+        }
+
+        [Fact]
+        public void Skip()
+        {
+            Assert.Equal(Enumerable.Range(10, 10), Enumerable.Range(0, 20).Skip(10));
+        }
+
+        [Fact]
+        public void SkipExcessive()
+        {
+            Assert.Empty(Enumerable.Range(10, 10).Skip(20));
+        }
+
+        [Fact]
+        public void SkipTakeCanOnlyBeOne()
+        {
+            Assert.Equal(new[] { 1 }, Enumerable.Range(1, 10).Take(1));
+            Assert.Equal(new[] { 2 }, Enumerable.Range(1, 10).Skip(1).Take(1));
+            Assert.Equal(new[] { 3 }, Enumerable.Range(1, 10).Take(3).Skip(2));
+            Assert.Equal(new[] { 1 }, Enumerable.Range(1, 10).Take(3).Take(1));
+        }
+
+        [Fact]
+        public void ElementAt()
+        {
+            Assert.Equal(4, Enumerable.Range(0, 10).ElementAt(4));
+        }
+
+        [Fact]
+        public void ElementAtExcessiveThrows()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("index", () => Enumerable.Range(0, 10).ElementAt(100));
+        }
+
+        [Fact]
+        public void ElementAtOrDefault()
+        {
+            Assert.Equal(4, Enumerable.Range(0, 10).ElementAtOrDefault(4));
+        }
+
+        [Fact]
+        public void ElementAtOrDefaultExcessiveIsDefault()
+        {
+            Assert.Equal(0, Enumerable.Range(52, 10).ElementAtOrDefault(100));
+        }
+
+        [Fact]
+        public void First()
+        {
+            Assert.Equal(57, Enumerable.Range(57, 1000000000).First());
+        }
+
+        [Fact]
+        public void FirstOrDefault()
+        {
+            Assert.Equal(-100, Enumerable.Range(-100, int.MaxValue).FirstOrDefault());
+        }
+
+        [Fact]
+        public void Last()
+        {
+            Assert.Equal(1000000056, Enumerable.Range(57, 1000000000).Last());
+        }
+
+        [Fact]
+        public void LastOrDefault()
+        {
+            Assert.Equal(int.MaxValue - 101, Enumerable.Range(-100, int.MaxValue).LastOrDefault());
         }
     }
 }

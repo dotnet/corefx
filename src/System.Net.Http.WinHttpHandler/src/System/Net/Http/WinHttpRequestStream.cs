@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.IO;
@@ -94,22 +95,22 @@ namespace System.Net.Http
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             if (count > buffer.Length - offset)
             {
-                throw new ArgumentException("buffer");
+                throw new ArgumentException(SR.net_http_buffer_insufficient_length, nameof(buffer));
             }
 
             if (token.IsCancellationRequested)
@@ -241,7 +242,7 @@ namespace System.Net.Http
                     IntPtr.Zero))
                 {
                     _state.TcsInternalWriteDataToRequestStream.TrySetException(
-                        new IOException(SR.net_http_io_write, WinHttpException.CreateExceptionUsingLastError()));
+                        new IOException(SR.net_http_io_write, WinHttpException.CreateExceptionUsingLastError().InitializeStackTrace()));
                 }
             }
 

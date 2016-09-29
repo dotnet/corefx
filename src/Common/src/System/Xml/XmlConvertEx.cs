@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 
@@ -71,13 +72,13 @@ namespace System.Xml
                 s = TrimString(s);
                 if (s.Length == 0 || s.IndexOf("##", StringComparison.Ordinal) != -1)
                 {
-                    throw new FormatException(SR.Format(SR.XmlConvert_BadFormat, s, "Uri"));
+                    throw new FormatException(SR.Format(SR.XmlConvert_BadFormat, s, nameof(Uri)));
                 }
             }
             Uri uri;
             if (!Uri.TryCreate(s, UriKind.RelativeOrAbsolute, out uri))
             {
-                throw new FormatException(SR.Format(SR.XmlConvert_BadFormat, s, "Uri"));
+                throw new FormatException(SR.Format(SR.XmlConvert_BadFormat, s, nameof(Uri)));
             }
             return uri;
         }
@@ -245,7 +246,7 @@ namespace System.Xml
         {
             if (string.IsNullOrEmpty(name))
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             int colonPosition = -1;

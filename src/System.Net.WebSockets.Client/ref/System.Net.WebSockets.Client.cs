@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -31,7 +32,10 @@ namespace System.Net.WebSockets
         public System.Net.ICredentials Credentials { get { return default(System.Net.ICredentials); } set { } }
         public System.TimeSpan KeepAliveInterval { get { return default(System.TimeSpan); } set { } }
         public System.Net.IWebProxy Proxy { get { return default(System.Net.IWebProxy); } set { } }
+        public bool UseDefaultCredentials { get { return default(bool); } set { } }
         public void AddSubProtocol(string subProtocol) { }
+        public void SetBuffer(int receiveBufferSize, int sendBufferSize) { }
+        public void SetBuffer(int receiveBufferSize, int sendBufferSize, System.ArraySegment<byte> buffer) { }
         public void SetRequestHeader(string headerName, string headerValue) { }
     }
 }

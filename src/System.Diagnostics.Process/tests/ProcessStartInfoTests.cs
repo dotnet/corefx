@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
@@ -14,7 +15,7 @@ using System.Text;
 
 namespace System.Diagnostics.Tests
 {
-    public class ProcessStartInfoTests : ProcessTestBase
+    public partial class ProcessStartInfoTests : ProcessTestBase
     {
         [Fact]
         public void TestEnvironmentProperty()
@@ -230,17 +231,53 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [PlatformSpecific(PlatformID.Windows)] // UseShellExecute currently not supported on Windows
         [Fact]
-        public void TestUseShellExecuteProperty()
+        public void TestUseShellExecuteProperty_SetAndGet_Windows()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
+            Assert.False(psi.UseShellExecute);
 
             // Calling the setter
-            psi.UseShellExecute = false;
             Assert.Throws<PlatformNotSupportedException>(() => { psi.UseShellExecute = true; });
+            psi.UseShellExecute = false;
 
             // Calling the getter
             Assert.False(psi.UseShellExecute, "UseShellExecute=true is not supported on onecore.");
+        }
+
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [Fact]
+        public void TestUseShellExecuteProperty_SetAndGet_Unix()
+        {
+            ProcessStartInfo psi = new ProcessStartInfo();
+            Assert.False(psi.UseShellExecute);
+
+            psi.UseShellExecute = true;
+            Assert.True(psi.UseShellExecute);
+
+            psi.UseShellExecute = false;
+            Assert.False(psi.UseShellExecute);
+        }
+
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        public void TestUseShellExecuteProperty_Redirects_NotSupported(int std)
+        {
+            Process p = CreateProcessLong();
+            p.StartInfo.UseShellExecute = true;
+
+            switch (std)
+            {
+                case 0: p.StartInfo.RedirectStandardInput = true; break;
+                case 1: p.StartInfo.RedirectStandardOutput = true; break;
+                case 2: p.StartInfo.RedirectStandardError = true; break;
+            }
+
+            Assert.Throws<InvalidOperationException>(() => p.Start());
         }
 
         [Fact]
@@ -276,59 +313,6 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact, PlatformSpecific(PlatformID.Windows), OuterLoop] // Requires admin privileges
-        public void TestUserCredentialsPropertiesOnWindows()
-        {
-            string username = "test", password = "PassWord123!!";
-            try
-            {
-                Interop.NetUserAdd(username, password);
-            }
-            catch (Exception exc)
-            {
-                Console.Error.WriteLine("TestUserCredentialsPropertiesOnWindows: NetUserAdd failed: {0}", exc.Message);
-                return; // test is irrelevant if we can't add a user
-            }
-
-            Process p = CreateProcessLong();
-
-            p.StartInfo.LoadUserProfile = true;
-            p.StartInfo.UserName = username;
-            p.StartInfo.PasswordInClearText = password;
-
-            SafeProcessHandle handle = null;
-            try
-            {
-                p.Start();
-                if (Interop.OpenProcessToken(p.SafeHandle, 0x8u, out handle))
-                {
-                    SecurityIdentifier sid;
-                    if (Interop.ProcessTokenToSid(handle, out sid))
-                    {
-                        string actualUserName = sid.Translate(typeof(NTAccount)).ToString();
-                        int indexOfDomain = actualUserName.IndexOf('\\');
-                        if (indexOfDomain != -1)
-                            actualUserName = actualUserName.Substring(indexOfDomain + 1);
-
-                        bool isProfileLoaded = GetNamesOfUserProfiles().Any(profile => profile.Equals(username));
-
-                        Assert.Equal(username, actualUserName);
-                        Assert.True(isProfileLoaded);
-                    }
-                }
-            }
-            finally
-            {
-                if (handle != null)
-                    handle.Dispose();
-
-                if (!p.HasExited)
-                    p.Kill();
-
-                Interop.NetUserDel(null, username);
-                Assert.True(p.WaitForExit(WaitInMS));
-            }
-        }
 
         [Fact, PlatformSpecific(PlatformID.AnyUnix)]
         public void TestUserCredentialsPropertiesOnUnix()
@@ -359,6 +343,69 @@ namespace System.Diagnostics.Tests
                     p.Kill();
 
                 Assert.True(p.WaitForExit(WaitInMS));
+            }
+        }
+
+        [Fact, PlatformSpecific(PlatformID.Windows), OuterLoop] // Requires admin privileges
+        public void TestUserCredentialsPropertiesOnWindows()
+        {
+            string username = "test", password = "PassWord123!!";
+            try
+            {
+                Interop.NetUserAdd(username, password);
+            }
+            catch (Exception exc)
+            {
+                Console.Error.WriteLine("TestUserCredentialsPropertiesOnWindows: NetUserAdd failed: {0}", exc.Message);
+                return; // test is irrelevant if we can't add a user
+            }
+
+            bool hasStarted = false;
+            SafeProcessHandle handle = null;
+            Process p = null;
+
+            try
+            {
+                p = CreateProcessLong();
+
+                p.StartInfo.LoadUserProfile = true;
+                p.StartInfo.UserName = username;
+                p.StartInfo.PasswordInClearText = password;
+
+                hasStarted = p.Start();
+
+                if (Interop.OpenProcessToken(p.SafeHandle, 0x8u, out handle))
+                {
+                    SecurityIdentifier sid;
+                    if (Interop.ProcessTokenToSid(handle, out sid))
+                    {
+                        string actualUserName = sid.Translate(typeof(NTAccount)).ToString();
+                        int indexOfDomain = actualUserName.IndexOf('\\');
+                        if (indexOfDomain != -1)
+                            actualUserName = actualUserName.Substring(indexOfDomain + 1);
+
+                        bool isProfileLoaded = GetNamesOfUserProfiles().Any(profile => profile.Equals(username));
+
+                        Assert.Equal(username, actualUserName);
+                        Assert.True(isProfileLoaded);
+                    }
+                }
+            }
+            finally
+            {
+                IEnumerable<uint> collection = new uint[] { 0 /* NERR_Success */, 2221 /* NERR_UserNotFound */ };
+                Assert.Contains<uint>(Interop.NetUserDel(null, username), collection);
+
+                if (handle != null)
+                    handle.Dispose();
+
+                if (hasStarted)
+                {
+                    if (!p.HasExited)
+                        p.Kill();
+
+                    Assert.True(p.WaitForExit(WaitInMS));
+                }
             }
         }
 

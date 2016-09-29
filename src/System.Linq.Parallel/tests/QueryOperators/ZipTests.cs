@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Threading;
@@ -7,7 +8,7 @@ using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
-    public class ZipTests
+    public static class ZipTests
     {
         //
         // Zip
@@ -16,9 +17,12 @@ namespace System.Linq.Parallel.Tests
         // Get two ranges, where the right starts at the end of the left range.
         public static IEnumerable<object[]> ZipUnorderedData(int[] counts)
         {
-            foreach (object[] parms in UnorderedSources.BinaryRanges(counts.Cast<int>(), (left, right) => left, counts.Cast<int>()))
+            foreach (int leftCount in counts)
             {
-                yield return parms.Take(4).ToArray();
+                foreach (int rightCount in counts)
+                {
+                    yield return new object[] { leftCount, rightCount };
+                }
             }
         }
 
@@ -26,7 +30,8 @@ namespace System.Linq.Parallel.Tests
         // Either or both range will be ordered.
         public static IEnumerable<object[]> ZipData(int[] counts)
         {
-            foreach (object[] parms in ZipUnorderedData(counts))
+            counts = counts.DefaultIfEmpty(Sources.OuterLoopCount / 8).ToArray();
+            foreach (object[] parms in UnorderedSources.BinaryRanges(counts, (left, right) => left, counts))
             {
                 yield return new object[] { ((Labeled<ParallelQuery<int>>)parms[0]).Order(), parms[1], ((Labeled<ParallelQuery<int>>)parms[2]).Order(), parms[3] };
                 yield return new object[] { ((Labeled<ParallelQuery<int>>)parms[0]).Order(), parms[1], parms[2], parms[3] };
@@ -39,7 +44,7 @@ namespace System.Linq.Parallel.Tests
         {
             foreach (object[] left in Sources.Ranges(counts))
             {
-                foreach (object[] right in Sources.Ranges(counts.Cast<int>(), x => degrees.Cast<int>()))
+                foreach (object[] right in Sources.Ranges(counts, x => degrees))
                 {
                     yield return new object[] { left[0], left[1], right[0], right[1], right[2] };
                 }
@@ -47,11 +52,11 @@ namespace System.Linq.Parallel.Tests
         }
 
         [Theory]
-        [MemberData("ZipUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
-        public static void Zip_Unordered(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        [MemberData(nameof(ZipUnorderedData), new[] { 0, 1, 2, 16 })]
+        public static void Zip_Unordered(int leftCount, int rightCount)
         {
-            ParallelQuery<int> leftQuery = left.Item;
-            ParallelQuery<int> rightQuery = right.Item;
+            ParallelQuery<int> leftQuery = UnorderedSources.Default(leftCount);
+            ParallelQuery<int> rightQuery = UnorderedSources.Default(leftCount, rightCount);
             IntegerRangeSet seen = new IntegerRangeSet(0, Math.Min(leftCount, rightCount));
             foreach (var pair in leftQuery.Zip(rightQuery, (x, y) => KeyValuePair.Create(x, y)))
             {
@@ -63,18 +68,20 @@ namespace System.Linq.Parallel.Tests
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [MemberData("ZipUnorderedData", (object)(new int[] { 1024 * 4, 1024 * 64 }))]
-        public static void Zip_Unordered_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        public static void Zip_Unordered_Longrunning()
         {
-            Zip_Unordered(left, leftCount, right, rightCount);
+            Zip_Unordered(Sources.OuterLoopCount / 4, Sources.OuterLoopCount / 4);
         }
 
         [Theory]
-        [MemberData("ZipData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(ZipData), new[] { 0, 1, 2, 16 })]
         public static void Zip(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
+            // The ordering of Zip is only guaranteed when both operands are ordered,
+            // however the current implementation manages to perform ordering if either operand is ordered _in most cases_.
+            // If this test starts failing, consider revising the operators and mention the change in release notes.
             ParallelQuery<int> leftQuery = left.Item;
             ParallelQuery<int> rightQuery = right.Item;
             int seen = 0;
@@ -88,18 +95,18 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("ZipData", (object)(new int[] { 1024 * 4, 1024 * 64 }))]
+        [MemberData(nameof(ZipData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Zip_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Zip(left, leftCount, right, rightCount);
         }
 
         [Theory]
-        [MemberData("ZipUnorderedData", (object)(new int[] { 0, 1, 2, 16 }))]
-        public static void Zip_Unordered_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        [MemberData(nameof(ZipUnorderedData), new[] { 0, 1, 2, 16 })]
+        public static void Zip_Unordered_NotPipelined(int leftCount, int rightCount)
         {
-            ParallelQuery<int> leftQuery = left.Item;
-            ParallelQuery<int> rightQuery = right.Item;
+            ParallelQuery<int> leftQuery = UnorderedSources.Default(leftCount);
+            ParallelQuery<int> rightQuery = UnorderedSources.Default(leftCount, rightCount);
             IntegerRangeSet seen = new IntegerRangeSet(0, Math.Min(leftCount, rightCount));
             Assert.All(leftQuery.Zip(rightQuery, (x, y) => KeyValuePair.Create(x, y)).ToList(),
                 pair =>
@@ -112,18 +119,20 @@ namespace System.Linq.Parallel.Tests
             seen.AssertComplete();
         }
 
-        [Theory]
+        [Fact]
         [OuterLoop]
-        [MemberData("ZipUnorderedData", (object)(new int[] { 1024 * 4, 1024 * 64 }))]
-        public static void Zip_Unordered_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
+        public static void Zip_Unordered_NotPipelined_Longrunning()
         {
-            Zip_Unordered_NotPipelined(left, leftCount, right, rightCount);
+            Zip_Unordered_NotPipelined(Sources.OuterLoopCount / 4, Sources.OuterLoopCount / 4);
         }
 
         [Theory]
-        [MemberData("ZipData", (object)(new int[] { 0, 1, 2, 16 }))]
+        [MemberData(nameof(ZipData), new[] { 0, 1, 2, 16 })]
         public static void Zip_NotPipelined(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
+            // The ordering of Zip is only guaranteed when both operands are ordered,
+            // however the current implementation manages to perform ordering if either operand is ordered _in most cases_.
+            // If this test starts failing, consider revising the operators and mention the change in release notes.
             ParallelQuery<int> leftQuery = left.Item;
             ParallelQuery<int> rightQuery = right.Item;
             int seen = 0;
@@ -138,7 +147,7 @@ namespace System.Linq.Parallel.Tests
 
         [Theory]
         [OuterLoop]
-        [MemberData("ZipData", (object)(new int[] { 1024 * 4, 1024 * 64 }))]
+        [MemberData(nameof(ZipData), new int[] { /* Sources.OuterLoopCount */ })]
         public static void Zip_NotPipelined_Longrunning(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount)
         {
             Zip_NotPipelined(left, leftCount, right, rightCount);
@@ -148,13 +157,12 @@ namespace System.Linq.Parallel.Tests
         // This is included as a regression test for that particular repro.
         [Theory]
         [OuterLoop]
-        [MemberData("ZipThreadedData", new[] { 1, 2, 16, 128, 1024 }, new[] { 1, 2, 4, 7, 8, 31, 32 })]
+        [MemberData(nameof(ZipThreadedData), new[] { 1, 2, 16, 128, 1024 }, new[] { 1, 2, 4, 7, 8, 31, 32 })]
         public static void Zip_AsOrdered_ThreadedDeadlock(Labeled<ParallelQuery<int>> left, int leftCount, Labeled<ParallelQuery<int>> right, int rightCount, int degree)
         {
             ParallelQuery<int> query = left.Item.WithDegreeOfParallelism(degree).Zip<int, int, int>(right.Item, (a, b) => { throw new DeliberateTestException(); });
 
-            AggregateException ae = Assert.Throws<AggregateException>(() => query.ToArray());
-            Assert.All(ae.InnerExceptions, e => Assert.IsType<DeliberateTestException>(e));
+            AssertThrows.Wrapped<DeliberateTestException>(() => query.ToArray());
         }
 
         [Fact]
@@ -179,9 +187,9 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Zip_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => ((ParallelQuery<int>)null).Zip(ParallelEnumerable.Range(0, 1), (x, y) => x));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).Zip(null, (Func<int, int, int>)((x, y) => x)));
-            Assert.Throws<ArgumentNullException>(() => ParallelEnumerable.Range(0, 1).Zip(ParallelEnumerable.Range(0, 1), (Func<int, int, int>)null));
+            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Zip(ParallelEnumerable.Range(0, 1), (x, y) => x));
+            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Zip(null, (Func<int, int, int>)((x, y) => x)));
+            Assert.Throws<ArgumentNullException>("resultSelector", () => ParallelEnumerable.Range(0, 1).Zip(ParallelEnumerable.Range(0, 1), (Func<int, int, int>)null));
         }
     }
 }

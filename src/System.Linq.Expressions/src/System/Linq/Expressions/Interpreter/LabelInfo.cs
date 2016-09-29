@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -67,7 +68,7 @@ namespace System.Linq.Expressions.Interpreter
             {
                 if (j.ContainsTarget(_node))
                 {
-                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Label target already defined: {0}", _node.Name));
+                    throw Error.LabelTargetAlreadyDefined(_node.Name);
                 }
             }
 
@@ -88,7 +89,7 @@ namespace System.Linq.Expressions.Interpreter
                 // now invalid
                 if (_acrossBlockJump)
                 {
-                    throw new InvalidOperationException("Ambiguous jump");
+                    throw Error.AmbiguousJump(_node.Name);
                 }
                 // For local jumps, we need a new IL label
                 // This is okay because:
@@ -118,7 +119,7 @@ namespace System.Linq.Expressions.Interpreter
 
             if (HasMultipleDefinitions)
             {
-                throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Ambiguous jump {0}", _node.Name));
+                throw Error.AmbiguousJump(_node.Name);
             }
 
             // We didn't find an outward jump. Look for a jump across blocks
@@ -130,26 +131,26 @@ namespace System.Linq.Expressions.Interpreter
             {
                 if (j.Kind == LabelScopeKind.Finally)
                 {
-                    throw new InvalidOperationException("Control cannot leave finally");
+                    throw Error.ControlCannotLeaveFinally();
                 }
                 if (j.Kind == LabelScopeKind.Filter)
                 {
-                    throw new InvalidOperationException("Control cannot leave filter test");
+                    throw Error.ControlCannotLeaveFilterTest();
                 }
             }
 
-            // Valdiate that we aren't jumping into a catch or an expression
+            // Validate that we aren't jumping into a catch or an expression
             for (LabelScopeInfo j = def; j != common; j = j.Parent)
             {
                 if (!j.CanJumpInto)
                 {
                     if (j.Kind == LabelScopeKind.Expression)
                     {
-                        throw new InvalidOperationException("Control cannot enter an expression");
+                        throw Error.ControlCannotEnterExpression();
                     }
                     else
                     {
-                        throw new InvalidOperationException("Control cannot enter try");
+                        throw Error.ControlCannotEnterTry();
                     }
                 }
             }
@@ -160,7 +161,7 @@ namespace System.Linq.Expressions.Interpreter
             // Make sure that if this label was jumped to, it is also defined
             if (_references.Count > 0 && !HasDefinitions)
             {
-                throw new InvalidOperationException("label target undefined");
+                throw Error.LabelTargetUndefined(_node.Name);
             }
         }
 

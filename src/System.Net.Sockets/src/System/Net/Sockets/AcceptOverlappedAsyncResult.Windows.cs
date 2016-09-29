@@ -1,7 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -25,7 +27,7 @@ namespace System.Net.Sockets
             if (errorCode == SocketError.Success)
             {
                 _localBytesTransferred = numBytes;
-                if (Logging.On)
+                if (SocketsEventSource.Log.IsEnabled())
                 {
                     LogBuffer((long)numBytes);
                 }
@@ -65,7 +67,11 @@ namespace System.Net.Sockets
                     {
                         errorCode = (SocketError)Marshal.GetLastWin32Error();
                     }
-                    GlobalLog.Print("AcceptOverlappedAsyncResult#" + Logging.HashString(this) + "::PostCallback() setsockopt handle:" + handle.ToString() + " AcceptSocket:" + Logging.HashString(_acceptSocket) + " itsHandle:" + _acceptSocket.SafeHandle.DangerousGetHandle().ToString() + " returns:" + errorCode.ToString());
+
+                    if (GlobalLog.IsEnabled)
+                    {
+                        GlobalLog.Print("AcceptOverlappedAsyncResult#" + LoggingHash.HashString(this) + "::PostCallback() setsockopt handle:" + handle.ToString() + " AcceptSocket:" + LoggingHash.HashString(_acceptSocket) + " itsHandle:" + _acceptSocket.SafeHandle.DangerousGetHandle().ToString() + " returns:" + errorCode.ToString());
+                    }
                 }
                 catch (ObjectDisposedException)
                 {
@@ -101,17 +107,24 @@ namespace System.Net.Sockets
 
         private void LogBuffer(long size)
         {
-            GlobalLog.Assert(Logging.On, "AcceptOverlappedAsyncResult#{0}::LogBuffer()|Logging is off!", Logging.HashString(this));
+            if (!SocketsEventSource.Log.IsEnabled())
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.AssertFormat("AcceptOverlappedAsyncResult#{0}::LogBuffer()|Logging is off!", LoggingHash.HashString(this));
+                }
+                Debug.Fail("AcceptOverlappedAsyncResult#" + LoggingHash.HashString(this) + "::LogBuffer()|Logging is off!");
+            }
             IntPtr pinnedBuffer = Marshal.UnsafeAddrOfPinnedArrayElement(_buffer, 0);
             if (pinnedBuffer != IntPtr.Zero)
             {
                 if (size > -1)
                 {
-                    Logging.Dump(Logging.Sockets, _listenSocket, "PostCompletion", pinnedBuffer, (int)Math.Min(size, (long)_buffer.Length));
+                    SocketsEventSource.Dump(pinnedBuffer, (int)Math.Min(size, (long)_buffer.Length));
                 }
                 else
                 {
-                    Logging.Dump(Logging.Sockets, _listenSocket, "PostCompletion", pinnedBuffer, (int)_buffer.Length);
+                    SocketsEventSource.Dump(pinnedBuffer, (int)_buffer.Length);
                 }
             }
         }

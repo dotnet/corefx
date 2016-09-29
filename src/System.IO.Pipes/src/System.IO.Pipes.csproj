@@ -1,27 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Windows_Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <ProjectGuid>{16EE5522-F387-4C9E-9EF2-B5134B043F37}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <AssemblyName>System.IO.Pipes</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants)</DefineConstants>
-    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
-    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+    <OmitTransitiveCompileReferences>true</OmitTransitiveCompileReferences>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
+    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net46'">None</ResourcesSourceOutputDirectory>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' == ''">
+    <ProjectJson>win/project.json</ProjectJson>
+    <ProjectLockJson>win/project.lock.json</ProjectLockJson>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <ProjectJson>unix/project.json</ProjectJson>
+    <ProjectLockJson>unix/project.lock.json</ProjectLockJson>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
   <!-- Compiled Source Files -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="Microsoft\Win32\SafeHandles\SafePipeHandle.cs" />
     <Compile Include="System\IO\Error.cs" />
     <Compile Include="System\IO\Pipes\AnonymousPipeClientStream.cs" />
@@ -33,8 +42,11 @@
     <Compile Include="System\IO\Pipes\NamedPipeServerStream.cs" />
     <Compile Include="System\IO\Pipes\PipeState.cs" />
     <Compile Include="System\IO\Pipes\PipeStream.cs" />
+    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.cs">
+      <Link>Common\System\IO\StreamHelpers.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' ">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -49,6 +61,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SecurityOptions.cs">
       <Link>Common\Interop\Windows\Interop.SecurityOptions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
       <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
@@ -143,6 +158,7 @@
     <Compile Include="System\IO\Pipes\NamedPipeClientStream.Unix.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeServerStream.Unix.cs" />
     <Compile Include="System\IO\Pipes\PipeStream.Unix.cs" />
+    <Compile Include="System\Net\Sockets\UnixDomainSocketEndPoint.cs" />
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs</Link>
     </Compile>
@@ -158,23 +174,32 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Close.cs">
       <Link>Common\Interop\Unix\Interop.Close.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.cs">
-      <Link>Common\Interop\Unix\Interop.Fcntl.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.Pipe.cs">
+      <Link>Common\Interop\Unix\Interop.Fcntl.Pipe.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.SetCloseOnExec.cs">
+      <Link>Common\Interop\Unix\Interop.Fcntl.SetCloseOnExec.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.FLock.cs">
       <Link>Common\Interop\Unix\Interop.FLock.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetDomainSocketSizes.cs">
+      <Link>Common\Interop\Unix\Interop.GetDomainSocketSizes.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
       <Link>Common\Interop\Unix\Interop.GetHostName.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPeerUserName.cs">
+      <Link>Common\Interop\Unix\Interop.GetPeerUserName.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MkDir.cs">
       <Link>Common\Interop\Unix\Interop.MkDir.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MkFifo.cs">
-      <Link>Common\Interop\Unix\Interop.MkFifo.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Open.cs">
       <Link>Common\Interop\Unix\Interop.Open.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Open.Pipe.cs">
+      <Link>Common\Interop\Unix\Interop.Open.Pipe.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.OpenFlags.cs">
       <Link>Common\Interop\Unix\Interop.OpenFlags.cs</Link>
@@ -188,26 +213,29 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Poll.cs">
       <Link>Common\Interop\Unix\Interop.Poll.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Read.cs">
-      <Link>Common\Interop\Unix\Interop.Read.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Read.Pipe.cs">
+      <Link>Common\Interop\Unix\Interop.Read.Pipe.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Unlink.cs">
       <Link>Common\Interop\Unix\Interop.Unlink.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Write.cs">
-      <Link>Common\Interop\Unix\Interop.Write.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Write.Pipe.cs">
+      <Link>Common\Interop\Unix\Interop.Write.Pipe.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
       <Link>Common\Interop\Unix\Interop.Stat.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Names.Unix.cs">
-      <Link>Common\System\IO\PersistedFiles.Names.Unix.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.Pipe.cs">
+      <Link>Common\Interop\Unix\Interop.Stat.Pipe.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Threading\Tasks\ForceAsyncAwaiter.cs">
       <Link>Common\System\Threading\Tasks\ForceAsyncAwaiter.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- Resource files -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System.Core" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

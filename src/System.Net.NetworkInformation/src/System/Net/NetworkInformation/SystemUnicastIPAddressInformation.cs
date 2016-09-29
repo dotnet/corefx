@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
@@ -153,8 +153,8 @@ namespace System.Net.NetworkInformation
         // Convert a CIDR prefix length to a subnet mask "255.255.255.0" format.
         private static IPAddress PrefixLengthToSubnetMask(byte prefixLength, AddressFamily family)
         {
-            Contract.Requires((0 <= prefixLength) && (prefixLength <= 126));
-            Contract.Requires((family == AddressFamily.InterNetwork) || (family == AddressFamily.InterNetworkV6));
+            Debug.Assert((0 <= prefixLength) && (prefixLength <= 126));
+            Debug.Assert((family == AddressFamily.InterNetwork) || (family == AddressFamily.InterNetworkV6));
 
             byte[] addressBytes;
             if (family == AddressFamily.InterNetwork)
@@ -167,7 +167,7 @@ namespace System.Net.NetworkInformation
                 addressBytes = new byte[16];
             }
 
-            Contract.Assert(prefixLength < (addressBytes.Length * 8));
+            Debug.Assert(prefixLength < (addressBytes.Length * 8));
 
             // Enable bits one at a time from left/high to right/low.
             for (int bit = 0; bit < prefixLength; bit++)

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -23,7 +24,7 @@ namespace System.Threading.Tasks.Dataflow
 {
     /// <summary>
     /// Provides a dataflow block that joins across multiple dataflow sources, not necessarily of the same type, 
-    /// waiting for one item to arrive for each type before they’re all released together as a tuple of one item per type.
+    /// waiting for one item to arrive for each type before they?re all released together as a tuple of one item per type.
     /// </summary>
     /// <typeparam name="T1">Specifies the type of data accepted by the block's first target.</typeparam>
     /// <typeparam name="T2">Specifies the type of data accepted by the block's second target.</typeparam>
@@ -51,7 +52,7 @@ namespace System.Threading.Tasks.Dataflow
         public JoinBlock(GroupingDataflowBlockOptions dataflowBlockOptions)
         {
             // Validate arguments
-            if (dataflowBlockOptions == null) throw new ArgumentNullException("dataflowBlockOptions");
+            if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
             Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
@@ -146,7 +147,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             Debug.Assert(_sharedResources != null, "_sharedResources not initialized");
@@ -216,7 +217,7 @@ namespace System.Threading.Tasks.Dataflow
             /// <param name="joinBlock">The JoinBlock being viewed.</param>
             public DebugView(JoinBlock<T1, T2> joinBlock)
             {
-                Contract.Requires(joinBlock != null, "Need a block with which to construct the debug view.");
+                Debug.Assert(joinBlock != null, "Need a block with which to construct the debug view.");
                 _joinBlock = joinBlock;
                 _sourceDebuggingInformation = joinBlock._source.GetDebuggingInformation();
             }
@@ -254,7 +255,7 @@ namespace System.Threading.Tasks.Dataflow
 
     /// <summary>
     /// Provides a dataflow block that joins across multiple dataflow sources, not necessarily of the same type, 
-    /// waiting for one item to arrive for each type before they’re all released together as a tuple of one item per type.
+    /// waiting for one item to arrive for each type before they?re all released together as a tuple of one item per type.
     /// </summary>
     /// <typeparam name="T1">Specifies the type of data accepted by the block's first target.</typeparam>
     /// <typeparam name="T2">Specifies the type of data accepted by the block's second target.</typeparam>
@@ -286,7 +287,7 @@ namespace System.Threading.Tasks.Dataflow
         public JoinBlock(GroupingDataflowBlockOptions dataflowBlockOptions)
         {
             // Validate arguments
-            if (dataflowBlockOptions == null) throw new ArgumentNullException("dataflowBlockOptions");
+            if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
             Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
@@ -381,7 +382,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             Debug.Assert(_sharedResources != null, "_sharedResources not initialized");
@@ -454,7 +455,7 @@ namespace System.Threading.Tasks.Dataflow
             /// <param name="joinBlock">The JoinBlock being viewed.</param>
             public DebugView(JoinBlock<T1, T2, T3> joinBlock)
             {
-                Contract.Requires(joinBlock != null, "Need a block with which to construct the debug view.");
+                Debug.Assert(joinBlock != null, "Need a block with which to construct the debug view.");
                 _joinBlock = joinBlock;
                 _sourceDebuggingInformation = joinBlock._source.GetDebuggingInformation();
             }
@@ -527,7 +528,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <param name="sharedResources">The shared resources used by all targets associated with this join.</param>
         internal JoinBlockTarget(JoinBlockTargetSharedResources sharedResources)
         {
-            Contract.Requires(sharedResources != null, "Targets need shared resources through which to communicate.");
+            Debug.Assert(sharedResources != null, "Targets need shared resources through which to communicate.");
 
             // Store arguments and initialize configuration
             GroupingDataflowBlockOptions dbo = sharedResources._dataflowBlockOptions;
@@ -842,8 +843,8 @@ namespace System.Threading.Tasks.Dataflow.Internal
         DataflowMessageStatus ITargetBlock<T>.OfferMessage(DataflowMessageHeader messageHeader, T messageValue, ISourceBlock<T> source, Boolean consumeToAccept)
         {
             // Validate arguments
-            if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, "messageHeader");
-            if (source == null && consumeToAccept) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, "consumeToAccept");
+            if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
+            if (source == null && consumeToAccept) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, nameof(consumeToAccept));
             Contract.EndContractBlock();
 
             lock (_sharedResources.IncomingLock)
@@ -954,7 +955,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             CompleteCore(exception, dropPendingMessages: true, releaseReservedMessages: false);
@@ -994,7 +995,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             /// <param name="joinBlockTarget">The join being viewed.</param>
             public DebugView(JoinBlockTarget<T> joinBlockTarget)
             {
-                Contract.Requires(joinBlockTarget != null, "Need a target with which to construct the debug view.");
+                Debug.Assert(joinBlockTarget != null, "Need a target with which to construct the debug view.");
                 _joinBlockTarget = joinBlockTarget;
             }
 
@@ -1061,11 +1062,11 @@ namespace System.Threading.Tasks.Dataflow.Internal
             Action joinFilledAction, Action<Exception> exceptionAction,
             GroupingDataflowBlockOptions dataflowBlockOptions)
         {
-            Contract.Requires(ownerJoin != null, "Resources must be associated with a join.");
-            Contract.Requires(targets != null, "Resources must be shared between multiple targets.");
-            Contract.Requires(joinFilledAction != null, "An action to invoke when a join is created must be provided.");
-            Contract.Requires(exceptionAction != null, "An action to invoke for faults must be provided.");
-            Contract.Requires(dataflowBlockOptions != null, "Options must be provided to configure the resources.");
+            Debug.Assert(ownerJoin != null, "Resources must be associated with a join.");
+            Debug.Assert(targets != null, "Resources must be shared between multiple targets.");
+            Debug.Assert(joinFilledAction != null, "An action to invoke when a join is created must be provided.");
+            Debug.Assert(exceptionAction != null, "An action to invoke for faults must be provided.");
+            Debug.Assert(dataflowBlockOptions != null, "Options must be provided to configure the resources.");
 
             // Store arguments
             _ownerJoin = ownerJoin;
@@ -1295,7 +1296,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// </summary>
         private void ProcessAsyncIfNecessary_Slow(bool isReplacementReplica)
         {
-            Contract.Requires(JoinNeedsProcessing, "There must be a join that needs processing.");
+            Debug.Assert(JoinNeedsProcessing, "There must be a join that needs processing.");
             Common.ContractAssertMonitorStatus(IncomingLock, held: true);
 
             // Create task and store into _taskForInputProcessing prior to scheduling the task
@@ -1379,7 +1380,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ProcessMessagesLoopCore()
         {
-            Contract.Requires(!_dataflowBlockOptions.Greedy || _boundingState != null, "This only makes sense in non-greedy or bounding mode");
+            Debug.Assert(!_dataflowBlockOptions.Greedy || _boundingState != null, "This only makes sense in non-greedy or bounding mode");
             Common.ContractAssertMonitorStatus(IncomingLock, held: false);
             try
             {
@@ -1445,7 +1446,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <param name="numItemsRemoved">The number of items removed.</param>
         internal void OnItemsRemoved(int numItemsRemoved)
         {
-            Contract.Requires(numItemsRemoved > 0, "Number of items removed needs to be positive.");
+            Debug.Assert(numItemsRemoved > 0, "Number of items removed needs to be positive.");
             Common.ContractAssertMonitorStatus(IncomingLock, held: false);
 
             // If we're bounding, we need to know when an item is removed so that we

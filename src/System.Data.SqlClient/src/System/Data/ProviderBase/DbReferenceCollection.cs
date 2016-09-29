@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -65,7 +66,7 @@ namespace System.Data.ProviderBase
         }
 
         private const int LockPollTime = 100;   // Time to wait (in ms) between attempting to get the _itemLock
-        private const int DefaultCollectionSize = 20;   // Default size for the collection, and the amount to grow everytime the collection is full
+        private const int DefaultCollectionSize = 20;   // Default size for the collection, and the amount to grow every time the collection is full
         private CollectionEntry[] _items;       // The collection of items we are keeping track of
         private readonly object _itemLock;      // Used to synchronize access to the _items collection
         private int _optimisticCount;           // (#ItemsAdded - #ItemsRemoved) - This estimates the number of items that we *should* have (but doesn't take into account item targets being GC'd)

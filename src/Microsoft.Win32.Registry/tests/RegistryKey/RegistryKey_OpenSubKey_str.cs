@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Linq;
@@ -7,7 +8,7 @@ using Xunit;
 
 namespace Microsoft.Win32.RegistryTests
 {
-    public class RegistryKey_OpenSubKey_str : RegistryTestsBase
+    public class RegistryKey_OpenSubKey_str : RegistryKeyOpenSubKeyTestsBase
     {
         [Fact]
         public void NegativeTests()
@@ -62,5 +63,15 @@ namespace Microsoft.Win32.RegistryTests
             Assert.Equal(subKeyNames.Length, TestRegistryKey.SubKeyCount);
             Assert.Equal(subKeyNames, TestRegistryKey.GetSubKeyNames());
         }
+
+        [Theory]
+        [MemberData(nameof(TestRegistrySubKeyNames))]
+        public void OpenSubKey_KeyExists_OpensWithFixedUpName(string expected, string subKeyName) =>
+            Verify_OpenSubKey_KeyExists_OpensWithFixedUpName(expected, () => TestRegistryKey.OpenSubKey(subKeyName));
+
+        [Theory]
+        [MemberData(nameof(TestRegistrySubKeyNames))]
+        public void OpenSubKey_KeyDoesNotExist_ReturnsNull(string expected, string subKeyName) =>
+            Verify_OpenSubKey_KeyDoesNotExist_ReturnsNull(expected, () => TestRegistryKey.OpenSubKey(subKeyName));
     }
 }

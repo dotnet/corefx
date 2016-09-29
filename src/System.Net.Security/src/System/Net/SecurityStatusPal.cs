@@ -1,9 +1,29 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Net
 {
-    internal enum SecurityStatusPal
+    internal struct SecurityStatusPal
+    {
+        public readonly SecurityStatusPalErrorCode ErrorCode;
+        public readonly Exception Exception;
+
+        public SecurityStatusPal(SecurityStatusPalErrorCode errorCode, Exception exception = null)
+        {
+            ErrorCode = errorCode;
+            Exception = exception;
+        }
+
+        public override string ToString()
+        {
+            return Exception == null ?
+                $"{nameof(ErrorCode)}={ErrorCode}" :
+                $"{nameof(ErrorCode)}={ErrorCode}, {nameof(Exception)}={Exception}";
+        }
+    }
+
+    internal enum SecurityStatusPalErrorCode
     {
         NotSet = 0,
         OK,

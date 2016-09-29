@@ -1,9 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,17 +17,33 @@ namespace System.Linq.Tests
     public class ToArrayTests : EnumerableTests
     {
         [Fact]
-        public void ToArray_AlwaysCreateACopy()
+        public void ToArray_CreateACopyWhenNotEmpty()
         {
             int[] sourceArray = new int[] { 1, 2, 3, 4, 5 };
             int[] resultArray = sourceArray.ToArray();
 
             Assert.NotSame(sourceArray, resultArray);
             Assert.Equal(sourceArray, resultArray);
+        }
 
+        [Fact]
+        public void ToArray_UseArrayEmptyWhenEmpty()
+        {
             int[] emptySourceArray = Array.Empty<int>();
-            Assert.NotSame(emptySourceArray.ToArray(), emptySourceArray.ToArray());
-            Assert.NotSame(emptySourceArray.Select(i => i).ToArray(), emptySourceArray.Select(i => i).ToArray());
+            Assert.Same(emptySourceArray.ToArray(), emptySourceArray.ToArray());
+
+            Assert.Same(emptySourceArray.Select(i => i).ToArray(), emptySourceArray.Select(i => i).ToArray());
+            Assert.Same(emptySourceArray.ToList().Select(i => i).ToArray(), emptySourceArray.ToList().Select(i => i).ToArray());
+            Assert.Same(new Collection<int>(emptySourceArray).Select(i => i).ToArray(), new Collection<int>(emptySourceArray).Select(i => i).ToArray());
+            Assert.Same(emptySourceArray.OrderBy(i => i).ToArray(), emptySourceArray.OrderBy(i => i).ToArray());
+
+            Assert.Same(Enumerable.Range(5, 0).ToArray(), Enumerable.Range(3, 0).ToArray());
+            Assert.Same(Enumerable.Range(5, 3).Take(0).ToArray(), Enumerable.Range(3, 0).ToArray());
+            Assert.Same(Enumerable.Range(5, 3).Skip(3).ToArray(), Enumerable.Range(3, 0).ToArray());
+
+            Assert.Same(Enumerable.Repeat(42, 0).ToArray(), Enumerable.Range(84, 0).ToArray());
+            Assert.Same(Enumerable.Repeat(42, 3).Take(0).ToArray(), Enumerable.Range(84, 3).Take(0).ToArray());
+            Assert.Same(Enumerable.Repeat(42, 3).Skip(3).ToArray(), Enumerable.Range(84, 3).Skip(3).ToArray());
         }
 
 
@@ -89,10 +108,8 @@ namespace System.Linq.Tests
             Assert.Throws<ArgumentNullException>("source", () => source.ToArray());
         }
 
-
-        // Later this behaviour can be changed
+        // Generally the optimal approach. Anything that breaks this should be confirmed as not harming performance.
         [Fact]
-        [ActiveIssue(1561)]
         public void ToArray_UseCopyToWithICollection()
         {
             TestCollection<int> source = new TestCollection<int>(new int[] { 1, 2, 3, 4 });
@@ -100,21 +117,6 @@ namespace System.Linq.Tests
 
             Assert.Equal(source, resultArray);
             Assert.Equal(1, source.CopyToTouched);
-        }
-
-
-        [Fact]
-        [ActiveIssue(1561)]
-        public void ToArray_WorkWhenCountChangedAsynchronously()
-        {
-            GrowingAfterCountReadCollection source = new GrowingAfterCountReadCollection(new int[] { 1, 2, 3, 4 });
-            var resultArray = source.ToArray();
-
-            Assert.True(resultArray.Length >= 4);
-            Assert.Equal(1, resultArray[0]);
-            Assert.Equal(2, resultArray[0]);
-            Assert.Equal(3, resultArray[0]);
-            Assert.Equal(4, resultArray[0]);
         }
 
         [Fact]
@@ -200,9 +202,9 @@ namespace System.Linq.Tests
         }
         
         [Fact]
-        public void EmptyArraysNotSameObject()
+        public void EmptyArraysSameObject()
         {
-            Assert.NotSame(Enumerable.Empty<int>().ToArray(), Enumerable.Empty<int>().ToArray());
+            Assert.Same(Enumerable.Empty<int>().ToArray(), Enumerable.Empty<int>().ToArray());
             
             var array = new int[0];
             Assert.NotSame(array, array.ToArray());
@@ -261,6 +263,106 @@ namespace System.Linq.Tests
             Assert.Null(source as ICollection<int>);
     
             Assert.Equal(expected, source.ToArray());
+        }
+
+        [Fact]
+        public void ConstantTimeCountPartitionSelectSameTypeToArray()
+        {
+            var source = Enumerable.Range(0, 100).Select(i => i * 2).Skip(1).Take(5);
+            Assert.Equal(new[] { 2, 4, 6, 8, 10 }, source.ToArray());
+        }
+
+        [Fact]
+        public void ConstantTimeCountPartitionSelectDiffTypeToArray()
+        {
+            var source = Enumerable.Range(0, 100).Select(i => i.ToString()).Skip(1).Take(5);
+            Assert.Equal(new[] { "1", "2", "3", "4", "5" }, source.ToArray());
+        }
+
+        [Fact]
+        public void ConstantTimeCountEmptyPartitionSelectSameTypeToArray()
+        {
+            var source = Enumerable.Range(0, 100).Select(i => i * 2).Skip(1000);
+            Assert.Empty(source.ToArray());
+        }
+
+        [Fact]
+        public void ConstantTimeCountEmptyPartitionSelectDiffTypeToArray()
+        {
+            var source = Enumerable.Range(0, 100).Select(i => i.ToString()).Skip(1000);
+            Assert.Empty(source.ToArray());
+        }
+
+        [Fact]
+        public void NonConstantTimeCountPartitionSelectSameTypeToArray()
+        {
+            var source = NumberRangeGuaranteedNotCollectionType(0, 100).OrderBy(i => i).Select(i => i * 2).Skip(1).Take(5);
+            Assert.Equal(new[] { 2, 4, 6, 8, 10 }, source.ToArray());
+        }
+
+        [Fact]
+        public void NonConstantTimeCountPartitionSelectDiffTypeToArray()
+        {
+            var source = NumberRangeGuaranteedNotCollectionType(0, 100).OrderBy(i => i).Select(i => i.ToString()).Skip(1).Take(5);
+            Assert.Equal(new[] { "1", "2", "3", "4", "5" }, source.ToArray());
+        }
+
+        [Fact]
+        public void NonConstantTimeCountEmptyPartitionSelectSameTypeToArray()
+        {
+            var source = NumberRangeGuaranteedNotCollectionType(0, 100).OrderBy(i => i).Select(i => i * 2).Skip(1000);
+            Assert.Empty(source.ToArray());
+        }
+
+        [Fact]
+        public void NonConstantTimeCountEmptyPartitionSelectDiffTypeToArray()
+        {
+            var source = NumberRangeGuaranteedNotCollectionType(0, 100).OrderBy(i => i).Select(i => i.ToString()).Skip(1000);
+            Assert.Empty(source.ToArray());
+        }
+
+        [Theory]
+        [MemberData(nameof(JustBelowPowersOfTwoLengths))]
+        [MemberData(nameof(PowersOfTwoLengths))]
+        [MemberData(nameof(JustAbovePowersOfTwoLengths))]
+        public void ToArrayShouldWorkWithSpecialLengthLazyEnumerables(int length)
+        {
+            Debug.Assert(length >= 0);
+
+            var range = Enumerable.Range(0, length);
+            var lazyEnumerable = ForceNotCollection(range); // We won't go down the IIListProvider path
+            Assert.Equal(range, lazyEnumerable.ToArray());
+        }
+
+        public static IEnumerable<object[]> JustBelowPowersOfTwoLengths()
+        {
+            return SmallPowersOfTwo.Select(p => new object[] { p - 1 });
+        }
+
+        public static IEnumerable<object[]> PowersOfTwoLengths()
+        {
+            return SmallPowersOfTwo.Select(p => new object[] { p });
+        }
+
+        public static IEnumerable<object[]> JustAbovePowersOfTwoLengths()
+        {
+            return SmallPowersOfTwo.Select(p => new object[] { p + 1 });
+        }
+        
+        private static IEnumerable<int> SmallPowersOfTwo
+        {
+            get
+            {
+                // By N being "small" we mean that allocating an array of
+                // size N doesn't come close to the risk of causing an OOME
+                
+                const int MaxPower = 18;
+
+                for (int i = 0; i <= MaxPower; i++)
+                {
+                    yield return 1 << i; // equivalent to pow(2, i)
+                }
+            }
         }
     }
 }

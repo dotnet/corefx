@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Text;
 
 namespace Test.Cryptography
 {
@@ -30,6 +32,18 @@ namespace Test.Cryptography
             }
 
             return bytes;
+        }
+
+        internal static string ByteArrayToHex(this byte[] bytes)
+        {
+            StringBuilder builder = new StringBuilder(bytes.Length * 2);
+
+            foreach (byte b in bytes)
+            {
+                builder.Append(b.ToString("X2"));
+            }
+
+            return builder.ToString();
         }
 
         internal static byte[] RepeatByte(byte b, int count)

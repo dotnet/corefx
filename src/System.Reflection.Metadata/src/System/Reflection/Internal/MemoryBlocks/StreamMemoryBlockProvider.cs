@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.IO;
@@ -73,6 +74,7 @@ namespace System.Reflection.Internal
             }
         }
 
+        /// <exception cref="IOException">Error reading from the stream.</exception>
         internal static unsafe NativeHeapMemoryBlock ReadMemoryBlockNoLock(Stream stream, bool isFileStream, long start, int size)
         {
             var block = new NativeHeapMemoryBlock(size);
@@ -127,6 +129,7 @@ namespace System.Reflection.Internal
             return _stream;
         }
 
+        /// <exception cref="IOException">IO error while mapping memory or not enough memory to create the mapping.</exception>
         private unsafe bool TryCreateMemoryMappedFileBlock(long start, int size, out MemoryMappedFileBlock block)
         {
             if (_lazyMemoryMap == null)

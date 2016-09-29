@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.IO;
 using System.Runtime.InteropServices;
@@ -20,7 +21,7 @@ namespace System.Reflection.Internal
 
         public unsafe override int ReadByte()
         {
-            if (_position == _length)
+            if (_position >= _length)
             {
                 return -1;
             }
@@ -40,37 +41,10 @@ namespace System.Reflection.Internal
         {
         }
 
-        public override bool CanRead
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public override bool CanSeek
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public override bool CanWrite
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override long Length
-        {
-            get
-            {
-                return _length;
-            }
-        }
+        public override bool CanRead => true;
+        public override bool CanSeek => true;
+        public override bool CanWrite => false;
+        public override long Length => _length;
 
         public override long Position
         {
@@ -105,17 +79,17 @@ namespace System.Reflection.Internal
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException("origin");
+                        throw new ArgumentOutOfRangeException(nameof(origin));
                 }
             }
             catch (OverflowException)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
-            if (target < 0 || target >= _length)
+            if (target < 0 || target > int.MaxValue)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             _position = (int)target;

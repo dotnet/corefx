@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -48,7 +49,7 @@ namespace System.Collections.ObjectModel
         private static List<T> CreateCopy(IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             return new List<T>(collection);
         }
@@ -131,8 +132,8 @@ namespace System.Collections.ObjectModel
         {
             CheckReentrancy();
             base.ClearItems();
-            OnPropertyChanged(CountString);
-            OnPropertyChanged(IndexerName);
+            OnCountPropertyChanged();
+            OnIndexerPropertyChanged();
             OnCollectionReset();
         }
 
@@ -147,8 +148,8 @@ namespace System.Collections.ObjectModel
 
             base.RemoveItem(index);
 
-            OnPropertyChanged(CountString);
-            OnPropertyChanged(IndexerName);
+            OnCountPropertyChanged();
+            OnIndexerPropertyChanged();
             OnCollectionChanged(NotifyCollectionChangedAction.Remove, removedItem, index);
         }
 
@@ -161,8 +162,8 @@ namespace System.Collections.ObjectModel
             CheckReentrancy();
             base.InsertItem(index, item);
 
-            OnPropertyChanged(CountString);
-            OnPropertyChanged(IndexerName);
+            OnCountPropertyChanged();
+            OnIndexerPropertyChanged();
             OnCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
         }
 
@@ -176,7 +177,7 @@ namespace System.Collections.ObjectModel
             T originalItem = this[index];
             base.SetItem(index, item);
 
-            OnPropertyChanged(IndexerName);
+            OnIndexerPropertyChanged();
             OnCollectionChanged(NotifyCollectionChangedAction.Replace, originalItem, item, index);
         }
 
@@ -193,7 +194,7 @@ namespace System.Collections.ObjectModel
             base.RemoveItem(oldIndex);
             base.InsertItem(newIndex, removedItem);
 
-            OnPropertyChanged(IndexerName);
+            OnIndexerPropertyChanged();
             OnCollectionChanged(NotifyCollectionChangedAction.Move, removedItem, newIndex, oldIndex);
         }
 
@@ -280,11 +281,19 @@ namespace System.Collections.ObjectModel
 
         #region Private Methods
         /// <summary>
-        /// Helper to raise a PropertyChanged event  />).
+        /// Helper to raise a PropertyChanged event for the Count property
         /// </summary>
-        private void OnPropertyChanged(string propertyName)
+        private void OnCountPropertyChanged()
         {
-            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+            OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+        }
+
+        /// <summary>
+        /// Helper to raise a PropertyChanged event for the Indexer property
+        /// </summary>
+        private void OnIndexerPropertyChanged()
+        {
+            OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
         }
 
         /// <summary>
@@ -316,7 +325,7 @@ namespace System.Collections.ObjectModel
         /// </summary>
         private void OnCollectionReset()
         {
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
         }
         #endregion Private Methods
 
@@ -356,13 +365,14 @@ namespace System.Collections.ObjectModel
 
         #region Private Fields
 
-        private const string CountString = "Count";
-
-        // This must agree with Binding.IndexerName.  It is declared separately
-        // here so as to avoid a dependency on PresentationFramework.dll.
-        private const string IndexerName = "Item[]";
-
-        private SimpleMonitor _monitor = new SimpleMonitor();
+        private readonly SimpleMonitor _monitor = new SimpleMonitor();
         #endregion Private Fields
+    }
+
+    internal static class EventArgsCache
+    {
+        internal static readonly PropertyChangedEventArgs CountPropertyChanged = new PropertyChangedEventArgs("Count");
+        internal static readonly PropertyChangedEventArgs IndexerPropertyChanged = new PropertyChangedEventArgs("Item[]");
+        internal static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
     }
 }

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +9,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Dynamic.Utils;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions.Compiler
 {
@@ -71,7 +73,7 @@ namespace System.Linq.Expressions.Compiler
         /// 
         /// Created lazily as we create hundreds of compiler scopes w/o merging scopes when compiling rules.
         /// </summary>
-        internal Set<object> MergedScopes;
+        internal HashSet<BlockExpression> MergedScopes;
 
         /// <summary>
         /// The scope's hoisted locals, if any.
@@ -195,13 +197,13 @@ namespace System.Linq.Expressions.Compiler
                 {
                     EmitGet(NearestHoistedLocals.SelfVariable);
                     lc.EmitConstantArray(indexes.ToArray());
-                    lc.IL.Emit(OpCodes.Call, typeof(RuntimeOps).GetMethod("CreateRuntimeVariables", new[] { typeof(object[]), typeof(long[]) }));
+                    lc.IL.Emit(OpCodes.Call, RuntimeOps_CreateRuntimeVariables_ObjectArray_Int64Array);
                     return;
                 }
             }
 
             // No visible variables
-            lc.IL.Emit(OpCodes.Call, typeof(RuntimeOps).GetMethod("CreateRuntimeVariables", Type.EmptyTypes));
+            lc.IL.Emit(OpCodes.Call, RuntimeOps_CreateRuntimeVariables);
             return;
         }
 
@@ -428,7 +430,7 @@ namespace System.Linq.Expressions.Compiler
         private void EmitClosureToVariable(LambdaCompiler lc, HoistedLocals locals)
         {
             lc.EmitClosureArgument();
-            lc.IL.Emit(OpCodes.Ldfld, typeof(Closure).GetField("Locals"));
+            lc.IL.Emit(OpCodes.Ldfld, Closure_Locals);
             AddLocal(lc, locals.SelfVariable);
             EmitSet(locals.SelfVariable);
         }
@@ -461,19 +463,23 @@ namespace System.Linq.Expressions.Compiler
             }
         }
 
-        private IList<ParameterExpression> GetVariables()
+        private IEnumerable<ParameterExpression> GetVariables() =>
+            MergedScopes == null ? GetVariables(Node) : GetVariablesIncludingMerged();
+
+        private IEnumerable<ParameterExpression> GetVariablesIncludingMerged()
         {
-            var vars = GetVariables(Node);
-            if (MergedScopes == null)
+            foreach (ParameterExpression param in GetVariables(Node))
             {
-                return vars;
+                yield return param;
             }
-            var list = new List<ParameterExpression>(vars);
+
             foreach (var scope in MergedScopes)
             {
-                list.AddRange(GetVariables(scope));
+                foreach (ParameterExpression param in scope.Variables)
+                {
+                    yield return param;
+                }
             }
-            return list;
         }
 
         private static IList<ParameterExpression> GetVariables(object scope)

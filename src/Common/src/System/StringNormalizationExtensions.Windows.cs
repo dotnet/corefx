@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -12,17 +13,17 @@ namespace System
     static partial class StringNormalizationExtensions
     {
         [SecurityCritical]
-        public static bool IsNormalized(this string value, NormalizationForm normalizationForm)
+        public static bool IsNormalized(this string strInput, NormalizationForm normalizationForm)
         {
-            if (value == null)
+            if (strInput == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(strInput));
             }
             Contract.EndContractBlock();
 
             // The only way to know if IsNormalizedString failed is through checking the Win32 last error
             Interop.mincore.SetLastError(Interop.ERROR_SUCCESS);
-            bool result = Interop.mincore.IsNormalizedString((int)normalizationForm, value, value.Length);
+            bool result = Interop.mincore.IsNormalizedString((int)normalizationForm, strInput, strInput.Length);
 
             int lastError = Marshal.GetLastWin32Error();
             switch (lastError)
@@ -33,7 +34,7 @@ namespace System
 
                 case Interop.ERROR_INVALID_PARAMETER:
                 case Interop.ERROR_NO_UNICODE_TRANSLATION:
-                    throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, "value");
+                    throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, nameof(strInput));
 
                 case Interop.ERROR_NOT_ENOUGH_MEMORY:
                     throw new OutOfMemoryException(SR.Arg_OutOfMemoryException);
@@ -46,11 +47,11 @@ namespace System
         }
 
         [SecurityCritical]
-        public static string Normalize(this string value, NormalizationForm normalizationForm)
+        public static string Normalize(this string strInput, NormalizationForm normalizationForm)
         {
-            if (value == null)
+            if (strInput == null)
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(strInput));
             }
             Contract.EndContractBlock();
 
@@ -58,7 +59,7 @@ namespace System
             Interop.mincore.SetLastError(Interop.ERROR_SUCCESS);
 
             // Guess our buffer size first
-            int iLength = Interop.mincore.NormalizeString((int)normalizationForm, value, value.Length, null, 0);
+            int iLength = Interop.mincore.NormalizeString((int)normalizationForm, strInput, strInput.Length, null, 0);
 
             int lastError = Marshal.GetLastWin32Error();
             // Could have an error (actually it'd be quite hard to have an error here)
@@ -66,7 +67,7 @@ namespace System
                  iLength < 0)
             {
                 if (lastError == Interop.ERROR_INVALID_PARAMETER)
-                    throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, "value");
+                    throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, nameof(strInput));
 
                 // We shouldn't really be able to get here..., guessing length is
                 // a trivial math function...
@@ -84,14 +85,14 @@ namespace System
             // Someplace to stick our buffer
             char[] cBuffer = null;
 
-            for (; ;)
+            for (;;)
             {
                 // (re)allocation buffer and normalize string
                 cBuffer = new char[iLength];
 
                 // Reset last error
                 Interop.mincore.SetLastError(Interop.ERROR_SUCCESS);
-                iLength = Interop.mincore.NormalizeString((int)normalizationForm, value, value.Length, cBuffer, cBuffer.Length);
+                iLength = Interop.mincore.NormalizeString((int)normalizationForm, strInput, strInput.Length, cBuffer, cBuffer.Length);
                 lastError = Marshal.GetLastWin32Error();
 
                 if (lastError == Interop.ERROR_SUCCESS || lastError == Interop.LAST_ERROR_TRASH_VALUE)
@@ -109,7 +110,7 @@ namespace System
                     case Interop.ERROR_INVALID_PARAMETER:
                     case Interop.ERROR_NO_UNICODE_TRANSLATION:
                         // Illegal code point or order found.  Ie: FFFE or D800 D800, etc.
-                        throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, "value");
+                        throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex, nameof(strInput));
 
                     case Interop.ERROR_NOT_ENOUGH_MEMORY:
                         throw new OutOfMemoryException(SR.Arg_OutOfMemoryException);

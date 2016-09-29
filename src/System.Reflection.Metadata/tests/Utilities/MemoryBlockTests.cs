@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using System.Reflection.Internal;
@@ -117,7 +118,7 @@ namespace System.Reflection.Metadata.Tests
             }
 
             // To cover to big to pool case.
-            str = String.Concat(Enumerable.Repeat(str, 10000));
+            str = string.Concat(Enumerable.Repeat(str, 10000));
             fixed (byte* ptr = (buffer = utf8.GetBytes(str)))
             {
                 Assert.Equal(str, new MemoryBlock(ptr, buffer.Length).PeekUtf8NullTerminated(0, null, decoder, out bytesRead));
@@ -135,7 +136,7 @@ namespace System.Reflection.Metadata.Tests
         {
             // This is a trick to use our portable light up outside the reader assembly (that 
             // I will use in Roslyn). Check that it works with encoding other than UTF8 and that it 
-            // validates arguments like the the real thing.
+            // validates arguments like the real thing.
             var decoder = new MetadataStringDecoder(Encoding.Unicode);
             Assert.Throws<ArgumentNullException>(() => decoder.GetString(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => decoder.GetString((byte*)1, -1));
@@ -147,23 +148,6 @@ namespace System.Reflection.Metadata.Tests
             }
         }
 
-        unsafe delegate string GetString(byte* bytes, int count);
-
-        sealed class CustomDecoder : MetadataStringDecoder
-        {
-            private GetString _getString;
-            public CustomDecoder(Encoding encoding, GetString getString)
-                : base(encoding)
-            {
-                _getString = getString;
-            }
-
-            public override unsafe string GetString(byte* bytes, int byteCount)
-            {
-                return _getString(bytes, byteCount);
-            }
-        }
-
         [Fact]
         public unsafe void DecoderIsUsedCorrectly()
         {
@@ -172,7 +156,7 @@ namespace System.Reflection.Metadata.Tests
             int bytesRead;
             bool prefixed = false;
 
-            var decoder = new CustomDecoder(
+            var decoder = new TestMetadataStringDecoder(
                 Encoding.UTF8,
                 (bytes, byteCount) =>
                 {
@@ -197,10 +181,10 @@ namespace System.Reflection.Metadata.Tests
             }
 
             // decoder will fail to intercept because we don't bother calling it for empty strings.
-            Assert.Same(String.Empty, new MemoryBlock(null, 0).PeekUtf8NullTerminated(0, null, decoder, out bytesRead));
+            Assert.Same(string.Empty, new MemoryBlock(null, 0).PeekUtf8NullTerminated(0, null, decoder, out bytesRead));
             Assert.Equal(0, bytesRead);
 
-            Assert.Same(String.Empty, new MemoryBlock(null, 0).PeekUtf8NullTerminated(0, new byte[0], decoder, out bytesRead));
+            Assert.Same(string.Empty, new MemoryBlock(null, 0).PeekUtf8NullTerminated(0, new byte[0], decoder, out bytesRead));
             Assert.Equal(0, bytesRead);
         }
 

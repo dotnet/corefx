@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -12,7 +13,7 @@ namespace System.IO.Tests
         {
             string path = GetTestFilePath();
             var info = new DirectoryInfo(path);
-            Assert.Equal(Path.GetFileName(path), info.ToString());
+            Assert.Equal(path, info.ToString());
         }
 
         [Fact]
@@ -23,20 +24,26 @@ namespace System.IO.Tests
             Assert.Equal(path, info.ToString());
         }
 
-        [Fact]
-        public void ParentDirectory()
+        [Theory,
+            InlineData(@"."),
+            InlineData(@".."),
+            InlineData(@"foo"),
+            InlineData(@"foo/bar"),
+            ]
+        public void KeepsOriginalPath(string path)
         {
-            string path = "..";
+            // ToString should return the passed in path
             var info = new DirectoryInfo(path);
-            Assert.Equal(Path.GetFileName(Directory.GetParent(Directory.GetCurrentDirectory()).Name), info.ToString());
+            Assert.Equal(path, info.ToString());
         }
 
         [Fact]
-        public void CurrentDirectory()
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
+        public void DriveOnlyReturnsPeriod_Windows()
         {
-            string path = ".";
+            string path = @"C:";
             var info = new DirectoryInfo(path);
-            Assert.Equal(Path.GetFileName(Directory.GetCurrentDirectory()), info.ToString());
+            Assert.Equal(".", info.ToString());
         }
     }
 }

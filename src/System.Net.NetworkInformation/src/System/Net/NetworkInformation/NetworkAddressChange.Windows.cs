@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 
@@ -11,6 +12,10 @@ namespace System.Net.NetworkInformation
 {
     public class NetworkChange
     {
+        //introduced for supporting design-time loading of System.Windows.dll
+        [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+        public static void RegisterNetworkChange(NetworkChange nc) { }
+
         public static event NetworkAvailabilityChangedEventHandler NetworkAvailabilityChanged
         {
             add
@@ -79,7 +84,7 @@ namespace System.Net.NetworkInformation
                             }
                             else
                             {
-                                ExecutionContext.Run(context.CreateCopy(), s_RunHandlerCallback, handler);
+                                ExecutionContext.Run(context, s_RunHandlerCallback, handler);
                             }
                         }
                     }
@@ -157,9 +162,9 @@ namespace System.Net.NetworkInformation
                     }
                     catch (NetworkInformationException nie)
                     {
-                        if (Logging.On)
+                        if (NetEventSource.Log.IsEnabled())
                         {
-                            Logging.Exception(Logging.Web, "AddressChangeListener", "AddressChangedCallback", nie);
+                            NetEventSource.Exception(NetEventSource.ComponentType.NetworkInformation, "AddressChangeListener", "AddressChangedCallback", nie);
                         }
                     }
 
@@ -172,7 +177,7 @@ namespace System.Net.NetworkInformation
                         }
                         else
                         {
-                            ExecutionContext.Run(context.CreateCopy(), s_runHandlerCallback, handler);
+                            ExecutionContext.Run(context, s_runHandlerCallback, handler);
                         }
                     }
                 }

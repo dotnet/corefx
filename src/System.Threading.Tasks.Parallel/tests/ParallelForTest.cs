@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -791,9 +792,6 @@ namespace System.Threading.Tasks.Tests
             {
                 Assert.False(double.MinValue == _results[i], String.Format("results[{0}] has been revisisted", i));
                 
-                if (_parameters.StateOption == ActionWithState.Stop && 0 == _results[i])
-                    Logger.LogInformation("Stopped calculation at index = {0}", i);
-
                 Assert.True(_parameters.StateOption == ActionWithState.Stop && 0 == _results[i],
                     String.Format("Incorrect results[{0}]. Expected result to lie between {1} and {2} but got {3})", i, minLimit, maxLimit, _results[i]));
             }

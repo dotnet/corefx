@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -15,6 +16,7 @@ using System.Threading;
 namespace System.Data.Common
 {
     public abstract class DbDataReader :
+        IDataReader,
         IDisposable,
         IEnumerable
     {
@@ -188,7 +190,7 @@ namespace System.Data.Common
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<T>(cancellationToken);
+                return TaskHelpers.FromCancellation<T>(cancellationToken);
             }
             else
             {
@@ -198,7 +200,7 @@ namespace System.Data.Common
                 }
                 catch (Exception e)
                 {
-                    return Task.FromException<T>(e);
+                    return TaskHelpers.FromException<T>(e);
                 }
             }
         }
@@ -216,7 +218,7 @@ namespace System.Data.Common
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<bool>(cancellationToken);
+                return TaskHelpers.FromCancellation<bool>(cancellationToken);
             }
             else
             {
@@ -226,7 +228,7 @@ namespace System.Data.Common
                 }
                 catch (Exception e)
                 {
-                    return Task.FromException<bool>(e);
+                    return TaskHelpers.FromException<bool>(e);
                 }
             }
         }
@@ -244,7 +246,7 @@ namespace System.Data.Common
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<bool>(cancellationToken);
+                return TaskHelpers.FromCancellation<bool>(cancellationToken);
             }
             else
             {
@@ -254,7 +256,7 @@ namespace System.Data.Common
                 }
                 catch (Exception e)
                 {
-                    return Task.FromException<bool>(e);
+                    return TaskHelpers.FromException<bool>(e);
                 }
             }
         }
@@ -268,7 +270,7 @@ namespace System.Data.Common
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<bool>(cancellationToken);
+                return TaskHelpers.FromCancellation<bool>(cancellationToken);
             }
             else
             {
@@ -278,9 +280,23 @@ namespace System.Data.Common
                 }
                 catch (Exception e)
                 {
-                    return Task.FromException<bool>(e);
+                    return TaskHelpers.FromException<bool>(e);
                 }
             }
+        }
+
+        public virtual void Close()
+        {
+        }
+
+        virtual public DataTable GetSchemaTable()
+        {
+            throw new NotSupportedException();
+        }
+
+        IDataReader IDataRecord.GetData(int ordinal)
+        {
+            return GetDbDataReader(ordinal);
         }
     }
 }

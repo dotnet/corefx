@@ -7,10 +7,11 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Threading.Timer.Tests</AssemblyName>
     <ProjectGuid>{ac20a28f-fda8-45e8-8728-058ead16e44c}</ProjectGuid>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="TimerConstructorTests.cs" />
     <Compile Include="TimerChangeTests.cs" />

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -55,10 +56,10 @@ namespace System.Threading.Tasks.Dataflow
         public BatchedJoinBlock(Int32 batchSize, GroupingDataflowBlockOptions dataflowBlockOptions)
         {
             // Validate arguments
-            if (batchSize < 1) throw new ArgumentOutOfRangeException("batchSize", SR.ArgumentOutOfRange_GenericPositive);
-            if (dataflowBlockOptions == null) throw new ArgumentNullException("dataflowBlockOptions");
-            if (!dataflowBlockOptions.Greedy) throw new ArgumentException(SR.Argument_NonGreedyNotSupported, "dataflowBlockOptions");
-            if (dataflowBlockOptions.BoundedCapacity != DataflowBlockOptions.Unbounded) throw new ArgumentException(SR.Argument_BoundedCapacityNotSupported, "dataflowBlockOptions");
+            if (batchSize < 1) throw new ArgumentOutOfRangeException(nameof(batchSize), SR.ArgumentOutOfRange_GenericPositive);
+            if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
+            if (!dataflowBlockOptions.Greedy) throw new ArgumentException(SR.Argument_NonGreedyNotSupported, nameof(dataflowBlockOptions));
+            if (dataflowBlockOptions.BoundedCapacity != DataflowBlockOptions.Unbounded) throw new ArgumentException(SR.Argument_BoundedCapacityNotSupported, nameof(dataflowBlockOptions));
             Contract.EndContractBlock();
 
             // Store arguments
@@ -163,7 +164,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             Debug.Assert(_sharedResources != null, "_sharedResources not initialized");
@@ -240,7 +241,7 @@ namespace System.Threading.Tasks.Dataflow
             /// <param name="batchedJoinBlock">The batched join being viewed.</param>
             public DebugView(BatchedJoinBlock<T1, T2> batchedJoinBlock)
             {
-                Contract.Requires(batchedJoinBlock != null, "Need a block with which to construct the debug view.");
+                Debug.Assert(batchedJoinBlock != null, "Need a block with which to construct the debug view.");
                 _batchedJoinBlock = batchedJoinBlock;
                 _sourceDebuggingInformation = batchedJoinBlock._source.GetDebuggingInformation();
             }
@@ -316,12 +317,12 @@ namespace System.Threading.Tasks.Dataflow
         public BatchedJoinBlock(Int32 batchSize, GroupingDataflowBlockOptions dataflowBlockOptions)
         {
             // Validate arguments
-            if (batchSize < 1) throw new ArgumentOutOfRangeException("batchSize", SR.ArgumentOutOfRange_GenericPositive);
-            if (dataflowBlockOptions == null) throw new ArgumentNullException("dataflowBlockOptions");
+            if (batchSize < 1) throw new ArgumentOutOfRangeException(nameof(batchSize), SR.ArgumentOutOfRange_GenericPositive);
+            if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
             if (!dataflowBlockOptions.Greedy ||
                 dataflowBlockOptions.BoundedCapacity != DataflowBlockOptions.Unbounded)
             {
-                throw new ArgumentException(SR.Argument_NonGreedyNotSupported, "dataflowBlockOptions");
+                throw new ArgumentException(SR.Argument_NonGreedyNotSupported, nameof(dataflowBlockOptions));
             }
             Contract.EndContractBlock();
 
@@ -432,7 +433,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             Debug.Assert(_sharedResources != null, "_sharedResources not initialized");
@@ -510,7 +511,7 @@ namespace System.Threading.Tasks.Dataflow
             /// <param name="batchedJoinBlock">The batched join being viewed.</param>
             public DebugView(BatchedJoinBlock<T1, T2, T3> batchedJoinBlock)
             {
-                Contract.Requires(batchedJoinBlock != null, "Need a block with which to construct the debug view.");
+                Debug.Assert(batchedJoinBlock != null, "Need a block with which to construct the debug view.");
                 _sourceDebuggingInformation = batchedJoinBlock._source.GetDebuggingInformation();
                 _batchedJoinBlock = batchedJoinBlock;
             }
@@ -568,7 +569,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <param name="sharedResources">The shared resources used by all targets associated with this batched join.</param>
         internal BatchedJoinBlockTarget(BatchedJoinBlockTargetSharedResources sharedResources)
         {
-            Contract.Requires(sharedResources != null, "Targets require a shared resources through which to communicate.");
+            Debug.Assert(sharedResources != null, "Targets require a shared resources through which to communicate.");
 
             // Store the shared resources, and register with it to let it know there's 
             // another target. This is done in a non-thread-safe manner and must be done 
@@ -595,8 +596,8 @@ namespace System.Threading.Tasks.Dataflow.Internal
         public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, T messageValue, ISourceBlock<T> source, Boolean consumeToAccept)
         {
             // Validate arguments
-            if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, "messageHeader");
-            if (source == null && consumeToAccept) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, "consumeToAccept");
+            if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
+            if (source == null && consumeToAccept) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, nameof(consumeToAccept));
             Contract.EndContractBlock();
 
             lock (_sharedResources._incomingLock)
@@ -642,7 +643,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Blocks/Member[@name="Fault"]/*' />
         void IDataflowBlock.Fault(Exception exception)
         {
-            if (exception == null) throw new ArgumentNullException("exception");
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
             Contract.EndContractBlock();
 
             lock (_sharedResources._incomingLock)
@@ -680,7 +681,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             /// <param name="batchedJoinBlockTarget">The batched join target being viewed.</param>
             public DebugView(BatchedJoinBlockTarget<T> batchedJoinBlockTarget)
             {
-                Contract.Requires(batchedJoinBlockTarget != null, "Need a block with which to construct the debug view.");
+                Debug.Assert(batchedJoinBlockTarget != null, "Need a block with which to construct the debug view.");
                 _batchedJoinBlockTarget = batchedJoinBlockTarget;
             }
 

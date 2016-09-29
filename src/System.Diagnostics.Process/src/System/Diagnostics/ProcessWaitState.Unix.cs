@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -13,7 +14,7 @@ namespace System.Diagnostics
     // We have a few constraints we're working under here:
     // - waitpid is used on Unix to get the exit status (including exit code) of a child process, but the first call
     //   to it after the child has completed will reap the child removing the chance of subsequent calls getting status.
-    // - The Process design allows for multiple indendent Process objects to be handed out, and each of those
+    // - The Process design allows for multiple independent Process objects to be handed out, and each of those
     //   objects may be used concurrently with each other, even if they refer to the same underlying process.
     //   Same with ProcessWaitHandle objects.  This is based on the Windows design where anyone with a handle to the
     //   process can retrieve completion information about that process.
@@ -39,7 +40,7 @@ namespace System.Diagnostics
     //
     // A negative ramification of this is that if a process exits, but there are outstanding wait handles 
     // handed out (and rooted, so they can't be GC'd), and then a new process is created and the pid is recycled, 
-    // new calls to get that process's wait state will get the old processe's wait state.  However, pid recycling
+    // new calls to get that process's wait state will get the old process's wait state.  However, pid recycling
     // will be a more general issue, since pids are the only identifier we have to a process, so if a Process
     // object is created for a particular pid, then that process goes away and a new one comes in with the same pid,
     // our Process object will silently switch to referring to the new pid.  Unix systems typically have a simple
@@ -146,7 +147,7 @@ namespace System.Diagnostics
         }
 
         /// <summary>
-        /// Synchroniation object used to protect all instance state.  Any number of
+        /// Synchronization object used to protect all instance state.  Any number of
         /// Process and ProcessWaitHandle objects may be using a ProcessWaitState
         /// instance concurrently.
         /// </summary>
@@ -292,82 +293,73 @@ namespace System.Diagnostics
             Debug.Assert(Monitor.IsEntered(_gate));
             Debug.Assert(!blockingAllowed); // see "PERF NOTE" comment in WaitForExit
 
-            while (true) // in case of EINTR during system call
+            // Try to get the state of the (child) process
+            int status;
+            int waitResult = Interop.Sys.WaitPid(_processId, out status,
+                blockingAllowed ? Interop.Sys.WaitPidOptions.None : Interop.Sys.WaitPidOptions.WNOHANG);
+
+            if (waitResult == _processId)
             {
-                // Try to get the state of the (child) process
-                int status;
-                int waitResult = Interop.Sys.WaitPid(_processId, out status,
-                    blockingAllowed ? Interop.Sys.WaitPidOptions.None : Interop.Sys.WaitPidOptions.WNOHANG);
-
-                if (waitResult == _processId)
+                // Process has exited
+                if (Interop.Sys.WIfExited(status))
                 {
-                    // Process has exited
-                    if (Interop.Sys.WIfExited(status))
-                    {
-                        _exitCode = Interop.Sys.WExitStatus(status);
-                    }
-                    else if (Interop.Sys.WIfSignaled(status))
-                    {
-                        const int ExitCodeSignalOffset = 128;
-                        _exitCode = ExitCodeSignalOffset + Interop.Sys.WTermSig(status);
-                    }
-                    SetExited();
-                    return;
+                    _exitCode = Interop.Sys.WExitStatus(status);
                 }
-                else if (waitResult == 0)
+                else if (Interop.Sys.WIfSignaled(status))
                 {
-                    // Process is still running
-                    return;
+                    const int ExitCodeSignalOffset = 128;
+                    _exitCode = ExitCodeSignalOffset + Interop.Sys.WTermSig(status);
                 }
-                else if (waitResult == -1)
-                {
-                    // Something went wrong, e.g. it's not a child process,
-                    // or waitpid was already called for this child, or
-                    // that the call was interrupted by a signal.
-                    Interop.Error errno = Interop.Sys.GetLastError();
-                    if (errno == Interop.Error.EINTR)
-                    {
-                        // waitpid was interrupted. Try again.
-                        continue;
-                    }
-                    else if (errno == Interop.Error.ECHILD)
-                    {
-                        // waitpid was used with a non-child process.  We won't be
-                        // able to get an exit code, but we'll at least be able 
-                        // to determine if the process is still running (assuming
-                        // there's not a race on its id).
-                        int killResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.None); // None means don't send a signal
-                        if (killResult == 0)
-                        {
-                            // Process is still running.  This could also be a defunct process that has completed
-                            // its work but still has an entry in the processes table due to its parent not yet
-                            // having waited on it to clean it up.
-                            return;
-                        }
-                        else // error from kill
-                        {
-                            errno = Interop.Sys.GetLastError();
-                            if (errno == Interop.Error.ESRCH)
-                            {
-                                // Couldn't find the process; assume it's exited
-                                SetExited();
-                                return;
-                            }
-                            else if (errno == Interop.Error.EPERM)
-                            {
-                                // Don't have permissions to the process; assume it's alive
-                                return;
-                            }
-                            else Debug.Fail("Unexpected errno value from kill");
-                        }
-                    }
-                    else Debug.Fail("Unexpected errno value from waitpid");
-                }
-                else Debug.Fail("Unexpected process ID from waitpid.");
-
                 SetExited();
                 return;
             }
+            else if (waitResult == 0)
+            {
+                // Process is still running
+                return;
+            }
+            else if (waitResult == -1)
+            {
+                // Something went wrong, e.g. it's not a child process,
+                // or waitpid was already called for this child, or
+                // that the call was interrupted by a signal.
+                Interop.Error errno = Interop.Sys.GetLastError();
+                if (errno == Interop.Error.ECHILD)
+                {
+                    // waitpid was used with a non-child process.  We won't be
+                    // able to get an exit code, but we'll at least be able 
+                    // to determine if the process is still running (assuming
+                    // there's not a race on its id).
+                    int killResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.None); // None means don't send a signal
+                    if (killResult == 0)
+                    {
+                        // Process is still running.  This could also be a defunct process that has completed
+                        // its work but still has an entry in the processes table due to its parent not yet
+                        // having waited on it to clean it up.
+                        return;
+                    }
+                    else // error from kill
+                    {
+                        errno = Interop.Sys.GetLastError();
+                        if (errno == Interop.Error.ESRCH)
+                        {
+                            // Couldn't find the process; assume it's exited
+                            SetExited();
+                            return;
+                        }
+                        else if (errno == Interop.Error.EPERM)
+                        {
+                            // Don't have permissions to the process; assume it's alive
+                            return;
+                        }
+                        else Debug.Fail("Unexpected errno value from kill");
+                    }
+                }
+                else Debug.Fail("Unexpected errno value from waitpid");
+            }
+            else Debug.Fail("Unexpected process ID from waitpid.");
+
+            SetExited();
         }
 
         /// <summary>Waits for the associated process to exit.</summary>
@@ -438,7 +430,7 @@ namespace System.Diagnostics
                         // PERF NOTE:
                         // At the moment, we never call CheckForExit(true) (which in turn allows
                         // waitpid to block until the child has completed) because we currently call it while
-                        // holdling the _gate lock.  This is probably unnecessary in some situations, and in particular
+                        // holding the _gate lock.  This is probably unnecessary in some situations, and in particular
                         // here if remainingTimeout == Timeout.Infinite. In that case, we should be able to set
                         // _waitInProgress to be a TaskCompletionSource task, and then below outside of the lock
                         // we could do a CheckForExit(blockingAllowed:true) and complete the TaskCompletionSource

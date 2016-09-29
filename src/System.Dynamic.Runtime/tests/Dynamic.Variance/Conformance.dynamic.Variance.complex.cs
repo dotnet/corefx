@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -8,7 +9,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.Variance.complex.Twondo
     using ManagedTests.DynamicCSharp.Conformance.dynamic.Variance.complex.Twondorder01.Twondorder01;
 
     // <Area>variance</Area>
-    // <Title> Higer order variance</Title>
+    // <Title> Higher order variance</Title>
     // <Description> 2nd order generic types </Description>
     // <RelatedBugs></RelatedBugs>
     // <Expects status=success></Expects>
@@ -76,7 +77,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.Variance.complex.Twondo
     using ManagedTests.DynamicCSharp.Conformance.dynamic.Variance.complex.Twondorder02.Twondorder02;
 
     // <Area>variance</Area>
-    // <Title> Higer order variance</Title>
+    // <Title> Higher order variance</Title>
     // <Description>declaration tests on interfaces -  2nd order generic types on return type, invariant => contravariant</Description>
     // <RelatedBugs></RelatedBugs>
     // <Expects status=success></Expects>

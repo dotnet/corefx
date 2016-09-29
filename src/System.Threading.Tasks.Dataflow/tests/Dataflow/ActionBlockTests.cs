@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Linq;
 using Xunit;
@@ -172,17 +173,17 @@ namespace System.Threading.Tasks.Dataflow.Tests
             {
                 var scheduler = new ConcurrentExclusiveSchedulerPair().ExclusiveScheduler;
 
-                var sync = new ActionBlock<int>(_ => Assert.Equal(scheduler.Id, TaskScheduler.Current.Id),
+                var actionBlockSync = new ActionBlock<int>(_ => Assert.Equal(scheduler.Id, TaskScheduler.Current.Id),
                     new ExecutionDataflowBlockOptions 
                     { 
                         TaskScheduler = scheduler,
                         SingleProducerConstrained = singleProducerConstrained
                     });
-                sync.PostRange(0, 10);
-                sync.Complete();
-                await sync.Completion;
+                actionBlockSync.PostRange(0, 10);
+                actionBlockSync.Complete();
+                await actionBlockSync.Completion;
 
-                var async = new ActionBlock<int>(_ => {
+                var actionBlockAsync = new ActionBlock<int>(_ => {
                     Assert.Equal(scheduler.Id, TaskScheduler.Current.Id);
                     return Task.FromResult(0);
                 }, new ExecutionDataflowBlockOptions
@@ -190,9 +191,9 @@ namespace System.Threading.Tasks.Dataflow.Tests
                         TaskScheduler = scheduler,
                         SingleProducerConstrained = singleProducerConstrained
                     });
-                async.PostRange(0, 10);
-                async.Complete();
-                await async.Completion;
+                actionBlockAsync.PostRange(0, 10);
+                actionBlockAsync.Complete();
+                await actionBlockAsync.Completion;
             }
         }
 

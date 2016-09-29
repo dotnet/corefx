@@ -1,10 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
+    /// <summary>
+    /// Lexical scope within which a group of imports are available. Stored in debug metadata.
+    /// </summary>
+    /// <remarks>
+    /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#importscope-table-0x35
+    /// </remarks>
     public struct ImportScope
     {
         private readonly MetadataReader _reader;
@@ -21,30 +28,14 @@ namespace System.Reflection.Metadata
             _rowId = handle.RowId;
         }
 
-        private ImportScopeHandle Handle
-        {
-            get { return ImportScopeHandle.FromRowId(_rowId); }
-        }
+        private ImportScopeHandle Handle => ImportScopeHandle.FromRowId(_rowId);
 
-        public ImportScopeHandle Parent
-        {
-            get
-            {
-                return _reader.ImportScopeTable.GetParent(Handle);
-            }
-        }
-
-        public BlobHandle ImportsBlob
-        {
-            get
-            {
-                return _reader.ImportScopeTable.GetImports(Handle);
-            }
-        }
+        public ImportScopeHandle Parent => _reader.ImportScopeTable.GetParent(Handle);
+        public BlobHandle ImportsBlob => _reader.ImportScopeTable.GetImports(Handle);
 
         public ImportDefinitionCollection GetImports()
         {
-            return new ImportDefinitionCollection(_reader.BlobStream.GetMemoryBlock(ImportsBlob));
+            return new ImportDefinitionCollection(_reader.BlobHeap.GetMemoryBlock(ImportsBlob));
         }
     }
 }

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -60,6 +61,7 @@ internal partial class Interop
         public const ushort INTERNET_DEFAULT_HTTPS_PORT = 443;
 
         public const uint WINHTTP_FLAG_SECURE = 0x00800000;
+        public const uint WINHTTP_FLAG_ESCAPE_DISABLE = 0x00000040;
 
         public const StringBuilder WINHTTP_NO_ADDITIONAL_HEADERS = null;
 
@@ -70,6 +72,7 @@ internal partial class Interop
         public const uint WINHTTP_QUERY_RAW_HEADERS = 21;
         public const uint WINHTTP_QUERY_RAW_HEADERS_CRLF = 22;
         public const uint WINHTTP_QUERY_CONTENT_ENCODING = 29;
+        public const uint WINHTTP_QUERY_SET_COOKIE = 43;
         public const uint WINHTTP_QUERY_CUSTOM = 65535;
         public const string WINHTTP_HEADER_NAME_BY_INDEX = null;
         public const byte[] WINHTTP_NO_OUTPUT_BUFFER = null;
@@ -147,6 +150,10 @@ internal partial class Interop
 
         public const uint WINHTTP_OPTION_ASSURED_NON_BLOCKING_CALLBACKS = 111;
 
+        public const uint WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL = 133;
+        public const uint WINHTTP_OPTION_HTTP_PROTOCOL_USED = 134;
+        public const uint WINHTTP_PROTOCOL_FLAG_HTTP2 = 0x1;
+
         public const uint WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET = 114;
         public const uint WINHTTP_OPTION_WEB_SOCKET_CLOSE_TIMEOUT = 115;
         public const uint WINHTTP_OPTION_WEB_SOCKET_KEEPALIVE_INTERVAL = 116;
@@ -193,6 +200,29 @@ internal partial class Interop
         public const uint WINHTTP_CALLBACK_STATUS_CLOSE_COMPLETE = 0x02000000;
         public const uint WINHTTP_CALLBACK_STATUS_SHUTDOWN_COMPLETE = 0x04000000;
 
+        public const uint WINHTTP_CALLBACK_FLAG_SEND_REQUEST =
+            WINHTTP_CALLBACK_STATUS_SENDING_REQUEST |
+            WINHTTP_CALLBACK_STATUS_REQUEST_SENT;
+        public const uint WINHTTP_CALLBACK_FLAG_HANDLES =
+            WINHTTP_CALLBACK_STATUS_HANDLE_CREATED |
+            WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING;
+        public const uint WINHTTP_CALLBACK_FLAG_REDIRECT = WINHTTP_CALLBACK_STATUS_REDIRECT;
+        public const uint WINHTTP_CALLBACK_FLAG_SECURE_FAILURE = WINHTTP_CALLBACK_STATUS_SECURE_FAILURE;
+        public const uint WINHTTP_CALLBACK_FLAG_SENDREQUEST_COMPLETE = WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE;
+        public const uint WINHTTP_CALLBACK_FLAG_HEADERS_AVAILABLE = WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE;
+        public const uint WINHTTP_CALLBACK_FLAG_DATA_AVAILABLE = WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE;
+        public const uint WINHTTP_CALLBACK_FLAG_READ_COMPLETE = WINHTTP_CALLBACK_STATUS_READ_COMPLETE;
+        public const uint WINHTTP_CALLBACK_FLAG_WRITE_COMPLETE = WINHTTP_CALLBACK_STATUS_WRITE_COMPLETE;
+        public const uint WINHTTP_CALLBACK_FLAG_REQUEST_ERROR = WINHTTP_CALLBACK_STATUS_REQUEST_ERROR;
+        public const uint WINHTTP_CALLBACK_FLAG_GETPROXYFORURL_COMPLETE = WINHTTP_CALLBACK_STATUS_GETPROXYFORURL_COMPLETE;
+        public const uint WINHTTP_CALLBACK_FLAG_ALL_COMPLETIONS =
+            WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE |
+            WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE |
+            WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE |
+            WINHTTP_CALLBACK_STATUS_READ_COMPLETE |
+            WINHTTP_CALLBACK_STATUS_WRITE_COMPLETE |
+            WINHTTP_CALLBACK_STATUS_REQUEST_ERROR |
+            WINHTTP_CALLBACK_STATUS_GETPROXYFORURL_COMPLETE;
         public const uint WINHTTP_CALLBACK_FLAG_ALL_NOTIFICATIONS = 0xFFFFFFFF;
 
         public const uint WININET_E_CONNECTION_RESET = 0x80072EFF;

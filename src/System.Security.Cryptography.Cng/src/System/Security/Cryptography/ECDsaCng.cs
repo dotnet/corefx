@@ -1,8 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Diagnostics;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Internal.Cryptography;
 
@@ -10,23 +8,7 @@ namespace System.Security.Cryptography
 {
     public sealed partial class ECDsaCng : ECDsa
     {
-        /// <summary>
-        ///     Create an ECDsaCng algorithm with a random 521 bit key pair.
-        /// </summary>
-        public ECDsaCng()
-            : this(521)
-        {
-        }
-
-        /// <summary>
-        ///     Creates a new ECDsaCng object that will use a randomly generated key of the specified size.
-        /// </summary>
-        /// <param name="keySize">Size of the key to generate, in bits.</param>
-        /// <exception cref="CryptographicException">if <paramref name="keySize" /> is not valid</exception>
-        public ECDsaCng(int keySize)
-        {
-            KeySize = keySize;
-        }
+        private CngAlgorithmCore _core;
 
         /// <summary>
         ///     Creates a new ECDsaCng object that will use the specified key. The key's
@@ -40,20 +22,12 @@ namespace System.Security.Cryptography
         public ECDsaCng(CngKey key)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
-            if (key.AlgorithmGroup != CngAlgorithmGroup.ECDsa)
-                throw new ArgumentException(SR.Cryptography_ArgECDsaRequiresECDsaKey, "key");
+            if (!IsEccAlgorithmGroup(key.AlgorithmGroup))
+                throw new ArgumentException(SR.Cryptography_ArgECDsaRequiresECDsaKey, nameof(key));
 
             Key = CngAlgorithmCore.Duplicate(key);
-        }
-
-        public override KeySizes[] LegalKeySizes
-        {
-            get
-            {
-                return (KeySizes[])(s_legalKeySizes.Clone());
-            }
         }
 
         protected override void Dispose(bool disposing)
@@ -61,16 +35,56 @@ namespace System.Security.Cryptography
             _core.Dispose();
         }
 
-        private CngAlgorithmCore _core;
+        private void DisposeKey()
+        {
+            _core.DisposeKey();
+        }
 
-        // See https://msdn.microsoft.com/en-us/library/windows/desktop/bb931354(v=vs.85).aspx
-        private static readonly KeySizes[] s_legalKeySizes =
-            new KeySizes[]
-            {
-                // All values are in bits.
-                new KeySizes(minSize: 256, maxSize: 384, skipSize: 128),
-                new KeySizes(minSize: 521, maxSize: 521, skipSize: 0),
-            };
+        private static bool IsEccAlgorithmGroup(CngAlgorithmGroup algorithmGroup)
+        {
+            // Sometimes, when reading from certificates, ECDSA keys get identified as ECDH.
+            // Windows allows the ECDH keys to perform both key exchange (ECDH) and signing (ECDSA),
+            // so either value is acceptable for the ECDSA wrapper object.
+            //
+            // It is worth noting, however, that ECDSA-identified keys cannot be used for key exchange (ECDH) in CNG.
+            return algorithmGroup == CngAlgorithmGroup.ECDsa || algorithmGroup == CngAlgorithmGroup.ECDiffieHellman;
+        }
+
+        internal string GetCurveName()
+        {
+            return Key.GetCurveName();
+        }
+
+        private void ImportFullKeyBlob(byte[] ecfullKeyBlob, bool includePrivateParameters)
+        {
+#if !NETNATIVE
+            Key = ECCng.ImportFullKeyBlob(ecfullKeyBlob, includePrivateParameters);
+#endif //!NETNATIVE
+        }
+
+        private void ImportKeyBlob(byte[] ecfullKeyBlob, string curveName, bool includePrivateParameters)
+        {
+#if !NETNATIVE
+            Key = ECCng.ImportKeyBlob(ecfullKeyBlob, curveName, includePrivateParameters);
+#endif //!NETNATIVE
+        }
+
+        private byte[] ExportKeyBlob(bool includePrivateParameters)
+        {
+#if NETNATIVE
+            return null;
+#else
+            return ECCng.ExportKeyBlob(Key, includePrivateParameters);
+#endif //NETNATIVE
+        }
+
+        private byte[] ExportFullKeyBlob(bool includePrivateParameters)
+        {
+#if NETNATIVE
+            return null;
+#else
+            return ECCng.ExportFullKeyBlob(Key, includePrivateParameters);
+#endif //NETNATIVE
+        }
     }
 }
-

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace System.Collections.Immutable.Tests
         {
             var builder = this.GetBuilder<string, int>();
             builder.Add("five", 5);
-            Assert.Throws<ArgumentException>(() => builder.Add("five", 6));
+            Assert.Throws<ArgumentException>(null, () => builder.Add("five", 6));
         }
 
         [Fact]
@@ -103,7 +104,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(new KeyValuePair<string, int>(), array[0]);
             Assert.Equal(new KeyValuePair<string, int>("five", 5), array[1]);
 
-            Assert.Throws<ArgumentNullException>(() => builder.CopyTo(null, 0));
+            Assert.Throws<ArgumentNullException>("array", () => builder.CopyTo(null, 0));
         }
 
         [Fact]

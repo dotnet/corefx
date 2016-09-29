@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
 using System.Diagnostics;
@@ -9,16 +10,35 @@ using System.Text.Unicode;
 
 namespace System.Text.Encodings.Web
 {
+    /// <summary>
+    /// Represents a type used to do HTML encoding.
+    /// </summary>
     public abstract class HtmlEncoder : TextEncoder
     {
+        /// <summary>
+        /// Returns a default built-in instance of <see cref="HtmlEncoder"/>.
+        /// </summary>
         public static HtmlEncoder Default
         {
             get { return DefaultHtmlEncoder.Singleton; }
         }
+
+        /// <summary>
+        /// Creates a new instance of HtmlEncoder with provided settings.
+        /// </summary>
+        /// <param name="settings">Settings used to control how the created <see cref="HtmlEncoder"/> encodes, primarily which characters to encode.</param>
+        /// <returns>A new instance of the <see cref="HtmlEncoder"/>.</returns>
         public static HtmlEncoder Create(TextEncoderSettings settings)
         {
             return new DefaultHtmlEncoder(settings);
         }
+
+        /// <summary>
+        /// Creates a new instance of HtmlEncoder specifying character to be encoded.
+        /// </summary>
+        /// <param name="allowedRanges">Set of characters that the encoder is allowed to not encode.</param>
+        /// <returns>A new instance of the <see cref="HtmlEncoder"/></returns>
+        /// <remarks>Some characters in <paramref name="allowedRanges"/> might still get encoded, i.e. this parameter is just telling the encoder what ranges it is allowed to not encode, not what characters it must not encode.</remarks> 
         public static HtmlEncoder Create(params UnicodeRange[] allowedRanges)
         {
             return new DefaultHtmlEncoder(allowedRanges);
@@ -34,7 +54,7 @@ namespace System.Text.Encodings.Web
         {
             if (filter == null)
             {
-                throw new ArgumentNullException("filter");
+                throw new ArgumentNullException(nameof(filter));
             }
 
             _allowedCharacters = filter.GetAllowedCharacters();
@@ -74,7 +94,7 @@ namespace System.Text.Encodings.Web
 
         public override int MaxOutputCharactersPerInputCharacter
         {
-            get { return 8; } // "&#xFFFF;" is the longest encoded form 
+            get { return 9; } // "&#xFFFFF;" is the longest encoded form
         }
 
         static readonly char[] s_quote = "&quot;".ToCharArray();
@@ -86,7 +106,7 @@ namespace System.Text.Encodings.Web
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }

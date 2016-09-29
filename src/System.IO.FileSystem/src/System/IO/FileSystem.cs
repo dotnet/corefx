@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 
@@ -17,6 +18,7 @@ namespace System.IO
 
         // File
         public abstract void CopyFile(string sourceFullPath, string destFullPath, bool overwrite);
+        public abstract void ReplaceFile(string sourceFullPath, string destFullPath, string destBackupFullPath, bool ignoreMetadataErrors);
         public abstract void DeleteFile(string fullPath);
         public abstract bool FileExists(string fullPath);
         public abstract FileStreamBase Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent);
@@ -42,5 +44,8 @@ namespace System.IO
         public abstract void SetCurrentDirectory(string fullPath);
         public abstract int MaxPath { get; }
         public abstract int MaxDirectoryPath { get; }
+
+        // Volume
+        public abstract string[] GetLogicalDrives();
     }
 }

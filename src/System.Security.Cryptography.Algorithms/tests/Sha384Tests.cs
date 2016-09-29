@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -10,6 +11,14 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         protected override HashAlgorithm Create()
         {
             return SHA384.Create();
+        }
+
+        [Fact]
+        public void Sha384_Empty()
+        {
+            Verify(
+                Array.Empty<byte>(),
+                "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA274EDEBFE76F65FBD51AD2F14898B95B");
         }
 
         // These test cases are from http://csrc.nist.gov/groups/ST/toolkit/documents/Examples/SHA_All.pdf

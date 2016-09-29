@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 //
 // This is used internally to create best fit behavior as per the original windows best fit behavior.
@@ -116,10 +117,10 @@ namespace System.Text
         {
             // Double check input surrogate pair
             if (!Char.IsHighSurrogate(charUnknownHigh))
-                throw new ArgumentOutOfRangeException("charUnknownHigh", SR.Format(SR.ArgumentOutOfRange_Range, 0xD800, 0xDBFF));
+                throw new ArgumentOutOfRangeException(nameof(charUnknownHigh), SR.Format(SR.ArgumentOutOfRange_Range, 0xD800, 0xDBFF));
 
             if (!Char.IsLowSurrogate(charUnknownLow))
-                throw new ArgumentOutOfRangeException("CharUnknownLow", SR.Format(SR.ArgumentOutOfRange_Range, 0xDC00, 0xDFFF));
+                throw new ArgumentOutOfRangeException(nameof(charUnknownLow), SR.Format(SR.ArgumentOutOfRange_Range, 0xDC00, 0xDFFF));
             Contract.EndContractBlock();
 
             // If we had a buffer already we're being recursive, throw, it's probably at the suspect

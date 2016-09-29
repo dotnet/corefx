@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
 using Xunit;
@@ -136,7 +137,7 @@ namespace System.Reflection.Tests
             // =========================================================
             //[FieldOffset(0x0f)] 
             // which will cause failures on cross-domain invocation. 
-            // also vsw#530141: System.DataMisalignedException thrown when compaing structs with StructLayout attribute
+            // also vsw#530141: System.DataMisalignedException thrown when comparing structs with StructLayout attribute
             // =========================================================
             [FieldOffset(0x10)]
             public int Field15;

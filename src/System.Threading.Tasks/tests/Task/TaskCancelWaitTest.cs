@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Summary:
 // Implements the exhaustive task cancel and wait scenarios.
@@ -27,7 +28,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
         private TaskInfo _taskTree;                     // the _taskTree to track child task cancellation option
 
-        private static readonly int s_delatTimeOut = 100;
+        private static readonly int s_deltaTimeOut = 10;
 
         private bool _taskCompleted;                    // result to record the Wait(timeout) return value
         private AggregateException _caughtException;    // exception thrown during wait
@@ -99,12 +100,12 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
             if (_waitTimeout != -1)
             {
-                long delta = sw.ElapsedMilliseconds - ((long)_waitTimeout + s_delatTimeOut);
+                long delta = sw.ElapsedMilliseconds - ((long)_waitTimeout + s_deltaTimeOut);
 
                 if (delta > 0)
                 {
                     Debug.WriteLine("ElapsedMilliseconds way more than requested Timeout.");
-                    Debug.WriteLine("WaitTime= {0} ms, ElapsedTime= {1} ms, Allowed Descrepancy = {2} ms", _waitTimeout, sw.ElapsedMilliseconds, s_delatTimeOut);
+                    Debug.WriteLine("WaitTime= {0} ms, ElapsedTime= {1} ms, Allowed Descrepancy = {2} ms", _waitTimeout, sw.ElapsedMilliseconds, s_deltaTimeOut);
                     Debug.WriteLine("Delta= {0} ms", delta);
                 }
                 else
@@ -676,11 +677,11 @@ namespace System.Threading.Tasks.Tests.CancelWait
     {
         Exceptional = -2,
         Cancelled = -1,
-        VeryLight = 1000,     // the number is the N input to the ZetaSequence workload
-        Light = 5000,
-        Medium = 100000,
-        Heavy = 500000,
-        VeryHeavy = 1000000,
+        VeryLight = 100,     // the number is the N input to the ZetaSequence workload
+        Light = 200,
+        Medium = 400,
+        Heavy = 800,
+        VeryHeavy = 1600,
     }
 
     #endregion

@@ -1,5 +1,6 @@
-' Copyright (c) Microsoft. All rights reserved.
-' Licensed under the MIT license. See LICENSE file in the project root for full license information.
+' Licensed to the .NET Foundation under one or more agreements.
+' The .NET Foundation licenses this file to you under the MIT license.
+' See the LICENSE file in the project root for more information.
 
 Option Strict On
 
@@ -1564,7 +1565,7 @@ RetryInference:
 
                 Debug.Assert(parameters.Length > 0, "expected some parameters here")  'Candidate collection guarantees this.
 
-                'The named argument mapping table contains indicies into the
+                'The named argument mapping table contains indices into the
                 'parameters array to describe the association between arguments
                 'and parameters.
                 '
@@ -1787,7 +1788,7 @@ skipargument:
 
                 Debug.Assert(parameters.Length > 0, "expected some parameters here")  'Candidate collection guarantees this.
 
-                'The named argument mapping table contains indicies into the
+                'The named argument mapping table contains indices into the
                 'parameters array to describe the association between arguments
                 'and parameters.
                 '

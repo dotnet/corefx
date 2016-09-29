@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Reflection.Metadata.Ecma335
 {
@@ -60,10 +61,5 @@ namespace System.Reflection.Metadata.Ecma335
         ImportScope = 0x35,
         StateMachineMethod = 0x36,
         CustomDebugInformation = 0x37,
-    }
-
-    internal static class TableIndexExtensions
-    {
-        internal const int Count = (int)TableIndex.CustomDebugInformation + 1;
     }
 }

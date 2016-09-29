@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -42,7 +43,7 @@ namespace System.Diagnostics
         public TextWriterTraceListener(Stream stream, string name)
             : base(name)
         {
-            if (stream == null) throw new ArgumentNullException("stream");
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
             this.writer = new StreamWriter(stream);
         }
 
@@ -64,7 +65,7 @@ namespace System.Diagnostics
         public TextWriterTraceListener(TextWriter writer, string name)
             : base(name)
         {
-            if (writer == null) throw new ArgumentNullException("writer");
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
             this.writer = writer;
         }
 

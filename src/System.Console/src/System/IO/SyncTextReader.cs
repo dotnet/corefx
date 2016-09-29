@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -11,6 +12,7 @@ namespace System.IO
     /* SyncTextReader intentionally locks on itself rather than a private lock object.
      * This is done to synchronize different console readers(Issue#2855).
      */
+    [Serializable]
     internal sealed partial class SyncTextReader : TextReader
     {
         internal readonly TextReader _in;
@@ -54,7 +56,7 @@ namespace System.IO
             }
         }
 
-        public override int Read([In, Out] char[] buffer, int index, int count)
+        public override int Read(char[] buffer, int index, int count)
         {
             lock (this)
             {
@@ -62,7 +64,7 @@ namespace System.IO
             }
         }
 
-        public override int ReadBlock([In, Out] char[] buffer, int index, int count)
+        public override int ReadBlock(char[] buffer, int index, int count)
         {
             lock (this)
             {
@@ -104,9 +106,9 @@ namespace System.IO
         public override Task<int> ReadBlockAsync(char[] buffer, int index, int count)
         {
             if (buffer == null)
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             if (index < 0 || count < 0)
-                throw new ArgumentOutOfRangeException((index < 0 ? "index" : "count"), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - index < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             Contract.EndContractBlock();
@@ -117,9 +119,9 @@ namespace System.IO
         public override Task<int> ReadAsync(char[] buffer, int index, int count)
         {
             if (buffer == null)
-                throw new ArgumentNullException("buffer", SR.ArgumentNull_Buffer);
+                throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
             if (index < 0 || count < 0)
-                throw new ArgumentOutOfRangeException((index < 0 ? "index" : "count"), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - index < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             Contract.EndContractBlock();

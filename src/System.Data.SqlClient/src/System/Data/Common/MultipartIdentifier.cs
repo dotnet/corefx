@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -39,10 +40,10 @@ namespace System.Data.Common
             MPI_RightQuote,
         }
 
-        /* Core function  for parsing the multipart identifer string.
-            * paramaters: name - string to parse
-            * leftquote:  set of characters which are valid quoteing characters to initiate a quote
-            * rightquote: set of characters which are valid to stop a quote, array index's correspond to the the leftquote array.
+        /* Core function  for parsing the multipart identifier string.
+            * parameters: name - string to parse
+            * leftquote:  set of characters which are valid quoting characters to initiate a quote
+            * rightquote: set of characters which are valid to stop a quote, array index's correspond to the leftquote array.
             * separator:  separator to use
             * limit:      number of names to parse out
             * removequote:to remove the quotes on the returned string 
@@ -77,7 +78,7 @@ namespace System.Data.Common
 
             string[] parsedNames = new string[limit];   // return string array                     
             int stringCount = 0;                        // index of current string in the buffer
-            MPIState state = MPIState.MPI_Value;        // Initalize the starting state
+            MPIState state = MPIState.MPI_Value;        // Initialize the starting state
 
             StringBuilder sb = new StringBuilder(name.Length); // String buffer to hold the string being currently built, init the string builder so it will never be resized
             StringBuilder whitespaceSB = null;                  // String buffer to hold white space used when parsing nonquoted strings  'a b .  c d' = 'a b' and 'c d'
@@ -96,8 +97,8 @@ namespace System.Data.Common
                             }
                             else
                             if (testchar == separator)
-                            {  // If we found a separator, no string was found, initalize the string we are parsing to Empty and the next one to Empty.
-                               // This is NOT a redundent setting of string.Empty it solves the case where we are parsing ".foo" and we should be returning null, null, empty, foo
+                            {  // If we found a separator, no string was found, initialize the string we are parsing to Empty and the next one to Empty.
+                               // This is NOT a redundant setting of string.Empty it solves the case where we are parsing ".foo" and we should be returning null, null, empty, foo
                                 parsedNames[stringCount] = string.Empty;
                                 IncrementStringCount(name, parsedNames, ref stringCount, property);
                             }
@@ -190,7 +191,7 @@ namespace System.Data.Common
                     case MPIState.MPI_ParseQuote:
                         {
                             if (testchar == rightQuoteChar)
-                            {    // if se are on a right quote see if we are escapeing the right quote or ending the quoted string                            
+                            {    // if se are on a right quote see if we are escaping the right quote or ending the quoted string                            
                                 if (!removequotes)
                                 {
                                     sb.Append(testchar);
@@ -207,7 +208,7 @@ namespace System.Data.Common
                     case MPIState.MPI_RightQuote:
                         {
                             if (testchar == rightQuoteChar)
-                            { // If the next char is a another right quote then we were escapeing the right quote
+                            { // If the next char is a another right quote then we were escaping the right quote
                                 sb.Append(testchar);
                                 state = MPIState.MPI_ParseQuote;
                             }
@@ -241,7 +242,7 @@ namespace System.Data.Common
                                     state = MPIState.MPI_Value;
                                 }
                                 else
-                                { // Othewise not a separator
+                                { // Otherwise not a separator
                                     throw ADP.InvalidMultipartNameIncorrectUsageOfQuotes(property, name);
                                 }
                             }
@@ -277,7 +278,7 @@ namespace System.Data.Common
             }
             else
             {
-                // Shuffle the parsed name, from left justification to right justification, ie [a][b][null][null] goes to [null][null][a][b]
+                // Shuffle the parsed name, from left justification to right justification, i.e. [a][b][null][null] goes to [null][null][a][b]
                 int offset = limit - stringCount - 1;
                 if (offset > 0)
                 {

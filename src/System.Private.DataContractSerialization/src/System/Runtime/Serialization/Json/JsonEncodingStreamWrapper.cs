@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 #pragma warning disable 1634 // Stops compiler from warning about unknown warnings (for Presharp)
 
 using System.IO;
 using System.Text;
 using System.Xml;
-using System.Security;
 
 namespace System.Runtime.Serialization.Json
 {
@@ -15,12 +15,6 @@ namespace System.Runtime.Serialization.Json
     // ASSUMPTION (Microsoft): This class will only be used for EITHER reading OR writing.  It can be done, it would just mean more buffers.
     internal class JsonEncodingStreamWrapper : Stream
     {
-        private static readonly UnicodeEncoding s_safeBEUTF16 = new UnicodeEncoding(true, false, false);
-
-        private static readonly UnicodeEncoding s_safeUTF16 = new UnicodeEncoding(false, false, false);
-
-        private static readonly UTF8Encoding s_safeUTF8 = new UTF8Encoding(false, false);
-
         private static readonly UnicodeEncoding s_validatingBEUTF16 = new UnicodeEncoding(true, false, true);
 
         private static readonly UnicodeEncoding s_validatingUTF16 = new UnicodeEncoding(false, false, true);
@@ -53,7 +47,7 @@ namespace System.Runtime.Serialization.Json
             {
                 if (encoding == null)
                 {
-                    throw new ArgumentNullException("encoding");
+                    throw new ArgumentNullException(nameof(encoding));
                 }
 
                 InitForWriting(stream, encoding);

@@ -13,24 +13,35 @@
     <CompileItem Include="$(CommonPath)\Interop\Windows\winhttp\Interop.SafeWinHttpHandle.cs" />
     <CompileItem Include="$(CommonPath)\Interop\Windows\winhttp\Interop.winhttp_types.cs" />
     <CompileItem Include="$(CommonPath)\Interop\Windows\winhttp\Interop.winhttp.cs" />
-    <CompileItem Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" />
+    <CompileItem Include="$(CommonPath)\System\CharArrayHelpers.cs" />
     <CompileItem Include="$(CommonPath)\System\StringExtensions.cs" />
-    <CompileItem Include="$(CommonPath)\System\Net\HttpVersion.cs" />
+    <CompileItem Include="$(CommonPath)\System\Diagnostics\ExceptionExtensions.cs" />
+    <CompileItem Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.cs" />
+    <CompileItem Include="$(CommonPath)\System\Net\HttpKnownHeaderNames.TryGetHeaderName.cs" />
     <CompileItem Include="$(CommonPath)\System\Net\UriScheme.cs" />
     <CompileItem Include="$(CommonPath)\System\Net\SecurityProtocol.cs" />
     <CompileItem Include="$(CommonPath)\System\Net\Http\HttpHandlerDefaults.cs" />
+    <CompileItem Include="$(CommonPath)\System\Net\Http\HttpHandlerDiagnosticListenerExtensions.cs" />
+    <CompileItem Include="$(CommonPath)\System\Net\Http\HttpHandlerLoggingStrings.cs" />
     <CompileItem Include="$(CommonPath)\System\Net\Http\WinHttpException.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpAuthHelper.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpCertificateHelper.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpChannelBinding.cs" />
+    <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpCookieContainerAdapter.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpHandler.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpRequestCallback.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpRequestState.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpRequestStream.cs" />
+    <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpResponseHeaderReader.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpResponseParser.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpResponseStream.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpTraceHelper.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinHttpTransportContext.cs" />
     <CompileItem Include="$(MSBuildThisFileDirectory)\System\Net\Http\WinInetProxyHelper.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+    <CompileItem Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" />
+    <CompileItem Include="$(CommonPath)\System\Net\HttpStatusDescription.cs" />
+    <CompileItem Include="$(CommonPath)\System\Net\HttpVersion.cs" />
   </ItemGroup>
 </Project>

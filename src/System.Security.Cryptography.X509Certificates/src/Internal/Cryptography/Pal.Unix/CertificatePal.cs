@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -14,9 +15,9 @@ namespace Internal.Cryptography.Pal
         public static ICertificatePal FromHandle(IntPtr handle)
         {
             if (handle == IntPtr.Zero)
-                throw new ArgumentException(SR.Arg_InvalidHandle, "handle");
+                throw new ArgumentException(SR.Arg_InvalidHandle, nameof(handle));
 
-            return new OpenSslX509CertificateReader(Interop.Crypto.X509Duplicate(handle));
+            return new OpenSslX509CertificateReader(Interop.Crypto.X509UpRef(handle));
         }
 
         public static ICertificatePal FromBlob(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
@@ -127,6 +128,7 @@ namespace Internal.Cryptography.Pal
 
             if (certHandle.IsInvalid)
             {
+                certHandle.Dispose();
                 certPal = null;
                 return false;
             }
@@ -141,6 +143,7 @@ namespace Internal.Cryptography.Pal
 
             if (cert.IsInvalid)
             {
+                cert.Dispose();
                 certPal = null;
                 return false;
             }
@@ -166,6 +169,7 @@ namespace Internal.Cryptography.Pal
 
             if (cert.IsInvalid)
             {
+                cert.Dispose();
                 fromBio = null;
                 return false;
             }

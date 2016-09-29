@@ -1,26 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Windows_Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <ProjectGuid>{16EE5522-F387-4C9E-9EF2-B5134B043F37}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <AssemblyName>System.IO.MemoryMappedFiles</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
-    <UsePackageTargetRuntimeDefaults>true</UsePackageTargetRuntimeDefaults>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
+    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net46'">None</ResourcesSourceOutputDirectory>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
   <!-- Compiled Source Files -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="$(CommonPath)\System\IO\Error.cs">
       <Link>Common\System\IO\Error.cs</Link>
     </Compile>
@@ -33,7 +35,40 @@
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMappedViewStream.cs" />
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMappedFileRights.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == '' ">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GlobalMemoryStatusEx.cs">
+      <Link>Common\Interop\Windows\Interop.GlobalMemoryStatusEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateFileMapping.cs">
+      <Link>Common\Interop\Windows\Interop.CreateFileMapping.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.MapViewOfFile.cs">
+      <Link>Common\Interop\Windows\Interop.MapViewOfFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.OpenFileMapping.cs">
+      <Link>Common\Interop\Windows\Interop.OpenFileMapping.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.VirtualAlloc.cs">
+      <Link>Common\Interop\Windows\Interop.VirtualAlloc.cs</Link>
+    </Compile>
+    <Compile Include="System\IO\MemoryMappedFiles\Interop.Windows.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcore50' ">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateFileMappingFromApp.cs">
+      <Link>Common\Interop\Windows\Interop.CreateFileMappingFromApp.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.MapViewOfFileFromApp.cs">
+      <Link>Common\Interop\Windows\Interop.MapViewOfFileFromApp.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.OpenFileMappingFromApp.cs">
+      <Link>Common\Interop\Windows\Interop.OpenFileMappingFromApp.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.VirtualAllocFromApp.cs">
+      <Link>Common\Interop\Windows\Interop.VirtualAllocFromApp.cs</Link>
+    </Compile>
+    <Compile Include="System\IO\MemoryMappedFiles\Interop.Windows.Uap.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' ">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -45,9 +80,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateFileMapping.cs">
-      <Link>Common\Interop\Windows\Interop.CreateFileMapping.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.EventLogErrors.cs">
       <Link>Common\Interop\Windows\Interop.EventLogErrors.cs</Link>
@@ -70,8 +102,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetSystemInfo.cs">
       <Link>Common\Interop\Windows\Interop.GetSystemInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GlobalMemoryStatusEx.cs">
-      <Link>Common\Interop\Windows\Interop.GlobalMemoryStatusEx.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SYSTEM_INFO.cs">
+      <Link>Common\Interop\Windows\Interop.SYSTEM_INFO.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.HandleOptions.cs">
       <Link>Common\Interop\Windows\Interop.HandleOptions.cs</Link>
@@ -79,17 +111,14 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.MEMORY_BASIC_INFO.cs">
       <Link>Common\Interop\Windows\Interop.MEMORY_BASIC_INFO.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.MapViewOfFile.cs">
-      <Link>Common\Interop\Windows\Interop.MapViewOfFile.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.MemOptions.cs">
       <Link>Common\Interop\Windows\Interop.MemOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.OpenFileMapping.cs">
-      <Link>Common\Interop\Windows\Interop.OpenFileMapping.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.PipeOptions.cs">
       <Link>Common\Interop\Windows\Interop.PipeOptions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs">
       <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
@@ -99,9 +128,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.UnmapViewOfFile.cs">
       <Link>Common\Interop\Windows\Interop.UnmapViewOfFile.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.VirtualAlloc.cs">
-      <Link>Common\Interop\Windows\Interop.VirtualAlloc.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.VirtualQuery.cs">
       <Link>Common\Interop\Windows\Interop.VirtualQuery.cs</Link>
@@ -120,6 +146,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
       <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.SetCloseOnExec.cs">
+      <Link>Common\Interop\Unix\Interop.Fcntl.SetCloseOnExec.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
       <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
@@ -158,23 +187,14 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ShmOpen.cs">
       <Link>Common\Interop\Unix\Interop.ShmOpen.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetEUid.cs">
-      <Link>Common\Interop\Unix\Interop.GetEUid.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPwUid.cs">
-      <Link>Common\Interop\Unix\Interop.GetPwUid.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Unlink.cs">
       <Link>Common\Interop\Unix\Interop.Unlink.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Names.Unix.cs">
-      <Link>Common\System\IO\PersistedFiles.Names.Unix.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Unix.cs">
-      <Link>Common\System\IO\PersistedFiles.Unix.cs</Link>
-    </Compile>
   </ItemGroup>
-  <!-- Resource files -->
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System.Core" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

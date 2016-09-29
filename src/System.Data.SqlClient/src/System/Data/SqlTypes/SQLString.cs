@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //------------------------------------------------------------------------------
@@ -128,7 +129,7 @@ namespace System.Data.SqlTypes
                 }
                 else
                 {
-                    Encoding cpe = LocaleInterop.GetEncodingForLcid(_lcid);
+                    Encoding cpe = Locale.GetEncodingForLcid(_lcid);
                     _value = cpe.GetString(data, index, count);
                 }
             }
@@ -203,7 +204,7 @@ namespace System.Data.SqlTypes
         ///       Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class.
         ///    </para>
         /// </devdoc>
-        public SqlString(String data) : this(data, LocaleInterop.GetCurrentCultureLcid(), s_iDefaultFlag)
+        public SqlString(String data) : this(data, Locale.GetCurrentCultureLcid(), s_iDefaultFlag)
         {
         }
 
@@ -277,7 +278,7 @@ namespace System.Data.SqlTypes
             get
             {
                 if (!IsNull)
-                    return new CultureInfo(LocaleInterop.GetLocaleNameForLcid(_lcid));
+                    return new CultureInfo(Locale.GetLocaleNameForLcid(_lcid));
                 else
                     throw new SqlNullValueException();
             }
@@ -287,7 +288,7 @@ namespace System.Data.SqlTypes
         {
             Debug.Assert(!IsNull);
             if (_cmpInfo == null)
-                _cmpInfo = (new CultureInfo(LocaleInterop.GetLocaleNameForLcid(_lcid))).CompareInfo;
+                _cmpInfo = (new CultureInfo(Locale.GetLocaleNameForLcid(_lcid))).CompareInfo;
         }
 
         /// <devdoc>
@@ -369,7 +370,7 @@ namespace System.Data.SqlTypes
                 return null;
 
             // Get the CultureInfo
-            Encoding cpe = LocaleInterop.GetEncodingForLcid(_lcid);
+            Encoding cpe = Locale.GetEncodingForLcid(_lcid);
             return cpe.GetBytes(_value);
         }
 
@@ -771,7 +772,7 @@ namespace System.Data.SqlTypes
         private static void ValidateSqlCompareOptions(SqlCompareOptions compareOptions)
         {
             if ((compareOptions & x_iValidSqlCompareOptionMask) != compareOptions)
-                throw new ArgumentOutOfRangeException("compareOptions");
+                throw new ArgumentOutOfRangeException(nameof(compareOptions));
         }
 
         public static CompareOptions CompareOptionsFromSqlCompareOptions(SqlCompareOptions compareOptions)
@@ -781,7 +782,7 @@ namespace System.Data.SqlTypes
             ValidateSqlCompareOptions(compareOptions);
 
             if ((compareOptions & (SqlCompareOptions.BinarySort | SqlCompareOptions.BinarySort2)) != 0)
-                throw ADP.ArgumentOutOfRange("compareOptions");
+                throw ADP.ArgumentOutOfRange(nameof(compareOptions));
             else
             {
                 if ((compareOptions & SqlCompareOptions.IgnoreCase) != 0)
@@ -978,7 +979,7 @@ namespace System.Data.SqlTypes
 
             int returnValue = StringCompare(this, value);
 
-            // Conver the result into -1, 0, or 1 as this method never returned any other values
+            // Convert the result into -1, 0, or 1 as this method never returned any other values
             //  This is to ensure the backcompat
             if (returnValue < 0)
             {
@@ -1101,7 +1102,7 @@ namespace System.Data.SqlTypes
                   }
 
                   // Now sort in place
-                  // Algo:
+                  // Algorithm:
                   // Start from 1, assume list before i is sorted, if next item
                   // violates this assumption, exchange with prev items until the
                   // item is in its correct place

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -168,7 +169,7 @@ namespace System.Collections.Immutable.Tests
             };
 
             var map = Empty<string, string>(StringComparer.Ordinal, StringComparer.Ordinal);
-            Assert.Throws<ArgumentException>(() => map.AddRange(uniqueEntries));
+            Assert.Throws<ArgumentException>(null, () => map.AddRange(uniqueEntries));
         }
 
         [Fact]
@@ -293,7 +294,7 @@ namespace System.Collections.Immutable.Tests
             // Now check where collisions have conflicting values.
             map = ImmutableSortedDictionary.Create<string, string>()
               .Add("a", "1").Add("A", "2").Add("b", "3");
-            Assert.Throws<ArgumentException>(() => map.WithComparers(StringComparer.OrdinalIgnoreCase));
+            Assert.Throws<ArgumentException>(null, () => map.WithComparers(StringComparer.OrdinalIgnoreCase));
 
             // Force all values to be considered equal.
             map = map.WithComparers(StringComparer.OrdinalIgnoreCase, EverythingEqual<string>.Default);
@@ -309,7 +310,7 @@ namespace System.Collections.Immutable.Tests
         {
             var map = ImmutableSortedDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
-            var exception = Assert.Throws<ArgumentException>(() => map.Add("firstKey", "3"));
+            var exception = Assert.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
             Assert.Contains("firstKey", exception.Message);
         }
 

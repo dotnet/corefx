@@ -1,10 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Security;
-using System.Security.Cryptography;
 using Internal.NativeCrypto;
 
 namespace System.Security.Cryptography
@@ -24,7 +21,7 @@ namespace System.Security.Cryptography
         ///Internal constructor for creating the CspKeyContainerInfo object
         /// </summary>
         /// <param name="parameters">CSP parameters</param>
-        /// <param name="randomKeyContainer">Is it ranndom container</param>
+        /// <param name="randomKeyContainer">Is it random container</param>
         internal CspKeyContainerInfo(CspParameters parameters, bool randomKeyContainer)
         {
             _parameters = new CspParameters(parameters);
@@ -50,16 +47,15 @@ namespace System.Security.Cryptography
         {
             get
             {
-                // This method will pop-up a UI for hardware keys.
-                SafeProvHandle safeProvHandle = SafeProvHandle.InvalidHandle;
-                int hr = CapiHelper.OpenCSP(_parameters, (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_SILENT, ref safeProvHandle);
-                if (hr != CapiHelper.S_OK)
+                object retVal = ReadKeyParameterSilent(Constants.CLR_ACCESSIBLE, throwOnNotFound: false);
+
+                if (retVal == null)
                 {
+                    // The key wasn't found, so consider it to be not accessible.
                     return false;
                 }
-                bool isAccessible = (bool)CapiHelper.GetProviderParameter(safeProvHandle, _parameters.KeyNumber, Constants.CLR_ACCESSIBLE);
-                safeProvHandle.Dispose();
-                return isAccessible;
+
+                return (bool)retVal;
             }
         }
 
@@ -71,20 +67,12 @@ namespace System.Security.Cryptography
             get
             {
                 // Assume hardware keys are not exportable.
-                if (this.HardwareDevice)
+                if (HardwareDevice)
                 {
                     return false;
                 }
-                SafeProvHandle safeProvHandle = SafeProvHandle.InvalidHandle;
-                int hr = CapiHelper.OpenCSP(_parameters, (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_SILENT, ref safeProvHandle);
-                if (hr != CapiHelper.S_OK)
-                {
-                    throw new CryptographicException(SR.Format(SR.Cryptography_CSP_NotFound, "Error"));
-                }
 
-                bool isExportable = (bool)CapiHelper.GetProviderParameter(safeProvHandle, _parameters.KeyNumber, Constants.CLR_EXPORTABLE);
-                safeProvHandle.Dispose();
-                return isExportable;
+                return (bool)ReadKeyParameterSilent(Constants.CLR_EXPORTABLE);
             }
         }
 
@@ -95,22 +83,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                SafeProvHandle safeProvHandle = SafeProvHandle.InvalidHandle;
-                CspParameters parameters = new CspParameters(_parameters);
-                parameters.KeyContainerName = null;
-                parameters.Flags = CapiHelper.IsFlagBitSet((uint)parameters.Flags,
-                                                            (uint)CspProviderFlags.UseMachineKeyStore) ?
-                                                            CspProviderFlags.UseMachineKeyStore : 0;
-
-                uint flags = (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
-                int hr = CapiHelper.OpenCSP(parameters, flags, ref safeProvHandle);
-                if (hr != CapiHelper.S_OK)
-                {
-                    throw new CryptographicException(SR.Format(SR.Cryptography_CSP_NotFound, "Error"));
-                }
-                bool isHardwareDevice = (bool)CapiHelper.GetProviderParameter(safeProvHandle, parameters.KeyNumber, Constants.CLR_HARDWARE);
-                safeProvHandle.Dispose();
-                return isHardwareDevice;
+                return (bool)ReadDeviceParameterVerifyContext(Constants.CLR_HARDWARE);
             }
         }
 
@@ -143,7 +116,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                return CapiHelper.IsFlagBitSet((uint)_parameters.Flags, (uint)CspProviderFlags.UseMachineKeyStore) ? true : false;
+                return CapiHelper.IsFlagBitSet((uint)_parameters.Flags, (uint)CspProviderFlags.UseMachineKeyStore);
             }
         }
 
@@ -155,19 +128,12 @@ namespace System.Security.Cryptography
             get
             {
                 // Assume hardware keys are protected.
-                if (this.HardwareDevice == true)
+                if (HardwareDevice)
                 {
                     return true;
                 }
-                SafeProvHandle safeProvHandle = SafeProvHandle.InvalidHandle;
-                int hr = CapiHelper.OpenCSP(_parameters, (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_SILENT, ref safeProvHandle);
-                if (hr != CapiHelper.S_OK)
-                {
-                    throw new CryptographicException(SR.Format(SR.Cryptography_CSP_NotFound, "Error"));
-                }
-                bool isProtected = (bool)CapiHelper.GetProviderParameter(safeProvHandle, _parameters.KeyNumber, Constants.CLR_PROTECTED);
-                safeProvHandle.Dispose();
-                return isProtected;
+
+                return (bool)ReadKeyParameterSilent(Constants.CLR_PROTECTED);
             }
         }
 
@@ -211,22 +177,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                SafeProvHandle safeProvHandle = SafeProvHandle.InvalidHandle;
-                CspParameters parameters = new CspParameters(_parameters);
-                parameters.KeyContainerName = null;
-                parameters.Flags = CapiHelper.IsFlagBitSet((uint)parameters.Flags,
-                                                            (uint)CspProviderFlags.UseMachineKeyStore) ?
-                                                            CspProviderFlags.UseMachineKeyStore : 0;
-
-                uint flags = (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
-                int hr = CapiHelper.OpenCSP(parameters, flags, ref safeProvHandle);
-                if (hr != CapiHelper.S_OK)
-                {
-                    throw new CryptographicException(SR.Format(SR.Cryptography_CSP_NotFound, "Error"));
-                }
-                bool isRemovable = (bool)CapiHelper.GetProviderParameter(safeProvHandle, parameters.KeyNumber, Constants.CLR_REMOVABLE);
-                safeProvHandle.Dispose();
-                return isRemovable;
+                return (bool)ReadDeviceParameterVerifyContext(Constants.CLR_REMOVABLE);
             }
         }
 
@@ -237,15 +188,64 @@ namespace System.Security.Cryptography
         {
             get
             {
-                SafeProvHandle safeProvHandle = SafeProvHandle.InvalidHandle;
-                int hr = CapiHelper.OpenCSP(_parameters, (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_SILENT, ref safeProvHandle);
+                return (string)ReadKeyParameterSilent(Constants.CLR_UNIQUE_CONTAINER);
+            }
+        }
+
+        /// <summary>
+        /// Read a parameter from the current key using CRYPT_SILENT, to avoid any potential UI prompts.
+        /// </summary>
+        private object ReadKeyParameterSilent(int keyParam, bool throwOnNotFound=true)
+        {
+            const uint SilentFlags = (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_SILENT;
+
+            SafeProvHandle safeProvHandle;
+            int hr = CapiHelper.OpenCSP(_parameters, SilentFlags, out safeProvHandle);
+
+            using (safeProvHandle)
+            {
+                if (hr != CapiHelper.S_OK)
+                {
+                    if (throwOnNotFound)
+                    {
+                        throw new CryptographicException(SR.Format(SR.Cryptography_CSP_NotFound, "Error"));
+                    }
+
+                    return null;
+                }
+
+                object retVal = CapiHelper.GetProviderParameter(safeProvHandle, _parameters.KeyNumber, keyParam);
+                return retVal;
+            }
+        }
+
+        /// <summary>
+        /// Read a parameter using VERIFY_CONTEXT to read from the device being targeted by _parameters
+        /// </summary>
+        private object ReadDeviceParameterVerifyContext(int keyParam)
+        {
+            CspParameters parameters = new CspParameters(_parameters);
+
+            // We're asking questions of the device container, the only flag that makes sense is Machine vs User.
+            parameters.Flags &= CspProviderFlags.UseMachineKeyStore;
+
+            // In order to ask about the device, instead of a key, we need to ensure that no key is named.
+            parameters.KeyContainerName = null;
+
+            const uint OpenDeviceFlags = (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
+
+            SafeProvHandle safeProvHandle;
+            int hr = CapiHelper.OpenCSP(parameters, OpenDeviceFlags, out safeProvHandle);
+
+            using (safeProvHandle)
+            {
                 if (hr != CapiHelper.S_OK)
                 {
                     throw new CryptographicException(SR.Format(SR.Cryptography_CSP_NotFound, "Error"));
                 }
-                string uniqueContainerName = (string)CapiHelper.GetProviderParameter(safeProvHandle, _parameters.KeyNumber, Constants.CLR_UNIQUE_CONTAINER);
-                safeProvHandle.Dispose();
-                return uniqueContainerName;
+
+                object retVal = CapiHelper.GetProviderParameter(safeProvHandle, parameters.KeyNumber, keyParam);
+                return retVal;
             }
         }
     }

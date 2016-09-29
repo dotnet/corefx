@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -7,9 +8,12 @@ namespace System.Reflection.Metadata
 {
     public struct ImportDefinition
     {
-        private readonly ImportDefinitionKind _kind;
-        private readonly BlobHandle _alias;
-        private readonly AssemblyReferenceHandle _assembly;
+        public ImportDefinitionKind Kind { get; }
+        public BlobHandle Alias { get; }
+        public AssemblyReferenceHandle TargetAssembly { get; }
+
+        public BlobHandle TargetNamespace => (BlobHandle)_typeOrNamespace;
+        public EntityHandle TargetType => (EntityHandle)_typeOrNamespace;
         private readonly Handle _typeOrNamespace;
 
         internal ImportDefinition(
@@ -25,16 +29,10 @@ namespace System.Reflection.Metadata
                 typeOrNamespace.Kind == HandleKind.TypeReference ||
                 typeOrNamespace.Kind == HandleKind.TypeSpecification);
 
-            _kind = kind;
-            _alias = alias;
-            _assembly = assembly;
+            Kind = kind;
+            Alias = alias;
+            TargetAssembly = assembly;
             _typeOrNamespace = typeOrNamespace;
         }
-
-        public ImportDefinitionKind Kind { get { return _kind; } }
-        public BlobHandle Alias { get { return _alias; } }
-        public AssemblyReferenceHandle TargetAssembly { get { return _assembly; } }
-        public BlobHandle TargetNamespace { get { return (BlobHandle)_typeOrNamespace; } }
-        public EntityHandle TargetType { get { return (EntityHandle)_typeOrNamespace; } }
     }
 }

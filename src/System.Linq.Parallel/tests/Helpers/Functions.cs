@@ -1,8 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
@@ -12,12 +12,12 @@ namespace System.Linq.Parallel.Tests
         // Sum a range of integers
         public static int SumRange(int start, int count)
         {
-            return count * (2 * start + (count - 1)) / 2;
+            return (count / 2) * (2 * start + count - 1) + (count % 2 != 0 ? start + count / 2 : 0);
         }
 
         public static long SumRange(long start, long count)
         {
-            return count * (2 * start + (count - 1)) / 2;
+            return (count / 2) * (2 * start + count - 1) + (count % 2 != 0 ? start + count / 2 : 0);
         }
 
         public static long ProductRange(long start, long count)
@@ -28,18 +28,6 @@ namespace System.Linq.Parallel.Tests
                 product *= start;
             }
             return product;
-        }
-
-        public static void AssertThrowsWrapped<T>(Action query)
-        {
-            AggregateException ae = Assert.Throws<AggregateException>(query);
-            Assert.All(ae.InnerExceptions, e => Assert.IsType<T>(e));
-        }
-
-        public static void AssertIsCanceled(CancellationTokenSource source, Action query)
-        {
-            OperationCanceledException oce = Assert.Throws<OperationCanceledException>(query);
-            Assert.Equal(source.Token, oce.CancellationToken);
         }
 
         public static void Enumerate<T>(this IEnumerable<T> e)

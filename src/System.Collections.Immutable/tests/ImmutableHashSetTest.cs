@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using Xunit;
 
@@ -205,7 +205,7 @@ namespace System.Collections.Immutable.Tests
         /// <param name="comparer">The comparer used to obtain the empty set, if any.</param>
         private void EmptyTestHelper<T>(IImmutableSet<T> emptySet, T value, IEqualityComparer<T> comparer)
         {
-            Contract.Requires(emptySet != null);
+            Assert.NotNull(emptySet);
 
             this.EmptyTestHelper(emptySet);
             Assert.Same(emptySet, emptySet.ToImmutableHashSet(comparer));

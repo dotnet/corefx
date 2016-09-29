@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Threading;
 using System.Threading.Tasks;
@@ -106,8 +107,8 @@ namespace System.ComponentModel.EventBasedAsync.Tests
                 // Pass a non-null state just to emphasize we're only testing passing a null delegate
                 var state = new object();
                 var operation = AsyncOperationManager.CreateOperation(state);
-                Assert.Throws<ArgumentNullException>(() => operation.Post(null, state));
-                Assert.Throws<ArgumentNullException>(() => operation.PostOperationCompleted(null, state));
+                Assert.Throws<ArgumentNullException>("d", () => operation.Post(null, state));
+                Assert.Throws<ArgumentNullException>("d", () => operation.PostOperationCompleted(null, state));
             }
             finally
             {

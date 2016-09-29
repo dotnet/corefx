@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -7,16 +8,18 @@ using System.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
+    // We allow only the public components of an RSAParameters object, the Modulus and Exponent to be serializable.
+    [Serializable]
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public struct RSAParameters
     {
-        public byte[] D;
-        public byte[] DP;
-        public byte[] DQ;
+        [NonSerialized] public byte[] D;
+        [NonSerialized] public byte[] DP;
+        [NonSerialized] public byte[] DQ;
         public byte[] Exponent;
-        public byte[] InverseQ;
+        [NonSerialized] public byte[] InverseQ;
         public byte[] Modulus;
-        public byte[] P;
-        public byte[] Q;
+        [NonSerialized] public byte[] P;
+        [NonSerialized] public byte[] Q;
     }
 }

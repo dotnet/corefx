@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -81,9 +82,6 @@ namespace System.Runtime.Serialization
 
         [SecurityCritical]
         private static MethodInfo s_writeEndElementMethod;
-
-        [SecurityCritical]
-        private static MethodInfo s_writeJsonISerializableMethod;
 
         [SecurityCritical]
         private static MethodInfo s_writeJsonNameWithMappingMethod;
@@ -401,19 +399,6 @@ namespace System.Runtime.Serialization
                     Debug.Assert(s_writeEndElementMethod != null);
                 }
                 return s_writeEndElementMethod;
-            }
-        }
-        public static MethodInfo WriteJsonISerializableMethod
-        {
-            [SecuritySafeCritical]
-            get
-            {
-                if (s_writeJsonISerializableMethod == null)
-                {
-                    s_writeJsonISerializableMethod = typeof(XmlObjectSerializerWriteContextComplexJson).GetMethod("WriteJsonISerializable", Globals.ScanAllMembers);
-                    Debug.Assert(s_writeJsonISerializableMethod != null);
-                }
-                return s_writeJsonISerializableMethod;
             }
         }
         public static MethodInfo WriteJsonNameWithMappingMethod

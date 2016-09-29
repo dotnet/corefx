@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Threading;
 
@@ -41,19 +42,19 @@ namespace System.Net
         {
             get
             {
-                // TODO (Event logging for System.Net.* #2500): Implement socket perf counters.
+                // TODO (#7833): Implement socket perf counters.
                 return false;
             }
         }
 
         public void Increment(SocketPerfCounterName perfCounter)
         {
-            // TODO (Event logging for System.Net.* #2500): Implement socket perf counters.
+            // TODO (#7833): Implement socket perf counters.
         }
 
         public void Increment(SocketPerfCounterName perfCounter, long amount)
         {
-            // TODO (Event logging for System.Net.* #2500): Implement socket perf counters.
+            // TODO (#7833): Implement socket perf counters.
         }
     }
 }

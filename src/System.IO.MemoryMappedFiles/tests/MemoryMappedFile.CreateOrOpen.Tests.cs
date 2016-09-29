@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using Xunit;
@@ -30,7 +31,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// </summary>
         [PlatformSpecific(PlatformID.AnyUnix)]
         [Theory]
-        [MemberData("CreateValidMapNames")]
+        [MemberData(nameof(CreateValidMapNames))]
         public void MapNamesNotSupported_Unix(string mapName)
         {
             Assert.Throws<PlatformNotSupportedException>(() => MemoryMappedFile.CreateOrOpen(mapName, 4096));
@@ -102,11 +103,11 @@ namespace System.IO.MemoryMappedFiles.Tests
 
         /// <summary>
         /// Test various combinations of arguments to CreateOrOpen, validating the created maps each time they're created,
-        /// focusing on on accesses that don't involve execute permissions.
+        /// focusing on accesses that don't involve execute permissions.
         /// </summary>
         [PlatformSpecific(PlatformID.Windows)]
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinations",
+        [MemberData(nameof(MemberData_ValidArgumentCombinations),
             new string[] { "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
             new MemoryMappedFileAccess[] { MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.CopyOnWrite },
@@ -163,11 +164,11 @@ namespace System.IO.MemoryMappedFiles.Tests
 
         /// <summary>
         /// Test various combinations of arguments to CreateOrOpen, validating the created maps each time they're created,
-        /// focusing on on accesses that involve execute permissions.
+        /// focusing on accesses that involve execute permissions.
         /// </summary>
         [PlatformSpecific(PlatformID.Windows)]
         [Theory]
-        [MemberData("MemberData_ValidArgumentCombinations",
+        [MemberData(nameof(MemberData_ValidArgumentCombinations),
             new string[] { "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
             new MemoryMappedFileAccess[] { MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWriteExecute },
@@ -225,7 +226,6 @@ namespace System.IO.MemoryMappedFiles.Tests
                 {
                     continue;
                 }
-                string mapName = tmpMapName == "CreateUniqueMapName()" ? CreateUniqueMapName() : tmpMapName;
 
                 foreach (long tmpCapacity in capacities)
                 {
@@ -239,6 +239,7 @@ namespace System.IO.MemoryMappedFiles.Tests
                         {
                             foreach (HandleInheritability inheritability in inheritabilities)
                             {
+                                string mapName = tmpMapName == "CreateUniqueMapName()" ? CreateUniqueMapName() : tmpMapName;
                                 yield return new object[] { mapName, capacity, access, option, inheritability };
                             }
                         }
@@ -281,7 +282,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
             else
             {
-                Assert.Throws<IOException>(() => MemoryMappedFile.CreateNew(CreateUniqueMapName(), long.MaxValue));
+                Assert.Throws<IOException>(() => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), long.MaxValue));
             }
         }
 

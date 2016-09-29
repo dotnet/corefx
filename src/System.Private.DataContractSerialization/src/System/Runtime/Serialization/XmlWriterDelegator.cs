@@ -1,12 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
 using System.Xml;
-using System.Text;
-using System.Diagnostics;
-using System.Reflection;
 using System.Globalization;
 
 
@@ -485,9 +481,6 @@ namespace System.Runtime.Serialization
             WriteEndElementPrimitive();
         }
 
-        private const int CharChunkSize = 76;
-        private const int ByteChunkSize = CharChunkSize / 4 * 3;
-
         internal virtual void WriteBase64(byte[] bytes)
         {
             if (bytes == null)
@@ -609,6 +602,14 @@ namespace System.Runtime.Serialization
         {
             writer.WriteRaw(XmlConvert.ToString(value));
         }
+
+        internal void WriteTimeSpan(char value, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            WriteStartElementPrimitive(name, ns);
+            writer.WriteRaw(XmlConvert.ToString(value));
+            WriteEndElementPrimitive();
+        }
+
 #if USE_REFEMIT
         public void WriteTimeSpan(TimeSpan value, XmlDictionaryString name, XmlDictionaryString ns)
 #else
@@ -638,6 +639,13 @@ namespace System.Runtime.Serialization
         internal void WriteUri(Uri value)
         {
             writer.WriteString(value.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped));
+        }
+
+        internal void WriteUri(Uri value, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            WriteStartElementPrimitive(name, ns);
+            WriteUri(value);
+            WriteEndElementPrimitive();
         }
 
         internal virtual void WriteQName(XmlQualifiedName value)

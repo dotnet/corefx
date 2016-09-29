@@ -1,56 +1,105 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
+    private static void ThrowExceptionForIoErrno(ErrorInfo errorInfo, string path, bool isDirectory, Func<ErrorInfo, ErrorInfo> errorRewriter)
+    {
+        Debug.Assert(errorInfo.Error != Error.SUCCESS);
+        Debug.Assert(errorInfo.Error != Error.EINTR, "EINTR errors should be handled by the native shim and never bubble up to managed code");
+
+        if (errorRewriter != null)
+        {
+            errorInfo = errorRewriter(errorInfo);
+        }
+
+        throw Interop.GetExceptionForIoErrno(errorInfo, path, isDirectory);
+    }
+
+    internal static void CheckIo(Error error, string path = null, bool isDirectory = false, Func<ErrorInfo, ErrorInfo> errorRewriter = null)
+    {
+        if (error != Interop.Error.SUCCESS)
+        {
+            ThrowExceptionForIoErrno(error.Info(), path, isDirectory, errorRewriter);
+        }
+    }
+
     /// <summary>
     /// Validates the result of system call that returns greater than or equal to 0 on success
     /// and less than 0 on failure, with errno set to the error code.
-    /// If the system call failed due to interruption (EINTR), true is returned and 
-    /// the caller should (usually) retry. If the system call failed for any other reason, 
-    /// an exception is thrown. Otherwise, the system call succeeded, and false is returned.
+    /// If the system call failed for any reason, an exception is thrown. Otherwise, the system call succeeded.
     /// </summary>
     /// <param name="result">The result of the system call.</param>
     /// <param name="path">The path with which this error is associated.  This may be null.</param>
     /// <param name="isDirectory">true if the <paramref name="path"/> is known to be a directory; otherwise, false.</param>
     /// <param name="errorRewriter">Optional function to change an error code prior to processing it.</param>
     /// <returns>
-    /// true if the system call should be retried due to it being interrupted; otherwise, false.
-    /// An exception will be thrown if the system call failed for any reason other than interruption.
+    /// On success, returns the non-negative result long that was validated.
     /// </returns>
-    internal static bool CheckIo(long result, string path = null, bool isDirectory = false, Func<ErrorInfo, ErrorInfo> errorRewriter = null)
+    internal static long CheckIo(long result, string path = null, bool isDirectory = false, Func<ErrorInfo, ErrorInfo> errorRewriter = null)
     {
         if (result < 0)
         {
-            ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
-            if (errorRewriter != null)
-            {
-                errorInfo = errorRewriter(errorInfo);
-            }
-
-            if (errorInfo.Error != Error.EINTR)
-            {
-                throw Interop.GetExceptionForIoErrno(errorInfo, path, isDirectory);
-            }
-            return true;
+            ThrowExceptionForIoErrno(Sys.GetLastErrorInfo(), path, isDirectory, errorRewriter);
         }
-        return false;
+
+        return result;
     }
 
     /// <summary>
-    /// Validates the result of system call that returns a non-zero pointer on success
-    /// and a zero pointer on failure.
-    /// If the system call failed due to interruption (EINTR), true is returned and 
-    /// the caller should (usually) retry. If the system call failed for any other reason, 
-    /// an exception is thrown. Otherwise, the system call succeeded, and false is returned.
+    /// Validates the result of system call that returns greater than or equal to 0 on success
+    /// and less than 0 on failure, with errno set to the error code.
+    /// If the system call failed for any reason, an exception is thrown. Otherwise, the system call succeeded.
     /// </summary>
-    internal static bool CheckIoPtr(IntPtr ptr, string path = null, bool isDirectory = false)
+    /// <returns>
+    /// On success, returns the non-negative result int that was validated.
+    /// </returns>
+    internal static int CheckIo(int result, string path = null, bool isDirectory = false, Func<ErrorInfo, ErrorInfo> errorRewriter = null)
     {
-        return CheckIo(ptr == IntPtr.Zero ? -1 : 0, path, isDirectory);
+        CheckIo((long)result, path, isDirectory, errorRewriter);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Validates the result of system call that returns greater than or equal to 0 on success
+    /// and less than 0 on failure, with errno set to the error code.
+    /// If the system call failed for any reason, an exception is thrown. Otherwise, the system call succeeded.
+    /// </summary>
+    /// <returns>
+    /// On success, returns the non-negative result IntPtr that was validated.
+    /// </returns>
+    internal static IntPtr CheckIo(IntPtr result, string path = null, bool isDirectory = false, Func<ErrorInfo, ErrorInfo> errorRewriter = null)
+    {
+        CheckIo((long)result, path, isDirectory, errorRewriter);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Validates the result of system call that returns greater than or equal to 0 on success
+    /// and less than 0 on failure, with errno set to the error code.
+    /// If the system call failed for any reason, an exception is thrown. Otherwise, the system call succeeded.
+    /// </summary>
+    /// <returns>
+    /// On success, returns the valid SafeFileHandle that was validated.
+    /// </returns>
+    internal static TSafeHandle CheckIo<TSafeHandle>(TSafeHandle handle, string path = null, bool isDirectory = false, Func<ErrorInfo, ErrorInfo> errorRewriter = null)
+        where TSafeHandle : SafeHandle
+    {
+        if (handle.IsInvalid)
+        {
+            ThrowExceptionForIoErrno(Sys.GetLastErrorInfo(), path, isDirectory, errorRewriter);
+        }
+
+        return handle;
     }
 
     /// <summary>
@@ -62,6 +111,8 @@ internal static partial class Interop
     /// <returns></returns>
     internal static Exception GetExceptionForIoErrno(ErrorInfo errorInfo, string path = null, bool isDirectory = false)
     {
+        // Translate the errno into a known set of exception types.  For cases where multiple errnos map
+        // to the same exception type, include an inner exception with the details.
         switch (errorInfo.Error)
         {
             case Error.ENOENT:
@@ -81,9 +132,10 @@ internal static partial class Interop
             case Error.EACCES:
             case Error.EBADF:
             case Error.EPERM:
+                Exception inner = GetIOException(errorInfo);
                 return !string.IsNullOrEmpty(path) ?
-                    new UnauthorizedAccessException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, path)) :
-                    new UnauthorizedAccessException(SR.UnauthorizedAccess_IODenied_NoPathName);
+                    new UnauthorizedAccessException(SR.Format(SR.UnauthorizedAccess_IODenied_Path, path), inner) :
+                    new UnauthorizedAccessException(SR.UnauthorizedAccess_IODenied_NoPathName, inner);
 
             case Error.ENAMETOOLONG:
                 return new PathTooLongException(SR.IO_PathTooLong);

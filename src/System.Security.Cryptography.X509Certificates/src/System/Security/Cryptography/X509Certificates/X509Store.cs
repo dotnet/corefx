@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -16,7 +17,7 @@ namespace System.Security.Cryptography.X509Certificates
     public sealed class X509Store : IDisposable
     {
         public X509Store()
-            : this("MY", StoreLocation.CurrentUser)
+            : this(StoreName.My, StoreLocation.CurrentUser)
         {
         }
 
@@ -85,7 +86,7 @@ namespace System.Security.Cryptography.X509Certificates
                 X509Certificate2Collection certificates = new X509Certificate2Collection();
                 if (_storePal != null)
                 {
-                    _storePal.CopyTo(certificates);
+                    _storePal.CloneTo(certificates);
                 }
                 return certificates;
             }
@@ -94,7 +95,7 @@ namespace System.Security.Cryptography.X509Certificates
         public void Add(X509Certificate2 certificate)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw new ArgumentNullException(nameof(certificate));
 
             if (_storePal == null)
                 throw new CryptographicException(SR.Cryptography_X509_StoreNotOpen);
@@ -105,7 +106,7 @@ namespace System.Security.Cryptography.X509Certificates
         public void Remove(X509Certificate2 certificate)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw new ArgumentNullException(nameof(certificate));
 
             if (_storePal == null)
                 throw new CryptographicException(SR.Cryptography_X509_StoreNotOpen);

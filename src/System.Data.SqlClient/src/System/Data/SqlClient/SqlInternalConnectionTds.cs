@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 
@@ -106,8 +107,40 @@ namespace System.Data.SqlClient
         // Connection Resiliency
         private bool _sessionRecoveryRequested;
         internal bool _sessionRecoveryAcknowledged;
-        internal SessionData _currentSessionData; // internal for use from TdsParser only, otehr should use CurrentSessionData property that will fix database and language
+        internal SessionData _currentSessionData; // internal for use from TdsParser only, other should use CurrentSessionData property that will fix database and language
         private SessionData _recoverySessionData;
+
+        // The errors in the transient error set are contained in
+        // https://azure.microsoft.com/en-us/documentation/articles/sql-database-develop-error-messages/#transient-faults-connection-loss-and-other-temporary-errors
+        private static readonly HashSet<int> s_transientErrors = new HashSet<int>
+        {
+            // SQL Error Code: 4060
+            // Cannot open database "%.*ls" requested by the login. The login failed.
+            4060,
+
+            // SQL Error Code: 10928
+            // Resource ID: %d. The %s limit for the database is %d and has been reached.
+            10928,
+
+            // SQL Error Code: 10929
+            // Resource ID: %d. The %s minimum guarantee is %d, maximum limit is %d and the current usage for the database is %d. 
+            // However, the server is currently too busy to support requests greater than %d for this database.
+            10929,
+
+            // SQL Error Code: 40197
+            // You will receive this error, when the service is down due to software or hardware upgrades, hardware failures, 
+            // or any other failover problems. The error code (%d) embedded within the message of error 40197 provides 
+            // additional information about the kind of failure or failover that occurred. Some examples of the error codes are 
+            // embedded within the message of error 40197 are 40020, 40143, 40166, and 40540.
+            40197,
+
+            // The service is currently busy. Retry the request after 10 seconds. Incident ID: %ls. Code: %d.
+            40501,
+
+            // Database '%.*ls' on server '%.*ls' is not currently available. Please retry the connection later. 
+            // If the problem persists, contact customer support, and provide them the session tracing ID of '%.*ls'.
+            40613
+        };
 
         internal SessionData CurrentSessionData
         {
@@ -146,7 +179,7 @@ namespace System.Data.SqlClient
         // 2. _parserLock will also be taken during close (to prevent closing in the middle of a write)
         // 3. Whenever you have the _parserLock and are calling a method that would cause the connection to close if it failed (with the exception of any writing method), you MUST set ThreadHasParserLockForClose to true
         //      * This is to prevent the connection deadlocking with itself (since you already have the _parserLock, and Closing the connection will attempt to re-take that lock)
-        //      * It is safe to set ThreadHasParserLockForClose to true when writing as well, but it is unneccesary
+        //      * It is safe to set ThreadHasParserLockForClose to true when writing as well, but it is unnecessary
         //      * If you have a method that takes _parserLock, it is a good idea check ThreadHasParserLockForClose first (if you don't expect _parserLock to be taken by something higher on the stack, then you should at least assert that it is false)
         // 4. ThreadHasParserLockForClose is thread-specific - this means that you must set it to false before returning a Task, and set it back to true in the continuation
         // 5. ThreadHasParserLockForClose should only be modified if you currently own the _parserLock
@@ -233,7 +266,7 @@ namespace System.Data.SqlClient
                 }
             }
 
-            // Necessary but not sufficient condition for thread to have lock (since sempahore may be obtained by any thread)            
+            // Necessary but not sufficient condition for thread to have lock (since semaphore may be obtained by any thread)            
             internal bool ThreadMayHaveLock()
             {
                 return Monitor.IsEntered(_semaphore) || _semaphore.CurrentCount == 0;
@@ -259,8 +292,9 @@ namespace System.Data.SqlClient
         private RoutingInfo _routingInfo = null;
         private Guid _originalClientConnectionId = Guid.Empty;
         private string _routingDestination = null;
+        
 
-        // although the new password is generally not used it must be passed to the c'tor
+        // although the new password is generally not used it must be passed to the ctor
         // the new Login7 packet will always write out the new password (or a length of zero and no bytes if not present)
         //
         internal SqlInternalConnectionTds(
@@ -269,7 +303,8 @@ namespace System.Data.SqlClient
                 object providerInfo,
                 bool redirectedUserInstance,
                 SqlConnectionString userConnectionOptions = null, // NOTE: userConnectionOptions may be different to connectionOptions if the connection string has been expanded (see SqlConnectionString.Expand)
-                SessionData reconnectSessionData = null) : base(connectionOptions)
+                SessionData reconnectSessionData = null,
+                bool applyTransientFaultHandling = false) : base(connectionOptions)
         {
 #if DEBUG
             if (reconnectSessionData != null)
@@ -312,13 +347,57 @@ namespace System.Data.SqlClient
             try
             {
                 var timeout = TimeoutTimer.StartSecondsTimeout(connectionOptions.ConnectTimeout);
-                OpenLoginEnlist(timeout, connectionOptions, redirectedUserInstance);
+
+                // If transient fault handling is enabled then we can retry the login up to the ConnectRetryCount.
+                int connectionEstablishCount = applyTransientFaultHandling ? connectionOptions.ConnectRetryCount + 1 : 1;
+                int transientRetryIntervalInMilliSeconds = connectionOptions.ConnectRetryInterval * 1000; // Max value of transientRetryInterval is 60*1000 ms. The max value allowed for ConnectRetryInterval is 60
+                for (int i = 0; i < connectionEstablishCount; i++)
+                {
+                    try
+                    {
+                        OpenLoginEnlist(timeout, connectionOptions, redirectedUserInstance);
+                        break;
+                    }
+                    catch (SqlException sqlex)
+                    {
+                        if (i + 1 == connectionEstablishCount
+                            || !applyTransientFaultHandling
+                            || timeout.IsExpired
+                            || timeout.MillisecondsRemaining < transientRetryIntervalInMilliSeconds
+                            || !IsTransientError(sqlex))
+                        {
+                            throw sqlex;
+                        }
+                        else
+                        {
+                            Thread.Sleep(transientRetryIntervalInMilliSeconds);
+                        }
+                    }
+                }
             }
             finally
             {
                 ThreadHasParserLockForClose = false;
                 _parserLock.Release();
             }
+        }
+
+        
+        // Returns true if the Sql error is a transient.
+        private bool IsTransientError(SqlException exc)
+        {
+            if (exc == null)
+            {
+                return false;
+            }
+            foreach (SqlError error in exc.Errors)
+            {
+                if (s_transientErrors.Contains(error.Number))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         internal Guid ClientConnectionId
@@ -566,7 +645,7 @@ namespace System.Data.SqlClient
         {
             // For implicit pooled connections, if connection reset behavior is specified,
             // reset the database and language properties back to default.  It is important
-            // to do this on activate so that the hashtable is correct before SqlConnection
+            // to do this on activate so that the dictionary is correct before SqlConnection
             // obtains a clone.
 
             Debug.Assert(!HasLocalTransactionFromAPI, "Upon ResetConnection SqlInternalConnectionTds has a currently ongoing local transaction.");
@@ -580,7 +659,7 @@ namespace System.Data.SqlClient
                 // to the server is made.
                 _parser.PrepareResetConnection();
 
-                // Reset hashtable values, since calling reset will not send us env_changes.
+                // Reset dictionary values, since calling reset will not send us env_changes.
                 CurrentDatabase = _originalDatabase;
                 _currentLanguage = _originalLanguage;
             }
@@ -898,7 +977,7 @@ namespace System.Data.SqlClient
 
             _timeoutErrorInternal.SetInternalSourceType(useFailoverPartner ? SqlConnectionInternalSourceType.Failover : SqlConnectionInternalSourceType.Principle);
 
-            bool hasFailoverPartner = !ADP.IsEmpty(failoverPartner);
+            bool hasFailoverPartner = !string.IsNullOrEmpty(failoverPartner);
 
             // Open the connection and Login
             try
@@ -947,8 +1026,8 @@ namespace System.Data.SqlClient
         {
             return (TdsEnums.LOGON_FAILED == exc.Number) // actual logon failed, i.e. bad password
                 || (TdsEnums.PASSWORD_EXPIRED == exc.Number) // actual logon failed, i.e. password isExpired
-                || (TdsEnums.IMPERSONATION_FAILED == exc.Number)  // Insuficient privelege for named pipe, among others
-                || exc._doNotReconnect; // Exception explicitly supressed reconnection attempts
+                || (TdsEnums.IMPERSONATION_FAILED == exc.Number)  // Insufficient privilege for named pipe, among others
+                || exc._doNotReconnect; // Exception explicitly suppressed reconnection attempts
         }
 
         // Attempt to login to a host that does not have a failover partner
@@ -1372,7 +1451,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        // called by SqlConnection.RepairConnection which is a relatevly expensive way of repair inner connection
+        // called by SqlConnection.RepairConnection which is a relatively expensive way of repair inner connection
         // prior to execution of request, used from EnlistTransaction, EnlistDistributedTransaction and ChangeDatabase
         internal bool GetSessionAndReconnectIfNeeded(SqlConnection parent, int timeout = 0)
         {
@@ -1439,7 +1518,7 @@ namespace System.Data.SqlClient
             switch (rec.type)
             {
                 case TdsEnums.ENV_DATABASE:
-                    // If connection is not open and recovery is not in progresss, store the server value as the original.
+                    // If connection is not open and recovery is not in progress, store the server value as the original.
                     if (!_fConnectionOpen && _recoverySessionData == null)
                     {
                         _originalDatabase = rec.newValue;
@@ -1449,7 +1528,7 @@ namespace System.Data.SqlClient
                     break;
 
                 case TdsEnums.ENV_LANG:
-                    // If connection is not open and recovery is not in progresss, store the server value as the original.
+                    // If connection is not open and recovery is not in progress, store the server value as the original.
                     if (!_fConnectionOpen && _recoverySessionData == null)
                     {
                         _originalLanguage = rec.newValue;
@@ -1713,7 +1792,7 @@ namespace System.Data.SqlClient
             // when using the Dbnetlib dll.  If the protocol is not specified, the netlib will
             // try all protocols in the order listed in the Client Network Utility.  Connect will
             // then fail if all protocols fail.
-            if (!ADP.IsEmpty(protocol))
+            if (!string.IsNullOrEmpty(protocol))
             {
                 ExtendedServerName = protocol + ":" + serverName;
             }

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -21,33 +22,10 @@ namespace System.Reflection.Metadata
             _rowId = handle.RowId;
         }
 
-        private CustomDebugInformationHandle Handle
-        {
-            get { return CustomDebugInformationHandle.FromRowId(_rowId); }
-        }
+        private CustomDebugInformationHandle Handle => CustomDebugInformationHandle.FromRowId(_rowId);
 
-        public EntityHandle Parent
-        {
-            get
-            {
-                return _reader.CustomDebugInformationTable.GetParent(Handle);
-            }
-        }
-
-        public GuidHandle Kind
-        {
-            get
-            {
-                return _reader.CustomDebugInformationTable.GetKind(Handle);
-            }
-        }
-
-        public BlobHandle Value
-        {
-            get
-            {
-                return _reader.CustomDebugInformationTable.GetValue(Handle);
-            }
-        }
+        public EntityHandle Parent => _reader.CustomDebugInformationTable.GetParent(Handle);
+        public GuidHandle Kind => _reader.CustomDebugInformationTable.GetKind(Handle);
+        public BlobHandle Value => _reader.CustomDebugInformationTable.GetValue(Handle);
     }
 }

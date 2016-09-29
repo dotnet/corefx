@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -35,7 +36,7 @@ namespace System.Composition.Convention
         /// <returns>An import builder allowing further configuration.</returns>
         public ImportConventionBuilder AsContractName(string contractName)
         {
-            Requires.NotNullOrEmpty(contractName, "contractName");
+            Requires.NotNullOrEmpty(contractName, nameof(contractName));
             _contractName = contractName;
             return this;
         }
@@ -47,7 +48,7 @@ namespace System.Composition.Convention
         /// <returns>An export builder allowing further configuration.</returns>
         public ImportConventionBuilder AsContractName(Func<Type, string> getContractNameFromPartType)
         {
-            Requires.NotNull(getContractNameFromPartType, "getContractNameFromPartType");
+            Requires.NotNull(getContractNameFromPartType, nameof(getContractNameFromPartType));
             _getContractNameFromPartType = getContractNameFromPartType;
             return this;
         }
@@ -91,7 +92,7 @@ namespace System.Composition.Convention
         /// <returns>An import builder allowing further configuration.</returns>
         public ImportConventionBuilder AddMetadataConstraint(string name, object value)
         {
-            Requires.NotNullOrEmpty(name, "name");
+            Requires.NotNullOrEmpty(name, nameof(name));
             if (_metadataConstraintItems == null)
             {
                 _metadataConstraintItems = new List<Tuple<string, object>>();
@@ -108,8 +109,8 @@ namespace System.Composition.Convention
         /// <returns>An export builder allowing further configuration.</returns>
         public ImportConventionBuilder AddMetadataConstraint(string name, Func<Type, object> getConstraintValueFromPartType)
         {
-            Requires.NotNullOrEmpty(name, "name");
-            Requires.NotNull(getConstraintValueFromPartType, "getConstraintValueFromPartType");
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.NotNull(getConstraintValueFromPartType, nameof(getConstraintValueFromPartType));
 
             if (_metadataConstraintItemFuncs == null)
             {

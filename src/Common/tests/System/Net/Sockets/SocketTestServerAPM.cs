@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Test.Common;
 
@@ -15,6 +16,7 @@ namespace System.Net.Sockets.Tests
         private volatile bool _disposed = false;
 
         protected sealed override int Port { get { return ((IPEndPoint)_socket.LocalEndPoint).Port; } }
+        public sealed override EndPoint EndPoint { get { return _socket.LocalEndPoint; } }
 
         public SocketTestServerAPM(int numConnections, int receiveBufferSize, EndPoint localEndPoint)
         {
@@ -153,7 +155,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        // TODO: Cache and reuse ServerSocketState objects.
         private class ServerSocketState
         {
             private Socket __socket;

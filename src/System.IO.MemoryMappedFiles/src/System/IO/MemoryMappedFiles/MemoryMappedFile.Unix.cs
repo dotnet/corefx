@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 using System.Security;
@@ -10,7 +11,7 @@ namespace System.IO.MemoryMappedFiles
     {
         /// <summary>
         /// Used by the 2 Create factory method groups.  A null fileHandle specifies that the 
-        /// memory mapped file should not be associated with an existing file on disk (ie start
+        /// memory mapped file should not be associated with an existing file on disk (i.e. start
         /// out empty).
         /// </summary>
         [SecurityCritical]
@@ -69,6 +70,12 @@ namespace System.IO.MemoryMappedFiles
                 {
                     ownsFileStream = true;
                     fileStream = CreateSharedBackingObject(protections, capacity);
+
+                    // If the MMF handle should not be inherited, mark the backing object fd as O_CLOEXEC.
+                    if (inheritability == HandleInheritability.None)
+                    {
+                        Interop.CheckIo(Interop.Sys.Fcntl.SetCloseOnExec(fileStream.SafeFileHandle));
+                    }
                 }
             }
 
@@ -163,8 +170,8 @@ namespace System.IO.MemoryMappedFiles
                 perms |= Interop.Sys.Permissions.S_IXUSR;
 
             // Create the shared memory object.
-            int fd = Interop.Sys.ShmOpen(mapName, flags, (int)perms);
-            if (fd < 0)
+            SafeFileHandle fd = Interop.Sys.ShmOpen(mapName, flags, (int)perms);
+            if (fd.IsInvalid)
             {
                 Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
                 if (errorInfo.Error == Interop.Error.ENOTSUP)
@@ -179,10 +186,9 @@ namespace System.IO.MemoryMappedFiles
                 throw Interop.GetExceptionForIoErrno(errorInfo);
             }
 
-            SafeFileHandle fileHandle = new SafeFileHandle((IntPtr)fd, ownsHandle: true);
             try
             {
-                // Unlink the shared memory object immediatley so that it'll go away once all handles 
+                // Unlink the shared memory object immediately so that it'll go away once all handles 
                 // to it are closed (as with opened then unlinked files, it'll remain usable via
                 // the open handles even though it's unlinked and can't be opened anew via its name).
                 Interop.CheckIo(Interop.Sys.ShmUnlink(mapName));
@@ -194,22 +200,20 @@ namespace System.IO.MemoryMappedFiles
                 Interop.CheckIo(Interop.Sys.FTruncate(fd, capacity));
 
                 // Wrap the file descriptor in a stream and return it.
-                return new FileStream(fileHandle, TranslateProtectionsToFileAccess(protections));
+                return new FileStream(fd, TranslateProtectionsToFileAccess(protections));
             }
             catch
             {
-                fileHandle.Dispose();
+                fd.Dispose();
                 throw;
             }
         }
 
-        private static string s_tempMapsDirectory;
-
         private static FileStream CreateSharedBackingObjectUsingFile(Interop.Sys.MemoryMappedProtections protections, long capacity)
         {
-            string tempMapsDirectory = s_tempMapsDirectory ?? (s_tempMapsDirectory = PersistedFiles.GetTempFeatureDirectory("maps"));
-            Directory.CreateDirectory(tempMapsDirectory);
-            string path = Path.Combine(tempMapsDirectory, Guid.NewGuid().ToString("N"));
+            // We create a temporary backing file in TMPDIR.  We don't bother putting it into subdirectories as the file exists
+            // extremely briefly: it's opened/created and then immediately unlinked.
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
             FileAccess access =
                 (protections & (Interop.Sys.MemoryMappedProtections.PROT_READ | Interop.Sys.MemoryMappedProtections.PROT_WRITE)) != 0 ? FileAccess.ReadWrite :

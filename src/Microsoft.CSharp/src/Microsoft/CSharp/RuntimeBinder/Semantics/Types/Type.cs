@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsWindowsRuntimeType()
         {
-            return this.AssociatedSystemType.GetTypeInfo().Attributes.HasFlag(System.Reflection.TypeAttributes.WindowsRuntime);
+            return (this.AssociatedSystemType.GetTypeInfo().Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
         }
 
         public bool IsCollectionType()
@@ -342,9 +343,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         ////////////////////////////////////////////////////////////////////////////////
-        // Given a symbol, determine its fundemental type. This is the type that 
+        // Given a symbol, determine its fundamental type. This is the type that 
         // indicate how the item is stored and what instructions are used to reference 
-        // if. The fundemental types are:
+        // if. The fundamental types are:
         // one of the integral/float types (includes enums with that underlying type)
         // reference type
         // struct/value type
@@ -445,9 +446,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // and returns the result.
         public CType GetNakedType(bool fStripNub)
         {
-            if (this == null)
-                return null;
-
             for (CType type = this; ;)
             {
                 switch (type.GetTypeKind())
@@ -487,8 +485,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public CType StripNubs()
         {
-            if (this == null)
-                return null;
             CType type;
             for (type = this; type.IsNullableType(); type = type.AsNullableType().GetUnderlyingType())
                 ;
@@ -497,8 +493,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public CType StripNubs(out int pcnub)
         {
             pcnub = 0;
-            if (this == null)
-                return null;
             CType type;
             for (type = this; type.IsNullableType(); type = type.AsNullableType().GetUnderlyingType())
                 (pcnub)++;
@@ -512,7 +506,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
         // A few types are considered "simple" types for purposes of conversions and so
-        // on. They are the fundemental types the compiler knows about for operators and
+        // on. They are the fundamental types the compiler knows about for operators and
         // conversions.
         public bool isSimpleType()
         {
@@ -534,7 +528,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         ////////////////////////////////////////////////////////////////////////////////
-        // A few types are considered "numeric" types. They are the fundemental number
+        // A few types are considered "numeric" types. They are the fundamental number
         // types the compiler knows about for operators and conversions.
         public bool isNumericType()
         {
@@ -598,8 +592,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool isPredefType(PredefinedType pt)
         {
-            if (this == null)
-                return false;
             if (this.IsAggregateType())
                 return this.AsAggregateType().getAggregate().IsPredefined() && this.AsAggregateType().getAggregate().GetPredefType() == pt;
             return (this.IsVoidType() && pt == PredefinedType.PT_VOID);
@@ -616,7 +608,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
         // Is this type System.TypedReference or System.ArgIterator?
-        // (used for errors becase these types can't go certain places)
+        // (used for errors because these types can't go certain places)
 
         public bool isSpecialByRefType()
         {
@@ -626,9 +618,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool isStaticClass()
         {
-            if (this == null)
-                return false;
-
             AggregateSymbol agg = this.GetNakedAgg(false);
             if (agg == null)
                 return false;
@@ -672,7 +661,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             return true;
                         }
 
-                        // If the struct layout has an error, dont recurse its children.
+                        // If the struct layout has an error, don't recurse its children.
                         if (aggT.IsLayoutError())
                         {
                             aggT.SetUnmanagedStruct(true);

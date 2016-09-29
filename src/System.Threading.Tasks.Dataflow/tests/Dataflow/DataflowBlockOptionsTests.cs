@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
 
@@ -34,6 +35,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
                 Assert.Equal(expected: CancellationToken.None, actual: dbo.CancellationToken);
                 Assert.Equal(expected: -1, actual: DataflowBlockOptions.Unbounded);
                 Assert.Equal(expected: @"{0} Id={1}", actual: dbo.NameFormat);
+                Assert.Equal(expected: true, actual: dbo.EnsureOrdered);
             };
 
             verifyBaseDefaults(new DataflowBlockOptions());
@@ -77,6 +79,11 @@ namespace System.Threading.Tasks.Dataflow.Tests
             foreach (string value in new[] { "none", "foo {0}", "foo {0} bar {1}", "kaboom {0} {1} {2}" })
             {
                 SetAndTest(dbo, (o, v) => o.NameFormat = v, o => o.NameFormat, value);
+            }
+
+            foreach (bool value in DataflowTestHelpers.BooleanValues)
+            {
+                SetAndTest(dbo, (o, v) => o.EnsureOrdered = v, o => o.EnsureOrdered, value);
             }
 
             foreach (bool value in DataflowTestHelpers.BooleanValues)

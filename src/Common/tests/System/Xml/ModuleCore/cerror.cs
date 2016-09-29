@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;	//StackFrame
@@ -32,7 +33,7 @@ namespace OLEDB.Test.ModuleCore
                 s_rIError = value;
 
                 //Setup the standard c# Console to log to LTM instead...
-                //ie: Console.WriteLine will automatically log to LTM
+                //i.e.: Console.WriteLine will automatically log to LTM
                 if (s_rLTMConsole == null)
                 {
                     s_rLTMConsole = new CLTMConsole();
@@ -243,7 +244,7 @@ namespace OLEDB.Test.ModuleCore
             try
             {
                 //Equals is identical to Compare, except that Equals doesn't throw.
-                //This way if We still want to throw the exception so we get the logging and comapre block
+                //This way if We still want to throw the exception so we get the logging and compare block
                 //but the test wants to continue to do other things.
                 return CError.Compare(actual, expected, message);
             }
@@ -259,7 +260,7 @@ namespace OLEDB.Test.ModuleCore
             try
             {
                 //Equals is identical to Compare, except that Equals doesn't throw.
-                //This way if We still want to throw the exception so we get the logging and comapre block
+                //This way if We still want to throw the exception so we get the logging and compare block
                 //but the test wants to continue to do other things.
                 return CError.Compare(equal, message);
             }

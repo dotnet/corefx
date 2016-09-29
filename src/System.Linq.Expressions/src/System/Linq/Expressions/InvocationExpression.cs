@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -479,7 +480,7 @@ namespace System.Linq.Expressions
         {
             // COMPAT: This method is marked as non-public to avoid a gap between a 0-ary and 2-ary overload (see remark for the unary case below).
 
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
 
             var method = GetInvokeMethod(expression);
 
@@ -508,14 +509,14 @@ namespace System.Linq.Expressions
         ///<exception cref="T:System.ArgumentNullException">
         ///<paramref name="expression" /> is null.</exception>
         ///<exception cref="T:System.ArgumentException">
-        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an arugment expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
+        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an argument expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
         ///<exception cref="T:System.InvalidOperationException">
         ///The number of arguments does not contain match the number of parameters for the delegate represented by <paramref name="expression" />.</exception>
         internal static InvocationExpression Invoke(Expression expression, Expression arg0)
         {
             // COMPAT: This method is marked as non-public to ensure compile-time compatibility for Expression.Invoke(e, null).
 
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
 
             var method = GetInvokeMethod(expression);
 
@@ -523,7 +524,7 @@ namespace System.Linq.Expressions
 
             ValidateArgumentCount(method, ExpressionType.Invoke, 1, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0], nameof(expression), nameof(arg0));
 
             return new InvocationExpression1(expression, method.ReturnType, arg0);
         }
@@ -549,13 +550,13 @@ namespace System.Linq.Expressions
         ///<exception cref="T:System.ArgumentNullException">
         ///<paramref name="expression" /> is null.</exception>
         ///<exception cref="T:System.ArgumentException">
-        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an arugment expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
+        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an argument expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
         ///<exception cref="T:System.InvalidOperationException">
         ///The number of arguments does not contain match the number of parameters for the delegate represented by <paramref name="expression" />.</exception>
         internal static InvocationExpression Invoke(Expression expression, Expression arg0, Expression arg1)
         {
             // NB: This method is marked as non-public to avoid public API additions at this point.
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
 
             var method = GetInvokeMethod(expression);
 
@@ -563,8 +564,8 @@ namespace System.Linq.Expressions
 
             ValidateArgumentCount(method, ExpressionType.Invoke, 2, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Invoke, arg1, pis[1]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0], nameof(expression), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Invoke, arg1, pis[1], nameof(expression), nameof(arg1));
 
             return new InvocationExpression2(expression, method.ReturnType, arg0, arg1);
         }
@@ -593,14 +594,14 @@ namespace System.Linq.Expressions
         ///<exception cref="T:System.ArgumentNullException">
         ///<paramref name="expression" /> is null.</exception>
         ///<exception cref="T:System.ArgumentException">
-        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an arugment expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
+        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an argument expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
         ///<exception cref="T:System.InvalidOperationException">
         ///The number of arguments does not contain match the number of parameters for the delegate represented by <paramref name="expression" />.</exception>
         internal static InvocationExpression Invoke(Expression expression, Expression arg0, Expression arg1, Expression arg2)
         {
             // NB: This method is marked as non-public to avoid public API additions at this point.
 
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
 
             var method = GetInvokeMethod(expression);
 
@@ -608,9 +609,9 @@ namespace System.Linq.Expressions
 
             ValidateArgumentCount(method, ExpressionType.Invoke, 3, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Invoke, arg1, pis[1]);
-            arg2 = ValidateOneArgument(method, ExpressionType.Invoke, arg2, pis[2]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0], nameof(expression), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Invoke, arg1, pis[1], nameof(expression), nameof(arg1));
+            arg2 = ValidateOneArgument(method, ExpressionType.Invoke, arg2, pis[2], nameof(expression), nameof(arg2));
 
             return new InvocationExpression3(expression, method.ReturnType, arg0, arg1, arg2);
         }
@@ -642,14 +643,14 @@ namespace System.Linq.Expressions
         ///<exception cref="T:System.ArgumentNullException">
         ///<paramref name="expression" /> is null.</exception>
         ///<exception cref="T:System.ArgumentException">
-        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an arugment expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
+        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an argument expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
         ///<exception cref="T:System.InvalidOperationException">
         ///The number of arguments does not contain match the number of parameters for the delegate represented by <paramref name="expression" />.</exception>
         internal static InvocationExpression Invoke(Expression expression, Expression arg0, Expression arg1, Expression arg2, Expression arg3)
         {
             // NB: This method is marked as non-public to avoid public API additions at this point.
 
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
 
             var method = GetInvokeMethod(expression);
 
@@ -657,10 +658,10 @@ namespace System.Linq.Expressions
 
             ValidateArgumentCount(method, ExpressionType.Invoke, 4, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Invoke, arg1, pis[1]);
-            arg2 = ValidateOneArgument(method, ExpressionType.Invoke, arg2, pis[2]);
-            arg3 = ValidateOneArgument(method, ExpressionType.Invoke, arg3, pis[3]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0], nameof(expression), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Invoke, arg1, pis[1], nameof(expression), nameof(arg1));
+            arg2 = ValidateOneArgument(method, ExpressionType.Invoke, arg2, pis[2], nameof(expression), nameof(arg2));
+            arg3 = ValidateOneArgument(method, ExpressionType.Invoke, arg3, pis[3], nameof(expression), nameof(arg3));
 
             return new InvocationExpression4(expression, method.ReturnType, arg0, arg1, arg2, arg3);
         }
@@ -695,14 +696,14 @@ namespace System.Linq.Expressions
         ///<exception cref="T:System.ArgumentNullException">
         ///<paramref name="expression" /> is null.</exception>
         ///<exception cref="T:System.ArgumentException">
-        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an arugment expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
+        ///<paramref name="expression" />.Type does not represent a delegate type or an <see cref="T:System.Linq.Expressions.Expression`1" />.-or-The <see cref="P:System.Linq.Expressions.Expression.Type" /> property of an argument expression is not assignable to the type of the corresponding parameter of the delegate represented by <paramref name="expression" />.</exception>
         ///<exception cref="T:System.InvalidOperationException">
         ///The number of arguments does not contain match the number of parameters for the delegate represented by <paramref name="expression" />.</exception>
         internal static InvocationExpression Invoke(Expression expression, Expression arg0, Expression arg1, Expression arg2, Expression arg3, Expression arg4)
         {
             // NB: This method is marked as non-public to avoid public API additions at this point.
 
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
 
             var method = GetInvokeMethod(expression);
 
@@ -710,11 +711,11 @@ namespace System.Linq.Expressions
 
             ValidateArgumentCount(method, ExpressionType.Invoke, 5, pis);
 
-            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0]);
-            arg1 = ValidateOneArgument(method, ExpressionType.Invoke, arg1, pis[1]);
-            arg2 = ValidateOneArgument(method, ExpressionType.Invoke, arg2, pis[2]);
-            arg3 = ValidateOneArgument(method, ExpressionType.Invoke, arg3, pis[3]);
-            arg4 = ValidateOneArgument(method, ExpressionType.Invoke, arg4, pis[4]);
+            arg0 = ValidateOneArgument(method, ExpressionType.Invoke, arg0, pis[0], nameof(expression), nameof(arg0));
+            arg1 = ValidateOneArgument(method, ExpressionType.Invoke, arg1, pis[1], nameof(expression), nameof(arg1));
+            arg2 = ValidateOneArgument(method, ExpressionType.Invoke, arg2, pis[2], nameof(expression), nameof(arg2));
+            arg3 = ValidateOneArgument(method, ExpressionType.Invoke, arg3, pis[3], nameof(expression), nameof(arg3));
+            arg4 = ValidateOneArgument(method, ExpressionType.Invoke, arg4, pis[4], nameof(expression), nameof(arg4));
 
             return new InvocationExpression5(expression, method.ReturnType, arg0, arg1, arg2, arg3, arg4);
         }
@@ -770,32 +771,29 @@ namespace System.Linq.Expressions
         ///<paramref name="arguments" /> does not contain the same number of elements as the list of parameters for the delegate represented by <paramref name="expression" />.</exception>
         public static InvocationExpression Invoke(Expression expression, IEnumerable<Expression> arguments)
         {
-            var argumentList = arguments as IReadOnlyList<Expression>;
+            var argumentList = arguments as IReadOnlyList<Expression> ?? arguments.ToReadOnly();
 
-            if (argumentList != null)
+            switch (argumentList.Count)
             {
-                switch (argumentList.Count)
-                {
-                    case 0:
-                        return Invoke(expression);
-                    case 1:
-                        return Invoke(expression, argumentList[0]);
-                    case 2:
-                        return Invoke(expression, argumentList[0], argumentList[1]);
-                    case 3:
-                        return Invoke(expression, argumentList[0], argumentList[1], argumentList[2]);
-                    case 4:
-                        return Invoke(expression, argumentList[0], argumentList[1], argumentList[2], argumentList[3]);
-                    case 5:
-                        return Invoke(expression, argumentList[0], argumentList[1], argumentList[2], argumentList[3], argumentList[4]);
-                }
+                case 0:
+                    return Invoke(expression);
+                case 1:
+                    return Invoke(expression, argumentList[0]);
+                case 2:
+                    return Invoke(expression, argumentList[0], argumentList[1]);
+                case 3:
+                    return Invoke(expression, argumentList[0], argumentList[1], argumentList[2]);
+                case 4:
+                    return Invoke(expression, argumentList[0], argumentList[1], argumentList[2], argumentList[3]);
+                case 5:
+                    return Invoke(expression, argumentList[0], argumentList[1], argumentList[2], argumentList[3], argumentList[4]);
             }
 
-            RequiresCanRead(expression, "expression");
+            RequiresCanRead(expression, nameof(expression));
 
-            var args = arguments.ToReadOnly();
+            var args = argumentList.ToReadOnly(); // Ensure is TrueReadOnlyCollection when count > 5. Returns fast if it already is.
             var mi = GetInvokeMethod(expression);
-            ValidateArgumentTypes(mi, ExpressionType.Invoke, ref args);
+            ValidateArgumentTypes(mi, ExpressionType.Invoke, ref args, nameof(expression));
             return new InvocationExpressionN(expression, args, mi.ReturnType);
         }
 
@@ -811,7 +809,7 @@ namespace System.Linq.Expressions
                 Type exprType = TypeUtils.FindGenericType(typeof(Expression<>), expression.Type);
                 if (exprType == null)
                 {
-                    throw Error.ExpressionTypeNotInvocable(expression.Type);
+                    throw Error.ExpressionTypeNotInvocable(expression.Type, nameof(expression));
                 }
                 delegateType = exprType.GetGenericArguments()[0];
             }

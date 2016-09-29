@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -42,6 +43,8 @@ namespace System.IO
         protected void OnDeleted(System.IO.FileSystemEventArgs e) { }
         protected void OnError(System.IO.ErrorEventArgs e) { }
         protected void OnRenamed(System.IO.RenamedEventArgs e) { }
+        public System.IO.WaitForChangedResult WaitForChanged(System.IO.WatcherChangeTypes changeType) { return default(System.IO.WaitForChangedResult); }
+        public System.IO.WaitForChangedResult WaitForChanged(System.IO.WatcherChangeTypes changeType, int timeout) { return default(System.IO.WaitForChangedResult); }
     }
     [System.FlagsAttribute]
     public enum NotifyFilters
@@ -62,6 +65,13 @@ namespace System.IO
         public string OldName { get { return default(string); } }
     }
     public delegate void RenamedEventHandler(object sender, System.IO.RenamedEventArgs e);
+    public struct WaitForChangedResult
+    {
+        public System.IO.WatcherChangeTypes ChangeType { get { return default(System.IO.WatcherChangeTypes); } set { } }
+        public string Name { get { return default(string); } set { } }
+        public string OldName { get { return default(string); } set { } }
+        public bool TimedOut { get { return false; } set { } }
+    }
     [System.FlagsAttribute]
     public enum WatcherChangeTypes
     {

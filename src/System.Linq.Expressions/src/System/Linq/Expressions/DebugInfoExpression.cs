@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -227,7 +228,7 @@ namespace System.Linq.Expressions
         /// <returns>An instance of <see cref="DebugInfoExpression"/>.</returns>
         public static DebugInfoExpression DebugInfo(SymbolDocumentInfo document, int startLine, int startColumn, int endLine, int endColumn)
         {
-            ContractUtils.RequiresNotNull(document, "document");
+            ContractUtils.RequiresNotNull(document, nameof(document));
             if (startLine == 0xfeefee && startColumn == 0 && endLine == 0xfeefee && endColumn == 0)
             {
                 return new ClearDebugInfoExpression(document);
@@ -241,10 +242,10 @@ namespace System.Linq.Expressions
         /// Creates a <see cref="DebugInfoExpression"/> for clearing a sequence point.
         /// </summary>
         /// <param name="document">The <see cref="SymbolDocumentInfo"/> that represents the source file.</param>
-        /// <returns>An instance of <see cref="DebugInfoExpression"/> for clearning a sequence point.</returns>
+        /// <returns>An instance of <see cref="DebugInfoExpression"/> for clearing a sequence point.</returns>
         public static DebugInfoExpression ClearDebugInfo(SymbolDocumentInfo document)
         {
-            ContractUtils.RequiresNotNull(document, "document");
+            ContractUtils.RequiresNotNull(document, nameof(document));
 
             return new ClearDebugInfoExpression(document);
         }
@@ -253,19 +254,19 @@ namespace System.Linq.Expressions
         {
             if (startLine < 1)
             {
-                throw Error.OutOfRange("startLine", 1);
+                throw Error.OutOfRange(nameof(startLine), 1);
             }
             if (startColumn < 1)
             {
-                throw Error.OutOfRange("startColumn", 1);
+                throw Error.OutOfRange(nameof(startColumn), 1);
             }
             if (endLine < 1)
             {
-                throw Error.OutOfRange("endLine", 1);
+                throw Error.OutOfRange(nameof(endLine), 1);
             }
             if (endColumn < 1)
             {
-                throw Error.OutOfRange("endColumn", 1);
+                throw Error.OutOfRange(nameof(endColumn), 1);
             }
             if (startLine > endLine)
             {

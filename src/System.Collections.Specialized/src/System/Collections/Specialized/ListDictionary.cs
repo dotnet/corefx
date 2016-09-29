@@ -1,7 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Collections;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Collections.Specialized
 {
@@ -12,12 +11,14 @@ namespace System.Collections.Specialized
     ///    This should not be used if performance is important for large numbers of elements.
     ///  </para>
     /// </devdoc>
+    [Serializable]
     public class ListDictionary : IDictionary
     {
         private DictionaryNode _head;
         private int _version;
         private int _count;
         private readonly IComparer _comparer;
+        [NonSerialized]
         private Object _syncRoot;
 
         public ListDictionary()
@@ -35,7 +36,7 @@ namespace System.Collections.Specialized
             {
                 if (key == null)
                 {
-                    throw new ArgumentNullException("key", SR.ArgumentNull_Key);
+                    throw new ArgumentNullException(nameof(key));
                 }
                 DictionaryNode node = _head;
                 if (_comparer == null)
@@ -43,7 +44,7 @@ namespace System.Collections.Specialized
                     while (node != null)
                     {
                         object oldKey = node.key;
-                        if (oldKey != null && oldKey.Equals(key))
+                        if (oldKey.Equals(key))
                         {
                             return node.value;
                         }
@@ -55,7 +56,7 @@ namespace System.Collections.Specialized
                     while (node != null)
                     {
                         object oldKey = node.key;
-                        if (oldKey != null && _comparer.Compare(oldKey, key) == 0)
+                        if (_comparer.Compare(oldKey, key) == 0)
                         {
                             return node.value;
                         }
@@ -68,7 +69,7 @@ namespace System.Collections.Specialized
             {
                 if (key == null)
                 {
-                    throw new ArgumentNullException("key", SR.ArgumentNull_Key);
+                    throw new ArgumentNullException(nameof(key));
                 }
                 _version++;
                 DictionaryNode last = null;
@@ -168,7 +169,7 @@ namespace System.Collections.Specialized
         {
             if (key == null)
             {
-                throw new ArgumentNullException("key", SR.ArgumentNull_Key);
+                throw new ArgumentNullException(nameof(key));
             }
             _version++;
             DictionaryNode last = null;
@@ -178,7 +179,7 @@ namespace System.Collections.Specialized
                 object oldKey = node.key;
                 if ((_comparer == null) ? oldKey.Equals(key) : _comparer.Compare(oldKey, key) == 0)
                 {
-                    throw new ArgumentException(SR.Argument_AddingDuplicate);
+                    throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key));
                 }
                 last = node;
             }
@@ -208,7 +209,7 @@ namespace System.Collections.Specialized
         {
             if (key == null)
             {
-                throw new ArgumentNullException("key", SR.ArgumentNull_Key);
+                throw new ArgumentNullException(nameof(key));
             }
             for (DictionaryNode node = _head; node != null; node = node.next)
             {
@@ -224,9 +225,9 @@ namespace System.Collections.Specialized
         public void CopyTo(Array array, int index)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             if (index < 0)
-                throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (array.Length - index < _count)
                 throw new ArgumentException(SR.Arg_InsufficientSpace);
@@ -252,7 +253,7 @@ namespace System.Collections.Specialized
         {
             if (key == null)
             {
-                throw new ArgumentNullException("key", SR.ArgumentNull_Key);
+                throw new ArgumentNullException(nameof(key));
             }
             _version++;
             DictionaryNode last = null;
@@ -385,9 +386,10 @@ namespace System.Collections.Specialized
             void ICollection.CopyTo(Array array, int index)
             {
                 if (array == null)
-                    throw new ArgumentNullException("array");
+                    throw new ArgumentNullException(nameof(array));
                 if (index < 0)
-                    throw new ArgumentOutOfRangeException("index", SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum);
+
                 for (DictionaryNode node = _list._head; node != null; node = node.next)
                 {
                     array.SetValue(_isKeys ? node.key : node.value, index);
@@ -489,6 +491,7 @@ namespace System.Collections.Specialized
             }
         }
 
+        [Serializable]
         private class DictionaryNode
         {
             public object key;

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 
@@ -47,7 +48,7 @@ namespace System
         //
         //
         // Assumption is the caller will check on the resulting name length
-        // Remarks:  MUST NOT be used unless all input indexes are are verified and trusted.
+        // Remarks:  MUST NOT be used unless all input indexes are verified and trusted.
         internal unsafe static bool IsValid(char* name, ushort start, ref int returnedEnd, bool notImplicitFile)
         {
             ushort end = (ushort)returnedEnd;

@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 
 //Zip Spec here: http://www.pkware.com/documents/casestudies/APPNOTE.TXT
@@ -129,10 +130,7 @@ namespace System.IO.Compression
         public ZipArchive(Stream stream, ZipArchiveMode mode, Boolean leaveOpen, Encoding entryNameEncoding)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
-
-            // Checking of compressionLevel is passed down to DeflateStream and the IDeflater implementation
-            // as it is a pugable component that completely encapsulates the meaning of compressionLevel.
+                throw new ArgumentNullException(nameof(stream));
 
             Contract.EndContractBlock();
 
@@ -232,30 +230,25 @@ namespace System.IO.Compression
         {
             if (disposing && !_isDisposed)
             {
-                switch (_mode)
+                try
                 {
-                    case ZipArchiveMode.Read:
-                        break;
-                    case ZipArchiveMode.Create:
-                    case ZipArchiveMode.Update:
-                    default:
-                        Debug.Assert(_mode == ZipArchiveMode.Update || _mode == ZipArchiveMode.Create);
-                        try
-                        {
+                    switch (_mode)
+                    {
+                        case ZipArchiveMode.Read:
+                            break;
+                        case ZipArchiveMode.Create:
+                        case ZipArchiveMode.Update:
+                        default:
+                            Debug.Assert(_mode == ZipArchiveMode.Update || _mode == ZipArchiveMode.Create);
                             WriteFile();
-                        }
-                        catch (InvalidDataException)
-                        {
-                            CloseStreams();
-                            _isDisposed = true;
-                            throw;
-                        }
-                        break;
+                            break;
+                    }
                 }
-
-                CloseStreams();
-
-                _isDisposed = true;
+                finally
+                {
+                    CloseStreams();
+                    _isDisposed = true;
+                }
             }
         }
 
@@ -282,7 +275,7 @@ namespace System.IO.Compression
         public ZipArchiveEntry GetEntry(String entryName)
         {
             if (entryName == null)
-                throw new ArgumentNullException("entryName");
+                throw new ArgumentNullException(nameof(entryName));
             Contract.EndContractBlock();
 
             if (_mode == ZipArchiveMode.Create)
@@ -337,7 +330,7 @@ namespace System.IO.Compression
 #endif // FEATURE_UTF7                        
                         ))
                 {
-                    throw new ArgumentException(SR.EntryNameEncodingNotSupported, "entryNameEncoding");
+                    throw new ArgumentException(SR.EntryNameEncodingNotSupported, nameof(EntryNameEncoding));
                 }
 
                 _entryNameEncoding = value;
@@ -348,14 +341,11 @@ namespace System.IO.Compression
         {
             Contract.Ensures(Contract.Result<ZipArchiveEntry>() != null);
 
-            // Checking of compressionLevel is passed down to DeflateStream and the IDeflater implementation
-            // as it is a pugable component that completely encapsulates the meaning of compressionLevel.
-
             if (entryName == null)
-                throw new ArgumentNullException("entryName");
+                throw new ArgumentNullException(nameof(entryName));
 
             if (String.IsNullOrEmpty(entryName))
-                throw new ArgumentException(SR.CannotBeEmpty, "entryName");
+                throw new ArgumentException(SR.CannotBeEmpty, nameof(entryName));
 
             if (_mode == ZipArchiveMode.Read)
                 throw new NotSupportedException(SR.CreateInReadMode);
@@ -497,7 +487,7 @@ namespace System.IO.Compression
                         break;
                     default:
                         //still have to throw this, because stream constructor doesn't do mode argument checks
-                        throw new ArgumentOutOfRangeException("mode");
+                        throw new ArgumentOutOfRangeException(nameof(mode));
                 }
 
                 _mode = mode;
@@ -676,7 +666,6 @@ namespace System.IO.Compression
         }
 
 
-        //the only exceptions that this function will throw directly are InvalidDataExceptions
         private void WriteFile()
         {
             //if we are in create mode, we always set readEntries to true in Init
@@ -696,7 +685,6 @@ namespace System.IO.Compression
 
                 _archiveStream.Seek(0, SeekOrigin.Begin);
                 _archiveStream.SetLength(0);
-                //nothing after this should throw an exception
             }
 
             foreach (ZipArchiveEntry entry in _entries)
@@ -746,5 +734,5 @@ namespace System.IO.Compression
             ZipEndOfCentralDirectoryBlock.WriteBlock(_archiveStream, _entries.Count, startOfCentralDirectory, sizeOfCentralDirectory, _archiveComment);
         }
         #endregion Privates
-    }  // class ZipArchive
-}  // namespace
+    }
+}

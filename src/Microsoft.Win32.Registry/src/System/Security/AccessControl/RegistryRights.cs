@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32;
 
@@ -9,7 +10,12 @@ namespace System.Security.AccessControl
     // winnt.h and from MSDN, plus some experimental validation with regedit.
     // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/sysinfo/base/registry_key_security_and_access_rights.asp
     [Flags]
-    public enum RegistryRights
+#if REGISTRY_ASSEMBLY
+    public
+#else
+    internal
+#endif
+    enum RegistryRights
     {
         // No None field - An ACE with the value 0 cannot grant nor deny.
         QueryValues = Interop.mincore.RegistryOperations.KEY_QUERY_VALUE,          // 0x0001 query the values of a registry key

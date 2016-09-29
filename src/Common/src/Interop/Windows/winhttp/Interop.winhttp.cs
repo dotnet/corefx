@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -124,9 +125,9 @@ internal partial class Interop
             SafeWinHttpHandle requestHandle,
             uint infoLevel,
             string name,
-            [Out] StringBuilder buffer,
+            IntPtr buffer,
             ref uint bufferLength,
-            IntPtr index);
+            ref uint index);
 
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -160,6 +161,14 @@ internal partial class Interop
             SafeWinHttpHandle handle,
             uint option,
             IntPtr buffer,
+            ref uint bufferSize);
+
+        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool WinHttpQueryOption(
+            SafeWinHttpHandle handle,
+            uint option,
+            ref uint buffer,
             ref uint bufferSize);
 
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]

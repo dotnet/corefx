@@ -1,65 +1,64 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
-using System.Linq;
-using System.Linq.Expressions;
 using Xunit;
 
-namespace Tests.ExpressionCompiler.Binary
+namespace System.Linq.Expressions.Tests
 {
     public static class BinaryNullableLogicalTests
     {
         #region Test methods
 
-        [Fact]
-        public static void CheckNullableBoolAndTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableBoolAndTest(bool useInterpreter)
         {
             bool?[] array = new bool?[] { null, true, false };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableBoolAnd(array[i], array[j]);
+                    VerifyNullableBoolAnd(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableBoolAndAlsoTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableBoolAndAlsoTest(bool useInterpreter)
         {
             bool?[] array = new bool?[] { null, true, false };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableBoolAndAlso(array[i], array[j]);
+                    VerifyNullableBoolAndAlso(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableBoolOrTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableBoolOrTest(bool useInterpreter)
         {
             bool?[] array = new bool?[] { null, true, false };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableBoolOr(array[i], array[j]);
+                    VerifyNullableBoolOr(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableBoolOrElseTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableBoolOrElseTest(bool useInterpreter)
         {
             bool?[] array = new bool?[] { null, true, false };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableBoolOrElse(array[i], array[j]);
+                    VerifyNullableBoolOrElse(array[i], array[j], useInterpreter);
                 }
             }
         }
@@ -68,7 +67,7 @@ namespace Tests.ExpressionCompiler.Binary
 
         #region Test verifiers
 
-        private static void VerifyNullableBoolAnd(bool? a, bool? b)
+        private static void VerifyNullableBoolAnd(bool? a, bool? b, bool useInterpreter)
         {
             Expression<Func<bool?>> e =
                 Expression.Lambda<Func<bool?>>(
@@ -76,46 +75,12 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(bool?)),
                         Expression.Constant(b, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.Compile(useInterpreter);
 
-            // compute with expression tree
-            bool? etResult = default(bool?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // compute with real IL
-            bool? csResult = default(bool?);
-            Exception csException = null;
-            try
-            {
-                csResult = (bool?)(a & b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a & b, f());
         }
 
-        private static void VerifyNullableBoolAndAlso(bool? a, bool? b)
+        private static void VerifyNullableBoolAndAlso(bool? a, bool? b, bool useInterpreter)
         {
             Expression<Func<bool?>> e =
                 Expression.Lambda<Func<bool?>>(
@@ -123,46 +88,12 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(bool?)),
                         Expression.Constant(b, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.Compile(useInterpreter);
 
-            // compute with expression tree
-            bool? etResult = default(bool?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // compute with real IL
-            bool? csResult = default(bool?);
-            Exception csException = null;
-            try
-            {
-                csResult = (bool?)(a & b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a & b, f());
         }
 
-        private static void VerifyNullableBoolOr(bool? a, bool? b)
+        private static void VerifyNullableBoolOr(bool? a, bool? b, bool useInterpreter)
         {
             Expression<Func<bool?>> e =
                 Expression.Lambda<Func<bool?>>(
@@ -170,46 +101,12 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(bool?)),
                         Expression.Constant(b, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.Compile(useInterpreter);
 
-            // compute with expression tree
-            bool? etResult = default(bool?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // compute with real IL
-            bool? csResult = default(bool?);
-            Exception csException = null;
-            try
-            {
-                csResult = (bool?)(a | b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a | b, f());
         }
 
-        private static void VerifyNullableBoolOrElse(bool? a, bool? b)
+        private static void VerifyNullableBoolOrElse(bool? a, bool? b, bool useInterpreter)
         {
             Expression<Func<bool?>> e =
                 Expression.Lambda<Func<bool?>>(
@@ -217,43 +114,9 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(bool?)),
                         Expression.Constant(b, typeof(bool?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<bool?> f = e.Compile();
+            Func<bool?> f = e.Compile(useInterpreter);
 
-            // compute with expression tree
-            bool? etResult = default(bool?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // compute with real IL
-            bool? csResult = default(bool?);
-            Exception csException = null;
-            try
-            {
-                csResult = (bool?)(a | b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a | b, f());
         }
 
         #endregion

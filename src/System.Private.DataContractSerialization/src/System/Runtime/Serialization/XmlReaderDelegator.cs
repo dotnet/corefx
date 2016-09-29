@@ -1,10 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Xml;
-using System.Xml.Schema;
-using System.Reflection;
 using System.Globalization;
 using System.Collections.Generic;
 
@@ -51,7 +49,7 @@ namespace System.Runtime.Serialization
         internal string GetAttribute(int i)
         {
             if (isEndOfEmptyElement)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("i", SR.Format(SR.XmlElementAttributes)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(i), SR.Format(SR.XmlElementAttributes)));
             return reader.GetAttribute(i);
         }
 
@@ -151,7 +149,7 @@ namespace System.Runtime.Serialization
         internal void MoveToAttribute(int i)
         {
             if (isEndOfEmptyElement)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("i", SR.Format(SR.XmlElementAttributes)));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(i), SR.Format(SR.XmlElementAttributes)));
             reader.MoveToAttribute(i);
         }
 
@@ -219,14 +217,6 @@ namespace System.Runtime.Serialization
             else
                 reader.ReadEndElement();
         }
-
-        private Exception CreateInvalidPrimitiveTypeException(Type type)
-        {
-            return new InvalidDataContractException(SR.Format(
-                type.GetTypeInfo().IsInterface ? SR.InterfaceTypeCannotBeCreated : SR.InvalidPrimitiveType,
-                DataContract.GetClrTypeFullName(type)));
-        }
-
 
         private void ThrowConversionException(string value, string type)
         {
@@ -677,9 +667,9 @@ namespace System.Runtime.Serialization
         }
 
 #if USE_REFEMIT
-        public bool TryReadDateTimeArray(XmlObjectSerializerReadContext context,
+        public virtual bool TryReadDateTimeArray(XmlObjectSerializerReadContext context,
 #else
-        internal bool TryReadDateTimeArray(XmlObjectSerializerReadContext context,
+        internal virtual bool TryReadDateTimeArray(XmlObjectSerializerReadContext context,
 #endif
         XmlDictionaryString itemName, XmlDictionaryString itemNamespace,
             int arrayLength, out DateTime[] array)

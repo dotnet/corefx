@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -110,7 +111,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "type must not be ByRef"
+        /// A string like "Type must not be ByRef"
         /// </summary>
         internal static string TypeMustNotBeByRef
         {
@@ -121,6 +122,11 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
+        /// A string like "Type must not be a pointer type"
+        /// </summary>
+        internal static string TypeMustNotBePointer => SR.TypeMustNotBePointer;
+
+        /// <summary>
         /// A string like "Type doesn't have constructor with a given signature"
         /// </summary>
         internal static string TypeDoesNotHaveConstructorForTheSignature
@@ -128,28 +134,6 @@ namespace System.Linq.Expressions
             get
             {
                 return SR.TypeDoesNotHaveConstructorForTheSignature;
-            }
-        }
-
-        /// <summary>
-        /// A string like "Count must be non-negative."
-        /// </summary>
-        internal static string CountCannotBeNegative
-        {
-            get
-            {
-                return SR.CountCannotBeNegative;
-            }
-        }
-
-        /// <summary>
-        /// A string like "arrayType must be an array type"
-        /// </summary>
-        internal static string ArrayTypeMustBeArray
-        {
-            get
-            {
-                return SR.ArrayTypeMustBeArray;
             }
         }
 
@@ -167,11 +151,11 @@ namespace System.Linq.Expressions
         /// <summary>
         /// A string like "Property type must match the value type of setter"
         /// </summary>
-        internal static string PropertyTyepMustMatchSetter
+        internal static string PropertyTypeMustMatchSetter
         {
             get
             {
-                return SR.PropertyTyepMustMatchSetter;
+                return SR.PropertyTypeMustMatchSetter;
             }
         }
 
@@ -304,17 +288,6 @@ namespace System.Linq.Expressions
             get
             {
                 return SR.DefaultBodyMustBeSupplied;
-            }
-        }
-
-        /// <summary>
-        /// A string like "MethodBuilder does not have a valid TypeBuilder"
-        /// </summary>
-        internal static string MethodBuilderDoesNotHaveTypeBuilder
-        {
-            get
-            {
-                return SR.MethodBuilderDoesNotHaveTypeBuilder;
             }
         }
 
@@ -527,22 +500,22 @@ namespace System.Linq.Expressions
         /// <summary>
         /// A string like "Argument must be either a FieldInfo or PropertyInfo"
         /// </summary>
-        internal static string ArgumentMustBeFieldInfoOrPropertInfo
+        internal static string ArgumentMustBeFieldInfoOrPropertyInfo
         {
             get
             {
-                return SR.ArgumentMustBeFieldInfoOrPropertInfo;
+                return SR.ArgumentMustBeFieldInfoOrPropertyInfo;
             }
         }
 
         /// <summary>
         /// A string like "Argument must be either a FieldInfo, PropertyInfo or MethodInfo"
         /// </summary>
-        internal static string ArgumentMustBeFieldInfoOrPropertInfoOrMethod
+        internal static string ArgumentMustBeFieldInfoOrPropertyInfoOrMethod
         {
             get
             {
-                return SR.ArgumentMustBeFieldInfoOrPropertInfoOrMethod;
+                return SR.ArgumentMustBeFieldInfoOrPropertyInfoOrMethod;
             }
         }
 
@@ -761,7 +734,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Lambda type parameter must be derived from System.Delegate"
+        /// A string like "Lambda type parameter must be derived from System.MulticastDelegate"
         /// </summary>
         internal static string LambdaTypeMustBeDerivedFromSystemDelegate
         {
@@ -909,17 +882,6 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "List initializers must contain at least one initializer"
-        /// </summary>
-        internal static string ListInitializerWithZeroMembers
-        {
-            get
-            {
-                return SR.ListInitializerWithZeroMembers;
-            }
-        }
-
-        /// <summary>
         /// A string like "Element initializer method must be named 'Add'"
         /// </summary>
         internal static string ElementInitializerMethodNotAdd
@@ -1020,14 +982,6 @@ namespace System.Linq.Expressions
         internal static string UnhandledConvert(object p0)
         {
             return SR.Format(SR.UnhandledConvert, p0);
-        }
-
-        /// <summary>
-        /// A string like "Unhandled Expression Type: {0}"
-        /// </summary>
-        internal static string UnhandledExpressionType(object p0)
-        {
-            return SR.Format(SR.UnhandledExpressionType, p0);
         }
 
         /// <summary>
@@ -1147,30 +1101,11 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Invalid operation: '{0}'"
-        /// </summary>
-        internal static string InvalidOperation(object p0)
-        {
-            return SR.Format(SR.InvalidOperation, p0);
-        }
-
-        /// <summary>
         /// A string like "{0} must be greater than or equal to {1}"
         /// </summary>
         internal static string OutOfRange(object p0, object p1)
         {
             return SR.Format(SR.OutOfRange, p0, p1);
-        }
-
-        /// <summary>
-        /// A string like "Queue empty."
-        /// </summary>
-        internal static string QueueEmpty
-        {
-            get
-            {
-                return SR.QueueEmpty;
-            }
         }
 
         /// <summary>
@@ -1260,6 +1195,7 @@ namespace System.Linq.Expressions
             }
         }
 
+#if FEATURE_COMPILE_TO_METHODBUILDER
         /// <summary>
         /// A string like "CompileToMethod cannot compile constant '{0}' because it is a non-trivial value, such as a live object. Instead, create an expression tree that can construct this value."
         /// </summary>
@@ -1278,6 +1214,18 @@ namespace System.Linq.Expressions
                 return SR.CannotCompileDynamic;
             }
         }
+
+        /// <summary>
+        /// A string like "MethodBuilder does not have a valid TypeBuilder"
+        /// </summary>
+        internal static string MethodBuilderDoesNotHaveTypeBuilder
+        {
+            get
+            {
+                return SR.MethodBuilderDoesNotHaveTypeBuilder;
+            }
+        }
+#endif
 
         /// <summary>
         /// A string like "Invalid lvalue for assignment: {0}."
@@ -1302,29 +1250,6 @@ namespace System.Linq.Expressions
         {
             return SR.Format(SR.UnknownLiftType, p0);
         }
-
-        /// <summary>
-        /// A string like "Invalid output directory."
-        /// </summary>
-        internal static string InvalidOutputDir
-        {
-            get
-            {
-                return SR.InvalidOutputDir;
-            }
-        }
-
-        /// <summary>
-        /// A string like "Invalid assembly name or file extension."
-        /// </summary>
-        internal static string InvalidAsmNameOrExtension
-        {
-            get
-            {
-                return SR.InvalidAsmNameOrExtension;
-            }
-        }
-
 
         /// <summary>
         /// A string like "Cannot create instance of {0} because it contains generic parameters"
@@ -1397,7 +1322,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is is intentional, override '{1}' and change it to allow this rewrite."
+        /// A string like "Rewritten expression calls operator method '{0}', but the original node had no operator method. If this is intentional, override '{1}' and change it to allow this rewrite."
         /// </summary>
         internal static string MustRewriteWithoutMethod(object p0, object p1)
         {
@@ -1421,17 +1346,6 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// A string like "Dynamic operations can only be performed in homogenous AppDomain."
-        /// </summary>
-        internal static string HomogenousAppDomainRequired
-        {
-            get
-            {
-                return SR.HomogenousAppDomainRequired;
-            }
-        }
-
-        /// <summary>
         /// A string like "Test value of type '{0}' cannot be used for the comparison method parameter of type '{1}'"
         /// </summary>
         internal static string TestValueTypeDoesNotMatchComparisonMethodParameter(object p0, object p1)
@@ -1447,6 +1361,7 @@ namespace System.Linq.Expressions
             return SR.Format(SR.SwitchValueTypeDoesNotMatchComparisonMethodParameter, p0, p1);
         }
 
+#if FEATURE_COMPILE_TO_METHODBUILDER && FEATURE_PDB_GENERATOR
         /// <summary>
         /// A string like "DebugInfoGenerator created by CreatePdbGenerator can only be used with LambdaExpression.CompileToMethod."
         /// </summary>
@@ -1457,6 +1372,7 @@ namespace System.Linq.Expressions
                 return SR.PdbGeneratorNeedsExpressionCompiler;
             }
         }
+#endif
 
 #if FEATURE_COMPILE
         /// <summary>

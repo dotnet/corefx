@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -93,7 +94,7 @@ namespace System.Linq.Tests
         {
             string[] key = { "Chris", "Prakash", "Robert" };
             int[] element = { 50, 80, 100, 95, 99, 56 };
-            var source = new []
+            var source = new[]
             {
                 new { Name = key[0], Score = element[0] },
                 new { Name = key[1], Score = element[2] },
@@ -104,6 +105,24 @@ namespace System.Linq.Tests
             };
 
             AssertMatches(key, element, source.ToLookup(e => e.Name, e => e.Score, new AnagramEqualityComparer()));
+        }
+
+        [Fact]
+        public void Count()
+        {
+            string[] key = { "Chris", "Prakash", "Robert" };
+            int[] element = { 50, 80, 100, 95, 99, 56 };
+            var source = new[]
+            {
+                new { Name = key[0], Score = element[0] },
+                new { Name = key[1], Score = element[2] },
+                new { Name = key[2], Score = element[5] },
+                new { Name = key[1], Score = element[3] },
+                new { Name = key[0], Score = element[1] },
+                new { Name = key[1], Score = element[4] }
+            };
+
+            Assert.Equal(3, source.ToLookup(e => e.Name, e => e.Score).Count());
         }
 
         [Fact]
@@ -194,6 +213,94 @@ namespace System.Linq.Tests
         {
             Func<int, int> elementSelector = null;
             Assert.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector, EqualityComparer<int>.Default));
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ApplyResultSelectorForGroup(int enumType)
+        {
+            //Create test data
+            var roles = new List<Role>
+            {
+                new Role { Id = 1 },
+                new Role { Id = 2 },
+                new Role { Id = 3 },
+            };
+
+            var memberships = Enumerable.Range(0, 50).Select(i => new Membership
+            {
+                Id = i,
+                Role = roles[i % 3],
+                CountMe = i % 3 == 0
+            });
+
+            //Run actual test
+            var grouping = memberships.GroupBy(
+                m => m.Role,
+                (role, mems) => new RoleMetadata
+                {
+                    Role = role,
+                    CountA = mems.Count(m => m.CountMe),
+                    CountrB = mems.Count(m => !m.CountMe)
+                });
+
+            IEnumerable<RoleMetadata> result;
+            switch(enumType)
+            {
+                case 1:
+                    result = grouping.ToList();
+                    break;
+                case 2:
+                    result = grouping.ToArray();
+                    break;
+                default:
+                    result = grouping;
+                    break;
+            }
+
+            var expected = new []
+            {
+                new RoleMetadata {Role = new Role {Id = 1}, CountA = 17, CountrB = 0 },
+                new RoleMetadata {Role = new Role {Id = 2}, CountA = 0, CountrB = 17 },
+                new RoleMetadata {Role = new Role {Id = 3}, CountA = 0, CountrB = 16 }
+            };
+
+            Assert.Equal(expected, result);
+        }
+
+        public class Membership
+        {
+            public int Id { get; set; }
+            public Role Role { get; set; }
+
+            public bool CountMe { get; set; }
+        }
+
+        public class Role : IEquatable<Role>
+        {
+            public int Id { get; set; }
+
+            public bool Equals(Role other) => other != null && Id == other.Id;
+
+            public override bool Equals(object obj) => Equals(obj as Role);
+
+            public override int GetHashCode() => Id;
+        }
+
+        public class RoleMetadata : IEquatable<RoleMetadata>
+        {
+            public Role Role { get; set; }
+            public int CountA { get; set; }
+            public int CountrB { get; set; }
+
+            public bool Equals(RoleMetadata other)
+                => other != null && Role.Equals(other.Role) && CountA == other.CountA && CountrB == other.CountrB;
+
+            public override bool Equals(object obj) => Equals(obj as RoleMetadata);
+
+            public override int GetHashCode() => Role.GetHashCode() * 31 + CountA + CountrB;
         }
     }
 }

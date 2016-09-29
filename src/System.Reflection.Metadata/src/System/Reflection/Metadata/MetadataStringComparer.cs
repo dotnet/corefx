@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -67,7 +68,7 @@ namespace System.Reflection.Metadata
                 Throw.ValueArgumentNull();
             }
 
-            return _reader.StringStream.Equals(handle, value, _reader.utf8Decoder, ignoreCase);
+            return _reader.StringHeap.Equals(handle, value, _reader.UTF8Decoder, ignoreCase);
         }
 
         public bool Equals(NamespaceDefinitionHandle handle, string value)
@@ -84,10 +85,10 @@ namespace System.Reflection.Metadata
 
             if (handle.HasFullName)
             {
-                return _reader.StringStream.Equals(handle.GetFullName(), value, _reader.utf8Decoder, ignoreCase);
+                return _reader.StringHeap.Equals(handle.GetFullName(), value, _reader.UTF8Decoder, ignoreCase);
             }
 
-            return value == _reader.namespaceCache.GetFullName(handle);
+            return value == _reader.NamespaceCache.GetFullName(handle);
         }
 
         public bool Equals(DocumentNameBlobHandle handle, string value)
@@ -102,7 +103,7 @@ namespace System.Reflection.Metadata
                 Throw.ValueArgumentNull();
             }
 
-            return _reader.BlobStream.DocumentNameEquals(handle, value, ignoreCase);
+            return _reader.BlobHeap.DocumentNameEquals(handle, value, ignoreCase);
         }
 
         public bool StartsWith(StringHandle handle, string value)
@@ -117,7 +118,7 @@ namespace System.Reflection.Metadata
                 Throw.ValueArgumentNull();
             }
 
-            return _reader.StringStream.StartsWith(handle, value, _reader.utf8Decoder, ignoreCase);
+            return _reader.StringHeap.StartsWith(handle, value, _reader.UTF8Decoder, ignoreCase);
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,6 @@ internal static class IOInputs
 
     public static bool SupportsSettingCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); } }
     public static bool SupportsGettingCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
-    public static bool CaseSensitive { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
-    public static bool CaseInsensitive { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
 
     // Max path length (minus trailing \0). Unix values vary system to system; just using really long values here likely to be more than on the average system.
     public static readonly int MaxPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 259 : 10000;
@@ -43,7 +42,7 @@ internal static class IOInputs
     {
         yield return Path.GetRandomFileName();
         yield return "!@#$%^&";
-        // yield return "\x65e5\x672c\x8a9e"; // TODO: Issue #846
+        yield return "\x65e5\x672c\x8a9e";
         yield return "A";
         yield return " A";
         yield return "  A";
@@ -230,8 +229,8 @@ internal static class IOInputs
 
     public static IEnumerable<string> GetPathsLongerThanMaxLongPath(string rootPath, bool useExtendedSyntax = false)
     {
-        yield return GetLongPath(rootPath, MaxExtendedPath + 1 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
-        yield return GetLongPath(rootPath, MaxExtendedPath + 2 - (useExtendedSyntax ? 0 : ExtendedPrefix.Length), useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxExtendedPath + 1, useExtendedSyntax);
+        yield return GetLongPath(rootPath, MaxExtendedPath + 2, useExtendedSyntax);
     }
 
     private static string GetLongPath(string rootPath, int characterCount, bool extended = false)

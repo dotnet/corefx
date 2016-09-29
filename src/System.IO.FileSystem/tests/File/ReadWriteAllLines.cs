@@ -1,19 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public class File_ReadWriteAllLines : FileSystemTest
+    public class File_ReadWriteAllLines_Enumerable : FileSystemTest
     {
         #region Utilities
 
         protected virtual void Write(string path, string[] content)
         {
-            File.WriteAllLines(path, content);
+            File.WriteAllLines(path, (IEnumerable<string>)content);
         }
 
         protected virtual string[] Read(string path)
@@ -96,25 +99,60 @@ namespace System.IO.Tests
             Assert.Throws<FileNotFoundException>(() => Read(path));
         }
 
-        [ActiveIssue(4605, PlatformID.OSX)]
+        /// <summary>
+        /// On Unix, modifying a file that is ReadOnly will fail under normal permissions.
+        /// If the test is being run under the superuser, however, modification of a ReadOnly
+        /// file is allowed.
+        /// </summary>
         [Fact]
-        public void WriteToReadOnlyFile_UnauthException()
+        public void WriteToReadOnlyFile()
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
             File.SetAttributes(path, FileAttributes.ReadOnly);
-            Assert.Throws<UnauthorizedAccessException>(() => Write(path, new string[] { "text" }));
-            File.SetAttributes(path, FileAttributes.Normal);
+            try
+            {
+                // Operation succeeds when being run by the Unix superuser
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && geteuid() == 0)
+                {
+                    Write(path, new string[] { "text" });
+                    Assert.Equal(new string[] { "text" }, Read(path));
+                }
+                else
+                    Assert.Throws<UnauthorizedAccessException>(() => Write(path, new string[] { "text" }));
+            }
+            finally
+            {
+                File.SetAttributes(path, FileAttributes.Normal);
+            }
+        }
+
+        [Fact]
+        public void DisposingEnumeratorClosesFile()
+        {
+            string path = GetTestFilePath();
+            Write(path, new[] { "line1", "line2", "line3" });
+
+            IEnumerable<string> readLines = File.ReadLines(path);
+            using (IEnumerator<string> e1 = readLines.GetEnumerator())
+            using (IEnumerator<string> e2 = readLines.GetEnumerator())
+            {
+                Assert.Same(readLines, e1);
+                Assert.NotSame(e1, e2);
+            }
+
+            // File should be closed deterministically; this shouldn't throw.
+            File.OpenWrite(path).Dispose();
         }
 
         #endregion
     }
 
-    public class File_ReadWriteAllLines_Encoded : File_ReadWriteAllLines
+    public class File_ReadWriteAllLines_Enumerable_Encoded : File_ReadWriteAllLines_Enumerable
     {
         protected override void Write(string path, string[] content)
         {
-            File.WriteAllLines(path, content, new UTF8Encoding(false));
+            File.WriteAllLines(path, (IEnumerable<string>)content, new UTF8Encoding(false));
         }
 
         protected override string[] Read(string path)
@@ -126,12 +164,12 @@ namespace System.IO.Tests
         public void NullEncoding()
         {
             string path = GetTestFilePath();
-            Assert.Throws<ArgumentNullException>(() => File.WriteAllLines(path, new string[] { "Text" }, null));
+            Assert.Throws<ArgumentNullException>(() => File.WriteAllLines(path, (IEnumerable<string>)new string[] { "Text" }, null));
             Assert.Throws<ArgumentNullException>(() => File.ReadAllLines(path, null));
         }
     }
 
-    public class File_ReadLines : File_ReadWriteAllLines
+    public class File_ReadLines : File_ReadWriteAllLines_Enumerable
     {
         protected override string[] Read(string path)
         {
@@ -139,11 +177,11 @@ namespace System.IO.Tests
         }
     }
 
-    public class File_ReadLines_Encoded : File_ReadWriteAllLines
+    public class File_ReadLines_Encoded : File_ReadWriteAllLines_Enumerable
     {
         protected override void Write(string path, string[] content)
         {
-            File.WriteAllLines(path, content, new UTF8Encoding(false));
+            File.WriteAllLines(path, (IEnumerable<string>)content, new UTF8Encoding(false));
         }
 
         protected override string[] Read(string path)
@@ -155,7 +193,7 @@ namespace System.IO.Tests
         public void NullEncoding()
         {
             string path = GetTestFilePath();
-            Assert.Throws<ArgumentNullException>(() => File.WriteAllLines(path, new string[] { "Text" }, null));
+            Assert.Throws<ArgumentNullException>(() => File.WriteAllLines(path, (IEnumerable<string>)new string[] { "Text" }, null));
             Assert.Throws<ArgumentNullException>(() => File.ReadLines(path, null));
         }
     }

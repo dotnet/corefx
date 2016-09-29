@@ -1,5 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -8,13 +11,20 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Win32.Registry.Tests</RootNamespace>
     <AssemblyName>Microsoft.Win32.Registry.Tests</AssemblyName>
-    <UnsupportedPlatforms>Linux;OSX</UnsupportedPlatforms>
+    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.RegSetValueEx.cs">
+      <Link>Common\Interop\Windows\Interop.RegSetValueEx.cs</Link>
+    </Compile>
     <Compile Include="Helpers.cs" />
+    <Compile Include="RegistryKey\RegistryKey_GetValue_CorruptData.cs" />
     <Compile Include="Registry\Registry_Getvalue_str_str_obj.cs" />
     <Compile Include="Registry\Registry_SetValue_str_str_obj.cs" />
     <Compile Include="Registry\Registry_SetValue_str_str_obj_valuekind.cs" />
@@ -42,6 +52,10 @@
     <Compile Include="RegistryKey\RegistryKey_OpenSubKey_str_rkpc.cs" />
     <Compile Include="RegistryKey\RegistryKey_SetValueKind_str_obj_valueKind.cs" />
     <Compile Include="RegistryKey\RegistryKey_SetValue_str_obj.cs" />
+    <Compile Include="RegistryKey\RegistryKeyCreateSubKeyTestsBase.cs" />
+    <Compile Include="RegistryKey\RegistryKeyDeleteSubKeyTestsBase.cs" />
+    <Compile Include="RegistryKey\RegistryKeyDeleteSubKeyTreeTestsBase.cs" />
+    <Compile Include="RegistryKey\RegistryKeyOpenSubKeyTestsBase.cs" />
     <Compile Include="RegistryKey\SafeRegistryHandle.cs" />
     <Compile Include="RegistryTestsBase.cs" />
     <Compile Include="TestData.cs" />
@@ -51,7 +65,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Microsoft.Win32.Registry.csproj">
+    <ProjectReference Include="..\pkg\Microsoft.Win32.Registry.pkgproj">
       <Project>{d3f18acc-d327-4abb-ba6c-e9c34a041b2f}</Project>
       <Name>Microsoft.Win32.Registry</Name>
     </ProjectReference>

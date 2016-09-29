@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -12,7 +13,7 @@ namespace System.Collections.Generic
         public IDictionaryDebugView(IDictionary<K, V> dictionary)
         {
             if (dictionary == null)
-                throw new ArgumentNullException("dictionary");
+                throw new ArgumentNullException(nameof(dictionary));
 
             _dict = dictionary;
         }
@@ -36,7 +37,7 @@ namespace System.Collections.Generic
         public DictionaryKeyCollectionDebugView(ICollection<TKey> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             _collection = collection;
         }
@@ -60,7 +61,7 @@ namespace System.Collections.Generic
         public DictionaryValueCollectionDebugView(ICollection<TValue> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
 
             _collection = collection;
         }

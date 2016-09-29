@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace System.Runtime.Serialization
 {
@@ -32,6 +33,22 @@ namespace System.Runtime.Serialization
         private DataContractResolver _dataContractResolver;
         private ISerializationSurrogateProvider _serializationSurrogateProvider;
         private bool _serializeReadOnlyTypes;
+
+        private static SerializationOption _option = SerializationOption.ReflectionAsBackup;
+        private static bool _optionAlreadySet;
+        public static SerializationOption Option
+        {
+            get { return _option; }
+            set
+            {
+                if (_optionAlreadySet)
+                {
+                    throw new InvalidOperationException("Can only set once");
+                }
+                _optionAlreadySet = true;
+                _option = value;
+            }
+        }
 
         public DataContractSerializer(Type type)
             : this(type, (IEnumerable<Type>)null)
@@ -116,7 +133,7 @@ namespace System.Runtime.Serialization
             }
 
             if (maxItemsInObjectGraph < 0)
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("maxItemsInObjectGraph", SR.Format(SR.ValueMustBeNonNegative)));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(maxItemsInObjectGraph), SR.Format(SR.ValueMustBeNonNegative)));
             _maxItemsInObjectGraph = maxItemsInObjectGraph;
 
             _ignoreExtensionDataObject = ignoreExtensionDataObject;
@@ -180,7 +197,7 @@ namespace System.Runtime.Serialization
             get { return _maxItemsInObjectGraph; }
         }
 
-        public ISerializationSurrogateProvider SerializationSurrogateProvider
+        internal ISerializationSurrogateProvider SerializationSurrogateProvider
         {
             get { return _serializationSurrogateProvider; }
             set { _serializationSurrogateProvider = value; }

@@ -1,22 +1,20 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 using System.Security;
 
 namespace System.Numerics
 {
-    // ATTENTION: always pass BitsBuffer by reference,
-    // it's a structure for performance reasons. Furthermore
-    // it's a mutable one, so use it only with care!
-
     internal static partial class BigIntegerCalculator
     {
-        // To spare memory allocations a buffer helps reusing memory!
-        // We just create the target array twice and switch between every
-        // operation. In order to not compute unnecessarily with all those
-        // leading zeros we take care of the current actual length.
-
+        /// <summary>
+        /// To spare memory allocations a buffer helps reusing memory!
+        /// We just create the target array twice and switch between every
+        /// operation. In order to not compute unnecessarily with all those
+        /// leading zeros we take care of the current actual length.
+        /// </summary>
         internal struct BitsBuffer
         {
             private uint[] _bits;
@@ -94,7 +92,6 @@ namespace System.Numerics
             {
                 // Executes a modulo operation using an optimized reducer.
                 // Thus, no need of any switching here, happens in-line.
-
                 _length = reducer.Reduce(_bits, _length);
             }
 
@@ -124,7 +121,6 @@ namespace System.Numerics
             {
                 // Executes a modulo operation using the divide operation.
                 // Thus, no need of any switching here, happens in-line.
-
                 if (_length >= modulus._length)
                 {
                     fixed (uint* b = _bits, m = modulus._bits)
@@ -144,7 +140,7 @@ namespace System.Numerics
 
                 if (_length > 2)
                 {
-                    // ensure leading zeros
+                    // Ensure leading zeros
                     Array.Clear(_bits, 2, _length - 2);
                 }
 
@@ -162,7 +158,7 @@ namespace System.Numerics
 
                 if (_length > 1)
                 {
-                    // ensure leading zeros
+                    // Ensure leading zeros
                     Array.Clear(_bits, 1, _length - 1);
                 }
 
@@ -191,7 +187,7 @@ namespace System.Numerics
 
                 if (_length > maxLength)
                 {
-                    // ensure leading zeros
+                    // Ensure leading zeros
                     Array.Clear(_bits, maxLength, _length - maxLength);
                 }
 
@@ -205,7 +201,6 @@ namespace System.Numerics
 
                 // Resets this and switches this and temp afterwards.
                 // The caller assumed an empty temp, the next will too.
-
                 Array.Clear(_bits, 0, _length);
 
                 uint[] t = temp._bits;

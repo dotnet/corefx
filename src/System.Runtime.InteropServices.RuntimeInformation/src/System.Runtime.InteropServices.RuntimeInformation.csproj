@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Windows_Debug</Configuration>
@@ -7,41 +10,86 @@
     <OutputType>Library</OutputType>
     <RootNamespace>System.Runtime.InteropServices</RootNamespace>
     <AssemblyName>System.Runtime.InteropServices.RuntimeInformation</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <ProjectGuid>{F9DF2357-81B4-4317-908E-512DA9395583}</ProjectGuid>
-    <PackageTargetFramework>dotnet5.1</PackageTargetFramework>
-    <PackageTargetRuntime Condition="'$(TargetsWindows)' == 'true'">win</PackageTargetRuntime>
-    <PackageTargetRuntime Condition="'$(TargetsUnix)' == 'true'">unix</PackageTargetRuntime>
+    <DefineConstants Condition="'$(TargetGroup)'=='net45'">net45</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='wpa81'">wpa81</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='win8'">win8</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcore50'">netcore50</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)'=='netcore50aot'">netcore50;netcore50aot</DefineConstants>
+    <NuGetTargetMoniker>.NETStandard,Version=v1.1</NuGetTargetMoniker>
+    <!-- Clear runtime for wpa81 & win8: these project types don't use project.json and need to resolve without a runtime -->
+    <PackageTargetRuntime Condition="'$(TargetGroup)'=='wpa81' OR '$(TargetGroup)'=='win8'">
+    </PackageTargetRuntime>
+    <ValidPinvokeMappings Condition="'$(TargetGroup)'=='wpa81' OR '$(TargetGroup)'=='win8'">$(MSBuildThisFileDirectory)PinvokeAnalyzer_win8-wpa81-APIs.txt</ValidPinvokeMappings>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
-  <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true' ">
-    <Compile Include="RuntimeInformation.FreeBSD.cs" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net45_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'win8_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'win8_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'wpa81_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'wpa81_Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetsUnix)'=='true'">
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetUnixName.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.GetUnixName.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetUnixVersion.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.GetUnixVersion.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetOSArchitecture.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.GetOSArchitecture.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetProcessArchitecture.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.GetProcessArchitecture.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ProcessorArchitecture.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.ProcessorArchitecture.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.Unix.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
-    <Compile Include="RuntimeInformation.Linux.cs" />
+  <ItemGroup Condition="'$(TargetsWindows)'=='true' And ('$(TargetGroup)'=='' OR '$(TargetGroup)'=='net45')">
+    <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.RtlGetVersion.cs">
+      <Link>Common\Interop\Windows\NtDll\Interop.RtlGetVersion.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.RTL_OSVERSIONINFOEX.cs">
+      <Link>Common\Interop\Windows\NtDll\Interop.RTL_OSVERSIONINFOEX.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsOSX)' == 'true' ">
-    <Compile Include="RuntimeInformation.OSX.cs" />
+  <ItemGroup Condition=" '$(TargetsWindows)'=='true' ">
+    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.Windows.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetNativeSystemInfo.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.GetNativeSystemInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SYSTEM_INFO.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.SYSTEM_INFO.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
-    <Compile Include="RuntimeInformation.Windows.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnknownUnix)' == 'true' ">
-    <Compile Include="RuntimeInformation.UnknownUnix.cs" />
+  <ItemGroup Condition=" '$(TargetsWindows)'=='true' AND '$(TargetGroup)' != 'win8' AND '$(TargetGroup)' != 'wpa81'">
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetSystemInfo.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.GetSystemInfo.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OSPlatform.cs" />
+    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\RuntimeInformation.cs" />
+    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\Architecture.cs" />
+    <Compile Include="System\Runtime\InteropServices\RuntimeInformation\OSPlatform.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

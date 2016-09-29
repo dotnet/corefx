@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Text;
@@ -9,21 +10,153 @@ using Xunit;
 
 namespace System.IO.Compression.Tests
 {
-    public class ZLibDeflateStreamTests : DeflateStreamTests, IDisposable
-    {
-        public ZLibDeflateStreamTests() { Common.SetDeflaterMode("zlib"); }
-        public void Dispose() { Common.SetDeflaterMode("unknown"); }
-    }
-
-    public class ManagedDeflateStreamTests : DeflateStreamTests, IDisposable
-    {
-        public ManagedDeflateStreamTests() { Common.SetDeflaterMode("managed"); }
-        public void Dispose() { Common.SetDeflaterMode("unknown"); }
-    }
-
-    public abstract class DeflateStreamTests
+    public class DeflateStreamTests
     {
         static string gzTestFile(String fileName) { return Path.Combine("GZTestData", fileName); }
+
+        [Fact]
+        public static async Task OverlappingReadAsync()
+        {
+            byte[] buffer = new byte[32];
+            string testFilePath = gzTestFile("GZTestDocument.pdf.gz");
+            using (var readStream = await ManualSyncMemoryStream.GetStreamFromFileAsync(testFilePath, false, true))
+            using (var unzip = new DeflateStream(readStream, CompressionMode.Decompress, true))
+            {
+                Task task = null;
+                try
+                {
+                    task = unzip.ReadAsync(buffer, 0, 32);
+                    Assert.True(readStream.ReadHit);
+                    Assert.Throws<InvalidOperationException>(() => { unzip.ReadAsync(buffer, 0, 32); }); // "overlapping read"
+                }
+                finally
+                {
+                    // Unblock Async operations
+                    readStream.manualResetEvent.Set();
+                    // The original ReadAsync should be able to complete
+                    Assert.True(task.Wait(100 * 500));
+                }
+            }
+        }
+
+        [Fact]
+        public static async Task OverlappingFlushAsync_DuringFlushAsync()
+        {
+            byte[] buffer = null;
+            string testFilePath = gzTestFile("GZTestDocument.pdf");
+            using (var origStream = await LocalMemoryStream.readAppFileAsync(testFilePath))
+            {
+                buffer = origStream.ToArray();
+            }
+
+            using (var writeStream = new ManualSyncMemoryStream(false))
+            using (var zip = new DeflateStream(writeStream, CompressionMode.Compress))
+            {
+                Task task = null;
+                try
+                {
+                    writeStream.manualResetEvent.Set();
+                    await zip.WriteAsync(buffer, 0, buffer.Length);
+                    writeStream.manualResetEvent.Reset();
+                    writeStream.WriteHit = false;
+                    task = zip.FlushAsync();
+                    Assert.True(writeStream.WriteHit);
+                    Assert.Throws<InvalidOperationException>(() => { zip.FlushAsync(); }); // "overlapping flushes"
+                }
+                finally
+                {
+                    // Unblock Async operations
+                    writeStream.manualResetEvent.Set();
+                    // The original WriteAsync should be able to complete
+                    Assert.True(task.Wait(100 * 500));
+                }
+            }
+        }
+
+        [Fact]
+        public static async Task OverlappingFlushAsync_DuringWriteAsync()
+        {
+            byte[] buffer = null;
+            string testFilePath = gzTestFile("GZTestDocument.pdf");
+            using (var origStream = await LocalMemoryStream.readAppFileAsync(testFilePath))
+            {
+                buffer = origStream.ToArray();
+            }
+
+            using (var writeStream = new ManualSyncMemoryStream(false))
+            using (var zip = new DeflateStream(writeStream, CompressionMode.Compress))
+            {
+                Task task = null;
+                try
+                {
+                    task = zip.WriteAsync(buffer, 0, buffer.Length);
+                    Assert.True(writeStream.WriteHit);
+                    Assert.Throws<InvalidOperationException>(() => { zip.FlushAsync(); }); // "overlapping flushes"
+                }
+                finally
+                {
+                    // Unblock Async operations
+                    writeStream.manualResetEvent.Set();
+                    // The original WriteAsync should be able to complete
+                    Assert.True(task.Wait(100 * 500));
+                }
+            }
+        }
+
+        [Fact]
+        public static async Task OverlappingFlushAsync_DuringReadAsync()
+        {
+            byte[] buffer = new byte[32];
+            string testFilePath = gzTestFile("GZTestDocument.pdf.gz");
+            using (var readStream = await ManualSyncMemoryStream.GetStreamFromFileAsync(testFilePath, false, true))
+            using (var unzip = new DeflateStream(readStream, CompressionMode.Decompress, true))
+            {
+                Task task = null;
+                try
+                {
+                    task = unzip.ReadAsync(buffer, 0, 32);
+                    Assert.True(readStream.ReadHit);
+                    Assert.Throws<InvalidOperationException>(() => { unzip.FlushAsync(); }); // "overlapping read"
+                }
+                finally
+                {
+                    // Unblock Async operations
+                    readStream.manualResetEvent.Set();
+                    // The original ReadAsync should be able to complete
+                    Assert.True(task.Wait(100 * 500));
+                }
+            }
+        }
+
+        [Fact]
+        public static async Task OverlappingWriteAsync()
+        {
+            byte[] buffer = null;
+            string testFilePath = gzTestFile("GZTestDocument.pdf");
+            using (var origStream = await LocalMemoryStream.readAppFileAsync(testFilePath))
+            {
+                buffer = origStream.ToArray();
+            }
+
+            using (var writeStream = new ManualSyncMemoryStream(false))
+            using (var zip = new DeflateStream(writeStream, CompressionMode.Compress))
+            {
+                Task task = null;
+                try
+                {
+                    task = zip.WriteAsync(buffer, 0, buffer.Length);    // write needs to be bigger than the internal write buffer
+                    Assert.True(writeStream.WriteHit);
+                    Assert.Throws<InvalidOperationException>(() => { zip.WriteAsync(buffer, 32, 32); }); // "overlapping write"
+                }
+                finally
+                {
+                    // Unblock Async operations
+                    writeStream.manualResetEvent.Set();
+                    // The original WriteAsync should be able to complete
+                    Assert.True(task.Wait(100 * 500));
+                }
+            }
+        }
 
         [Fact]
         public void BaseStream1()
@@ -54,10 +187,10 @@ namespace System.IO.Compression.Tests
             var zip = new DeflateStream(newMs, CompressionMode.Decompress);
             int size = 1024;
             Byte[] bytes = new Byte[size];
-            zip.BaseStream.Read(bytes, 0, size); // This will throw if the underlying stream is not writeable as expected
+            zip.BaseStream.Read(bytes, 0, size); // This will throw if the underlying stream is not writable as expected
 
             zip.BaseStream.Position = 0;
-            await zip.BaseStream.ReadAsync(bytes, 0, size); 
+            await zip.BaseStream.ReadAsync(bytes, 0, size);
         }
 
         [Fact]
@@ -116,10 +249,10 @@ namespace System.IO.Compression.Tests
 
             int size = 1024;
             Byte[] bytes = new Byte[size];
-            baseStream.Read(bytes, 0, size); // This will throw if the underlying stream is not writeable as expected
+            baseStream.Read(bytes, 0, size); // This will throw if the underlying stream is not writable as expected
 
             baseStream.Position = 0;
-            await baseStream.ReadAsync(bytes, 0, size); 
+            await baseStream.ReadAsync(bytes, 0, size);
         }
 
         [Fact]
@@ -341,8 +474,33 @@ namespace System.IO.Compression.Tests
             var ds = new DeflateStream(ms, CompressionMode.Compress);
             ds.Flush();
             await ds.FlushAsync();
+        }
 
-            // Just ensuring Flush doesn't throw
+        [Fact]
+        public void DoubleFlush()
+        {
+            var ms = new MemoryStream();
+            var ds = new DeflateStream(ms, CompressionMode.Compress);
+            ds.Flush();
+            ds.Flush();
+        }
+
+        [Fact]
+        public void DoubleDispose()
+        {
+            var ms = new MemoryStream();
+            var ds = new DeflateStream(ms, CompressionMode.Compress);
+            ds.Dispose();
+            ds.Dispose();
+        }
+
+        [Fact]
+        public void FlushThenDispose()
+        {
+            var ms = new MemoryStream();
+            var ds = new DeflateStream(ms, CompressionMode.Compress);
+            ds.Flush();
+            ds.Dispose();
         }
 
         [Fact]
@@ -445,6 +603,23 @@ namespace System.IO.Compression.Tests
         }
 
         [Fact]
+        public void CopyToAsyncArgumentValidation()
+        {
+            using (DeflateStream ds = new DeflateStream(new MemoryStream(), CompressionMode.Decompress))
+            {
+                Assert.Throws<ArgumentNullException>("destination", () => { ds.CopyToAsync(null); });
+                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { ds.CopyToAsync(new MemoryStream(), 0); });
+                Assert.Throws<NotSupportedException>(() => { ds.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
+                ds.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => { ds.CopyToAsync(new MemoryStream()); });
+            }
+            using (DeflateStream ds = new DeflateStream(new MemoryStream(), CompressionMode.Compress))
+            {
+                Assert.Throws<NotSupportedException>(() => { ds.CopyToAsync(new MemoryStream()); });
+            }
+        }
+
+        [Fact]
         public void Precancellation()
         {
             var ms = new MemoryStream();
@@ -463,15 +638,28 @@ namespace System.IO.Compression.Tests
         public async Task RoundtripCompressDecompress()
         {
             await RoundtripCompressDecompress(useAsync: false, useGzip: false, chunkSize: 1, totalSize: 10, level: CompressionLevel.Fastest);
-            await RoundtripCompressDecompress(useAsync: true,  useGzip: true,  chunkSize: 1024, totalSize: 8192, level: CompressionLevel.Optimal);
+            await RoundtripCompressDecompress(useAsync: true, useGzip: true, chunkSize: 1024, totalSize: 8192, level: CompressionLevel.Optimal);
         }
 
-        [OuterLoop]
-        [Theory]
-        [MemberData("RoundtripCompressDecompressOuterData")]
-        public Task RoundtripCompressDecompressOuter(bool useAsync, bool useGzip, int chunkSize, int totalSize, CompressionLevel level)
+        [Fact]
+        public async Task RoundTripWithFlush()
         {
-            return RoundtripCompressDecompress(useAsync, useGzip, chunkSize, totalSize, level);
+            await RoundTripWithFlush(useAsync: false, useGzip: false, chunkSize: 1, totalSize: 10, level: CompressionLevel.Fastest);
+            await RoundTripWithFlush(useAsync: true, useGzip: true, chunkSize: 1024, totalSize: 8192, level: CompressionLevel.Optimal);
+        }
+
+        [Fact]
+        public async Task WriteAfterFlushing()
+        {
+            await WriteAfterFlushing(useAsync: false, useGzip: false, chunkSize: 1, totalSize: 10, level: CompressionLevel.Fastest);
+            await WriteAfterFlushing(useAsync: true, useGzip: true, chunkSize: 1024, totalSize: 8192, level: CompressionLevel.Optimal);
+        }
+
+        [Fact]
+        public async Task FlushBeforeFirstWrites()
+        {
+            await FlushBeforeFirstWrites(useAsync: false, useGzip: false, chunkSize: 1, totalSize: 10, level: CompressionLevel.Fastest);
+            await FlushBeforeFirstWrites(useAsync: true, useGzip: true, chunkSize: 1024, totalSize: 8192, level: CompressionLevel.Optimal);
         }
 
         public static IEnumerable<object[]> RoundtripCompressDecompressOuterData
@@ -485,15 +673,18 @@ namespace System.IO.Compression.Tests
                         foreach (var level in new[] { CompressionLevel.Fastest, CompressionLevel.Optimal, CompressionLevel.NoCompression }) // compression level
                         {
                             yield return new object[] { useAsync, useGzip, 1, 5, level }; // smallest possible writes
-                            yield return new object[] { useAsync, useGzip, 1023, 1023*10, level }; // overflowing internal buffer
-                            yield return new object[] { useAsync, useGzip, 1024*1024, 1024*1024, level }; // large single write
+                            yield return new object[] { useAsync, useGzip, 1023, 1023 * 10, level }; // overflowing internal buffer
+                            yield return new object[] { useAsync, useGzip, 1024 * 1024, 1024 * 1024, level }; // large single write
                         }
                     }
                 }
             }
         }
 
-        private async Task RoundtripCompressDecompress(bool useAsync, bool useGzip, int chunkSize, int totalSize, CompressionLevel level)
+        [OuterLoop]
+        [Theory]
+        [MemberData(nameof(RoundtripCompressDecompressOuterData))]
+        public async Task RoundtripCompressDecompress(bool useAsync, bool useGzip, int chunkSize, int totalSize, CompressionLevel level)
         {
             byte[] data = new byte[totalSize];
             new Random(42).NextBytes(data);
@@ -511,23 +702,131 @@ namespace System.IO.Compression.Tests
                 }
             }
             compressed.Position = 0;
+            await ValidateCompressedData(useAsync, useGzip, chunkSize, compressed, data);
+            compressed.Dispose();
+        }
 
-            var decompressed = new MemoryStream();
-            using (var decompressor = useGzip ? (Stream)new GZipStream(compressed, CompressionMode.Decompress, true) : new DeflateStream(compressed, CompressionMode.Decompress, true))
+        [OuterLoop]
+        [Theory]
+        [MemberData(nameof(RoundtripCompressDecompressOuterData))]
+        public async Task RoundTripWithFlush(bool useAsync, bool useGzip, int chunkSize, int totalSize, CompressionLevel level)
+        {
+            byte[] data = new byte[totalSize];
+            new Random(42).NextBytes(data);
+
+            using (var compressed = new MemoryStream())
+            using (var compressor = useGzip ? (Stream)new GZipStream(compressed, level, true) : new DeflateStream(compressed, level, true))
+            {
+                for (int i = 0; i < data.Length; i += chunkSize) // not using CopyTo{Async} due to optimizations in MemoryStream's implementation that avoid what we're trying to test
+                {
+                    switch (useAsync)
+                    {
+                        case true: await compressor.WriteAsync(data, i, chunkSize); break;
+                        case false: compressor.Write(data, i, chunkSize); break;
+                    }
+                }
+                switch (useAsync)
+                {
+                    case true: await compressor.FlushAsync(); break;
+                    case false: compressor.Flush(); break;
+                }
+                compressed.Position = 0;
+                await ValidateCompressedData(useAsync, useGzip, chunkSize, compressed, data);
+            }
+        }
+
+        [OuterLoop]
+        [Theory]
+        [MemberData(nameof(RoundtripCompressDecompressOuterData))]
+        public async Task WriteAfterFlushing(bool useAsync, bool useGzip, int chunkSize, int totalSize, CompressionLevel level)
+        {
+            byte[] data = new byte[totalSize];
+            List<byte> expected = new List<byte>();
+            new Random(42).NextBytes(data);
+
+            using (var compressed = new MemoryStream())
+            using (var compressor = useGzip ? (Stream)new GZipStream(compressed, level, true) : new DeflateStream(compressed, level, true))
+            {
+                for (int i = 0; i < data.Length; i += chunkSize) // not using CopyTo{Async} due to optimizations in MemoryStream's implementation that avoid what we're trying to test
+                {
+                    switch (useAsync)
+                    {
+                        case true: await compressor.WriteAsync(data, i, chunkSize); break;
+                        case false: compressor.Write(data, i, chunkSize); break;
+                    }
+                    for (int j = i; j < i + chunkSize; j++)
+                        expected.Insert(j, data[j]);
+
+                    switch (useAsync)
+                    {
+                        case true: await compressor.FlushAsync(); break;
+                        case false: compressor.Flush(); break;
+                    }
+
+                    MemoryStream partiallyCompressed = new MemoryStream(compressed.ToArray());
+                    partiallyCompressed.Position = 0;
+                    await ValidateCompressedData(useAsync, useGzip, chunkSize, partiallyCompressed, expected.ToArray());
+                }
+            }
+        }
+
+        [OuterLoop]
+        [Theory]
+        [MemberData(nameof(RoundtripCompressDecompressOuterData))]
+        public async Task FlushBeforeFirstWrites(bool useAsync, bool useGzip, int chunkSize, int totalSize, CompressionLevel level)
+        {
+            byte[] data = new byte[totalSize];
+            new Random(42).NextBytes(data);
+
+            using (var compressed = new MemoryStream())
+            using (var compressor = useGzip ? (Stream)new GZipStream(compressed, level, true) : new DeflateStream(compressed, level, true))
+            {
+                switch (useAsync)
+                {
+                    case true: await compressor.FlushAsync(); break;
+                    case false: compressor.Flush(); break;
+                }
+
+                for (int i = 0; i < data.Length; i += chunkSize) // not using CopyTo{Async} due to optimizations in MemoryStream's implementation that avoid what we're trying to test
+                {
+                    switch (useAsync)
+                    {
+                        case true: await compressor.WriteAsync(data, i, chunkSize); break;
+                        case false: compressor.Write(data, i, chunkSize); break;
+                    }
+                }
+
+                switch (useAsync)
+                {
+                    case true: await compressor.FlushAsync(); break;
+                    case false: compressor.Flush(); break;
+                }
+                compressed.Position = 0;
+                await ValidateCompressedData(useAsync, useGzip, chunkSize, compressed, data);
+            }
+        }
+
+        /// <summary>
+        /// Given a MemoryStream of compressed data and a byte array of desired output, decompresses
+        /// the stream and validates that it is equal to the expected array.
+        /// </summary>
+        private async Task ValidateCompressedData(bool useAsync, bool useGzip, int chunkSize, MemoryStream compressed, byte[] expected)
+        {
+            using (MemoryStream decompressed = new MemoryStream())
+            using (Stream decompressor = useGzip ? (Stream)new GZipStream(compressed, CompressionMode.Decompress, true) : new DeflateStream(compressed, CompressionMode.Decompress, true))
             {
                 if (useAsync)
                     decompressor.CopyTo(decompressed, chunkSize);
                 else
                     await decompressor.CopyToAsync(decompressed, chunkSize, CancellationToken.None);
+                Assert.Equal<byte>(expected, decompressed.ToArray());
             }
-
-            Assert.Equal<byte>(data, decompressed.ToArray());
         }
 
         [Fact]
         public void SequentialReadsOnMemoryStream_Return_SameBytes()
         {
-            byte[] data = new byte[1024*10];
+            byte[] data = new byte[1024 * 10];
             new Random(42).NextBytes(data);
 
             var compressed = new MemoryStream();
@@ -540,7 +839,6 @@ namespace System.IO.Compression.Tests
             }
             compressed.Position = 0;
 
-            var decompressed = new MemoryStream();
             using (var decompressor = new DeflateStream(compressed, CompressionMode.Decompress, true))
             {
                 int i, j;
@@ -556,6 +854,26 @@ namespace System.IO.Compression.Tests
                 decompressor.Read(array2, 0, array2.Length);
                 for (j = 0; j < array2.Length; j++)
                     Assert.Equal(data[j], array[j]);
+            }
+        }
+
+        [Fact]
+        public void Roundtrip_Write_ReadByte()
+        {
+            byte[] data = new byte[1024 * 10];
+            new Random(42).NextBytes(data);
+
+            var compressed = new MemoryStream();
+            using (var compressor = new DeflateStream(compressed, CompressionMode.Compress, true))
+            {
+                compressor.Write(data, 0, data.Length);
+            }
+            compressed.Position = 0;
+
+            using (var decompressor = new DeflateStream(compressed, CompressionMode.Decompress, true))
+            {
+                for (int i = 0; i < data.Length; i++)
+                    Assert.Equal(data[i], decompressor.ReadByte());
             }
         }
 
@@ -606,7 +924,7 @@ namespace System.IO.Compression.Tests
 
             public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
-                return _mode == Mode.ReturnNullTasks ? 
+                return _mode == Mode.ReturnNullTasks ?
                     null :
                     base.ReadAsync(buffer, offset, count, cancellationToken);
             }
@@ -627,6 +945,65 @@ namespace System.IO.Compression.Tests
             public override long Position { get { throw new NotSupportedException(); } set { throw new NotSupportedException(); } }
             public override long Seek(long offset, SeekOrigin origin) { throw new NotSupportedException(); }
             public override void SetLength(long value) { throw new NotSupportedException(); }
+        }
+
+        private class ManualSyncMemoryStream : MemoryStream
+        {
+            private bool isSync;
+            public ManualResetEventSlim manualResetEvent = new ManualResetEventSlim(false);
+
+            public bool ReadHit = false;  // For validation of the async methods we want to ensure they correctly delegate the async
+            public bool WriteHit = false; // methods of the underlying stream. This bool acts as a toggle to check that they're being used.
+
+            public static async Task<ManualSyncMemoryStream> GetStreamFromFileAsync(String testFile, bool sync = false, bool strip = false)
+            {
+                var baseStream = await StreamHelpers.CreateTempCopyStream(testFile);
+                if (strip)
+                {
+                    baseStream = StripHeaderAndFooter.Strip(baseStream);
+                }
+
+                var ms = new ManualSyncMemoryStream(sync);
+                await baseStream.CopyToAsync(ms);
+
+                ms.Position = 0;
+                return ms;
+            }
+
+            public ManualSyncMemoryStream(bool sync = false) : base()
+            {
+                isSync = sync;
+            }
+
+            public override async Task<int> ReadAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
+            {
+                ReadHit = true;
+                if (isSync)
+                {
+                    manualResetEvent.Wait(cancellationToken);
+                }
+                else
+                {
+                    await Task.Run(() => manualResetEvent.Wait(cancellationToken));
+                }
+
+                return await base.ReadAsync(array, offset, count, cancellationToken);
+            }
+
+            public override async Task WriteAsync(Byte[] array, int offset, int count, CancellationToken cancellationToken)
+            {
+                WriteHit = true;
+                if (isSync)
+                {
+                    manualResetEvent.Wait(cancellationToken);
+                }
+                else
+                {
+                    await Task.Run(() => manualResetEvent.Wait(cancellationToken));
+                }
+
+                await base.WriteAsync(array, offset, count, cancellationToken);
+            }
         }
 
     }

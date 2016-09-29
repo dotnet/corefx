@@ -1,12 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Linq;
-using System.Linq.Expressions;
 using Xunit;
 
-namespace Tests.ExpressionCompiler.Binary
+namespace System.Linq.Expressions.Tests
 {
     public static class BinaryNullableAddTests
     {
@@ -15,7 +13,7 @@ namespace Tests.ExpressionCompiler.Binary
         [Fact]
         public static void CheckNullableByteAddTest()
         {
-            byte?[] array = new byte?[] { 0, 1, byte.MaxValue };
+            byte?[] array = { 0, 1, byte.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -28,7 +26,7 @@ namespace Tests.ExpressionCompiler.Binary
         [Fact]
         public static void CheckNullableSByteAddTest()
         {
-            sbyte?[] array = new sbyte?[] { 0, 1, -1, sbyte.MinValue, sbyte.MaxValue };
+            sbyte?[] array = { 0, 1, -1, sbyte.MinValue, sbyte.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -38,119 +36,128 @@ namespace Tests.ExpressionCompiler.Binary
             }
         }
 
-        [Fact]
-        public static void CheckNullableUShortAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableUShortAddTest(bool useInterpreter)
         {
-            ushort?[] array = new ushort?[] { 0, 1, ushort.MaxValue };
+            ushort?[] array = { 0, 1, ushort.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableUShortAdd(array[i], array[j]);
+                    VerifyNullableUShortAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableUShortAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableShortAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableShortAddTest(bool useInterpreter)
         {
-            short?[] array = new short?[] { 0, 1, -1, short.MinValue, short.MaxValue };
+            short?[] array = { 0, 1, -1, short.MinValue, short.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableShortAdd(array[i], array[j]);
+                    VerifyNullableShortAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableShortAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableUIntAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableUIntAddTest(bool useInterpreter)
         {
-            uint?[] array = new uint?[] { 0, 1, uint.MaxValue };
+            uint?[] array = { 0, 1, uint.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableUIntAdd(array[i], array[j]);
+                    VerifyNullableUIntAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableUIntAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableIntAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableIntAddTest(bool useInterpreter)
         {
-            int?[] array = new int?[] { 0, 1, -1, int.MinValue, int.MaxValue };
+            int?[] array = { 0, 1, -1, int.MinValue, int.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableIntAdd(array[i], array[j]);
+                    VerifyNullableIntAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableIntAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableULongAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableULongAddTest(bool useInterpreter)
         {
-            ulong?[] array = new ulong?[] { 0, 1, ulong.MaxValue };
+            ulong?[] array = { 0, 1, ulong.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableULongAdd(array[i], array[j]);
+                    VerifyNullableULongAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableULongAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableLongAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableLongAddTest(bool useInterpreter)
         {
-            long?[] array = new long?[] { 0, 1, -1, long.MinValue, long.MaxValue };
+            long?[] array = { 0, 1, -1, long.MinValue, long.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableLongAdd(array[i], array[j]);
+                    VerifyNullableLongAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableLongAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableFloatAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableFloatAddTest(bool useInterpreter)
         {
-            float?[] array = new float?[] { 0, 1, -1, float.MinValue, float.MaxValue, float.Epsilon, float.NegativeInfinity, float.PositiveInfinity, float.NaN };
+            float?[] array = { 0, 1, -1, float.MinValue, float.MaxValue, float.Epsilon, float.NegativeInfinity, float.PositiveInfinity, float.NaN, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableFloatAdd(array[i], array[j]);
+                    VerifyNullableFloatAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableFloatAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableDoubleAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableDoubleAddTest(bool useInterpreter)
         {
-            double?[] array = new double?[] { 0, 1, -1, double.MinValue, double.MaxValue, double.Epsilon, double.NegativeInfinity, double.PositiveInfinity, double.NaN };
+            double?[] array = { 0, 1, -1, double.MinValue, double.MaxValue, double.Epsilon, double.NegativeInfinity, double.PositiveInfinity, double.NaN, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableDoubleAdd(array[i], array[j]);
+                    VerifyNullableDoubleAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableDoubleAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
 
-        [Fact]
-        public static void CheckNullableDecimalAddTest()
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CheckNullableDecimalAddTest(bool useInterpreter)
         {
-            decimal?[] array = new decimal?[] { decimal.Zero, decimal.One, decimal.MinusOne, decimal.MinValue, decimal.MaxValue };
+            decimal?[] array = { decimal.Zero, decimal.One, decimal.MinusOne, decimal.MinValue, decimal.MaxValue, null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
                 {
-                    VerifyNullableDecimalAdd(array[i], array[j]);
+                    VerifyNullableDecimalAdd(array[i], array[j], useInterpreter);
+                    VerifyNullableDecimalAddOvf(array[i], array[j], useInterpreter);
                 }
             }
         }
@@ -158,7 +165,7 @@ namespace Tests.ExpressionCompiler.Binary
         [Fact]
         public static void CheckNullableCharAddTest()
         {
-            char?[] array = new char?[] { '\0', '\b', 'A', '\uffff' };
+            char?[] array = { '\0', '\b', 'A', '\uffff', null };
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
@@ -177,6 +184,7 @@ namespace Tests.ExpressionCompiler.Binary
             Expression aExp = Expression.Constant(a, typeof(byte?));
             Expression bExp = Expression.Constant(b, typeof(byte?));
             Assert.Throws<InvalidOperationException>(() => Expression.Add(aExp, bExp));
+            Assert.Throws<InvalidOperationException>(() => Expression.AddChecked(aExp, bExp));
         }
 
         private static void VerifyNullableSByteAdd(sbyte? a, sbyte? b)
@@ -184,9 +192,10 @@ namespace Tests.ExpressionCompiler.Binary
             Expression aExp = Expression.Constant(a, typeof(sbyte?));
             Expression bExp = Expression.Constant(b, typeof(sbyte?));
             Assert.Throws<InvalidOperationException>(() => Expression.Add(aExp, bExp));
+            Assert.Throws<InvalidOperationException>(() => Expression.AddChecked(aExp, bExp));
         }
 
-        private static void VerifyNullableUShortAdd(ushort? a, ushort? b)
+        private static void VerifyNullableUShortAdd(ushort? a, ushort? b, bool useInterpreter)
         {
             Expression<Func<ushort?>> e =
                 Expression.Lambda<Func<ushort?>>(
@@ -194,46 +203,29 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(ushort?)),
                         Expression.Constant(b, typeof(ushort?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ushort?> f = e.Compile();
+            Func<ushort?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            ushort? etResult = default(ushort?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // add with real IL
-            ushort? csResult = default(ushort?);
-            Exception csException = null;
-            try
-            {
-                csResult = (ushort?)(a + b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal((ushort?)(a + b), f());
         }
 
-        private static void VerifyNullableShortAdd(short? a, short? b)
+        private static void VerifyNullableUShortAddOvf(ushort? a, ushort? b, bool useInterpreter)
+        {
+            Expression<Func<ushort?>> e =
+                Expression.Lambda<Func<ushort?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(ushort?)),
+                        Expression.Constant(b, typeof(ushort?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<ushort?> f = e.Compile(useInterpreter);
+
+            int? expected = a + b;
+            if (expected < 0 || expected > ushort.MaxValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(expected, f());
+        }
+
+        private static void VerifyNullableShortAdd(short? a, short? b, bool useInterpreter)
         {
             Expression<Func<short?>> e =
                 Expression.Lambda<Func<short?>>(
@@ -241,46 +233,29 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(short?)),
                         Expression.Constant(b, typeof(short?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<short?> f = e.Compile();
+            Func<short?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            short? etResult = default(short?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // add with real IL
-            short? csResult = default(short?);
-            Exception csException = null;
-            try
-            {
-                csResult = (short?)(a + b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal((short?)(a + b), f());
         }
 
-        private static void VerifyNullableUIntAdd(uint? a, uint? b)
+        private static void VerifyNullableShortAddOvf(short? a, short? b, bool useInterpreter)
+        {
+            Expression<Func<short?>> e =
+                Expression.Lambda<Func<short?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(short?)),
+                        Expression.Constant(b, typeof(short?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<short?> f = e.Compile(useInterpreter);
+
+            int? expected = a + b;
+            if (expected < short.MinValue || expected > short.MaxValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(expected, f());
+        }
+
+        private static void VerifyNullableUIntAdd(uint? a, uint? b, bool useInterpreter)
         {
             Expression<Func<uint?>> e =
                 Expression.Lambda<Func<uint?>>(
@@ -288,46 +263,29 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(uint?)),
                         Expression.Constant(b, typeof(uint?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<uint?> f = e.Compile();
+            Func<uint?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            uint? etResult = default(uint?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // add with real IL
-            uint? csResult = default(uint?);
-            Exception csException = null;
-            try
-            {
-                csResult = (uint?)(a + b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a + b, f());
         }
 
-        private static void VerifyNullableIntAdd(int? a, int? b)
+        private static void VerifyNullableUIntAddOvf(uint? a, uint? b, bool useInterpreter)
+        {
+            Expression<Func<uint?>> e =
+                Expression.Lambda<Func<uint?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(uint?)),
+                        Expression.Constant(b, typeof(uint?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<uint?> f = e.Compile(useInterpreter);
+
+            long? expected = a + (long?)b;
+            if (expected < 0 || expected > uint.MaxValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(expected, f());
+        }
+
+        private static void VerifyNullableIntAdd(int? a, int? b, bool useInterpreter)
         {
             Expression<Func<int?>> e =
                 Expression.Lambda<Func<int?>>(
@@ -335,46 +293,29 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(int?)),
                         Expression.Constant(b, typeof(int?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<int?> f = e.Compile();
+            Func<int?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            int? etResult = default(int?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // add with real IL
-            int? csResult = default(int?);
-            Exception csException = null;
-            try
-            {
-                csResult = (int?)(a + b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a + b, f());
         }
 
-        private static void VerifyNullableULongAdd(ulong? a, ulong? b)
+        private static void VerifyNullableIntAddOvf(int? a, int? b, bool useInterpreter)
+        {
+            Expression<Func<int?>> e =
+                Expression.Lambda<Func<int?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(int?)),
+                        Expression.Constant(b, typeof(int?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<int?> f = e.Compile(useInterpreter);
+
+            long? expected = a + (long?)b;
+            if (expected < int.MinValue || expected > int.MaxValue)
+                Assert.Throws<OverflowException>(() => f());
+            else
+                Assert.Equal(expected, f());
+        }
+
+        private static void VerifyNullableULongAdd(ulong? a, ulong? b, bool useInterpreter)
         {
             Expression<Func<ulong?>> e =
                 Expression.Lambda<Func<ulong?>>(
@@ -382,46 +323,36 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(ulong?)),
                         Expression.Constant(b, typeof(ulong?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<ulong?> f = e.Compile();
+            Func<ulong?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            ulong? etResult = default(ulong?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // add with real IL
-            ulong? csResult = default(ulong?);
-            Exception csException = null;
-            try
-            {
-                csResult = (ulong?)(a + b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a + b, f());
         }
 
-        private static void VerifyNullableLongAdd(long? a, long? b)
+        private static void VerifyNullableULongAddOvf(ulong? a, ulong? b, bool useInterpreter)
+        {
+            Expression<Func<ulong?>> e =
+                Expression.Lambda<Func<ulong?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(ulong?)),
+                        Expression.Constant(b, typeof(ulong?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<ulong?> f = e.Compile(useInterpreter);
+
+            ulong? expected;
+            try
+            {
+                expected = checked(a + b);
+            }
+            catch (OverflowException)
+            {
+                Assert.Throws<OverflowException>(() => f());
+                return;
+            }
+
+            Assert.Equal(expected, f());
+        }
+
+        private static void VerifyNullableLongAdd(long? a, long? b, bool useInterpreter)
         {
             Expression<Func<long?>> e =
                 Expression.Lambda<Func<long?>>(
@@ -429,46 +360,36 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(long?)),
                         Expression.Constant(b, typeof(long?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<long?> f = e.Compile();
+            Func<long?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            long? etResult = default(long?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // add with real IL
-            long? csResult = default(long?);
-            Exception csException = null;
-            try
-            {
-                csResult = (long?)(a + b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a + b, f());
         }
 
-        private static void VerifyNullableFloatAdd(float? a, float? b)
+        private static void VerifyNullableLongAddOvf(long? a, long? b, bool useInterpreter)
+        {
+            Expression<Func<long?>> e =
+                Expression.Lambda<Func<long?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(long?)),
+                        Expression.Constant(b, typeof(long?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<long?> f = e.Compile(useInterpreter);
+
+            long? expected;
+            try
+            {
+                expected = checked(a + b);
+            }
+            catch (OverflowException)
+            {
+                Assert.Throws<OverflowException>(() => f());
+                return;
+            }
+
+            Assert.Equal(expected, f());
+        }
+
+        private static void VerifyNullableFloatAdd(float? a, float? b, bool useInterpreter)
         {
             Expression<Func<float?>> e =
                 Expression.Lambda<Func<float?>>(
@@ -476,46 +397,25 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(float?)),
                         Expression.Constant(b, typeof(float?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<float?> f = e.Compile();
+            Func<float?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            float? etResult = default(float?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // add with real IL
-            float? csResult = default(float?);
-            Exception csException = null;
-            try
-            {
-                csResult = (float?)(a + b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a + b, f());
         }
 
-        private static void VerifyNullableDoubleAdd(double? a, double? b)
+        private static void VerifyNullableFloatAddOvf(float? a, float? b, bool useInterpreter)
+        {
+            Expression<Func<float?>> e =
+                Expression.Lambda<Func<float?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(float?)),
+                        Expression.Constant(b, typeof(float?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<float?> f = e.Compile(useInterpreter);
+
+            Assert.Equal(a + b, f());
+        }
+
+        private static void VerifyNullableDoubleAdd(double? a, double? b, bool useInterpreter)
         {
             Expression<Func<double?>> e =
                 Expression.Lambda<Func<double?>>(
@@ -523,46 +423,25 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(double?)),
                         Expression.Constant(b, typeof(double?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<double?> f = e.Compile();
+            Func<double?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            double? etResult = default(double?);
-            Exception etException = null;
-            try
-            {
-                etResult = f();
-            }
-            catch (Exception ex)
-            {
-                etException = ex;
-            }
-
-            // add with real IL
-            double? csResult = default(double?);
-            Exception csException = null;
-            try
-            {
-                csResult = (double?)(a + b);
-            }
-            catch (Exception ex)
-            {
-                csException = ex;
-            }
-
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(a + b, f());
         }
 
-        private static void VerifyNullableDecimalAdd(decimal? a, decimal? b)
+        private static void VerifyNullableDoubleAddOvf(double? a, double? b, bool useInterpreter)
+        {
+            Expression<Func<double?>> e =
+                Expression.Lambda<Func<double?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(double?)),
+                        Expression.Constant(b, typeof(double?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<double?> f = e.Compile(useInterpreter);
+
+            Assert.Equal(a + b, f());
+        }
+
+        private static void VerifyNullableDecimalAdd(decimal? a, decimal? b, bool useInterpreter)
         {
             Expression<Func<decimal?>> e =
                 Expression.Lambda<Func<decimal?>>(
@@ -570,43 +449,44 @@ namespace Tests.ExpressionCompiler.Binary
                         Expression.Constant(a, typeof(decimal?)),
                         Expression.Constant(b, typeof(decimal?))),
                     Enumerable.Empty<ParameterExpression>());
-            Func<decimal?> f = e.Compile();
+            Func<decimal?> f = e.Compile(useInterpreter);
 
-            // add with expression tree
-            decimal? etResult = default(decimal?);
-            Exception etException = null;
+            decimal? expected;
             try
             {
-                etResult = f();
+                expected = a + b;
             }
-            catch (Exception ex)
+            catch (OverflowException)
             {
-                etException = ex;
+                Assert.Throws<OverflowException>(() => f());
+                return;
             }
 
-            // add with real IL
-            decimal? csResult = default(decimal?);
-            Exception csException = null;
+            Assert.Equal(expected, f());
+        }
+
+        private static void VerifyNullableDecimalAddOvf(decimal? a, decimal? b, bool useInterpreter)
+        {
+            Expression<Func<decimal?>> e =
+                Expression.Lambda<Func<decimal?>>(
+                    Expression.AddChecked(
+                        Expression.Constant(a, typeof(decimal?)),
+                        Expression.Constant(b, typeof(decimal?))),
+                    Enumerable.Empty<ParameterExpression>());
+            Func<decimal?> f = e.Compile(useInterpreter);
+
+            decimal? expected;
             try
             {
-                csResult = (decimal?)(a + b);
+                expected = a + b;
             }
-            catch (Exception ex)
+            catch (OverflowException)
             {
-                csException = ex;
+                Assert.Throws<OverflowException>(() => f());
+                return;
             }
 
-            // either both should have failed the same way or they should both produce the same result
-            if (etException != null || csException != null)
-            {
-                Assert.NotNull(etException);
-                Assert.NotNull(csException);
-                Assert.Equal(csException.GetType(), etException.GetType());
-            }
-            else
-            {
-                Assert.Equal(csResult, etResult);
-            }
+            Assert.Equal(expected, f());
         }
 
         private static void VerifyNullableCharAdd(char? a, char? b)
@@ -614,6 +494,7 @@ namespace Tests.ExpressionCompiler.Binary
             Expression aExp = Expression.Constant(a, typeof(char?));
             Expression bExp = Expression.Constant(b, typeof(char?));
             Assert.Throws<InvalidOperationException>(() => Expression.Add(aExp, bExp));
+            Assert.Throws<InvalidOperationException>(() => Expression.AddChecked(aExp, bExp));
         }
 
         #endregion

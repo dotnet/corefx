@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
 
@@ -10,21 +11,21 @@ namespace System.IO
      */
     internal sealed partial class SyncTextReader : TextReader
     {
-        internal StdInStreamReader Inner
+        internal StdInReader Inner
         {
             get
             {
-                var inner = _in as StdInStreamReader;
+                var inner = _in as StdInReader;
                 Debug.Assert(inner != null);
                 return inner;
             }
         }
 
-        public ConsoleKeyInfo ReadKey()
+        public ConsoleKeyInfo ReadKey(out bool previouslyProcessed)
         {
             lock (this)
             {
-                return Inner.ReadKey();
+                return Inner.ReadKey(out previouslyProcessed);
             }
         }
 
@@ -34,8 +35,8 @@ namespace System.IO
             {
                 lock (this)
                 {
-                    StdInStreamReader r = Inner;
-                    return !r.IsExtraBufferEmpty() || r.StdinReady;
+                    StdInReader r = Inner;
+                    return !r.IsUnprocessedBufferEmpty() || r.StdinReady;
                 }
             }
         }

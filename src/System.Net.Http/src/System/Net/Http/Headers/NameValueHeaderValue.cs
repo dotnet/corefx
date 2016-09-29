@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace System.Net.Http.Headers
@@ -52,7 +52,7 @@ namespace System.Net.Http.Headers
 
         protected NameValueHeaderValue(NameValueHeaderValue source)
         {
-            Contract.Requires(source != null);
+            Debug.Assert(source != null);
 
             _name = source._name;
             _value = source._value;
@@ -201,9 +201,9 @@ namespace System.Net.Http.Headers
         internal static int GetNameValueLength(string input, int startIndex,
             Func<NameValueHeaderValue> nameValueCreator, out NameValueHeaderValue parsedValue)
         {
-            Contract.Requires(input != null);
-            Contract.Requires(startIndex >= 0);
-            Contract.Requires(nameValueCreator != null);
+            Debug.Assert(input != null);
+            Debug.Assert(startIndex >= 0);
+            Debug.Assert(nameValueCreator != null);
 
             parsedValue = null;
 
@@ -213,7 +213,7 @@ namespace System.Net.Http.Headers
             }
 
             // Parse the name, i.e. <name> in name/value string "<name>=<value>". Caller must remove 
-            // leading whitespaces.
+            // leading whitespace.
             int nameLength = HttpRuleParser.GetTokenLength(input, startIndex);
 
             if (nameLength == 0)
@@ -231,7 +231,7 @@ namespace System.Net.Http.Headers
                 // We only have a name and that's OK. Return.
                 parsedValue = nameValueCreator();
                 parsedValue._name = name;
-                current = current + HttpRuleParser.GetWhitespaceLength(input, current); // skip whitespaces
+                current = current + HttpRuleParser.GetWhitespaceLength(input, current); // skip whitespace
                 return current - startIndex;
             }
 
@@ -251,7 +251,7 @@ namespace System.Net.Http.Headers
             parsedValue._name = name;
             parsedValue._value = input.Substring(current, valueLength);
             current = current + valueLength;
-            current = current + HttpRuleParser.GetWhitespaceLength(input, current); // skip whitespaces
+            current = current + HttpRuleParser.GetWhitespaceLength(input, current); // skip whitespace
             return current - startIndex;
         }
 
@@ -260,8 +260,8 @@ namespace System.Net.Http.Headers
         internal static int GetNameValueListLength(string input, int startIndex, char delimiter,
             ObjectCollection<NameValueHeaderValue> nameValueCollection)
         {
-            Contract.Requires(nameValueCollection != null);
-            Contract.Requires(startIndex >= 0);
+            Debug.Assert(nameValueCollection != null);
+            Debug.Assert(startIndex >= 0);
 
             if ((string.IsNullOrEmpty(input)) || (startIndex >= input.Length))
             {
@@ -290,7 +290,7 @@ namespace System.Net.Http.Headers
                     return current - startIndex;
                 }
 
-                // input[current] is 'delimiter'. Skip the delimiter and whitespaces and try to parse again.
+                // input[current] is 'delimiter'. Skip the delimiter and whitespace and try to parse again.
                 current++; // skip delimiter.
                 current = current + HttpRuleParser.GetWhitespaceLength(input, current);
             }
@@ -298,7 +298,7 @@ namespace System.Net.Http.Headers
 
         internal static NameValueHeaderValue Find(ObjectCollection<NameValueHeaderValue> values, string name)
         {
-            Contract.Requires((name != null) && (name.Length > 0));
+            Debug.Assert((name != null) && (name.Length > 0));
 
             if ((values == null) || (values.Count == 0))
             {
@@ -317,7 +317,7 @@ namespace System.Net.Http.Headers
 
         internal static int GetValueLength(string input, int startIndex)
         {
-            Contract.Requires(input != null);
+            Debug.Assert(input != null);
 
             if (startIndex >= input.Length)
             {

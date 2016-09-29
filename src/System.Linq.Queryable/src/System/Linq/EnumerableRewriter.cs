@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -146,7 +147,7 @@ namespace System.Linq
             if (_equivalentTypeCache == null)
             {
                 // Pre-loading with the non-generic IQueryable and IEnumerable not only covers this case
-                // without any reflection-based interspection, but also means the slightly different
+                // without any reflection-based introspection, but also means the slightly different
                 // code needed to catch this case can be omitted safely.
                 _equivalentTypeCache = new Dictionary<Type, Type>
                     {
@@ -304,7 +305,7 @@ namespace System.Linq
         {
             Type type = c.Type;
             if (!typeof(IQueryable).IsAssignableFrom(type))
-                return base.Visit(c);
+                return base.VisitConditional(c);
             Expression test = Visit(c.Test);
             Expression ifTrue = Visit(c.IfTrue);
             Expression ifFalse = Visit(c.IfFalse);
@@ -322,7 +323,7 @@ namespace System.Linq
         {
             Type type = node.Type;
             if (!typeof(IQueryable).IsAssignableFrom(type))
-                return base.Visit(node);
+                return base.VisitBlock(node);
             ReadOnlyCollection<Expression> nodes = Visit(node.Expressions);
             ReadOnlyCollection<ParameterExpression> variables = VisitAndConvert(node.Variables, "EnumerableRewriter.VisitBlock");
             if (type == node.Expressions.Last().Type)

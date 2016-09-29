@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.ObjectModel;
 using System.Dynamic.Utils;
@@ -51,9 +52,9 @@ namespace System.Dynamic
         /// </returns>
         public sealed override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
         {
-            ContractUtils.RequiresNotNull(args, "args");
-            ContractUtils.RequiresNotNull(parameters, "parameters");
-            ContractUtils.RequiresNotNull(returnLabel, "returnLabel");
+            ContractUtils.RequiresNotNull(args, nameof(args));
+            ContractUtils.RequiresNotNull(parameters, nameof(parameters));
+            ContractUtils.RequiresNotNull(returnLabel, nameof(returnLabel));
             if (args.Length == 0)
             {
                 throw Error.OutOfRange("args.Length", 1);
@@ -64,7 +65,7 @@ namespace System.Dynamic
             }
             if (args.Length != parameters.Count)
             {
-                throw new ArgumentOutOfRangeException("args");
+                throw new ArgumentOutOfRangeException(nameof(args));
             }
 
             // Ensure that the binder's ReturnType matches CallSite's return
@@ -193,7 +194,7 @@ namespace System.Dynamic
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
         public DynamicMetaObject Defer(DynamicMetaObject target, params DynamicMetaObject[] args)
         {
-            ContractUtils.RequiresNotNull(target, "target");
+            ContractUtils.RequiresNotNull(target, nameof(target));
 
             if (args == null)
             {

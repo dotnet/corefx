@@ -1,8 +1,18 @@
 {
-  "dependencies": {
-    "System.Runtime": "4.0.20"
-  },
   "frameworks": {
-    "dnxcore50": {}
+    "netstandard1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.Platforms": "1.0.2-beta-24522-03",
+        "System.Runtime": "4.0.0"
+      },
+      "imports": [
+        "dotnet5.1"
+      ]
+    },
+    "net46": {
+      "dependencies": {
+        "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
+      }
+    }
   }
 }

@@ -2,22 +2,21 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <ProjectGuid>{BE28323E-327A-4E0F-B7F9-16AB7EAB59DD}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <AssemblyName>System.Linq.Parallel</AssemblyName>
-    <AssemblyVersion>4.0.1.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFramework>dotnet5.4</PackageTargetFramework>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
+    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net46'">None</ResourcesSourceOutputDirectory>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
+    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.3;netcore50</PackageTargetFramework>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
   <!-- Compiled Source Files -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
     <Compile Include="System\Linq\Parallel\Channels\AsynchronousChannel.cs" />
     <Compile Include="System\Linq\Parallel\Channels\SynchronousChannel.cs" />
     <Compile Include="System\Linq\Parallel\Enumerables\AggregationMinMaxHelpers.cs" />
@@ -30,7 +29,6 @@
     <Compile Include="System\Linq\Parallel\Enumerables\QueryAggregationOptions.cs" />
     <Compile Include="System\Linq\Parallel\Enumerables\RangeEnumerable.cs" />
     <Compile Include="System\Linq\Parallel\Enumerables\RepeatEnumerable.cs" />
-    <Compile Include="System\Linq\Errors.cs" />
     <Compile Include="System\Linq\Parallel\Merging\ArrayMergeHelper.cs" />
     <Compile Include="System\Linq\Parallel\Merging\AsynchronousChannelMergeEnumerator.cs" />
     <Compile Include="System\Linq\Parallel\Merging\DefaultMergeHelper.cs" />
@@ -157,10 +155,10 @@
     <Compile Include="System\Linq\Parallel\Utils\Wrapper.cs" />
     <Compile Include="System\Linq\Parallel\Utils\WrapperEqualityComparer.cs" />
   </ItemGroup>
-  <!-- Common or Common-branched source files -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System.Core" />
   </ItemGroup>
-  <!-- Resource files -->
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>

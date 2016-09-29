@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
 
@@ -20,7 +21,10 @@ namespace System.Net.Sockets
         protected SafeNativeOverlapped()
             : this(IntPtr.Zero)
         {
-            GlobalLog.Print("SafeNativeOverlapped#" + Logging.HashString(this) + "::ctor(null)");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SafeNativeOverlapped#" + LoggingHash.HashString(this) + "::ctor(null)");
+            }
         }
 
         protected SafeNativeOverlapped(IntPtr handle)
@@ -34,7 +38,11 @@ namespace System.Net.Sockets
         {
             _safeCloseSocket = socketHandle;
 
-            GlobalLog.Print("SafeNativeOverlapped#" + Logging.HashString(this) + "::ctor(socket#" + Logging.HashString(socketHandle) + ")");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SafeNativeOverlapped#" + LoggingHash.HashString(this) + "::ctor(socket#" + LoggingHash.HashString(socketHandle) + ")");
+            }
+
 #if DEBUG
             _safeCloseSocket.AddRef();
 #endif
@@ -45,7 +53,11 @@ namespace System.Net.Sockets
             if (disposing)
             {
                 // It is important that the boundHandle is released immediately to allow new overlapped operations.
-                GlobalLog.Print("SafeNativeOverlapped#" + Logging.HashString(this) + "::Dispose(true)");
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.Print("SafeNativeOverlapped#" + LoggingHash.HashString(this) + "::Dispose(true)");
+                }
+
                 FreeNativeOverlapped();
             }
         }
@@ -57,7 +69,10 @@ namespace System.Net.Sockets
 
         protected override bool ReleaseHandle()
         {
-            GlobalLog.Print("SafeNativeOverlapped#" + Logging.HashString(this) + "::ReleaseHandle()");
+            if (GlobalLog.IsEnabled)
+            {
+                GlobalLog.Print("SafeNativeOverlapped#" + LoggingHash.HashString(this) + "::ReleaseHandle()");
+            }
 
             FreeNativeOverlapped();
             return true;

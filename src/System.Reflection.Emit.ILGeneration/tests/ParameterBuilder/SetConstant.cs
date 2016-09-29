@@ -1,26 +1,23 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System;
-using System.Reflection.Emit;
 
-namespace System.Reflection.Emit.ILGeneration.Tests
+namespace System.Reflection.Emit.Tests
 {
     public class TestSetConstant
     {
         [Fact]
-        public void TestNullableValueTypes()
+        public void NullableValueType_DoesNotThrow()
         {
-            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TestAssembly_SetConstant"), AssemblyBuilderAccess.Run);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("ModuleName");
-            TypeBuilder typeBuilder = moduleBuilder.DefineType("TypeName", TypeAttributes.Public);
-            MethodBuilder methodBuilder = typeBuilder.DefineMethod("TestMethod", MethodAttributes.Public, typeof(void), new Type[] { typeof(int?) });
+            TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
+            MethodBuilder methodBuilder = type.DefineMethod("TestMethod", MethodAttributes.Public, typeof(void), new Type[] { typeof(int?) });
             ILGenerator generator = methodBuilder.GetILGenerator();
             generator.Emit(OpCodes.Ret);
-            ParameterBuilder pBuilder = methodBuilder.DefineParameter(1, ParameterAttributes.HasDefault, "paramName");
-            // should not throw
-            pBuilder.SetConstant(null);
+
+            ParameterBuilder parameter = methodBuilder.DefineParameter(1, ParameterAttributes.HasDefault, "paramName");
+            parameter.SetConstant(null);
         }
     }
 }

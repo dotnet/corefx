@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -193,11 +194,6 @@ namespace System.Linq.Expressions.Interpreter
                     throw Error.ExpressionNotSupportedForType("Div", type);
             }
         }
-
-        public override string ToString()
-        {
-            return "Div()";
-        }
     }
 
     internal abstract class ModuloInstruction : Instruction
@@ -384,11 +380,6 @@ namespace System.Linq.Expressions.Interpreter
                 default:
                     throw Error.ExpressionNotSupportedForType("Modulo", type);
             }
-        }
-
-        public override string ToString()
-        {
-            return "Modulo()";
         }
     }
 }

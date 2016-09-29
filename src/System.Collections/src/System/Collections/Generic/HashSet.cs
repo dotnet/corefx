@@ -1,14 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Text;
 using System.Diagnostics.CodeAnalysis;
-using System.Security;
+using System.Diagnostics.Contracts;
+using System.Runtime.Serialization;
 
 namespace System.Collections.Generic
 {
@@ -51,7 +48,8 @@ namespace System.Collections.Generic
     [DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "By design")]
-    public class HashSet<T> : ICollection<T>, ISet<T>, IReadOnlyCollection<T>
+    [Serializable]
+    public class HashSet<T> : ICollection<T>, ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
     {
         // store lower 31 bits of hash code
         private const int Lower31BitMask = 0x7FFFFFFF;
@@ -64,6 +62,12 @@ namespace System.Collections.Generic
         // This is set to 3 because capacity is acceptable as 2x rounded up to nearest prime.
         private const int ShrinkThreshold = 3;
 
+        // constants for serialization
+        private const string CapacityName = "Capacity";
+        private const string ElementsName = "Elements";
+        private const string ComparerName = "Comparer";
+        private const string VersionName = "Version";
+
         private int[] _buckets;
         private Slot[] _slots;
         private int _count;
@@ -71,6 +75,8 @@ namespace System.Collections.Generic
         private int _freeList;
         private IEqualityComparer<T> _comparer;
         private int _version;
+
+        private SerializationInfo _siInfo; // temporary variable needed during deserialization
 
         #region Constructors
 
@@ -108,44 +114,85 @@ namespace System.Collections.Generic
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
             Contract.EndContractBlock();
 
             var otherAsHashSet = collection as HashSet<T>;
             if (otherAsHashSet != null && AreEqualityComparersEqual(this, otherAsHashSet))
             {
-                _buckets = (int[])otherAsHashSet._buckets.Clone();
-                _slots = (Slot[])otherAsHashSet._slots.Clone();
-
-                _count = otherAsHashSet._count;
-                _lastIndex = otherAsHashSet._lastIndex;
-                _freeList = otherAsHashSet._freeList;
-                _version = otherAsHashSet._version;
-
-                // _comparer is already the same
+                CopyFrom(otherAsHashSet);
             }
             else
             {
                 // to avoid excess resizes, first set size based on collection's count. Collection
                 // may contain duplicates, so call TrimExcess if resulting hashset is larger than
                 // threshold
-                int suggestedCapacity = 0;
                 ICollection<T> coll = collection as ICollection<T>;
-                if (coll != null)
-                {
-                    suggestedCapacity = coll.Count;
-                }
+                int suggestedCapacity = coll == null ? 0 : coll.Count;
                 Initialize(suggestedCapacity);
 
-                this.UnionWith(collection);
+                UnionWith(collection);
+
+                if (_count > 0 && _slots.Length / _count > ShrinkThreshold)
+                {
+                    TrimExcess();
+                }
+            }
+        }
+
+        protected HashSet(SerializationInfo info, StreamingContext context)
+        {
+            // We can't do anything with the keys and values until the entire graph has been 
+            // deserialized and we have a reasonable estimate that GetHashCode is not going to 
+            // fail.  For the time being, we'll just cache this.  The graph is not valid until 
+            // OnDeserialization has been called.
+            _siInfo = info;
+        }
+
+        // Initializes the HashSet from another HashSet with the same element type and
+        // equality comparer.
+        private void CopyFrom(HashSet<T> source)
+        {
+            int count = source._count;
+            if (count == 0)
+            {
+                // As well as short-circuiting on the rest of the work done,
+                // this avoids errors from trying to access otherAsHashSet._buckets
+                // or otherAsHashSet._slots when they aren't initialized.
+                return;
             }
 
-            if ((_count == 0 && _slots.Length > HashHelpers.GetMinPrime()) ||
-                (_count > 0 && _slots.Length / _count > ShrinkThreshold))
+            int capacity = source._buckets.Length;
+            int threshold = HashHelpers.ExpandPrime(count + 1);
+
+            if (threshold >= capacity)
             {
-                TrimExcess();
+                _buckets = (int[])source._buckets.Clone();
+                _slots = (Slot[])source._slots.Clone();
+
+                _lastIndex = source._lastIndex;
+                _freeList = source._freeList;
             }
+            else
+            {
+                int lastIndex = source._lastIndex;
+                Slot[] slots = source._slots;
+                Initialize(count);
+                int index = 0;
+                for (int i = 0; i < lastIndex; ++i)
+                {
+                    int hashCode = slots[i].hashCode;
+                    if (hashCode >= 0)
+                    {
+                        AddValue(index, hashCode, slots[i].value);
+                        ++index;
+                    }
+                }
+                Debug.Assert(index == count);
+                _lastIndex = index;
+            }
+            _count = count;
         }
 
         #endregion
@@ -302,6 +349,74 @@ namespace System.Collections.Generic
 
         #endregion
 
+        #region ISerializable methods
+
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info));
+            }
+
+            info.AddValue(VersionName, _version); // need to serialize version to avoid problems with serializing while enumerating
+            info.AddValue(ComparerName, _comparer, typeof(IComparer<T>));
+            info.AddValue(CapacityName, _buckets == null ? 0 : _buckets.Length);
+
+            if (_buckets != null)
+            {
+                T[] array = new T[_count];
+                CopyTo(array);
+                info.AddValue(ElementsName, array, typeof(T[]));
+            }
+        }
+
+        #endregion
+
+        #region IDeserializationCallback methods
+
+        public virtual void OnDeserialization(Object sender)
+        {
+            if (_siInfo == null)
+            {
+                // It might be necessary to call OnDeserialization from a container if the 
+                // container object also implements OnDeserialization. We can return immediately
+                // if this function is called twice. Note we set _siInfo to null at the end of this method.
+                return;
+            }
+
+            int capacity = _siInfo.GetInt32(CapacityName);
+            _comparer = (IEqualityComparer<T>)_siInfo.GetValue(ComparerName, typeof(IEqualityComparer<T>));
+            _freeList = -1;
+
+            if (capacity != 0)
+            {
+                _buckets = new int[capacity];
+                _slots = new Slot[capacity];
+
+                T[] array = (T[])_siInfo.GetValue(ElementsName, typeof(T[]));
+
+                if (array == null)
+                {
+                    throw new SerializationException(SR.Serialization_MissingKeys);
+                }
+
+                // there are no resizes here because we already set capacity above
+                for (int i = 0; i < array.Length; i++)
+                {
+                    AddIfNotPresent(array[i]);
+                }
+            }
+            else
+            {
+                _buckets = null;
+            }
+
+            _version = _siInfo.GetInt32(VersionName);
+            _siInfo = null;
+        }
+
+        #endregion
+
         #region HashSet methods
 
         /// <summary>
@@ -327,7 +442,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -355,7 +470,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -403,11 +518,11 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
-            // this is already the enpty set; return
+            // this is already the empty set; return
             if (_count == 0)
             {
                 return;
@@ -435,7 +550,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -487,7 +602,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -544,7 +659,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -603,7 +718,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -661,7 +776,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -712,7 +827,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -747,7 +862,7 @@ namespace System.Collections.Generic
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -788,26 +903,29 @@ namespace System.Collections.Generic
             }
         }
 
-        public void CopyTo(T[] array) { CopyTo(array, 0, _count); }
+        public void CopyTo(T[] array)
+        {
+            CopyTo(array, 0, _count);
+        }
 
         public void CopyTo(T[] array, int arrayIndex, int count)
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
             Contract.EndContractBlock();
 
             // check array index valid index into array
             if (arrayIndex < 0)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             // also throw if count less than 0
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(nameof(count), count, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             // will array, starting at arrayIndex, be able to hold elements? Note: not
@@ -838,7 +956,7 @@ namespace System.Collections.Generic
         {
             if (match == null)
             {
-                throw new ArgumentNullException("match");
+                throw new ArgumentNullException(nameof(match));
             }
             Contract.EndContractBlock();
 
@@ -938,6 +1056,15 @@ namespace System.Collections.Generic
         #region Helper methods
 
         /// <summary>
+        /// Used for deep equality of HashSet testing
+        /// </summary>
+        /// <returns></returns>
+        public static IEqualityComparer<HashSet<T>> CreateSetComparer()
+        {
+            return new HashSetEqualityComparer<T>();
+        }
+
+        /// <summary>
         /// Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
         /// greater than or equal to capacity.
         /// </summary>
@@ -980,8 +1107,6 @@ namespace System.Collections.Generic
         /// </summary>
         private void SetCapacity(int newSize, bool forceNewHashCodes)
         {
-            Debug.Assert(HashHelpers.IsPrime(newSize), "New size is not prime!");
-
             Debug.Assert(_buckets != null, "SetCapacity called on a set with no elements");
 
             Slot[] newSlots = new Slot[newSize];
@@ -990,6 +1115,7 @@ namespace System.Collections.Generic
                 Array.Copy(_slots, 0, newSlots, 0, _lastIndex);
             }
 
+#if FEATURE_RANDOMIZED_STRING_HASHING
             if (forceNewHashCodes)
             {
                 for (int i = 0; i < _lastIndex; i++)
@@ -1000,6 +1126,9 @@ namespace System.Collections.Generic
                     }
                 }
             }
+#else
+            Debug.Assert(!forceNewHashCodes);
+#endif
 
             int[] newBuckets = new int[newSize];
             for (int i = 0; i < _lastIndex; i++)
@@ -1074,6 +1203,27 @@ namespace System.Collections.Generic
 #endif // FEATURE_RANDOMIZED_STRING_HASHING
 
             return true;
+        }
+
+        // Add value at known index with known hash code. Used only
+        // when constructing from another HashSet.
+        private void AddValue(int index, int hashCode, T value)
+        {
+            int bucket = hashCode % _buckets.Length;
+
+#if DEBUG
+            Debug.Assert(InternalGetHashCode(value) == hashCode);
+            for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
+            {
+                Debug.Assert(!_comparer.Equals(_slots[i].value, value));
+            }
+#endif
+
+            Debug.Assert(_freeList == -1);
+            _slots[index].hashCode = hashCode;
+            _slots[index].value = value;
+            _slots[index].next = _buckets[bucket] - 1;
+            _buckets[bucket] = index + 1;
         }
 
         /// <summary>
@@ -1401,7 +1551,6 @@ namespace System.Collections.Generic
                 return result;
             }
 
-
             Debug.Assert((_buckets != null) && (_count > 0), "_buckets was null but count greater than 0");
 
             int originalLastIndex = _lastIndex;
@@ -1451,16 +1600,6 @@ namespace System.Collections.Generic
             return result;
         }
 
-        /// <summary>
-        /// Copies this to an array. Used for DebugView
-        /// </summary>
-        /// <returns></returns>
-        internal T[] ToArray()
-        {
-            T[] newArray = new T[Count];
-            CopyTo(newArray);
-            return newArray;
-        }
 
         /// <summary>
         /// Internal method used for HashSetEqualityComparer. Compares set1 and set2 according 
@@ -1568,7 +1707,8 @@ namespace System.Collections.Generic
             internal T value;
         }
 
-        public struct Enumerator : IEnumerator<T>, System.Collections.IEnumerator
+        [Serializable]
+        public struct Enumerator : IEnumerator<T>, IEnumerator
         {
             private HashSet<T> _set;
             private int _index;
@@ -1617,7 +1757,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            Object System.Collections.IEnumerator.Current
+            object IEnumerator.Current
             {
                 get
                 {
@@ -1629,7 +1769,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            void System.Collections.IEnumerator.Reset()
+            void IEnumerator.Reset()
             {
                 if (_version != _set._version)
                 {

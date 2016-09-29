@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using Test.Cryptography;
 using Xunit;
@@ -9,7 +10,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     public static class NameTests
     {
         [Fact]
-        [ActiveIssue(1993, PlatformID.AnyUnix)]
         public static void TestEncode()
         {
             byte[] expectedEncoding = "300e310c300a06035504031303466f6f".HexToByteArray();

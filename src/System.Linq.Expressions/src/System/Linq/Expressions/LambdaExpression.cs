@@ -1,16 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Linq.Expressions.Compiler;
 using System.Reflection;
-using System.Threading;
-using System.Runtime.CompilerServices;
-using System.Linq.Expressions;
 
 namespace System.Linq.Expressions
 {
@@ -127,14 +123,31 @@ namespace System.Linq.Expressions
 #if FEATURE_INTERPRET
             if (preferInterpretation)
             {
-                return new System.Linq.Expressions.Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
+                return new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
             }
 #endif
             return Compiler.LambdaCompiler.Compile(this);
 #else
-            return new System.Linq.Expressions.Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
+            return new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
 #endif
         }
+
+#if FEATURE_COMPILE_TO_METHODBUILDER
+        /// <summary>
+        /// Compiles the lambda into a method definition.
+        /// </summary>
+        /// <param name="method">A <see cref="System.Reflection.Emit.MethodBuilder"/> which will be used to hold the lambda's IL.</param>
+        public void CompileToMethod(System.Reflection.Emit.MethodBuilder method)
+        {
+            ContractUtils.RequiresNotNull(method, nameof(method));
+            ContractUtils.Requires(method.IsStatic, nameof(method));
+            var type = method.DeclaringType.GetTypeInfo() as System.Reflection.Emit.TypeBuilder;
+            if (type == null) throw Error.MethodBuilderDoesNotHaveTypeBuilder();
+
+            Compiler.LambdaCompiler.Compile(this, method);
+        }
+#endif
+
 
 #if FEATURE_COMPILE
         internal abstract LambdaExpression Accept(Compiler.StackSpiller spiller);
@@ -151,7 +164,7 @@ namespace System.Linq.Expressions
     /// </remarks>
     public sealed class Expression<TDelegate> : LambdaExpression
     {
-        public Expression(Expression body, string name, bool tailCall, ReadOnlyCollection<ParameterExpression> parameters)
+        internal Expression(Expression body, string name, bool tailCall, ReadOnlyCollection<ParameterExpression> parameters)
             : base(typeof(TDelegate), name, body, tailCall, parameters)
         {
         }
@@ -176,12 +189,12 @@ namespace System.Linq.Expressions
 #if FEATURE_INTERPRET
             if (preferInterpretation)
             {
-                return (TDelegate)(object)new System.Linq.Expressions.Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
+                return (TDelegate)(object)new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
             }
 #endif
             return (TDelegate)(object)Compiler.LambdaCompiler.Compile(this);
 #else
-            return (TDelegate)(object)new System.Linq.Expressions.Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
+            return (TDelegate)(object)new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
 #endif
         }
 
@@ -224,7 +237,7 @@ namespace System.Linq.Expressions
     }
 
 #if !FEATURE_COMPILE
-    // Seperate expression creation class to hide the CreateExpressionFunc function from users reflecting on Expression<T>
+    // Separate expression creation class to hide the CreateExpressionFunc function from users reflecting on Expression<T>
     public class ExpressionCreator<TDelegate>
     {
         public static LambdaExpression CreateExpressionFunc(Expression body, string name, bool tailCall, ReadOnlyCollection<ParameterExpression> parameters)
@@ -350,7 +363,7 @@ namespace System.Linq.Expressions
         public static Expression<TDelegate> Lambda<TDelegate>(Expression body, String name, bool tailCall, IEnumerable<ParameterExpression> parameters)
         {
             var parameterList = parameters.ToReadOnly();
-            ValidateLambdaArgs(typeof(TDelegate), ref body, parameterList);
+            ValidateLambdaArgs(typeof(TDelegate), ref body, parameterList, nameof(TDelegate));
             return new Expression<TDelegate>(body, name, tailCall, parameterList);
         }
 
@@ -473,7 +486,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="LambdaExpression"/> that has the <see cref="P:NodeType"/> property equal to Lambda and the <see cref="P:Body"/> and <see cref="P:Parameters"/> properties set to the specified values.</returns>
         public static LambdaExpression Lambda(Expression body, string name, bool tailCall, IEnumerable<ParameterExpression> parameters)
         {
-            ContractUtils.RequiresNotNull(body, "body");
+            ContractUtils.RequiresNotNull(body, nameof(body));
 
             var parameterList = parameters.ToReadOnly();
 
@@ -481,17 +494,16 @@ namespace System.Linq.Expressions
             Type[] typeArgs = new Type[paramCount + 1];
             if (paramCount > 0)
             {
-                var set = new Set<ParameterExpression>(parameterList.Count);
+                var set = new HashSet<ParameterExpression>();
                 for (int i = 0; i < paramCount; i++)
                 {
                     var param = parameterList[i];
                     ContractUtils.RequiresNotNull(param, "parameter");
                     typeArgs[i] = param.IsByRef ? param.Type.MakeByRefType() : param.Type;
-                    if (set.Contains(param))
+                    if (!set.Add(param))
                     {
-                        throw Error.DuplicateVariable(param);
+                        throw Error.DuplicateVariable(param, nameof(parameters), i);
                     }
-                    set.Add(param);
                 }
             }
             typeArgs[paramCount] = body.Type;
@@ -512,7 +524,7 @@ namespace System.Linq.Expressions
         public static LambdaExpression Lambda(Type delegateType, Expression body, string name, IEnumerable<ParameterExpression> parameters)
         {
             var paramList = parameters.ToReadOnly();
-            ValidateLambdaArgs(delegateType, ref body, paramList);
+            ValidateLambdaArgs(delegateType, ref body, paramList, nameof(delegateType));
 
             return CreateLambda(delegateType, body, name, false, paramList);
         }
@@ -529,19 +541,19 @@ namespace System.Linq.Expressions
         public static LambdaExpression Lambda(Type delegateType, Expression body, string name, bool tailCall, IEnumerable<ParameterExpression> parameters)
         {
             var paramList = parameters.ToReadOnly();
-            ValidateLambdaArgs(delegateType, ref body, paramList);
+            ValidateLambdaArgs(delegateType, ref body, paramList, nameof(delegateType));
 
             return CreateLambda(delegateType, body, name, tailCall, paramList);
         }
 
-        private static void ValidateLambdaArgs(Type delegateType, ref Expression body, ReadOnlyCollection<ParameterExpression> parameters)
+        private static void ValidateLambdaArgs(Type delegateType, ref Expression body, ReadOnlyCollection<ParameterExpression> parameters, string paramName)
         {
-            ContractUtils.RequiresNotNull(delegateType, "delegateType");
-            RequiresCanRead(body, "body");
+            ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
+            RequiresCanRead(body, nameof(body));
 
             if (!typeof(MulticastDelegate).IsAssignableFrom(delegateType) || delegateType == typeof(MulticastDelegate))
             {
-                throw Error.LambdaTypeMustBeDerivedFromSystemDelegate();
+                throw Error.LambdaTypeMustBeDerivedFromSystemDelegate(paramName);
             }
 
             MethodInfo mi;
@@ -563,12 +575,12 @@ namespace System.Linq.Expressions
                 {
                     throw Error.IncorrectNumberOfLambdaDeclarationParameters();
                 }
-                var set = new Set<ParameterExpression>(pis.Length);
+                var set = new HashSet<ParameterExpression>();
                 for (int i = 0, n = pis.Length; i < n; i++)
                 {
                     ParameterExpression pex = parameters[i];
                     ParameterInfo pi = pis[i];
-                    RequiresCanRead(pex, "parameters");
+                    RequiresCanRead(pex, nameof(parameters), i);
                     Type pType = pi.ParameterType;
                     if (pex.IsByRef)
                     {
@@ -583,11 +595,10 @@ namespace System.Linq.Expressions
                     {
                         throw Error.ParameterExpressionNotValidAsDelegate(pex.Type, pType);
                     }
-                    if (set.Contains(pex))
+                    if (!set.Add(pex))
                     {
-                        throw Error.DuplicateVariable(pex);
+                        throw Error.DuplicateVariable(pex, nameof(parameters), i);
                     }
-                    set.Add(pex);
                 }
             }
             else if (parameters.Count > 0)
@@ -603,25 +614,41 @@ namespace System.Linq.Expressions
             }
         }
 
-        private static bool ValidateTryGetFuncActionArgs(Type[] typeArgs)
+        private enum TryGetFuncActionArgsResult
+        {
+            Valid,
+            ArgumentNull,
+            ByRef,
+            PointerOrVoid
+        }
+
+        private static TryGetFuncActionArgsResult ValidateTryGetFuncActionArgs(Type[] typeArgs)
         {
             if (typeArgs == null)
             {
-                throw new ArgumentNullException("typeArgs");
+                return TryGetFuncActionArgsResult.ArgumentNull;
             }
-            for (int i = 0, n = typeArgs.Length; i < n; i++)
+
+            for (int i = 0; i < typeArgs.Length; i++)
             {
                 var a = typeArgs[i];
                 if (a == null)
                 {
-                    throw new ArgumentNullException("typeArgs");
+                    return TryGetFuncActionArgsResult.ArgumentNull;
                 }
+
                 if (a.IsByRef)
                 {
-                    return false;
+                    return TryGetFuncActionArgsResult.ByRef;
+                }
+
+                if (a == typeof(void) || a.IsPointer)
+                {
+                    return TryGetFuncActionArgsResult.PointerOrVoid;
                 }
             }
-            return true;
+
+            return TryGetFuncActionArgsResult.Valid;
         }
 
         /// <summary>
@@ -632,14 +659,24 @@ namespace System.Linq.Expressions
         /// <returns>The type of a System.Func delegate that has the specified type arguments.</returns>
         public static Type GetFuncType(params Type[] typeArgs)
         {
-            if (!ValidateTryGetFuncActionArgs(typeArgs)) throw Error.TypeMustNotBeByRef();
-
-            Type result = Compiler.DelegateHelpers.GetFuncType(typeArgs);
-            if (result == null)
+            switch (ValidateTryGetFuncActionArgs(typeArgs))
             {
-                throw Error.IncorrectNumberOfTypeArgsForFunc();
+                case TryGetFuncActionArgsResult.ArgumentNull:
+                    throw new ArgumentNullException(nameof(typeArgs));
+                case TryGetFuncActionArgsResult.ByRef:
+                    throw Error.TypeMustNotBeByRef(nameof(typeArgs));
+                default:
+
+                    // This includes pointers or void. We allow the exception that comes
+                    // from trying to use them as generic arguments to pass through.
+                    Type result = Compiler.DelegateHelpers.GetFuncType(typeArgs);
+                    if (result == null)
+                    {
+                        throw Error.IncorrectNumberOfTypeArgsForFunc(nameof(typeArgs));
+                    }
+
+                    return result;
             }
-            return result;
         }
 
         /// <summary>
@@ -651,10 +688,11 @@ namespace System.Linq.Expressions
         /// <returns>true if generic System.Func delegate type was created for specific <paramref name="typeArgs"/>; false otherwise.</returns>
         public static bool TryGetFuncType(Type[] typeArgs, out Type funcType)
         {
-            if (ValidateTryGetFuncActionArgs(typeArgs))
+            if (ValidateTryGetFuncActionArgs(typeArgs) == TryGetFuncActionArgsResult.Valid)
             {
                 return (funcType = Compiler.DelegateHelpers.GetFuncType(typeArgs)) != null;
             }
+
             funcType = null;
             return false;
         }
@@ -666,14 +704,24 @@ namespace System.Linq.Expressions
         /// <returns>The type of a System.Action delegate that has the specified type arguments.</returns>
         public static Type GetActionType(params Type[] typeArgs)
         {
-            if (!ValidateTryGetFuncActionArgs(typeArgs)) throw Error.TypeMustNotBeByRef();
-
-            Type result = Compiler.DelegateHelpers.GetActionType(typeArgs);
-            if (result == null)
+            switch (ValidateTryGetFuncActionArgs(typeArgs))
             {
-                throw Error.IncorrectNumberOfTypeArgsForAction();
+                case TryGetFuncActionArgsResult.ArgumentNull:
+                    throw new ArgumentNullException(nameof(typeArgs));
+                case TryGetFuncActionArgsResult.ByRef:
+                    throw Error.TypeMustNotBeByRef(nameof(typeArgs));
+                default:
+
+                    // This includes pointers or void. We allow the exception that comes
+                    // from trying to use them as generic arguments to pass through.
+                    Type result = Compiler.DelegateHelpers.GetActionType(typeArgs);
+                    if (result == null)
+                    {
+                        throw Error.IncorrectNumberOfTypeArgsForAction(nameof(typeArgs));
+                    }
+
+                    return result;
             }
-            return result;
         }
 
         /// <summary>
@@ -684,10 +732,11 @@ namespace System.Linq.Expressions
         /// <returns>true if generic System.Action delegate type was created for specific <paramref name="typeArgs"/>; false otherwise.</returns>
         public static bool TryGetActionType(Type[] typeArgs, out Type actionType)
         {
-            if (ValidateTryGetFuncActionArgs(typeArgs))
+            if (ValidateTryGetFuncActionArgs(typeArgs) == TryGetFuncActionArgsResult.Valid)
             {
                 return (actionType = Compiler.DelegateHelpers.GetActionType(typeArgs)) != null;
             }
+
             actionType = null;
             return false;
         }
@@ -704,8 +753,8 @@ namespace System.Linq.Expressions
         /// to System.Void to produce an Action.</remarks>
         public static Type GetDelegateType(params Type[] typeArgs)
         {
-            ContractUtils.RequiresNotEmpty(typeArgs, "typeArgs");
-            ContractUtils.RequiresNotNullItems(typeArgs, "typeArgs");
+            ContractUtils.RequiresNotEmpty(typeArgs, nameof(typeArgs));
+            ContractUtils.RequiresNotNullItems(typeArgs, nameof(typeArgs));
             return Compiler.DelegateHelpers.MakeDelegateType(typeArgs);
         }
     }

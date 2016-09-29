@@ -1,242 +1,191 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
-using BitArrayTests.BitArray_BitArray_OperatorsTests;
 
-namespace BitArrayTests
+namespace System.Collections.Tests
 {
-    public enum Operator { Xor, Or, And };
-    namespace BitArray_BitArray_OperatorsTests
+    public static class BitArray_OperatorsTests
     {
-        public class BitArray_OperatorsTests
+        private const int BitsPerByte = 8;
+        private const int BitsPerInt32 = 32;
+
+        public static IEnumerable<object[]> Not_Operator_Data()
         {
-            /// <summary>
-            /// Test BitArray.And Operator
-            /// </summary>
-            [Fact]
-            public static void BitArray_AndTest()
+            foreach (int size in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
             {
-                BitArray_Helper(Operator.And);
-
-                // [] Test to make sure that 0 sized bit arrays can be And-ed
-
-                BitArray b1 = new BitArray(0);
-                BitArray b2 = new BitArray(0);
-
-                b1.And(b2);
+                yield return new object[] { Enumerable.Repeat(true, size).ToArray() };
+                yield return new object[] { Enumerable.Repeat(false, size).ToArray() };
+                yield return new object[] { Enumerable.Range(0, size).Select(i => i % 2 == 1).ToArray() };
             }
+        }
 
-            /// <summary>
-            /// Test BitArray.Not Operator
-            /// </summary>
-            [Fact]
-            public static void BitArray_NotTest()
+        [Theory]
+        [MemberData(nameof(Not_Operator_Data))]
+        public static void Not(bool[] data)
+        {
+            BitArray bitArray = new BitArray(data);
+
+            BitArray bitArrayNot = bitArray.Not();
+            Assert.Equal(bitArray.Length, bitArrayNot.Length);
+            Assert.Same(bitArray, bitArrayNot);
+            for (int i = 0; i < bitArray.Length; i++)
             {
-                // []  Standard cases 
-
-                BitArray ba2 = null;
-                BitArray ba4 = null;
-
-                ba2 = new BitArray(6, false);
-
-                ba2.Set(0, true);
-                ba2.Set(1, true);
-
-                ba4 = ba2.Not();
-
-                for (int i = 0; i < ba4.Length; i++)
-                {
-                    if (i <= 1)
-                        Assert.False(ba4.Get(i)); //"Err_2! ba4.Get(" + i + ") should be false"
-                    else
-                        Assert.True(ba4.Get(i)); //"Err_3! ba4.Get(" + i + ") should be true"
-                }
-
-
-
-                // []  Size stress cases.
-                ba2 = new BitArray(0x1000F, false);
-
-                ba2.Set(0, true);
-                ba2.Set(1, true);
-
-                ba2.Set(0x10000, true);
-                ba2.Set(0x10001, true);
-
-                ba4 = ba2.Not();
-
-                Assert.False(ba4.Get(1)); //"Err_4! ba4.Get(1) should be false"
-                Assert.True(ba4.Get(2)); //"Err_5! ba4.Get(2) should be true"
-
-                for (int i = 0x10000; i < ba2.Length; i++)
-                {
-                    if (i <= 0x10001)
-                        Assert.False(ba4.Get(i)); //"Err_6! ba4.Get(" + i + ") should be false"
-                    else
-                        Assert.True(ba4.Get(i)); //"Err_7! ba4.Get(" + i + ") should be true"
-                }
+                Assert.Equal(!data[i], bitArrayNot[i]);
             }
+        }
 
-            /// <summary>
-            /// Test BitArray.Or Operator
-            /// </summary>
-            [Fact]
-            public static void BitArray_OrTest()
+        public static IEnumerable<object[]> And_Operator_Data()
+        {
+            yield return new object[] { new bool[0], new bool[0], new bool[0] };
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
             {
-                BitArray_Helper(Operator.Or);
+                bool[] allTrue = Enumerable.Repeat(true, size).ToArray();
+                bool[] allFalse = Enumerable.Repeat(false, size).ToArray();
+                bool[] alternating = Enumerable.Range(0, size).Select(i => i % 2 == 1).ToArray();
+                yield return new object[] { allTrue, allTrue, allTrue };
+                yield return new object[] { allTrue, allFalse, allFalse };
+                yield return new object[] { allFalse, allTrue, allFalse };
+                yield return new object[] { allFalse, allFalse, allFalse };
+                yield return new object[] { allTrue, alternating, alternating };
+                yield return new object[] { alternating, allTrue, alternating };
+                yield return new object[] { allFalse, alternating, allFalse };
+                yield return new object[] { alternating, allFalse, allFalse };
             }
+        }
 
-            /// <summary>
-            /// Test BitArray.Xor Operator
-            /// </summary>
-            [Fact]
-            public static void BitArray_XorTest()
+        [Theory]
+        [MemberData(nameof(And_Operator_Data))]
+        public static void And_Operator(bool[] l, bool[] r, bool[] expected)
+        {
+            BitArray left = new BitArray(l);
+            BitArray right = new BitArray(r);
+
+            BitArray actual = left.And(right);
+            Assert.Same(left, actual);
+            Assert.Equal(actual.Length, expected.Length);
+
+            for (int i = 0; i < expected.Length; i++)
             {
-                BitArray_Helper(Operator.Xor);
+                Assert.Equal(expected[i], actual[i]);
             }
+        }
 
-            public static void BitArray_Helper(Operator op)
+        public static IEnumerable<object[]> Or_Operator_Data()
+        {
+            yield return new object[] { new bool[0], new bool[0], new bool[0] };
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
             {
-                BitArray ba2 = null;
-                BitArray ba3 = null;
-                BitArray ba4 = null;
-
-                // []  Standard cases (1,1) (1,0) (0,0).
-                ba2 = new BitArray(6, false);
-                ba3 = new BitArray(6, false);
-
-                ba2.Set(0, true);
-                ba2.Set(1, true);
-
-                ba3.Set(1, true);
-                ba3.Set(2, true);
-
-                switch (op)
-                {
-                    case Operator.Xor:
-                        ba4 = ba2.Xor(ba3);
-                        Assert.True(ba4.Get(0)); //"Err_8! Expected ba4.Get(0) to be true"
-                        Assert.False(ba4.Get(1)); //"Err_9! Expected ba4.Get(1) to be false"
-                        Assert.True(ba4.Get(2)); //"Err_10! Expected ba4.Get(2) to be true"
-                        Assert.False(ba4.Get(4)); //"Err_11! Expected ba4.Get(4) to be false"
-                        break;
-
-                    case Operator.And:
-                        ba4 = ba2.And(ba3);
-                        Assert.False(ba4.Get(0)); //"Err_12! Expected ba4.Get(0) to be false"
-                        Assert.True(ba4.Get(1)); //"Err_13! Expected ba4.Get(1) to be true"
-                        Assert.False(ba4.Get(2)); //"Err_14! Expected ba4.Get(2) to be false"
-                        Assert.False(ba4.Get(4)); //"Err_15! Expected ba4.Get(4) to be false"
-                        break;
-
-                    case Operator.Or:
-                        ba4 = ba2.Or(ba3);
-                        Assert.True(ba4.Get(0)); //"Err_16! Expected ba4.Get(0) to be true"
-                        Assert.True(ba4.Get(1)); //"Err_17! Expected ba4.Get(1) to be true"
-                        Assert.True(ba4.Get(2)); //"Err_18! Expected ba4.Get(2) to be true"
-                        Assert.False(ba4.Get(4)); //"Err_19! Expected ba4.Get(4) to be false"
-                        break;
-                }
-
-
-                // []  Size stress cases.
-                ba2 = new BitArray(0x1000F, false);
-                ba3 = new BitArray(0x1000F, false);
-
-                ba2.Set(0x10000, true); // The bit for 1 (2^0).
-                ba2.Set(0x10001, true); // The bit for 2 (2^1).
-
-                ba3.Set(0x10001, true); // The bit for 2 (2^1).
-
-                switch (op)
-                {
-                    case Operator.Xor:
-                        ba4 = ba2.Xor(ba3);
-                        Assert.True(ba4.Get(0x10000)); //"Err_20! Expected ba4.Get(0x10000) to be true"
-                        Assert.False(ba4.Get(0x10001)); //"Err_21! Expected ba4.Get(0x10001) to be false"
-                        Assert.False(ba4.Get(0x10002)); //"Err_22! Expected ba4.Get(0x10002) to be false"
-                        Assert.False(ba4.Get(0x10004)); //"Err_23! Expected ba4.Get(0x10004) to be false"
-                        break;
-
-                    case Operator.And:
-                        ba4 = ba2.And(ba3);
-                        Assert.False(ba4.Get(0x10000)); //"Err_24! Expected ba4.Get(0x10000) to be false"
-                        Assert.True(ba4.Get(0x10001)); //"Err_25! Expected ba4.Get(0x10001) to be true"
-                        Assert.False(ba4.Get(0x10002)); //"Err_26! Expected ba4.Get(0x10002) to be false"
-                        Assert.False(ba4.Get(0x10004)); //"Err_27! Expected ba4.Get(0x10004) to be false"
-                        break;
-
-                    case Operator.Or:
-                        ba4 = ba2.Or(ba3);
-                        Assert.True(ba4.Get(0x10000)); //"Err_28! Expected ba4.Get(0x10000) to be true"
-                        Assert.True(ba4.Get(0x10001)); //"Err_29! Expected ba4.Get(0x10001) to be true"
-                        Assert.False(ba4.Get(0x10002)); //"Err_30! Expected ba4.Get(0x10002) to be false"
-                        Assert.False(ba4.Get(0x10004)); //"Err_31! Expected ba4.Get(0x10004) to be false"
-                        break;
-                }
+                bool[] allTrue = Enumerable.Repeat(true, size).ToArray();
+                bool[] allFalse = Enumerable.Repeat(false, size).ToArray();
+                bool[] alternating = Enumerable.Range(0, size).Select(i => i % 2 == 1).ToArray();
+                yield return new object[] { allTrue, allTrue, allTrue };
+                yield return new object[] { allTrue, allFalse, allTrue };
+                yield return new object[] { allFalse, allTrue, allTrue };
+                yield return new object[] { allFalse, allFalse, allFalse };
+                yield return new object[] { allTrue, alternating, allTrue };
+                yield return new object[] { alternating, allTrue, allTrue };
+                yield return new object[] { allFalse, alternating, alternating };
+                yield return new object[] { alternating, allFalse, alternating };
             }
+        }
 
-            /// <summary>
-            /// And negative test
-            /// </summary>
-            [Fact]
-            public static void BitArray_AndTest_Negative()
+        [Theory]
+        [MemberData(nameof(Or_Operator_Data))]
+        public static void Or_Operator(bool[] l, bool[] r, bool[] expected)
+        {
+            BitArray left = new BitArray(l);
+            BitArray right = new BitArray(r);
+
+            BitArray actual = left.Or(right);
+            Assert.Same(left, actual);
+            Assert.Equal(actual.Length, expected.Length);
+
+            for (int i = 0; i < expected.Length; i++)
             {
-                // []  ArgumentException, length of arrays is different
-                BitArray ba2 = new BitArray(11, false);
-                BitArray ba3 = new BitArray(6, false);
-
-                Assert.Throws<ArgumentException>(delegate { ba2.And(ba3); }); //"Err_32! wrong exception thrown."
-                Assert.Throws<ArgumentException>(delegate { ba3.And(ba2); }); //"Err_33! wrong exception thrown."
-
-
-                // []  ArgumentNullException, null.
-                ba2 = new BitArray(6, false);
-                ba3 = null;
-
-                Assert.Throws<ArgumentNullException>(delegate { ba2.And(ba3); }); //"Err_34! wrong exception thrown."
+                Assert.Equal(expected[i], actual[i]);
             }
+        }
 
-            /// <summary>
-            /// Or negative test
-            /// </summary>
-            [Fact]
-            public static void BitArray_OrTest_Negative()
+        public static IEnumerable<object[]> Xor_Operator_Data()
+        {
+            yield return new object[] { new bool[0], new bool[0], new bool[0] };
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, short.MaxValue })
             {
-                // []  ArgumentException, length of arrays is different
-                BitArray ba2 = new BitArray(11, false);
-                BitArray ba3 = new BitArray(6, false);
-
-                Assert.Throws<ArgumentException>(delegate { ba2.Or(ba3); }); //"Err_35! wrong exception thrown."
-
-                // []  ArgumentNullException, null.
-                ba2 = new BitArray(6, false);
-                ba3 = null;
-
-                Assert.Throws<ArgumentNullException>(delegate { ba2.Or(ba3); }); //"Err_36! wrong exception thrown."
+                bool[] allTrue = Enumerable.Repeat(true, size).ToArray();
+                bool[] allFalse = Enumerable.Repeat(false, size).ToArray();
+                bool[] alternating = Enumerable.Range(0, size).Select(i => i % 2 == 1).ToArray();
+                bool[] inverse = Enumerable.Range(0, size).Select(i => i % 2 == 0).ToArray();
+                yield return new object[] { allTrue, allTrue, allFalse };
+                yield return new object[] { allTrue, allFalse, allTrue };
+                yield return new object[] { allFalse, allTrue, allTrue };
+                yield return new object[] { allFalse, allFalse, allFalse };
+                yield return new object[] { allTrue, alternating, inverse };
+                yield return new object[] { alternating, allTrue, inverse };
+                yield return new object[] { allFalse, alternating, alternating };
+                yield return new object[] { alternating, allFalse, alternating };
+                yield return new object[] { alternating, inverse, allTrue };
+                yield return new object[] { inverse, alternating, allTrue };
             }
+        }
 
-            /// <summary>
-            /// Xor negative test
-            /// </summary>
-            [Fact]
-            public static void BitArray_XorTest_Negative()
+        [Theory]
+        [MemberData(nameof(Xor_Operator_Data))]
+        public static void Xor_Operator(bool[] l, bool[] r, bool[] expected)
+        {
+            BitArray left = new BitArray(l);
+            BitArray right = new BitArray(r);
+
+            BitArray actual = left.Xor(right);
+            Assert.Same(left, actual);
+            Assert.Equal(actual.Length, expected.Length);
+
+            for (int i = 0; i < expected.Length; i++)
             {
-                // []  ArgumentException, length of arrays is different
-                BitArray ba2 = new BitArray(11, false);
-                BitArray ba3 = new BitArray(6, false);
-
-                Assert.Throws<ArgumentException>(delegate { ba2.Xor(ba3); }); //"Err_37! wrong exception thrown."
-
-                // []  ArgumentNullException, null.
-                ba2 = new BitArray(6, false);
-                ba3 = null;
-
-                Assert.Throws<ArgumentNullException>(delegate { ba2.Xor(ba3); }); //"Err_38! wrong exception thrown."
+                Assert.Equal(expected[i], actual[i]);
             }
+        }
+
+        [Fact]
+        public static void And_Invalid()
+        {
+            BitArray bitArray1 = new BitArray(11, false);
+            BitArray bitArray2 = new BitArray(6, false);
+
+            // Different lengths
+            Assert.Throws<ArgumentException>(null, () => bitArray1.And(bitArray2));
+            Assert.Throws<ArgumentException>(null, () => bitArray2.And(bitArray1));
+
+            Assert.Throws<ArgumentNullException>("value", () => bitArray1.And(null));
+        }
+
+        [Fact]
+        public static void Or_Invalid()
+        {
+            BitArray bitArray1 = new BitArray(11, false);
+            BitArray bitArray2 = new BitArray(6, false);
+
+            // Different lengths
+            Assert.Throws<ArgumentException>(null, () => bitArray1.Or(bitArray2));
+            Assert.Throws<ArgumentException>(null, () => bitArray2.Or(bitArray1));
+
+            Assert.Throws<ArgumentNullException>("value", () => bitArray1.Or(null));
+        }
+
+        [Fact]
+        public static void Xor_Invalid()
+        {
+            BitArray bitArray1 = new BitArray(11, false);
+            BitArray bitArray2 = new BitArray(6, false);
+
+            // Different lengths
+            Assert.Throws<ArgumentException>(null, () => bitArray1.Xor(bitArray2));
+            Assert.Throws<ArgumentException>(null, () => bitArray2.Xor(bitArray1));
+
+            Assert.Throws<ArgumentNullException>("value", () => bitArray1.Xor(null));
         }
     }
 }

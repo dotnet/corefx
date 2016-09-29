@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 // ------------------------------------------------------------------------------
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
@@ -69,4 +70,19 @@ namespace System.Runtime.CompilerServices
         public RequiredAttributeAttribute(System.Type requiredContract) { }
         public System.Type RequiredContract { get { return default(System.Type); } }
     }
+    public static partial class IsPinned
+    {
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(8))]
+    public sealed partial class HasCopySemanticsAttribute : System.Attribute
+    {
+        public HasCopySemanticsAttribute() { }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(16))]
+    public sealed partial class ScopelessEnumAttribute : System.Attribute
+    {
+        public ScopelessEnumAttribute() { }
+    }
+    
+    
 }

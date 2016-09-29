@@ -1,6 +1,8 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
@@ -48,6 +50,8 @@ namespace System.Diagnostics.Tests
                     run(Encoding.UTF8.CodePage);
                 }
 
+                // Don't test this on Windows Nano, Windows Nano only supports UTF8.
+                if (File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "regedit.exe")))
                 {
                     Interop.SetConsoleCP(s_ConsoleEncoding);
                     Interop.SetConsoleOutputCP(s_ConsoleEncoding);

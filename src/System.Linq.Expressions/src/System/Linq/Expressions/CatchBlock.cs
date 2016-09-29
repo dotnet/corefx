@@ -1,7 +1,7 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 
@@ -113,7 +113,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="CatchBlock"/>.</returns>
         public static CatchBlock Catch(ParameterExpression variable, Expression body)
         {
-            ContractUtils.RequiresNotNull(variable, "variable");
+            ContractUtils.RequiresNotNull(variable, nameof(variable));
             return MakeCatchBlock(variable.Type, variable, body, null);
         }
 
@@ -140,7 +140,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="CatchBlock"/>.</returns>
         public static CatchBlock Catch(ParameterExpression variable, Expression body, Expression filter)
         {
-            ContractUtils.RequiresNotNull(variable, "variable");
+            ContractUtils.RequiresNotNull(variable, nameof(variable));
             return MakeCatchBlock(variable.Type, variable, body, filter);
         }
 
@@ -155,17 +155,30 @@ namespace System.Linq.Expressions
         /// <remarks><paramref name="type"/> must be non-null and match the type of <paramref name="variable"/> (if it is supplied).</remarks>
         public static CatchBlock MakeCatchBlock(Type type, ParameterExpression variable, Expression body, Expression filter)
         {
-            ContractUtils.RequiresNotNull(type, "type");
-            ContractUtils.Requires(variable == null || TypeUtils.AreEquivalent(variable.Type, type), "variable");
-            if (variable != null && variable.IsByRef)
+            ContractUtils.RequiresNotNull(type, nameof(type));
+            ContractUtils.Requires(variable == null || TypeUtils.AreEquivalent(variable.Type, type), nameof(variable));
+            if (variable == null)
             {
-                throw Error.VariableMustNotBeByRef(variable, variable.Type);
+                TypeUtils.ValidateType(type, nameof(type));
+                if (type.IsByRef)
+                {
+                    throw Error.TypeMustNotBeByRef(nameof(type));
+                }
+
+                if (type.IsPointer)
+                {
+                    throw Error.TypeMustNotBePointer(nameof(type));
+                }
             }
-            RequiresCanRead(body, "body");
+            else if (variable.IsByRef)
+            {
+                throw Error.VariableMustNotBeByRef(variable, variable.Type, nameof(variable));
+            }
+            RequiresCanRead(body, nameof(body));
             if (filter != null)
             {
-                RequiresCanRead(filter, "filter");
-                if (filter.Type != typeof(bool)) throw Error.ArgumentMustBeBoolean();
+                RequiresCanRead(filter, nameof(filter));
+                if (filter.Type != typeof(bool)) throw Error.ArgumentMustBeBoolean(nameof(filter));
             }
 
             return new CatchBlock(type, variable, body, filter);

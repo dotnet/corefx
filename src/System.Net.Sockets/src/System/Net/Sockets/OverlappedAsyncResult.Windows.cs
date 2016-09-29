@@ -1,7 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -102,7 +104,7 @@ namespace System.Net.Sockets
         // 3) failed.
         internal override object PostCompletion(int numBytes)
         {
-            if (ErrorCode == 0 && Logging.On)
+            if (ErrorCode == 0 && SocketsEventSource.Log.IsEnabled())
             {
                 LogBuffer(numBytes);
             }
@@ -112,14 +114,22 @@ namespace System.Net.Sockets
 
         private void LogBuffer(int size)
         {
-            GlobalLog.Assert(Logging.On, "OverlappedAsyncResult#{0}::LogBuffer()|Logging is off!", Logging.HashString(this));
+            if (!SocketsEventSource.Log.IsEnabled())
+            {
+                if (GlobalLog.IsEnabled)
+                {
+                    GlobalLog.AssertFormat("OverlappedAsyncResult#{0}::LogBuffer()|Logging is off!", LoggingHash.HashString(this));
+                }
+                Debug.Fail("OverlappedAsyncResult#" + LoggingHash.HashString(this) + "::LogBuffer()|Logging is off!");
+            }
+
             if (size > -1)
             {
                 if (_wsaBuffers != null)
                 {
                     foreach (WSABuffer wsaBuffer in _wsaBuffers)
                     {
-                        Logging.Dump(Logging.Sockets, AsyncObject, "PostCompletion", wsaBuffer.Pointer, Math.Min(wsaBuffer.Length, size));
+                        SocketsEventSource.Dump(wsaBuffer.Pointer, Math.Min(wsaBuffer.Length, size));
                         if ((size -= wsaBuffer.Length) <= 0)
                         {
                             break;
@@ -128,7 +138,7 @@ namespace System.Net.Sockets
                 }
                 else
                 {
-                    Logging.Dump(Logging.Sockets, AsyncObject, "PostCompletion", _singleBuffer.Pointer, Math.Min(_singleBuffer.Length, size));
+                    SocketsEventSource.Dump(_singleBuffer.Pointer, Math.Min(_singleBuffer.Length, size));
                 }
             }
         }

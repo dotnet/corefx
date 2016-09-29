@@ -6,22 +6,43 @@
     <FeatureInterpret>true</FeatureInterpret>
   </PropertyGroup>
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{AEF718E9-D4FC-418F-A7AE-ED6B2C7B3787}</ProjectGuid>
-    <OutputType>Library</OutputType>
     <AssemblyName>System.Linq.Expressions</AssemblyName>
     <RootNamespace>System.Linq.Expressions</RootNamespace>
-    <AssemblyVersion>4.0.11.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)'=='netstandard1.6' Or '$(TargetGroup)'=='netstandard1.6'">4.1.1.0</AssemblyVersion>
+    <ContractProject Condition="'$(AssemblyVersion)'=='4.1.1.0'">../ref/4.1.0/System.Linq.Expressions.depproj</ContractProject>
+    <IsInterpreting Condition="'$(PackageTargetFramework)' == 'netcore50'">true</IsInterpreting>
     <DefineConstants Condition=" '$(IsInterpreting)' != 'true' ">$(DefineConstants);FEATURE_COMPILE</DefineConstants>
     <DefineConstants Condition=" '$(FeatureInterpret)' == 'true' ">$(DefineConstants);FEATURE_INTERPRET</DefineConstants>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
+    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net463'">None</ResourcesSourceOutputDirectory>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.6_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.6_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
+  <!-- netcore50 project.json fork is shared for both netcore50 and netcore50aot. This redirects netcore50aot. -->
+  <PropertyGroup Condition="'$(TargetGroup)' == 'netcore50aot'">
+    <ProjectJson>netcore50/project.json</ProjectJson>
+    <ProjectLockJson>netcore50/project.lock.json</ProjectLockJson>
+    <DefineConstants>$(DefineConstants);FEATURE_DYNAMIC_DELEGATE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcore50aot'">
+    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+    <TargetingPackReference Include="System.Private.CoreLib.DynamicDelegate" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
+    <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
+      <Link>Common\System\Collections\Generic\EnumerableHelpers.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs">
       <Link>Common\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs</Link>
     </Compile>
@@ -70,12 +91,10 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs">
-      <Link>Common\System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Runtime\CompilerServices\TrueReadOnlyCollection.cs">
       <Link>Common\System\Runtime\CompilerServices\TrueReadOnlyCollection.cs</Link>
     </Compile>
+    <Compile Include="System\Dynamic\Utils\ExpressionVisitorUtils.cs" />
     <Compile Include="System\Dynamic\Utils\TypeExtensions.cs" />
     <Compile Include="System\Dynamic\Utils\TypeUtils.cs" />
     <Compile Include="System\Linq\Expressions\BinaryExpression.cs" />
@@ -114,7 +133,6 @@
     <Compile Include="System\Linq\Expressions\NewExpression.cs" />
     <Compile Include="System\Linq\Expressions\ParameterExpression.cs" />
     <Compile Include="System\Linq\Expressions\RuntimeVariablesExpression.cs" />
-    <Compile Include="System\Linq\Expressions\Set.cs" />
     <Compile Include="System\Linq\Expressions\Strings.cs" />
     <Compile Include="System\Linq\Expressions\SwitchCase.cs" />
     <Compile Include="System\Linq\Expressions\SwitchExpression.cs" />
@@ -123,11 +141,18 @@
     <Compile Include="System\Linq\Expressions\TypeBinaryExpression.cs" />
     <Compile Include="System\Linq\Expressions\UnaryExpression.cs" />
     <Compile Include="System\Linq\Expressions\Utils.cs" />
+    <Compile Include="System\Linq\Expressions\StackGuard.cs" />
     <Compile Include="System\Linq\IQueryable.cs" />
     <Compile Include="System\Runtime\CompilerServices\IRuntimeVariables.cs" />
+    <Compile Include="System\Linq\Expressions\Common\ConstantCheck.cs" />
+    <Compile Include="System\Linq\Expressions\Common\CachedReflectionInfo.cs" />
+    <Compile Include="System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs" />
     <None Include="project.json" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(IsInterpreting)' != 'true' ">
+  <ItemGroup Condition=" '$(IsInterpreting)' != 'true' And '$(TargetGroup)' != 'net463'">
+    <Compile Include="$(CommonPath)\System\Collections\Generic\ReferenceEqualityComparer.cs">
+      <Link>Common\System\Collections\Generic\ReferenceEqualityComparer.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\CollectionExtensions.AddFirst.cs">
       <Link>Common\System\Dynamic\Utils\CollectionExtensions.AddFirst.cs</Link>
     </Compile>
@@ -138,12 +163,10 @@
       <Link>Common\System\Linq\Expressions\Compiler\AssemblyGen.cs</Link>
     </Compile>
     <Compile Include="System\Dynamic\Utils\Helpers.cs" />
-    <Compile Include="System\Dynamic\Utils\ReferenceEqualityComparer.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\AnalyzedTree.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\BoundConstants.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\CompilerScope.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\CompilerScope.Storage.cs" />
-    <Compile Include="System\Linq\Expressions\Compiler\ConstantCheck.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\HoistedLocals.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\ILGen.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\KeyedQueue.cs" />
@@ -167,7 +190,7 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeOps.ExpressionQuoter.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeOps.RuntimeVariableList.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(IsInterpreting)' == 'true' Or '$(FeatureInterpret)' == 'true' ">
+  <ItemGroup Condition=" ('$(IsInterpreting)' == 'true' Or '$(FeatureInterpret)' == 'true') And '$(TargetGroup)' != 'net463' ">
     <Compile Include="$(CommonPath)\System\Dynamic\Utils\DelegateHelpers.cs">
       <Link>Common\System\Dynamic\Utils\DelegateHelpers.cs</Link>
     </Compile>
@@ -176,13 +199,11 @@
     <Compile Include="System\Linq\Expressions\Interpreter\BranchLabel.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\CallInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\CallInstruction.Generated.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\ConstantCheck.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\ControlFlowInstructions.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\DivInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\EqualInstruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\FieldOperations.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\GreaterThanInstruction.cs" />
-    <Compile Include="System\Linq\Expressions\Interpreter\ILightCallSiteBinder.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\Instruction.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\InstructionList.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\InterpretedFrame.cs" />
@@ -204,6 +225,10 @@
     <Compile Include="System\Linq\Expressions\Interpreter\TypeOperations.cs" />
     <Compile Include="System\Linq\Expressions\Interpreter\Utilities.cs" />
     <Compile Include="System\Linq\Expressions\Compiler\DelegateHelpers.Generated.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System.Core" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

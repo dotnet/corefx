@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Net.Sockets;
 
@@ -17,7 +18,7 @@ namespace System.Net
         {
             if (host == null)
             {
-                throw new ArgumentNullException("host");
+                throw new ArgumentNullException(nameof(host));
             }
 
             if (String.IsNullOrEmpty(host))
@@ -27,14 +28,14 @@ namespace System.Net
 
             if (port < IPEndPoint.MinPort || port > IPEndPoint.MaxPort)
             {
-                throw new ArgumentOutOfRangeException("port");
+                throw new ArgumentOutOfRangeException(nameof(port));
             }
 
             if (addressFamily != AddressFamily.InterNetwork &&
                 addressFamily != AddressFamily.InterNetworkV6 &&
                 addressFamily != AddressFamily.Unspecified)
             {
-                throw new ArgumentException(SR.net_sockets_invalid_optionValue_all, "addressFamily");
+                throw new ArgumentException(SR.net_sockets_invalid_optionValue_all, nameof(addressFamily));
             }
 
             _host = host;

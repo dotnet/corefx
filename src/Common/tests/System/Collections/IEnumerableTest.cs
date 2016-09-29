@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections;
@@ -17,20 +18,11 @@ namespace Tests.Collections
     {
         private const int EnumerableSize = 16;
 
-        protected T DefaultValue
-        {
-            get { return default(T); }
-        }
+        protected T DefaultValue => default(T);
 
-        protected bool MoveNextAtEndThrowsOnModifiedCollection
-        {
-            get { return true; }
-        }
+        protected bool MoveNextAtEndThrowsOnModifiedCollection => true;
 
-        protected virtual CollectionOrder CollectionOrder
-        {
-            get { return CollectionOrder.Sequential; }
-        }
+        protected virtual CollectionOrder CollectionOrder => CollectionOrder.Sequential;
 
         protected abstract bool IsResetNotSupported { get; }
         protected abstract bool IsGenericCompatibility { get; }
@@ -58,8 +50,7 @@ namespace Tests.Collections
         /// </summary>
         /// <param name="enumerable">The <see cref="IEnumerable" /> to invalidate enumerators for.</param>
         /// <returns>The new set of items in the <see cref="IEnumerable" /></returns>
-        protected abstract object[] InvalidateEnumerator(
-            IEnumerable enumerable);
+        protected abstract object[] InvalidateEnumerator(IEnumerable enumerable);
 
         private void RepeatTest(
             Action<IEnumerator, object[], int> testCode,
