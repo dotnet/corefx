@@ -16,10 +16,11 @@
         "System.Runtime.Handles": "4.3.0-beta-24522-03",
         "System.Runtime.InteropServices": "4.3.0-beta-24522-03",
         "System.Threading": "4.3.0-beta-24522-03",
+        "System.Threading.Overlapped": "4.3.0-beta-24522-03",
         "System.Threading.Tasks": "4.3.0-beta-24522-03",
         "System.Threading.Thread": "4.3.0-beta-24522-03"
     },
-      "imports": [
+    "imports": [
         "dotnet5.8"
       ]
     },

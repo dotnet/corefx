@@ -47,7 +47,7 @@ namespace System.IO
         public System.IO.WaitForChangedResult WaitForChanged(System.IO.WatcherChangeTypes changeType, int timeout) { return default(System.IO.WaitForChangedResult); }
     }
     [Serializable]
-    public partial class InternalBufferOverflowException : System.Exception
+    public partial class InternalBufferOverflowException : System.SystemException
     {
         public InternalBufferOverflowException() { }
         public InternalBufferOverflowException(string message) { }
