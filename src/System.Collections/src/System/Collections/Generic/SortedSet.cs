@@ -1347,7 +1347,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            if (toSave.Count < this.Count)
+            if (toSave.Count < Count)
             {
                 Clear();
                 AddAllElements(toSave);
@@ -2201,21 +2201,7 @@ namespace System.Collections.Generic
 
             internal override void IntersectWithEnumerable(IEnumerable<T> other)
             {
-                List<T> toSave = new List<T>(this.Count);
-                foreach (T item in other)
-                {
-                    if (Contains(item))
-                    {
-                        toSave.Add(item);
-                    }
-                }
-
-                if (toSave.Count < Count)
-                {
-                    Clear();
-                    AddAllElements(toSave);
-                }
-
+                base.IntersectWithEnumerable(other);
 #if DEBUG
                 Debug.Assert(this.versionUpToDate() && _root == _underlying.FindRange(_min, _max));
 #endif
