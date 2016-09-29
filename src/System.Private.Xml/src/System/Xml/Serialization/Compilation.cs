@@ -307,7 +307,6 @@ namespace System.Xml.Serialization
                 writer.WriteLine("#if _DYNAMIC_XMLSERIALIZER_COMPILATION");
                 writer.WriteLine("[assembly:System.Security.AllowPartiallyTrustedCallers()]");
                 writer.WriteLine("[assembly:System.Security.SecurityTransparent()]");
-                writer.WriteLine("[assembly:System.Security.SecurityRules(System.Security.SecurityRuleSet.Level1)]");
                 writer.WriteLine("#endif");
                 // Add AssemblyVersion attribute to match parent accembly version
                 if (types != null && types.Length > 0 && types[0] != null)
@@ -427,10 +426,6 @@ namespace System.Xml.Serialization
                 CodeGenerator.EmptyTypeArray
                 );
             assemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(AllowPartiallyTrustedCallersAttribute_ctor, new Object[0]));
-            ConstructorInfo SecurityRulesAttribute_ctor = typeof(SecurityRulesAttribute).GetConstructor(
-                new Type[] { typeof(SecurityRuleSet) }
-                );
-            assemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(SecurityRulesAttribute_ctor, new Object[] { SecurityRuleSet.Level1 }));
             // Add AssemblyVersion attribute to match parent accembly version
             if (types != null && types.Length > 0 && types[0] != null)
             {
