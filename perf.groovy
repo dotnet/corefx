@@ -1,7 +1,6 @@
 // Import the utility functionality.
 
-import jobs.generation.Utilities;
-import jobs.generation.JobReport;
+import jobs.generation.*;
 
 // The input project name (e.g. dotnet/corefx)
 def project = GithubProject
