@@ -116,6 +116,34 @@ namespace System.Linq.Expressions.Tests
             VerifyEmitConstantsToIL((DateTime?)DateTime.Now, 1);
         }
 
+        [Fact]
+        public static void VariableBinder_CatchBlock_Filter1()
+        {
+            // See https://github.com/dotnet/corefx/issues/11994 for reported issue
+
+            Verify_VariableBinder_CatchBlock_Filter(
+                Expression.Catch(
+                    Expression.Parameter(typeof(Exception), "ex"),
+                    Expression.Empty(),
+                    Expression.Parameter(typeof(bool), "???")
+                )
+            );
+        }
+
+        [Fact]
+        public static void VariableBinder_CatchBlock_Filter2()
+        {
+            // See https://github.com/dotnet/corefx/issues/11994 for reported issue
+
+            Verify_VariableBinder_CatchBlock_Filter(
+                Expression.Catch(
+                    typeof(Exception),
+                    Expression.Empty(),
+                    Expression.Parameter(typeof(bool), "???")
+                )
+            );
+        }
+
         private static void VerifyEmitConstantsToIL<T>(T value)
         {
             VerifyEmitConstantsToIL<T>(value, 0);
@@ -136,6 +164,19 @@ namespace System.Linq.Expressions.Tests
 
             var o = f.DynamicInvoke();
             Assert.Equal(expectedValue, o);
+        }
+
+        private static void Verify_VariableBinder_CatchBlock_Filter(CatchBlock @catch)
+        {
+            var e =
+                Expression.Lambda<Action>(
+                    Expression.TryCatch(
+                        Expression.Empty(),
+                        @catch
+                    )
+                );
+
+            Assert.Throws<InvalidOperationException>(() => e.Compile());
         }
 #endif
     }
