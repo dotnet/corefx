@@ -76,7 +76,7 @@ def osShortName = ['Windows 10': 'win10',
 			}
 
 			// Set the label.
-			job.with {
+			newJob.with {
 				label('windows_clr_perf')
 			}
 			// Set up standard options.
