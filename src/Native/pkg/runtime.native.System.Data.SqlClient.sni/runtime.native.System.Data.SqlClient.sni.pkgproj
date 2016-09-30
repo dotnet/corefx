@@ -12,9 +12,10 @@
     <Dependency Include="runtime.win7-x86.runtime.native.System.Data.SqlClient.sni">
       <Version>$(RuntimeWin7RuntimeNativeSystemDataSqlClientSniVersion)</Version>
     </Dependency>
+    <!-- The following package is not being built as part of the 1.1 release and will not have a stable version
     <Dependency Include="runtime.win10-arm64.runtime.native.System.Data.SqlClient.sni">
       <Version>$(RuntimeWin10Arm64RuntimeNativeSystemDataSqlClientSniVersion)</Version>
-    </Dependency>
+    </Dependency> -->
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
