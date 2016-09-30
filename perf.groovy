@@ -75,8 +75,10 @@ def osShortName = ['Windows 10': 'win10',
 				}
 			}
 
-			// Set the affinity.
-			Utilities.setMachineAffinity(newJob, os, 'windows_clr_perf')
+			// Set the label.
+			job.with {
+				label('windows_clr_perf')
+			}
 			// Set up standard options.
 			Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
 			// Add the unit test results
