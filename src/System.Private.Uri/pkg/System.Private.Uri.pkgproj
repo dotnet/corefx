@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <!-- Ideally we'd harvest this from the runtime dependencies -->
-    <Version>4.0.1</Version>
+    <Version>4.0.2</Version>
     <!-- The Unix implementations place the asset in a generation folder,
          however the assembly won't reference any generation-based contracts -->
     <SkipGenerationCheck>true</SkipGenerationCheck>
