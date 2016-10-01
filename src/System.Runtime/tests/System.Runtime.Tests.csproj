@@ -28,7 +28,6 @@
     <Compile Include="Helpers.cs" />
     <Compile Include="System\ActivatorTests.cs" />
     <Compile Include="System\ArrayTests.cs" />
-    <Compile Include="System\ArrayTests.netcoreapp1.1.cs" Condition="'$(TargetGroup)' == 'netcoreapp1.1'" />
     <Compile Include="System\AttributeTests.cs" />
     <Compile Include="System\ArraySegmentTests.cs" />
     <Compile Include="System\BooleanTests.cs" />
@@ -46,7 +45,6 @@
     <Compile Include="System\DelegateTests.cs" />
     <Compile Include="System\DoubleTests.cs" />
     <Compile Include="System\EnumTests.cs" />
-    <Compile Include="System\EnumTests.netcoreapp1.1.cs" Condition="'$(TargetGroup)' == 'netcoreapp1.1'" />
     <Compile Include="System\FieldAccessExceptionTests.cs" />
     <Compile Include="System\GCTests.cs" />
     <Compile Include="System\GuidTests.cs" />
@@ -54,7 +52,6 @@
     <Compile Include="System\Int32Tests.cs" />
     <Compile Include="System\Int64Tests.cs" />
     <Compile Include="System\IntPtrTests.cs" />
-    <Compile Include="System\IntPtrTests.netcoreapp1.1.cs" Condition="'$(TargetGroup)' == 'netcoreapp1.1'" />
     <Compile Include="System\IO\DirectoryNotFoundExceptionTests.cs" />
     <Compile Include="System\IO\DirectoryNotFoundException.InteropTests.cs" />
     <Compile Include="System\IO\EndOfStreamExceptionTests.cs" />
@@ -65,7 +62,6 @@
     <Compile Include="System\IO\PathTooLongExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongException.InteropTests.cs" />
     <Compile Include="System\LazyTests.cs" />
-    <Compile Include="System\LazyTests.netcoreapp1.1.cs" Condition="'$(TargetGroup)' == 'netcoreapp1.1'" />
     <Compile Include="System\LazyOfTMetadataTests.cs" />
     <Compile Include="System\MethodAccessExceptionTests.cs" />
     <Compile Include="System\MissingFieldExceptionTests.cs" />
@@ -77,7 +73,6 @@
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\StrongBoxTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.cs" />
-    <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp1.1.cs" Condition="'$(TargetGroup)' == 'netcoreapp1.1'" />
     <Compile Include="System\SByteTests.cs" />
     <Compile Include="System\SingleTests.cs" />
     <Compile Include="System\StringTests.cs" />
@@ -92,7 +87,6 @@
     <Compile Include="System\UInt32Tests.cs" />
     <Compile Include="System\UInt64Tests.cs" />
     <Compile Include="System\UIntPtrTests.cs" />
-    <Compile Include="System\UIntPtrTests.netcoreapp1.1.cs" Condition="'$(TargetGroup)' == 'netcoreapp1.1'" />
     <Compile Include="System\Uri.CreateStringTests.cs" />
     <Compile Include="System\Uri.CreateUriTests.cs" />
     <Compile Include="System\Uri.MethodsTests.cs" />
@@ -105,6 +99,14 @@
     <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
       <Link>Common\System\PlatformDetection.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp1.1'">
+    <Compile Include="System\ArrayTests.netcoreapp1.1.cs" />
+    <Compile Include="System\EnumTests.netcoreapp1.1.cs" />
+    <Compile Include="System\IntPtrTests.netcoreapp1.1.cs" />
+    <Compile Include="System\LazyTests.netcoreapp1.1.cs" />
+    <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp1.1.cs" />
+    <Compile Include="System\UIntPtrTests.netcoreapp1.1.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="ArrayTests.netstandard1.7.cs" />
