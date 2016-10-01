@@ -17,7 +17,7 @@ namespace System.Dynamic.Utils
             string name,
             Type[] types)
         {
-            foreach (var method in type.GetRuntimeMethods())
+            foreach (MethodInfo method in type.GetRuntimeMethods())
             {
                 if (method.IsStatic && method.Name == name && method.MatchesArgumentTypes(types))
                 {
