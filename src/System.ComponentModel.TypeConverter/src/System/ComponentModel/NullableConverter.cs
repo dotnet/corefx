@@ -125,7 +125,6 @@ namespace System.ComponentModel
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        /// <include file='doc\NullableConverter.uex' path='docs/doc[@for="NullableConverter.CreateInstance"]/*' />
         /// <summary>
         /// </summary>
         public override object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
@@ -156,7 +155,6 @@ namespace System.ComponentModel
             return base.GetCreateInstanceSupported(context);
         }
 
-#if !NETSTANDARD10
         /// <summary>
         ///    <para>
         ///        Gets a collection of properties for the type of array specified by the value
@@ -173,7 +171,6 @@ namespace System.ComponentModel
 
             return base.GetProperties(context, value, attributes);
         }
-#endif // !NETSTANDARD10
 
         /// <summary>
         ///    <para>Gets a value indicating whether this object supports properties using the specified context.</para>

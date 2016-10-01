@@ -56,6 +56,10 @@ If both CodeView and Embedded Portable PDB entries are present then they shall r
 
 > Note: Including both entries enables a tool that does not recognize Embedded Portable PDB entry to locate debug information as long as it is also available in a file specified in CodeView entry. Such file can be created by extracting the embedded Portable PDB image to a separate file.
 
+UncompressedSize shall be greater than 0. Other values are reserved for future use, in case the format of the data changes.
+
+> Note: Some tools and APIs only work with the data blob and don't have access to the Debug Directory Entry itself to determine the version of the data format. To enable these tools to adopt new versions of the data blob the UncompressedSize highest bit shall be used to indicate version change and the new version shall be included in the data blob.
+
 The Major version specified in the entry indicates the version of the Portable PDB format. The Minor version indicates the version of the Embedded Portable PDB data format.
 
 The value of Stamp field in the entry shall be 0.

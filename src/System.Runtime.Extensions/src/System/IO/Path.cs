@@ -18,6 +18,9 @@ namespace System.IO
         // as the alternate separator on Windows, so same definition is used for both.
         public static readonly char AltDirectorySeparatorChar = '/';
 
+        [Obsolete("Please use GetInvalidPathChars or GetInvalidFileNameChars instead.")]
+        public static readonly char[] InvalidPathChars = GetInvalidPathChars();
+
         // Changes the extension of a file path. The path parameter
         // specifies a file path, and the extension parameter
         // specifies a file extension (with a leading period, such as
@@ -85,12 +88,7 @@ namespace System.IO
 
         public static char[] GetInvalidPathChars()
         {
-            return (char[])PathInternal.InvalidPathChars.Clone();
-        }
-
-        public static char[] GetInvalidFileNameChars()
-        {
-            return (char[])InvalidFileNameChars.Clone();
+            return PathInternal.GetInvalidPathChars();
         }
 
         // Returns the extension of the given path. The returned value includes the
@@ -212,6 +210,20 @@ namespace System.IO
             PathInternal.CheckInvalidPathChars(path3);
 
             return CombineNoChecks(path1, path2, path3);
+        }
+
+        public static string Combine(string path1, string path2, string path3, string path4)
+        {
+            if (path1 == null || path2 == null || path3 == null || path4 == null)
+                throw new ArgumentNullException((path1 == null) ? "path1" : (path2 == null) ? "path2" : (path3 == null) ? "path3" : "path4");
+            Contract.EndContractBlock();
+
+            PathInternal.CheckInvalidPathChars(path1);
+            PathInternal.CheckInvalidPathChars(path2);
+            PathInternal.CheckInvalidPathChars(path3);
+            PathInternal.CheckInvalidPathChars(path4);
+
+            return CombineNoChecks(path1, path2, path3, path4);
         }
 
         public static string Combine(params string[] paths)
@@ -345,6 +357,63 @@ namespace System.IO
             }
         }
 
+        private static string CombineNoChecks(string path1, string path2, string path3, string path4)
+        {
+            if (path1.Length == 0)
+                return CombineNoChecks(path2, path3, path4);
+            if (path2.Length == 0)
+                return CombineNoChecks(path1, path3, path4);
+            if (path3.Length == 0)
+                return CombineNoChecks(path1, path2, path4);
+            if (path4.Length == 0)
+                return CombineNoChecks(path1, path2, path3);
+
+            if (IsPathRooted(path4))
+                return path4;
+            if (IsPathRooted(path3))
+                return CombineNoChecks(path3, path4);
+            if (IsPathRooted(path2))
+                return CombineNoChecks(path2, path3, path4);
+
+            bool hasSep1 = PathInternal.IsDirectoryOrVolumeSeparator(path1[path1.Length - 1]);
+            bool hasSep2 = PathInternal.IsDirectoryOrVolumeSeparator(path2[path2.Length - 1]);
+            bool hasSep3 = PathInternal.IsDirectoryOrVolumeSeparator(path3[path3.Length - 1]);
+
+            if (hasSep1 && hasSep2 && hasSep3)
+            {
+                // Use string.Concat overload that takes four strings
+                return path1 + path2 + path3 + path4;
+            }
+            else
+            {
+                // string.Concat only has string-based overloads up to four arguments; after that requires allocating
+                // a params string[].  Instead, try to use a cached StringBuilder.
+                StringBuilder sb = StringBuilderCache.Acquire(path1.Length + path2.Length + path3.Length + path4.Length + 3);
+
+                sb.Append(path1);
+                if (!hasSep1)
+                {
+                    sb.Append(DirectorySeparatorChar);
+                }
+
+                sb.Append(path2);
+                if (!hasSep2)
+                {
+                    sb.Append(DirectorySeparatorChar);
+                }
+
+                sb.Append(path3);
+                if (!hasSep3)
+                {
+                    sb.Append(DirectorySeparatorChar);
+                }
+
+                sb.Append(path4);
+
+                return StringBuilderCache.GetStringAndRelease(sb);
+            }
+        }
+
         private static readonly char[] s_base32Char = {
                 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
                 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
@@ -401,6 +470,106 @@ namespace System.IO
             chars[9] = s_base32Char[(bytes[5] & 0x1F)];
             chars[10] = s_base32Char[(bytes[6] & 0x1F)];
             chars[11] = s_base32Char[(bytes[7] & 0x1F)];
+        }
+
+        /// <summary>
+        /// Create a relative path from one path to another. Paths will be resolved before calculating the difference.
+        /// Default path comparison for the active platform will be used (OrdinalIgnoreCase for Windows or Mac, Ordinal for Unix).
+        /// </summary>
+        /// <param name="relativeTo">The source path the output should be relative to. This path is always considered to be a directory.</param>
+        /// <param name="path">The destination path.</param>
+        /// <returns>The relative path or <paramref name="path"/> if the paths don't share the same root.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="relativeTo"/> or <paramref name="path"/> is <c>null</c> or an empty string.</exception>
+        public static string GetRelativePath(string relativeTo, string path)
+        {
+            return GetRelativePath(relativeTo, path, StringComparison);
+        }
+
+        private static string GetRelativePath(string relativeTo, string path, StringComparison comparisonType)
+        {
+            if (string.IsNullOrEmpty(relativeTo)) throw new ArgumentNullException(nameof(relativeTo));
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentNullException(nameof(path));
+            Debug.Assert(comparisonType == StringComparison.Ordinal || comparisonType == StringComparison.OrdinalIgnoreCase);
+
+            relativeTo = GetFullPath(relativeTo);
+            path = GetFullPath(path);
+
+            // Need to check if the roots are different- if they are we need to return the "to" path.
+            if (!PathInternal.AreRootsEqual(relativeTo, path, comparisonType))
+                return path;
+
+            int commonLength = PathInternal.GetCommonPathLength(relativeTo, path, ignoreCase: comparisonType == StringComparison.OrdinalIgnoreCase);
+
+            // If there is nothing in common they can't share the same root, return the "to" path as is.
+            if (commonLength == 0)
+                return path;
+
+            // Trailing separators aren't significant for comparison
+            int relativeToLength = relativeTo.Length;
+            if (PathInternal.EndsInDirectorySeparator(relativeTo))
+                relativeToLength--;
+
+            bool pathEndsInSeparator = PathInternal.EndsInDirectorySeparator(path);
+            int pathLength = path.Length;
+            if (pathEndsInSeparator)
+                pathLength--;
+
+            // If we have effectively the same path, return "."
+            if (relativeToLength == pathLength && commonLength >= relativeToLength) return ".";
+
+            // We have the same root, we need to calculate the difference now using the
+            // common Length and Segment count past the length.
+            //
+            // Some examples:
+            //
+            //  C:\Foo C:\Bar L3, S1 -> ..\Bar
+            //  C:\Foo C:\Foo\Bar L6, S0 -> Bar
+            //  C:\Foo\Bar C:\Bar\Bar L3, S2 -> ..\..\Bar\Bar
+            //  C:\Foo\Foo C:\Foo\Bar L7, S1 -> ..\Bar
+
+            StringBuilder sb = StringBuilderCache.Acquire(Math.Max(relativeTo.Length, path.Length));
+
+            // Add parent segments for segments past the common on the "from" path
+            if (commonLength < relativeToLength)
+            {
+                sb.Append(PathInternal.ParentDirectoryPrefix);
+
+                for (int i = commonLength; i < relativeToLength; i++)
+                {
+                    if (PathInternal.IsDirectorySeparator(relativeTo[i]))
+                    {
+                        sb.Append(PathInternal.ParentDirectoryPrefix);
+                    }
+                }
+            }
+            else if (PathInternal.IsDirectorySeparator(path[commonLength]))
+            {
+                // No parent segments and we need to eat the initial separator
+                //  (C:\Foo C:\Foo\Bar case)
+                commonLength++;
+            }
+
+            // Now add the rest of the "to" path, adding back the trailing separator
+            int count = pathLength - commonLength;
+            if (pathEndsInSeparator)
+                count++;
+
+            sb.Append(path, commonLength, count);
+            return StringBuilderCache.GetStringAndRelease(sb);
+        }
+
+        // StringComparison and IsCaseSensitive are also available in PathInternal.CaseSensitivity but we are
+        // too low in System.Runtime.Extensions to use it (no FileStream, etc.)
+
+        /// <summary>Returns a comparison that can be used to compare file and directory names for equality.</summary>
+        internal static StringComparison StringComparison
+        {
+            get
+            {
+                return IsCaseSensitive ?
+                    StringComparison.Ordinal :
+                    StringComparison.OrdinalIgnoreCase;
+            }
         }
     }
 }

@@ -18,7 +18,8 @@ namespace System.Net.Sockets.Tests
         {
             get
             {
-                return Capability.SocketsReuseUnicastPortSupport();
+                return Capability.SocketsReuseUnicastPortSupport().HasValue &&
+                    Capability.SocketsReuseUnicastPortSupport().Value;
             }
         }
 
@@ -26,11 +27,12 @@ namespace System.Net.Sockets.Tests
         {
             get
             {
-                return !Capability.SocketsReuseUnicastPortSupport();
+                return Capability.SocketsReuseUnicastPortSupport().HasValue &&
+                    !Capability.SocketsReuseUnicastPortSupport().Value;
             }
         }
 
-        [ActiveIssue(11088, PlatformID.Windows)]
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(NoSocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketGetOption_NoSocketsReuseUnicastPortSupport_Throws()
         {
@@ -40,6 +42,7 @@ namespace System.Net.Sockets.Tests
                 socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseUnicastPort));
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(SocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketGetOption_SocketsReuseUnicastPortSupport_OptionIsZero()
         {
@@ -49,7 +52,7 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, optionValue);
         }
 
-        [ActiveIssue(11088, PlatformID.Windows)]
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(NoSocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketSetOption_NoSocketsReuseUnicastPortSupport_Throws()
         {
@@ -59,6 +62,7 @@ namespace System.Net.Sockets.Tests
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseUnicastPort, 1));
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(SocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketSetOptionToZeroAndGetOption_SocketsReuseUnicastPortSupport_OptionIsZero()
         {
@@ -73,6 +77,7 @@ namespace System.Net.Sockets.Tests
         // The socket option 'ReuseUnicastPost' only works on Windows 10 systems. In addition, setting the option
         // is a no-op unless specialized network settings using PowerShell configuration are first applied to the
         // machine. This is currently difficult to test in the CI environment. So, this ests will be disabled for now
+        [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(4887)]
         public void ReuseUnicastPort_CreateSocketSetOptionToOneAndGetOption_SocketsReuseUnicastPortSupport_OptionIsOne()
         {
@@ -83,6 +88,7 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(1, optionValue);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void MulticastOption_CreateSocketSetGetOption_GroupAndInterfaceIndex_SetSucceeds_GetThrows()
         {
@@ -97,6 +103,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task MulticastInterface_Set_AnyInterface_Succeeds()
         {
@@ -104,6 +111,7 @@ namespace System.Net.Sockets.Tests
             await MulticastInterface_Set_Helper(0);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [PlatformSpecific(PlatformID.Windows)] // see comment below
         public async Task MulticastInterface_Set_Loopback_Succeeds()
@@ -128,7 +136,11 @@ namespace System.Net.Sockets.Tests
                 receiveSocket.ReceiveTimeout = 1000;
                 receiveSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(multicastAddress, interfaceIndex));
 
-                sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex));
+                // https://github.com/Microsoft/BashOnWindows/issues/990
+                if (!PlatformDetection.IsWindowsSubsystemForLinux)
+                {
+                    sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex));
+                }
 
                 var receiveBuffer = new byte[1024];
                 var receiveTask = receiveSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), SocketFlags.None);
@@ -145,6 +157,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void MulticastInterface_Set_InvalidIndex_Throws()
         {
@@ -156,7 +169,8 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Theory]
+        [OuterLoop] // TODO: Issue #11345
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // In WSL, the connect() call fails immediately.
         [InlineData(false)]
         [InlineData(true)]
         public void FailedConnect_GetSocketOption_SocketOptionNameError(bool simpleGet)
@@ -218,6 +232,66 @@ namespace System.Net.Sockets.Tests
 
             localPort = (receiveSocket.LocalEndPoint as IPEndPoint).Port;
             return receiveSocket;
+        }
+
+        [Theory]
+        [InlineData(null, null, null, true)]
+        [InlineData(null, null, false, true)]
+        [InlineData(null, false, false, true)]
+        [InlineData(null, true, false, true)]
+        [InlineData(null, true, true, false)]
+        [InlineData(true, null, null, true)]
+        [InlineData(true, null, false, true)]
+        [InlineData(true, null, true, true)]
+        [InlineData(true, false, null, true)]
+        [InlineData(true, false, false, true)]
+        [InlineData(true, false, true, true)]
+        public void ReuseAddress(bool? exclusiveAddressUse, bool? firstSocketReuseAddress, bool? secondSocketReuseAddress, bool expectFailure)
+        {
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                if (exclusiveAddressUse.HasValue)
+                {
+                    a.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, exclusiveAddressUse.Value);
+                }
+                if (firstSocketReuseAddress.HasValue)
+                {
+                    a.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, firstSocketReuseAddress.Value);
+                }
+
+                a.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+
+                using (Socket b = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                {
+                    if (secondSocketReuseAddress.HasValue)
+                    {
+                        b.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, secondSocketReuseAddress.Value);
+                    }
+
+                    if (expectFailure)
+                    {
+                        Assert.ThrowsAny<SocketException>(() => b.Bind(a.LocalEndPoint));
+                    }
+                    else
+                    {
+                        b.Bind(a.LocalEndPoint);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [PlatformSpecific(PlatformID.Windows)]
+        [InlineData(false, null, null, true)]
+        [InlineData(false, null, false, true)]
+        [InlineData(false, false, null, true)]
+        [InlineData(false, false, false, true)]
+        [InlineData(false, true, null, true)]
+        [InlineData(false, true, false, true)]
+        [InlineData(false, true, true, false)]
+        public void ReuseAddress_Windows(bool? exclusiveAddressUse, bool? firstSocketReuseAddress, bool? secondSocketReuseAddress, bool expectFailure)
+        {
+            ReuseAddress(exclusiveAddressUse, firstSocketReuseAddress, secondSocketReuseAddress, expectFailure);
         }
     }
 }

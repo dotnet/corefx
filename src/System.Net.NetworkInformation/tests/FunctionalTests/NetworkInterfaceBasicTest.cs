@@ -20,7 +20,7 @@ namespace System.Net.NetworkInformation.Tests
             _log = TestLogging.GetInstance();
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void BasicTest_GetNetworkInterfaces_AtLeastOne()
         {
             Assert.NotEqual<int>(0, NetworkInterface.GetAllNetworkInterfaces().Length);
@@ -71,7 +71,7 @@ namespace System.Net.NetworkInformation.Tests
                 try
                 {
                     _log.WriteLine("Speed: " + nic.Speed);
-                    Assert.InRange(nic.Speed, 0, long.MaxValue);
+                    Assert.InRange(nic.Speed, -1, long.MaxValue);
                 }
                 // We cannot guarantee this works on all devices.
                 catch (PlatformNotSupportedException pnse)
@@ -108,7 +108,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv4", "true")]
         public void BasicTest_StaticLoopbackIndex_MatchesLoopbackNetworkInterface()
         {
@@ -130,7 +130,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv4", "true")]
         public void BasicTest_StaticLoopbackIndex_ExceptionIfV4NotSupported()
         {
@@ -139,7 +139,7 @@ namespace System.Net.NetworkInformation.Tests
             _log.WriteLine("Loopback IPv4 index: " + NetworkInterface.LoopbackInterfaceIndex);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv6", "true")]
         public void BasicTest_StaticIPv6LoopbackIndex_MatchesLoopbackNetworkInterface()
         {
@@ -163,7 +163,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv6", "true")]
         public void BasicTest_StaticIPv6LoopbackIndex_ExceptionIfV6NotSupported()
         {
@@ -175,10 +175,34 @@ namespace System.Net.NetworkInformation.Tests
         [PlatformSpecific(PlatformID.Windows)]
         public void BasicTest_GetIPInterfaceStatistics_Success()
         {
-            // This API is not actually IPv4 specific.
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
             {
                 IPInterfaceStatistics stats = nic.GetIPStatistics();
+
+                _log.WriteLine("- Stats for : " + nic.Name);
+                _log.WriteLine("BytesReceived: " + stats.BytesReceived);
+                _log.WriteLine("BytesSent: " + stats.BytesSent);
+                _log.WriteLine("IncomingPacketsDiscarded: " + stats.IncomingPacketsDiscarded);
+                _log.WriteLine("IncomingPacketsWithErrors: " + stats.IncomingPacketsWithErrors);
+                _log.WriteLine("IncomingUnknownProtocolPackets: " + stats.IncomingUnknownProtocolPackets);
+                _log.WriteLine("NonUnicastPacketsReceived: " + stats.NonUnicastPacketsReceived);
+                _log.WriteLine("NonUnicastPacketsSent: " + stats.NonUnicastPacketsSent);
+                _log.WriteLine("OutgoingPacketsDiscarded: " + stats.OutgoingPacketsDiscarded);
+                _log.WriteLine("OutgoingPacketsWithErrors: " + stats.OutgoingPacketsWithErrors);
+                _log.WriteLine("OutputQueueLength: " + stats.OutputQueueLength);
+                _log.WriteLine("UnicastPacketsReceived: " + stats.UnicastPacketsReceived);
+                _log.WriteLine("UnicastPacketsSent: " + stats.UnicastPacketsSent);
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void BasicTest_GetIPv4InterfaceStatistics_Success()
+        {
+            // This API is not actually IPv4 specific.
+            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                IPv4InterfaceStatistics stats = nic.GetIPv4Statistics();
 
                 _log.WriteLine("- Stats for : " + nic.Name);
                 _log.WriteLine("BytesReceived: " + stats.BytesReceived);
@@ -200,7 +224,6 @@ namespace System.Net.NetworkInformation.Tests
         [PlatformSpecific(PlatformID.Linux)]
         public void BasicTest_GetIPInterfaceStatistics_Success_Linux()
         {
-            // This API is not actually IPv4 specific.
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
             {
                 IPInterfaceStatistics stats = nic.GetIPStatistics();
@@ -222,10 +245,34 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
+        [PlatformSpecific(PlatformID.Linux)]
+        public void BasicTest_GetIPv4InterfaceStatistics_Success_Linux()
+        {
+            // This API is not actually IPv4 specific.
+            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                IPv4InterfaceStatistics stats = nic.GetIPv4Statistics();
+
+                _log.WriteLine("- Stats for : " + nic.Name);
+                _log.WriteLine("BytesReceived: " + stats.BytesReceived);
+                _log.WriteLine("BytesSent: " + stats.BytesSent);
+                _log.WriteLine("IncomingPacketsDiscarded: " + stats.IncomingPacketsDiscarded);
+                _log.WriteLine("IncomingPacketsWithErrors: " + stats.IncomingPacketsWithErrors);
+                Assert.Throws<PlatformNotSupportedException>(() => stats.IncomingUnknownProtocolPackets);
+                _log.WriteLine("NonUnicastPacketsReceived: " + stats.NonUnicastPacketsReceived);
+                Assert.Throws<PlatformNotSupportedException>(() => stats.NonUnicastPacketsSent);
+                _log.WriteLine("OutgoingPacketsDiscarded: " + stats.OutgoingPacketsDiscarded);
+                _log.WriteLine("OutgoingPacketsWithErrors: " + stats.OutgoingPacketsWithErrors);
+                _log.WriteLine("OutputQueueLength: " + stats.OutputQueueLength);
+                _log.WriteLine("UnicastPacketsReceived: " + stats.UnicastPacketsReceived);
+                _log.WriteLine("UnicastPacketsSent: " + stats.UnicastPacketsSent);
+            }
+        }
+
+        [Fact]
         [PlatformSpecific(PlatformID.OSX)]
         public void BasicTest_GetIPInterfaceStatistics_Success_OSX()
         {
-            // This API is not actually IPv4 specific.
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
             {
                 IPInterfaceStatistics stats = nic.GetIPStatistics();
@@ -247,12 +294,37 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
+        [PlatformSpecific(PlatformID.OSX)]
+        public void BasicTest_GetIPv4InterfaceStatistics_Success_OSX()
+        {
+            // This API is not actually IPv4 specific.
+            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                IPv4InterfaceStatistics stats = nic.GetIPv4Statistics();
+
+                _log.WriteLine("- Stats for : " + nic.Name);
+                _log.WriteLine("BytesReceived: " + stats.BytesReceived);
+                _log.WriteLine("BytesSent: " + stats.BytesSent);
+                _log.WriteLine("IncomingPacketsDiscarded: " + stats.IncomingPacketsDiscarded);
+                _log.WriteLine("IncomingPacketsWithErrors: " + stats.IncomingPacketsWithErrors);
+                _log.WriteLine("IncomingUnknownProtocolPackets: " + stats.IncomingUnknownProtocolPackets);
+                _log.WriteLine("NonUnicastPacketsReceived: " + stats.NonUnicastPacketsReceived);
+                _log.WriteLine("NonUnicastPacketsSent: " + stats.NonUnicastPacketsSent);
+                Assert.Throws<PlatformNotSupportedException>(() => stats.OutgoingPacketsDiscarded);
+                _log.WriteLine("OutgoingPacketsWithErrors: " + stats.OutgoingPacketsWithErrors);
+                _log.WriteLine("OutputQueueLength: " + stats.OutputQueueLength);
+                _log.WriteLine("UnicastPacketsReceived: " + stats.UnicastPacketsReceived);
+                _log.WriteLine("UnicastPacketsSent: " + stats.UnicastPacketsSent);
+            }
+        }
+
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void BasicTest_GetIsNetworkAvailable_Success()
         {
             Assert.True(NetworkInterface.GetIsNetworkAvailable());
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [PlatformSpecific(~PlatformID.OSX)]
         [InlineData(false)]
         [InlineData(true)]

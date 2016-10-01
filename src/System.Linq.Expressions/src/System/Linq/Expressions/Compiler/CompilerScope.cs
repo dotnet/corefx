@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Dynamic.Utils;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions.Compiler
 {
@@ -168,10 +169,10 @@ namespace System.Linq.Expressions.Compiler
 
         internal void EmitVariableAccess(LambdaCompiler lc, ReadOnlyCollection<ParameterExpression> vars)
         {
-            if (NearestHoistedLocals != null)
+            if (NearestHoistedLocals != null && vars.Count > 0)
             {
                 // Find what array each variable is on & its index
-                var indexes = new List<long>(vars.Count);
+                var indexes = new ArrayBuilder<long>(vars.Count);
 
                 foreach (var variable in vars)
                 {
@@ -192,18 +193,15 @@ namespace System.Linq.Expressions.Compiler
                     indexes.Add((long)index);
                 }
 
-                if (indexes.Count > 0)
-                {
-                    EmitGet(NearestHoistedLocals.SelfVariable);
-                    lc.EmitConstantArray(indexes.ToArray());
-                    lc.IL.Emit(OpCodes.Call, typeof(RuntimeOps).GetMethod("CreateRuntimeVariables", new[] { typeof(object[]), typeof(long[]) }));
-                    return;
-                }
+                EmitGet(NearestHoistedLocals.SelfVariable);
+                lc.EmitConstantArray(indexes.ToArray());
+                lc.IL.Emit(OpCodes.Call, RuntimeOps_CreateRuntimeVariables_ObjectArray_Int64Array);
             }
-
-            // No visible variables
-            lc.IL.Emit(OpCodes.Call, typeof(RuntimeOps).GetMethod("CreateRuntimeVariables", Type.EmptyTypes));
-            return;
+            else
+            {
+                // No visible variables
+                lc.IL.Emit(OpCodes.Call, RuntimeOps_CreateRuntimeVariables);
+            }
         }
 
         #endregion
@@ -429,7 +427,7 @@ namespace System.Linq.Expressions.Compiler
         private void EmitClosureToVariable(LambdaCompiler lc, HoistedLocals locals)
         {
             lc.EmitClosureArgument();
-            lc.IL.Emit(OpCodes.Ldfld, typeof(Closure).GetField("Locals"));
+            lc.IL.Emit(OpCodes.Ldfld, Closure_Locals);
             AddLocal(lc, locals.SelfVariable);
             EmitSet(locals.SelfVariable);
         }

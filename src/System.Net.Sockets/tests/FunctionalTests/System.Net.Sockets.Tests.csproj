@@ -15,8 +15,11 @@
     <Compile Include="AcceptAsync.cs" />
     <Compile Include="AgnosticListenerTest.cs" />
     <Compile Include="ArgumentValidationTests.cs" />
+    <Compile Include="DisconnectTest.cs" />
+    <Compile Include="Handle.cs" />
     <Compile Include="ConnectAsync.cs" />
     <Compile Include="ConnectExTest.cs" />
+    <Compile Include="Close.cs" />
     <Compile Include="CreateSocketTests.cs" />
     <Compile Include="DisposedSocketTests.cs" />
     <Compile Include="DnsEndPointTest.cs" />
@@ -39,7 +42,6 @@
     <Compile Include="SocketOptionNameTest.cs" />
     <Compile Include="UdpClientTest.cs" />
     <Compile Include="UnixDomainSocketTest.cs" />
-    
     <!-- Common Sockets files -->
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
       <Link>SocketCommon\Configuration.cs</Link>
@@ -84,6 +86,9 @@
     <Compile Include="$(CommonTestPath)\System\Net\Capability.Sockets.cs">
       <Link>Common\System\Net\Capability.Sockets.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
+      <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\Sockets\SocketAPMExtensions.cs">
       <Link>Common\System\Net\Sockets\SocketAPMExtensions.cs</Link>
     </Compile>
@@ -92,10 +97,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\System.Net.NameResolution\pkg\System.Net.NameResolution.pkgproj">
-      <Project>{1714448C-211E-48C1-8B7E-4EE667D336A1}</Project>
-      <Name>System.Net.NameResolution</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\pkg\System.Net.Sockets.pkgproj">
       <Project>{43311AFB-D7C4-4E5A-B1DE-855407F90D1B}</Project>
       <Name>System.Net.Sockets</Name>

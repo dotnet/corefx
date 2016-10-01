@@ -5,7 +5,53 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
+namespace System.CodeDom.Compiler
+{
+    public class IndentedTextWriter : System.IO.TextWriter
+    {
+        public const string DefaultTabString = "    ";
+        public IndentedTextWriter(System.IO.TextWriter writer) { }
+        public IndentedTextWriter(System.IO.TextWriter writer, string tabString) { }
+        public override System.Text.Encoding Encoding { get { throw null; } }
+        public override string NewLine { get { throw null; } set { } }
+        public int Indent { get { throw null; } set { } }
+        public System.IO.TextWriter InnerWriter { get { throw null; } }
+        internal string TabString { get { throw null; } }
+        public override void Close() { }
+        public override void Flush() { }
+        protected virtual void OutputTabs() { }
+        public override void Write(string s) { }
+        public override void Write(bool value) { }
+        public override void Write(char value) { }
+        public override void Write(char[] buffer) { }
+        public override void Write(char[] buffer, int index, int count) { }
+        public override void Write(double value) { }
+        public override void Write(float value) { }
+        public override void Write(int value) { }
+        public override void Write(long value) { }
+        public override void Write(object value) { }
+        public override void Write(string format, object arg0) { }
+        public override void Write(string format, object arg0, object arg1) { }
+        public override void Write(string format, params object[] arg) { }
+        public void WriteLineNoTabs(string s) { }
+        public override void WriteLine(string s) { }
+        public override void WriteLine() { }
+        public override void WriteLine(bool value) { }
+        public override void WriteLine(char value) { }
+        public override void WriteLine(char[] buffer) { }
+        public override void WriteLine(char[] buffer, int index, int count) { }
+        public override void WriteLine(double value) { }
+        public override void WriteLine(float value) { }
+        public override void WriteLine(int value) { }
+        public override void WriteLine(long value) { }
+        public override void WriteLine(object value) { }
+        public override void WriteLine(string format, object arg0) { }
+        public override void WriteLine(string format, object arg0, object arg1) { }
+        public override void WriteLine(string format, params object[] arg) { }
+        [CLSCompliant(false)]
+        public override void WriteLine(uint value) { }
+    }
+}
 namespace System.IO
 {
     public partial class BinaryReader : System.IDisposable
@@ -14,6 +60,7 @@ namespace System.IO
         public BinaryReader(System.IO.Stream input, System.Text.Encoding encoding) { }
         public BinaryReader(System.IO.Stream input, System.Text.Encoding encoding, bool leaveOpen) { }
         public virtual System.IO.Stream BaseStream { get { return default(System.IO.Stream); } }
+        public virtual void Close() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         protected virtual void FillBuffer(int numBytes) { }
@@ -52,6 +99,7 @@ namespace System.IO
         public BinaryWriter(System.IO.Stream output, System.Text.Encoding encoding) { }
         public BinaryWriter(System.IO.Stream output, System.Text.Encoding encoding, bool leaveOpen) { }
         public virtual System.IO.Stream BaseStream { get { return default(System.IO.Stream); } }
+        public virtual void Close() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public virtual void Flush() { }
@@ -89,7 +137,11 @@ namespace System.IO
         public override bool CanWrite { get { return default(bool); } }
         public override long Length { get { return default(long); } }
         public override long Position { get { return default(long); } set { } }
+        public override System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
+        public override System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
         protected override void Dispose(bool disposing) { }
+        public override int EndRead(System.IAsyncResult asyncResult) { return 0; }
+        public override void EndWrite(System.IAsyncResult asyncResult) { return; }
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public override int Read(byte[] array, int offset, int count) { return default(int); }
@@ -128,10 +180,15 @@ namespace System.IO
         public virtual int Capacity { get { return default(int); } set { } }
         public override long Length { get { return default(long); } }
         public override long Position { get { return default(long); } set { } }
+        public override System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
+        public override System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { return default(System.IAsyncResult); }
         public override System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         protected override void Dispose(bool disposing) { }
+        public override int EndRead(System.IAsyncResult asyncResult) { return 0; }
+        public override void EndWrite(System.IAsyncResult asyncResult) { return; }
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public virtual byte[] GetBuffer() { return default(byte[]); }
         public override int Read(byte[] buffer, int offset, int count) { buffer = default(byte[]); return default(int); }
         public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
         public override int ReadByte() { return default(int); }
@@ -143,45 +200,6 @@ namespace System.IO
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public override void WriteByte(byte value) { }
         public virtual void WriteTo(System.IO.Stream stream) { }
-    }
-    public enum SeekOrigin
-    {
-        Begin = 0,
-        Current = 1,
-        End = 2,
-    }
-    public abstract partial class Stream : System.IDisposable
-    {
-        public static readonly System.IO.Stream Null;
-        protected Stream() { }
-        public abstract bool CanRead { get; }
-        public abstract bool CanSeek { get; }
-        public virtual bool CanTimeout { get { return default(bool); } }
-        public abstract bool CanWrite { get; }
-        public abstract long Length { get; }
-        public abstract long Position { get; set; }
-        public virtual int ReadTimeout { get { return default(int); } set { } }
-        public virtual int WriteTimeout { get { return default(int); } set { } }
-        public void CopyTo(System.IO.Stream destination) { }
-        public void CopyTo(System.IO.Stream destination, int bufferSize) { }
-        public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination) { return default(System.Threading.Tasks.Task); }
-        public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize) { return default(System.Threading.Tasks.Task); }
-        public virtual System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
-        public void Dispose() { }
-        protected virtual void Dispose(bool disposing) { }
-        public abstract void Flush();
-        public System.Threading.Tasks.Task FlushAsync() { return default(System.Threading.Tasks.Task); }
-        public virtual System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
-        public abstract int Read(byte[] buffer, int offset, int count);
-        public System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count) { return default(System.Threading.Tasks.Task<int>); }
-        public virtual System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
-        public virtual int ReadByte() { return default(int); }
-        public abstract long Seek(long offset, System.IO.SeekOrigin origin);
-        public abstract void SetLength(long value);
-        public abstract void Write(byte[] buffer, int offset, int count);
-        public System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count) { return default(System.Threading.Tasks.Task); }
-        public virtual System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
-        public virtual void WriteByte(byte value) { }
     }
     public partial class StreamReader : System.IO.TextReader
     {
@@ -196,6 +214,7 @@ namespace System.IO
         public virtual System.Text.Encoding CurrentEncoding { get { return default(System.Text.Encoding); } }
         public bool EndOfStream { get { return default(bool); } }
         public void DiscardBufferedData() { }
+        public override void Close() { }
         protected override void Dispose(bool disposing) { }
         public override int Peek() { return default(int); }
         public override int Read() { return default(int); }
@@ -218,6 +237,7 @@ namespace System.IO
         public virtual bool AutoFlush { get { return default(bool); } set { } }
         public virtual System.IO.Stream BaseStream { get { return default(System.IO.Stream); } }
         public override System.Text.Encoding Encoding { get { return default(System.Text.Encoding); } }
+        public override void Close() { }
         protected override void Dispose(bool disposing) { }
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync() { return default(System.Threading.Tasks.Task); }
@@ -236,6 +256,7 @@ namespace System.IO
     public partial class StringReader : System.IO.TextReader
     {
         public StringReader(string s) { }
+        public override void Close() { }
         protected override void Dispose(bool disposing) { }
         public override int Peek() { return default(int); }
         public override int Read() { return default(int); }
@@ -254,6 +275,7 @@ namespace System.IO
         public StringWriter(System.Text.StringBuilder sb) { }
         public StringWriter(System.Text.StringBuilder sb, System.IFormatProvider formatProvider) { }
         public override System.Text.Encoding Encoding { get { return default(System.Text.Encoding); } }
+        public override void Close() { }
         protected override void Dispose(bool disposing) { }
         public override System.Threading.Tasks.Task FlushAsync() { return default(System.Threading.Tasks.Task); }
         public virtual System.Text.StringBuilder GetStringBuilder() { return default(System.Text.StringBuilder); }
@@ -272,6 +294,7 @@ namespace System.IO
     {
         public static readonly System.IO.TextReader Null;
         protected TextReader() { }
+        public virtual void Close() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public virtual int Peek() { return default(int); }
@@ -294,6 +317,7 @@ namespace System.IO
         public abstract System.Text.Encoding Encoding { get; }
         public virtual System.IFormatProvider FormatProvider { get { return default(System.IFormatProvider); } }
         public virtual string NewLine { get { return default(string); } set { } }
+        public virtual void Close() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public virtual void Flush() { }

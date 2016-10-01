@@ -45,19 +45,33 @@ namespace System.IO
         internal const string UncExtendedPrefixToInsert = @"?\UNC\";
         internal const string UncExtendedPathPrefix = @"\\?\UNC\";
         internal const string DevicePathPrefix = @"\\.\";
+        internal const string ParentDirectoryPrefix = @"..\";
+
         internal const int MaxShortPath = 260;
         internal const int MaxShortDirectoryPath = 248;
         internal const int MaxLongPath = short.MaxValue;
+        // \\?\, \\.\, \??\
         internal const int DevicePrefixLength = 4;
+        // \\
+        internal const int UncPrefixLength = 2;
+        // \\?\UNC\, \\.\UNC\
+        internal const int UncExtendedPrefixLength = 8;
         internal static readonly int MaxComponentLength = 255;
 
-        internal static readonly char[] InvalidPathChars =
+        internal static char[] GetInvalidPathChars() => new char[]
         {
-            '\"', '<', '>', '|', '\0',
+            '|', '\0',
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
             (char)11, (char)12, (char)13, (char)14, (char)15, (char)16, (char)17, (char)18, (char)19, (char)20,
             (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
             (char)31
+        };
+
+        // [MS - FSA] 2.1.4.4 Algorithm for Determining if a FileName Is in an Expression
+        // https://msdn.microsoft.com/en-us/library/ff469270.aspx
+        private static readonly char[] s_wildcardChars =
+        {
+            '\"', '<', '>', '*', '?'
         };
 
         /// <summary>
@@ -74,30 +88,8 @@ namespace System.IO
         internal static bool IsPathTooLong(string fullPath)
         {
             // We'll never know precisely what will fail as paths get changed internally in Windows and
-            // may grow to exceed MaxExtendedPath. We'll only try to catch ones we know will absolutely
-            // fail.
-
-            if (fullPath.Length < MaxLongPath - UncExtendedPathPrefix.Length)
-            {
-                // We won't push it over MaxLongPath
-                return false;
-            }
-
-            // We need to check if we have a prefix to account for one being implicitly added.
-            if (IsDevice(fullPath))
-            {
-                // We won't add any length to make the path extended
-                return fullPath.Length >= MaxLongPath;
-            }
-
-            if (fullPath.StartsWith(UncPathPrefix, StringComparison.Ordinal))
-            {
-                // If we have a UNC we'll need to stick \\?\UNC in front
-                return fullPath.Length + UncExtendedPrefixToInsert.Length >= MaxLongPath;
-            }
-
-            // Otherwise we need to insert \\?\
-            return fullPath.Length + ExtendedPathPrefix.Length >= MaxLongPath;
+            // may grow to exceed MaxLongPath.
+            return fullPath.Length >= MaxLongPath;
         }
 
         /// <summary>
@@ -188,27 +180,39 @@ namespace System.IO
         /// NUL, or any ASCII char whose integer representation is in the range of 1 through 31).
         /// Does not check for wild card characters ? and *.
         /// </summary>
-        internal static bool HasIllegalCharacters(string path, bool checkAdditional = false)
+        internal static bool HasIllegalCharacters(string path)
         {
-            return path.IndexOfAny(InvalidPathChars) >= 0;
+            // This is equivalent to IndexOfAny(InvalidPathChars) >= 0,
+            // except faster since IndexOfAny grows slower as the input
+            // array grows larger.
+            // Since we know that some of the characters we're looking
+            // for are contiguous in the alphabet-- the path cannot contain
+            // characters 0-31-- we can optimize this for our specific use
+            // case and use simple comparison operations.
+
+            for (int i = 0; i < path.Length; i++)
+            {
+                char c = path[i];
+
+                if (c <= '\u001f' || c == '|')
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
-        /// Check for ? and *.
+        /// Check for known wildcard characters. '*' and '?' are the most common ones.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal unsafe static bool HasWildCardCharacters(string path)
         {
-            // Question mark is part of extended syntax so we have to skip if we're extended
-            int startIndex = PathInternal.IsExtended(path) ? ExtendedPathPrefix.Length : 0;
+            // Question mark is part of dos device syntax so we have to skip if we are
+            int startIndex = PathInternal.IsDevice(path) ? ExtendedPathPrefix.Length : 0;
 
-            char currentChar;
-            for (int i = startIndex; i < path.Length; i++)
-            {
-                currentChar = path[i];
-                if (currentChar == '*' || currentChar == '?') return true;
-            }
-            return false;
+            return path.IndexOfAny(s_wildcardChars, startIndex) >= 0;
         }
 
         /// <summary>
@@ -311,7 +315,10 @@ namespace System.IO
             // is the drive, colon, slash format- i.e. C:\
             return !((path.Length >= 3)
                 && (path[1] == Path.VolumeSeparatorChar)
-                && IsDirectorySeparator(path[2]));
+                && IsDirectorySeparator(path[2])
+                // To match old behavior we'll check the drive character for validity as the path is technically
+                // not qualified if you don't have a valid drive. "=:\" is the "=" file's default data stream.
+                && IsValidDriveChar(path[0]));
         }
 
         /// <summary>

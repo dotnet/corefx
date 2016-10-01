@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />
+    <Compile Include="DebugViewTests.cs" />
     <Compile Include="Array\ArrayAccessTests.cs" />
     <Compile Include="Array\ArrayArrayIndexTests.cs" />
     <Compile Include="Array\ArrayArrayLengthTests.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="BinaryOperators\Arithmetic\BinaryNullableMultiplyTests.cs" />
     <Compile Include="BinaryOperators\Arithmetic\BinaryNullablePowerTests.cs" />
     <Compile Include="BinaryOperators\Arithmetic\BinaryNullableSubtractTests.cs" />
+    <Compile Include="BinaryOperators\Arithmetic\BinaryPowerTests.cs" />
     <Compile Include="BinaryOperators\Arithmetic\BinarySubtractTests.cs" />
     <Compile Include="BinaryOperators\Assignment\Assign.cs" />
     <Compile Include="BinaryOperators\Assignment\OpAssign.cs" />
@@ -63,18 +65,8 @@
     <Compile Include="BinaryOperators\Bitwise\BinaryNullableOrTests.cs" />
     <Compile Include="BinaryOperators\Bitwise\BinaryOrTests.cs" />
     <Compile Include="BinaryOperators\Coalesce\BinaryCoalesceTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryEqualTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryGreaterThanOrEqualTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryGreaterThanTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryLessThanOrEqualTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryLessThanTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryNotEqualTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryNullableEqualTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryNullableGreaterThanOrEqualTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryNullableGreaterThanTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryNullableLessThanOrEqualTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryNullableLessThanTests.cs" />
-    <Compile Include="BinaryOperators\Comparison\BinaryNullableNotEqualTests.cs" />
+    <Compile Include="BinaryOperators\Comparison\EqualNotEqualTests.cs" />
+    <Compile Include="BinaryOperators\Comparison\CompareTests.cs" />
     <Compile Include="BinaryOperators\GeneralBinaryTests.cs" />
     <Compile Include="BinaryOperators\Logical\BinaryLogicalTests.cs" />
     <Compile Include="BinaryOperators\Logical\BinaryNullableLogicalTests.cs" />
@@ -116,6 +108,7 @@
     <Compile Include="Goto\MakeGoto.cs" />
     <Compile Include="Goto\Return.cs" />
     <Compile Include="HelperTypes.cs" />
+    <Compile Include="ILReader\ITypeFactory.cs" />
     <Compile Include="IndexExpression\IndexExpressionHelpers.cs" />
     <Compile Include="IndexExpression\IndexExpressionVisitorTests.cs" />
     <Compile Include="IndexExpression\SampleClassWithProperties.cs" />
@@ -176,6 +169,7 @@
     <Compile Include="New\NewWithTwoParametersTests.cs" />
     <Compile Include="New\TypeExtensions.cs" />
     <Compile Include="SequenceTests\SequenceTests.cs" />
+    <Compile Include="StackSpillerTests.cs" />
     <Compile Include="Switch\SwitchTests.cs" />
     <Compile Include="Ternary\TernaryArrayNullableTests.cs" />
     <Compile Include="Ternary\TernaryArrayTests.cs" />
@@ -207,6 +201,7 @@
     <Compile Include="Unary\UnaryIsFalseNullableTests.cs" />
     <Compile Include="Unary\UnaryIsFalseTests.cs" />
     <Compile Include="Unary\UnaryIsTrueNullableTests.cs" />
+    <Compile Include="Unary\UnaryQuoteTests.cs" />
     <Compile Include="Unary\UnaryUnboxTests.cs" />
     <Compile Include="Unary\UnaryIsTrueTests.cs" />
     <Compile Include="Unary\UnaryOnesComplementNullableTests.cs" />
@@ -219,6 +214,24 @@
     <Compile Include="Variables\RuntimeVariablesTests.cs" />
     <Compile Include="Variables\VariableTests.cs" />
     <Compile Include="Visitor\VisitorTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
+      <Link>Common\System\PlatformDetection.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(IsInterpreting)' != 'true' ">
+    <Compile Include="ILReader\DynamicMethodILProvider.cs" />
+    <Compile Include="ILReader\DynamicScopeTokenResolver.cs" />
+    <Compile Include="ILReader\FormatProvider.cs" />
+    <Compile Include="ILReader\ILInstruction.cs" />
+    <Compile Include="ILReader\ILProvider.cs" />
+    <Compile Include="ILReader\ILReader.cs" />
+    <Compile Include="ILReader\ILReaderFactory.cs" />
+    <Compile Include="ILReader\ReadableILStringVisitor.cs" />
+    <Compile Include="ILReader\TokenResolver.cs" />
+    <Compile Include="ILReader\ILPrinter.cs" />
+    <Compile Include="ILReader\PrivateReflectionHelpers.cs" />
+    <Compile Include="ILReader\LocalsSignatureParser.cs" />
+    <Compile Include="ILReader\SigParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\System.Linq.Expressions.csproj">

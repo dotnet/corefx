@@ -9,7 +9,7 @@
     <AssemblyName>System.Runtime.Extensions.Performance.Tests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IncludePerformanceTests>true</IncludePerformanceTests>
-    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
+    <NugetTargetMoniker Condition="'$(NugetTargetMoniker)'==''">.NETStandard,Version=v1.5</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -31,8 +31,6 @@
       <Name>System.Runtime.Extensions.CoreCLR</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\System.Private.Uri\pkg\System.Private.Uri.pkgproj">
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\System.Diagnostics.Debug\pkg\System.Diagnostics.Debug.pkgproj">
     </ProjectReference>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>

@@ -10,6 +10,22 @@ using Xunit;
 public class PathInternal_Windows_Tests
 {
     [Theory
+        InlineData(@"\\?\", false)
+        InlineData(@"\\?\?", true)
+        InlineData(@"//?/", false)
+        InlineData(@"//?/*", true)
+        InlineData(@"\\.\>", true)
+        InlineData(@"C:\", false)
+        InlineData(@"C:\<", true)
+        InlineData("\"MyFile\"", true)
+        ]
+    [PlatformSpecific(PlatformID.Windows)]
+    public void HasWildcardCharacters(string path, bool expected)
+    {
+        Assert.Equal(expected, PathInternal.HasWildCardCharacters(path));
+    }
+
+    [Theory
         InlineData(PathInternal.ExtendedPathPrefix, PathInternal.ExtendedPathPrefix)
         InlineData(@"Foo", @"Foo")
         InlineData(@"C:\Foo", @"\\?\C:\Foo")
@@ -176,4 +192,19 @@ public class PathInternal_Windows_Tests
     {
         Assert.Equal(expected, PathInternal.FindFileNameIndex(path));
     }
+
+    [Theory,
+        InlineData(@"", @"", StringComparison.OrdinalIgnoreCase, true)
+        InlineData(@"", @"", StringComparison.Ordinal, true)
+        InlineData(@"A", @"a", StringComparison.OrdinalIgnoreCase, true)
+        InlineData(@"A", @"a", StringComparison.Ordinal, true)
+        InlineData(@"C:\", @"c:\", StringComparison.OrdinalIgnoreCase, true)
+        InlineData(@"C:\", @"c:\", StringComparison.Ordinal, false)
+        ]
+    [PlatformSpecific(PlatformID.Windows)]
+    public void AreRootsEqual(string first, string second, StringComparison comparisonType, bool expected)
+    {
+        Assert.Equal(expected, PathInternal.AreRootsEqual(first, second, comparisonType));
+    }
+
 }

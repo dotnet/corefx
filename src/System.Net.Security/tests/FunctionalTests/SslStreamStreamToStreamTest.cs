@@ -7,16 +7,20 @@ using System.Net.Test.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
 
 namespace System.Net.Security.Tests
 {
-    public class SslStreamStreamToStreamTest
+    public abstract class SslStreamStreamToStreamTest
     {
         private readonly byte[] _sampleMsg = Encoding.UTF8.GetBytes("Sample Test Message");
 
+        protected abstract bool DoHandshake(SslStream clientSslStream, SslStream serverSslStream);
+
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Authentication_Success()
         {
@@ -28,15 +32,11 @@ namespace System.Net.Security.Tests
             using (var server = new SslStream(serverStream))
             using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
             {
-                Task[] auth = new Task[2];
-                auth[0] = client.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
-                auth[1] = server.AuthenticateAsServerAsync(certificate);
-
-                bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
-                Assert.True(finished, "Handshake completed in the allotted time");
+                Assert.True(DoHandshake(client, server), "Handshake completed in the allotted time");
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Authentication_IncorrectServerName_Fail()
         {
@@ -61,6 +61,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
@@ -90,6 +91,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -138,6 +140,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Successive_ClientWrite_Async_Success()
         {
@@ -169,6 +172,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SslStream_StreamToStream_Write_ReadByte_Success()
         {
@@ -222,18 +226,49 @@ namespace System.Net.Security.Tests
                 return false;
             }
         }
+    }
 
-        private bool DoHandshake(SslStream clientSslStream, SslStream serverSslStream)
+    public sealed class SslStreamStreamToStreamTest_Async : SslStreamStreamToStreamTest
+    {
+        protected override bool DoHandshake(SslStream clientSslStream, SslStream serverSslStream)
         {
             using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
             {
-                Task[] auth = new Task[2];
+                Task t1 = clientSslStream.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
+                Task t2 = serverSslStream.AuthenticateAsServerAsync(certificate);
+                return Task.WaitAll(new[] { t1, t2 }, TestConfiguration.PassingTestTimeoutMilliseconds);
+            }
+        }
+    }
 
-                auth[0] = clientSslStream.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
-                auth[1] = serverSslStream.AuthenticateAsServerAsync(certificate);
+    public sealed class SslStreamStreamToStreamTest_BeginEnd : SslStreamStreamToStreamTest
+    {
+        protected override bool DoHandshake(SslStream clientSslStream, SslStream serverSslStream)
+        {
+            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+            {
+                IAsyncResult a1 = clientSslStream.BeginAuthenticateAsClient(certificate.GetNameInfo(X509NameType.SimpleName, false), null, null);
+                IAsyncResult a2 = serverSslStream.BeginAuthenticateAsServer(certificate, null, null);
+                if (WaitHandle.WaitAll(new[] { a1.AsyncWaitHandle, a2.AsyncWaitHandle }, TestConfiguration.PassingTestTimeoutMilliseconds))
+                {
+                    clientSslStream.EndAuthenticateAsClient(a1);
+                    serverSslStream.EndAuthenticateAsServer(a2);
+                    return true;
+                }
+                return false;
+            }
+        }
+    }
 
-                bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
-                return finished;
+    public sealed class SslStreamStreamToStreamTest_Sync : SslStreamStreamToStreamTest
+    {
+        protected override bool DoHandshake(SslStream clientSslStream, SslStream serverSslStream)
+        {
+            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+            {
+                Task t1 = Task.Run(() => clientSslStream.AuthenticateAsClient(certificate.GetNameInfo(X509NameType.SimpleName, false)));
+                Task t2 = Task.Run(() => serverSslStream.AuthenticateAsServer(certificate));
+                return Task.WaitAll(new[] { t1, t2 }, TestConfiguration.PassingTestTimeoutMilliseconds);
             }
         }
     }

@@ -19,10 +19,6 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomAttributeBuilder\CustomAttributeBuilderCtor1.cs" />
-    <Compile Include="CustomAttributeBuilder\CustomAttributeBuilderCtor2.cs" />
-    <Compile Include="CustomAttributeBuilder\CustomAttributeBuilderCtor3.cs" />
-    <Compile Include="CustomAttributeBuilder\CustomAttributeBuilderCtor4.cs" />
     <Compile Include="ILGenerator\DeclareLocalTests.cs" />
     <Compile Include="ILGenerator\DefineLabelTests.cs" />
     <Compile Include="ILGenerator\Emit1Tests.cs" />
@@ -48,6 +44,7 @@
     <Compile Include="SignatureHelper\SignatureHelperGetPropertySigHelper.cs" />
     <Compile Include="SignatureHelper\SignatureHelperGetSignature.cs" />
     <Compile Include="SignatureHelper\SignatureHelperToString.cs" />
+    <Compile Include="CustomAttributeBuilderTests.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

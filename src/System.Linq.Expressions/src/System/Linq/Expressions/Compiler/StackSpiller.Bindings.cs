@@ -47,6 +47,16 @@ namespace System.Linq.Expressions.Compiler
                 }
                 throw Error.UnhandledBinding();
             }
+
+            protected void RequireNoValueProperty()
+            {
+                var property = _binding.Member as PropertyInfo;
+
+                if (property != null && property.PropertyType.GetTypeInfo().IsValueType)
+                {
+                    throw Error.CannotAutoInitializeValueTypeMemberThroughProperty(property);
+                }
+            }
         }
 
         private class MemberMemberBindingRewriter : BindingRewriter
@@ -86,10 +96,7 @@ namespace System.Linq.Expressions.Compiler
 
             internal override Expression AsExpression(Expression target)
             {
-                if (target.Type.GetTypeInfo().IsValueType && _binding.Member is System.Reflection.PropertyInfo)
-                {
-                    throw Error.CannotAutoInitializeValueTypeMemberThroughProperty(_binding.Member);
-                }
+                RequireNoValueProperty();
                 RequireNotRefInstance(target);
 
                 MemberExpression member = Expression.MakeMemberAccess(target, _binding.Member);
@@ -114,7 +121,7 @@ namespace System.Linq.Expressions.Compiler
                 }
                 else
                 {
-                    block[_bindings.Count + 1] = Expression.Empty();
+                    block[_bindings.Count + 1] = Utils.Empty();
                 }
                 return MakeBlock(block);
             }
@@ -170,10 +177,7 @@ namespace System.Linq.Expressions.Compiler
 
             internal override Expression AsExpression(Expression target)
             {
-                if (target.Type.GetTypeInfo().IsValueType && _binding.Member is System.Reflection.PropertyInfo)
-                {
-                    throw Error.CannotAutoInitializeValueTypeElementThroughProperty(_binding.Member);
-                }
+                RequireNoValueProperty();
                 RequireNotRefInstance(target);
 
                 MemberExpression member = Expression.MakeMemberAccess(target, _binding.Member);
@@ -199,7 +203,7 @@ namespace System.Linq.Expressions.Compiler
                 }
                 else
                 {
-                    block[_inits.Count + 1] = Expression.Empty();
+                    block[_inits.Count + 1] = Utils.Empty();
                 }
                 return MakeBlock(block);
             }
@@ -239,7 +243,7 @@ namespace System.Linq.Expressions.Compiler
                 return MakeBlock(
                     Expression.Assign(memberTemp, _rhs),
                     Expression.Assign(member, memberTemp),
-                    Expression.Empty()
+                    Utils.Empty()
                 );
             }
         }

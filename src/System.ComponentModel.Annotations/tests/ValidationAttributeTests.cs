@@ -4,7 +4,7 @@
 
 using Xunit;
 
-namespace System.ComponentModel.DataAnnotations
+namespace System.ComponentModel.DataAnnotations.Tests
 {
     public class ValidationAttributeTests
     {
@@ -78,8 +78,7 @@ namespace System.ComponentModel.DataAnnotations
         public static void TestNoThrowIfOverrideIsValid()
         {
             var attribute = new ValidationAttributeOverrideOneArgIsValid();
-            AssertEx.DoesNotThrow(
-                () => attribute.Validate("Valid Value", "Name to put in error message does not matter - no error"));
+            attribute.Validate("Valid Value", "Name to put in error message does not matter - no error");
         }
 
         // Validate_object_string_successful_if_derived_ValidationAttribute_overrides_Two_Args_IsValid_method
@@ -87,8 +86,7 @@ namespace System.ComponentModel.DataAnnotations
         public static void TestNoThrowIfOverrideIsValid01()
         {
             var attribute = new ValidationAttributeOverrideTwoArgsIsValid();
-            AssertEx.DoesNotThrow(
-                () => attribute.Validate("Valid Value", "Name to put in error message does not matter - no error"));
+            attribute.Validate("Valid Value", "Name to put in error message does not matter - no error");
         }
 
         // Validate_object_ValidationContext_successful_if_derived_ValidationAttribute_overrides_One_Arg_IsValid_method
@@ -96,7 +94,7 @@ namespace System.ComponentModel.DataAnnotations
         public static void TestNoThrowIfOverrideIsValid02()
         {
             var attribute = new ValidationAttributeOverrideOneArgIsValid();
-            AssertEx.DoesNotThrow(() => attribute.Validate("Valid Value", s_testValidationContext));
+            attribute.Validate("Valid Value", s_testValidationContext);
         }
 
         // Validate_object_ValidationContext_successful_if_derived_ValidationAttribute_overrides_Two_Args_IsValid_method()
@@ -104,7 +102,7 @@ namespace System.ComponentModel.DataAnnotations
         public static void TestNoThrowIfOverrideIsValid03()
         {
             var attribute = new ValidationAttributeOverrideTwoArgsIsValid();
-            AssertEx.DoesNotThrow(() => attribute.Validate("Valid Value", s_testValidationContext));
+            attribute.Validate("Valid Value", s_testValidationContext);
         }
 
         // Validate_object_string_preferentially_uses_One_Arg_IsValid_method_to_validate
@@ -112,8 +110,7 @@ namespace System.ComponentModel.DataAnnotations
         public static void TestNoThrowIfOverrideIsValid04()
         {
             var attribute = new ValidationAttributeOverrideBothIsValids();
-            AssertEx.DoesNotThrow(
-                () => attribute.Validate("Valid 1-Arg Value", "Name to put in error message does not matter - no error"));
+            attribute.Validate("Valid 1-Arg Value", "Name to put in error message does not matter - no error");
             Assert.Throws<ValidationException>(
                 () => attribute.Validate("Valid 2-Args Value", "Name to put in error message does not matter - no error"));
         }
@@ -124,7 +121,7 @@ namespace System.ComponentModel.DataAnnotations
         {
             var attribute = new ValidationAttributeOverrideBothIsValids();
             Assert.Throws<ValidationException>(() => attribute.Validate("Valid 1-Arg Value", s_testValidationContext));
-            AssertEx.DoesNotThrow(() => attribute.Validate("Valid 2-Args Value", s_testValidationContext));
+            attribute.Validate("Valid 2-Args Value", s_testValidationContext);
         }
 
         // FormatErrorMessage_throws_InvalidOperationException_if_ErrorMessage_and_ErrorMessageResourceName_are_both_null_or_empty
@@ -289,12 +286,19 @@ namespace System.ComponentModel.DataAnnotations
             Assert.Throws<ArgumentNullException>(() => attribute.GetValidationResult("Does not matter", validationContext: null));
         }
 
+        [Fact]
+        public static void Validate_NullValidationContext_ThrowsArgumentNullException()
+        {
+            ValidationAttributeOverrideBothIsValids attribute = new ValidationAttributeOverrideBothIsValids();
+            Assert.Throws<ArgumentNullException>("validationContext", () => attribute.Validate("Any", validationContext: null));
+        }
+
         // GetValidationResult_successful_if_One_Arg_IsValid_validates_successfully
         [Fact]
         public static void TestOneArgsIsValidValidatesSuccessfully()
         {
             var attribute = new ValidationAttributeOverrideOneArgIsValid();
-            AssertEx.DoesNotThrow(() => attribute.GetValidationResult("Valid Value", s_testValidationContext));
+            attribute.GetValidationResult("Valid Value", s_testValidationContext);
         }
 
         // GetValidationResult_successful_if_Two_Args_IsValid_validates_successfully
@@ -302,7 +306,7 @@ namespace System.ComponentModel.DataAnnotations
         public static void TestTwoArgsIsValidValidatesSuccessfully()
         {
             var attribute = new ValidationAttributeOverrideTwoArgsIsValid();
-            AssertEx.DoesNotThrow(() => attribute.GetValidationResult("Valid Value", s_testValidationContext));
+            attribute.GetValidationResult("Valid Value", s_testValidationContext);
         }
 
         // GetValidationResult_returns_ValidationResult_with_preset_error_message_if_One_Arg_IsValid_fails_to_validate
@@ -329,6 +333,22 @@ namespace System.ComponentModel.DataAnnotations
             var validationResult = attribute.GetValidationResult(toBeTested, validationContext);
             Assert.NotNull(validationResult); // validationResult == null would be success
                                               // cannot check error message - not defined on ret builds
+        }
+
+        [Fact]
+        public void GetValidationResult_NullErrorMessage_ProvidesErrorMessage()
+        {
+            ValidationAttributeAlwaysInvalidNullErrorMessage attribute = new ValidationAttributeAlwaysInvalidNullErrorMessage();
+            ValidationResult validationResult = attribute.GetValidationResult("abc", new ValidationContext(new object()));
+            Assert.NotEmpty(validationResult.ErrorMessage);
+        }
+
+        [Fact]
+        public void GetValidationResult_EmptyErrorMessage_ProvidesErrorMessage()
+        {
+            ValidationAttributeAlwaysInvalidEmptyErrorMessage attribute = new ValidationAttributeAlwaysInvalidEmptyErrorMessage();
+            ValidationResult validationResult = attribute.GetValidationResult("abc", new ValidationContext(new object()));
+            Assert.NotEmpty(validationResult.ErrorMessage);
         }
 
         public class ValidationAttributeNoOverrides : ValidationAttribute
@@ -382,6 +402,16 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
+        public class ValidationAttributeAlwaysInvalidNullErrorMessage : ValidationAttribute
+        {
+            protected override ValidationResult IsValid(object value, ValidationContext validationContext) => new ValidationResult(null);
+        }
+
+        public class ValidationAttributeAlwaysInvalidEmptyErrorMessage : ValidationAttribute
+        {
+            protected override ValidationResult IsValid(object value, ValidationContext validationContext) => new ValidationResult(string.Empty);
+        }
+
         public class ToBeTested
         {
             public string PropertyToBeTested
@@ -391,11 +421,16 @@ namespace System.ComponentModel.DataAnnotations
         }
     }
 
-    internal static class ErrorMessageResources
+    internal class ErrorMessageResources
     {
         internal static string InternalErrorMessageTestProperty
         {
             get { return "Error Message from ErrorMessageResources.InternalErrorMessageTestProperty"; }
         }
+
+        internal string InstanceProperty => "";
+        private static string PrivateProperty => "";
+        internal string SetOnlyProperty { set { } }
+        internal static bool BoolProperty => false;
     }
 }

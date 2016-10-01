@@ -3,13 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace System.Collections
 {
     // A vector of bits.  Use this to store bits efficiently, without having to do bit 
     // shifting yourself.
     [System.Runtime.InteropServices.ComVisible(true)]
+    [Serializable]
     public sealed class BitArray : ICollection
     {
         private BitArray()
@@ -90,8 +91,8 @@ namespace System.Collections
                 j += 4;
             }
 
-            Contract.Assert(bytes.Length - j >= 0, "BitArray byteLength problem");
-            Contract.Assert(bytes.Length - j < 4, "BitArray byteLength problem #2");
+            Debug.Assert(bytes.Length - j >= 0, "BitArray byteLength problem");
+            Debug.Assert(bytes.Length - j < 4, "BitArray byteLength problem #2");
 
             switch (bytes.Length - j)
             {
@@ -381,8 +382,7 @@ namespace System.Collections
             }
         }
 
-        // ICollection implementation
-        void ICollection.CopyTo(Array array, int index)
+        public void CopyTo(Array array, int index)
         {
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
@@ -422,7 +422,7 @@ namespace System.Collections
                 throw new ArgumentException(SR.Arg_BitArrayTypeUnsupported, nameof(array));
         }
 
-        int ICollection.Count
+        public int Count
         {
             get
             {
@@ -432,7 +432,7 @@ namespace System.Collections
             }
         }
 
-        object ICollection.SyncRoot
+        public Object SyncRoot
         {
             get
             {
@@ -444,12 +444,25 @@ namespace System.Collections
             }
         }
 
-        bool ICollection.IsSynchronized
+        public bool IsSynchronized
         {
             get
             {
                 return false;
             }
+        }
+
+        public bool IsReadOnly
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public object Clone()
+        {
+            return new BitArray(this);
         }
 
         public IEnumerator GetEnumerator()
@@ -479,10 +492,11 @@ namespace System.Collections
         /// <returns></returns>
         private static int GetArrayLength(int n, int div)
         {
-            Contract.Assert(div > 0, "GetArrayLength: div arg must be greater than 0");
+            Debug.Assert(div > 0, "GetArrayLength: div arg must be greater than 0");
             return n > 0 ? (((n - 1) / div) + 1) : 0;
         }
 
+        [Serializable]
         private class BitArrayEnumeratorSimple : IEnumerator
         {
             private BitArray bitarray;
@@ -540,6 +554,7 @@ namespace System.Collections
         private int[] m_array;
         private int m_length;
         private int _version;
+        [NonSerialized]
         private object _syncRoot;
 
         private const int _ShrinkThreshold = 256;
