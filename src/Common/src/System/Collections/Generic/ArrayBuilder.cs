@@ -74,7 +74,7 @@ namespace System.Collections.Generic
                     EnsureCapacity(endCount);
                 }
 
-                Debug.Assert(Capacity > 0);
+                Debug.Assert(Capacity > 0); // At least 1 item is being added
                 Array.Copy(items, 0, _array, _count, items.Length);
                 _count = endCount;
             }
