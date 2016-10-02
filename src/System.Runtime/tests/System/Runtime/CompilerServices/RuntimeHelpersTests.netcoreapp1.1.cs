@@ -15,8 +15,13 @@ namespace System.Runtime.CompilerServices.Tests
         }
 
         [Fact]
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void TryEnsureSufficientExecutionStack_NoSpaceAvailable_ReturnsFalse()
+        {
+            FillStack(depth: 0);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void FillStack(int depth)
         {
             // This test will fail with a StackOverflowException if TryEnsureSufficientExecutionStack() doesn't
             // return false. No exception is thrown and the test finishes when TryEnsureSufficientExecutionStack()
@@ -26,7 +31,10 @@ namespace System.Runtime.CompilerServices.Tests
                 Assert.Throws<InsufficientExecutionStackException>(() => RuntimeHelpers.EnsureSufficientExecutionStack());
                 return;
             }
-            TryEnsureSufficientExecutionStack_NoSpaceAvailable_ReturnsFalse();   
+            else if (depth < 2048)
+            {
+                FillStack(depth + 1);
+            } 
         }
     }
 }
