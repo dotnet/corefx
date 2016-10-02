@@ -869,7 +869,7 @@ namespace System
                     }
                     else
                     {
-                        LowLevelList<string> pathSegments = new LowLevelList<string>();
+                        var pathSegments = ValueList.Create<string>();
                         int current = 0;
                         while (current < path.Length)
                         {
@@ -881,7 +881,7 @@ namespace System
                             pathSegments.Add(path.Substring(current, (next - current) + 1));
                             current = next + 1;
                         }
-                        segments = pathSegments.ToArray();
+                        segments = pathSegments.ExtractOrToArray();
                     }
                 }
                 return segments;

@@ -30,8 +30,8 @@
     <Compile Include="$(CommonPath)\System\Collections\Generic\LowLevelDictionary.cs">
       <Link>Common\System\Collections\Generic\LowLevelDictionary.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\LowLevelList.cs">
-      <Link>Common\System\Collections\Generic\LowLevelList.cs</Link>
+    <Compile Include="$(CommonPath)\System\Collections\Generic\ValueList.cs">
+      <Link>Common\System\Collections\Generic\ValueList.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\StringNormalizationExtensions.cs">
       <Link>Common\System\StringNormalizationExtensions.cs</Link>
