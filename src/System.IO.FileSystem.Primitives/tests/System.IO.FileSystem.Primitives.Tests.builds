@@ -8,7 +8,7 @@
       <TestTFMs>netcoreapp1.1</TestTFMs>
     </Project>
     <Project Include="System.IO.FileSystem.Primitives.Tests.csproj">
-      <TestTFMs>net463</TestTFMs>
+      <TestTFMs>netcore50;net463</TestTFMs>
       <OSGroup>Windows_NT</OSGroup>
     </Project>
   </ItemGroup>
