@@ -67,15 +67,17 @@ namespace System.Collections.Generic
             _array[_count++] = item;
         }
 
-        public T[] Extract(out int count)
+        public T[] AsArray() => _array;
+
+        public T[] AsArray(out int count)
         {
             count = Count;
             return _array;
         }
 
-        public T[] ExtractOrToArray()
+        public T[] AsOrToArray()
         {
-            return Count == Capacity ? _array : ToArray();
+            return Count == Capacity ? AsArray() : ToArray();
         }
 
         public Enumerator GetEnumerator()
@@ -117,6 +119,8 @@ namespace System.Collections.Generic
                 _count = count;
                 _index = -1;
             }
+
+            public void Dispose() { }
 
             public bool MoveNext()
             {
