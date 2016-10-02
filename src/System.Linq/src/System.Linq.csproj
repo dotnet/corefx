@@ -16,11 +16,11 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)' == ''">
+    <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
+      <Link>System\Collections\Generic\ArrayBuilder.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
       <Link>System\Collections\Generic\EnumerableHelpers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\ValueList.cs">
-      <Link>System\Collections\Generic\ValueList.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs">
       <Link>System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs</Link>

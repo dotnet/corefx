@@ -132,7 +132,7 @@ namespace System.Collections.Generic
             // the backing store will be Array.Empty<T>() if you do not pass in a
             // capacity. It only starts allocating arrays when we add the first item.
 
-            var buffers = ValueList.Create<T[]>(); // list of previous buffers
+            var buffers = new ArrayBuilder<T[]>(); // list of previous buffers
             var current = new T[first.Length]; // the current buffer we're reading the sequence into
             int read = first.Length; // number of items we've read so far, updated every time we exhaust a buffer
 

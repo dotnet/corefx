@@ -6,38 +6,31 @@ using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
-    internal static class ValueList
-    {
-        public static ValueList<T> Create<T>()
-        {
-            return new ValueList<T> { _array = Array.Empty<T>() };
-        }
-
-        public static ValueList<T> Create<T>(int capacity)
-        {
-            Debug.Assert(capacity >= 0);
-
-            T[] array = capacity == 0 ? Array.Empty<T>() : new T[capacity];
-            return new ValueList<T> { _array = array };
-        }
-    }
-
-    internal struct ValueList<T>
+    internal struct ArrayBuilder<T>
     {
         private const int DefaultCapacity = 4;
 
-        // Not possible since currently, this is being used by System.Private.Uri.
-        // [EditorBrowsable(EditorBrowsableState.Never)]
-        internal T[] _array;
-        private int _count;
+        private T[] _array; // Starts out null, initialized on first Add.
+        private int _count; // Number of items into _array we're using.
 
         public int Capacity
         {
-            get { return _array.Length; }
+            get { return _array?.Length ?? 0; }
             set
             {
+                // Although it has almost exactly what we're looking for,
+                // Array.Resize is not used here since it unnecessarily copies
+                // the indices between Count and Capacity, which will all be
+                // default-initialized.
+
                 Debug.Assert(value > Capacity);
-                Array.Resize(ref _array, value);
+
+                var next = new T[value];
+                if (_array != null)
+                {
+                    Array.Copy(_array, 0, next, 0, _count);
+                }
+                _array = next;
             }
         }
 
@@ -59,7 +52,7 @@ namespace System.Collections.Generic
 
         public void Add(T item)
         {
-            if (_count == _array.Length)
+            if (_count == Capacity)
             {
                 EnsureCapacity(_count + 1);
             }
@@ -67,17 +60,37 @@ namespace System.Collections.Generic
             _array[_count++] = item;
         }
 
-        public T[] AsArray() => _array;
+        public void AddRange(T[] items)
+        {
+            Debug.Assert(items != null);
+
+            if (items.Length != 0)
+            {
+                int endCount = _count + items.Length;
+                Debug.Assert(endCount > 0); // Check for overflow
+
+                if (endCount > Capacity)
+                {
+                    EnsureCapacity(endCount);
+                }
+
+                Debug.Assert(Capacity > 0);
+                Array.Copy(items, 0, _array, _count, items.Length);
+                _count = endCount;
+            }
+        }
+
+        public T[] AsArray() => _array ?? Array.Empty<T>();
 
         public T[] AsArray(out int count)
         {
-            count = Count;
-            return _array;
+            count = _count;
+            return AsArray();
         }
 
         public T[] AsOrToArray()
         {
-            return Count == Capacity ? AsArray() : ToArray();
+            return _count == Capacity ? AsArray() : ToArray();
         }
 
         public Enumerator GetEnumerator()
@@ -87,9 +100,21 @@ namespace System.Collections.Generic
 
         public T[] ToArray()
         {
-            var result = new T[Count];
-            Array.Copy(_array, 0, result, 0, Count);
+            if (_count == 0)
+            {
+                return Array.Empty<T>();
+            }
+
+            var result = new T[_count];
+            Array.Copy(_array, 0, result, 0, _count);
             return result;
+        }
+
+        public void ZeroExtend(int count)
+        {
+            Debug.Assert(count >= 0);
+            EnsureCapacity(_count + count);
+            _count += count;
         }
 
         private void EnsureCapacity(int minimum)
@@ -112,8 +137,8 @@ namespace System.Collections.Generic
             
             internal Enumerator(T[] array, int count)
             {
-                Debug.Assert(array != null);
-                Debug.Assert(count >= 0 && count <= array.Length);
+                Debug.Assert(count >= 0);
+                Debug.Assert(array == null || count <= array.Length);
 
                 _array = array;
                 _count = count;
