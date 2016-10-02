@@ -27,27 +27,7 @@ namespace System.Linq
             }
 
             UnionIterator<TSource> union = first as UnionIterator<TSource>;
-            return union != null && EquivalentEqualityComparers(comparer, union._comparer) ? union.Union(second) : new UnionIterator2<TSource>(first, second, comparer);
-        }
-
-        private static bool EquivalentEqualityComparers<TSource>(IEqualityComparer<TSource> x, IEqualityComparer<TSource> y)
-        {
-            if (ReferenceEquals(x, y))
-            {
-                return true;
-            }
-
-            if (x == null)
-            {
-                return y.Equals(EqualityComparer<TSource>.Default);
-            }
-
-            if (y == null)
-            {
-                return x.Equals(EqualityComparer<TSource>.Default);
-            }
-
-            return x.Equals(y);
+            return union != null && AreEqualityComparersEqual(comparer, union._comparer) ? union.Union(second) : new UnionIterator2<TSource>(first, second, comparer);
         }
 
         private abstract class UnionIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
