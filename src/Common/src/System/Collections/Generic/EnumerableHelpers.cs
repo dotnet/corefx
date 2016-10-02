@@ -119,18 +119,20 @@ namespace System.Collections.Generic
 
             // Here's a visualization showing what first, buffers, and current
             // might look like for a 200-length enumerable:
-            //
-            // first: [items 0-31]
-            //
-            // buffers:
-            // [0]: [items 32-63]
-            // [1]: [items 64-127]
-            //
-            // current: [items 128-199], [slots 200-255 empty]
+            
+            /*
+                first: [items 0-31]
 
-            // There will be no up-front allocation for the ValueList, since
-            // the backing store will be Array.Empty<T>() if you do not pass in a
-            // capacity. It only starts allocating arrays when we add the first item.
+                buffers:
+                [0]: [items 32-63]
+                [1]: [items 64-127]
+
+                current: [items 128-199], [slots 200-255 empty]
+            */
+
+            // There will be no up-front allocation for the ArrayBuilder, since
+            // the backing store will be nil if you do not pass in a capacity.
+            // It only starts allocating arrays when we add the first item.
 
             var buffers = new ArrayBuilder<T[]>(); // list of previous buffers
             var current = new T[first.Length]; // the current buffer we're reading the sequence into
