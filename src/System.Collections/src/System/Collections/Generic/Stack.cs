@@ -12,7 +12,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
@@ -194,11 +193,13 @@ namespace System.Collections.Generic
 
         // Returns the top object on the stack without removing it.  If the stack
         // is empty, Peek throws an InvalidOperationException.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek()
         {
             if (_size == 0)
-                ThrowInvalidOperationEmptyStack();
+            {
+                ThrowForEmptyStack();
+            }
+            
             return _array[_size - 1];
         }
 
@@ -207,7 +208,10 @@ namespace System.Collections.Generic
         public T Pop()
         {
             if (_size == 0)
-                ThrowInvalidOperationEmptyStack();
+            {
+                ThrowForEmptyStack();
+            }
+            
             _version++;
             T item = _array[--_size];
             _array[_size] = default(T);     // Free memory quicker.
@@ -241,7 +245,7 @@ namespace System.Collections.Generic
             return objArray;
         }
 
-        private void ThrowInvalidOperationEmptyStack()
+        private void ThrowForEmptyStack()
         {
             Debug.Assert(_size == 0);
             throw new InvalidOperationException(SR.InvalidOperation_EmptyStack);
