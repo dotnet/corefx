@@ -8,31 +8,19 @@ namespace System.Collections.Generic
 {
     internal struct ArrayBuilder<T>
     {
-        private const int DefaultCapacity = 4;
-
         private T[] _array; // Starts out null, initialized on first Add.
         private int _count; // Number of items into _array we're using.
 
-        public int Capacity
+        public ArrayBuilder(int capacity)
         {
-            get { return _array?.Length ?? 0; }
-            set
+            Debug.Assert(capacity >= 0);
+            if (capacity != 0)
             {
-                // Although it has almost exactly what we're looking for,
-                // Array.Resize is not used here since it unnecessarily copies
-                // the indices between Count and Capacity, which will all be
-                // default-initialized.
-
-                Debug.Assert(value > Capacity);
-
-                var next = new T[value];
-                if (_array != null)
-                {
-                    Array.Copy(_array, 0, next, 0, _count);
-                }
-                _array = next;
+                _array = new T[capacity];
             }
         }
+
+        public int Capacity => _array?.Length ?? 0;
 
         public int Count => _count;
 
@@ -57,7 +45,7 @@ namespace System.Collections.Generic
                 EnsureCapacity(_count + 1);
             }
 
-            _array[_count++] = item;
+            UncheckedAdd(item);
         }
 
         public void AddRange(T[] items)
@@ -80,19 +68,6 @@ namespace System.Collections.Generic
             }
         }
 
-        public T[] AsArray() => _array ?? Array.Empty<T>();
-
-        public T[] AsArray(out int count)
-        {
-            count = _count;
-            return AsArray();
-        }
-
-        public T[] AsOrToArray()
-        {
-            return _count == Capacity ? AsArray() : ToArray();
-        }
-
         public Enumerator GetEnumerator()
         {
             return new Enumerator(_array, _count);
@@ -100,20 +75,39 @@ namespace System.Collections.Generic
 
         public T[] ToArray()
         {
-            if (_count == 0)
+#if DEBUG
+            // Try to prevent callers from using the ArrayBuilder after ToArray.
+            _count = -1;
+#endif
+
+            if (_array == null)
             {
                 return Array.Empty<T>();
             }
 
-            var result = new T[_count];
-            Array.Copy(_array, 0, result, 0, _count);
-            return result;
+            if (_count < _array.Length)
+            {
+                Array.Resize(ref _array, _count);
+            }
+
+            return _array;
+        }
+
+        public void UncheckedAdd(T item)
+        {
+            Debug.Assert(_count < Capacity);
+
+            _array[_count++] = item;
         }
 
         public void ZeroExtend(int count)
         {
             Debug.Assert(count >= 0);
-            EnsureCapacity(_count + count);
+
+            if (count > 0)
+            {
+                EnsureCapacity(_count + count);
+            }
             _count += count;
         }
 
@@ -121,12 +115,19 @@ namespace System.Collections.Generic
         {
             Debug.Assert(minimum > Capacity);
 
-            int nextCapacity = Capacity == 0 ? DefaultCapacity : 2 * Capacity;
+            int nextCapacity = 2 * Capacity + 1;
 
             Debug.Assert(nextCapacity > 0); // Check for overflow.
             nextCapacity = Math.Max(nextCapacity, minimum);
-
-            Capacity = minimum;
+            
+            // Array.Resize will unnecessarily copy the slots @ _count
+            // and after which are all default-initialized.
+            T[] next = new T[nextCapacity];
+            if (_count > 0)
+            {
+                Array.Copy(_array, 0, next, 0, _count);
+            }
+            _array = next;
         }
 
         public struct Enumerator
@@ -144,8 +145,6 @@ namespace System.Collections.Generic
                 _count = count;
                 _index = -1;
             }
-
-            public void Dispose() { }
 
             public bool MoveNext()
             {

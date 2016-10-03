@@ -881,7 +881,7 @@ namespace System
                             pathSegments.Add(path.Substring(current, (next - current) + 1));
                             current = next + 1;
                         }
-                        segments = pathSegments.AsOrToArray();
+                        segments = pathSegments.ToArray();
                     }
                 }
                 return segments;
