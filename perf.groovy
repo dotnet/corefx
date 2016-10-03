@@ -66,7 +66,7 @@ def osShortName = ['Windows 10': 'win10',
 					batchFile("SET")
 					// Grab the latest version of the Benchview tools for uploading results
 					batchFile("C:\\Tools\\nuget.exe install Microsoft.BenchView.JSONFormat -Source http://benchviewtestfeed.azurewebsites.net/nuget -OutputDirectory C:\\tools -Prerelease -version 0.1.0-pre015")
-					batchFile("python C:\\tools\\Microsoft.BenchView.JSONFormat.0.1.0-pre015\\tools\\submission-metadata.py --name " + "Test commit name" + " --user " + "anscoggi@microsoft.com" + " -o C:\\submission-metadata.json")
+					batchFile("python C:\\tools\\Microsoft.BenchView.JSONFormat.0.1.0-pre015\\tools\\submission-metadata.py --name " + "\"Test commit name\"" + " --user " + "\"anscoggi@microsoft.com\"" + " -o C:\\submission-metadata.json")
 					batchFile("python C:\\tools\\Microsoft.BenchView.JSONFormat.0.1.0-pre015\\tools\\build.py git --type " + runType + " -o C:\\build.json")
 					batchFile("python C:\\tools\\Microsoft.BenchView.JSONFormat.0.1.0-pre015\\tools\\machinedata.py -o C:\\machinedata.json")
 					//We need to specify the max cpu count to be one as we do not want to be executing performance tests in parallel
