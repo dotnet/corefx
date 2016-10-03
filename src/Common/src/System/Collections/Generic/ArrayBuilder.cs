@@ -14,7 +14,7 @@ namespace System.Collections.Generic
         public ArrayBuilder(int capacity)
         {
             Debug.Assert(capacity >= 0);
-            if (capacity != 0)
+            if (capacity > 0)
             {
                 _array = new T[capacity];
             }
@@ -104,11 +104,12 @@ namespace System.Collections.Generic
         {
             Debug.Assert(count >= 0);
 
-            if (count > 0)
+            int endCount = _count + count;
+            if (endCount > Capacity)
             {
-                EnsureCapacity(_count + count);
+                EnsureCapacity(endCount);
             }
-            _count += count;
+            _count = endCount;
         }
 
         private void EnsureCapacity(int minimum)
