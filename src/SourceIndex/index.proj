@@ -36,6 +36,7 @@
   </Target>
 
   <Target Name="Build" DependsOnTargets="RestorePackages">
+    <Error Condition="'$(OS)' != 'Windows_NT'" Text="This tool can only be run on Windows_NT."/>
     <Error Condition="!Exists('$(HtmlGeneratorExePath)')" Text="Html generator executable not found."/>
     <RemoveDuplicates Inputs="@(SourceProject)">
       <Output TaskParameter="Filtered" ItemName="_FilteredProject"/>
@@ -46,6 +47,6 @@
     <MakeDir Condition="!Exists('$(BinDir)')" Directories="$(BinDir)"/>
     <RemoveDir Directories="$(BinDir)index/"/>
     <WriteLinesToFile Lines="@(_SortedProject -> '%(FullPath)')" File="$(BinDir)index.list" Overwrite="true"/>
-    <Exec Command="$(HtmlGeneratorExePath) /out:$(BinDir)index/ /in:$(BinDir)index.list /p:SourceIndex=true" WorkingDirectory="$(BinDir)index/"/>
+    <Exec Command="$(HtmlGeneratorExePath) /out:$(BinDir)index/ /in:$(BinDir)index.list /p:SourceIndex=true"/>
   </Target>
 </Project>
