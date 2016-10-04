@@ -63,30 +63,58 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             byte[] expected_bytes = ByteUtils.HexToByteArray(expectedHash);
             byte[] emptyHash_bytes = ByteUtils.HexToByteArray(emptyHash);
 
-            VerifyTransformOutput(block1_bytes, block2_bytes);
-            VerifyTransformComputeHashInteraction(block1_bytes, block2_bytes, expected_bytes, emptyHash_bytes);
+            VerifyTransformBlockOutput(block1_bytes, block2_bytes);
+            VerifyTransformBlockHash(block1_bytes, block2_bytes, expected_bytes, emptyHash_bytes);
+            VerifyTransformBlockComputeHashInteraction(block1_bytes, block2_bytes, expected_bytes, emptyHash_bytes);
 #endif
         }
 
 #if netstandard17
-        private void VerifyTransformOutput(byte[] block1, byte[] block2)
+        private void VerifyTransformBlockOutput(byte[] block1, byte[] block2)
         {
-            byte[] output = new byte[block1.Length + block2.Length];
-
-            // Concat block1 and block2
-            byte[] expected = new byte[block1.Length + block2.Length];
-            Buffer.BlockCopy(block1, 0, expected, 0, block1.Length);
-            Buffer.BlockCopy(block2, 0, expected, block1.Length, block2.Length);
-
             using (HashAlgorithm hash = Create())
             {
-                int byteCount = hash.TransformBlock(block1, 0, block1.Length, output, 0);
-                hash.TransformBlock(block2, 0, block2.Length, output, byteCount);
-                Assert.Equal(expected, output);
+                byte[] actualBlock1 = new byte[block1.Length];
+                int byteCount = hash.TransformBlock(block1, 0, block1.Length, actualBlock1, 0);
+                Assert.Equal(block1.Length, byteCount);
+                Assert.Equal(block1, actualBlock1);
+
+                byte[] actualBlock2 = hash.TransformFinalBlock(block2, 0, block2.Length);
+                Assert.Equal(block2, actualBlock2);
             }
         }
 
-        private void VerifyTransformComputeHashInteraction(byte[] block1, byte[] block2, byte[] expected, byte[] expectedEmpty)
+        private void VerifyTransformBlockHash(byte[] block1, byte[] block2, byte[] expected, byte[] expectedEmpty)
+        {
+            using (HashAlgorithm hash = Create())
+            {
+                // Verify Empty Hash
+                hash.TransformBlock(Array.Empty<byte>(), 0, 0, null, 0);
+                hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+                Assert.Equal(hash.Hash, expectedEmpty);
+                hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+                Assert.Equal(hash.Hash, expectedEmpty);
+
+                // Verify Hash
+                hash.TransformBlock(block1, 0, block1.Length, null, 0);
+                hash.TransformFinalBlock(block2, 0, block2.Length);
+                Assert.Equal(expected, hash.Hash);
+                Assert.Equal(expected, hash.Hash); // .Hash doesn't clear hash
+
+                // Verify bad State
+                hash.TransformBlock(block1, 0, block1.Length, null, 0);
+                // Can't access hash until TransformFinalBlock is called
+                Assert.Throws<CryptographicUnexpectedOperationException>(() => hash.Hash);
+                hash.TransformFinalBlock(block2, 0, block2.Length);
+                Assert.Equal(expected, hash.Hash);
+
+                // Verify clean State
+                hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+                Assert.Equal(hash.Hash, expectedEmpty);
+            }
+        }
+
+        private void VerifyTransformBlockComputeHashInteraction(byte[] block1, byte[] block2, byte[] expected, byte[] expectedEmpty)
         {
             using (HashAlgorithm hash = Create())
             {
@@ -95,23 +123,12 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
                 byte[] actual = hash.ComputeHash(block2, 0, block2.Length);
                 Assert.Equal(expected, actual);
 
-                // Verify ComputeHash above cleared hash
+                // ComputeHash does not reset State variable
+                Assert.Throws<CryptographicUnexpectedOperationException>(() => hash.Hash);
+                hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+                Assert.Equal(expectedEmpty, hash.Hash);
                 actual = hash.ComputeHash(Array.Empty<byte>(), 0, 0);
                 Assert.Equal(expectedEmpty, actual);
-
-                // We should now be able to re-hash
-                hash.TransformBlock(block1, 0, block1.Length, null, 0);
-                actual = hash.ComputeHash(block2, 0, block2.Length);
-                Assert.Equal(expected, actual);
-
-                // TransformBlock + TransformFinalBlock
-                hash.TransformBlock(block1, 0, block1.Length, null, 0);
-                hash.TransformFinalBlock(block2, 0, block2.Length);
-                Assert.Equal(expected, hash.Hash);
-                Assert.Equal(expected, hash.Hash); // .Hash doesn't clear hash
-                // ComputeHash with 0 bytes resets without interfering with hash
-                actual = hash.ComputeHash(Array.Empty<byte>(), 0, 0);
-                Assert.Equal(expected, actual);
 
                 // TransformBlock + TransformBlock + ComputeHash(empty)
                 hash.TransformBlock(block1, 0, block1.Length, null, 0);
@@ -141,25 +158,6 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             {
                 hash.TransformBlock(Array.Empty<byte>(), 0, 0, null, 0);
                 Assert.Throws<CryptographicUnexpectedOperationException>(() => hash.Hash);
-            }
-        }
-
-        [Fact]
-        public void VerifyUseAfterTransformFinalBlock()
-        {
-            byte[] block = new byte[1] {1};
-
-            using (HashAlgorithm hash = Create())
-            {
-                hash.TransformBlock(block, 0, block.Length, null, 0);
-                hash.TransformFinalBlock(block, 0, block.Length);
-
-                Assert.Throws<CryptographicException>(() => hash.TransformBlock(block, 0, block.Length, null, 0));
-                Assert.Throws<CryptographicException>(() => hash.TransformFinalBlock(block, 0, block.Length));
-
-                // Transforming 0 bytes should not throw
-                hash.TransformBlock(block, 0, 0, null, 0);
-                hash.TransformFinalBlock(block, 0, 0);
             }
         }
 

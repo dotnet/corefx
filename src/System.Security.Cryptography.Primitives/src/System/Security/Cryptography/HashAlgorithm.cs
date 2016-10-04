@@ -38,7 +38,7 @@ namespace System.Security.Cryptography
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            HashCoreInternal(buffer, 0, buffer.Length);
+            HashCore(buffer, 0, buffer.Length);
             return CaptureHashCodeAndReinitialize();
         }
 
@@ -56,7 +56,7 @@ namespace System.Security.Cryptography
             if (_disposed)
                 throw new ObjectDisposedException(null);
 
-            HashCoreInternal(buffer, offset, count);
+            HashCore(buffer, offset, count);
             return CaptureHashCodeAndReinitialize();
         }
 
@@ -70,38 +70,19 @@ namespace System.Security.Cryptography
             int bytesRead;
             while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                HashCoreInternal(buffer, 0, bytesRead);
+                HashCore(buffer, 0, bytesRead);
             }
             return CaptureHashCodeAndReinitialize();
         }
 
-        private void HashCoreInternal(byte[] array, int ibStart, int cbSize)
-        {
-            // Emulate desktop semantics where HashCore(nonempty) cannot be
-            // called after TransformFinalBlock\HashFinal.
-            if (_hashFinalCalledWithoutInitialize && cbSize > 0)
-                throw new CryptographicException(SR.Cryptography_BadHashState);
-
-            HashCore(array, ibStart, cbSize);
-        }
-
         private byte[] CaptureHashCodeAndReinitialize()
         {
-            if (_hashFinalCalledWithoutInitialize)
-            {
-                // Keep the previous hash value for desktop compat; the previous call to
-                // HashCore was for zero bytes.
-            }
-            else
-            {
-                HashValue = HashFinal();
-            }
+            HashValue = HashFinal();
 
             // Clone the hash value prior to invoking Initialize in case the user-defined Initialize
             // manipulates the array.
             byte[] tmp = (byte[])HashValue.Clone();
             Initialize();
-            _hashFinalCalledWithoutInitialize = false;
             return tmp;
         }
 
@@ -153,7 +134,7 @@ namespace System.Security.Cryptography
             // Change the State value
             State = 1;
 
-            HashCoreInternal(inputBuffer, inputOffset, inputCount);
+            HashCore(inputBuffer, inputOffset, inputCount);
             if ((outputBuffer != null) && ((inputBuffer != outputBuffer) || (inputOffset != outputOffset)))
             {
                 // We let BlockCopy do the destination array validation
@@ -166,8 +147,8 @@ namespace System.Security.Cryptography
         {
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 
-            HashCoreInternal(inputBuffer, inputOffset, inputCount);
-            HashValue = HashFinal();
+            HashCore(inputBuffer, inputOffset, inputCount);
+            HashValue = CaptureHashCodeAndReinitialize();
             byte[] outputBytes;
             if (inputCount != 0)
             {
@@ -181,10 +162,6 @@ namespace System.Security.Cryptography
 
             // Reset the State value
             State = 0;
-
-            // For desktop compat, set a flag to enforce that ComputeHash must be called
-            // with non-empty value before another HashCore.
-            _hashFinalCalledWithoutInitialize = true;
 
             return outputBytes;
         }
@@ -209,7 +186,6 @@ namespace System.Security.Cryptography
         public abstract void Initialize();
 
         private bool _disposed;
-        private bool _hashFinalCalledWithoutInitialize;
         protected internal byte[] HashValue;
         protected int State = 0;
     }
