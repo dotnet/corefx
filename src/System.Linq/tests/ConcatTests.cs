@@ -90,9 +90,9 @@ namespace System.Linq.Tests
         [MemberData(nameof(EnumerableSourcesData))]
         [MemberData(nameof(NonCollectionSourcesData))]
         [MemberData(nameof(ListSourcesData))]
-        [MemberData(nameof(ConcatOfConcatsData))]
         [MemberData(nameof(ConcatWithSelfData))]
         [MemberData(nameof(ChainedCollectionConcatData))]
+        [MemberData(nameof(AppendedPrependedConcatChainsData))]
         public void VerifyEquals(IEnumerable<int> expected, IEnumerable<int> actual)
         {
             // workaround: xUnit type inference doesn't work if the input type is not T (like IEnumerable<T>)
@@ -126,21 +126,6 @@ namespace System.Linq.Tests
 
         public static IEnumerable<object[]> ListSourcesData() => GenerateSourcesData(outerTransform: e => e.ToList());
 
-        public static IEnumerable<object[]> ConcatOfConcatsData()
-        {
-            yield return new object[]
-            {
-                Enumerable.Range(0, 20),
-                Enumerable.Concat(
-                    Enumerable.Concat(
-                        Enumerable.Range(0, 4),
-                        Enumerable.Range(4, 6)),
-                    Enumerable.Concat(
-                        Enumerable.Range(10, 3),
-                        Enumerable.Range(13, 7)))
-            };
-        }
-
         public static IEnumerable<object[]> ConcatWithSelfData()
         {
             IEnumerable<int> source = Enumerable.Repeat(1, 4).Concat(Enumerable.Repeat(1, 5));
@@ -150,6 +135,39 @@ namespace System.Linq.Tests
         }
 
         public static IEnumerable<object[]> ChainedCollectionConcatData() => GenerateSourcesData(innerTransform: e => e.ToList());
+
+        public static IEnumerable<object[]> AppendedPrependedConcatChainsData()
+        {
+            var @base = Array.Empty<int>();
+            var expected = new List<int>();
+            IEnumerable<int> actual = @base;
+
+            // each bit in the last 6 bits of i represent whether we want to prepend/append a node for this iteration.
+            // if it's set, we'll prepend. otherwise, we'll append.
+            for (int i = 0; i < (1 << 6); i++)
+            {
+                for (int j = 0; j < 6; j++)
+                {
+                    var nextRange = Enumerable.Range(j, 1);
+                    bool prepend = ((i >> j) & 1) != 0;
+
+                    actual = prepend ? nextRange.Concat(actual) : actual.Concat(nextRange);
+                    if (prepend)
+                    {
+                        expected.Insert(0, j);
+                    }
+                    else
+                    {
+                        expected.Add(j);
+                    }
+                }
+
+                yield return new object[] { expected.ToArray(), actual.ToArray() };
+
+                actual = @base;
+                expected.Clear();
+            }
+        }
 
         private static IEnumerable<object[]> GenerateSourcesData(
             Func<IEnumerable<int>, IEnumerable<int>> outerTransform = null,
