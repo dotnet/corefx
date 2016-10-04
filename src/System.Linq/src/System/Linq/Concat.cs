@@ -419,16 +419,22 @@ namespace System.Linq
 
                 // We've reached the first 2 collections that were concatenated
                 var current2 = (Concat2CollectionIterator<TSource>)current;
-                checked
+                int currentCount = current2.Count;
+
+                if (currentCount > 0)
                 {
-                    upperBound -= current2.Count; // We'll treat this node as an appended node
+                    checked
+                    {
+                        upperBound -= currentCount; // We'll treat this node as an appended node
+                    }
+                    current2.CopyTo(array, upperBound);
                 }
 
+#if DEBUG
                 int itemsPrepended = lowerBound - startIndex;
                 int itemsAppended = (startIndex + count) - upperBound;
                 Debug.Assert(itemsPrepended + itemsAppended == Count); // We should have copied all the elements
-
-                current2.CopyTo(array, upperBound);
+#endif
             }
 
             internal override IEnumerable<TSource> GetEnumerable(int index)
