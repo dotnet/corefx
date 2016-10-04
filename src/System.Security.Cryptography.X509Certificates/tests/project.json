@@ -14,6 +14,7 @@
     "System.Security.Cryptography.Cng": "4.3.0-beta-24604-02",
     "System.Security.Cryptography.Csp": "4.3.0-beta-24604-02",
     "System.Security.Cryptography.Encoding": "4.3.0-beta-24604-02",
+    "System.Security.Cryptography.OpenSsl": "4.3.0-beta-24604-02",
     "System.Security.Cryptography.X509Certificates.TestData": "1.0.2-prerelease",
     "System.Text.RegularExpressions": "4.3.0-beta-24604-02",
     "test-runtime": {

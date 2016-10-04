@@ -133,7 +133,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory, MemberData(nameof(BrainpoolCurvesPfx))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp1_0, "dotnet/corefx#12235")]
         public static void ReadECDsaPrivateKey_BrainpoolP160r1_Pfx(byte[] pfxData)
         {
             try

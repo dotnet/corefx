@@ -4,7 +4,6 @@
 
 using Internal.Cryptography;
 using Internal.Cryptography.Pal;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -74,7 +73,10 @@ namespace System.Security.Cryptography.X509Certificates
             if (cert == null)
                 throw new ArgumentNullException(nameof(cert));
 
-            Pal = CertificatePal.FromHandle(cert.Handle); // Let FromHandle throw if certHandle is 0
+            if (cert.Pal != null)
+            {
+                Pal = CertificatePal.FromOtherCert(cert);
+            }
         }
 
         public IntPtr Handle

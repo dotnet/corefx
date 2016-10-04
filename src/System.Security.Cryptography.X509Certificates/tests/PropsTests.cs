@@ -139,7 +139,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp1_0, "dotnet/corefx#12235")]
         public static void GetPublicKey_X509Signature_NoParameters()
         {
             // Normally RSA signature AlgorithmIdentifiers get represented as

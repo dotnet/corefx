@@ -14,41 +14,46 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             using (X509Certificate2 c = new X509Certificate2())
             {
-                IntPtr h = c.Handle;
-                object ignored;
-                Assert.Equal(IntPtr.Zero, h);
-                Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithm());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParameters());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParametersString());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetPublicKey());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetSerialNumber());
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Issuer);
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Subject);
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.RawData);
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Thumbprint);
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.SignatureAlgorithm);
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.HasPrivateKey);
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Version);
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.Archived);
-                Assert.ThrowsAny<CryptographicException>(() => c.Archived = false);
-                Assert.ThrowsAny<CryptographicException>(() => c.FriendlyName = "Hi");
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.SubjectName);
-                Assert.ThrowsAny<CryptographicException>(() => ignored = c.IssuerName);
+                VerifyDefaultConstructor(c);
+            }
+        }
+
+        private static void VerifyDefaultConstructor(X509Certificate2 c)
+        {
+            IntPtr h = c.Handle;
+            object ignored;
+            Assert.Equal(IntPtr.Zero, h);
+            Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithm());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParameters());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParametersString());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetPublicKey());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetSerialNumber());
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.Issuer);
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.Subject);
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.RawData);
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.Thumbprint);
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.SignatureAlgorithm);
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.HasPrivateKey);
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.Version);
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.Archived);
+            Assert.ThrowsAny<CryptographicException>(() => c.Archived = false);
+            Assert.ThrowsAny<CryptographicException>(() => c.FriendlyName = "Hi");
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.SubjectName);
+            Assert.ThrowsAny<CryptographicException>(() => ignored = c.IssuerName);
 #if netstandard17
-                Assert.ThrowsAny<CryptographicException>(() => c.GetCertHashString());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetEffectiveDateString());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetExpirationDateString());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetPublicKeyString());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetRawCertData());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetRawCertDataString());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetSerialNumberString());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetCertHashString());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetEffectiveDateString());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetExpirationDateString());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetPublicKeyString());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetRawCertData());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetRawCertDataString());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetSerialNumberString());
 #pragma warning disable 0618
-                Assert.ThrowsAny<CryptographicException>(() => c.GetIssuerName());
-                Assert.ThrowsAny<CryptographicException>(() => c.GetName());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetIssuerName());
+            Assert.ThrowsAny<CryptographicException>(() => c.GetName());
 #pragma warning restore 0618
 #endif
-            }
         }
 
         [Fact]
@@ -111,8 +116,56 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+#if netstandard17
         [Fact]
-        public static void TestConstructor_CertificateArg_Lifetime()
+        public static void TestCopyConstructor_NoPal()
+        {
+            using (var c1 = new X509Certificate2())
+            using (var c2 = new X509Certificate2(c1))
+            {
+                VerifyDefaultConstructor(c1);
+                VerifyDefaultConstructor(c2);
+            }
+        }
+
+        [Fact]
+        public static void TestCopyConstructor_Pal()
+        {
+            using (var c1 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (var c2 = new X509Certificate2(c1))
+            {
+                Assert.Equal(c1.GetCertHash(), c2.GetCertHash());
+                Assert.Equal(c1.GetKeyAlgorithm(), c2.GetKeyAlgorithm());
+                Assert.Equal(c1.GetKeyAlgorithmParameters(), c2.GetKeyAlgorithmParameters());
+                Assert.Equal(c1.GetKeyAlgorithmParametersString(), c2.GetKeyAlgorithmParametersString());
+                Assert.Equal(c1.GetPublicKey(), c2.GetPublicKey());
+                Assert.Equal(c1.GetSerialNumber(), c2.GetSerialNumber());
+                Assert.Equal(c1.Issuer, c2.Issuer);
+                Assert.Equal(c1.Subject, c2.Subject);
+                Assert.Equal(c1.RawData, c2.RawData);
+                Assert.Equal(c1.Thumbprint, c2.Thumbprint);
+                Assert.Equal(c1.SignatureAlgorithm.Value, c2.SignatureAlgorithm.Value);
+                Assert.Equal(c1.HasPrivateKey, c2.HasPrivateKey);
+                Assert.Equal(c1.Version, c2.Version);
+                Assert.Equal(c1.Archived, c2.Archived);
+                Assert.Equal(c1.SubjectName.Name, c2.SubjectName.Name);
+                Assert.Equal(c1.IssuerName.Name, c2.IssuerName.Name);
+                Assert.Equal(c1.GetCertHashString(), c2.GetCertHashString());
+                Assert.Equal(c1.GetEffectiveDateString(), c2.GetEffectiveDateString());
+                Assert.Equal(c1.GetExpirationDateString(), c2.GetExpirationDateString());
+                Assert.Equal(c1.GetPublicKeyString(), c2.GetPublicKeyString());
+                Assert.Equal(c1.GetRawCertData(), c2.GetRawCertData());
+                Assert.Equal(c1.GetRawCertDataString(), c2.GetRawCertDataString());
+                Assert.Equal(c1.GetSerialNumberString(), c2.GetSerialNumberString());
+#pragma warning disable 0618
+                Assert.Equal(c1.GetIssuerName(), c2.GetIssuerName());
+                Assert.Equal(c1.GetName(), c2.GetName());
+#pragma warning restore 0618
+            }
+        }
+
+        [Fact]
+        public static void TestCopyConstructor_Lifetime()
         {
             var c1 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword);
             var c2 = new X509Certificate2(c1);
@@ -129,22 +182,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         private static void TestPrivateKey(X509Certificate2 c, bool expectSuccess)
         {
+            if (expectSuccess)
             {
                 using (RSA rsa = c.GetRSAPrivateKey())
                 {
                     byte[] hash = new byte[20];
-                    if (expectSuccess)
-                    {
-                        byte[] sig = rsa.SignHash(hash, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
-                        Assert.Equal(TestData.PfxSha1Empty_ExpectedSig, sig);
-                    }
-                    else
-                    {
-                        Assert.ThrowsAny<CryptographicException>(() => rsa.SignHash(hash, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1));
-                    }
+                    byte[] sig = rsa.SignHash(hash, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+                    Assert.Equal(TestData.PfxSha1Empty_ExpectedSig, sig);
                 }
             }
+            else
+            {
+                Assert.ThrowsAny<CryptographicException>(() => c.GetRSAPrivateKey());
+            }
         }
+#endif
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
