@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <!-- TODO: Get this from the file version -->
-    <Version>4.0.1</Version>
+    <Version>4.0.0</Version>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
     <SkipValidatePackage>true</SkipValidatePackage>
   </PropertyGroup>
