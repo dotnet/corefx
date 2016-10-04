@@ -90,6 +90,7 @@ namespace System.Linq.Tests
         [MemberData(nameof(EnumerableSourcesData))]
         [MemberData(nameof(NonCollectionSourcesData))]
         [MemberData(nameof(ListSourcesData))]
+        [MemberData(nameof(ConcatOfConcatsData))]
         [MemberData(nameof(ConcatWithSelfData))]
         [MemberData(nameof(ChainedCollectionConcatData))]
         [MemberData(nameof(AppendedPrependedConcatAlternationsData))]
@@ -125,6 +126,21 @@ namespace System.Linq.Tests
         public static IEnumerable<object[]> NonCollectionSourcesData() => GenerateSourcesData(outerTransform: e => ForceNotCollection(e));
 
         public static IEnumerable<object[]> ListSourcesData() => GenerateSourcesData(outerTransform: e => e.ToList());
+
+        public static IEnumerable<object[]> ConcatOfConcatsData()
+        {
+            yield return new object[]
+            {
+                Enumerable.Range(0, 20),
+                Enumerable.Concat(
+                    Enumerable.Concat(
+                        Enumerable.Range(0, 4),
+                        Enumerable.Range(4, 6)),
+                    Enumerable.Concat(
+                        Enumerable.Range(10, 3),
+                        Enumerable.Range(13, 7)))
+            };
+        }
 
         public static IEnumerable<object[]> ConcatWithSelfData()
         {
