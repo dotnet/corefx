@@ -419,18 +419,14 @@ namespace System.Linq
 
                 // We've reached the first 2 collections that were concatenated
                 var current2 = (Concat2CollectionIterator<TSource>)current;
-                int currentCount = current2.Count;
-
-                if (currentCount > 0)
-                {
-                    checked
-                    {
-                        upperBound -= currentCount; // We'll treat this node as an appended node
-                    }
-                    current2.CopyTo(array, upperBound);
-                }
+                current2.CopyTo(array, lowerBound); // We'll treat this node as a prepended one so we don't have to get its .Count in Release
 
 #if DEBUG
+                checked
+                {
+                    lowerBound += current2.Count;
+                }
+
                 int itemsPrepended = lowerBound - startIndex;
                 int itemsAppended = (startIndex + count) - upperBound;
                 Debug.Assert(itemsPrepended + itemsAppended == Count); // We should have copied all the elements
