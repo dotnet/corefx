@@ -392,20 +392,24 @@ namespace System.Linq
                 do
                 {
                     ICollection<TSource> concatee = currentN._concatee;
+                    int toCopy = concatee.Count;
 
-                    checked
+                    if (toCopy > 0)
                     {
-                        if (currentN.IsAppended)
+                        checked
                         {
-                            // Copy towards the end of the array.
-                            upperBound -= concatee.Count;
-                            concatee.CopyTo(array, upperBound);
-                        }
-                        else
-                        {
-                            // Copy towards the beginning of the array.
-                            concatee.CopyTo(array, lowerBound);
-                            lowerBound += concatee.Count;
+                            if (currentN.IsAppended)
+                            {
+                                // Copy towards the end of the array.
+                                upperBound -= toCopy;
+                                concatee.CopyTo(array, upperBound);
+                            }
+                            else
+                            {
+                                // Copy towards the beginning of the array.
+                                concatee.CopyTo(array, lowerBound);
+                                lowerBound += toCopy;
+                            }
                         }
                     }
                     
