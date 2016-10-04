@@ -252,8 +252,8 @@ namespace System.Linq
                 Debug.Assert(arrayIndex >= 0);
                 Debug.Assert(array.Length - arrayIndex >= Count);
 
-                _first.CopyTo(array, 0);
-                _second.CopyTo(array, _first.Count);
+                _first.CopyTo(array, arrayIndex);
+                _second.CopyTo(array, arrayIndex + _first.Count);
             }
 
             internal override IEnumerable<TSource> GetEnumerable(int index)
