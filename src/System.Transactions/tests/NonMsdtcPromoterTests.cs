@@ -2208,7 +2208,6 @@ namespace System.Transactions.Tests
         /// <summary>
         /// PSPE Non-MSDTC Timeout.
         /// </summary>
-        //[ActiveIssue(11737)]
         [OuterLoop] // long timeout
         [Theory]
         [InlineData(false)]
