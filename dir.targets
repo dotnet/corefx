@@ -73,7 +73,8 @@
   <Target Name="RewriteReferences" Condition="'$(SourceIndex)' == 'true'" AfterTargets="ResolveNuGetPackages">
     <ItemGroup>
       <Reference Remove="@(_ReferenceFromPackage)"/>
-      <_ReferenceProjectToHarvest Include="@(_ReferenceFromPackage -> '$(MSBuildThisFileDirectory)src/%(Filename)/src/%(FileName).builds')" />
+      <_ReferenceProjectToHarvest Include="@(_ReferenceFromPackage -> '$(MSBuildThisFileDirectory)src/%(Filename)/src/%(FileName).csproj')"/>
+      <_ReferenceProjectToHarvest Include="@(_ReferenceFromPackage -> '$(MSBuildThisFileDirectory)src/%(Filename)/src/%(FileName).vbproj')"/>
     </ItemGroup>
 
     <MSBuild Condition="'$(SourceIndex)' == 'true' AND Exists('%(Identity)')"
@@ -87,7 +88,6 @@
       <ReferencePath Include="$(PackagesDir)runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\1.2.0-$(CoreClrExpectedPrerelease)\runtimes\win7-x64\lib\netstandard1.0\mscorlib.dll"/>
       <ReferencePath Include="$(PackagesDir)runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\1.2.0-$(CoreClrExpectedPrerelease)\runtimes\win7-x64\lib\netstandard1.0\System.Private.CoreLib.dll"/>
     </ItemGroup>
-
   </Target>
 
 </Project>
