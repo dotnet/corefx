@@ -10,27 +10,19 @@ namespace System.Runtime.Versioning
     [Conditional("RESOURCE_ANNOTATION_WORK")]
     public sealed class ResourceConsumptionAttribute : Attribute
     {
-        private ResourceScope _consumptionScope;
-        private ResourceScope _resourceScope;
+        public ResourceScope ResourceScope { get; }
+        public ResourceScope ConsumptionScope { get; }
 
         public ResourceConsumptionAttribute(ResourceScope resourceScope)
         {
-            _resourceScope = resourceScope;
-            _consumptionScope = _resourceScope;
+            ResourceScope = resourceScope;
+            ConsumptionScope = resourceScope;
         }
 
         public ResourceConsumptionAttribute(ResourceScope resourceScope, ResourceScope consumptionScope)
         {
-            _resourceScope = resourceScope;
-            _consumptionScope = consumptionScope;
-        }
-
-        public ResourceScope ResourceScope {
-            get { return _resourceScope; }
-        }
-
-        public ResourceScope ConsumptionScope {
-            get { return _consumptionScope; }
+            ResourceScope = resourceScope;
+            ConsumptionScope = consumptionScope;
         }
     }
 }

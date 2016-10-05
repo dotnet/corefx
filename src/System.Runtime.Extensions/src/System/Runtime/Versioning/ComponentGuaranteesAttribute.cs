@@ -12,15 +12,11 @@ namespace System.Runtime.Versioning
                     AllowMultiple = false, Inherited = false)]
     public sealed class ComponentGuaranteesAttribute : Attribute
     {
-        private ComponentGuaranteesOptions _guarantees;
+        public ComponentGuaranteesOptions Guarantees { get; }
 
         public ComponentGuaranteesAttribute(ComponentGuaranteesOptions guarantees)
         {
-            _guarantees = guarantees;
-        }
-
-        public ComponentGuaranteesOptions Guarantees {
-            get { return _guarantees; }
+            Guarantees = guarantees;
         }
     }
 }

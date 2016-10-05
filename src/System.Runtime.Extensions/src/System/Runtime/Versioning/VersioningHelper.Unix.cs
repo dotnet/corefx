@@ -6,8 +6,6 @@ namespace System.Runtime.Versioning
 {
     public static partial class VersioningHelper
     {
-        private static int GetCurrentProcessId(){
-            return Interop.Sys.GetPid();
-        }
+        private static int GetCurrentProcessId() => Interop.Sys.GetPid();
     }
 }
