@@ -2,7 +2,7 @@
   "frameworks": {
     "netstandard1.5": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24603-02"
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24605-01"
       }
     },
     "net462": {
@@ -10,22 +10,11 @@
         "Microsoft.TargetingPack.NETFramework.v4.6": "1.0.1"
       }
     },
-    "netcore50": {
-      "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1",
-        "Microsoft.TargetingPack.Private.NETNative": "1.1.0-beta-24603-00",
-        "System.Collections": "4.0.0",
-        "System.Diagnostics.Contracts": "4.0.0",
-        "System.Linq": "4.0.0",
-        "System.Reflection": "4.1.0",
-        "System.Runtime.Extensions": "4.0.10"
-      }
-    },
     "uap10.1": {
       "dependencies": {
-        "System.Runtime": "4.3.0-beta-24601-02",
-        "System.Reflection": "4.3.0-beta-24601-02",
-        "System.Resources.ResourceManager": "4.3.0-beta-24601-02"
+        "System.Runtime": "4.3.0-beta-24604-02",
+        "System.Reflection": "4.3.0-beta-24604-02",
+        "System.Resources.ResourceManager": "4.3.0-beta-24604-02"
       }
     }
   }
