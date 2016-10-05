@@ -7,6 +7,11 @@
       <TestTFMs>net463</TestTFMs>
       <OSGroup>Windows_NT</OSGroup>
     </Project>
+    <Project Include="System.IO.FileSystem.Primitives.Tests.csproj">
+      <TargetGroup>netstandard1.3</TargetGroup>
+      <TestTFMs>net46;netcore50</TestTFMs>
+      <OSGroup>Windows_NT</OSGroup>
+    </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
