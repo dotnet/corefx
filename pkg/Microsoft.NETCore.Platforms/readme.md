@@ -101,6 +101,7 @@ Binary compatibility is represented through imports.  If a platform is considere
 
 ###Import convention
 Imports should be used when the added RID is considered compatible with an existing RID.
+
 1. Architecture-specific RIDs should first import the architecture-less RID.  EG: `osx.10.11-x64` should first import `osx.10.11`.
 2. Architecture-specific RIDs that are compatible with a previous version RID for the same OS should then import the previous version, architecture specific RID.  EG: `osx.10.11-x64` should then import `osx.10.10-x64`.  If there is no earlier compatible/supported version, then a versionless RID should be imported.  EG: `osx.10.10-x64` should import `osx-x64`.
 3. Architecture-less RIDs that are compatible with a previous version RID for the same OS should then import the previous version, architecture neutral RID.  EG: `osx.10.11` should import `osx.10.10`. If there is no earlier compatible/supported version, then a versionless RID should be imported.  EG: `osx.10.10` should import `osx`.
