@@ -20,8 +20,12 @@ fi
 
 __working_tree_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# OSX doesn't support Bash 4, so ${var,,} is not supported.
 clean_arg=$*
-if [[ "${clean_arg,,}" == *"all"* ]]
+clean_arg=${clean_arg//A/a}
+clean_arg=${clean_arg//L/l}
+clean_arg=${clean_arg//-/}
+if [[ "${clean_arg}" == "all" ]]
 then
    echo "Removing all untracked files in the working tree"
    git clean -xdf $__working_tree_root
