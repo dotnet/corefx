@@ -24,17 +24,13 @@
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipManagedPackageBuild)' != 'true'" >
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
-    <Project Include="System.Private.Uri\pkg\win\System.Private.Uri.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-      <OSGroup>Windows_NT</OSGroup>
-    </Project>
-    <Project Include="..\pkg\Microsoft.NETCore.Targets\Microsoft.NETCore.Targets.builds">
+    <Project Include="..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="System.Diagnostics.StackTrace\pkg\System.Diagnostics.StackTrace.builds">
+    <Project Include="System.Net.Http\pkg\System.Net.Http.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="System.IO.Compression\pkg\System.IO.Compression.builds">
+    <Project Include="System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
