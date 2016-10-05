@@ -1532,7 +1532,7 @@ namespace System.Xml
             return XmlConverter.ToInt32(ReadContentAsString());
         }
 
-        public DateTime ReadContentAsDateTime()
+        public override DateTime ReadContentAsDateTime()
         {
             XmlNode node = this.Node;
             if (_value == null && node.IsAtomicValue)

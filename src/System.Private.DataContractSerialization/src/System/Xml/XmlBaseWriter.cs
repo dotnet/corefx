@@ -1402,7 +1402,7 @@ namespace System.Xml
             WriteString(value);
         }
 
-        public void WriteValue(DateTime value)
+        public override void WriteValue(DateTime value)
         {
             if (IsClosed)
                 ThrowClosed();

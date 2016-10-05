@@ -16,7 +16,21 @@ using System.Runtime.Serialization;
 
 namespace System.Xml
 {
-    internal class XmlBinaryReader : XmlBaseReader
+    public interface IXmlBinaryReaderInitializer
+    {
+        void SetInput(byte[] buffer, int offset, int count,
+                            IXmlDictionary dictionary,
+                            XmlDictionaryReaderQuotas quotas,
+                            XmlBinaryReaderSession session,
+                            OnXmlDictionaryReaderClose onClose);
+        void SetInput(Stream stream,
+                             IXmlDictionary dictionary,
+                             XmlDictionaryReaderQuotas quotas,
+                             XmlBinaryReaderSession session,
+                             OnXmlDictionaryReaderClose onClose);
+    }
+
+    internal class XmlBinaryReader : XmlBaseReader, IXmlBinaryReaderInitializer
     {
         private bool _isTextWithEndElement;
         private bool _buffered;
@@ -32,7 +46,8 @@ namespace System.Xml
         public void SetInput(byte[] buffer, int offset, int count,
                             IXmlDictionary dictionary,
                             XmlDictionaryReaderQuotas quotas,
-                            XmlBinaryReaderSession session)
+                            XmlBinaryReaderSession session,
+                            OnXmlDictionaryReaderClose onClose)
         {
             if (buffer == null)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("buffer");
@@ -52,7 +67,8 @@ namespace System.Xml
         public void SetInput(Stream stream,
                              IXmlDictionary dictionary,
                             XmlDictionaryReaderQuotas quotas,
-                            XmlBinaryReaderSession session)
+                            XmlBinaryReaderSession session,
+                            OnXmlDictionaryReaderClose onClose)
         {
             if (stream == null)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("stream");
