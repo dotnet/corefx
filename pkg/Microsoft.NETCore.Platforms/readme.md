@@ -2,7 +2,7 @@
 The package `Microsoft.NETCore.Platforms` defines the runtime identifiers (RIDs) used by .NET packages to represent runtime-specific assets in NuGet packages.
 
 ##What is a RID?
-A RID is an opaque string that describes a platform.  RIDs have relationships to other RIDs by "importing" the other RID.  In that way a RID is a graph of compatible RIDs.
+A RID is an opaque string that identifies a platform.  RIDs have relationships to other RIDs by "importing" the other RID.  In that way a RID is a directed graph of compatible RIDs.
 
 ##How does NuGet use RIDs?
 When NuGet is deciding which assets to use from a package and which packages to include NuGet will consider a RID if the project.json lists a RID in its `runtimes` section.
@@ -42,7 +42,7 @@ This can be visualized as a directed graph, as follows:
        |   \   /    |
        |   win7     |
        |     |      |
-    win-x64  |  win7-x86
+    win-x64  |  win-x86
           \  |  /
             win
              |
@@ -58,7 +58,7 @@ NuGet will always prefer a RID-qualified asset over a RID-less asset.  For examp
 lib/netcoreapp1.0/foo.dll
 runtimes/win/lib/netcoreapp1.0/foo.dll
 ```
-NuGet will choose `runtimes/win/lib/netcoreapp1.0/foo.dll`.
+When resolving for netstandard1.0/win7-x64 NuGet will choose `runtimes/win/lib/netcoreapp1.0/foo.dll`.
 
 Additionally, NuGet will always prefer a RID-qualified asset over a RID-less asset, even if the framework is less specific for the RID-qualified asset.
 ```
@@ -78,7 +78,7 @@ When resolving for netstandard1.5/win7-x64 will select `lib/netstandard1.5/foo.d
 ##Adding new RIDs
 
 ###Why do I need to add a new RID?
-NuGet's extensibility mechanism for platform-specific assets requires a RID be defined for any platform that needs assets specific to that platform.  Unlike TFMs, which have a known relationship in NuGet (eg net4.5 is compatible with net4.0), RIDs are opaque strings whigh NuGet knows nothing about.  The definition and relationship of RIDs comes solely from the `runtime.json` files within the root of the packages referenced by the project.
+NuGet's extensibility mechanism for platform-specific assets requires a RID be defined for any platform that needs assets specific to that platform.  Unlike TFMs, which have a known relationship in NuGet (eg net4.5 is compatible with net4.0), RIDs are opaque strings which NuGet knows nothing about.  The definition and relationship of RIDs comes solely from the `runtime.json` files within the root of the packages referenced by the project.
 As such, whenever we want to put a new RID in a project.json in order to get assets specific for that RID we have to define the rid in some package.  Typically that package is `Microsoft.NETCore.Platforms` if the RID is "official".  If you'd like to prototype you can put the RID in any other package and so long as that package is referenced you can use that RID.
 
 ###Do I really need to add a new RID?
@@ -94,11 +94,16 @@ We use the following convention in all newly-defined RIDs.  Some RIDs (win7-x64,
 - `[architecture]` can contain any characters other than `-`. Typically: `x86`, `x64`, `arm`, `arm64`
 - `[additional qualifiers]` can be things like `aot`.  Used to further differentiate different platforms.
 
+For all of these we strive to make them something that can be uniquely discoverable at runtime, so that a RID may be computed from an executing application.  As such these properties should be derivable from `/etc/os-release` or similar platform APIs / data.
+
+###Binary compatibility
+Binary compatibility is represented through imports.  If a platform is considered binary compatible with another version of the same platform, or a specific version of another platform, then it can import that platform.  This permits packages to reuse assets that were built for the imported platform on the compatible platform.  Binary compatibility here is a bit nebulous because inevietably different platforms will have observable differences that can cause compatibility problems.  For the purposes of RIDs we'll try to represent compatibility as versions of a platform that are explicitly advertised as being compatible with a previous version and/or another platform and don't have any known broad breaking changes.
+
 ###Import convention
 Imports should be used when the added RID is considered compatible with an existing RID.
-1. Architecture-specific RIDs should first import the architecture-less RID.  EG: `ubuntu.14.10-x64` should first import `ubuntu.14.10`.
-2. Architecture-specific RIDs that are compatible with a previous version RID for the same OS should then import the previous version, architecture specific RID.  EG: `ubuntu.14.10-x64` should then import `ubuntu.14.04-x64`.  If there is no earlier compatible/supported version, then a versionless RID should be imported.  EG: `ubuntu14.04-x64` should import `ubuntu-x64`.
-3. Architecture-less RIDs that are compatible with a previous version RID for the same OS should then import the previous version, architecture neutral RID.  EG: `ubuntu.14.10` should import `ubuntu.14.04`. If there is no earlier compatible/supported version, then a versionless RID should be imported.  EG: `ubuntu14.04` should import `ubuntu`.
-4. Version-less RIDs shoudld import an OS category.  EG: `ubuntu-x64` should import `linux-x64`, `ubuntu` should import `linux`.
+1. Architecture-specific RIDs should first import the architecture-less RID.  EG: `osx.10.11-x64` should first import `osx.10.11`.
+2. Architecture-specific RIDs that are compatible with a previous version RID for the same OS should then import the previous version, architecture specific RID.  EG: `osx.10.11-x64` should then import `osx.10.10-x64`.  If there is no earlier compatible/supported version, then a versionless RID should be imported.  EG: `osx.10.10-x64` should import `osx-x64`.
+3. Architecture-less RIDs that are compatible with a previous version RID for the same OS should then import the previous version, architecture neutral RID.  EG: `osx.10.11` should import `osx.10.10`. If there is no earlier compatible/supported version, then a versionless RID should be imported.  EG: `osx.10.10` should import `osx`.
+4. Version-less RIDs should import an OS category.  EG: `osx-x64` should import `unix-x64`, `osx` should import `unix`.
 
 
