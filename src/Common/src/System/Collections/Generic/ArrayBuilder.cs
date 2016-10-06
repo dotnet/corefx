@@ -75,11 +75,6 @@ namespace System.Collections.Generic
 
         public T[] ToArray()
         {
-#if DEBUG
-            // Try to prevent callers from using the ArrayBuilder after ToArray.
-            _count = -1;
-#endif
-
             if (_array == null)
             {
                 return Array.Empty<T>();
@@ -89,6 +84,11 @@ namespace System.Collections.Generic
             {
                 Array.Resize(ref _array, _count);
             }
+
+#if DEBUG
+            // Try to prevent callers from using the ArrayBuilder after ToArray, if _array isn't null.
+            _count = -1;
+#endif
 
             return _array;
         }
