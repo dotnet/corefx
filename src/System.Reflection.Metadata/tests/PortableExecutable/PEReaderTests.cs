@@ -389,7 +389,7 @@ namespace System.Reflection.PortableExecutable.Tests
             var peStream = new MemoryStream(PortablePdbs.DocumentsEmbeddedDll);
             using (var reader = new PEReader(peStream))
             {
-                using (var embeddedProvider = reader.ReadEmbeddedPortablePdbDebugDirectoryData(reader.ReadDebugDirectory()[2]))
+                using (MetadataReaderProvider embeddedProvider = reader.ReadEmbeddedPortablePdbDebugDirectoryData(reader.ReadDebugDirectory()[2]))
                 {
                     var embeddedReader = embeddedProvider.GetMetadataReader();
                     var embeddedBytes = new BlobReader(embeddedReader.MetadataPointer, embeddedReader.MetadataLength).ReadBytes(embeddedReader.MetadataLength);

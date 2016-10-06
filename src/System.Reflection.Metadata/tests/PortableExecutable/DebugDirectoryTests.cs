@@ -153,7 +153,7 @@ namespace System.Reflection.PortableExecutable.Tests
             Assert.Equal(DebugDirectoryEntryType.Reproducible, entries[1].Type);
             Assert.Equal(DebugDirectoryEntryType.EmbeddedPortablePdb, entries[2].Type);
 
-            using (var provider = reader.ReadEmbeddedPortablePdbDebugDirectoryData(entries[2]))
+            using (MetadataReaderProvider provider = reader.ReadEmbeddedPortablePdbDebugDirectoryData(entries[2]))
             {
                 var pdbReader = provider.GetMetadataReader();
                 var document = pdbReader.GetDocument(pdbReader.Documents.First());
