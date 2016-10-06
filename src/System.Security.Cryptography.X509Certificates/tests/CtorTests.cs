@@ -165,7 +165,31 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        public static void TestCopyConstructor_Lifetime()
+        public static void TestCopyConstructor_Lifetime_Independent()
+        {
+            var c1 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword);
+            using (var c2 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            {
+                RSA rsa = c2.GetRSAPrivateKey();
+                byte[] hash = new byte[20];
+                byte[] sig = rsa.SignHash(hash, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+                Assert.Equal(TestData.PfxSha1Empty_ExpectedSig, sig);
+
+                c1.Dispose();
+                rsa.Dispose();
+
+                // Verify other cert and previous key do not affect cert
+                using (rsa = c2.GetRSAPrivateKey())
+                {
+                    hash = new byte[20];
+                    sig = rsa.SignHash(hash, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+                    Assert.Equal(TestData.PfxSha1Empty_ExpectedSig, sig);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestCopyConstructor_Lifetime_Cloned()
         {
             var c1 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword);
             var c2 = new X509Certificate2(c1);
@@ -178,6 +202,22 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             c2.Dispose();
             TestPrivateKey(c2, false);
+        }
+
+        [Fact]
+        public static void TestCopyConstructor_Lifetime_Cloned_Reversed()
+        {
+            var c1 = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword);
+            var c2 = new X509Certificate2(c1);
+            TestPrivateKey(c1, true);
+            TestPrivateKey(c2, true);
+
+            c2.Dispose();
+            TestPrivateKey(c1, true);
+            TestPrivateKey(c2, false);
+
+            c1.Dispose();
+            TestPrivateKey(c1, false);
         }
 
         private static void TestPrivateKey(X509Certificate2 c, bool expectSuccess)
