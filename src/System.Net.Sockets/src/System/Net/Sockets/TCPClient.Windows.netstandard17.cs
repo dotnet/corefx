@@ -10,7 +10,7 @@ namespace System.Net.Sockets
     {
         private void ConnectCore(string hostname, int port)
         {
-            // IPv6: We need to process each of the addresses return from
+            // IPv6: We need to process each of the addresses returned from
             //       DNS when trying to connect. Use of AddressList[0] is
             //       bad form.
             IPAddress[] addresses = Dns.GetHostAddresses(hostname);
@@ -45,19 +45,13 @@ namespace System.Net.Sockets
                             {
                                 ipv4Socket.Connect(address, port);
                                 _clientSocket = ipv4Socket;
-                                if (ipv6Socket != null)
-                                {
-                                    ipv6Socket.Close();
-                                }
+                                ipv6Socket?.Close();
                             }
                             else if (ipv6Socket != null)
                             {
                                 ipv6Socket.Connect(address, port);
                                 _clientSocket = ipv6Socket;
-                                if (ipv4Socket != null)
-                                {
-                                    ipv4Socket.Close();
-                                }
+                                ipv4Socket?.Close();
                             }
 
                             _family = address.AddressFamily;
@@ -72,13 +66,8 @@ namespace System.Net.Sockets
                             break;
                         }
                     }
-
-                    catch (Exception ex)
+                    catch (Exception ex) when (!(ex is OutOfMemoryException))
                     {
-                        if (ex is OutOfMemoryException)
-                        {
-                            throw;
-                        }
                         lastex = ex;
                     }
                 }
@@ -95,23 +84,14 @@ namespace System.Net.Sockets
 
             finally
             {
-
                 //cleanup temp sockets if failed
                 //main socket gets closed when tcpclient gets closed
 
                 //did we connect?
                 if (!_active)
                 {
-                    if (ipv6Socket != null)
-                    {
-                        ipv6Socket.Close();
-                    }
-
-                    if (ipv4Socket != null)
-                    {
-                        ipv4Socket.Close();
-                    }
-
+                    ipv6Socket?.Close();
+                    ipv4Socket?.Close();
 
                     // The connect failed - rethrow the last error we had
                     if (lastex != null)

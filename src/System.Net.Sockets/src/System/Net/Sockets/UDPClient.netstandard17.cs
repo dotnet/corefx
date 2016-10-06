@@ -19,12 +19,11 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
-            //
+
             // NOTE: Need to create different kinds of sockets based on the addresses
             //       returned from DNS. As a result, we defer the creation of the 
             //       socket until the Connect method.
-            //
-            //CreateClientSocket();
+
             Connect(hostname, port);
         }
 

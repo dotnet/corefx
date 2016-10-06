@@ -49,12 +49,10 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
-            //
+
             // IPv6: Delay creating the client socket until we have
             //       performed DNS resolution and know which address
             //       families we can use.
-            //
-            //InitializeClientSocket();
 
             try
             {
@@ -168,7 +166,6 @@ namespace System.Net.Sockets
             }
         }
 
-        //methods
         public void Connect(IPAddress[] ipAddresses, int port)
         {
             if (NetEventSource.Log.IsEnabled())
