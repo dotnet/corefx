@@ -110,10 +110,12 @@ namespace System.Collections.Generic
         /// </remarks>
         public T[] ToArray()
         {
-            if (_array == null)
+            if (_count == 0)
             {
                 return Array.Empty<T>();
             }
+
+            Debug.Assert(_array != null); // Nonzero _count should imply this
 
             if (_count < _array.Length)
             {
@@ -121,7 +123,7 @@ namespace System.Collections.Generic
             }
 
 #if DEBUG
-            // Try to prevent callers from using the ArrayBuilder after ToArray, if _array isn't null.
+            // Try to prevent callers from using the ArrayBuilder after ToArray, if _count != 0.
             _count = -1;
 #endif
 
