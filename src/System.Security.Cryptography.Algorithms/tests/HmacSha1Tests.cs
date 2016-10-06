@@ -41,17 +41,25 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         [Fact]
         public void HmacSha1_Byte_Constructors()
         {
-            byte[] arg = new byte[]{ 1 };
+            byte[] key = (byte[])s_testKeys2202[1].Clone();
+            string digest = "b617318655057264e28bc0b6fb378c8ef146be00";
 
-            HMACSHA1 h1 = new HMACSHA1(arg);
-            Assert.Equal(1, h1.Key[0]);
-
+            using (HMACSHA1 h1 = new HMACSHA1(key))
+            {
+                VerifyHmac_KeyAlreadySet(h1, 1, digest);
 #if netstandard17
-            HMACSHA1 h2 = new HMACSHA1(arg, true);
-            Assert.Equal(1, h2.Key[0]);
-
-            Assert.Equal(h1.Key, h2.Key);
+                using (HMACSHA1 h2 = new HMACSHA1(key, true))
+                {
+                    VerifyHmac_KeyAlreadySet(h2, 1, digest);
+                    Assert.Equal(h1.Key, h2.Key);
+                }
+                using (HMACSHA1 h2 = new HMACSHA1(key, false))
+                {
+                    VerifyHmac_KeyAlreadySet(h1, 1, digest);
+                    Assert.Equal(h1.Key, h2.Key);
+                }
 #endif
+            }
         }
 
         [Fact]

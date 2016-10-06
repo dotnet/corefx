@@ -27,7 +27,7 @@ namespace System.Security.Cryptography
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public HMACSHA1(byte[] key, bool useManagedSha1) : this (key)
+        public HMACSHA1(byte[] key, bool useManagedSha1) : this(key)
         {
             // useManagedSha1 is ignored
         }

@@ -10,7 +10,7 @@ namespace System.Security.Cryptography
     [Serializable]
     public abstract class ECDiffieHellmanPublicKey : IDisposable
     {
-        private byte[] _keyBlob;
+        private readonly byte[] _keyBlob;
 
         protected ECDiffieHellmanPublicKey(byte[] keyBlob)
         {
@@ -27,10 +27,7 @@ namespace System.Security.Cryptography
             Dispose(true);
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            return;
-        }
+        protected virtual void Dispose(bool disposing) { }
 
         public virtual byte[] ToByteArray()
         {
