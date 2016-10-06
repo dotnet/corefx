@@ -242,7 +242,7 @@ namespace System.Linq
                     if (union == null)
                     {
                         Debug.Assert(index == 0 || index == 1);
-                        Debug.Assert(EquivalentEqualityComparers(_comparer, previous._comparer));
+                        Debug.Assert(AreEqualityComparersEqual(_comparer, previous._comparer));
                         return previous.GetEnumerable(index);
                     }
                 }
