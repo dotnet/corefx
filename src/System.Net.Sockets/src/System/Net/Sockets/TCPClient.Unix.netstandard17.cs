@@ -14,10 +14,22 @@ namespace System.Net.Sockets
         private void ConnectCore(string host, int port)
         {
             StartConnectCore(host, port);
-            Task t = ConnectCorePrivate(host, port, (s, a, p) => { s.Connect(a, p); return Task.CompletedTask; });
 
-            Debug.Assert(t.IsCompleted);
-            t.GetAwaiter().GetResult();
+            try
+            {
+                // Since Socket.Connect(host, port) won't work, get the addresses manually,
+                // and then delegate to Connect(IPAddress[], int).
+                IPAddress[] addresses = Dns.GetHostAddresses(host);
+
+                Task t = ConnectCorePrivate(addresses, port, (s, a, p) => { s.Connect(a, p); return Task.CompletedTask; });
+
+                Debug.Assert(t.IsCompleted);
+                t.GetAwaiter().GetResult();
+            }
+            finally
+            {
+                ExitClientLock();
+            }
         }
 
         private void ConnectCore(IPAddress[] addresses, int port)

@@ -195,7 +195,7 @@ namespace System.Net.Sockets
         private Task ConnectAsyncCore(string host, int port)
         {
             StartConnectCore(host, port);
-            return ConnectCorePrivate(host, port, (s, a, p) => s.ConnectAsync(a, p));
+            return ConnectAsyncCorePrivate(host, port, (s, a, p) => s.ConnectAsync(a, p));
         }
 
         private void StartConnectCore(string host, int port)
@@ -219,7 +219,7 @@ namespace System.Net.Sockets
             EnterClientLock();
         }
 
-        private async Task ConnectCorePrivate(string host, int port, Func<Socket, IPAddress, int, Task> connect)
+        private async Task ConnectAsyncCorePrivate(string host, int port, Func<Socket, IPAddress, int, Task> connect)
         {
             try
             {
