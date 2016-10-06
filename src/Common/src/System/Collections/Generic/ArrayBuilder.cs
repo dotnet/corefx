@@ -6,12 +6,19 @@ using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
+    /// <summary>
+    /// Helper type for avoiding allocations while building arrays.
+    /// </summary>
     internal struct ArrayBuilder<T>
     {
         private T[] _array; // Starts out null, initialized on first Add.
         private int _count; // Number of items into _array we're using.
 
-        public ArrayBuilder(int capacity)
+        /// <summary>
+        /// Initializes the <see cref="ArrayBuilder{T}"/> with a specified capacity.
+        /// </summary>
+        /// <param name="capacity">The capacity of the array to allocate.</param>
+        public ArrayBuilder(int capacity) : this()
         {
             Debug.Assert(capacity >= 0);
             if (capacity > 0)
@@ -20,10 +27,21 @@ namespace System.Collections.Generic
             }
         }
 
+        /// <summary>
+        /// Gets the number of items this instance can store without re-allocating,
+        /// or 0 if the backing array is <c>null</c>.
+        /// </summary>
         public int Capacity => _array?.Length ?? 0;
 
+        /// <summary>
+        /// Gets the number of items in the array currently in use.
+        /// </summary>
         public int Count => _count;
 
+        /// <summary>
+        /// Gets or sets the item at a certain index in the array.
+        /// </summary>
+        /// <param name="index">The index into the array.</param>
         public T this[int index]
         {
             get
@@ -38,6 +56,10 @@ namespace System.Collections.Generic
             }
         }
 
+        /// <summary>
+        /// Adds an item to the backing array, resizing it if necessary.
+        /// </summary>
+        /// <param name="item">The item to add.</param>
         public void Add(T item)
         {
             if (_count == Capacity)
@@ -48,6 +70,10 @@ namespace System.Collections.Generic
             UncheckedAdd(item);
         }
 
+        /// <summary>
+        /// Adds an array of items to the backing array, resizing it if necessary.
+        /// </summary>
+        /// <param name="items">The items to add.</param>
         public void AddRange(T[] items)
         {
             Debug.Assert(items != null);
@@ -68,11 +94,20 @@ namespace System.Collections.Generic
             }
         }
 
+        /// <summary>
+        /// Gets an enumerator which enumerates the contents of this builder.
+        /// </summary>
         public Enumerator GetEnumerator()
         {
             return new Enumerator(_array, _count);
         }
 
+        /// <summary>
+        /// Returns an array with equivalent contents as this builder.
+        /// </summary>
+        /// <remarks>
+        /// Do not call this method twice on the same builder.
+        /// </remarks>
         public T[] ToArray()
         {
             if (_array == null)
@@ -93,6 +128,14 @@ namespace System.Collections.Generic
             return _array;
         }
 
+        /// <summary>
+        /// Adds an item to the backing array, without checking if there is room.
+        /// </summary>
+        /// <param name="item">The item to add.</param>
+        /// <remarks>
+        /// Use this method if you know there is enough space in the <see cref="ArrayBuilder{T}"/>
+        /// for another item, and you are writing performance-sensitive code.
+        /// </remarks>
         public void UncheckedAdd(T item)
         {
             Debug.Assert(_count < Capacity);
@@ -100,6 +143,14 @@ namespace System.Collections.Generic
             _array[_count++] = item;
         }
 
+        /// <summary>
+        /// Adds new default-initialized slots to this <see cref="ArrayBuilder{T}"/>.
+        /// </summary>
+        /// <param name="count">The number of items to zero-extend by.</param>
+        /// <remarks>
+        /// Unless <see cref="Count"/> plus <paramref name="count"/> cannot fit into
+        /// <see cref="Capacity"/>, this method operates in O(1) time.
+        /// </remarks>
         public void ZeroExtend(int count)
         {
             Debug.Assert(count >= 0);
