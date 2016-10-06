@@ -57,7 +57,7 @@
     <Compile Include="System\Runtime\Versioning\ComponentGuaranteesOptions.cs" />
     <Compile Include="System\Runtime\Versioning\ResourceExposureAttribute.cs" />
     <Compile Include="System\Runtime\Versioning\ResourceScope.cs" />
-   <Compile Include="System\Runtime\Versioning\VersioningHelper.cs" />
+    <Compile Include="System\Runtime\Versioning\VersioningHelper.cs" />
     <Compile Include="$(CommonPath)\System\Collections\Generic\LowLevelDictionary.cs">
       <Link>Common\System\Collections\Generic\LowLevelDictionary.cs</Link>
     </Compile>
@@ -283,7 +283,6 @@
     <Compile Include="System\Runtime\Versioning\VersioningHelper.Unix.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.Unix.cs" />
     <Compile Include="System\IO\Path.Unix.cs" />
-
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.Libraries.cs">
       <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
     </Compile>
