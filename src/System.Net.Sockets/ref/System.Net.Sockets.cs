@@ -102,13 +102,13 @@ namespace System.Net.Sockets
         protected Socket Socket { get { return default(Socket); } }
         protected bool Writeable { get { return default(bool); } set { } }
         public override int WriteTimeout { get { return default(int); } set { } }
-        public IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, Object state) { return default(IAsyncResult); }
-        public IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state) { return default(IAsyncResult); }
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, Object state) { return default(IAsyncResult); }
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state) { return default(IAsyncResult); }
         public void Close(int timeout) { }
         protected override void Dispose(bool disposing) { }
         ~NetworkStream() { }
-        public int EndRead(IAsyncResult asyncResult) { return default(int); }
-        public void EndWrite(IAsyncResult asyncResult) { }
+        public override int EndRead(IAsyncResult asyncResult) { return default(int); }
+        public override void EndWrite(IAsyncResult asyncResult) { }
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public override int Read(byte[] buffer, int offset, int size) { buffer = default(byte[]); return default(int); }
