@@ -533,6 +533,7 @@ namespace System.Net.Sockets
         public IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state) { return default(IAsyncResult); }
         public IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state) { return default(IAsyncResult); }
         public IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state) { return default(IAsyncResult); }
+        public void Close() { }
         public void Connect(System.Net.IPAddress address, int port) { }
         public void Connect(System.Net.IPAddress[] ipAddresses, int port) { }
         public void Connect(System.Net.IPEndPoint remoteEP) { }
@@ -615,6 +616,9 @@ namespace System.Net.Sockets
         public void JoinMulticastGroup(System.Net.IPAddress multicastAddr, System.Net.IPAddress localAddress) { }
         public byte[] Receive(ref IPEndPoint remoteEP) { return default(byte[]); }
         public System.Threading.Tasks.Task<System.Net.Sockets.UdpReceiveResult> ReceiveAsync() { return default(System.Threading.Tasks.Task<System.Net.Sockets.UdpReceiveResult>); }
+        public int Send(byte[] dgram, int bytes) { return default(int); }
+        public int Send(byte[] dgram, int bytes, System.Net.IPEndPoint endPoint) { return default(int); }
+        public int Send(byte[] dgram, int bytes, string hostname, int port) { return default(int); }
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes) { return default(System.Threading.Tasks.Task<int>); }
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes, System.Net.IPEndPoint endPoint) { return default(System.Threading.Tasks.Task<int>); }
         public System.Threading.Tasks.Task<int> SendAsync(byte[] datagram, int bytes, string hostname, int port) { return default(System.Threading.Tasks.Task<int>); }
