@@ -8,14 +8,14 @@ namespace System.Linq
 {
     internal static class Utilities
     {
-        public static bool AreEqualityComparersEqual<T>(IEqualityComparer<T> left, IEqualityComparer<T> right)
+        public static bool AreEqualityComparersEqual<TSource>(IEqualityComparer<TSource> left, IEqualityComparer<TSource> right)
         {
             if (left == right)
             {
                 return true;
             }
 
-            var defaultComparer = EqualityComparer<T>.Default;
+            var defaultComparer = EqualityComparer<TSource>.Default;
 
             if (left == null)
             {
