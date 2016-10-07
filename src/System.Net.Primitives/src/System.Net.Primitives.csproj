@@ -11,8 +11,13 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableWinRT Condition="'$(TargetGroup)' == 'netcore50'">true</EnableWinRT>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetGroup)' == 'netcore50'">
+    <DefineConstants>$(DefineConstants);netcore50</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(EnableWinRT)' != 'true' AND '$(TargetGroup)' == ''">
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
   </PropertyGroup>

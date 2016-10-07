@@ -54,6 +54,8 @@ namespace System.Net
         public void Add(System.Net.CookieCollection cookies) { }
         public System.Collections.IEnumerator GetEnumerator() { return default(System.Collections.IEnumerator); }
         void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
+        public void CopyTo(Cookie[] array, int index) { }
+        public bool IsReadOnly { get; }
     }
     public partial class CookieContainer
     {
@@ -61,12 +63,16 @@ namespace System.Net
         public const int DefaultCookieLimit = 300;
         public const int DefaultPerDomainCookieLimit = 20;
         public CookieContainer() { }
+        public CookieContainer(int capacity) { }
+        public CookieContainer(int capacity, int perDomainCapacity, int maxCookieSize) { }
         public int Capacity { get { return default(int); } set { } }
         public int Count { get { return default(int); } }
         public int MaxCookieSize { get { return default(int); } set { } }
         public int PerDomainCapacity { get { return default(int); } set { } }
         public void Add(System.Uri uri, System.Net.Cookie cookie) { }
         public void Add(System.Uri uri, System.Net.CookieCollection cookies) { }
+        public void Add(CookieCollection cookies) { }
+        public void Add(Cookie cookie) { }
         public string GetCookieHeader(System.Uri uri) { return default(string); }
         public System.Net.CookieCollection GetCookies(System.Uri uri) { return default(System.Net.CookieCollection); }
         public void SetCookies(System.Uri uri, string cookieHeader) { }

@@ -10,6 +10,12 @@
 // System.Private.Networking dll. So, we need to move the classes to a different namespace. Those classes are never
 // exposed up to user code so there isn't a problem.  In the future, we might expose some of the internal methods
 // as new public APIs and then we can remove this duplicate source code inclusion in the binaries.
+using System;
+
+#if !netcore50
+using System.Runtime.Serialization;
+#endif
+
 #if NETNative_SystemNetHttp
 namespace System.Net.Internal
 #else
@@ -17,6 +23,9 @@ namespace System.Net
 #endif
 {
     public class CookieException : FormatException
+#if !netcore50
+        , ISerializable
+#endif
     {
         public CookieException() : base()
         {
@@ -29,5 +38,21 @@ namespace System.Net
         internal CookieException(string message, Exception inner) : base(message, inner)
         {
         }
+#if !netcore50
+        protected CookieException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
+        }
+
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext)
+        {
+            base.GetObjectData(serializationInfo, streamingContext);
+        }
+
+        void ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, StreamingContext streamingContext) 
+        {
+            base.GetObjectData(serializationInfo, streamingContext);
+        }
+#endif
     }
 }

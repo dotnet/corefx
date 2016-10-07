@@ -1,0 +1,2 @@
+#Compat issues with assembly System.Net.Primitives
+CannotRemoveBaseTypeOrInterface : Type 'System.Security.Authentication.ExtendedProtection.ChannelBinding' does not inherit from base type 'System.Runtime.ConstrainedExecution.CriticalFinalizerObject' in the implementation but it does in the contract.
