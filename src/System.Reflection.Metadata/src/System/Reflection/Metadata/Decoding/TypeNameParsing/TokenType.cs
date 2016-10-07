@@ -5,6 +5,7 @@ namespace System.Reflection.Metadata.Decoding
 {
     internal enum TokenType
     {
+        EndOfInput = -1,
         Literal = 0,
         LeftBracket = '[',
         RightBracket = ']',

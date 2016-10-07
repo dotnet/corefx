@@ -117,30 +117,37 @@ namespace System.Reflection.Metadata.Decoding
     {
         private readonly TypeBuilder _builder = new TypeBuilder();
         private readonly ITypeNameParserTypeProvider<TType> _typeProvider;
-        private readonly Tokenizer _tokenizer;
+        private Tokenizer _tokenizer;
         private readonly ParseMode _mode;
 
-        private TypeNameParser(ITypeNameParserTypeProvider<TType> typeProvider, Tokenizer tokenizer, ParseMode mode)
+        private TypeNameParser(ITypeNameParserTypeProvider<TType> typeProvider, string typeName, int startIndex, ParseMode mode)
         {
             Debug.Assert(typeProvider != null);
-            Debug.Assert(tokenizer != null);
 
             _typeProvider = typeProvider;
-            _tokenizer = tokenizer;
+            _tokenizer = new Tokenizer(typeName, startIndex, Delimiters.TypeName);
             _mode = mode;
         }
 
         public static TType ParseType(string typeName, ITypeNameParserTypeProvider<TType> typeProvider)
         {
-            Tokenizer tokenizer = new Tokenizer(new StringReader(typeName), Delimiters.TypeName);
-
-            TypeNameParser<TType> parser = new TypeNameParser<TType>(typeProvider, tokenizer, ParseMode.AssemblyQualifiedName);
+            TypeNameParser<TType> parser = new TypeNameParser<TType>(typeProvider, typeName, 0, ParseMode.AssemblyQualifiedName);
             TType type = parser.Parse();
 
             // Make sure there's no trailing chars
-            tokenizer.Close();
+            parser.Close();
 
             return type;
+        }
+
+        public int Position
+        {
+            get { return _tokenizer.Position; }
+        }
+        
+        private void Close()
+        {
+            _tokenizer.Close();
         }
 
         // <format>
@@ -233,8 +240,8 @@ namespace System.Reflection.Metadata.Decoding
 
             // NOTE: Peek skips white space, so a space between brackets,
             // such as in 'System.Int32[ ]', will not trip us up
-            TokenType? token = _tokenizer.PeekNext();
-            return (token != null &&
+            TokenType token = _tokenizer.PeekNext();
+            return (token != TokenType.EndOfInput &&
                     token != TokenType.RightBracket &&
                     token != TokenType.Comma &&
                     token != TokenType.Star);
@@ -278,9 +285,10 @@ namespace System.Reflection.Metadata.Decoding
 
         private void ParseGenericTypeArgumentName(ParseMode mode)
         {
-            TypeNameParser<TType> parser = new TypeNameParser<TType>(_typeProvider, _tokenizer, mode);
+            TypeNameParser<TType> parser = new TypeNameParser<TType>(_typeProvider, _tokenizer.Input, _tokenizer.Position, mode);
 
             TType type = parser.Parse();
+            _tokenizer.Position = parser.Position;
 
             _builder.AddGenericTypeArgument(type);
         }
@@ -402,7 +410,9 @@ namespace System.Reflection.Metadata.Decoding
             if (!_tokenizer.SkipIf(TokenType.Comma))
                 return;
 
-            _builder.AssemblyName = AssemblyNameParser.Parse(_tokenizer.UnderlyingReader, withinGenericTypeArgument: _mode == ParseMode.AssemblyQualifiedNameWithinGenericTypeArgument);
+            int position = _tokenizer.Position;
+            _builder.AssemblyName = AssemblyNameParser.Parse(_tokenizer.Input, ref position, withinGenericTypeArgument: _mode == ParseMode.AssemblyQualifiedNameWithinGenericTypeArgument);
+            _tokenizer.Position = position;
         }
     }
 }

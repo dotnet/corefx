@@ -5,20 +5,25 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Decoding
 {
-    internal partial class Tokenizer
+    internal partial struct Tokenizer
     {
         // Represents a self-contained unit within a tokenized string
-        private class Token
+        private struct Token
         {
             private readonly char _value;
             private readonly TokenType _tokenType;
 
             private Token(char value, TokenType tokenType)
             {
-                Debug.Assert(value != '\0');
+                Debug.Assert(tokenType == TokenType.EndOfInput || value != '\0');
 
                 _value = value;
                 _tokenType = tokenType;
+            }
+
+            public bool IsEndOfInput
+            {
+                get { return _tokenType == TokenType.EndOfInput; }
             }
 
             public bool IsDelimiter
@@ -91,6 +96,11 @@ namespace System.Reflection.Metadata.Decoding
             public static Token EscapeSequence(char value)
             {
                 return new Token(value, TokenType.EscapeSequence);
+            }
+
+            public static Token EndOfInput()
+            {
+                return new Token('\0', TokenType.EndOfInput);
             }
         }
     }

@@ -9,34 +9,83 @@ using System.Text;
 namespace System.Reflection.Metadata.Decoding
 {
     // Tokenizes a string into delimiters, literals and whitespace
-    internal partial class Tokenizer
+    internal partial struct Tokenizer
     {
-        private readonly StringReader _reader;
+        private readonly string _input;
+        private int _position;
         private readonly ImmutableArray<TokenType> _delimiters;
 
-        public Tokenizer(StringReader reader, ImmutableArray<TokenType> delimiters)
+        public Tokenizer(string input, int startIndex, ImmutableArray<TokenType> delimiters)
         {
-            Debug.Assert(reader != null);
+            Debug.Assert(input != null);
+            Debug.Assert(input.Length > 0);
+            Debug.Assert(startIndex >= 0);
+            Debug.Assert(startIndex <= input.Length);
 
-            _reader = reader;
+            _input = input;
+            _position = startIndex;
             _delimiters = delimiters;
         }
 
-        public StringReader UnderlyingReader
+        public bool CanRead
         {
-            get { return _reader; }
+            get
+            {
+                if (_position < _input.Length)
+                {
+                    // Treat null as end of string
+                    return PeekChar() != '\0';
+                }
+
+                return false;
+            }
         }
 
-        public TokenType? Peek(int lookAhead = 1)
+        public string Input
         {
-            Token token = PeekToken(lookAhead);
-            if (token == null)
-                return null;
-
-            return token.TokenType;
+            get { return _input; }
         }
 
-        public TokenType? PeekNext()
+        public int Position
+        {
+            get { return _position; }
+            set
+            {
+                Debug.Assert(value >= 0 && value <= _input.Length);
+                _position = value;
+            }
+        }
+
+        public char PeekChar()
+        {
+            return _input[_position];
+        }
+
+        public char ReadChar()
+        {
+            char c = PeekChar();
+
+            _position++;
+
+            return c;
+        }
+
+        public Tokenizer Clone()
+        {
+            return new Tokenizer(_input, _position, _delimiters);
+        }
+
+        internal Tokenizer WithDelimiters(ImmutableArray<TokenType> delimiters)
+        {
+            return new Tokenizer(_input, _position, delimiters);
+        }
+
+        public TokenType Peek(int lookAhead = 1)
+        {
+            return PeekToken(lookAhead).TokenType;
+        }
+
+        public TokenType PeekNext()
         {
             return Peek(2);
         }
@@ -44,7 +93,7 @@ namespace System.Reflection.Metadata.Decoding
         public void Skip(TokenType expected)
         {
             Token token = ReadToken();
-            if (token == null)
+            if (token.IsEndOfInput)
             {
                 throw FormatException(TypeNameFormatErrorId.DelimiterExpected_EncounteredEndOfString, SR.TypeFormat_DelimiterExpected_EncounteredEndOfString, (char)expected);
             }
@@ -67,7 +116,7 @@ namespace System.Reflection.Metadata.Decoding
         public void Close()
         {
             Token token = ReadToken();
-            if (token != null)
+            if (!token.IsEndOfInput)
                 throw FormatException(TypeNameFormatErrorId.EndOfStringExpected_EncounteredExtraCharacters, SR.TypeFormat_EndOfStringExpected_EncounteredExtraCharacters, token.Value);
         }
 
@@ -97,7 +146,7 @@ namespace System.Reflection.Metadata.Decoding
             StringBuilder identifier = new StringBuilder();
 
             Token token;
-            while ((token = PeekToken(ParseOptions.IncludeWhiteSpace)) != null)
+            while (!(token = PeekToken(ParseOptions.IncludeWhiteSpace)).IsEndOfInput)
             {
                 if (!token.IsIdentifier)
                     break;
@@ -116,7 +165,7 @@ namespace System.Reflection.Metadata.Decoding
 
             // Are we at the end of the string?
             Token token = ReadToken(ParseOptions.IncludeWhiteSpace);    // Consume token, so "position" is correct
-            if (token == null)
+            if (token.IsEndOfInput)
             {
                 throw FormatException(TypeNameFormatErrorId.IdExpected_EncounteredEndOfString, SR.TypeFormat_IdExpected_EncounteredEndOfString);
             }
@@ -146,10 +195,10 @@ namespace System.Reflection.Metadata.Decoding
 
         private Token PeekToken(int lookAhead, ParseOptions options = ParseOptions.None)
         {
-            StringReader reader = _reader.Clone();
+            Tokenizer clone = Clone();
 
             Token token;
-            while ((token = ParseTokenFrom(reader, options)) != null)
+            while (!(token = clone.ReadToken(options)).IsEndOfInput)
             {
                 lookAhead--;
                 if (lookAhead == 0)
@@ -161,35 +210,30 @@ namespace System.Reflection.Metadata.Decoding
 
         private Token ReadToken(ParseOptions options = ParseOptions.None)
         {
-            return ParseTokenFrom(_reader, options);
-        }
+            if (!CanRead)
+                return Token.EndOfInput();
 
-        private Token ParseTokenFrom(StringReader reader, ParseOptions options)
-        {
-            Token token = GetTokenFrom(reader);
-            if (token == null)
-                return null;
+            Token token = GetToken();
+            if (token.IsEndOfInput)
+                return token;
 
-            token = HandleEscapeSequence(token, reader);
+            token = HandleEscapeSequence(token);
 
             if (options != ParseOptions.IncludeWhiteSpace)
             {
-                token = HandleWhiteSpace(token, reader);
+                token = HandleWhiteSpace(token);
             }
 
             return token;
         }
 
-        private Token GetTokenFrom(StringReader reader)
+        private Token GetToken()
         {
-            if (!reader.CanRead)
-                return null;
+            if (!CanRead)
+                return Token.EndOfInput();
 
-            return GetToken(reader.Read());
-        }
+            char c = ReadChar();
 
-        private Token GetToken(char c)
-        {
             if (IsDelimiter(c))
             {
                 return Token.Delimiter(c);
@@ -209,12 +253,12 @@ namespace System.Reflection.Metadata.Decoding
             return Token.Literal(c);
         }
 
-        private bool IsWhiteSpace(char c)
+        private static bool IsWhiteSpace(char c)
         {
             return (TokenType)c == TokenType.WhiteSpace;
         }
 
-        private bool IsEscapeSequence(char c)
+        private static bool IsEscapeSequence(char c)
         {
             return (TokenType)c == TokenType.EscapeSequence;
         }
@@ -224,30 +268,30 @@ namespace System.Reflection.Metadata.Decoding
             return _delimiters.Contains((TokenType)c);
         }
 
-        private Token HandleEscapeSequence(Token token, StringReader reader)
+        private Token HandleEscapeSequence(Token token)
         {
             // Are we looking at escape sequence?
             if (!token.IsEscapeSequence)
                 return token;
 
             // Escape sequence must be followed by a delimiter or escape sequence
-            token = GetTokenFrom(reader);
-            if (token == null)
-                throw FormatException(reader, TypeNameFormatErrorId.EscapedDelimiterExpected_EncounteredEndOfString, SR.TypeFormat_EscapedDelimiterExpected_EncounteredEndOfString);
+            token = GetToken();
+            if (token.IsEndOfInput)
+                throw FormatException(TypeNameFormatErrorId.EscapedDelimiterExpected_EncounteredEndOfString, SR.TypeFormat_EscapedDelimiterExpected_EncounteredEndOfString);
 
             // Next delimiter is always considered a literal
             if (!token.IsDelimiter && !token.IsEscapeSequence)
-                throw FormatException(reader, TypeNameFormatErrorId.EscapedDelimiterExpected, SR.TypeFormat_EscapedDelimiterExpected, token.Value);
+                throw FormatException(TypeNameFormatErrorId.EscapedDelimiterExpected, SR.TypeFormat_EscapedDelimiterExpected, token.Value);
 
             // Treat the next thing as literal
             return Token.Literal(token.Value);
         }
 
-        private Token HandleWhiteSpace(Token token, StringReader reader)
+        private Token HandleWhiteSpace(Token token)
         {
-            while (token != null && token.IsWhiteSpace)
+            while (!token.IsEndOfInput && token.IsWhiteSpace)
             {
-                token = GetTokenFrom(reader);
+                token = GetToken();
             }
 
             return token;
@@ -255,17 +299,12 @@ namespace System.Reflection.Metadata.Decoding
 
         public FormatException FormatException(TypeNameFormatErrorId errorId, string format, params object[] arguments)
         {
-            return FormatException(_reader, errorId, format, arguments);
-        }
-
-        private static FormatException FormatException(StringReader reader, TypeNameFormatErrorId errorId, string format, params object[] arguments)
-        {
             string message = String.Format(CultureInfo.CurrentCulture, format, arguments);
-            string positionMessage = String.Format(CultureInfo.CurrentCulture, SR.TypeFormat_Position, reader.Position);
+            string positionMessage = String.Format(CultureInfo.CurrentCulture, SR.TypeFormat_Position, _position);
 
             return new TypeNameFormatException(message + " " + positionMessage,
                                                errorId,
-                                               reader.Position);
+                                               _position);
         }
     }
 }

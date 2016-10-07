@@ -79,26 +79,28 @@ namespace System.Reflection.Metadata.Decoding
     internal partial class AssemblyNameParser
     {
         private readonly AssemblyNameBuilder _builder = new AssemblyNameBuilder();
-        private readonly Tokenizer _tokenizer;
+        private Tokenizer _tokenizer;
         private readonly bool _ownTokenizer;
 
-        private AssemblyNameParser(StringReader reader, ParseMode mode)
+        private AssemblyNameParser(string input, int startIndex, ParseMode mode)
         {
-            Debug.Assert(reader != null);
-
             _ownTokenizer = mode == ParseMode.AssemblyName;
-            _tokenizer = new Tokenizer(reader, mode == ParseMode.AssemblyName ? Delimiters.AssemblyName :
-                                                                                Delimiters.AssemblyNameWithinGenericTypeArgument);
+            _tokenizer = new Tokenizer(input, startIndex, mode == ParseMode.AssemblyName ? Delimiters.AssemblyName :
+                                                                                           Delimiters.AssemblyNameWithinGenericTypeArgument);
         }
 
-        public static AssemblyNameComponents Parse(StringReader reader, bool withinGenericTypeArgument)
+        public static AssemblyNameComponents Parse(string input, ref int index, bool withinGenericTypeArgument)
         {
-            Debug.Assert(reader != null);
-
-            AssemblyNameParser parser = new AssemblyNameParser(reader, withinGenericTypeArgument ? ParseMode.AssemblyNameWithinGenericTypeArgument : ParseMode.AssemblyName);
+            AssemblyNameParser parser = new AssemblyNameParser(input, index, withinGenericTypeArgument ? ParseMode.AssemblyNameWithinGenericTypeArgument : ParseMode.AssemblyName);
             AssemblyNameComponents name = parser.Parse();
+            index = parser._tokenizer.Position;
 
             return name;
+        }
+
+        public int Position
+        {
+            get { return _tokenizer.Position; }
         }
 
         private AssemblyNameComponents Parse()
@@ -163,7 +165,19 @@ namespace System.Reflection.Metadata.Decoding
             if (_tokenizer.Peek() != TokenType.Quote)
                 return null;
 
-            return QuotedIdentifierParser.Parse(_tokenizer.UnderlyingReader, required);
+            Tokenizer quotedTokenizer = _tokenizer.WithDelimiters(Delimiters.QuotedIdentifier);
+
+            // Consume '"'
+            quotedTokenizer.Skip(TokenType.Quote);
+
+            // Within a quoted identifier, all leading/trailing white space is treated as significant
+            string identifier = quotedTokenizer.ReadId(required ? IdentifierOptions.Required : IdentifierOptions.None);
+
+            // Consume '"'
+            quotedTokenizer.Skip(TokenType.Quote);
+
+            _tokenizer.Position = quotedTokenizer.Position;
+            return identifier;
         }
 
         // <identifier>

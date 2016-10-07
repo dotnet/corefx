@@ -3,7 +3,7 @@
 
 namespace System.Reflection.Metadata.Decoding
 {
-    internal partial class Tokenizer
+    internal partial struct Tokenizer
     {
         private enum ParseOptions
         {

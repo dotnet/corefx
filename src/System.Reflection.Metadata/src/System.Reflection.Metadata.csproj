@@ -139,8 +139,6 @@
     <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Delimiters.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\IdentifierOptions.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\ITypeNameParserTypeProvider.cs" />
-    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\QuotedIdentifierParser.cs" />
-    <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\StringReader.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.ParseOptions.cs" />
     <Compile Include="System\Reflection\Metadata\Decoding\TypeNameParsing\Tokenizer.Token.cs" />
