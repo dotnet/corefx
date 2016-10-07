@@ -240,5 +240,94 @@ namespace System.Net.Sockets
             return _buffer;
         }
 
+
+        // Sends a UDP datagram to the host at the remote end point.
+        public int Send(byte[] dgram, int bytes, IPEndPoint endPoint)
+        {
+            if (_cleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+            if (dgram == null)
+            {
+                throw new ArgumentNullException(nameof(dgram));
+            }
+            if (_active && endPoint != null)
+            {
+                // Do not allow sending packets to arbitrary host when connected
+                throw new InvalidOperationException(SR.net_udpconnected);
+            }
+
+            if (endPoint == null)
+            {
+                return Client.Send(dgram, 0, bytes, SocketFlags.None);
+            }
+
+            CheckForBroadcast(endPoint.Address);
+
+            return Client.SendTo(dgram, 0, bytes, SocketFlags.None, endPoint);
+        }
+
+
+        // Sends a UDP datagram to the specified port on the specified remote host.
+        public int Send(byte[] dgram, int bytes, string hostname, int port)
+        {
+            if (_cleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+            if (dgram == null)
+            {
+                throw new ArgumentNullException(nameof(dgram));
+            }
+            if (_active && ((hostname != null) || (port != 0)))
+            {
+                // Do not allow sending packets to arbitrary host when connected
+                throw new InvalidOperationException(SR.net_udpconnected);
+            }
+
+            if (hostname == null || port == 0)
+            {
+                return Client.Send(dgram, 0, bytes, SocketFlags.None);
+            }
+
+            IPAddress[] addresses = Dns.GetHostAddresses(hostname);
+
+            int i = 0;
+            for (; i < addresses.Length && addresses[i].AddressFamily != _family; i++)
+            {
+                ; // just count the addresses
+            }
+
+            if (addresses.Length == 0 || i == addresses.Length)
+            {
+                throw new ArgumentException(SR.net_invalidAddressList, nameof(hostname));
+            }
+
+            CheckForBroadcast(addresses[i]);
+            IPEndPoint ipEndPoint = new IPEndPoint(addresses[i], port);
+            return Client.SendTo(dgram, 0, bytes, SocketFlags.None, ipEndPoint);
+        }
+
+
+        // Sends a UDP datagram to a remote host.
+        public int Send(byte[] dgram, int bytes)
+        {
+            if (_cleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+            if (dgram == null)
+            {
+                throw new ArgumentNullException(nameof(dgram));
+            }
+            if (!_active)
+            {
+                // only allowed on connected socket
+                throw new InvalidOperationException(SR.net_notconnected);
+            }
+
+            return Client.Send(dgram, 0, bytes, SocketFlags.None);
+        }
     }
 }

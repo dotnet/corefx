@@ -180,5 +180,10 @@ namespace System.Net.Sockets
                 NetEventSource.Exit(NetEventSource.ComponentType.Socket, this, nameof(Connect), null);
             }
         }
+
+        public void Close()
+        {
+            Dispose();
+        }
     }
 }
