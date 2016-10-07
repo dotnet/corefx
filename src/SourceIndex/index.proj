@@ -25,6 +25,10 @@
       </Code>
     </Task>
   </UsingTask>
+  
+  <Target Name="Validate" BeforeTargets="RestorePackages">
+    <Error Condition="!Exists('../../../coreclr/src/mscorlib/System.Private.CoreLib.csproj')" Text="CoreClr repository not found - the source index can only be built with side by side repositories of coreclr and corefx."/>
+  </Target>
 
   <Target Name="RestorePackages" Condition="'$(HtmlGeneratorExePath)' == ''">
     <Exec Command="$(DotnetToolCommand) restore --packages $(PackagesDir)" WorkingDirectory="$(MSBuildThisFileDirectory)"/>
