@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Threading.Timer.Tests", "tests\System.Threading.Timer.Tests.csproj", "{AC20A28F-FDA8-45E8-8728-058EAD16E44C}"
 EndProject
@@ -39,14 +39,14 @@ Global
 		{AC20A28F-FDA8-45E8-8728-058EAD16E44C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50_Debug|Any CPU.ActiveCfg = netcore50_Debug|Any CPU
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50_Debug|Any CPU.Build.0 = netcore50_Debug|Any CPU
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50_Release|Any CPU.ActiveCfg = netcore50_Release|Any CPU
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50_Release|Any CPU.Build.0 = netcore50_Release|Any CPU
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50aot_Debug|Any CPU.ActiveCfg = netcore50aot_Debug|Any CPU
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50aot_Debug|Any CPU.Build.0 = netcore50aot_Debug|Any CPU
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50aot_Release|Any CPU.ActiveCfg = netcore50aot_Release|Any CPU
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50aot_Release|Any CPU.Build.0 = netcore50aot_Release|Any CPU
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50_Release|Any CPU.Build.0 = Release|Any CPU
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50aot_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50aot_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50aot_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.netcore50aot_Release|Any CPU.Build.0 = Release|Any CPU
 		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{97EEEDF4-D074-4D68-BB1D-B7C3EE36D522}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -66,8 +66,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA} = {9BA4D6A6-C48D-4470-8FA6-D12102F47EA5}
 		{AC20A28F-FDA8-45E8-8728-058EAD16E44C} = {C68160F1-EC89-4B68-B2FE-9DB33E6360CE}
+		{248D07D6-0DA9-4F3B-9F05-A17C72F3EDAA} = {9BA4D6A6-C48D-4470-8FA6-D12102F47EA5}
 		{97EEEDF4-D074-4D68-BB1D-B7C3EE36D522} = {32AFC2C9-4EE5-4EE7-A5D8-8FBF49D488A3}
 	EndGlobalSection
 EndGlobal
