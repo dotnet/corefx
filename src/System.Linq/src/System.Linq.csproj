@@ -16,14 +16,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)' == ''">
-    <Compile Include="$(CommonPath)\System\Collections\Generic\ComparerUtilities.cs">
-      <Link>System\Collections\Generic\ComparerUtilities.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
       <Link>System\Collections\Generic\EnumerableHelpers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\FunctionUtilities.cs">
-      <Link>System\Collections\Generic\FunctionUtilities.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs">
       <Link>System\Diagnostics\CodeAnalysis\ExcludeFromCodeCoverageAttribute.cs</Link>
@@ -70,6 +64,7 @@
     <Compile Include="System\Linq\Take.cs" />
     <Compile Include="System\Linq\ToCollection.cs" />
     <Compile Include="System\Linq\Union.cs" />
+    <Compile Include="System\Linq\Utilities.cs" />
     <Compile Include="System\Linq\Where.cs" />
     <Compile Include="System\Linq\Zip.cs" />
   </ItemGroup>

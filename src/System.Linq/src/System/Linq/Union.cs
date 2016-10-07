@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using static System.Collections.Generic.ComparerUtilities;
+using static System.Linq.Utilities;
 
 namespace System.Linq
 {
