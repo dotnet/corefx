@@ -154,21 +154,23 @@ namespace System.Linq.Tests
 
         public static IEnumerable<object[]> AppendedPrependedConcatAlternationsData()
         {
-            var @base = Array.Empty<int>();
-            var expected = new List<int>();
-            IEnumerable<int> actual = @base;
+            const int EnumerableCount = 4; // How many enumerables to concat together per test case.
 
-            // each bit in the last 6 bits of i represent whether we want to prepend/append a sequence for this iteration.
+            var foundation = Array.Empty<int>();
+            var expected = new List<int>();
+            IEnumerable<int> actual = foundation;
+
+            // each bit in the last EnumerableCount bits of i represent whether we want to prepend/append a sequence for this iteration.
             // if it's set, we'll prepend. otherwise, we'll append.
-            for (int i = 0; i < (1 << 6); i++)
+            for (int i = 0; i < (1 << EnumerableCount); i++)
             {
-                // each bit in last 6 bits of j is set if we want to ensure the nth enumerable
+                // each bit in last EnumerableCount bits of j is set if we want to ensure the nth enumerable
                 // concat'd is an ICollection.
                 // Note: It is important we run over the all-bits-set case, since currently
                 // Concat is specialized for when all inputs are ICollection.
-                for (int j = 0; j < (1 << 6); j++)
+                for (int j = 0; j < (1 << EnumerableCount); j++)
                 {
-                    for (int k = 0; k < 6; k++) // k is how much bits we shift by, and also the item that gets appended/prepended.
+                    for (int k = 0; k < EnumerableCount; k++) // k is how much bits we shift by, and also the item that gets appended/prepended.
                     {
                         var nextRange = Enumerable.Range(k, 1);
                         bool prepend = ((i >> k) & 1) != 0;
@@ -192,7 +194,7 @@ namespace System.Linq.Tests
 
                     yield return new object[] { expected.ToArray(), actual.ToArray() };
 
-                    actual = @base;
+                    actual = foundation;
                     expected.Clear();
                 }
             }
