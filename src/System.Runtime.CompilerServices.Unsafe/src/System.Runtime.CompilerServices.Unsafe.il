@@ -41,7 +41,7 @@
     01 00 00 00 00
   ) // false
   .hash algorithm 0x00008004
-  .ver 4:0:4:0
+  .ver 4:0:3:0
 }
 .module System.Runtime.CompilerServices.Unsafe.dll
 // MVID: {1E97D84A-565B-49C5-B60A-F31A1A4ACE13}
@@ -255,7 +255,6 @@
         ldarg.0
         ldarg.1
         sizeof !!T
-        conv.i
         mul
         add
         ret
@@ -264,7 +263,7 @@
   .method public hidebysig static !!T& AddByteOffset<T>(!!T& source, native int byteOffset) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
+        .maxstack 2
         ldarg.0
         ldarg.1
         add
@@ -291,7 +290,6 @@
         ldarg.0
         ldarg.1
         sizeof !!T
-        conv.i
         mul
         sub
         ret
@@ -300,7 +298,7 @@
   .method public hidebysig static !!T& SubtractByteOffset<T>(!!T& source, native int byteOffset) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
-        .maxstack 3
+        .maxstack 2
         ldarg.0
         ldarg.1
         sub
