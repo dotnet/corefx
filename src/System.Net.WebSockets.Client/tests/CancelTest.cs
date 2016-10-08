@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,7 +12,9 @@ namespace System.Net.WebSockets.Client.Tests
 {
     public class CancelTest : ClientWebSocketTestBase
     {
-        public CancelTest(ITestOutputHelper output) : base(output) { }
+        public CancelTest(ITestOutputHelper output) : base(output)
+        {
+        }
 
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
@@ -102,7 +102,6 @@ namespace System.Net.WebSockets.Client.Tests
         {
             await TestCancellation(async (cws) =>
             {
-
                 var cts = new CancellationTokenSource(5);
                 var ctsDefault = new CancellationTokenSource(TimeOutMilliseconds);
 
@@ -125,19 +124,14 @@ namespace System.Net.WebSockets.Client.Tests
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
             {
-                var cts = new CancellationTokenSource(500);
-
                 var recvBuffer = new byte[100];
                 var segment = new ArraySegment<byte>(recvBuffer);
+                var cts = new CancellationTokenSource(500);
 
-                try
-                {
-                    await cws.ReceiveAsync(segment, cts.Token);
-                    Assert.True(false, "Receive should not complete.");
-                }
-                catch (OperationCanceledException) { }
-                catch (ObjectDisposedException) { }
-                catch (WebSocketException) { }
+                Exception e = await Record.ExceptionAsync(() => cws.ReceiveAsync(segment, cts.Token));
+                Assert.NotNull(e);
+                Assert.True(e is OperationCanceledException || e is ObjectDisposedException || e is WebSocketException,
+                    "Exception unexpected type: " + e.GetType());
 
                 WebSocketException ex = await Assert.ThrowsAsync<WebSocketException>(() =>
                     cws.ReceiveAsync(segment, CancellationToken.None));

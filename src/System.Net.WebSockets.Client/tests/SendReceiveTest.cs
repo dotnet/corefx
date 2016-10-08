@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,7 +12,9 @@ namespace System.Net.WebSockets.Client.Tests
 {
     public class SendReceiveTest : ClientWebSocketTestBase
     {
-        public SendReceiveTest(ITestOutputHelper output) : base(output) { }
+        public SendReceiveTest(ITestOutputHelper output) : base(output)
+        {
+        }
 
         [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(10702)]
@@ -157,20 +157,26 @@ namespace System.Net.WebSockets.Client.Tests
                 var recvBuffer = new byte[100];
                 var recvSegment = new ArraySegment<byte>(recvBuffer);
 
-                try
+                for (int i = 0; i < tasks.Length; i++)
                 {
-                    for (int i = 0; i < tasks.Length; i++)
-                    {
-                        tasks[i] = cws.ReceiveAsync(recvSegment, cts.Token);
-                    }
+                    tasks[i] = cws.ReceiveAsync(recvSegment, cts.Token);
+                }
 
-                    Task.WaitAll(tasks);
+                Exception e = Record.Exception(() => Task.WaitAll(tasks));
+
+                if (e == null)
+                {
                     Assert.Equal(WebSocketState.Open, cws.State);
                 }
-                catch (AggregateException ag)
+                else
                 {
-                    foreach (var ex in ag.InnerExceptions)
+                    AggregateException ae = Assert.IsType<AggregateException>(e);
+
+                    Assert.All(ae.InnerExceptions, ex =>
                     {
+                        Assert.True(ex is InvalidOperationException || ex is WebSocketException,
+                            "Exception unexpected type: " + ex.GetType());
+                        Assert.Equal(WebSocketState.Aborted, cws.State);
                         if (ex is InvalidOperationException)
                         {
                             Assert.Equal(
@@ -178,24 +184,15 @@ namespace System.Net.WebSockets.Client.Tests
                                     "net_Websockets_AlreadyOneOutstandingOperation",
                                     "ReceiveAsync"),
                                 ex.Message);
-
-                            Assert.Equal(WebSocketState.Aborted, cws.State);
                         }
                         else if (ex is WebSocketException)
                         {
-                            // Multiple cases.
-                            Assert.Equal(WebSocketState.Aborted, cws.State);
-
                             WebSocketError errCode = (ex as WebSocketException).WebSocketErrorCode;
                             Assert.True(
                                 (errCode == WebSocketError.InvalidState) || (errCode == WebSocketError.Success),
                                 "WebSocketErrorCode");
                         }
-                        else
-                        {
-                            Assert.True(false, "Unexpected exception: " + ex.Message);
-                        }
-                    }
+                    });
                 }
             }
         }
