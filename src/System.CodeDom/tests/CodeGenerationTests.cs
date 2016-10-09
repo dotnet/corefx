@@ -101,7 +101,7 @@ namespace System.CodeDom.Tests
                 new CodeVariableReferenceExpression(variableName),
                 new CodeBinaryOperatorExpression(new CodeVariableReferenceExpression(variableName), CodeBinaryOperatorType.Add, new CodePrimitiveExpression(primitive)));
 
-        protected void AssertEqual(CodeObject c, string expected)
+        protected void AssertEqual<CType>(CType c, string expected) where CType : CodeObject
         {
             // Validate all identifiers are valid
             CodeGenerator.ValidateIdentifiers(c);
@@ -123,12 +123,12 @@ namespace System.CodeDom.Tests
 
             // Serialize and deserialize the CodeObject, and make sure code generated for it
             // is the same as the original.
-            CodeObject clone = BinaryFormatterHelpers.Clone(c);
+            CType clone = BinaryFormatterHelpers.Clone(c);
             string cloneCode = GenerateCode(clone, provider);
             Assert.Equal(code, cloneCode);
         }
 
-        private static string GenerateCode(CodeObject c, CodeDomProvider provider)
+        private static string GenerateCode<CType>(CType c, CodeDomProvider provider) where CType : CodeObject
         {
             var sb = new StringBuilder();
             var writer = new StringWriter(sb);
@@ -136,31 +136,31 @@ namespace System.CodeDom.Tests
 
             if (c is CodeStatement)
             {
-                provider.GenerateCodeFromStatement((CodeStatement)c, writer, options);
+                provider.GenerateCodeFromStatement(c as CodeStatement, writer, options);
             }
             else if (c is CodeCompileUnit)
             {
-                provider.GenerateCodeFromCompileUnit((CodeCompileUnit)c, writer, options);
+               provider.GenerateCodeFromCompileUnit(c as CodeCompileUnit, writer, options);
             }
             else if (c is CodeExpression)
             {
-                provider.GenerateCodeFromExpression((CodeExpression)c, writer, options);
+               provider.GenerateCodeFromExpression(c as CodeExpression, writer, options);
             }
             else if (c is CodeTypeMember)
             {
-                provider.GenerateCodeFromMember((CodeTypeMember)c, writer, options);
+               provider.GenerateCodeFromMember(c as CodeTypeMember, writer, options);
             }
             else if (c is CodeTypeDeclaration)
             {
-                provider.GenerateCodeFromType((CodeTypeDeclaration)c, writer, options);
+                provider.GenerateCodeFromType(c as CodeTypeDeclaration, writer, options);
             }
             else if (c is CodeNamespace)
             {
-                provider.GenerateCodeFromNamespace((CodeNamespace)c, writer, options);
+               provider.GenerateCodeFromNamespace(c as CodeNamespace, writer, options);
             }
             else
             {
-                Assert.False(true, $"Unknown type: {c.GetType()}");
+                throw new ArgumentException($"Tests not set up for unexpected type: {c.GetType()}");
             }
 
             return sb.ToString();
