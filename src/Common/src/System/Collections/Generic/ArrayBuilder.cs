@@ -88,7 +88,7 @@ namespace System.Collections.Generic
                     EnsureCapacity(endCount);
                 }
 
-                Debug.Assert(Capacity > 0); // At least 1 item is being added
+                Debug.Assert(Capacity > 0); // At least 1 item is being added per above branch
                 Array.Copy(items, 0, _array, _count, items.Length);
                 _count = endCount;
             }
@@ -117,17 +117,22 @@ namespace System.Collections.Generic
 
             Debug.Assert(_array != null); // Nonzero _count should imply this
 
-            if (_count < _array.Length)
+            T[] result = _array;
+            if (_count < result.Length)
             {
-                Array.Resize(ref _array, _count);
+                // Avoid a bit of overhead (method call, some branches, extra codegen)
+                // which would be incurred by using Array.Resize
+                result = new T[_count];
+                Array.Copy(_array, 0, result, 0, _count);
             }
 
 #if DEBUG
             // Try to prevent callers from using the ArrayBuilder after ToArray, if _count != 0.
             _count = -1;
+            _array = null;
 #endif
 
-            return _array;
+            return result;
         }
 
         /// <summary>
