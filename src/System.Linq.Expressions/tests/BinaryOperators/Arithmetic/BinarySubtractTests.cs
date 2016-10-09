@@ -492,7 +492,26 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(new DateTime(90), lambda());
         }
 
-        [Fact]
+		[Fact]
+		public static void Subtract_NoSuchOperatorDeclaredOnType_ThrowsInvalidOperationException()
+		{
+			Assert.Throws<InvalidOperationException>(() => Expression.Add(Expression.Constant(new SubClass(0)), Expression.Constant(new SubClass(1))));
+		}
+
+		public class BaseClass
+		{
+			public BaseClass(int value) { Value = value; }
+			public int Value { get; }
+
+			public static BaseClass operator -(BaseClass i1, BaseClass i2) => new BaseClass(i1.Value - i2.Value);
+		}
+
+		public class SubClass : BaseClass
+		{
+			public SubClass(int value) : base(value) { }
+		}
+
+		[Fact]
         public static void CannotReduce()
         {
             Expression exp = Expression.Subtract(Expression.Constant(0), Expression.Constant(0));

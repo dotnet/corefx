@@ -67,7 +67,7 @@ namespace System.Linq.Expressions.Tests
             string name,
             Type[] types)
         {
-            foreach (MethodInfo method in type.GetRuntimeMethods())
+            foreach (MethodInfo method in type.GetTypeInfo().DeclaredMethods)
             {
                 if (method.IsStatic && method.Name == name && method.MatchesArgumentTypes(types))
                 {
