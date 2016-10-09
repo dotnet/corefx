@@ -54,7 +54,42 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, builder.ToArray());
         }
 
-        private void TestContentEquals(byte[] left, byte[] right)
+        [Theory]
+        [InlineData(new byte[] { }, new byte[] { })]
+        [InlineData(new byte[] { 1 }, new byte[] { })]
+        [InlineData(new byte[] { }, new byte[] { 1 })]
+        [InlineData(new byte[] { 1 }, new byte[] { 1 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 })]
+        [InlineData(
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
+                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 })]
+        public static void ContentEquals(byte[] left, byte[] right)
         {
             var builder1 = new BlobBuilder(0);
             builder1.WriteBytes(left);
@@ -72,51 +107,6 @@ namespace System.Reflection.Metadata.Tests
             var builder = new BlobBuilder();
             Assert.True(builder.ContentEquals(builder));
             Assert.False(builder.ContentEquals(null));
-
-            TestContentEquals(new byte[] { }, new byte[] { });
-            TestContentEquals(new byte[] { 1 }, new byte[] { });
-            TestContentEquals(new byte[] { }, new byte[] { 1 });
-            TestContentEquals(new byte[] { 1 }, new byte[] { 1 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 });
-
-            TestContentEquals(
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-                new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 99, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 });
         }
 
         [Fact]
@@ -653,7 +643,17 @@ namespace System.Reflection.Metadata.Tests
         // WriteBytes(IA<byte>)
         // WriteReference
 
-        private static void TestCompressedUnsignedInteger(byte[] expected, int value)
+        [Theory]
+        // These examples are straight from the CLI spec.
+        [InlineData(new byte[] { 0x00 }, 0)]
+        [InlineData(new byte[] { 0x03 }, 0x03)]
+        [InlineData(new byte[] { 0x7f }, 0x7F)]
+        [InlineData(new byte[] { 0x80, 0x80 }, 0x80)]
+        [InlineData(new byte[] { 0xAE, 0x57 }, 0x2E57)]
+        [InlineData(new byte[] { 0xBF, 0xFF }, 0x3FFF)]
+        [InlineData(new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 0x4000)]
+        [InlineData(new byte[] { 0xDF, 0xFF, 0xFF, 0xFF }, 0x1FFFFFFF)]
+        public static void CompressUnsignedIntegersFromSpecExamples(byte[] expected, int value)
         {
             var writer = new BlobWriter(4);
             writer.WriteCompressedInteger(value);
@@ -664,7 +664,32 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(expected, builder.ToArray());
         }
 
-        private static void TestCompressedSignedInteger(byte[] expected, int value)
+        [Fact]
+        public void CompressUnsignedIntegersFromSpecExamples()
+        {
+            var writer = new BlobWriter(4);
+            var builder = new BlobBuilder();
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => writer.WriteCompressedInteger(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => writer.WriteCompressedInteger(BlobWriterImpl.MaxCompressedIntegerValue + 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.WriteCompressedInteger(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.WriteCompressedInteger(BlobWriterImpl.MaxCompressedIntegerValue + 1));
+        }
+
+        [Theory]
+        // These examples are straight from the CLI spec.
+        [InlineData(new byte[] { 0x00 }, 0)]
+        [InlineData(new byte[] { 0x02 }, 1)]
+        [InlineData(new byte[] { 0x06 }, 3)]
+        [InlineData(new byte[] { 0x7f }, -1)]
+        [InlineData(new byte[] { 0x7b }, -3)]
+        [InlineData(new byte[] { 0x80, 0x80 }, 64)]
+        [InlineData(new byte[] { 0x01 }, -64)]
+        [InlineData(new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 8192)]
+        [InlineData(new byte[] { 0x80, 0x01 }, -8192)]
+        [InlineData(new byte[] { 0xDF, 0xFF, 0xFF, 0xFE }, 268435455)]
+        [InlineData(new byte[] { 0xC0, 0x00, 0x00, 0x01 }, -268435456)]
+        public static void CompressSignedIntegersFromSpecExamples(byte[] expected, int value)
         {
             var writer = new BlobWriter(4);
             writer.WriteCompressedSignedInteger(value);
@@ -676,44 +701,8 @@ namespace System.Reflection.Metadata.Tests
         }
 
         [Fact]
-        public void CompressUnsignedIntegersFromSpecExamples()
-        {
-            // These examples are straight from the CLI spec.
-
-            TestCompressedUnsignedInteger(new byte[] { 0x00 }, 0);
-            TestCompressedUnsignedInteger(new byte[] { 0x03 }, 0x03);
-            TestCompressedUnsignedInteger(new byte[] { 0x7f }, 0x7F);
-            TestCompressedUnsignedInteger(new byte[] { 0x80, 0x80 }, 0x80);
-            TestCompressedUnsignedInteger(new byte[] { 0xAE, 0x57 }, 0x2E57);
-            TestCompressedUnsignedInteger(new byte[] { 0xBF, 0xFF }, 0x3FFF);
-            TestCompressedUnsignedInteger(new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 0x4000);
-            TestCompressedUnsignedInteger(new byte[] { 0xDF, 0xFF, 0xFF, 0xFF }, 0x1FFFFFFF);
-
-            var writer = new BlobWriter(4);
-            var builder = new BlobBuilder();
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => writer.WriteCompressedInteger(-1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => writer.WriteCompressedInteger(BlobWriterImpl.MaxCompressedIntegerValue + 1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => builder.WriteCompressedInteger(-1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => builder.WriteCompressedInteger(BlobWriterImpl.MaxCompressedIntegerValue + 1));
-        }
-
-        [Fact]
         public void CompressSignedIntegersFromSpecExamples()
         {
-            // These examples are straight from the CLI spec.
-            TestCompressedSignedInteger(new byte[] { 0x00 }, 0);
-            TestCompressedSignedInteger(new byte[] { 0x02 }, 1);
-            TestCompressedSignedInteger(new byte[] { 0x06 }, 3);
-            TestCompressedSignedInteger(new byte[] { 0x7f }, -1);
-            TestCompressedSignedInteger(new byte[] { 0x7b }, -3);
-            TestCompressedSignedInteger(new byte[] { 0x80, 0x80 }, 64);
-            TestCompressedSignedInteger(new byte[] { 0x01 }, -64);
-            TestCompressedSignedInteger(new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 8192);
-            TestCompressedSignedInteger(new byte[] { 0x80, 0x01 }, -8192);
-            TestCompressedSignedInteger(new byte[] { 0xDF, 0xFF, 0xFF, 0xFE }, 268435455);
-            TestCompressedSignedInteger(new byte[] { 0xC0, 0x00, 0x00, 0x01 }, -268435456);
-
             var writer = new BlobWriter(4);
             var builder = new BlobBuilder();
 
