@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Immutable;
 using System.Reflection.Metadata.Tests;
 using Xunit;
 
@@ -48,7 +47,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             rootBuilder.Serialize(builder, 0, 0);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // signature:
                 0x42, 0x53, 0x4A, 0x42,
@@ -95,10 +94,10 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // --------
                 // #~
                 // --------
-                
+
                 // Reserved (0)
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 // Major Version (2)
                 0x02,
 
@@ -115,7 +114,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
                 // Sorted tables
-                0x00, 0xFA, 0x01, 0x33, 0x00, 0x16, 0x00, 0x00, 
+                0x00, 0xFA, 0x01, 0x33, 0x00, 0x16, 0x00, 0x00,
 
                 // Rows (empty)
                 // Tables (empty)
@@ -157,7 +156,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             rootBuilder.Serialize(builder, 0, 0);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // signature:
                 0x42, 0x53, 0x4A, 0x42,
@@ -208,10 +207,10 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // --------
                 // #-
                 // --------
-                
+
                 // Reserved (0)
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 // Major Version (2)
                 0x02,
 
@@ -228,7 +227,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00,
 
                 // Sorted tables
-                0x00, 0xFA, 0x01, 0x33, 0x00, 0x16, 0x00, 0x00, 
+                0x00, 0xFA, 0x01, 0x33, 0x00, 0x16, 0x00, 0x00,
 
                 // Rows
                 0x01, 0x00, 0x00, 0x00,
@@ -263,7 +262,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 // --------
 
                 0x00, 0x00, 0x00, 0x00,
-                
+
                 // --------
                 // #JTD
                 // --------
@@ -281,7 +280,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             rootBuilder.Serialize(builder, 0, 0);
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 // padded version length:
                 0x0C, 0x00, 0x00, 0x00,
@@ -306,7 +305,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             rootBuilder.Serialize(builder, 0, 0);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // padded version length:
                 0x04, 0x00, 0x00, 0x00,
@@ -331,7 +330,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             rootBuilder.Serialize(builder, 0, 0);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // padded version length:
                 0x00, 0x01, 0x00, 0x00,
@@ -371,7 +370,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             rootBuilder.Serialize(builder, 0, 0);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // padded version length:
                 0x08, 0x00, 0x00, 0x00,

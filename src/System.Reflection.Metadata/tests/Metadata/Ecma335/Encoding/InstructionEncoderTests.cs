@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection.Metadata.Tests;
 using Xunit;
 
 namespace System.Reflection.Metadata.Ecma335.Tests
@@ -48,7 +47,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             builder.WriteByte(0xcc);
             Assert.Equal(9, il.Offset);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0xFF,
                 0x58,
@@ -97,7 +96,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.CallIndirect(MetadataTokens.StandaloneSignatureHandle(0x001122));
             Assert.Equal(48, il.Offset);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x56, 0x34, 0x12, 0x02,
                 0x7C, 0x7D, 0x7E, 0x7F,
@@ -130,7 +129,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.LoadConstantI4(int.MinValue);
             il.LoadConstantI4(int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Ldc_i4_m1,
                 (byte)ILOpCode.Ldc_i4_0,
@@ -161,7 +160,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.LoadConstantI8(long.MinValue);
             il.LoadConstantI8(long.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Ldc_i8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 (byte)ILOpCode.Ldc_i8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
@@ -183,7 +182,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.LoadConstantR4(float.PositiveInfinity);
             il.LoadConstantR4(float.Epsilon);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Ldc_r4, 0x00, 0x00, 0x00, 0x00,
                 (byte)ILOpCode.Ldc_r4, 0xFF, 0xFF, 0x7F, 0x7F,
@@ -209,7 +208,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.LoadConstantR8(double.PositiveInfinity);
             il.LoadConstantR8(double.Epsilon);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Ldc_r8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 (byte)ILOpCode.Ldc_r8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0x7F,
@@ -236,7 +235,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.LoadLocal(byte.MaxValue + 1);
             il.LoadLocal(int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Ldloc_0,
                 (byte)ILOpCode.Ldloc_1,
@@ -267,7 +266,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.StoreLocal(byte.MaxValue + 1);
             il.StoreLocal(int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Stloc_0,
                 (byte)ILOpCode.Stloc_1,
@@ -298,7 +297,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.LoadLocalAddress(byte.MaxValue + 1);
             il.LoadLocalAddress(int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Ldloca_s, 0x00,
                 (byte)ILOpCode.Ldloca_s, 0x01,
@@ -329,7 +328,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.LoadArgument(byte.MaxValue + 1);
             il.LoadArgument(int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Ldarg_0,
                 (byte)ILOpCode.Ldarg_1,
@@ -360,7 +359,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.LoadArgumentAddress(byte.MaxValue + 1);
             il.LoadArgumentAddress(int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Ldarga_s, 0x00,
                 (byte)ILOpCode.Ldarga_s, 0x01,
@@ -391,7 +390,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.StoreArgument(byte.MaxValue + 1);
             il.StoreArgument(int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Starg_s, 0x00,
                 (byte)ILOpCode.Starg_s, 0x01,
@@ -443,7 +442,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             il.Branch(ILOpCode.Blt_un, l);
             il.Branch(ILOpCode.Leave, l);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Br_s,      0xff,
                 (byte)ILOpCode.Brfalse_s, 0xff,
@@ -520,7 +519,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var builder = new BlobBuilder();
             new MethodBodyStreamEncoder(builder).AddMethodBody(il);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x16, // header
                 (byte)ILOpCode.Br_s, 0x02,

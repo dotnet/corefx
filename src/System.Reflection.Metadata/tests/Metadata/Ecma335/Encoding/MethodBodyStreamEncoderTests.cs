@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
-using System.Reflection.Metadata.Tests;
 using Xunit;
 
 namespace System.Reflection.Metadata.Ecma335.Tests
@@ -67,7 +66,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             var body = encoder.AddMethodBody(10);
             Assert.Equal(3, body.Offset);
-         
+
             var segment = body.Instructions.GetBytes();
             Assert.Equal(4, segment.Offset); // +1 byte for the header
             Assert.Equal(10, segment.Count);
@@ -76,7 +75,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             new BlobWriter(body.Instructions).WriteBytes(0x02, 10);
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 0x01, 0x01, 0x01,
                 0x2A, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02
@@ -92,7 +91,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var body = encoder.AddMethodBody(10, attributes: MethodBodyAttributes.None);
             new BlobWriter(body.Instructions).WriteBytes(0x02, 10);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x2A, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02
             }, streamBuilder.ToArray());
@@ -107,7 +106,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             var body = encoder.AddMethodBody(10, maxStack: 7);
             new BlobWriter(body.Instructions).WriteBytes(0x02, 10);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x2A, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02
             }, streamBuilder.ToArray());
@@ -128,7 +127,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             Assert.Null(body.ExceptionRegions.Builder);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x02
             }, streamBuilder.ToArray());
@@ -153,7 +152,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             new BlobWriter(body.Instructions).WriteBytes(0x02, 10);
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 0x01, 0x01, 0x01,
                 0x00, // padding
@@ -161,7 +160,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x09, 0x00, // max stack
                 0x0A, 0x00, 0x00, 0x00, // code size
                 0x00, 0x00, 0x00, 0x00, // local sig
-                0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02 
+                0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02
             }, streamBuilder.ToArray());
         }
 
@@ -184,7 +183,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             new BlobWriter(body.Instructions).WriteBytes(0x02, 10);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x01, 0x01,
                 0x00, // padding
@@ -215,7 +214,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             new BlobWriter(body.Instructions).WriteBytes(0x02, 10);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x01, 0x01,
                 0x00, // padding
@@ -255,7 +254,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             Assert.Equal(l1, brInfo.Label);
             Assert.Equal(ILOpCode.Br_s, brInfo.OpCode);
 
-            AssertEx.Equal(new byte[] { 1, (byte)ILOpCode.Br_s, unchecked((byte)-1) }, codeBuilder.ToArray(60, 3));
+            Assert.Equal(new byte[] { 1, (byte)ILOpCode.Br_s, unchecked((byte)-1) }, codeBuilder.ToArray(60, 3));
 
             var streamEncoder = new MethodBodyStreamEncoder(streamBuilder);
             int bodyOffset = streamEncoder.AddMethodBody(
@@ -266,7 +265,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             var bodyBytes = streamBuilder.ToArray();
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 0xFE, // tiny header
                 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -289,7 +288,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 Assert.Equal(bodyBytes.Length, body.Size);
 
                 var ilBytes = body.GetILBytes();
-                AssertEx.Equal(new byte[]
+                Assert.Equal(new byte[]
                 {
                     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
                     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -324,7 +323,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             Assert.Equal(l1, brInfo.Label);
             Assert.Equal(ILOpCode.Br_s, brInfo.OpCode);
 
-            AssertEx.Equal(new byte[] { 1, 1, (byte)ILOpCode.Br_s, unchecked((byte)-1) }, codeBuilder.ToArray(60, 4));
+            Assert.Equal(new byte[] { 1, 1, (byte)ILOpCode.Br_s, unchecked((byte)-1) }, codeBuilder.ToArray(60, 4));
 
             var streamEncoder = new MethodBodyStreamEncoder(streamBuilder);
             int bodyOffset = streamEncoder.AddMethodBody(
@@ -335,7 +334,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             var bodyBytes = streamBuilder.ToArray();
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x03, 0x30, 0x02, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // fat header
                 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -358,7 +357,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 Assert.Equal(bodyBytes.Length, body.Size);
 
                 var ilBytes = body.GetILBytes();
-                AssertEx.Equal(new byte[]
+                Assert.Equal(new byte[]
                 {
                     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
                     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -399,7 +398,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             flowBuilder.CopyCodeAndFixupBranches(srcBuilder, dstBuilder);
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 (byte)ILOpCode.Bge, 0xFA, 0x00, 0x00, 0x00,
                 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,

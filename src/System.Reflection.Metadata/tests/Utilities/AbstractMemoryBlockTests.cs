@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.IO;
-using System.Reflection.Metadata.Tests;
 using Xunit;
 
 namespace System.Reflection.Internal.Tests
@@ -20,19 +19,19 @@ namespace System.Reflection.Internal.Tests
                 using (var block = provider.GetMemoryBlock())
                 {
                     Assert.Equal(4, block.Size);
-                    AssertEx.Equal(provider.Pointer, block.Pointer);
-                    AssertEx.Equal(new byte[] { }, block.GetContentUnchecked(0, 0));
-                    AssertEx.Equal(new byte[] { 3, 4 }, block.GetContentUnchecked(2, 2));
-                    AssertEx.Equal(new byte[] { 1, 2, 3 }, block.GetContentUnchecked(0, 3));
+                    AssertEqual(provider.Pointer, block.Pointer);
+                    Assert.Equal(new byte[] { }, block.GetContentUnchecked(0, 0));
+                    Assert.Equal(new byte[] { 3, 4 }, block.GetContentUnchecked(2, 2));
+                    Assert.Equal(new byte[] { 1, 2, 3 }, block.GetContentUnchecked(0, 3));
                 }
 
                 using (var block = provider.GetMemoryBlock(1, 2))
                 {
-                    AssertEx.Equal(provider.Pointer + 1, block.Pointer);
+                    AssertEqual(provider.Pointer + 1, block.Pointer);
                     Assert.Equal(2, block.Size);
-                    AssertEx.Equal(new byte[] { 2, 3 }, block.GetContentUnchecked(0, 2));
-                    AssertEx.Equal(new byte[] { 3 }, block.GetContentUnchecked(1, 1));
-                    AssertEx.Equal(new byte[] { }, block.GetContentUnchecked(2, 0));
+                    Assert.Equal(new byte[] { 2, 3 }, block.GetContentUnchecked(0, 2));
+                    Assert.Equal(new byte[] { 3 }, block.GetContentUnchecked(1, 1));
+                    Assert.Equal(new byte[] { }, block.GetContentUnchecked(2, 0));
                 }
             }
         }
@@ -48,19 +47,19 @@ namespace System.Reflection.Internal.Tests
                     using (var block = provider.GetMemoryBlock())
                     {
                         Assert.Equal(4, block.Size);
-                        AssertEx.Equal(provider.Pointer, block.Pointer);
-                        AssertEx.Equal(new byte[] { }, block.GetContentUnchecked(0, 0));
-                        AssertEx.Equal(new byte[] { 3, 4 }, block.GetContentUnchecked(2, 2));
-                        AssertEx.Equal(new byte[] { 1, 2, 3 }, block.GetContentUnchecked(0, 3));
+                        AssertEqual(provider.Pointer, block.Pointer);
+                        Assert.Equal(new byte[] { }, block.GetContentUnchecked(0, 0));
+                        Assert.Equal(new byte[] { 3, 4 }, block.GetContentUnchecked(2, 2));
+                        Assert.Equal(new byte[] { 1, 2, 3 }, block.GetContentUnchecked(0, 3));
                     }
 
                     using (var block = provider.GetMemoryBlock(1, 2))
                     {
-                        AssertEx.Equal(provider.Pointer + 1, block.Pointer);
+                        AssertEqual(provider.Pointer + 1, block.Pointer);
                         Assert.Equal(2, block.Size);
-                        AssertEx.Equal(new byte[] { 2, 3 }, block.GetContentUnchecked(0, 2));
-                        AssertEx.Equal(new byte[] { 3 }, block.GetContentUnchecked(1, 1));
-                        AssertEx.Equal(new byte[] { }, block.GetContentUnchecked(2, 0));
+                        Assert.Equal(new byte[] { 2, 3 }, block.GetContentUnchecked(0, 2));
+                        Assert.Equal(new byte[] { 3 }, block.GetContentUnchecked(1, 1));
+                        Assert.Equal(new byte[] { }, block.GetContentUnchecked(2, 0));
                     }
                 }
             }
@@ -80,9 +79,9 @@ namespace System.Reflection.Internal.Tests
                     {
                         Assert.IsType<NativeHeapMemoryBlock>(block);
                         Assert.Equal(4, block.Size);
-                        AssertEx.Equal(new byte[] { }, block.GetContentUnchecked(0, 0));
-                        AssertEx.Equal(new byte[] { 3, 4 }, block.GetContentUnchecked(2, 2));
-                        AssertEx.Equal(new byte[] { 1, 2, 3 }, block.GetContentUnchecked(0, 3));
+                        Assert.Equal(new byte[] { }, block.GetContentUnchecked(0, 0));
+                        Assert.Equal(new byte[] { 3, 4 }, block.GetContentUnchecked(2, 2));
+                        Assert.Equal(new byte[] { 1, 2, 3 }, block.GetContentUnchecked(0, 3));
                     }
 
                     Assert.Equal(4, stream.Position);
@@ -91,9 +90,9 @@ namespace System.Reflection.Internal.Tests
                     {
                         Assert.IsType<NativeHeapMemoryBlock>(block);
                         Assert.Equal(2, block.Size);
-                        AssertEx.Equal(new byte[] { 2, 3 }, block.GetContentUnchecked(0, 2));
-                        AssertEx.Equal(new byte[] { 3 }, block.GetContentUnchecked(1, 1));
-                        AssertEx.Equal(new byte[] { }, block.GetContentUnchecked(2, 0));
+                        Assert.Equal(new byte[] { 2, 3 }, block.GetContentUnchecked(0, 2));
+                        Assert.Equal(new byte[] { 3 }, block.GetContentUnchecked(1, 1));
+                        Assert.Equal(new byte[] { }, block.GetContentUnchecked(2, 0));
                     }
 
                     Assert.Equal(3, stream.Position);
@@ -105,9 +104,9 @@ namespace System.Reflection.Internal.Tests
                     {
                         Assert.IsType<NativeHeapMemoryBlock>(block);
                         Assert.Equal(4, block.Size);
-                        AssertEx.Equal(new byte[] { }, block.GetContentUnchecked(0, 0));
-                        AssertEx.Equal(new byte[] { 3, 4 }, block.GetContentUnchecked(2, 2));
-                        AssertEx.Equal(new byte[] { 1, 2, 3 }, block.GetContentUnchecked(0, 3));
+                        Assert.Equal(new byte[] { }, block.GetContentUnchecked(0, 0));
+                        Assert.Equal(new byte[] { 3, 4 }, block.GetContentUnchecked(2, 2));
+                        Assert.Equal(new byte[] { 1, 2, 3 }, block.GetContentUnchecked(0, 3));
                     }
 
                     Assert.Equal(4, stream.Position);
@@ -199,6 +198,11 @@ namespace System.Reflection.Internal.Tests
             {
                 File.Delete(filePath);
             }
+        }
+
+        private static unsafe void AssertEqual(byte* expected, byte* actual)
+        {
+            Assert.Equal((IntPtr)expected, (IntPtr)actual);
         }
     }
 }

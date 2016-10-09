@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Reflection.Internal;
-using System.Reflection.Metadata.Tests;
 using Xunit;
 
 namespace System.Reflection.PortableExecutable.Tests
@@ -24,8 +23,8 @@ namespace System.Reflection.PortableExecutable.Tests
             var reader2 = peBlock.GetReader(0, 0);
             Assert.Equal(0, reader2.Length);
 
-            AssertEx.Equal(new byte[0], peBlock.GetContent());
-            AssertEx.Equal(new byte[0], peBlock.GetContent(0, 0));
+            Assert.Equal(new byte[0], peBlock.GetContent());
+            Assert.Equal(new byte[0], peBlock.GetContent(0, 0));
         }
 
         [Fact]
@@ -56,16 +55,16 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var reader1 = peBlock.GetReader();
             Assert.Equal(4, reader1.Length);
-            AssertEx.Equal(new byte[] { 1, 2, 3 }, reader1.ReadBytes(3));
-            AssertEx.Equal(new byte[] { 4 }, reader1.ReadBytes(1));
+            Assert.Equal(new byte[] { 1, 2, 3 }, reader1.ReadBytes(3));
+            Assert.Equal(new byte[] { 4 }, reader1.ReadBytes(1));
 
             var reader2 = peBlock.GetReader(1, 2);
             Assert.Equal(2, reader2.Length);
-            AssertEx.Equal(new byte[] { 2, 3 }, reader2.ReadBytes(2));
+            Assert.Equal(new byte[] { 2, 3 }, reader2.ReadBytes(2));
 
             var reader3 = peBlock.GetReader(4, 0);
             Assert.Equal(0, reader3.Length);
-            AssertEx.Equal(new byte[] { }, reader3.ReadBytes(0));
+            Assert.Equal(new byte[] { }, reader3.ReadBytes(0));
 
             Assert.Throws<ArgumentOutOfRangeException>(() => peBlock.GetReader(0, 5));
             Assert.Throws<ArgumentOutOfRangeException>(() => peBlock.GetReader(4, 1));
@@ -83,16 +82,16 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var reader1 = peBlock.GetReader();
             Assert.Equal(4, reader1.Length);
-            AssertEx.Equal(new byte[] { 1, 2, 3 }, reader1.ReadBytes(3));
-            AssertEx.Equal(new byte[] { 4 }, reader1.ReadBytes(1));
+            Assert.Equal(new byte[] { 1, 2, 3 }, reader1.ReadBytes(3));
+            Assert.Equal(new byte[] { 4 }, reader1.ReadBytes(1));
 
             var reader2 = peBlock.GetReader(1, 2);
             Assert.Equal(2, reader2.Length);
-            AssertEx.Equal(new byte[] { 2, 3 }, reader2.ReadBytes(2));
+            Assert.Equal(new byte[] { 2, 3 }, reader2.ReadBytes(2));
 
             var reader3 = peBlock.GetReader(4, 0);
             Assert.Equal(0, reader3.Length);
-            AssertEx.Equal(new byte[] { }, reader3.ReadBytes(0));
+            Assert.Equal(new byte[] { }, reader3.ReadBytes(0));
 
             Assert.Throws<ArgumentOutOfRangeException>(() => peBlock.GetReader(0, 5));
             Assert.Throws<ArgumentOutOfRangeException>(() => peBlock.GetReader(4, 1));
@@ -108,9 +107,9 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var peBlock = new PEMemoryBlock(block);
 
-            AssertEx.Equal(new byte[] { 1, 2, 3, 4 }, peBlock.GetContent());
-            AssertEx.Equal(new byte[] { 2, 3 }, peBlock.GetContent(1, 2));
-            AssertEx.Equal(new byte[] { }, peBlock.GetContent(4, 0));
+            Assert.Equal(new byte[] { 1, 2, 3, 4 }, peBlock.GetContent());
+            Assert.Equal(new byte[] { 2, 3 }, peBlock.GetContent(1, 2));
+            Assert.Equal(new byte[] { }, peBlock.GetContent(4, 0));
 
             Assert.Throws<ArgumentOutOfRangeException>(() => peBlock.GetContent(0, 5));
             Assert.Throws<ArgumentOutOfRangeException>(() => peBlock.GetContent(4, 1));
@@ -126,9 +125,9 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var peBlock = new PEMemoryBlock(block, offset: 1);
 
-            AssertEx.Equal(new byte[] { 1, 2, 3, 4 }, peBlock.GetContent());
-            AssertEx.Equal(new byte[] { 2, 3 }, peBlock.GetContent(1, 2));
-            AssertEx.Equal(new byte[] { }, peBlock.GetContent(4, 0));
+            Assert.Equal(new byte[] { 1, 2, 3, 4 }, peBlock.GetContent());
+            Assert.Equal(new byte[] { 2, 3 }, peBlock.GetContent(1, 2));
+            Assert.Equal(new byte[] { }, peBlock.GetContent(4, 0));
 
             Assert.Throws<ArgumentOutOfRangeException>(() => peBlock.GetContent(0, 5));
             Assert.Throws<ArgumentOutOfRangeException>(() => peBlock.GetContent(4, 1));

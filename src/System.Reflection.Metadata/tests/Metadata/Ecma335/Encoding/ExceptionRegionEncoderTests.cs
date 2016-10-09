@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection.Metadata.Tests;
 using Xunit;
 
 namespace System.Reflection.Metadata.Ecma335.Tests
@@ -44,7 +43,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             builder.WriteByte(0xff);
             ExceptionRegionEncoder.SerializeTableHeader(builder, ExceptionRegionEncoder.MaxSmallExceptionRegions, hasSmallRegions: true);
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 0xff, 0x00, 0x00, 0x00, // padding
                 0x01, // flags
@@ -55,7 +54,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             builder.WriteByte(0xff);
             ExceptionRegionEncoder.SerializeTableHeader(builder, ExceptionRegionEncoder.MaxExceptionRegions, hasSmallRegions: false);
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0xff, 0x00, 0x00, 0x00, // padding
                 0x41, // flags
@@ -71,7 +70,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             encoder.Add(ExceptionRegionKind.Catch, 1, 2, 4, 5, catchType: MetadataTokens.TypeDefinitionHandle(1));
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00,            // kind
                 0x01, 0x00,            // try offset
@@ -84,7 +83,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             encoder.Add(ExceptionRegionKind.Filter, 0xffff, 0xff, 0xffff, 0xff, filterOffset: int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x00,            // kind
                 0xff, 0xff,            // try offset
@@ -97,7 +96,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             encoder.Add(ExceptionRegionKind.Fault, 0xffff, 0xff, 0xffff, 0xff);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x04, 0x00,            // kind
                 0xff, 0xff,            // try offset
@@ -110,7 +109,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             encoder.Add(ExceptionRegionKind.Finally, 0, 0, 0, 0);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x02, 0x00,            // kind
                 0x00, 0x00,            // try offset
@@ -130,7 +129,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             encoder.Add(ExceptionRegionKind.Catch, 1, 2, 4, 5, catchType: MetadataTokens.TypeDefinitionHandle(1));
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, // kind
                 0x01, 0x00, 0x00, 0x00, // try offset
@@ -143,7 +142,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             encoder.Add(ExceptionRegionKind.Filter, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, filterOffset: int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x01, 0x00, 0x00, 0x00, // kind
                 0xff, 0xff, 0xff, 0x7f, // try offset
@@ -156,7 +155,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             encoder.Add(ExceptionRegionKind.Fault, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x04, 0x00, 0x00, 0x00,  // kind
                 0xff, 0xff, 0xff, 0x7f,  // try offset
@@ -169,7 +168,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             encoder.Add(ExceptionRegionKind.Finally, 0, 0, 0, 0);
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 0x02, 0x00, 0x00, 0x00, // kind
                 0x00, 0x00, 0x00, 0x00, // try offset
@@ -185,7 +184,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
         public void Add_Errors()
         {
             Assert.Throws<InvalidOperationException>(() => default(ExceptionRegionEncoder).Add(ExceptionRegionKind.Fault, 0, 0, 0, 0));
-        
+
             var builder = new BlobBuilder();
             var smallEncoder = new ExceptionRegionEncoder(builder, hasSmallFormat: true);
             var fatEncoder = new ExceptionRegionEncoder(builder, hasSmallFormat: false);

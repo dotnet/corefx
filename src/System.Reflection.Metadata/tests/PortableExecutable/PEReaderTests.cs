@@ -239,49 +239,53 @@ namespace System.Reflection.PortableExecutable.Tests
             var relocBlob1 = reader.GetSectionData(".reloc").GetContent();
             var relocBlob2 = reader.GetSectionData(0x6000).GetContent();
 
-            AssertEx.Equal(new byte[] 
+            Assert.Equal(new byte[]
             {
                 0x00, 0x20, 0x00, 0x00,
                 0x0C, 0x00, 0x00, 0x00,
                 0xD0, 0x38, 0x00, 0x00
             }, relocBlob1);
-
-            AssertEx.Equal(relocBlob1, relocBlob2);
+            Assert.Equal(new byte[]
+            {
+                0x00, 0x20, 0x00, 0x00,
+                0x0C, 0x00, 0x00, 0x00,
+                0xD0, 0x38, 0x00, 0x00
+            }, relocBlob2);
 
             var data = reader.GetSectionData(0x5fff);
             Assert.True(data.Pointer == null);
             Assert.Equal(0, data.Length);
-            AssertEx.Equal(new byte[0], data.GetContent());
+            Assert.Equal(new byte[0], data.GetContent());
 
             data = reader.GetSectionData(0x600B);
             Assert.True(data.Pointer != null);
             Assert.Equal(1, data.Length);
-            AssertEx.Equal(new byte[] { 0x00 }, data.GetContent());
+            Assert.Equal(new byte[] { 0x00 }, data.GetContent());
 
             data = reader.GetSectionData(0x600C);
             Assert.True(data.Pointer == null);
             Assert.Equal(0, data.Length);
-            AssertEx.Equal(new byte[0], data.GetContent());
+            Assert.Equal(new byte[0], data.GetContent());
 
             data = reader.GetSectionData(0x600D);
             Assert.True(data.Pointer == null);
             Assert.Equal(0, data.Length);
-            AssertEx.Equal(new byte[0], data.GetContent());
+            Assert.Equal(new byte[0], data.GetContent());
 
             data = reader.GetSectionData(int.MaxValue);
             Assert.True(data.Pointer == null);
             Assert.Equal(0, data.Length);
-            AssertEx.Equal(new byte[0], data.GetContent());
+            Assert.Equal(new byte[0], data.GetContent());
 
             data = reader.GetSectionData(".nonexisting");
             Assert.True(data.Pointer == null);
             Assert.Equal(0, data.Length);
-            AssertEx.Equal(new byte[0], data.GetContent());
+            Assert.Equal(new byte[0], data.GetContent());
 
             data = reader.GetSectionData("");
             Assert.True(data.Pointer == null);
             Assert.Equal(0, data.Length);
-            AssertEx.Equal(new byte[0], data.GetContent());
+            Assert.Equal(new byte[0], data.GetContent());
         }
 
         [Fact]
@@ -587,7 +591,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 {
                     Assert.Null(pathQueried);
                     pathQueried = p;
-                    
+
                     // Doesn't match the id
                     return new MemoryStream(PortablePdbs.DocumentsPdb);
                 };
@@ -691,13 +695,13 @@ namespace System.Reflection.PortableExecutable.Tests
                 string pdbPath;
 
                 // reports the first error:
-                Assert.Throws<IOException>(() => 
+                Assert.Throws<IOException>(() =>
                     reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), _ => { throw new IOException(); }, out pdbProvider, out pdbPath));
 
                 // reports the first error:
-                AssertEx.Throws<BadImageFormatException>(() =>
-                    reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), _ => { throw new BadImageFormatException("Bang!"); }, out pdbProvider, out pdbPath),
-                    e => Assert.Equal("Bang!", e.Message));
+                BadImageFormatException e = Assert.Throws<BadImageFormatException>(() =>
+                     reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), _ => { throw new BadImageFormatException("Bang!"); }, out pdbProvider, out pdbPath));
+                Assert.Equal("Bang!", e.Message);
 
                 // file doesn't exist, fall back to embedded without reporting FileNotFoundExeception
                 Assert.Throws<BadImageFormatException>(() =>
@@ -728,9 +732,9 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Throws<IOException>(() =>
                     reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), _ => { throw new IOException(); }, out pdbProvider, out pdbPath));
 
-                AssertEx.Throws<BadImageFormatException>(() =>
-                    reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), _ => { throw new BadImageFormatException("Bang!"); }, out pdbProvider, out pdbPath),
-                    e => Assert.Equal("Bang!", e.Message));
+                BadImageFormatException e = Assert.Throws<BadImageFormatException>(() =>
+                      reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), _ => { throw new BadImageFormatException("Bang!"); }, out pdbProvider, out pdbPath));
+                Assert.Equal("Bang!", e.Message);
 
                 // file doesn't exist and no embedded => return false
                 Assert.False(reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), _ => { throw new FileNotFoundException(); }, out pdbProvider, out pdbPath));

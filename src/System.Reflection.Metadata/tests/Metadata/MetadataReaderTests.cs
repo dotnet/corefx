@@ -231,7 +231,7 @@ namespace System.Reflection.Metadata.Tests
             var assemblyRef = reader.GetAssemblyReference(handle);
             Assert.Equal("System.Runtime", reader.GetString(assemblyRef.Name));
 
-            AssertEx.Equal(
+            Assert.Equal(
                 new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A },
                 reader.GetBlobBytes(assemblyRef.PublicKeyOrToken));
 
@@ -251,8 +251,8 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(StringKind.Plain, winrtDef.Name.StringKind);
             Assert.Equal("Class1", reader.GetString(winrtDef.Name));
             Assert.Equal(
-                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
-                TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit, 
+                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
+                TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 winrtDef.Attributes);
 
             var strReader = reader.GetBlobReader(winrtDef.Name);
@@ -265,7 +265,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(StringKind.WinRTPrefixed, clrDef.Name.StringKind);
             Assert.Equal("<WinRT>Class1", reader.GetString(clrDef.Name));
             Assert.Equal(
-                TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
+                TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
                 TypeAttributes.Import | TypeAttributes.WindowsRuntime | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
                 clrDef.Attributes);
 
@@ -462,7 +462,7 @@ namespace System.Reflection.Metadata.Tests
         /// <summary>
         /// ModuleRef Table Columns:
         ///     Name (offset to #String)
-        /// -----------------------------    
+        /// -----------------------------
         /// File Table Columns:
         ///     Name (offset to #String)
         ///     Flags (4 byte uint)
@@ -478,7 +478,7 @@ namespace System.Reflection.Metadata.Tests
                 // ModuleCS01.mod - 2B 56 10 8B 34 A1 DC CD CC B5 CF 66 5E 43 94 5E 09 9F 34 A3
                 new byte[] { 0x2B, 0x56, 0x10, 0x8B, 0x34, 0xA1, 0xDC, 0xCD, 0xCC, 0xB5, 0xCF, 0x66, 0x5E, 0x43, 0x94, 0x5E, 0x09, 0x9F, 0x34, 0xA3 },
 
-                // ModuleVB01.mod - A7 F0 25 28 0F 3C 29 2E 83 90 F0 FA A7 13 8E E4 54 16 D7 A0 
+                // ModuleVB01.mod - A7 F0 25 28 0F 3C 29 2E 83 90 F0 FA A7 13 8E E4 54 16 D7 A0
                 new byte[] { 0xA7, 0xF0, 0x25, 0x28, 0x0F, 0x3C, 0x29, 0x2E, 0x83, 0x90, 0xF0, 0xFA, 0xA7, 0x13, 0x8E, 0xE4, 0x54, 0x16, 0xD7, 0xA0 }
             };
 
@@ -520,7 +520,7 @@ namespace System.Reflection.Metadata.Tests
         /// <summary>
         /// ModuleRef Table Columns:
         ///     Name (offset to #String)
-        /// -----------------------------    
+        /// -----------------------------
         /// File Table Columns:
         ///     Name (offset to #String)
         ///     Flags (4 byte uint)
@@ -534,7 +534,7 @@ namespace System.Reflection.Metadata.Tests
             var expHashs = new byte[][]
             {
                 // ModuleCS00.mod
-                // new byte [] { 0xd4, 0x6b, 0xec, 0x25, 0x47, 0x01, 0x20, 0x30, 0x05, 0x42, 0x34, 0x4b, 0x31, 0x22, 0x44, 0xd8, 0x1c, 0x87, 0xd0, 0x98 }, 
+                // new byte [] { 0xd4, 0x6b, 0xec, 0x25, 0x47, 0x01, 0x20, 0x30, 0x05, 0x42, 0x34, 0x4b, 0x31, 0x22, 0x44, 0xd8, 0x1c, 0x87, 0xd0, 0x98 },
             };
 
             // ModuleVB01
@@ -837,7 +837,7 @@ namespace System.Reflection.Metadata.Tests
 
             // var expNest = new bool[] { false, false, false, true, true, true, true };
             // count is calc-ed by the smaller of last row of table OR next row in EventMap table
-            // TODO: check with DEV - too much work to figure out, hard code for now - property, event 
+            // TODO: check with DEV - too much work to figure out, hard code for now - property, event
             var expMemberCount = new uint[]
             {
                 /*<Module>*/0, 0, /*ModVBClass*/ 2, 0, /*ModVBStruct*/ 0, 1,
@@ -916,13 +916,13 @@ namespace System.Reflection.Metadata.Tests
         /// of it) report correct values for their child namespaces, types, etc. All namespaces in the module are expected
         /// to be listed in the allNamespaces array. Additionally, the global namespace is expected to have type definitions
         /// for GlobalClassA, GlobalClassB, and Module. No type forwarder declarations are expected.
-        /// 
+        ///
         /// All namespaces that aren't the global NS are expected to have type definitions equal to the array
         /// @namespaceName.Split('.')
         /// So, ns1.Ns2.NS3 is expected to have type definitions
         /// {"ns1", "Ns2", "NS3"}.
-        /// 
-        /// definitionExceptions and forwarderExceptions may be used to override the default expectations. Pass in 
+        ///
+        /// definitionExceptions and forwarderExceptions may be used to override the default expectations. Pass in
         /// namespace (key) and what is expected (list of strings) for each exception.
         /// </summary>
         private void ValidateNamespaceChildren(
@@ -1802,7 +1802,7 @@ namespace System.Reflection.Metadata.Tests
         {
             // CSModule1
             var expTDef = new int[] { 0x02000007, 0x2000008 }; // class other who implements the interface
-            var expIfs = new int[] { 0x1b000001, 0x1b000002 }; // TypeSpec table 
+            var expIfs = new int[] { 0x1b000001, 0x1b000002 }; // TypeSpec table
 
             var reader = GetMetadataReader(NetModule.ModuleCS01, true);
             Assert.Equal(2, reader.InterfaceImplTable.NumberOfRows);
@@ -1999,7 +1999,7 @@ namespace System.Reflection.Metadata.Tests
             // class other who implements the interface
             // InteropImpl
             var comClassRids = new int[] { 2, 3, 4 }; // , 0x02000002, 0x2000003, 0x2000004, };
-            // TypeDef/Ref/Spec table 
+            // TypeDef/Ref/Spec table
             var comInterface = new int[] { 0x01000002, 0x01000004, 0x01000005, };
 
             // CSModule1
@@ -2150,11 +2150,11 @@ namespace System.Reflection.Metadata.Tests
             var reader = GetMetadataReader(Interop.Interop_Mock01);
 
             var attributes1 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x02000006));
-            AssertEx.Equal(new[] { 0x16, 0x17, 0x18, 0x19 }, attributes1.Select(a => a.RowId));
+            Assert.Equal(new[] { 0x16, 0x17, 0x18, 0x19 }, attributes1.Select(a => a.RowId));
             Assert.Equal(4, attributes1.Count);
 
             var attributes2 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x02000000));
-            AssertEx.Equal(new int[0], attributes2.Select(a => a.RowId));
+            Assert.Equal(new int[0], attributes2.Select(a => a.RowId));
             Assert.Equal(0, attributes2.Count);
         }
 
@@ -2162,7 +2162,7 @@ namespace System.Reflection.Metadata.Tests
         /// MethodSemantics Table
         ///     Semantic (2-byte unsigned)
         ///     Method (RID to method table)
-        ///     Association (Token)    
+        ///     Association (Token)
         /// </summary>
         [Fact]
         public void ValidateMethodSemanticsTable()
@@ -2437,11 +2437,11 @@ namespace System.Reflection.Metadata.Tests
             {
                 var reader = provider.GetMetadataReader();
                 var cdi1 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x30000001));
-                AssertEx.Equal(new int[0], cdi1.Select(a => a.RowId));
+                Assert.Equal(new int[0], cdi1.Select(a => a.RowId));
                 Assert.Equal(0, cdi1.Count);
 
                 var cdi2 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x03000000));
-                AssertEx.Equal(new int[0], cdi2.Select(a => a.RowId));
+                Assert.Equal(new int[0], cdi2.Select(a => a.RowId));
                 Assert.Equal(0, cdi2.Count);
             }
         }

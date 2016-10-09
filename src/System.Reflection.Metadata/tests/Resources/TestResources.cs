@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection.PortableExecutable;
+using Xunit;
 
 namespace System.Reflection.Metadata.Tests
 {
@@ -26,7 +27,7 @@ namespace System.Reflection.Metadata.Tests
         public static readonly byte[] KeyPair = ResourceHelper.GetResource("Misc.KeyPair.snk");
         public static readonly byte[] Signed = ResourceHelper.GetResource("Misc.Signed.exe");
 
-        public static readonly byte[] KeyPair_PublicKey = new byte[] 
+        public static readonly byte[] KeyPair_PublicKey = new byte[]
         {
             0x00, 0x24, 0x00, 0x00, 0x04, 0x80, 0x00, 0x00, 0x94, 0x00, 0x00, 0x00, 0x06, 0x02, 0x00, 0x00,
             0x00, 0x24, 0x00, 0x00, 0x52, 0x53, 0x41, 0x31, 0x00, 0x04, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,
@@ -113,7 +114,7 @@ namespace System.Reflection.Metadata.Tests
             var contentId = peBuilder.Serialize(peImageBuilder);
             var peImage = peImageBuilder.ToImmutableArray();
 
-            AssertEx.Equal(new byte[]
+            Assert.Equal(new byte[]
             {
                 // headers:
                 0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00,
