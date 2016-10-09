@@ -101,12 +101,12 @@ namespace System.CodeDom.Tests
                 new CodeVariableReferenceExpression(variableName),
                 new CodeBinaryOperatorExpression(new CodeVariableReferenceExpression(variableName), CodeBinaryOperatorType.Add, new CodePrimitiveExpression(primitive)));
 
-        protected void AssertEqual<CType>(CType c, string expected) where CType : CodeObject
+        protected void AssertEqual(CodeObject c, string expected)
         {
             // Validate all identifiers are valid
             CodeGenerator.ValidateIdentifiers(c);
 
-            // Generate code 
+            // Generate code
             CodeDomProvider provider = GetProvider();
             string code = GenerateCode(c, provider);
 
@@ -123,12 +123,12 @@ namespace System.CodeDom.Tests
 
             // Serialize and deserialize the CodeObject, and make sure code generated for it
             // is the same as the original.
-            CType clone = BinaryFormatterHelpers.Clone(c);
+            CodeObject clone = BinaryFormatterHelpers.Clone(c);
             string cloneCode = GenerateCode(clone, provider);
             Assert.Equal(code, cloneCode);
         }
 
-        private static string GenerateCode<CType>(CType c, CodeDomProvider provider) where CType : CodeObject
+        private static string GenerateCode(CodeObject c, CodeDomProvider provider)
         {
             var sb = new StringBuilder();
             var writer = new StringWriter(sb);
@@ -136,27 +136,27 @@ namespace System.CodeDom.Tests
 
             if (c is CodeStatement)
             {
-                provider.GenerateCodeFromStatement(c as CodeStatement, writer, options);
+                provider.GenerateCodeFromStatement((CodeStatement)c, writer, options);
             }
             else if (c is CodeCompileUnit)
             {
-               provider.GenerateCodeFromCompileUnit(c as CodeCompileUnit, writer, options);
+                provider.GenerateCodeFromCompileUnit((CodeCompileUnit)c, writer, options);
             }
             else if (c is CodeExpression)
             {
-               provider.GenerateCodeFromExpression(c as CodeExpression, writer, options);
+                provider.GenerateCodeFromExpression((CodeExpression)c, writer, options);
             }
             else if (c is CodeTypeMember)
             {
-               provider.GenerateCodeFromMember(c as CodeTypeMember, writer, options);
+                provider.GenerateCodeFromMember((CodeTypeMember)c, writer, options);
             }
             else if (c is CodeTypeDeclaration)
             {
-                provider.GenerateCodeFromType(c as CodeTypeDeclaration, writer, options);
+                provider.GenerateCodeFromType((CodeTypeDeclaration)c, writer, options);
             }
             else if (c is CodeNamespace)
             {
-               provider.GenerateCodeFromNamespace(c as CodeNamespace, writer, options);
+                provider.GenerateCodeFromNamespace((CodeNamespace)c, writer, options);
             }
             else
             {
