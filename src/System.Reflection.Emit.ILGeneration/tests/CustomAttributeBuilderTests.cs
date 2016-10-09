@@ -734,8 +734,14 @@ namespace System.Reflection.Emit.Tests
             ConstructorInfo con = typeof(TestAttribute).GetConstructor(new Type[0]);
             FieldInfo[] namedFields = new FieldInfo[] { typeof(TestAttribute).GetField(nameof(TestAttribute.ConstField)) };
             object[] propertyValues = new object[] { 5 };
-            Assert.Throws<ArgumentException>("namedFields[0]", () => new CustomAttributeBuilder(con, new object[0], namedFields, propertyValues));
-            Assert.Throws<ArgumentException>("namedFields[0]", () => new CustomAttributeBuilder(con, new object[0], new PropertyInfo[0], new object[0], namedFields, propertyValues));
+            CustomAttributeBuilder attribute = new CustomAttributeBuilder(con, new object[0], namedFields, propertyValues);
+
+            AssemblyBuilder assembly = Helpers.DynamicAssembly();
+            assembly.SetCustomAttribute(attribute);
+
+            // CustomAttributeFormatException is not exposed on .NET Core
+            Exception ex = Assert.ThrowsAny<Exception>(() => assembly.GetCustomAttributes());
+            Assert.Equal("System.Reflection.CustomAttributeFormatException", ex.GetType().ToString());
         }
 
         [Fact]
@@ -871,9 +877,14 @@ namespace System.Reflection.Emit.Tests
         {
             ConstructorInfo con = typeof(IndexerAttribute).GetConstructor(new Type[0]);
             PropertyInfo[] namedProperties = new PropertyInfo[] { typeof(IndexerAttribute).GetProperty("Item") };
+            CustomAttributeBuilder attribute = new CustomAttributeBuilder(con, new object[0], namedProperties, new object[] { "abc" });
 
-            Assert.Throws<ArgumentException>("namedProperties[0]", () => new CustomAttributeBuilder(con, new object[0], namedProperties, new object[] { "abc" }));
-            Assert.Throws<ArgumentException>("namedProperties[0]", () => new CustomAttributeBuilder(con, new object[0], namedProperties, new object[] { "abc" }, new FieldInfo[0], new object[0]));
+            AssemblyBuilder assembly = Helpers.DynamicAssembly();
+            assembly.SetCustomAttribute(attribute);
+
+            // CustomAttributeFormatException is not exposed on .NET Core
+            Exception ex = Assert.ThrowsAny<Exception>(() => assembly.GetCustomAttributes());
+            Assert.Equal("System.Reflection.CustomAttributeFormatException", ex.GetType().ToString());
         }
 
         [Theory]
