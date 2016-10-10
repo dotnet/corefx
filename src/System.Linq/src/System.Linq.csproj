@@ -28,7 +28,7 @@
     <Compile Include="System\Linq\Average.cs" />
     <Compile Include="System\Linq\Buffer.cs" />
     <Compile Include="System\Linq\Cast.cs" />
-    <Compile Include="System\Linq\Concatenate.cs" />
+    <Compile Include="System\Linq\Concat.cs" />
     <Compile Include="System\Linq\Contains.cs" />
     <Compile Include="System\Linq\Count.cs" />
     <Compile Include="System\Linq\DebugView.cs" />
@@ -64,6 +64,7 @@
     <Compile Include="System\Linq\Take.cs" />
     <Compile Include="System\Linq\ToCollection.cs" />
     <Compile Include="System\Linq\Union.cs" />
+    <Compile Include="System\Linq\Utilities.cs" />
     <Compile Include="System\Linq\Where.cs" />
     <Compile Include="System\Linq\Zip.cs" />
   </ItemGroup>

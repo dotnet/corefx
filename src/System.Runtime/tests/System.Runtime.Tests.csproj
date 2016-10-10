@@ -103,6 +103,7 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp1.1'">
     <Compile Include="System\ArrayTests.netcoreapp1.1.cs" />
     <Compile Include="System\EnumTests.netcoreapp1.1.cs" />
+    <Compile Include="System\GCTests.netcoreapp1.1.cs" />
     <Compile Include="System\IntPtrTests.netcoreapp1.1.cs" />
     <Compile Include="System\LazyTests.netcoreapp1.1.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp1.1.cs" />
@@ -169,6 +170,8 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netstandard1.7.cs" />
     <Compile Include="System\Attributes.netstandard1.7.cs" />
     <Compile Include="System\HandleTests.netstandard1.7.cs" />
+    <Compile Include="System\AppContext\AppContext.Switch.cs" />
+    <Compile Include="System\AppContext\AppContext.Switch.Validation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
