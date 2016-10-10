@@ -189,14 +189,18 @@ namespace System.Reflection.Tests
             AssemblyName assemblyName = new AssemblyName(name);
             
             string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null";
-            Assert.True(assemblyName.FullName == expectedName || assemblyName.FullName == extended);
+            Assert.StartsWith(expectedName, assemblyName.FullName);
+            if (assemblyName.FullName.Length > expectedName.Length)
+            {
+                Assert.Equal(extended, assemblyName.FullName);
+            }
         }
 
         [Fact]
         public void FullName_CurrentlyExecutingAssembly()
         {
             AssemblyName assemblyName = typeof(AssemblyNameTests).GetTypeInfo().Assembly.GetName();
-            Assert.True(assemblyName.FullName.StartsWith("System.Reflection.Tests"));
+            Assert.StartsWith("System.Reflection.Tests", assemblyName.FullName);
             Assert.Equal(assemblyName.Name.Length, assemblyName.FullName.IndexOf(','));
         }
 
@@ -249,7 +253,7 @@ namespace System.Reflection.Tests
         public void Name_CurrentlyExecutingAssembly()
         {
             AssemblyName assemblyName = typeof(AssemblyNameTests).GetTypeInfo().Assembly.GetName();
-            Assert.True(assemblyName.Name.StartsWith("System.Reflection.Tests"));
+            Assert.StartsWith("System.Reflection.Tests", assemblyName.Name);
         }
 
         public static IEnumerable<object[]> Version_TestData()
@@ -268,7 +272,11 @@ namespace System.Reflection.Tests
 
             string expected = "MyAssemblyName, Version=" + versionString;
             string extended = expected + ", Culture=neutral, PublicKeyToken=null";
-            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended);
+            Assert.StartsWith(expected, assemblyName.FullName);
+            if (assemblyName.FullName.Length > expected.Length)
+            {
+                Assert.Equal(extended, assemblyName.FullName);
+            }
         }
 
         [Fact]
@@ -276,7 +284,7 @@ namespace System.Reflection.Tests
         {
             AssemblyName assemblyName = typeof(AssemblyNameTests).GetTypeInfo().Assembly.GetName();
             assemblyName.Version = new Version(255, 1, 2, 3);
-            Assert.True(assemblyName.FullName.Contains("Version=255.1.2.3"));
+            Assert.Contains("Version=255.1.2.3", assemblyName.FullName);
         }
 
         [Theory]
@@ -285,7 +293,7 @@ namespace System.Reflection.Tests
         public void ToString(string name)
         {
             var assemblyName = new AssemblyName(name);
-            Assert.True(assemblyName.ToString().StartsWith(name), string.Format("Assembly name {0} did not start with \"{1}\".", assemblyName, name));
+            Assert.StartsWith(name, assemblyName.ToString());
             Assert.Equal(assemblyName.FullName, assemblyName.ToString());
         }
 

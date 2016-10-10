@@ -174,18 +174,15 @@ namespace System.Reflection.Tests
             ConstructorInfo[] constructors = GetConstructors(typeof(StructWith1Constructor));
             StructWith1Constructor obj;
             obj = (StructWith1Constructor)constructors[0].Invoke(new object[] { 1, 2 });
-            Assert.Equal(obj.x, 1);
-            Assert.Equal(obj.y, 2);
+            Assert.Equal(1, obj.x);
+            Assert.Equal(2, obj.y);
         }
 
         [Fact]
         public void IsConstructor_ReturnsTrue()
         {
             ConstructorInfo[] constructors = GetConstructors(typeof(ClassWith3Constructors));
-            foreach (ConstructorInfo constructorInfo in constructors)
-            {
-                Assert.True(constructorInfo.IsConstructor);
-            }
+            Assert.All(constructors, constructorInfo => Assert.True(constructorInfo.IsConstructor));
         }
 
         [Fact]
