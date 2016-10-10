@@ -106,9 +106,13 @@ namespace System.Linq
             public int GetCount(bool onlyIfCheap)
             {
                 int count;
-                if (!onlyIfCheap || _source is ICollection<TSource> || _source is ICollection)
+                if (!onlyIfCheap)
                 {
                     count = _source.Count();
+                }
+                else if (_source is ICollection<TSource> || _source is ICollection)
+                {
+                    count = _source.Count(Check.ICollectionOfT | Check.ICollection);
                 }
                 else
                 {

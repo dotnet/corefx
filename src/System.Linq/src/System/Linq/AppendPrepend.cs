@@ -235,7 +235,9 @@ namespace System.Linq
                     return count == -1 ? -1 : count + 1;
                 }
 
-                return !onlyIfCheap || _source is ICollection<TSource> ? _source.Count() + 1 : -1;
+                return !onlyIfCheap || _source is ICollection<TSource> ?
+                    _source.Count(Check.All & ~Check.IIListProvider) + 1 :
+                    -1;
             }
         }
 
@@ -416,14 +418,19 @@ namespace System.Linq
 
             public override int GetCount(bool onlyIfCheap)
             {
+                int appendedCount = _appended?.Count ?? 0;
+                int prependedCount = _prepended?.Count ?? 0;
+
                 IIListProvider<TSource> listProv = _source as IIListProvider<TSource>;
                 if (listProv != null)
                 {
                     int count = listProv.GetCount(onlyIfCheap);
-                    return count == -1 ? -1 : count + (_appended == null ? 0 : _appended.Count) + (_prepended == null ? 0 : _prepended.Count);
+                    return count == -1 ? -1 : count + appendedCount + prependedCount;
                 }
 
-                return !onlyIfCheap || _source is ICollection<TSource> ? _source.Count() + (_appended == null ? 0 : _appended.Count) + (_prepended == null ? 0 : _prepended.Count) : -1;
+                return !onlyIfCheap || _source is ICollection<TSource> ?
+                    _source.Count(Check.All & ~Check.IIListProvider) + appendedCount + prependedCount :
+                    -1;
             }
         }
     }
