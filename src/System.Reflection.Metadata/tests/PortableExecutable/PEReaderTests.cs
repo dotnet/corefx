@@ -239,18 +239,15 @@ namespace System.Reflection.PortableExecutable.Tests
             var relocBlob1 = reader.GetSectionData(".reloc").GetContent();
             var relocBlob2 = reader.GetSectionData(0x6000).GetContent();
 
-            Assert.Equal(new byte[]
+            byte[] expected = new byte[]
             {
                 0x00, 0x20, 0x00, 0x00,
                 0x0C, 0x00, 0x00, 0x00,
                 0xD0, 0x38, 0x00, 0x00
-            }, relocBlob1);
-            Assert.Equal(new byte[]
-            {
-                0x00, 0x20, 0x00, 0x00,
-                0x0C, 0x00, 0x00, 0x00,
-                0xD0, 0x38, 0x00, 0x00
-            }, relocBlob2);
+            };
+
+            Assert.Equal(expected, relocBlob1);
+            Assert.Equal(expected, relocBlob2);
 
             var data = reader.GetSectionData(0x5fff);
             Assert.True(data.Pointer == null);
