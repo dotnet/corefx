@@ -124,14 +124,12 @@ namespace System.Net.WebSockets.Client.Tests
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
             {
-                var cts = new CancellationTokenSource(500);
-
                 var recvBuffer = new byte[100];
                 var segment = new ArraySegment<byte>(recvBuffer);
 
-                Exception e = await Assert.ThrowsAnyAsync<Exception>(() => cws.ReceiveAsync(segment, cts.Token));
-                Assert.True(e is OperationCanceledException || e is ObjectDisposedException || e is WebSocketException,
-                    $"Unexpected exception type {e.GetType()}");
+                var cts = new CancellationTokenSource(100);
+                // If this fails with OperationCancelledException, was not yet being awaited - rerun test.
+                WebSocketException wse = await Assert.ThrowsAnyAsync<WebSocketException>(() => cws.ReceiveAsync(segment, cts.Token));
 
                 WebSocketException ex = await Assert.ThrowsAsync<WebSocketException>(() =>
                     cws.ReceiveAsync(segment, CancellationToken.None));
