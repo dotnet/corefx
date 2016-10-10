@@ -642,8 +642,9 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public void NullValueForPrimitiveTypeInConstructorArgs_ThrowsNullReferenceException()
+        public void NullValueForPrimitiveTypeInConstructorArgs_ThrowsArgumentNullException()
         {
+        	// Used to throw a NullReferenceException, see issue #11702
             ConstructorInfo con = typeof(TestAttribute).GetConstructor(new Type[] { typeof(int) });
             object[] constructorArgs = new object[] { null };
 
@@ -807,6 +808,9 @@ namespace System.Reflection.Emit.Tests
         [MemberData(nameof(NotSupportedPrimitives_TestData))]
         public static void NotSupportedPrimitiveInFieldValues_ThrowsArgumentException(object value)
         {
+        	// Used to assert in CustomAttributeBuilder.EmitType(), not writing any CustomAttributeEncoding.
+        	// This created a blob that (probably) generates a CustomAttributeFormatException. In theory, this
+        	// could have been something more uncontrolled, so was fixed. See issue #11703.
             ConstructorInfo con = typeof(TestAttribute).GetConstructor(new Type[0]);
             FieldInfo[] namedFields = Helpers.GetFields(typeof(TestAttribute), nameof(TestAttribute.ObjectField));
             object[] fieldValues = new object[] { value };
@@ -873,7 +877,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Fact]
-        public static void IndexerInNamedProperties_ThrowsArgumentException()
+        public static void IndexerInNamedProperties_ThrowsCustomAttributeFormatExceptionOnCreation()
         {
             ConstructorInfo con = typeof(IndexerAttribute).GetConstructor(new Type[0]);
             PropertyInfo[] namedProperties = new PropertyInfo[] { typeof(IndexerAttribute).GetProperty("Item") };
