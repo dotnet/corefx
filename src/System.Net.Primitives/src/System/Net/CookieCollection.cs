@@ -93,6 +93,14 @@ namespace System.Net
             }
         }
 
+        public bool IsReadOnly
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         bool ICollection.IsSynchronized
         {
             get
@@ -110,6 +118,11 @@ namespace System.Net
         }
 
         void ICollection.CopyTo(Array array, int index)
+        {
+            ((ICollection)_list).CopyTo(array, index);
+        }
+
+        public void CopyTo(Cookie[] array, int index)
         {
             ((ICollection)_list).CopyTo(array, index);
         }
