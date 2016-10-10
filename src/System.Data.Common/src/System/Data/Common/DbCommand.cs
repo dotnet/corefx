@@ -200,7 +200,7 @@ namespace System.Data.Common
 
                 try
                 {
-                    return Task.FromResult<int>(ExecuteNonQuery());
+                    return Task.Run<int>(() => ExecuteNonQuery());
                 }
                 catch (Exception e)
                 {
@@ -249,7 +249,7 @@ namespace System.Data.Common
 
                 try
                 {
-                    return Task.FromResult<DbDataReader>(ExecuteReader(behavior));
+                    return Task.Run<DbDataReader>(() => ExecuteReader(behavior));
                 }
                 catch (Exception e)
                 {
@@ -283,7 +283,7 @@ namespace System.Data.Common
 
                 try
                 {
-                    return Task.FromResult<object>(ExecuteScalar());
+                    return Task.Run<object>(() => ExecuteScalar());
                 }
                 catch (Exception e)
                 {
