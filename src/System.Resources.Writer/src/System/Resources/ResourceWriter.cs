@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Versioning;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 
@@ -44,7 +43,7 @@ namespace System.Resources
         // An initial size for our internal sorted list, to avoid extra resizes.
         private const int AverageNameSize = 20 * 2;  // chars in little endian Unicode
         private const int AverageValueSize = 40;
-        private const string ResourceWriterTypeName = "System.Resources.ResourceReader, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+        private const string ResourceReaderFulyQualifiedName = "System.Resources.ResourceReader, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
         private const string ResSetTypeName = "System.Resources.RuntimeResourceSet";
         private const int ResSetVersion = 2;
 
@@ -53,20 +52,8 @@ namespace System.Resources
         private Dictionary<string, object> _caseInsensitiveDups;
         private Dictionary<string, PrecannedResource> _preserializedData;
 
-        private Func<Type, String> typeConverter;
- 
         // Set this delegate to allow multi-targeting for .resources files.
-        public Func<Type, string> TypeNameConverter
-        {
-            get
-            {
-                return typeConverter;
-            }
-            set
-            {
-                typeConverter = value;
-            }
-        }
+        public Func<Type, string> TypeNameConverter { get; set; }
 
         public ResourceWriter(string fileName)
         {
@@ -93,7 +80,7 @@ namespace System.Resources
         // Adds a string resource to the list of resources to be written to a file.
         // They aren't written until Generate() is called.
         // 
-        public void AddResource(String name, String value)
+        public void AddResource(string name, string value)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -109,9 +96,9 @@ namespace System.Resources
         // Adds a resource of type Object to the list of resources to be 
         // written to a file.  They aren't written until Generate() is called.
         // 
-        public void AddResource(String name, Object value)
+        public void AddResource(string name, object value)
         {
-            if (name==null)
+            if (name == null)
                 throw new ArgumentNullException(nameof(name));
             Contract.EndContractBlock();
             if (_resourceList == null)
@@ -134,7 +121,7 @@ namespace System.Resources
         // written to a file.  They aren't written until Generate() is called.
         // Doesn't close the Stream when done.
         //
-        public void AddResource(String name, Stream value)
+        public void AddResource(string name, Stream value)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -149,7 +136,7 @@ namespace System.Resources
         // written to a file.  They aren't written until Generate() is called.
         // closeAfterWrite parameter indicates whether to close the stream when done.
         // 
-        public void AddResource(String name, Stream value, bool closeAfterWrite)
+        public void AddResource(string name, Stream value, bool closeAfterWrite)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -160,7 +147,7 @@ namespace System.Resources
             AddResourceInternal(name, value, closeAfterWrite);
         }
  
-        private void AddResourceInternal(String name, Stream value, bool closeAfterWrite)
+        private void AddResourceInternal(string name, Stream value, bool closeAfterWrite)
         {
             if (value == null)
             {
@@ -183,9 +170,9 @@ namespace System.Resources
         // Adds a named byte array as a resource to the list of resources to 
         // be written to a file. They aren't written until Generate() is called.
         // 
-        public void AddResource(String name, byte[] value)
+        public void AddResource(string name, byte[] value)
         {
-            if (name==null)
+            if (name == null)
                 throw new ArgumentNullException(nameof(name));
             Contract.EndContractBlock();
             if (_resourceList == null)
@@ -196,7 +183,7 @@ namespace System.Resources
             _resourceList.Add(name, value);
         }
         
-        public void AddResourceData(String name, String typeName, byte[] serializedData)
+        public void AddResourceData(string name, string typeName, byte[] serializedData)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -211,7 +198,7 @@ namespace System.Resources
             // Check for duplicate resources whose names vary only by case.
             _caseInsensitiveDups.Add(name, null);
             if (_preserializedData == null)
-                _preserializedData = new Dictionary<String, PrecannedResource>(FastResourceComparer.Default);
+                _preserializedData = new Dictionary<string, PrecannedResource>(FastResourceComparer.Default);
  
             _preserializedData.Add(name, new PrecannedResource(typeName, serializedData));
         }
@@ -221,10 +208,10 @@ namespace System.Resources
         // LocStudio's managed code parser will do this in some cases.
         private class PrecannedResource
         {
-            internal String TypeName;
-            internal byte[] Data;
+            internal readonly string TypeName;
+            internal readonly byte[] Data;
  
-            internal PrecannedResource(String typeName, byte[] data)
+            internal PrecannedResource(string typeName, byte[] data)
             {
                 TypeName = typeName;
                 Data = data;
@@ -233,13 +220,13 @@ namespace System.Resources
  
         private class StreamWrapper
         {
-            internal Stream m_stream;
-            internal bool m_closeAfterWrite;
+            internal readonly Stream Stream;
+            internal readonly bool CloseAfterWrite;
  
             internal StreamWrapper(Stream s, bool closeAfterWrite)
             {
-                m_stream = s;
-                m_closeAfterWrite = closeAfterWrite;
+                Stream = s;
+                CloseAfterWrite = closeAfterWrite;
             }
         }
 
@@ -296,7 +283,7 @@ namespace System.Resources
 
             // Write out class name of IResourceReader capable of handling 
             // this file.
-            resMgrHeaderPart.Write(ResourceWriterTypeName);
+            resMgrHeaderPart.Write(ResourceReaderFulyQualifiedName);
 
             // Write out class name of the ResourceSet class best suited to
             // handling this file.
@@ -337,8 +324,6 @@ namespace System.Resources
             {
                 BinaryWriter data = new BinaryWriter(dataSection, Encoding.UTF8);
 
-                IFormatter objFormatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File | StreamingContextStates.Persistence));
-
                 if (_preserializedData != null)
                 {
                     foreach (KeyValuePair<string, PrecannedResource> entry in _preserializedData)
@@ -369,7 +354,7 @@ namespace System.Resources
                     }
                     else
                     {
-                        WriteValue(typeCode, value, data, objFormatter);
+                        WriteValue(typeCode, value, data);
                     }
                 }
 
@@ -471,33 +456,33 @@ namespace System.Resources
                 return ResourceTypeCode.Null;
  
             Type type = value.GetType();
-            if (type == typeof(String))
+            if (type == typeof(string))
                 return ResourceTypeCode.String;
-            else if (type == typeof(Int32))
+            else if (type == typeof(int))
                 return ResourceTypeCode.Int32;
-            else if (type == typeof(Boolean))
+            else if (type == typeof(bool))
                 return ResourceTypeCode.Boolean;
-            else if (type == typeof(Char))
+            else if (type == typeof(char))
                 return ResourceTypeCode.Char;
-            else if (type == typeof(Byte))
+            else if (type == typeof(byte))
                 return ResourceTypeCode.Byte;
-            else if (type == typeof(SByte))
+            else if (type == typeof(sbyte))
                 return ResourceTypeCode.SByte;
-            else if (type == typeof(Int16))
+            else if (type == typeof(short))
                 return ResourceTypeCode.Int16;
-            else if (type == typeof(Int64))
+            else if (type == typeof(long))
                 return ResourceTypeCode.Int64;
-            else if (type == typeof(UInt16))
+            else if (type == typeof(ushort))
                 return ResourceTypeCode.UInt16;
-            else if (type == typeof(UInt32))
+            else if (type == typeof(uint))
                 return ResourceTypeCode.UInt32;
-            else if (type == typeof(UInt64))
+            else if (type == typeof(ulong))
                 return ResourceTypeCode.UInt64;
-            else if (type == typeof(Single))
+            else if (type == typeof(float))
                 return ResourceTypeCode.Single;
-            else if (type == typeof(Double))
+            else if (type == typeof(double))
                 return ResourceTypeCode.Double;
-            else if (type == typeof (Decimal))
+            else if (type == typeof(decimal))
                 return ResourceTypeCode.Decimal;
             else if (type == typeof(DateTime))
                 return ResourceTypeCode.DateTime;
@@ -507,11 +492,11 @@ namespace System.Resources
                 return ResourceTypeCode.ByteArray;
             else if (type == typeof(StreamWrapper))
                 return ResourceTypeCode.Stream;
- 
-            
+
+
             // This is a user type, or a precanned resource.  Find type 
             // table index.  If not there, add new element.
-            String typeName;
+            string typeName;
             if (type == typeof(PrecannedResource)) {
                 typeName = ((PrecannedResource)value).TypeName;
                 if (typeName.StartsWith("ResourceTypeCode.", StringComparison.Ordinal)) {
@@ -522,7 +507,7 @@ namespace System.Resources
             }
             else 
             {
-                typeName = MultitargetingHelpers.GetAssemblyQualifiedName(type, typeConverter);
+                typeName = MultitargetingHelpers.GetAssemblyQualifiedName(type, TypeNameConverter);
             }
  
             int typeIndex = types.IndexOf(typeName);
@@ -534,7 +519,7 @@ namespace System.Resources
             return (ResourceTypeCode)(typeIndex + ResourceTypeCode.StartOfUserTypes);
         }
 
-        private void WriteValue(ResourceTypeCode typeCode, Object value, BinaryWriter writer, IFormatter objFormatter)
+        private void WriteValue(ResourceTypeCode typeCode, object value, BinaryWriter writer)
         {
             Contract.Requires(writer != null);
 
@@ -544,7 +529,7 @@ namespace System.Resources
                     break;
 
                 case ResourceTypeCode.String:
-                    writer.Write((String)value);
+                    writer.Write((string)value);
                     break;
 
                 case ResourceTypeCode.Boolean:
@@ -552,7 +537,7 @@ namespace System.Resources
                     break;
 
                 case ResourceTypeCode.Char:
-                    writer.Write((UInt16)(char)value);
+                    writer.Write((ushort)(char)value);
                     break;
 
                 case ResourceTypeCode.Byte:
@@ -564,44 +549,44 @@ namespace System.Resources
                     break;
 
                 case ResourceTypeCode.Int16:
-                    writer.Write((Int16)value);
+                    writer.Write((short)value);
                     break;
 
                 case ResourceTypeCode.UInt16:
-                    writer.Write((UInt16)value);
+                    writer.Write((ushort)value);
                     break;
 
                 case ResourceTypeCode.Int32:
-                    writer.Write((Int32)value);
+                    writer.Write((int)value);
                     break;
 
                 case ResourceTypeCode.UInt32:
-                    writer.Write((UInt32)value);
+                    writer.Write((uint)value);
                     break;
 
                 case ResourceTypeCode.Int64:
-                    writer.Write((Int64)value);
+                    writer.Write((long)value);
                     break;
 
                 case ResourceTypeCode.UInt64:
-                    writer.Write((UInt64)value);
+                    writer.Write((ulong)value);
                     break;
 
                 case ResourceTypeCode.Single:
-                    writer.Write((Single)value);
+                    writer.Write((float)value);
                     break;
 
                 case ResourceTypeCode.Double:
-                    writer.Write((Double)value);
+                    writer.Write((double)value);
                     break;
 
                 case ResourceTypeCode.Decimal:
-                    writer.Write((Decimal)value);
+                    writer.Write((decimal)value);
                     break;
 
                 case ResourceTypeCode.DateTime:
                     // Use DateTime's ToBinary & FromBinary.
-                    Int64 data = ((DateTime)value).ToBinary();
+                    long data = ((DateTime)value).ToBinary();
                     writer.Write(data);
                     break;
 
@@ -621,10 +606,10 @@ namespace System.Resources
                 case ResourceTypeCode.Stream:
                     {
                         StreamWrapper sw = (StreamWrapper)value;
-                        if (sw.m_stream.GetType() == typeof(MemoryStream))
+                        if (sw.Stream.GetType() == typeof(MemoryStream))
                         {
-                            MemoryStream ms = (MemoryStream)sw.m_stream;
-                            if (ms.Length > Int32.MaxValue)
+                            MemoryStream ms = (MemoryStream)sw.Stream;
+                            if (ms.Length > int.MaxValue)
                                 throw new ArgumentException(SR.ArgumentOutOfRange_StreamLength);
                             byte[] arr = ms.ToArray();
                             writer.Write(arr.Length);
@@ -632,9 +617,9 @@ namespace System.Resources
                         }
                         else
                         {
-                            Stream s = sw.m_stream;
+                            Stream s = sw.Stream;
                             // we've already verified that the Stream is seekable
-                            if (s.Length > Int32.MaxValue)
+                            if (s.Length > int.MaxValue)
                                 throw new ArgumentException(SR.ArgumentOutOfRange_StreamLength);
 
                             s.Position = 0;
@@ -645,7 +630,7 @@ namespace System.Resources
                             {
                                 writer.Write(buffer, 0, read);
                             }
-                            if (sw.m_closeAfterWrite)
+                            if (sw.CloseAfterWrite)
                             {
                                 s.Close();
                             }
@@ -654,9 +639,8 @@ namespace System.Resources
                     }
 
                 default:
-                    Contract.Assert(typeCode >= ResourceTypeCode.StartOfUserTypes, String.Format(CultureInfo.InvariantCulture, "ResourceReader: Unsupported ResourceTypeCode in .resources file!  {0}", typeCode));
-                objFormatter.Serialize(writer.BaseStream, value);
-                break;
+                    Contract.Assert(typeCode >= ResourceTypeCode.StartOfUserTypes, string.Format(CultureInfo.InvariantCulture, "ResourceReader: Unsupported ResourceTypeCode in .resources file!  {0}", typeCode));
+                    throw new PlatformNotSupportedException(SR.NotSupported_BinarySerializedResources);
             }
         }
     }

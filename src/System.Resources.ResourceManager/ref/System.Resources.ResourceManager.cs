@@ -15,7 +15,6 @@ namespace System.Resources
     }
     public sealed partial class ResourceReader : IResourceReader
     {
-        [System.Security.SecurityCriticalAttribute]
         public ResourceReader(System.IO.Stream stream) { }
         public ResourceReader(string fileName) { }
         public void Close() { }

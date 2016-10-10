@@ -11,7 +11,6 @@
     "System.IO.FileSystem.Primitives": "4.3.0-beta-24604-02",
     "System.Runtime": "4.3.0-beta-24604-02",
     "System.Runtime.Extensions": "4.3.0-beta-24604-02",
-    "System.Runtime.Serialization.Formatters": "4.3.0-beta-24604-02",
     "System.Text.Encoding": "4.3.0-beta-24604-02",
     "System.Threading": "4.3.0-beta-24604-02",
     "System.Threading.Tasks": "4.3.0-beta-24604-02"
