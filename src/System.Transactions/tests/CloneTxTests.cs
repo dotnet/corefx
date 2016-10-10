@@ -41,13 +41,14 @@ namespace System.Transactions.Tests
         [InlineData(CloneType.RollbackDependent, IsolationLevel.Unspecified, false, false, TransactionStatus.Aborted)]
         // TODO: Issue #10353 - These variations need to be added once we have promotion support.
         /*
-        [InlineData(CloneType.Normal, true, true, TransactionStatus.Committed)]
+        //[InlineData(CloneType.Normal, true, true, TransactionStatus.Committed)]
         [InlineData(CloneType.Normal, IsolationLevel.RepeatableRead, false, false, TransactionStatus.Committed)]
         [InlineData(CloneType.Normal, IsolationLevel.ReadCommitted, false, false, TransactionStatus.Committed)]
         [InlineData(CloneType.Normal, IsolationLevel.ReadUncommitted, false, false, TransactionStatus.Committed)]
         [InlineData(CloneType.Normal, IsolationLevel.Snapshot, false, false, TransactionStatus.Committed)]
         [InlineData(CloneType.Normal, IsolationLevel.Chaos, false, false, TransactionStatus.Committed)]
         [InlineData(CloneType.Normal, IsolationLevel.Unspecified, false, false, TransactionStatus.Committed)]
+        [InlineData(CloneType.Normal, true, true, TransactionStatus.Committed)]
         [InlineData(CloneType.BlockingDependent, IsolationLevel.Serializable, true, true, TransactionStatus.Committed)]
         [InlineData(CloneType.BlockingDependent, IsolationLevel.RepeatableRead, true, true, TransactionStatus.Committed)]
         [InlineData(CloneType.BlockingDependent, IsolationLevel.ReadCommitted, true, true, TransactionStatus.Committed)]
@@ -71,6 +72,14 @@ namespace System.Transactions.Tests
                 // Shorten the delay before a timeout for blocking clones.
                 Timeout = TimeSpan.FromSeconds(1)
             };
+
+            // If we are dealing with a "normal" clone, we fully expect the transaction to commit successfully.
+            // But a timeout of 1 seconds may not be enough for that to happen. So increase the timeout
+            // for "normal" clones. This will not increase the test execution time in the "passing" scenario.
+            if (cloneType == CloneType.Normal)
+            {
+                options.Timeout = TimeSpan.FromSeconds(10);
+            }
 
             CommittableTransaction tx = new CommittableTransaction(options);
 
@@ -115,9 +124,34 @@ namespace System.Transactions.Tests
             {
                 tx.Commit();
             }
-            catch (TransactionAbortedException)
+            catch (TransactionAbortedException ex)
             {
                 Assert.Equal(expectedStatus, TransactionStatus.Aborted);
+                switch (cloneType)
+                {
+                    case CloneType.Normal:
+                        {
+                            // We shouldn't be getting TransactionAbortedException for "normal" clones,
+                            // so we have these two Asserts to possibly help determine what went wrong.
+                            Assert.Null(ex.InnerException);
+                            Assert.Equal(ex.Message, "There shouldn't be any exception with this Message property");
+                            break;
+                        }
+                    case CloneType.BlockingDependent:
+                        {
+                            Assert.Equal(ex.InnerException.GetType(), typeof(TimeoutException));
+                            break;
+                        }
+                    case CloneType.RollbackDependent:
+                        {
+                            Assert.Null(ex.InnerException);
+                            break;
+                        }
+                    default:
+                        {
+                            throw new Exception("Unexpected CloneType - " + cloneType.ToString());
+                        }
+                }
             }
 
             Assert.Equal(expectedStatus, tx.TransactionInformation.Status);
