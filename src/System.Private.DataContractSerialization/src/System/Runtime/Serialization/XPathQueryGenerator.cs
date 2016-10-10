@@ -28,11 +28,11 @@ namespace System.Runtime.Serialization
         {
             if (type == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("type"));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(type)));
             }
             if (pathToMember == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("pathToMember"));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(pathToMember)));
             }
 
             DataContract currentContract = DataContract.GetDataContract(type);
@@ -100,33 +100,33 @@ namespace System.Runtime.Serialization
 
         class ExportContext
         {
-            XmlNamespaceManager namespaces;
-            int nextPrefix;
-            StringBuilder xPathBuilder;
+            private XmlNamespaceManager _namespaces;
+            private int _nextPrefix;
+            private StringBuilder _xPathBuilder;
 
             public ExportContext(DataContract rootContract)
             {
-                this.namespaces = new XmlNamespaceManager(new NameTable());
+                _namespaces = new XmlNamespaceManager(new NameTable());
                 string prefix = SetNamespace(rootContract.TopLevelElementNamespace.Value);
-                this.xPathBuilder = new StringBuilder(XPathQueryGenerator.XPathSeparator + prefix + XPathQueryGenerator.NsSeparator + rootContract.TopLevelElementName.Value);
+                _xPathBuilder = new StringBuilder(XPathQueryGenerator.XPathSeparator + prefix + XPathQueryGenerator.NsSeparator + rootContract.TopLevelElementName.Value);
             }
 
             public ExportContext(StringBuilder rootContractXPath)
             {
-                this.namespaces = new XmlNamespaceManager(new NameTable());
-                this.xPathBuilder = rootContractXPath;
+                _namespaces = new XmlNamespaceManager(new NameTable());
+                _xPathBuilder = rootContractXPath;
             }
 
             public void WriteChildToContext(DataMember contextMember, string prefix)
             {
-                this.xPathBuilder.Append(XPathQueryGenerator.XPathSeparator + prefix + XPathQueryGenerator.NsSeparator + contextMember.Name);
+                _xPathBuilder.Append(XPathQueryGenerator.XPathSeparator + prefix + XPathQueryGenerator.NsSeparator + contextMember.Name);
             }
 
             public XmlNamespaceManager Namespaces
             {
                 get
                 {
-                    return this.namespaces;
+                    return _namespaces;
                 }
             }
 
@@ -134,16 +134,16 @@ namespace System.Runtime.Serialization
             {
                 get
                 {
-                    return this.xPathBuilder.ToString();
+                    return _xPathBuilder.ToString();
                 }
             }
 
             public string SetNamespace(string ns)
             {
-                string prefix = namespaces.LookupPrefix(ns);
+                string prefix = _namespaces.LookupPrefix(ns);
                 if (prefix == null || prefix.Length == 0)
                 {
-                    prefix = "xg" + (this.nextPrefix++).ToString(NumberFormatInfo.InvariantInfo);
+                    prefix = "xg" + (_nextPrefix++).ToString(NumberFormatInfo.InvariantInfo);
                     Namespaces.AddNamespace(prefix, ns);
                 }
                 return prefix;

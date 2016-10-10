@@ -8,30 +8,31 @@ namespace System.Runtime.Serialization
 {
     public class ExportOptions
     {
-        Collection<Type> knownTypes;
-        // IDataContractSurrogate is not available in NetCore.
-        //IDataContractSurrogate dataContractSurrogate;
+        private Collection<Type> _knownTypes;
+#if SUPPORT_SURROGATE
+        IDataContractSurrogate dataContractSurrogate;
 
-        //public IDataContractSurrogate DataContractSurrogate
-        //{
-        //    get { return dataContractSurrogate; }
-        //    set { dataContractSurrogate = value; }
-        //}
+        public IDataContractSurrogate DataContractSurrogate
+        {
+            get { return dataContractSurrogate; }
+            set { dataContractSurrogate = value; }
+        }
 
-        //internal IDataContractSurrogate GetSurrogate()
-        //{
-        //    return dataContractSurrogate;
-        //}
+        internal IDataContractSurrogate GetSurrogate()
+        {
+            return dataContractSurrogate;
+        }
+#endif
 
         public Collection<Type> KnownTypes
         {
             get
             {
-                if (knownTypes == null)
+                if (_knownTypes == null)
                 {
-                    knownTypes = new Collection<Type>();
+                    _knownTypes = new Collection<Type>();
                 }
-                return knownTypes;
+                return _knownTypes;
             }
         }
     }

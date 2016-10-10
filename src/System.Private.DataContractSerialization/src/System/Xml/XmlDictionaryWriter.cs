@@ -201,7 +201,7 @@ namespace System.Xml
         public virtual void WriteValue(IStreamProvider value)
         {
             if (value == null)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("value"));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException(nameof(value)));
 
             Stream stream = value.GetStream();
             if (stream == null)
