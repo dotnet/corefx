@@ -46,7 +46,7 @@ namespace System.Net.Security.Tests
                         Dispose();
                     }
 
-                    throw new IllegalStateException("KDC setup failure");
+                    throw new InvalidOperationException("KDC setup failure");
                 }
             }
             else
