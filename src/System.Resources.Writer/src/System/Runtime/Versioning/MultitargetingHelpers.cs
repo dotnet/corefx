@@ -8,9 +8,6 @@ namespace System.Runtime.Versioning
  
     internal static class MultitargetingHelpers
     {
-        // default type converter
-        private static readonly Func<Type, string> s_defaultConverter = (t) => t.AssemblyQualifiedName;
- 
         // This method gets assembly info for the corresponding type. If the typeConverter
         // is provided it is used to get this information.
         internal static string GetAssemblyQualifiedName(Type type, Func<Type, string> converter)
@@ -37,7 +34,7 @@ namespace System.Runtime.Versioning
  
                 if (assemblyFullName == null)
                 {
-                    assemblyFullName = s_defaultConverter(type);
+                    assemblyFullName = type.AssemblyQualifiedName;
                 }
             }
  

@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../pkg/System.Resources.ResourceManager.pkgproj"/>
+    <ProjectReference Include="../../System.Runtime.InteropServices/pkg/System.Runtime.InteropServices.pkgproj"/>
     <ProjectReference Include="../../System.IO.UnmanagedMemoryStream/pkg/System.IO.UnmanagedMemoryStream.pkgproj"/>
     <ProjectReference Include="../../System.Resources.Writer/pkg/System.Resources.Writer.pkgproj"/>
   </ItemGroup>

@@ -4280,6 +4280,13 @@ namespace System.IO
         public DirectoryNotFoundException(string message, System.Exception innerException) { }
         protected DirectoryNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
+    [Flags]
+    public enum FileAccess
+    {
+        Read = 1,
+        ReadWrite = 3,
+        Write = 2,
+    }
     public partial class FileLoadException : System.IO.IOException
     {
         public FileLoadException() { }

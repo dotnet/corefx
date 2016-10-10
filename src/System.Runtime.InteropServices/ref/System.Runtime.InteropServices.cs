@@ -25,6 +25,44 @@ namespace System
         public DllNotFoundException(string message, System.Exception inner) { }
     }
 }
+namespace System.IO
+{
+    public partial class UnmanagedMemoryStream : System.IO.Stream
+    {
+        protected UnmanagedMemoryStream() { }
+        [System.CLSCompliantAttribute(false)]
+        [System.Security.SecurityCriticalAttribute]
+        public unsafe UnmanagedMemoryStream(byte* pointer, long length) { }
+        [System.CLSCompliantAttribute(false)]
+        [System.Security.SecurityCriticalAttribute]
+        public unsafe UnmanagedMemoryStream(byte* pointer, long length, long capacity, System.IO.FileAccess access) { }
+        public UnmanagedMemoryStream(System.Runtime.InteropServices.SafeBuffer buffer, long offset, long length) { }
+        public UnmanagedMemoryStream(System.Runtime.InteropServices.SafeBuffer buffer, long offset, long length, System.IO.FileAccess access) { }
+        public override bool CanRead { get { return default(bool); } }
+        public override bool CanSeek { get { return default(bool); } }
+        public override bool CanWrite { get { return default(bool); } }
+        public long Capacity { get { return default(long); } }
+        public override long Length { get { return default(long); } }
+        public override long Position { get { return default(long); } set { } }
+        [System.CLSCompliantAttribute(false)]
+        public unsafe byte* PositionPointer {[System.Security.SecurityCriticalAttribute]get { return default(byte*); }[System.Security.SecurityCriticalAttribute]set { } }
+        protected override void Dispose(bool disposing) { }
+        public override void Flush() { }
+        public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        [System.CLSCompliantAttribute(false)]
+        [System.Security.SecurityCriticalAttribute]
+        protected unsafe void Initialize(byte* pointer, long length, long capacity, System.IO.FileAccess access) { }
+        protected void Initialize(System.Runtime.InteropServices.SafeBuffer buffer, long offset, long length, System.IO.FileAccess access) { }
+        public override int Read(byte[] buffer, int offset, int count) { buffer = default(byte[]); return default(int); }
+        public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
+        public override int ReadByte() { return default(int); }
+        public override long Seek(long offset, System.IO.SeekOrigin loc) { return default(long); }
+        public override void SetLength(long value) { }
+        public override void Write(byte[] buffer, int offset, int count) { }
+        public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        public override void WriteByte(byte value) { }
+    }
+}
 namespace System.Runtime.CompilerServices
 {
     [System.AttributeUsageAttribute((System.AttributeTargets)(2304), Inherited=false)]

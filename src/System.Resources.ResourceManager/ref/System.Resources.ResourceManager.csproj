@@ -10,6 +10,9 @@
     <Compile Include="System.Resources.ResourceManager.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="../../System.Runtime.InteropServices/ref/System.Runtime.InteropServices.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

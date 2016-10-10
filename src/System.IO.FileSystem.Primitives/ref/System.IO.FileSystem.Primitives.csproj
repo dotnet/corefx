@@ -9,6 +9,9 @@
     <Compile Include="System.IO.FileSystem.Primitives.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="../../System.Runtime/ref/System.Runtime.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
