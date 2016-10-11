@@ -71,30 +71,6 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
-        /// Adds an array of items to the backing array, resizing it if necessary.
-        /// </summary>
-        /// <param name="items">The items to add.</param>
-        public void AddRange(T[] items)
-        {
-            Debug.Assert(items != null);
-
-            if (items.Length != 0)
-            {
-                int endCount = _count + items.Length;
-                Debug.Assert(endCount > 0); // Check for overflow
-
-                if (endCount > Capacity)
-                {
-                    EnsureCapacity(endCount);
-                }
-
-                Debug.Assert(Capacity > 0); // At least 1 item is being added per above branch
-                Array.Copy(items, 0, _array, _count, items.Length);
-                _count = endCount;
-            }
-        }
-
-        /// <summary>
         /// Gets an enumerator which enumerates the contents of this builder.
         /// </summary>
         public Enumerator GetEnumerator()
@@ -148,26 +124,6 @@ namespace System.Collections.Generic
             Debug.Assert(_count < Capacity);
 
             _array[_count++] = item;
-        }
-
-        /// <summary>
-        /// Adds new default-initialized slots to this <see cref="ArrayBuilder{T}"/>.
-        /// </summary>
-        /// <param name="count">The number of items to zero-extend by.</param>
-        /// <remarks>
-        /// Unless <see cref="Count"/> plus <paramref name="count"/> cannot fit into
-        /// <see cref="Capacity"/>, this method operates in O(1) time.
-        /// </remarks>
-        public void ZeroExtend(int count)
-        {
-            Debug.Assert(count >= 0);
-
-            int endCount = _count + count;
-            if (endCount > Capacity)
-            {
-                EnsureCapacity(endCount);
-            }
-            _count = endCount;
         }
 
         private void EnsureCapacity(int minimum)

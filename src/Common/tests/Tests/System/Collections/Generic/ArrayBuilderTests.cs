@@ -114,20 +114,6 @@ namespace System.Collections.Generic.Tests
         }
 
         [Theory]
-        [MemberData(nameof(AddRangeData))]
-        public void AddRange(IEnumerable<T> seed, IEnumerable<T> items)
-        {
-            var builder = CreateBuilderFromSequence(seed);
-
-            builder.AddRange(items.ToArray());
-
-            var expected = seed.Concat(items);
-
-            VerifyBuilderContentsWithForeach(expected, builder);
-            Assert.Equal(expected, builder.ToArray());
-        }
-
-        [Theory]
         [MemberData(nameof(EnumerableData))]
         public void GetEnumerator(IEnumerable<T> seed)
         {
@@ -167,41 +153,6 @@ namespace System.Collections.Generic.Tests
             Assert.ThrowsAny<Exception>(() => builder.UncheckedAdd(default(T)));
         }
 
-        [Theory]
-        [MemberData(nameof(ZeroExtendData))]
-        public void ZeroExtend(IEnumerable<T> seed, int count)
-        {
-            Debug.Assert(count >= 0);
-
-            var builder = CreateBuilderFromSequence(seed);
-
-            builder.ZeroExtend(count);
-
-            var expected = seed.Concat(Enumerable.Repeat(default(T), count));
-
-            VerifyBuilderContentsWithForeach(expected, builder);
-            Assert.Equal(expected, builder.ToArray());
-        }
-
-        public static TheoryData<IEnumerable<T>, IEnumerable<T>> AddRangeData()
-        {
-            var data = new TheoryData<IEnumerable<T>, IEnumerable<T>>();
-
-            var enumerables = EnumerableData().Select(array => array[0]).Cast<IEnumerable<T>>();
-
-            // Pair up each of the enumerables with each of the other enumerables, including itself.
-            // This has O(N^2) complexity depending on how many enumerables there are.
-            foreach (var enumerable1 in enumerables)
-            {
-                foreach (var enumerable2 in enumerables)
-                {
-                    data.Add(enumerable1, enumerable2);
-                }
-            }
-
-            return data;
-        }
-
         public static TheoryData<int> CapacityData()
         {
             var data = new TheoryData<int>();
@@ -236,26 +187,6 @@ namespace System.Collections.Generic.Tests
                 // Test perf: Capture the items into a List here so we
                 // only enumerate the sequence once.
                 data.Add(GenerateEnumerable(count).ToList());
-            }
-
-            return data;
-        }
-
-        public static TheoryData<IEnumerable<T>, int> ZeroExtendData()
-        {
-            var data = new TheoryData<IEnumerable<T>, int>();
-
-            // Pair up all of the enumerables in EnumerableData with all of the counts in CountData.
-
-            var enumerables = EnumerableData().Select(array => array[0]).Cast<IEnumerable<T>>();
-            var counts = CountData().Select(array => array[0]).Cast<int>();
-
-            foreach (var enumerable in enumerables)
-            {
-                foreach (int count in counts)
-                {
-                    data.Add(enumerable, count);
-                }
             }
 
             return data;
