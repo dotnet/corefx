@@ -88,22 +88,30 @@ fi
 if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
     if [ -e $__TOOLRUNTIME_DIR ]; then rm -rf -- $__TOOLRUNTIME_DIR; fi
     echo "Running: $__scriptpath/init-tools.sh" > $__init_tools_log
-    if [ ! -e $__DOTNET_PATH ]; then
-        echo "Installing dotnet cli..."
-        __DOTNET_LOCATION="https://dotnetcli.blob.core.windows.net/dotnet/Sdk/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.${__DOTNET_TOOLS_VERSION}.tar.gz"
-        # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
-        echo "Installing '${__DOTNET_LOCATION}' to '$__DOTNET_PATH/dotnet.tar'" >> $__init_tools_log
-        which curl > /dev/null 2> /dev/null
-        if [ $? -ne 0 ]; then
-            mkdir -p "$__DOTNET_PATH"
-            wget -q -O $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
-        else
-            curl --retry 10 -sSL --create-dirs -o $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
-        fi
-        cd $__DOTNET_PATH
-        tar -xf $__DOTNET_PATH/dotnet.tar
+    if [ "$LocalDotnetcli" != "" ]; then
+        echo "Using local dotnetcli as Tools host. $LocalDotnetcli" >> $__init_tools_log
+        mkdir -p $__DOTNET_PATH
+        pushd $LocalDotnetcli > /dev/null
+        cp -r * $__DOTNET_PATH
+        popd > /dev/null
+    else
+        if [ ! -e $__DOTNET_PATH ]; then
+    	    echo "Installing dotnet cli..."
+            __DOTNET_LOCATION="https://dotnetcli.blob.core.windows.net/dotnet/Sdk/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.${__DOTNET_TOOLS_VERSION}.tar.gz"
+            # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
+            echo "Installing '${__DOTNET_LOCATION}' to '$__DOTNET_PATH/dotnet.tar'" >> $__init_tools_log
+            which curl > /dev/null 2> /dev/null
+            if [ $? -ne 0 ]; then
+                mkdir -p "$__DOTNET_PATH"
+                wget -q -O $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
+            else
+                curl --retry 10 -sSL --create-dirs -o $__DOTNET_PATH/dotnet.tar ${__DOTNET_LOCATION}
+            fi
+            cd $__DOTNET_PATH
+            tar -xf $__DOTNET_PATH/dotnet.tar
 
-        cd $__scriptpath
+            cd $__scriptpath
+        fi
     fi
 
     if [ ! -d "$__PROJECT_JSON_PATH" ]; then mkdir "$__PROJECT_JSON_PATH"; fi
