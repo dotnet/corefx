@@ -53,10 +53,8 @@ namespace System.Resources
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public class ResourceManager
     {
-        protected string BaseNameField;
         public static readonly int HeaderVersionNumber;
         public static readonly int MagicNumber;
-        protected System.Reflection.Assembly MainAssembly;
         protected ResourceManager() { }
         public ResourceManager(string baseName, System.Reflection.Assembly assembly) { }
         public ResourceManager(string baseName, System.Reflection.Assembly assembly, System.Type usingResourceSet) { }
@@ -76,8 +74,6 @@ namespace System.Resources
         public virtual string GetString(string name, System.Globalization.CultureInfo culture) { return default(string); }
         protected virtual ResourceSet InternalGetResourceSet(System.Globalization.CultureInfo culture, bool createIfNotExists, bool tryParents) { throw null; }
         public virtual void ReleaseAllResources() { }
-        // [System.Obsolete("call InternalGetResourceSet instead")]
-        // protected System.Collections.Hashtable ResourceSets;
         protected UltimateResourceFallbackLocation FallbackLocation { get { throw null; } set { } }
         public static ResourceManager CreateFileBasedResourceManager(string baseName, string resourceDir, System.Type usingResourceSet) { throw null; }
         
@@ -85,8 +81,6 @@ namespace System.Resources
     [System.Serializable]
     public class ResourceSet : System.IDisposable, System.Collections.IEnumerable
     {
-        protected IResourceReader Reader;
-        // protected System.Collections.Hashtable Table;
         protected ResourceSet() { }
         public ResourceSet(System.IO.Stream stream) { }
         public ResourceSet(string fileName) { }
