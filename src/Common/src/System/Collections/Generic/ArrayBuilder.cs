@@ -11,6 +11,8 @@ namespace System.Collections.Generic
     /// </summary>
     internal struct ArrayBuilder<T>
     {
+        private const int DefaultCapacity = 4;
+
         private T[] _array; // Starts out null, initialized on first Add.
         private int _count; // Number of items into _array we're using.
 
@@ -122,7 +124,7 @@ namespace System.Collections.Generic
         {
             Debug.Assert(minimum > Capacity);
 
-            int nextCapacity = 2 * Capacity + 1;
+            int nextCapacity = Capacity == 0 ? DefaultCapacity : 2 * Capacity;
 
             Debug.Assert(nextCapacity > 0); // Check for overflow.
             nextCapacity = Math.Max(nextCapacity, minimum);

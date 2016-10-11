@@ -235,16 +235,27 @@ namespace System.Collections.Generic.Tests
             // If we create an ArrayBuilder with no initial backing store,
             // and add this many items to it, what should be it's capacity?
 
-            return NextPowerOfTwoExclusive(count) - 1;
+            Debug.Assert(count >= 0);
+            
+            // We start with no capacity for 0 items...
+            if (count == 0)
+            {
+                return 0;
+            }
+
+            // Then allocate arrays of size 4, 8, 16, etc.
+            count = Math.Max(count, 4);
+            return NextPowerOfTwo(count);
         }
 
-        private static int NextPowerOfTwoExclusive(int value)
+        private static int NextPowerOfTwo(int value)
         {
-            // Similar to https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2,
-            // except we do not decrement the value first so 8 gets rounded up to 16,
-            // 16 to 32, etc.
+            // Taken from https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
 
             Debug.Assert(value >= 0);
+
+            // If the number is already a power of 2, we want to round to itself.
+            value--;
 
             // Propogate 1-bits right: if the highest bit set is @ position n,
             // then all of the bits to the right of position n will become set.
