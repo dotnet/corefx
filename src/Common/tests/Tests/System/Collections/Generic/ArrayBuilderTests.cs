@@ -47,11 +47,9 @@ namespace System.Collections.Generic.Tests
 
             // Indexing into the builder should be unchecked in Release builds, so the
             // jit can optimize better and have an easier time inlining the method.
-            // However, in debug builds we should throw.
-            AssertExtensions.ThrowsAnyInDebug<Exception>(() => builder[0]);
-            AssertExtensions.ThrowsAnyInDebug<Exception>(() => builder[0] = default(T));
+            // So we may not throw an exception for builder[i] if the Capacity > i.
 
-            // If we index @ Capacity and beyond, we should throw regardless of build config
+            // If we index @ Capacity and beyond, however, we should throw regardless of build config
             Assert.ThrowsAny<Exception>(() => builder[capacity]);
             Assert.ThrowsAny<Exception>(() => builder[capacity] = default(T));
 
@@ -76,10 +74,9 @@ namespace System.Collections.Generic.Tests
             {
                 var item = builder[i];
             }
-
-            // After that, we should throw in Debug builds.
-            AssertExtensions.ThrowsAnyInDebug<Exception>(() => builder[count]);
-            AssertExtensions.ThrowsAnyInDebug<Exception>(() => builder[count] = default(T));
+            
+            // Again, builder[count] may not throw for Release builds unless
+            // Count == Capacity, so don't assert that here.
 
             // After Capacity, we should throw in Debug and Release builds.
             Assert.ThrowsAny<Exception>(() => builder[builder.Capacity]);

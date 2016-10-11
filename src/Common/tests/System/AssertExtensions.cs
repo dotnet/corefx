@@ -14,17 +14,5 @@ namespace System
         {
             Assert.Equal(Assert.Throws<T>(action).Message, message);
         }
-
-        [Conditional("DEBUG")]
-        public static void ThrowsInDebug<T>(Action action) where T : Exception => Assert.Throws<T>(action);
-
-        [Conditional("DEBUG")]
-        public static void ThrowsInDebug<T>(Func<object> func) where T : Exception => Assert.Throws<T>(func);
-
-        [Conditional("DEBUG")]
-        public static void ThrowsAnyInDebug<T>(Action action) where T : Exception => Assert.ThrowsAny<T>(action);
-
-        [Conditional("DEBUG")]
-        public static void ThrowsAnyInDebug<T>(Func<object> func) where T : Exception => Assert.ThrowsAny<T>(func);
     }
 }
