@@ -105,21 +105,12 @@ namespace System.Collections.Generic.Tests
                 // Nil out the slot we're no longer using
                 builder[left--] = default(T);
 
-                for (int i = 0; i < left; i++)
-                {
-                    int offset = (builder.Count - 1) - left; // How much we've skipped into the enumerable
-                    Assert.Equal(seed.ElementAt(offset + i), builder[i]);
-                }
-            }
-        }
+                int offset = (builder.Count - 1) - left; // How much we've skipped into the enumerable
+                IEnumerable<T> expected = seed.Skip(offset)
+                    .Concat(Enumerable.Repeat(default(T), offset)); // The count has not been changed, but slots @ the end have been nil'd out
 
-        [Theory]
-        [MemberData(nameof(EnumerableData))]
-        public void GetEnumerator(IEnumerable<T> seed)
-        {
-            var builder = CreateBuilderFromSequence(seed);
-            
-            VerifyBuilderContentsWithForeach(seed, builder);
+                VerifyBuilderContents(expected, builder);
+            }
         }
 
         [Theory]
@@ -147,6 +138,8 @@ namespace System.Collections.Generic.Tests
             {
                 builder.UncheckedAdd(default(T));
             }
+
+            VerifyBuilderContents(Enumerable.Repeat(default(T), capacity), builder);
             
             // Count == Capacity now, so attempting to add more should raise
             // an assert or generate an IndexOutOfRangeException
@@ -216,11 +209,7 @@ namespace System.Collections.Generic.Tests
                 
                 Assert.Equal(count, builder.Count);
                 Assert.Equal(CalculateExpectedCapacity(count), builder.Capacity);
-
-                for (int i = 0; i < count; i++)
-                {
-                    Assert.Equal(sequence.ElementAt(i), builder[i]);
-                }
+                VerifyBuilderContents(sequence.Take(count), builder);
             }
 
             return builder;
@@ -228,23 +217,19 @@ namespace System.Collections.Generic.Tests
 
         // Assert.Equal cannot be used directly on ArrayBuilder-- it does not implement IEnumerable<T>
         // to be as lightweight as possible. This is what you should call instead.
-        private static void VerifyBuilderContentsWithForeach(IEnumerable<T> expected, ArrayBuilder<T> actual)
+        private static void VerifyBuilderContents(IEnumerable<T> expected, ArrayBuilder<T> actual)
         {
             Debug.Assert(expected != null);
 
-            using (var sequenceEnumerator = expected.GetEnumerator())
+            using (var enumerator = expected.GetEnumerator())
             {
-                var builderEnumerator = actual.GetEnumerator();
-
-                Assert.ThrowsAny<Exception>(() => builderEnumerator.Current);
-
-                while (sequenceEnumerator.MoveNext())
+                int index = 0;
+                while (enumerator.MoveNext())
                 {
-                    Assert.True(builderEnumerator.MoveNext());
-                    Assert.Equal(sequenceEnumerator.Current, builderEnumerator.Current);
+                    Assert.Equal(enumerator.Current, actual[index++]);
                 }
 
-                Assert.False(builderEnumerator.MoveNext());
+                Assert.Equal(actual.Count, index);
             }
         }
 

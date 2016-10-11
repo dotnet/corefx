@@ -71,14 +71,6 @@ namespace System.Collections.Generic
         }
 
         /// <summary>
-        /// Gets an enumerator which enumerates the contents of this builder.
-        /// </summary>
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(_array, _count);
-        }
-
-        /// <summary>
         /// Returns an array with equivalent contents as this builder.
         /// </summary>
         /// <remarks>
@@ -143,30 +135,6 @@ namespace System.Collections.Generic
                 Array.Copy(_array, 0, next, 0, _count);
             }
             _array = next;
-        }
-
-        public struct Enumerator
-        {
-            private readonly T[] _array;
-            private readonly int _count;
-            private int _index;
-            
-            internal Enumerator(T[] array, int count)
-            {
-                Debug.Assert(count >= 0);
-                Debug.Assert(array == null || count <= array.Length);
-
-                _array = array;
-                _count = count;
-                _index = -1;
-            }
-
-            public bool MoveNext()
-            {
-                return ++_index < _count;
-            }
-
-            public T Current => _array[_index];
         }
     }
 }

@@ -174,8 +174,9 @@ namespace System.Collections.Generic
 
                     // Copy from the buffers in the list that came before this one
                     int copied = first.Length;
-                    foreach (T[] buffer in buffers)
+                    for (int i = 0; i < buffers.Count; i++)
                     {
+                        T[] buffer = buffers[i];
                         Array.Copy(buffer, 0, result, copied, buffer.Length);
                         copied += buffer.Length;
                     }
