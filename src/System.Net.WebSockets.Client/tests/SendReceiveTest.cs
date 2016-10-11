@@ -85,7 +85,7 @@ namespace System.Net.WebSockets.Client.Tests
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
             {
-                Task[] tasks = new Task[2];
+                var tasks = new Task[2];
 
                 // Need large buffer, or Send completes too quickly and no exception is thrown.
                 var sendBuffer = new byte[128 * 1024];
@@ -132,7 +132,7 @@ namespace System.Net.WebSockets.Client.Tests
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
             {
-                Task[] tasks = new Task[2];
+                var tasks = new Task[2];
 
                 var recvBuffer = new byte[100];
                 var recvSegment = new ArraySegment<byte>(recvBuffer);
@@ -142,8 +142,6 @@ namespace System.Net.WebSockets.Client.Tests
                     tasks[i] = cws.ReceiveAsync(recvSegment, CancellationToken.None);
                 }
 
-                // Even though inidividual tasks complete asynchronously, they were submitted synchronously.
-                // Since the tasks share a token
                 await Assert.ThrowsAsync<InvalidOperationException>(() => Task.WhenAll(tasks));
                 Assert.Equal(WebSocketState.Aborted, cws.State);
                 Assert.All(tasks, task =>
