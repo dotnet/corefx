@@ -12,6 +12,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         protected override IEnumerable<TestCase> ValidValues()
         {
             yield return new TestCase(new EmailAddressAttribute(), null);
+            yield return new TestCase(new EmailAddressAttribute(), "");
             yield return new TestCase(new EmailAddressAttribute(), "someName@someDomain.com");
             yield return new TestCase(new EmailAddressAttribute(), "1234@someDomain.com");
             yield return new TestCase(new EmailAddressAttribute(), "firstName.lastName@someDomain.com");
@@ -28,7 +29,6 @@ namespace System.ComponentModel.DataAnnotations.Tests
         protected override IEnumerable<TestCase> InvalidValues()
         {
             yield return new TestCase(new EmailAddressAttribute(), 0);
-            yield return new TestCase(new EmailAddressAttribute(), "");
             yield return new TestCase(new EmailAddressAttribute(), " \r \t \n" );
             yield return new TestCase(new EmailAddressAttribute(), "@someDomain.com");
             yield return new TestCase(new EmailAddressAttribute(), "@someDomain@abc.com");
