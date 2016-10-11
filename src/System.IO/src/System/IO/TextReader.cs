@@ -24,6 +24,12 @@ namespace System.IO
 
         protected TextReader() { }
 
+        public virtual void Close()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -249,7 +255,6 @@ namespace System.IO
         {
             public NullTextReader() { }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override int Read(char[] buffer, int index, int count)
             {
                 return 0;

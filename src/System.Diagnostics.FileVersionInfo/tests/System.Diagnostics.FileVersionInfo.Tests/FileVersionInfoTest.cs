@@ -22,7 +22,7 @@ namespace System.Diagnostics.Tests
         private const string TestNotFoundFileName = "notfound.dll";
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // native PE files only supported on Windows
+        [PlatformSpecific(TestPlatforms.Windows)] // native PE files only supported on Windows
         public void FileVersionInfo_Normal()
         {
             // NativeConsoleApp (English)
@@ -59,7 +59,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // native PE files only supported on Windows
+        [PlatformSpecific(TestPlatforms.Windows)] // native PE files only supported on Windows
         public void FileVersionInfo_Chinese()
         {
             // NativeLibrary.dll (Chinese)
@@ -97,7 +97,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // native PE files only supported on Windows
+        [PlatformSpecific(TestPlatforms.Windows)] // native PE files only supported on Windows
         public void FileVersionInfo_DifferentFileVersionAndProductVersion()
         {
             // Mtxex.dll
@@ -159,12 +159,12 @@ namespace System.Diagnostics.Tests
                 LegalTrademarks = "TM",
                 OriginalFilename = TestAssemblyFileName,
                 PrivateBuild = "",
-                ProductBuildPart = 2,
-                ProductMajorPart = 4,
-                ProductMinorPart = 3,
+                ProductBuildPart = 3,
+                ProductMajorPart = 1,
+                ProductMinorPart = 2,
                 ProductName = "The greatest product EVER",
-                ProductPrivatePart = 1,
-                ProductVersion = "4.3.2.1",
+                ProductPrivatePart = 0,
+                ProductVersion = "1.2.3-beta.4",
                 SpecialBuild = "",
             });
         }

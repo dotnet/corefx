@@ -15,6 +15,37 @@ namespace System.Security.Cryptography
         public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { return default(System.Security.Cryptography.KeySizes[]); } }
         public static System.Security.Cryptography.Aes Create() { return default(System.Security.Cryptography.Aes); }
     }
+    public abstract partial class AsymmetricKeyExchangeDeformatter
+    {
+        protected AsymmetricKeyExchangeDeformatter() { }
+        public abstract string Parameters { get; set; }
+        public abstract byte[] DecryptKeyExchange(byte[] rgb);
+        public abstract void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key);
+    }
+    public abstract partial class AsymmetricKeyExchangeFormatter
+    {
+        protected AsymmetricKeyExchangeFormatter() { }
+        public abstract string Parameters { get; }
+        public abstract byte[] CreateKeyExchange(byte[] data);
+        public abstract byte[] CreateKeyExchange(byte[] data, System.Type symAlgType);
+        public abstract void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key);
+    }
+    public abstract partial class AsymmetricSignatureDeformatter
+    {
+        protected AsymmetricSignatureDeformatter() { }
+        public abstract void SetHashAlgorithm(string strName);
+        public abstract void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key);
+        public abstract bool VerifySignature(byte[] rgbHash, byte[] rgbSignature);
+        public virtual bool VerifySignature(System.Security.Cryptography.HashAlgorithm hash, byte[] rgbSignature) { return default(bool); }
+    }
+    public abstract partial class AsymmetricSignatureFormatter
+    {
+        protected AsymmetricSignatureFormatter() { }
+        public abstract byte[] CreateSignature(byte[] rgbHash);
+        public virtual byte[] CreateSignature(System.Security.Cryptography.HashAlgorithm hash) { return default(byte[]); }
+        public abstract void SetHashAlgorithm(string strName);
+        public abstract void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key);
+    }
     public abstract partial class DeriveBytes : System.IDisposable
     {
         protected DeriveBytes() { }
@@ -22,6 +53,51 @@ namespace System.Security.Cryptography
         protected virtual void Dispose(bool disposing) { }
         public abstract byte[] GetBytes(int cb);
         public abstract void Reset();
+    }
+    public abstract partial class DSA : System.Security.Cryptography.AsymmetricAlgorithm
+    {
+        protected DSA() { }
+        public static System.Security.Cryptography.DSA Create() { return default(System.Security.Cryptography.DSA); }
+        public abstract byte[] CreateSignature(byte[] hash);
+        public abstract System.Security.Cryptography.DSAParameters ExportParameters(bool includePrivateParameters);
+        protected virtual byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        protected virtual byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        public abstract void ImportParameters(System.Security.Cryptography.DSAParameters parameters);
+        public virtual byte[] SignData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        public byte[] SignData(byte[] data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        public virtual byte[] SignData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(byte[]); }
+        public bool VerifyData(byte[] data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(bool); }
+        public virtual bool VerifyData(byte[] data, int offset, int count, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(bool); }
+        public virtual bool VerifyData(System.IO.Stream data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { return default(bool); }
+        public abstract bool VerifySignature(byte[] hash, byte[] signature);
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct DSAParameters
+    {
+        public int Counter;
+        public byte[] G;
+        public byte[] J;
+        public byte[] P;
+        public byte[] Q;
+        public byte[] Seed;
+        public byte[] X;
+        public byte[] Y;
+    }
+    public partial class DSASignatureDeformatter : System.Security.Cryptography.AsymmetricSignatureDeformatter
+    {
+        public DSASignatureDeformatter() { }
+        public DSASignatureDeformatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override void SetHashAlgorithm(string strName) { }
+        public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature) { return default(bool); }
+    }
+    public partial class DSASignatureFormatter : System.Security.Cryptography.AsymmetricSignatureFormatter
+    {
+        public DSASignatureFormatter() { }
+        public DSASignatureFormatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override byte[] CreateSignature(byte[] rgbHash) { return default(byte[]); }
+        public override void SetHashAlgorithm(string strName) { }
+        public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ECCurve
@@ -75,6 +151,14 @@ namespace System.Security.Cryptography
             public static System.Security.Cryptography.ECCurve nistP521 { get { return default(System.Security.Cryptography.ECCurve); } }
         }
     }
+    public abstract partial class ECDiffieHellmanPublicKey : System.IDisposable
+    {
+        protected ECDiffieHellmanPublicKey(byte[] keyBlob) { }
+        public void Dispose() { }
+        protected virtual void Dispose(bool disposing) { }
+        public virtual byte[] ToByteArray() { return default(byte[]); }
+        public virtual string ToXmlString() { return default(string); }
+    }
     public abstract partial class ECDsa : System.Security.Cryptography.AsymmetricAlgorithm
     {
         protected ECDsa() { }
@@ -125,6 +209,8 @@ namespace System.Security.Cryptography
     {
         public HMACSHA1() { }
         public HMACSHA1(byte[] key) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        public HMACSHA1(byte[] key, bool useManagedSha1) { }
         public override int HashSize { get { return default(int); } }
         public override byte[] Key { get { return default(byte[]); } set { } }
         protected override void Dispose(bool disposing) { }
@@ -205,7 +291,7 @@ namespace System.Security.Cryptography
     public abstract partial class RSA : System.Security.Cryptography.AsymmetricAlgorithm
     {
         protected RSA() { }
-        public static RSA Create() { return default(RSA); }
+        public static System.Security.Cryptography.RSA Create() { return default(System.Security.Cryptography.RSA); }
         public abstract byte[] Decrypt(byte[] data, System.Security.Cryptography.RSAEncryptionPadding padding);
         public abstract byte[] Encrypt(byte[] data, System.Security.Cryptography.RSAEncryptionPadding padding);
         public abstract System.Security.Cryptography.RSAParameters ExportParameters(bool includePrivateParameters);
@@ -244,6 +330,24 @@ namespace System.Security.Cryptography
         Oaep = 1,
         Pkcs1 = 0,
     }
+    public partial class RSAOAEPKeyExchangeDeformatter : System.Security.Cryptography.AsymmetricKeyExchangeDeformatter
+    {
+        public RSAOAEPKeyExchangeDeformatter() { }
+        public RSAOAEPKeyExchangeDeformatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override string Parameters { get { return default(string); } set { } }
+        public override byte[] DecryptKeyExchange(byte[] rgbData) { return default(byte[]); }
+        public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+    }
+    public partial class RSAOAEPKeyExchangeFormatter : System.Security.Cryptography.AsymmetricKeyExchangeFormatter
+    {
+        public RSAOAEPKeyExchangeFormatter() { }
+        public RSAOAEPKeyExchangeFormatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public byte[] Parameter { get { return default(byte[]); } set { } }
+        public override string Parameters { get { return default(string); } }
+        public override byte[] CreateKeyExchange(byte[] rgbData) { return default(byte[]); }
+        public override byte[] CreateKeyExchange(byte[] rgbData, System.Type symAlgType) { return default(byte[]); }
+        public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+    }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct RSAParameters
     {
@@ -255,6 +359,39 @@ namespace System.Security.Cryptography
         public byte[] Modulus;
         public byte[] P;
         public byte[] Q;
+    }
+    public partial class RSAPKCS1KeyExchangeDeformatter : System.Security.Cryptography.AsymmetricKeyExchangeDeformatter
+    {
+        public RSAPKCS1KeyExchangeDeformatter() { }
+        public RSAPKCS1KeyExchangeDeformatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override string Parameters { get { return default(string); } set { } }
+        public override byte[] DecryptKeyExchange(byte[] rgbIn) { return default(byte[]); }
+        public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+    }
+    public partial class RSAPKCS1KeyExchangeFormatter : System.Security.Cryptography.AsymmetricKeyExchangeFormatter
+    {
+        public RSAPKCS1KeyExchangeFormatter() { }
+        public RSAPKCS1KeyExchangeFormatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override string Parameters { get { return default(string); } }
+        public override byte[] CreateKeyExchange(byte[] rgbData) { return default(byte[]); }
+        public override byte[] CreateKeyExchange(byte[] rgbData, System.Type symAlgType) { return default(byte[]); }
+        public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+    }
+    public partial class RSAPKCS1SignatureDeformatter : System.Security.Cryptography.AsymmetricSignatureDeformatter
+    {
+        public RSAPKCS1SignatureDeformatter() { }
+        public RSAPKCS1SignatureDeformatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override void SetHashAlgorithm(string strName) { }
+        public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature) { return default(bool); }
+    }
+    public partial class RSAPKCS1SignatureFormatter : System.Security.Cryptography.AsymmetricSignatureFormatter
+    {
+        public RSAPKCS1SignatureFormatter() { }
+        public RSAPKCS1SignatureFormatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
+        public override byte[] CreateSignature(byte[] rgbHash) { return default(byte[]); }
+        public override void SetHashAlgorithm(string strName) { }
+        public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
     }
     public sealed partial class RSASignaturePadding : System.IEquatable<System.Security.Cryptography.RSASignaturePadding>
     {
@@ -304,3 +441,4 @@ namespace System.Security.Cryptography
         public static bool IsWeakKey(byte[] rgbKey) { return default(bool); }
     }
 }
+

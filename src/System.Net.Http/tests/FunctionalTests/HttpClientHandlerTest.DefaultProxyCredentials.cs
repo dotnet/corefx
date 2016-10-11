@@ -35,6 +35,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void ProxyExplicitlyProvided_DefaultCredentials_Ignored()
         {
@@ -63,8 +64,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)] // proxies set via the http_proxy environment variable are specific to Unix
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // proxies set via the http_proxy environment variable are specific to Unix
         public void ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed()
         {
             int port;

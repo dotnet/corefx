@@ -1,19 +1,19 @@
 {
   "frameworks": {
-    "netstandard1.3": {
+    "netstandard1.7": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.CoreCLR": "1.0.2-beta-24321-01",
+        "Microsoft.TargetingPack.Private.CoreCLR": "1.2.0-beta-24609-02",
         "System.IO.FileSystem": "4.0.1",
-        "System.Reflection.Metadata": "1.3.0",
+        "System.Reflection.Metadata": "1.5.0-beta-24608-01",
         "System.Collections.Immutable": "1.2.0"
       },
       "imports": [
-        "dotnet5.4"
+        "dotnet5.8"
       ]
     },
     "netcore50": {
       "dependencies": {
-        "Microsoft.TargetingPack.Private.NETNative": "1.0.1-beta-24321-00"
+        "Microsoft.TargetingPack.Private.NETNative": "1.1.0-beta-24604-01"
       }
     },
     "net46": {

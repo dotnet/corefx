@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public static class PathCombineTests
+    public static partial class PathTests
     {
         private static readonly char s_separator = Path.DirectorySeparatorChar;
 
@@ -48,6 +48,15 @@ namespace System.IO.Tests
 
             // Any path is multiple element
             yield return Path.Combine("abc", Path.Combine("def", "ghi"));
+
+            // Wildcard characters
+            yield return "*";
+            yield return "?";
+
+            // Obscure wildcard characters
+            yield return "\"";
+            yield return "<";
+            yield return ">";
         }
 
         public static IEnumerable<object[]> Combine_CommonCases_TestData()
@@ -104,8 +113,9 @@ namespace System.IO.Tests
                     Assert.Equal(expected, Path.Combine(paths[0], paths[1], paths[2]));
                     break;
 
-                default:
-                    // Nothing to do: everything else is pushed into an array
+                case 4:
+                    // Combine(string, string, string, string)
+                    Assert.Equal(expected, Path.Combine(paths[0], paths[1], paths[2], paths[3]));
                     break;
             }
         }
@@ -131,14 +141,10 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Windows()
         {
             //any path contains invalid character without rooted after (AE)
-            CommonCasesException<ArgumentException>("ab\"cd");
-            CommonCasesException<ArgumentException>("ab\"cd");
-            CommonCasesException<ArgumentException>("ab<cd");
-            CommonCasesException<ArgumentException>("ab>cd");
             CommonCasesException<ArgumentException>("ab|cd");
             CommonCasesException<ArgumentException>("ab\bcd");
             CommonCasesException<ArgumentException>("ab\0cd");
@@ -153,13 +159,10 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void ContainsInvalidCharWithRootedAfterArgumentNull_Windows()
         {
             //any path contains invalid character with rooted after (AE)
-            CommonCasesException<ArgumentException>("ab\"cd", s_separator + "abc");
-            CommonCasesException<ArgumentException>("ab<cd", s_separator + "abc");
-            CommonCasesException<ArgumentException>("ab>cd", s_separator + "abc");
             CommonCasesException<ArgumentException>("ab|cd", s_separator + "abc");
             CommonCasesException<ArgumentException>("ab\bcd", s_separator + "abc");
             CommonCasesException<ArgumentException>("ab\tcd", s_separator + "abc");

@@ -119,8 +119,10 @@ namespace System.Linq.Expressions.Interpreter
                 var cookieEnumerator = (debugCookies != null ? debugCookies : new KeyValuePair<int, object>[0]).GetEnumerator();
                 var hasCookie = cookieEnumerator.MoveNext();
 
-                for (int i = 0; i < instructions.Count; i++)
+                for (int i = 0, n = instructions.Count; i < n; i++)
                 {
+                    Instruction instruction = instructions[i];
+
                     object cookie = null;
                     while (hasCookie && cookieEnumerator.Current.Key == i)
                     {
@@ -128,10 +130,10 @@ namespace System.Linq.Expressions.Interpreter
                         hasCookie = cookieEnumerator.MoveNext();
                     }
 
-                    int stackDiff = instructions[i].StackBalance;
-                    int contDiff = instructions[i].ContinuationsBalance;
-                    string name = instructions[i].ToDebugString(i, cookie, labelIndexer, objects);
-                    result.Add(new InstructionView(instructions[i], name, i, stackDepth, continuationsDepth));
+                    int stackDiff = instruction.StackBalance;
+                    int contDiff = instruction.ContinuationsBalance;
+                    string name = instruction.ToDebugString(i, cookie, labelIndexer, objects);
+                    result.Add(new InstructionView(instruction, name, i, stackDepth, continuationsDepth));
 
                     index++;
                     stackDepth += stackDiff;
@@ -209,6 +211,21 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
+        // "Un-emit" the previous instruction.
+        // Useful if the instruction was emitted in the calling method, and covers the more usual case.
+        // In particular, calling this after an EmitPush() or EmitDup() costs about the same as adding
+        // an EmitPop() to undo it at compile time, and leaves a slightly leaner instruction list.
+        public void UnEmit()
+        {
+            Instruction instruction = _instructions[_instructions.Count - 1];
+            _instructions.RemoveAt(_instructions.Count - 1);
+
+            _currentContinuationsDepth -= instruction.ProducedContinuations;
+            _currentContinuationsDepth += instruction.ConsumedContinuations;
+            _currentStackDepth -= instruction.ProducedStack;
+            _currentStackDepth += instruction.ConsumedStack;
+        }
+
         /// <summary>
         /// Attaches a cookie to the last emitted instruction.
         /// </summary>
@@ -226,30 +243,12 @@ namespace System.Linq.Expressions.Interpreter
 #endif
         }
 
-        public int Count
-        {
-            get { return _instructions.Count; }
-        }
+        public int Count => _instructions.Count;
+        public int CurrentStackDepth => _currentStackDepth;
+        public int CurrentContinuationsDepth => _currentContinuationsDepth;
+        public int MaxStackDepth => _maxStackDepth;
 
-        public int CurrentStackDepth
-        {
-            get { return _currentStackDepth; }
-        }
-
-        public int CurrentContinuationsDepth
-        {
-            get { return _currentContinuationsDepth; }
-        }
-
-        public int MaxStackDepth
-        {
-            get { return _maxStackDepth; }
-        }
-
-        internal Instruction GetInstruction(int index)
-        {
-            return _instructions[index];
-        }
+        internal Instruction GetInstruction(int index) => _instructions[index];
 
 #if STATS
         private static Dictionary<string, int> _executedInstructions = new Dictionary<string, int>();
@@ -842,12 +841,22 @@ namespace System.Linq.Expressions.Interpreter
 
         public void EmitNew(ConstructorInfo constructorInfo)
         {
-            Emit(new NewInstruction(constructorInfo));
+            EmitNew(constructorInfo, constructorInfo.GetParameters());
+        }
+
+        public void EmitNew(ConstructorInfo constructorInfo, ParameterInfo[] parameters)
+        {
+            Emit(new NewInstruction(constructorInfo, parameters.Length));
         }
 
         public void EmitByRefNew(ConstructorInfo constructorInfo, ByRefUpdater[] updaters)
         {
-            Emit(new ByRefNewInstruction(constructorInfo, updaters));
+            EmitByRefNew(constructorInfo, constructorInfo.GetParameters(), updaters);
+        }
+
+        public void EmitByRefNew(ConstructorInfo constructorInfo, ParameterInfo[] parameters, ByRefUpdater[] updaters)
+        {
+            Emit(new ByRefNewInstruction(constructorInfo, parameters.Length, updaters));
         }
 
         internal void EmitCreateDelegate(LightDelegateCreator creator)

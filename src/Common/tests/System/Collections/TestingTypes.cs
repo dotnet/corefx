@@ -9,6 +9,7 @@ namespace System.Collections.Tests
     #region Comparers and Equatables
 
     // Use parity only as a hashcode so as to have many collisions.
+    [Serializable]
     public class BadIntEqualityComparer : IEqualityComparer<int>
     {
         public bool Equals(int x, int y)
@@ -32,6 +33,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [Serializable]
     public class EquatableBackwardsOrder : IEquatable<EquatableBackwardsOrder>, IComparable<EquatableBackwardsOrder>, IComparable
     {
         private int _value;
@@ -44,6 +46,14 @@ namespace System.Collections.Tests
         public int CompareTo(EquatableBackwardsOrder other) //backwards from the usual integer ordering
         {
             return other._value - _value;
+        }
+
+        public override int GetHashCode() => _value;
+
+        public override bool Equals(object obj)
+        {
+            EquatableBackwardsOrder other = obj as EquatableBackwardsOrder;
+            return other != null && Equals(other);
         }
 
         public bool Equals(EquatableBackwardsOrder other)
@@ -59,6 +69,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [Serializable]
     public class Comparer_SameAsDefaultComparer : IEqualityComparer<int>, IComparer<int>
     {
         public int Compare(int x, int y)
@@ -77,6 +88,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [Serializable]
     public class Comparer_HashCodeAlwaysReturnsZero : IEqualityComparer<int>, IComparer<int>
     {
         public int Compare(int x, int y)
@@ -95,6 +107,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [Serializable]
     public class Comparer_ModOfInt : IEqualityComparer<int>, IComparer<int>
     {
         private int _mod;
@@ -125,6 +138,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [Serializable]
     public class Comparer_AbsOfInt : IEqualityComparer<int>, IComparer<int>
     {
         public int Compare(int x, int y)
@@ -147,6 +161,7 @@ namespace System.Collections.Tests
 
     #region TestClasses
 
+    [Serializable]
     public struct SimpleInt : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<SimpleInt>
     {
         private int _val;
@@ -194,6 +209,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [Serializable]
     public class WrapStructural_Int : IEqualityComparer<int>, IComparer<int>
     {
         public int Compare(int x, int y)
@@ -212,6 +228,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [Serializable]
     public class WrapStructural_SimpleInt : IEqualityComparer<SimpleInt>, IComparer<SimpleInt>
     {
         public int Compare(SimpleInt x, SimpleInt y)
@@ -228,6 +245,125 @@ namespace System.Collections.Tests
         {
             return StructuralComparisons.StructuralEqualityComparer.GetHashCode(obj);
         }
+    }
+
+    public class GenericComparable : IComparable<GenericComparable>
+    {
+        private readonly int _value;
+
+        public GenericComparable(int value)
+        {
+            _value = value;
+        }
+
+        public int CompareTo(GenericComparable other) => _value.CompareTo(other._value);
+    }
+
+    public class NonGenericComparable : IComparable
+    {
+        private readonly GenericComparable _inner;
+
+        public NonGenericComparable(int value)
+        {
+            _inner = new GenericComparable(value);
+        }
+
+        public int CompareTo(object other) =>
+            _inner.CompareTo(((NonGenericComparable)other)._inner);
+    }
+
+    public class BadlyBehavingComparable : IComparable<BadlyBehavingComparable>, IComparable
+    {
+        public int CompareTo(BadlyBehavingComparable other) => 1;
+
+        public int CompareTo(object other) => -1;
+    }
+
+    public class MutatingComparable : IComparable<MutatingComparable>, IComparable
+    {
+        private int _state;
+
+        public MutatingComparable(int initialState)
+        {
+            _state = initialState;
+        }
+
+        public int State => _state;
+
+        public int CompareTo(object other) => _state++;
+
+        public int CompareTo(MutatingComparable other) => _state++;
+    }
+
+    public static class ValueComparable
+    {
+        // Convenience method so the compiler can work its type inference magic.
+        public static ValueComparable<T> Create<T>(T value) where T : IComparable<T>
+        {
+            return new ValueComparable<T>(value);
+        }
+    }
+
+    public struct ValueComparable<T> : IComparable<ValueComparable<T>> where T : IComparable<T>
+    {
+        public ValueComparable(T value)
+        {
+            Value = value;
+        }
+
+        public T Value { get; }
+
+        public int CompareTo(ValueComparable<T> other) =>
+            Value.CompareTo(other.Value);
+    }
+
+    public class Equatable : IEquatable<Equatable>
+    {
+        public Equatable(int value)
+        {
+            Value = value;
+        }
+
+        public int Value { get; }
+        
+        // Equals(object) is not implemented on purpose.
+        // EqualityComparer is only supposed to call through to the strongly-typed Equals since we implement IEquatable.
+
+        public bool Equals(Equatable other)
+        {
+            return other != null && Value == other.Value;
+        }
+
+        public override int GetHashCode() => Value;
+    }
+
+    public struct NonEquatableValueType
+    {
+        public NonEquatableValueType(int value)
+        {
+            Value = value;
+        }
+
+        public int Value { get; set; }
+    }
+
+    public class DelegateEquatable : IEquatable<DelegateEquatable>
+    {
+        public DelegateEquatable()
+        {
+            EqualsWorker = _ => false;
+        }
+
+        public Func<DelegateEquatable, bool> EqualsWorker { get; set; }
+
+        public bool Equals(DelegateEquatable other) => EqualsWorker(other);
+    }
+
+    public struct ValueDelegateEquatable : IEquatable<ValueDelegateEquatable>
+    {
+        public Func<ValueDelegateEquatable, bool> EqualsWorker { get; set; }
+
+        public bool Equals(ValueDelegateEquatable other) => EqualsWorker(other);
     }
 
     #endregion

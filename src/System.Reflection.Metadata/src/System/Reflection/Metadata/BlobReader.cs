@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Reflection.Internal;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.Reflection.Metadata
 {
@@ -15,7 +16,7 @@ namespace System.Reflection.Metadata
         /// <summary>An array containing the '\0' character.</summary>
         private static readonly char[] s_nullCharArray = new char[1] { '\0' };
 
-        internal const int InvalidCompressedInteger = Int32.MaxValue;
+        internal const int InvalidCompressedInteger = int.MaxValue;
 
         private readonly MemoryBlock _block;
 
@@ -24,7 +25,15 @@ namespace System.Reflection.Metadata
 
         private byte* _currentPointer;
 
-        public unsafe BlobReader(byte* buffer, int length)
+        /// <summary>
+        /// Creates a reader of the specified memory block.
+        /// </summary>
+        /// <param name="buffer">Pointer to the start of the memory block.</param>
+        /// <param name="length">Length in bytes of the memory block.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="buffer"/> is null and <paramref name="length"/> is greater than zero.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="length"/> is negative.</exception>
+        /// <exception cref="PlatformNotSupportedException">The current platform is not little-endian.</exception>
+        public BlobReader(byte* buffer, int length)
             : this(MemoryBlock.CreateChecked(buffer, length))
         {
 
@@ -65,52 +74,59 @@ namespace System.Reflection.Metadata
 
         #region Offset, Skipping, Marking, Alignment, Bounds Checking
 
-        public int Length
-        {
-            get
-            {
-                return _block.Length;
-            }
-        }
+        /// <summary>
+        /// Pointer to the byte at the start of the underlying memory block.
+        /// </summary>
+        public byte* StartPointer => _block.Pointer;
 
+        /// <summary>
+        /// Pointer to the byte at the current position of the reader.
+        /// </summary>
+        public byte* CurrentPointer => _currentPointer;
+
+        /// <summary>
+        /// The total length of the underlying memory block.
+        /// </summary>
+        public int Length => _block.Length;
+
+        /// <summary>
+        /// Gets or sets the offset from start of the blob to the current position.
+        /// </summary>
+        /// <exception cref="BadImageFormatException">Offset is set outside the bounds of underlying reader.</exception>
         public int Offset
         {
             get
             {
                 return (int)(_currentPointer - _block.Pointer);
             }
-        }
-
-        public int RemainingBytes
-        {
-            get
+            set
             {
-                return (int)(_endPointer - _currentPointer);
+                if (unchecked((uint)value) > (uint)_block.Length)
+                {
+                    Throw.OutOfBounds();
+                }
+
+                _currentPointer = _block.Pointer + value;
             }
         }
 
+        /// <summary>
+        /// Bytes remaining from current position to end of underlying memory block.
+        /// </summary>
+        public int RemainingBytes => (int)(_endPointer - _currentPointer);
+       
+        /// <summary>
+        /// Repositions the reader to the start of the underluing memory block.
+        /// </summary>
         public void Reset()
         {
             _currentPointer = _block.Pointer;
         }
 
-        internal bool SeekOffset(int offset)
-        {
-            if (unchecked((uint)offset) >= (uint)_block.Length)
-            {
-                return false;
-            }
-
-            _currentPointer = _block.Pointer + offset;
-            return true;
-        }
-
-        internal void SkipBytes(int count)
-        {
-            GetCurrentPointerAndAdvance(count);
-        }
-
-        internal void Align(byte alignment)
+        /// <summary>
+        /// Repositions the reader forward by the number of bytes required to satisfy the given alignment.
+        /// </summary>
+        public void Align(byte alignment)
         {
             if (!TryAlign(alignment))
             {
@@ -261,12 +277,14 @@ namespace System.Reflection.Metadata
 
         public float ReadSingle()
         {
-            return *(float*)GetCurrentPointerAndAdvance(sizeof(float));
+            int val = ReadInt32();
+            return *(float*)&val;
         }
 
         public double ReadDouble()
         {
-            return *(double*)GetCurrentPointerAndAdvance(sizeof(double));
+            long val = ReadInt64();
+            return *(double*)&val;
         }
 
         public Guid ReadGuid()
@@ -313,6 +331,22 @@ namespace System.Reflection.Metadata
         }
 
         /// <summary>
+        /// Finds specified byte in the blob following the current position.
+        /// </summary>
+        /// <returns>
+        /// Index relative to the current position, or -1 if the byte is not found in the blob following the current position.
+        /// </returns>
+        /// <remarks>
+        /// Doesn't change the current position.
+        /// </remarks>
+        public int IndexOf(byte value)
+        {
+            int start = Offset;
+            int absoluteIndex = _block.IndexOfUnchecked(value, start);
+            return (absoluteIndex >= 0) ? absoluteIndex - start : -1;
+        }
+
+        /// <summary>
         /// Reads UTF8 encoded string starting at the current position. 
         /// </summary>
         /// <param name="byteCount">The number of bytes to read.</param>
@@ -349,6 +383,18 @@ namespace System.Reflection.Metadata
             byte[] bytes = _block.PeekBytes(this.Offset, byteCount);
             _currentPointer += byteCount;
             return bytes;
+        }
+
+        /// <summary>
+        /// Reads bytes starting at the current position in to the given buffer at the given offset;
+        /// </summary>
+        /// <param name="byteCount">The number of bytes to read.</param>
+        /// <param name="buffer">The destination buffer the bytes read will be written.</param>
+        /// <param name="bufferOffset">The offset in the destination buffer where the bytes read will be written.</param>
+        /// <exception cref="BadImageFormatException"><paramref name="byteCount"/> bytes not available.</exception>
+        public void ReadBytes(int byteCount, byte[] buffer, int bufferOffset)
+        {
+            Marshal.Copy((IntPtr)GetCurrentPointerAndAdvance(byteCount), buffer, bufferOffset, byteCount);
         }
 
         internal string ReadUtf8NullTerminated()

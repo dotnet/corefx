@@ -1,18 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Net.NetworkInformation</AssemblyName>
-    <AssemblyVersion>4.1.1.0</AssemblyVersion>
     <OutputType>Library</OutputType>
     <ProjectGuid>{3CA89D6C-F8D1-4813-9775-F8D249686E31}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableWinRT Condition="'$(TargetGroup)' == 'netcore50'">true</EnableWinRT>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.3</PackageTargetFramework>
-    <PackageTargetFramework Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">netcore50</PackageTargetFramework>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
@@ -46,6 +43,7 @@
     <Compile Include="System\Net\NetworkInformation\IPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\IPInterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\IPv4InterfaceProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\Ipv4InterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\IPv6InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\MulticastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\MulticastIPAddressInformationCollection.cs" />
@@ -121,6 +119,7 @@
     <Compile Include="System\Net\NetworkInformation\SystemIPInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemIPInterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemIPv4InterfaceProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\SystemIPv4InterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemIPv6InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemMulticastIPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\SystemNetworkInterface.cs" />
@@ -258,13 +257,13 @@
   </ItemGroup>
   <!-- Windows : Win32 + WinRT -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">
-    <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.NetNative.cs" />
+    <Compile Include="System\Net\NetworkInformation\IPGlobalPropertiesPal.Uap.cs" />
     <Compile Include="System\Net\NetworkInformation\NetNativeIPGlobalProperties.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkAddressChange.NetNative.cs" />
-    <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.NetNative.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkAddressChange.Uap.cs" />
+    <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Uap.cs" />
     <Compile Include="System\Net\NetworkInformation\NetNativeNetworkInterface.cs" />
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.NetNative.cs">
-      <Link>Common\System\Net\NetworkInformation\HostInformationPal.NetNative.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Uap.cs">
+      <Link>Common\System\Net\NetworkInformation\HostInformationPal.Uap.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Unix -->
@@ -286,7 +285,7 @@
       <Link>Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs">
-      <Link>Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs"</Link>
+      <Link>Interop\Unix\System.Native\Interop.EnumerateInterfaceAddresses.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Unix.cs">
       <Link>System\Net\NetworkInformation\HostInformationPal.Unix.cs</Link>
@@ -327,6 +326,7 @@
     <Compile Include="System\Net\NetworkInformation\NetworkInterfacePal.Linux.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxNetworkInterface.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPv4InterfaceProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\LinuxIPv4InterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\LinuxIPv6InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\StringParsingHelpers.Addresses.cs" />
     <Compile Include="System\Net\NetworkInformation\StringParsingHelpers.Connections.cs" />
@@ -354,6 +354,7 @@
     <Compile Include="System\Net\NetworkInformation\OsxIPv4GlobalStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPv4InterfaceProperties.cs" />
+    <Compile Include="System\Net\NetworkInformation\OsxIPv4InterfaceStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIPv6InterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxIpInterfaceProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\OsxNetworkInterface.cs" />

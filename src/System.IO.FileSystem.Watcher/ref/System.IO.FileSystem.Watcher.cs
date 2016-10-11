@@ -22,7 +22,7 @@ namespace System.IO
         public string Name { get { return default(string); } }
     }
     public delegate void FileSystemEventHandler(object sender, System.IO.FileSystemEventArgs e);
-    public partial class FileSystemWatcher
+    public partial class FileSystemWatcher : System.ComponentModel.Component
     {
         public FileSystemWatcher() { }
         public FileSystemWatcher(string path) { }
@@ -45,6 +45,14 @@ namespace System.IO
         protected void OnRenamed(System.IO.RenamedEventArgs e) { }
         public System.IO.WaitForChangedResult WaitForChanged(System.IO.WatcherChangeTypes changeType) { return default(System.IO.WaitForChangedResult); }
         public System.IO.WaitForChangedResult WaitForChanged(System.IO.WatcherChangeTypes changeType, int timeout) { return default(System.IO.WaitForChangedResult); }
+    }
+    [Serializable]
+    public partial class InternalBufferOverflowException : System.SystemException
+    {
+        public InternalBufferOverflowException() { }
+        public InternalBufferOverflowException(string message) { }
+        public InternalBufferOverflowException(string message, System.Exception inner) { }
+        protected InternalBufferOverflowException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     [System.FlagsAttribute]
     public enum NotifyFilters

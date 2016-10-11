@@ -1,10 +1,7 @@
 {
   "dependencies": {},
   "frameworks": {
-    "netstandard1.5": {
-      "imports": [
-        "dotnet5.6"
-      ]
-    }
+    "netstandard1.7": {},
+    "netcoreapp1.1": {},
   }
 }

@@ -11,8 +11,8 @@ namespace System.IO.Tests
     {
         public static readonly byte[] TestBuffer = { 0xBA, 0x5E, 0xBA, 0x11, 0xF0, 0x07, 0xBA, 0x11 };
 
-        protected const PlatformID CaseInsensitivePlatforms = PlatformID.Windows | PlatformID.OSX;
-        protected const PlatformID CaseSensitivePlatforms = PlatformID.AnyUnix & ~PlatformID.OSX;
+        protected const TestPlatforms CaseInsensitivePlatforms = TestPlatforms.Windows | TestPlatforms.OSX;
+        protected const TestPlatforms CaseSensitivePlatforms = TestPlatforms.AnyUnix & ~TestPlatforms.OSX;
 
         /// <summary>
         /// In some cases (such as when running without elevated privileges),

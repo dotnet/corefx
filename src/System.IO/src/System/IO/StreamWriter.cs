@@ -125,6 +125,36 @@ namespace System.IO
             Init(stream, encoding, bufferSize, leaveOpen);
         }
 
+        public StreamWriter(string path)
+            : this(path, false, UTF8NoBOM, DefaultBufferSize)
+        {
+        }
+
+        public StreamWriter(string path, bool append)
+            : this(path, append, UTF8NoBOM, DefaultBufferSize)
+        {
+        }
+
+        public StreamWriter(string path, bool append, Encoding encoding)
+            : this(path, append, encoding, DefaultBufferSize)
+        {
+        }
+
+        public StreamWriter(string path, bool append, Encoding encoding, int bufferSize)
+        { 
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+            if (encoding == null)
+                throw new ArgumentNullException(nameof(encoding));
+            if (path.Length == 0)
+                throw new ArgumentException(SR.Argument_EmptyPath);
+            if (bufferSize <= 0)
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
+
+            Stream stream = FileStreamHelpers.CreateFileStream(path, write: true, append: append);
+            Init(stream, encoding, bufferSize, shouldLeaveOpen: false);
+        }
+
         private void Init(Stream streamArg, Encoding encodingArg, int bufferSize, bool shouldLeaveOpen)
         {
             _stream = streamArg;
@@ -146,6 +176,12 @@ namespace System.IO
             }
 
             _closable = !shouldLeaveOpen;
+        }
+
+        public override void Close()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected override void Dispose(bool disposing)
@@ -181,7 +217,7 @@ namespace System.IO
                         // cleaning up internal resources, hence the finally block.  
                         if (disposing)
                         {
-                            _stream.Dispose();
+                            _stream.Close();
                         }
                     }
                     finally
@@ -388,36 +424,91 @@ namespace System.IO
 
         public override void Write(string value)
         {
-            if (value != null)
+            if (value == null)
             {
-                CheckAsyncTaskInProgress();
+                return;
+            }
 
-                int count = value.Length;
-                int index = 0;
-                while (count > 0)
+            CheckAsyncTaskInProgress();
+
+            int count = value.Length;
+            int index = 0;
+            while (count > 0)
+            {
+                if (_charPos == _charLen)
                 {
-                    if (_charPos == _charLen)
-                    {
-                        Flush(false, false);
-                    }
-
-                    int n = _charLen - _charPos;
-                    if (n > count)
-                    {
-                        n = count;
-                    }
-
-                    Debug.Assert(n > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
-                    value.CopyTo(index, _charBuffer, _charPos, n);
-                    _charPos += n;
-                    index += n;
-                    count -= n;
+                    Flush(false, false);
                 }
 
-                if (_autoFlush)
+                int n = _charLen - _charPos;
+                if (n > count)
                 {
-                    Flush(true, false);
+                    n = count;
                 }
+
+                Debug.Assert(n > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
+                value.CopyTo(index, _charBuffer, _charPos, n);
+                _charPos += n;
+                index += n;
+                count -= n;
+            }
+
+            if (_autoFlush)
+            {
+                Flush(true, false);
+            }
+        }
+
+        //
+        // Optimize the most commonly used WriteLine overload. This optimization is important for System.Console in particular
+        // because of it will make one WriteLine equal to one call to the OS instead of two in the common case.
+        //
+        public override void WriteLine(string value)
+        {
+            if (value == null)
+            {
+                value = String.Empty;
+            }
+
+            CheckAsyncTaskInProgress();
+
+            int count = value.Length;
+            int index = 0;
+            while (count > 0)
+            {
+                if (_charPos == _charLen)
+                {
+                    Flush(false, false);
+                }
+
+                int n = _charLen - _charPos;
+                if (n > count)
+                {
+                    n = count;
+                }
+
+                Debug.Assert(n > 0, "StreamWriter::WriteLine(String) isn't making progress!  This is most likely a race condition in user code.");
+                value.CopyTo(index, _charBuffer, _charPos, n);
+                _charPos += n;
+                index += n;
+                count -= n;
+            }
+
+            char[] coreNewLine = CoreNewLine;
+            for (int i = 0; i < coreNewLine.Length; i++)   // Expect 2 iterations, no point calling BlockCopy
+            {
+                if (_charPos == _charLen)
+                {
+                    Flush(false, false);
+                }
+
+                _charBuffer[_charPos] = coreNewLine[i];
+                _charPos++;
+            }
+
+            if (_autoFlush)
+            {
+                Flush(true, false);
             }
         }
 

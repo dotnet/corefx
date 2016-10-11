@@ -2,11 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions.Interpreter
@@ -51,22 +46,16 @@ namespace System.Linq.Expressions.Interpreter
 
         protected abstract object Convert(object obj);
 
-        public override string InstructionName
-        {
-            get { return "NumericConvert"; }
-        }
-        public override int ConsumedStack { get { return 1; } }
-        public override int ProducedStack { get { return 1; } }
+        public override string InstructionName => "NumericConvert";
+        public override int ConsumedStack => 1;
+        public override int ProducedStack => 1;
 
-        public override string ToString()
-        {
-            return InstructionName + "(" + _from + "->" + _to + ")";
-        }
+        public override string ToString() => InstructionName + "(" + _from + "->" + _to + ")";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         internal sealed class Unchecked : NumericConvertInstruction
         {
-            public override string InstructionName { get { return "UncheckedConvert"; } }
+            public override string InstructionName => "UncheckedConvert";
 
             public Unchecked(TypeCode from, TypeCode to, bool isLiftedToNull)
                 : base(from, to, isLiftedToNull)
@@ -110,6 +99,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt64: return (UInt64)obj;
                         case TypeCode.Single: return (Single)obj;
                         case TypeCode.Double: return (Double)obj;
+                        case TypeCode.Decimal: return (Decimal)obj;
                         default: throw ContractUtils.Unreachable;
                     }
                 }
@@ -132,6 +122,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt64: return (UInt64)obj;
                         case TypeCode.Single: return (Single)obj;
                         case TypeCode.Double: return (Double)obj;
+                        case TypeCode.Decimal: return (Decimal)obj;
                         default: throw ContractUtils.Unreachable;
                     }
                 }
@@ -154,6 +145,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt64: return (UInt64)obj;
                         case TypeCode.Single: return (Single)obj;
                         case TypeCode.Double: return (Double)obj;
+                        case TypeCode.Decimal: return (Decimal)obj;
                         default: throw ContractUtils.Unreachable;
                     }
                 }
@@ -176,6 +168,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt64: return (UInt64)obj;
                         case TypeCode.Single: return (Single)obj;
                         case TypeCode.Double: return (Double)obj;
+                        case TypeCode.Decimal: return (Decimal)obj;
                         default: throw ContractUtils.Unreachable;
                     }
                 }
@@ -185,7 +178,7 @@ namespace System.Linq.Expressions.Interpreter
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         internal sealed class Checked : NumericConvertInstruction
         {
-            public override string InstructionName { get { return "CheckedConvert"; } }
+            public override string InstructionName => "CheckedConvert";
 
             public Checked(TypeCode from, TypeCode to, bool isLiftedToNull)
                 : base(from, to, isLiftedToNull)
@@ -229,6 +222,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt64: return (UInt64)obj;
                         case TypeCode.Single: return (Single)obj;
                         case TypeCode.Double: return (Double)obj;
+                        case TypeCode.Decimal: return (Decimal)obj;
                         default: throw ContractUtils.Unreachable;
                     }
                 }
@@ -251,6 +245,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt64: return (UInt64)obj;
                         case TypeCode.Single: return (Single)obj;
                         case TypeCode.Double: return (Double)obj;
+                        case TypeCode.Decimal: return (Decimal)obj;
                         default: throw ContractUtils.Unreachable;
                     }
                 }
@@ -273,6 +268,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt64: return (UInt64)obj;
                         case TypeCode.Single: return (Single)obj;
                         case TypeCode.Double: return (Double)obj;
+                        case TypeCode.Decimal: return (Decimal)obj;
                         default: throw ContractUtils.Unreachable;
                     }
                 }
@@ -295,6 +291,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt64: return (UInt64)obj;
                         case TypeCode.Single: return (Single)obj;
                         case TypeCode.Double: return (Double)obj;
+                        case TypeCode.Decimal: return (Decimal)obj;
                         default: throw ContractUtils.Unreachable;
                     }
                 }

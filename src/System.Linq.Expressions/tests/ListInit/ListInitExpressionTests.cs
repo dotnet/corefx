@@ -119,7 +119,10 @@ namespace System.Linq.Expressions.Tests
         {
             var newExp = Expression.New(typeof(EnumerableStaticAdd));
             var adder = typeof(EnumerableStaticAdd).GetMethod(nameof(EnumerableStaticAdd.Add));
-            Assert.Throws<ArgumentException>("addMethod", () => Expression.ListInit(newExp, Expression.Constant("")));
+
+            // this exception behavior (rather than ArgumentException) is compatible with the .NET Framework
+            Assert.Throws<InvalidOperationException>(() => Expression.ListInit(newExp, Expression.Constant("")));
+
             Assert.Throws<ArgumentException>("addMethod", () => Expression.ListInit(newExp, adder, Expression.Constant("")));
             Assert.Throws<ArgumentException>("addMethod", () => Expression.ElementInit(adder, Expression.Constant("")));
             Assert.Throws<ArgumentException>("addMethod", () => Expression.ElementInit(adder, Enumerable.Repeat(Expression.Constant(""), 1)));
@@ -177,6 +180,52 @@ namespace System.Linq.Expressions.Tests
                 { "a", 1 }, {"b", 2 }, {"c", 3 }
             };
             Assert.Equal(expected.OrderBy(kvp => kvp.Key), func().OrderBy(kvp => kvp.Key));
+        }
+
+        [Fact]
+        public void UpdateSameReturnsSame()
+        {
+            var init = Expression.ListInit(
+                Expression.New(typeof(List<int>)),
+                Expression.Constant(1),
+                Expression.Constant(2),
+                Expression.Constant(3));
+            Assert.Same(init, init.Update(init.NewExpression, init.Initializers));
+        }
+
+        [Fact]
+        public void UpdateDifferentNewReturnsDifferent()
+        {
+            var init = Expression.ListInit(
+                Expression.New(typeof(List<int>)),
+                Expression.Constant(1),
+                Expression.Constant(2),
+                Expression.Constant(3));
+            Assert.NotSame(init, init.Update(Expression.New(typeof(List<int>)), init.Initializers));
+        }
+
+        [Fact]
+        public void UpdateDifferentInitializersReturnsDifferent()
+        {
+            var meth = typeof(List<int>).GetMethod("Add");
+            var inits = new[]
+            {
+                Expression.ElementInit(meth, Expression.Constant(1)),
+                Expression.ElementInit(meth, Expression.Constant(2)),
+                Expression.ElementInit(meth, Expression.Constant(3))
+            };
+            var init = Expression.ListInit(Expression.New(typeof(List<int>)), inits);
+            Assert.NotSame(init, init.Update(Expression.New(typeof(List<int>)), inits));
+        }
+
+        [Fact]
+        public static void ToStringTest()
+        {
+            var e1 = Expression.ListInit(Expression.New(typeof(List<int>)), Expression.Parameter(typeof(int), "x"));
+            Assert.Equal("new List`1() {Void Add(Int32)(x)}", e1.ToString());
+
+            var e2 = Expression.ListInit(Expression.New(typeof(List<int>)), Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y"));
+            Assert.Equal("new List`1() {Void Add(Int32)(x), Void Add(Int32)(y)}", e2.ToString());
         }
     }
 }

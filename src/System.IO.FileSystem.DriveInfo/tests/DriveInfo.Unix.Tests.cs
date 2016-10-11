@@ -10,7 +10,7 @@ namespace System.IO.FileSystem.DriveInfoTests
     public partial class DriveInfoUnixTests
     {
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void TestConstructor()
         {
             Assert.All(
@@ -23,7 +23,7 @@ namespace System.IO.FileSystem.DriveInfoTests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void TestGetDrives()
         {
             var drives = DriveInfo.GetDrives();
@@ -41,7 +41,7 @@ namespace System.IO.FileSystem.DriveInfoTests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void PropertiesOfInvalidDrive()
         {
             string invalidDriveName = "NonExistentDriveName";
@@ -59,8 +59,8 @@ namespace System.IO.FileSystem.DriveInfoTests
             Assert.Equal(invalidDriveName, invalidDrive.VolumeLabel);   // VolumeLabel is equivalent to Name on Unix
         }
 
-        [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/dotnet/corefx/issues/11570
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void PropertiesOfValidDrive()
         {
             var root = new DriveInfo("/");
@@ -77,7 +77,7 @@ namespace System.IO.FileSystem.DriveInfoTests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void SetVolumeLabel_Throws_PlatformNotSupportedException()
         {
             var root = new DriveInfo("/");

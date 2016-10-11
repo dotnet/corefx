@@ -13,12 +13,24 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             return SHA1.Create();
         }
 
+        [Fact]
+        public void Sha1_Empty()
+        {
+            Verify(Array.Empty<byte>(), "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709");
+        }
+
         // SHA1 tests are defined somewhat obliquely within RFC 3174, section 7.3
         // The same tests appear in http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf Appendix A
         [Fact]
         public void Sha1_Rfc3174_1()
         {
             Verify("abc", "A9993E364706816ABA3E25717850C26C9CD0D89D");
+        }
+
+        [Fact]
+        public void Sha1_Rfc3174_MultiBlock()
+        {
+            VerifyMultiBlock("ab", "c", "A9993E364706816ABA3E25717850C26C9CD0D89D", "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709");
         }
 
         [Fact]

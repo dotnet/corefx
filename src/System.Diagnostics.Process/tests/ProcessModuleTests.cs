@@ -22,14 +22,14 @@ namespace System.Diagnostics.Tests
                 Assert.NotNull(module.FileName);
                 Assert.NotEmpty(module.FileName);
 
-                Assert.InRange(module.BaseAddress.ToInt64(), 0, long.MaxValue);
-                Assert.InRange(module.EntryPointAddress.ToInt64(), 0, long.MaxValue);
+                Assert.InRange(module.BaseAddress.ToInt64(), long.MinValue, long.MaxValue);
+                Assert.InRange(module.EntryPointAddress.ToInt64(), long.MinValue, long.MaxValue);
                 Assert.InRange(module.ModuleMemorySize, 0, long.MaxValue);
             }
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void TestModulesContainsCorerun()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
@@ -37,7 +37,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux)] // OSX only includes the main module
+        [PlatformSpecific(TestPlatforms.Linux)] // OSX only includes the main module
         public void TestModulesContainsUnixNativeLibs()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;

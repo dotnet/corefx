@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" InitialTargets="CheckForBuildTools" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
   <Target Name="CheckForBuildTools">
     <Error Condition="!Exists('$(ToolsDir)') and '$(OverrideToolsDir)'=='true'"
@@ -44,5 +44,50 @@
     <TargetFrameworkProfile></TargetFrameworkProfile>
     <!-- We set this property to avoid MSBuild errors regarding not setting TargetFrameworkProfile (see above line) -->
     <PortableNuGetMode>true</PortableNuGetMode>
+    <!-- tests should not set this.  A value of netstandard* triggers validation which is irrelevant for tests.  Remove once ValidatePackageTargetFramework target is removed -->
+    <PackageTargetFramework Condition="'$(IsTestProject)' == 'true'"></PackageTargetFramework>
   </PropertyGroup>
+
+  <!--
+    add the test-runtime project.json to the list of supplemental test data so it will get included
+    in the test archive; the stress test build system depends on it when building test mixes.
+  -->
+  <ItemGroup Condition="'$(IsTestProject)'=='true'">
+    <SupplementalTestData Include="$(SourceDir)Common/test-runtime/project.json">
+      <DestinationDir>test-runtime/</DestinationDir>
+    </SupplementalTestData>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(NuGetTargetMoniker)'=='.NETStandard,Version=v1.7'">
+    <!-- Temporarily suppress the message until we get a nuget version that knows about the mapping between netstandard1.7 and uap10.1 -->
+    <SuppressPackageTargetFrameworkCompatibility Include="uap10.1" />
+  </ItemGroup>
+
+  <Target Name="ProducesPackageId" 
+          Returns="@(PackageIds)">
+    <ItemGroup>
+      <PackageIds Include="$(Id)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RewriteReferences" Condition="'$(SourceIndex)' == 'true'" AfterTargets="ResolveNuGetPackages">
+    <ItemGroup>
+      <Reference Remove="@(_ReferenceFromPackage)"/>
+      <_ReferenceProjectToHarvest Include="@(_ReferenceFromPackage -> '$(MSBuildThisFileDirectory)src/%(Filename)/src/%(FileName).csproj')"/>
+      <_ReferenceProjectToHarvest Include="@(_ReferenceFromPackage -> '$(MSBuildThisFileDirectory)src/%(Filename)/src/%(FileName).vbproj')"/>
+    </ItemGroup>
+
+    <MSBuild Condition="'$(SourceIndex)' == 'true' AND Exists('%(Identity)')"
+             Projects="%(_ReferenceProjectToHarvest.Identity)"
+             Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" ItemName="_PackageLibReferencePath"/>
+    </MSBuild>
+    <Error Condition="!Exists('%(_PackageLibReferencePath.Identity)')" Text="Required Reference '%(Identity)' does not exist. Ensure that you have built the entire tree."/>
+    <ItemGroup Condition=" '$(SourceIndex)' == 'true' ">
+      <ReferencePath Include="%(_PackageLibReferencePath.Identity)" Condition="Exists('%(Identity)')"/>
+      <ReferencePath Include="$(PackagesDir)runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\1.2.0-$(CoreClrExpectedPrerelease)\runtimes\win7-x64\lib\netstandard1.0\mscorlib.dll"/>
+      <ReferencePath Include="$(PackagesDir)runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\1.2.0-$(CoreClrExpectedPrerelease)\runtimes\win7-x64\lib\netstandard1.0\System.Private.CoreLib.dll"/>
+    </ItemGroup>
+  </Target>
+
 </Project>

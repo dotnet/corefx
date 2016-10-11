@@ -1,9 +1,13 @@
 {
   "dependencies": {
-    "System.Runtime": "4.1.1-beta-24320-04",
-    "System.Runtime.Extensions": "4.1.1-beta-24320-04"
+    "System.Runtime": "4.4.0-beta-24608-01",
+    "System.Runtime.Extensions": "4.4.0-beta-24608-01",
+    "test-runtime": {
+      "target": "project",
+      "exclude": "compile"
+    }
   },
   "frameworks": {
-    "netstandard1.0": {}
+    "netstandard1.3": {}
   }
 }

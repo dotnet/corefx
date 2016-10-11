@@ -31,6 +31,15 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
+        public static void ConvertDelegatesTest(bool useInterpreter)
+        {
+            foreach (var e in ConvertDelegates())
+            {
+                VerifyUnaryConvert(e, useInterpreter);
+            }
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
         public static void ConvertUnboxingInvalidCastTest(bool useInterpreter)
         {
             foreach (var e in ConvertUnboxingInvalidCast())
@@ -100,6 +109,18 @@ namespace System.Linq.Expressions.Tests
             {
                 VerifyUnaryConvertThrows<InvalidCastException>(Expression.Convert(Expression.Constant(arr), t), useInterpreter);
             }
+        }
+
+        [Fact]
+        public static void ToStringTest()
+        {
+            // NB: Unlike TypeAs, the output does not include the type we're converting to
+
+            var e1 = Expression.Convert(Expression.Parameter(typeof(object), "o"), typeof(int));
+            Assert.Equal("Convert(o, Int32)", e1.ToString());
+
+            var e2 = Expression.ConvertChecked(Expression.Parameter(typeof(long), "x"), typeof(int));
+            Assert.Equal("ConvertChecked(x, Int32)", e2.ToString());
         }
 
         private static IEnumerable<KeyValuePair<Expression, object>> ConvertBooleanToNumeric()
@@ -251,7 +272,7 @@ namespace System.Linq.Expressions.Tests
         private static IEnumerable<Expression> ConvertUnboxing()
         {
             // C# Language Specification - 4.3.2 Unboxing conversions
-            // ----------------------------------------------------
+            // ------------------------------------------------------
 
             var factories = new Func<Expression, Type, Expression>[] { Expression.Convert, Expression.ConvertChecked };
 
@@ -304,6 +325,30 @@ namespace System.Linq.Expressions.Tests
                     yield return factory(Expression.Constant(DayOfWeek.Monday, typeof(Enum)), typeof(DayOfWeek?));
                     yield return factory(Expression.Constant(null, typeof(Enum)), typeof(DayOfWeek?));
                 }
+            }
+        }
+
+        private static IEnumerable<Expression> ConvertDelegates()
+        {
+            var factories = new Func<Expression, Type, Expression>[] { Expression.Convert, Expression.ConvertChecked };
+
+            foreach (var factory in factories)
+            {
+                yield return factory(Expression.Constant((Action)(() => { })), typeof(Action));
+
+                yield return factory(Expression.Constant((Action<int>)(x => { })), typeof(Action<int>));
+                yield return factory(Expression.Constant((Action<int, object>)((x, o) => { })), typeof(Action<int, object>));
+                yield return factory(Expression.Constant((Action<int, object>)((x, o) => { })), typeof(Action<int, string>)); // contravariant
+                yield return factory(Expression.Constant((Action<object, int>)((o, x) => { })), typeof(Action<string, int>)); // contravariant
+
+                yield return factory(Expression.Constant((Func<int>)(() => 42)), typeof(Func<int>));
+                yield return factory(Expression.Constant((Func<string>)(() => "bar")), typeof(Func<string>));
+                yield return factory(Expression.Constant((Func<string>)(() => "bar")), typeof(Func<object>)); // covariant
+                yield return factory(Expression.Constant((Func<int, string>)(x => "bar")), typeof(Func<int, object>)); // covariant
+
+                yield return factory(Expression.Constant((Func<object, string>)(o => "bar")), typeof(Func<string, object>)); // contravariant and covariant
+                yield return factory(Expression.Constant((Func<object, int, string>)((o, x) => "bar")), typeof(Func<string, int, object>)); // contravariant and covariant
+                yield return factory(Expression.Constant((Func<int, object, string>)((x, o) => "bar")), typeof(Func<int, string, object>)); // contravariant and covariant
             }
         }
 

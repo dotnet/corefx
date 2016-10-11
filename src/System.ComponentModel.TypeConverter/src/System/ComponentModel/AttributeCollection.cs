@@ -12,7 +12,7 @@ namespace System.ComponentModel
     /// <summary>
     ///     Represents a collection of attributes.
     /// </summary>
-    public class AttributeCollection : ICollection
+    public class AttributeCollection : ICollection, IEnumerable
     {
         /// <summary>
         ///     An empty AttributeCollection that can used instead of creating a new one.
@@ -41,7 +41,7 @@ namespace System.ComponentModel
         /// </summary>
         public AttributeCollection(params Attribute[] attributes)
         {
-            _attributes = attributes ?? new Attribute[0];
+            _attributes = attributes ?? Array.Empty<Attribute>();
 
             for (int idx = 0; idx < _attributes.Length; idx++)
             {
@@ -71,7 +71,7 @@ namespace System.ComponentModel
 
             if (newAttributes == null)
             {
-                newAttributes = new Attribute[0];
+                newAttributes = Array.Empty<Attribute>();
             }
 
             Attribute[] newArray = new Attribute[existing.Count + newAttributes.Length];
@@ -90,7 +90,7 @@ namespace System.ComponentModel
                 bool match = false;
                 for (int existingIdx = 0; existingIdx < existing.Count; existingIdx++)
                 {
-                    if (newArray[existingIdx].GetTypeId().Equals(newAttributes[idx].GetTypeId()))
+                    if (newArray[existingIdx].TypeId.Equals(newAttributes[idx].TypeId))
                     {
                         match = true;
                         newArray[existingIdx] = newAttributes[idx];
@@ -300,10 +300,10 @@ namespace System.ComponentModel
                 }
                 else
                 {
-                    ConstructorInfo ci = reflect.GetTypeInfo().UnderlyingSystemType.GetTypeInfo().GetConstructor(new Type[0]);
+                    ConstructorInfo ci = reflect.GetTypeInfo().UnderlyingSystemType.GetTypeInfo().GetConstructor(Array.Empty<Type>());
                     if (ci != null)
                     {
-                        attr = (Attribute)ci.Invoke(new object[0]);
+                        attr = (Attribute)ci.Invoke(Array.Empty<object>());
 
                         // If we successfully created, verify that it is the
                         // default.  Attributes don't have to abide by this rule.
@@ -376,6 +376,19 @@ namespace System.ComponentModel
             {
                 return null;
             }
+        }
+
+        int ICollection.Count 
+        { 
+            get
+            {
+                return Count;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         /// <summary>

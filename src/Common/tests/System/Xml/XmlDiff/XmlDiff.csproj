@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -8,6 +8,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>XmlDiff</AssemblyName>
     <RootNamespace>System.Xml.XmlDiff</RootNamespace>
+    <NuGetTargetMoniker>.NETStandard,Version=v1.3</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
   </PropertyGroup>
@@ -25,10 +26,7 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ModuleCore\ModuleCore.csproj">
-      <Project>{3cf0cc76-4ce0-460a-ba37-657cfed39ab0}</Project>
-      <Name>ModuleCore</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\ModuleCore\ModuleCore.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

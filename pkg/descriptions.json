@@ -187,6 +187,16 @@
         ]
     },
     {
+        "Name": "System.CodeDom",
+        "Description": "Provides types that can be used to model the structure of a source code document and to output source code for that model in a supported language.",
+        "CommonTypes": [
+            "System.CodeDom.CodeObject",
+            "System.CodeDom.Compiler.CodeDomProvider",
+            "Microsoft.CSharp.CSharpCodeProvider",
+            "Microsoft.VisualBasic.VBCodeProvider"
+        ]
+    },
+    {
         "Name": "System.Collections",
         "Description": "Provides classes that define generic collections, which allow developers to create strongly typed collections that provide better type safety and performance than non-generic strongly typed collections.",
         "CommonTypes": [
@@ -545,6 +555,7 @@
         "Name": "System.Drawing.Primitives",
         "Description": "Provides basic drawing primitive structures, that exposes the corresponding System.Drawing.dll types in .NET Core.",
         "CommonTypes": [
+            "System.Drawing.Color",
             "System.Drawing.Point",
             "System.Drawing.PointF",
             "System.Drawing.Size",
@@ -767,6 +778,16 @@
         ]
     },
     {
+        "Name": "System.Json",
+        "Description": "Provides standards-based support for the serialization of JavaScript Object Notation (JSON).",
+        "CommonTypes": [
+            "System.Json.JsonArray",
+            "System.Json.JsonObject",
+            "System.Json.JsonPrimitive",
+            "System.Json.JsonValue"
+        ]
+    },
+    {
         "Name": "System.Linq",
         "Description": "Provides classes and interfaces that supports queries that use Language-Integrated Query (LINQ).",
         "CommonTypes": [
@@ -781,16 +802,11 @@
         "Name": "System.Linq.Expressions",
         "Description": "Provides classes, interfaces and enumerations that enable language-level code expressions to be represented as objects in the form of expression trees.",
         "CommonTypes": [
-            "System.Linq.Expressions.Expression<TDelegate>",
-            "System.Linq.Expressions.Expression",
-            "System.Linq.Expressions.MemberExpression",
-            "System.Linq.Expressions.ExpressionVisitor",
-            "System.Linq.Expressions.MethodCallExpression",
             "System.Linq.IQueryable<T>",
             "System.Linq.IQueryable",
-            "System.Linq.Expressions.NewExpression",
-            "System.Linq.Expressions.ParameterExpression",
-            "System.Linq.Expressions.ConstantExpression"
+            "System.Linq.Expressions.Expression<TDelegate>",
+            "System.Linq.Expressions.Expression",
+            "System.Linq.Expressions.ExpressionVisitor"
         ]
     },
     {
@@ -853,6 +869,16 @@
         "Description": "Provides a message handler for HttpClient based on the WinHTTP interface of Windows. While similar to HttpClientHandler, it provides developers more granular control over the application's HTTP communication than the HttpClientHandler.",
         "CommonTypes": [
             "System.Net.Http.WinHttpHandler"
+        ]
+    },
+    {
+        "Name": "System.Net.Mime",
+        "Description": "Provides types that are used to represent Multipurpose Internet Mail Exchange (MIME) headers.",
+        "CommonTypes": [
+            "System.Net.Mime.ContentDisposition",
+            "System.Net.Mime.ContentType",
+            "System.Net.Mime.DispositionTypeNames",
+            "System.Net.Mime.MediaTypeNames"
         ]
     },
     {
@@ -931,12 +957,26 @@
         ]
     },
     {
+        "Name": "System.Net.WebClient",
+        "Description": "Provides the System.Net.WebClient class, which supports sending data to and receiving data from a resource identified by a URI.",
+        "CommonTypes": [
+            "System.Net.WebClient"
+        ]
+    },
+    {
         "Name": "System.Net.WebHeaderCollection",
         "Description": "Contains types that represent HTTP request and response headers. This library is used with classes such as System.Net.HttpWebRequest and System.Net.HttpWebResponse and allows developers to query/edit header names/values.",
         "CommonTypes": [
             "System.Net.HttpRequestHeader",
             "System.Net.HttpResponseHeader",
             "System.Net.WebHeaderCollection"
+        ]
+    },
+    {
+        "Name": "System.Net.WebProxy",
+        "Description": "Provides the System.Net.WebProxy class, which supports sending data to and receiving data from a resource identified by a URI.",
+        "CommonTypes": [
+            "System.Net.WebProxy"
         ]
     },
     {
@@ -1088,10 +1128,13 @@
     },
     {
         "Name": "System.Reflection.Metadata",
-        "Description": "This packages provides a low-level .NET (ECMA-335) metadata reader. It's geared for performance and is the ideal choice for building higher-level libraries that intend to provide their own object model, such as compilers.",
+        "Description": "This packages provides a low-level .NET (ECMA-335) metadata reader and writer. It's geared for performance and is the ideal choice for building higher-level libraries that intend to provide their own object model, such as compilers.",
         "CommonTypes": [
             "System.Reflection.Metadata.MetadataReader",
-            "System.Reflection.PortableExecutable.PEReader"
+            "System.Reflection.PortableExecutable.PEReader",  
+            "System.Reflection.Metadata.Ecma335.MetadataBuilder",          
+            "System.Reflection.PortableExecutable.PEBuilder",          
+            "System.Reflection.PortableExecutable.ManagedPEBuilder"
         ]
     },
     {
@@ -1459,6 +1502,11 @@
         ]
     },
     {
+        "Name": "System.Security.Permissions",
+        "Description": "Provides types supporting Code Access Security (CAS).",
+        "CommonTypes": [ ]
+    },
+    {
         "Name": "System.Security.Principal",
         "Description": "Provides the base interfaces for principal and identity objects that represents the security context under which code is running.",
         "CommonTypes": [
@@ -1680,10 +1728,6 @@
             "System.Threading.Tasks.Dataflow.BroadcastBlock<T>",
             "System.Threading.Tasks.Dataflow.BufferBlock<T>",
             "System.Threading.Tasks.Dataflow.DataflowBlock",
-            "System.Threading.Tasks.Dataflow.DataflowBlockOptions",
-            "System.Threading.Tasks.Dataflow.DataflowLinkOptions",
-            "System.Threading.Tasks.Dataflow.ExecutionDataflowBlockOptions",
-            "System.Threading.Tasks.Dataflow.GroupingDataflowBlockOptions",
             "System.Threading.Tasks.Dataflow.JoinBlock<T1, T2>",
             "System.Threading.Tasks.Dataflow.JoinBlock<T1, T2, T3>",
             "System.Threading.Tasks.Dataflow.TransformBlock<TInput, TOutput>",
@@ -1733,6 +1777,14 @@
             "System.Threading.TimerCallback"
         ]
     },
+	{
+        "Name": "System.Transactions",
+        "Description": "Provides classes that allow you to write your own transactional application and resource manager.",
+        "CommonTypes": [
+            "System.Transactions.Transaction",
+            "System.Transactions.TransactionScope"
+        ]
+    },
     {
         "Name": "System.ValueTuple",
         "Description": "Provides the System.ValueTuple structs, which implement the underlying types for C# 7 tuples.",
@@ -1749,8 +1801,30 @@
         ]
     },
     {
+        "Name": "System.Web.HttpUtility",
+        "Description": "Provides the System.Web.HttpUtility class for encoding and decoding various web formats.",
+        "CommonTypes": [
+            "System.Web.HttpUtility"
+        ]
+    },
+    {
+        "Name": "System.Private.Xml",
+        "Description": "Provides a fast, non-cached, forward-only way to read and write Extensible Markup Language (XML) data.",
+        "CommonTypes": [
+            "System.Xml.XmlNodeType",
+            "System.Xml.XmlException",
+            "System.Xml.XmlReader",
+            "System.Xml.XmlWriter",
+            "System.Xml.IXmlLineInfo",
+            "System.Xml.XmlNameTable",
+            "System.Xml.IXmlNamespaceResolver",
+            "System.Xml.XmlNamespaceManager",
+            "System.Xml.XmlQualifiedName"
+        ]
+    },
+    {
         "Name": "System.Xml.ReaderWriter",
-        "Description": "Provides provides a fast, non-cached, forward-only way to read and write Extensible Markup Language (XML) data.",
+        "Description": "Provides a fast, non-cached, forward-only way to read and write Extensible Markup Language (XML) data.",
         "CommonTypes": [
             "System.Xml.XmlNodeType",
             "System.Xml.XmlException",
@@ -1765,6 +1839,22 @@
     },
     {
         "Name": "System.Xml.XDocument",
+        "Description": "Provides the classes for Language-Integrated Query (LINQ) to Extensible Markup Language (XML). LINQ to XML is an in-memory XML programming interface that enables you to modify XML documents efficiently and easily.",
+        "CommonTypes": [
+            "System.Xml.Linq.XElement",
+            "System.Xml.Linq.XAttribute",
+            "System.Xml.Linq.XDocument",
+            "System.Xml.Linq.XText",
+            "System.Xml.Linq.XNode",
+            "System.Xml.Linq.XContainer",
+            "System.Xml.Linq.XComment",
+            "System.Xml.Linq.XObject",
+            "System.Xml.Linq.XProcessingInstruction",
+            "System.Xml.Linq.XDocumentType"
+        ]
+    },
+    {
+        "Name": "System.Private.Xml.Linq",
         "Description": "Provides the classes for Language-Integrated Query (LINQ) to Extensible Markup Language (XML). LINQ to XML is an in-memory XML programming interface that enables you to modify XML documents efficiently and easily.",
         "CommonTypes": [
             "System.Xml.Linq.XElement",

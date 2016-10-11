@@ -51,6 +51,12 @@ namespace System.IO
             }
         }
 
+        public virtual void Close()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
         }
@@ -565,7 +571,6 @@ namespace System.IO
                 }
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override void Write(char[] buffer, int index, int count)
             {
             }

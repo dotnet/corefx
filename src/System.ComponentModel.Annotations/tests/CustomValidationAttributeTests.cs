@@ -2,260 +2,162 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
-namespace System.ComponentModel.DataAnnotations
+namespace System.ComponentModel.DataAnnotations.Tests
 {
-    public class CustomValidationAttributeTests
+    public class CustomValidationAttributeTests : ValidationAttributeTestBase
     {
         private static readonly ValidationContext s_testValidationContext = new ValidationContext(new object());
 
-        [Fact]
-        public static void Can_construct_attribute_and_get_values()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "SomeMethod");
-            Assert.Equal(typeof(CustomValidator), attribute.ValidatorType);
-            Assert.Equal("SomeMethod", attribute.Method);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArg)), "AnyString");
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgs)), new TestClass("AnyString"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgStronglyTyped)), "AnyString");
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), new TestClass("AnyString"));
+
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), null);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), new TestStruct() { Value = "Valid Value" });
+
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), null);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), new TestStruct() { Value = "Valid Value" });
+
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), new DerivedTestClass("AnyString"));
+
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), false);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123456L);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123.456F);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), 123.456D);
         }
 
-        [Fact]
-        public static void Can_construct_attribute_and_get_invalid_values()
+        protected override IEnumerable<TestCase> InvalidValues()
         {
-            var attribute = new CustomValidationAttribute(null, null);
-            Assert.Equal(null, attribute.ValidatorType);
-            Assert.Equal(null, attribute.Method);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArg)), new TestClass("AnyString"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgs)), "AnyString");
 
-            attribute = new CustomValidationAttribute(typeof(string), string.Empty);
-            Assert.Equal(typeof(string), attribute.ValidatorType);
-            Assert.Equal(string.Empty, attribute.Method);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgStronglyTyped)), new TestClass("AnyString"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped)), "AnyString");
 
-            attribute = new CustomValidationAttribute(typeof(int), " \t\r\n");
-            Assert.Equal(typeof(int), attribute.ValidatorType);
-            Assert.Equal(" \t\r\n", attribute.Method);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgNullable)), new TestStruct());
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodTwoArgsWithFirstNullable)), new TestStruct() { Value = "Invalid Value" });
+
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), null);
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), new TestClass("NotInt"));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodIntegerArg)), new DateTime(2014, 3, 19));
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgDateTime)), "abcdef");
+
+            // Implements IConvertible (throws NotSupportedException - is caught)
+            yield return new TestCase(GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgInt)), new IConvertibleImplementor() { IntThrow = new NotSupportedException() });
         }
 
-        [Fact]
-        public static void RequiresValidationContext_return_false_for_valid_validation_type_and_one_arg_method() {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodOneArg");
-            Assert.False(attribute.RequiresValidationContext);
+        protected override bool RespectsErrorMessage => false;
 
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodOneArgStronglyTyped");
-            Assert.False(attribute.RequiresValidationContext);
-        }
+        private static CustomValidationAttribute GetAttribute(string name) => new CustomValidationAttribute(typeof(CustomValidator), name);
 
-        [Fact]
-        public static void RequiresValidationContext_return_true_for_valid_validation_type_and_two_arg_method() {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodTwoArgs");
-            Assert.True(attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodTwoArgsStronglyTyped");
-            Assert.True(attribute.RequiresValidationContext);
-        }
-
-        [Fact]
-        public static void RequiresValidationContext_throws_InvalidOperationException_if_attribute_not_well_formed() {
-            var attribute = new CustomValidationAttribute(null, "Does not matter");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(NonPublicCustomValidator), "Does not matter");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), null);
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), string.Empty);
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "NonExistentMethod");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "NonPublicValidationMethod");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "NonStaticValidationMethod");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "ValidationMethodDoesNotReturnValidationResult");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "ValidationMethodWithNoArgs");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "ValidationMethodWithByRefArg");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "ValidationMethodTwoArgsButSecondIsNotValidationContext");
-            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
-        }
-
-        [Fact]
-        public static void Validate_throws_InvalidOperationException_for_invalid_ValidatorType()
+        [Theory]
+        [InlineData(typeof(CustomValidator), "SomeMethod")]
+        [InlineData(null, null)]
+        [InlineData(typeof(string), "")]
+        [InlineData(typeof(int), " \t\r\n")]
+        public static void Constructor(Type validatorType, string method)
         {
-            var attribute = new CustomValidationAttribute(null, "Does not matter");
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
+            CustomValidationAttribute attribute = new CustomValidationAttribute(validatorType, method);
+            Assert.Equal(validatorType, attribute.ValidatorType);
+            Assert.Equal(method, attribute.Method);
+        }
 
-            attribute = new CustomValidationAttribute(typeof(NonPublicCustomValidator), "Does not matter");
+        [Theory]
+        [InlineData(nameof(CustomValidator.CorrectValidationMethodOneArg), false)]
+        [InlineData(nameof(CustomValidator.CorrectValidationMethodOneArgStronglyTyped), false)]
+        [InlineData(nameof(CustomValidator.CorrectValidationMethodTwoArgs), true)]
+        [InlineData(nameof(CustomValidator.CorrectValidationMethodTwoArgsStronglyTyped), true)]
+        public static void RequiresValidationContext_Get_ReturnsExpected(string method, bool expected)
+        {
+            CustomValidationAttribute attribute = GetAttribute(method);
+            Assert.Equal(expected, attribute.RequiresValidationContext);
+        }
+
+        public static IEnumerable<object[]> BadlyFormed_TestData()
+        {
+            yield return new object[] { null, "Does not matter" };
+            yield return new object[] { typeof(NonPublicCustomValidator), "Does not matter" };
+            yield return new object[] { typeof(CustomValidator), null };
+            yield return new object[] { typeof(CustomValidator), "" };
+            yield return new object[] { typeof(CustomValidator), "NonExistentMethod" };
+            yield return new object[] { typeof(CustomValidator), nameof(CustomValidator.NonPublicValidationMethod) };
+            yield return new object[] { typeof(CustomValidator), nameof(CustomValidator.NonStaticValidationMethod) };
+            yield return new object[] { typeof(CustomValidator), nameof(CustomValidator.ValidationMethodDoesNotReturnValidationResult) };
+            yield return new object[] { typeof(CustomValidator), nameof(CustomValidator.ValidationMethodWithNoArgs) };
+            yield return new object[] { typeof(CustomValidator), nameof(CustomValidator.ValidationMethodWithByRefArg) };
+            yield return new object[] { typeof(CustomValidator), nameof(CustomValidator.ValidationMethodTwoArgsButSecondIsNotValidationContext) };
+        }
+
+        [Theory]
+        [MemberData(nameof(BadlyFormed_TestData))]
+        public static void RequiresValidationContext_BadlyFormed_ThrowsInvalidOperationException(Type validatorType, string method)
+        {
+            CustomValidationAttribute attribute = new CustomValidationAttribute(validatorType, method);
+            Assert.Throws<InvalidOperationException>(() => attribute.RequiresValidationContext);
+        }
+
+        [Theory]
+        [MemberData(nameof(BadlyFormed_TestData))]
+        public static void Validate_BadlyFormed_ThrowsInvalidOperationException(Type validatorType, string method)
+        {
+            CustomValidationAttribute attribute = new CustomValidationAttribute(validatorType, method);
             Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
         }
 
-        [Fact]
-        public static void Validate_throws_InvalidOperationException_for_invalid_validation_method()
+        [Theory]
+        [MemberData(nameof(BadlyFormed_TestData))]
+        public static void FormatErrorMessage_BadlyFormed_ThrowsInvalidOperationException(Type validatorType, string method)
         {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), null);
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), string.Empty);
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "NonExistentMethod");
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "NonPublicValidationMethod");
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "NonStaticValidationMethod");
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "ValidationMethodDoesNotReturnValidationResult");
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "ValidationMethodWithNoArgs");
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "ValidationMethodWithByRefArg");
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "ValidationMethodTwoArgsButSecondIsNotValidationContext");
-            Assert.Throws<InvalidOperationException>(() => attribute.Validate("Does not matter", s_testValidationContext));
+            CustomValidationAttribute attribute = new CustomValidationAttribute(validatorType, method);
+            Assert.Throws<InvalidOperationException>(() => attribute.FormatErrorMessage("name"));
         }
 
         [Fact]
-        public static void Validate_successful_for_valid_validation_type_and_method()
+        public static void Validate_IConvertibleThrowsCustomException_IsNotCaught()
         {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodOneArg");
-            AssertEx.DoesNotThrow(() => attribute.Validate("Validation returns success for any string", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodTwoArgs");
-            AssertEx.DoesNotThrow(() => attribute.Validate(new TestClass("Validation returns success for any TestClass"), s_testValidationContext));
+            CustomValidationAttribute attribute = GetAttribute(nameof(CustomValidator.CorrectValidationMethodOneArgInt));
+            Assert.Throws<ArithmeticException>(() => attribute.Validate(new IConvertibleImplementor() { IntThrow = new ArithmeticException() }, s_testValidationContext));
         }
 
         [Fact]
-        public static void Validate_successful_for_valid_validation_type_and_method_with_strongly_typed_first_arg()
+        public static void Validate_MethodThrowsCustomException_IsNotCaught()
         {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodOneArgStronglyTyped");
-            AssertEx.DoesNotThrow(() => attribute.Validate("Validation returns success for any string", s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodTwoArgsStronglyTyped");
-            AssertEx.DoesNotThrow(() => attribute.Validate(new TestClass("Validation returns success for any TestClass"), s_testValidationContext));
-        }
-
-        [Fact]
-        public static void Validate_throws_ValidationException_for_invalid_values()
-        {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodOneArg");
-            Assert.Throws<ValidationException>(
-                () => attribute.Validate(new TestClass("Value is not a string - so validation fails"), s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodTwoArgs");
-            Assert.Throws<ValidationException>(
-                () => attribute.Validate("Value is not a TestClass - so validation fails", s_testValidationContext));
-
-            // This Assert produces different results on Core CLR versus .Net Native. In CustomValidationAttribute.TryConvertValue()
-            // we call Convert.ChangeType(instanceOfAClass, typeof(string), ...). On K this throws InvalidCastException because
-            // the class does not implement IConvertible. On N this just returns the result of ToString() on the class and does not throw.
-            // As of 7/9/14 no plans to change this.
-            //attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodOneArgStronglyTyped");
-            //Assert.Throws<ValidationException>(
-            //    () => attribute.Validate(new TestClass("Validation method expects a string but is given a TestClass and so fails"), TestValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodTwoArgsStronglyTyped");
-            Assert.Throws<ValidationException>(
-                () => attribute.Validate("Validation method expects a TestClass but is given a string and so fails", s_testValidationContext));
-        }
-
-        [Fact]
-        public static void Validation_works_for_null_and_non_null_values_and_validation_method_taking_nullable_value_type()
-        {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodOneArgNullable");
-            AssertEx.DoesNotThrow(() => attribute.Validate(null, s_testValidationContext));
-            AssertEx.DoesNotThrow(
-                () => attribute.Validate(new TestStruct() { Value = "Valid Value" }, s_testValidationContext));
-            Assert.Throws<ValidationException>(
-                () => attribute.Validate(new TestStruct() { Value = "Some non-valid value" }, s_testValidationContext));
-
-            attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodTwoArgsWithFirstNullable");
-            AssertEx.DoesNotThrow(() => attribute.Validate(null, s_testValidationContext));
-            AssertEx.DoesNotThrow(
-                () => attribute.Validate(new TestStruct() { Value = "Valid Value" }, s_testValidationContext));
-            Assert.Throws<ValidationException>(
-                () => attribute.Validate(new TestStruct() { Value = "Some non-valid value" }, s_testValidationContext));
-        }
-
-        [Fact]
-        public static void Validate_successful_for_validation_method_with_strongly_typed_first_arg_and_value_type_assignable_from_expected_type()
-        {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodTwoArgsStronglyTyped");
-            AssertEx.DoesNotThrow(
-                () => attribute.Validate(new DerivedTestClass("Validation returns success for DerivedTestClass too"), s_testValidationContext));
-        }
-
-        [Fact]
-        public static void Validate_successful_for_validation_method_with_strongly_typed_first_arg_and_value_type_convertible_to_expected_type()
-        {
-            var attribute = new CustomValidationAttribute(typeof(CustomValidator), "CorrectValidationMethodIntegerArg");
-
-            // validation works for integer value as it is declared with integer arg
-            AssertEx.DoesNotThrow(() => attribute.Validate(123, s_testValidationContext));
-
-            // also works with bool, long, float & double as can convert them to int
-            AssertEx.DoesNotThrow(() => attribute.Validate(false, s_testValidationContext));
-            AssertEx.DoesNotThrow(() => attribute.Validate(123456L, s_testValidationContext));
-            AssertEx.DoesNotThrow(() => attribute.Validate(123.456F, s_testValidationContext));
-            AssertEx.DoesNotThrow(() => attribute.Validate(123.456D, s_testValidationContext));
-
-            // does not work with TestClass or DateTime as cannot convert them
-            Assert.Throws<ValidationException>(() => attribute.Validate(new TestClass("Does not convert to int"), s_testValidationContext));
-            Assert.Throws<ValidationException>(() => attribute.Validate(new DateTime(2014, 3, 19), s_testValidationContext));
+            CustomValidationAttribute attribute = GetAttribute(nameof(CustomValidator.ValidationMethodThrowsException));
+            Assert.Throws<ArgumentException>(() => attribute.Validate(new IConvertibleImplementor(), s_testValidationContext));
         }
 
         internal class NonPublicCustomValidator
         {
-            public static ValidationResult ValidationMethodOneArg(object o)
-            {
-                return ValidationResult.Success;
-            }
+            public static ValidationResult ValidationMethodOneArg(object o) => ValidationResult.Success;
         }
 
         public class CustomValidator
         {
-            internal static ValidationResult NonPublicValidationMethod(object o)
-            {
-                return ValidationResult.Success;
-            }
+            internal static ValidationResult NonPublicValidationMethod(object o) => ValidationResult.Success;
 
-            public ValidationResult NonStaticValidationMethod(object o)
-            {
-                return ValidationResult.Success;
-            }
+            public ValidationResult NonStaticValidationMethod(object o) => ValidationResult.Success;
 
-            public static string ValidationMethodDoesNotReturnValidationResult(object o)
-            {
-                return null;
-            }
+            public static string ValidationMethodDoesNotReturnValidationResult(object o) => null;
 
-            public static ValidationResult ValidationMethodWithNoArgs()
-            {
-                return ValidationResult.Success;
-            }
+            public static ValidationResult ValidationMethodWithNoArgs() => ValidationResult.Success;
 
-            public static ValidationResult ValidationMethodWithByRefArg(ref object o)
-            {
-                return ValidationResult.Success;
-            }
+            public static ValidationResult ValidationMethodWithByRefArg(ref object o) => ValidationResult.Success;
 
             public static ValidationResult ValidationMethodTwoArgsButSecondIsNotValidationContext(object o, object someOtherObject)
             {
                 return ValidationResult.Success;
+            }
+            
+            public static ValidationResult ValidationMethodThrowsException(object o)
+            {
+                throw new ArgumentException();
             }
 
             public static ValidationResult ValidationMethodThreeArgs(object o, ValidationContext context, object someOtherObject)
@@ -269,10 +171,7 @@ namespace System.ComponentModel.DataAnnotations
                 return new ValidationResult("Validation failed - not a string");
             }
 
-            public static ValidationResult CorrectValidationMethodOneArgStronglyTyped(string s)
-            {
-                return ValidationResult.Success;
-            }
+            public static ValidationResult CorrectValidationMethodOneArgStronglyTyped(string s) => ValidationResult.Success;
 
             public static ValidationResult CorrectValidationMethodTwoArgs(object o, ValidationContext context)
             {
@@ -285,12 +184,9 @@ namespace System.ComponentModel.DataAnnotations
                 return ValidationResult.Success;
             }
 
-            public static ValidationResult CorrectValidationMethodIntegerArg(int i)
-            {
-                return ValidationResult.Success;
-            }
+            public static ValidationResult CorrectValidationMethodIntegerArg(int i) => ValidationResult.Success;
 
-            public static ValidationResult CorrectValidationMethodOneArgNullable(Nullable<TestStruct> testStruct)
+            public static ValidationResult CorrectValidationMethodOneArgNullable(TestStruct? testStruct)
             {
                 if (testStruct == null) { return ValidationResult.Success; }
                 var ts = (TestStruct)testStruct;
@@ -298,13 +194,16 @@ namespace System.ComponentModel.DataAnnotations
                 return new ValidationResult("Validation failed - neither null nor Value=\"Valid Value\"");
             }
 
-            public static ValidationResult CorrectValidationMethodTwoArgsWithFirstNullable(Nullable<TestStruct> testStruct, ValidationContext context)
+            public static ValidationResult CorrectValidationMethodTwoArgsWithFirstNullable(TestStruct? testStruct, ValidationContext context)
             {
                 if (testStruct == null) { return ValidationResult.Success; }
                 var ts = (TestStruct)testStruct;
                 if ("Valid Value".Equals(ts.Value)) { return ValidationResult.Success; }
                 return new ValidationResult("Validation failed - neither null nor Value=\"Valid Value\"");
             }
+
+            public static ValidationResult CorrectValidationMethodOneArgDateTime(DateTime dateTime) => ValidationResult.Success;
+            public static ValidationResult CorrectValidationMethodOneArgInt(int i) => ValidationResult.Success;
         }
 
         public class TestClass

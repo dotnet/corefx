@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Dynamic.Utils;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 
@@ -17,52 +15,6 @@ namespace System.Linq.Expressions.Interpreter
     {
         private const int MaxHelpers = 3;
         private const int MaxArgs = 3;
-
-        public virtual object InvokeInstance(object instance, params object[] args)
-        {
-            switch (args.Length)
-            {
-                case 0: return Invoke(instance);
-                case 1: return Invoke(instance, args[0]);
-                case 2: return Invoke(instance, args[0], args[1]);
-                case 3: return Invoke(instance, args[0], args[1], args[2]);
-                case 4: return Invoke(instance, args[0], args[1], args[2], args[3]);
-                case 5: return Invoke(instance, args[0], args[1], args[2], args[3], args[4]);
-                case 6: return Invoke(instance, args[0], args[1], args[2], args[3], args[4], args[5]);
-                case 7: return Invoke(instance, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-                case 8: return Invoke(instance, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-                default: throw new InvalidOperationException();
-            }
-        }
-
-        public virtual object Invoke(params object[] args)
-        {
-            switch (args.Length)
-            {
-                case 0: return Invoke();
-                case 1: return Invoke(args[0]);
-                case 2: return Invoke(args[0], args[1]);
-                case 3: return Invoke(args[0], args[1], args[2]);
-                case 4: return Invoke(args[0], args[1], args[2], args[3]);
-                case 5: return Invoke(args[0], args[1], args[2], args[3], args[4]);
-                case 6: return Invoke(args[0], args[1], args[2], args[3], args[4], args[5]);
-                case 7: return Invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-                case 8: return Invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-                case 9: return Invoke(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
-                default: throw new InvalidOperationException();
-            }
-        }
-
-        public virtual object Invoke() { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0) { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0, object arg1) { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0, object arg1, object arg2) { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0, object arg1, object arg2, object arg3) { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0, object arg1, object arg2, object arg3, object arg4) { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0, object arg1, object arg2, object arg3, object arg4, object arg5) { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6) { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7) { throw new InvalidOperationException(); }
-        public virtual object Invoke(object arg0, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8) { throw new InvalidOperationException(); }
 
 #if FEATURE_FAST_CREATE
         /// <summary>
@@ -236,24 +188,18 @@ namespace System.Linq.Expressions.Interpreter
     internal sealed class ActionCallInstruction : CallInstruction
     {
         private readonly Action _target;
-        public override int ArgumentCount { get { return 0; } }
+        public override int ArgumentCount => 0;
 
         public ActionCallInstruction(Action target)
         {
             _target = target;
         }
 
-        public override int ProducedStack { get { return 0; } }
+        public override int ProducedStack => 0;
 
         public ActionCallInstruction(MethodInfo target)
         {
             _target = (Action)target.CreateDelegate(typeof(Action), target);
-        }
-
-        public override object Invoke()
-        {
-            _target();
-            return null;
         }
 
         public override int Run(InterpretedFrame frame)
@@ -267,8 +213,8 @@ namespace System.Linq.Expressions.Interpreter
     internal sealed class ActionCallInstruction<T0> : CallInstruction
     {
         private readonly Action<T0> _target;
-        public override int ProducedStack { get { return 0; } }
-        public override int ArgumentCount { get { return 1; } }
+        public override int ProducedStack => 0;
+        public override int ArgumentCount => 1;
 
         public ActionCallInstruction(Action<T0> target)
         {
@@ -278,12 +224,6 @@ namespace System.Linq.Expressions.Interpreter
         public ActionCallInstruction(MethodInfo target)
         {
             _target = (Action<T0>)target.CreateDelegate(typeof(Action<T0>), target);
-        }
-
-        public override object Invoke(object arg0)
-        {
-            _target(arg0 != null ? (T0)arg0 : default(T0));
-            return null;
         }
 
         public override int Run(InterpretedFrame frame)
@@ -297,8 +237,8 @@ namespace System.Linq.Expressions.Interpreter
     internal sealed class ActionCallInstruction<T0, T1> : CallInstruction
     {
         private readonly Action<T0, T1> _target;
-        public override int ProducedStack { get { return 0; } }
-        public override int ArgumentCount { get { return 2; } }
+        public override int ProducedStack => 0;
+        public override int ArgumentCount => 2;
 
         public ActionCallInstruction(Action<T0, T1> target)
         {
@@ -308,12 +248,6 @@ namespace System.Linq.Expressions.Interpreter
         public ActionCallInstruction(MethodInfo target)
         {
             _target = (Action<T0, T1>)target.CreateDelegate(typeof(Action<T0, T1>), target);
-        }
-
-        public override object Invoke(object arg0, object arg1)
-        {
-            _target(arg0 != null ? (T0)arg0 : default(T0), arg1 != null ? (T1)arg1 : default(T1));
-            return null;
         }
 
         public override int Run(InterpretedFrame frame)
@@ -327,8 +261,8 @@ namespace System.Linq.Expressions.Interpreter
     internal sealed class FuncCallInstruction<TRet> : CallInstruction
     {
         private readonly Func<TRet> _target;
-        public override int ProducedStack { get { return 1; } }
-        public override int ArgumentCount { get { return 0; } }
+        public override int ProducedStack => 1;
+        public override int ArgumentCount => 0;
 
         public FuncCallInstruction(Func<TRet> target)
         {
@@ -338,11 +272,6 @@ namespace System.Linq.Expressions.Interpreter
         public FuncCallInstruction(MethodInfo target)
         {
             _target = (Func<TRet>)target.CreateDelegate(typeof(Func<TRet>), target);
-        }
-
-        public override object Invoke()
-        {
-            return _target();
         }
 
         public override int Run(InterpretedFrame frame)
@@ -356,8 +285,8 @@ namespace System.Linq.Expressions.Interpreter
     internal sealed class FuncCallInstruction<T0, TRet> : CallInstruction
     {
         private readonly Func<T0, TRet> _target;
-        public override int ProducedStack { get { return 1; } }
-        public override int ArgumentCount { get { return 1; } }
+        public override int ProducedStack => 1;
+        public override int ArgumentCount => 1;
 
         public FuncCallInstruction(Func<T0, TRet> target)
         {
@@ -367,11 +296,6 @@ namespace System.Linq.Expressions.Interpreter
         public FuncCallInstruction(MethodInfo target)
         {
             _target = (Func<T0, TRet>)target.CreateDelegate(typeof(Func<T0, TRet>), target);
-        }
-
-        public override object Invoke(object arg0)
-        {
-            return _target(arg0 != null ? (T0)arg0 : default(T0));
         }
 
         public override int Run(InterpretedFrame frame)
@@ -385,8 +309,8 @@ namespace System.Linq.Expressions.Interpreter
     internal sealed class FuncCallInstruction<T0, T1, TRet> : CallInstruction
     {
         private readonly Func<T0, T1, TRet> _target;
-        public override int ProducedStack { get { return 1; } }
-        public override int ArgumentCount { get { return 2; } }
+        public override int ProducedStack => 1;
+        public override int ArgumentCount => 2;
 
         public FuncCallInstruction(Func<T0, T1, TRet> target)
         {
@@ -396,11 +320,6 @@ namespace System.Linq.Expressions.Interpreter
         public FuncCallInstruction(MethodInfo target)
         {
             _target = (Func<T0, T1, TRet>)target.CreateDelegate(typeof(Func<T0, T1, TRet>), target);
-        }
-
-        public override object Invoke(object arg0, object arg1)
-        {
-            return _target(arg0 != null ? (T0)arg0 : default(T0), arg1 != null ? (T1)arg1 : default(T1));
         }
 
         public override int Run(InterpretedFrame frame)

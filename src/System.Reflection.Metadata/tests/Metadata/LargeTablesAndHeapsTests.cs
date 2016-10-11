@@ -924,9 +924,12 @@ namespace System.Reflection.Metadata.Tests
 
             mdBuilder.SetCapacity(TableIndex.InterfaceImpl, 0x10000);
 
-            for (int i = 0; i < 0x10000; i++)
+            for (int i = 0; i < 0x100; i++)
             {
-                mdBuilder.AddInterfaceImplementation(default(TypeDefinitionHandle), default(TypeDefinitionHandle));
+                for (int j = 0; j < 0x100; j++)
+                {
+                    mdBuilder.AddInterfaceImplementation(MetadataTokens.TypeDefinitionHandle(i + 1), MetadataTokens.TypeDefinitionHandle(j + 1));
+                }
             }
 
             mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
@@ -2214,7 +2217,7 @@ namespace System.Reflection.Metadata.Tests
 
             mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
 
-            var rootBuilder = new MetadataRootBuilder(mdBuilder);
+            var rootBuilder = new MetadataRootBuilder(mdBuilder, suppressValidation: true); // NestedClass not sorted
             var mdBlob = new BlobBuilder();
             rootBuilder.Serialize(mdBlob, 0, 0);
 

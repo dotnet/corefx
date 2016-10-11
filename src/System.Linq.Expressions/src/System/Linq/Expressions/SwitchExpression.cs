@@ -222,7 +222,7 @@ namespace System.Linq.Expressions
                 var pms = comparison.GetParametersCached();
                 if (pms.Length != 2)
                 {
-                    throw Error.IncorrectNumberOfMethodCallArguments(comparison);
+                    throw Error.IncorrectNumberOfMethodCallArguments(comparison, nameof(comparison));
                 }
                 // Validate that the switch value's type matches the comparison method's 
                 // left hand side parameter type.
@@ -282,7 +282,7 @@ namespace System.Linq.Expressions
                     {
                         if (!TypeUtils.AreEquivalent(firstTestValue.Type, c.TestValues[i].Type))
                         {
-                            throw new ArgumentException(Strings.AllTestValuesMustHaveSameType, nameof(cases));
+                            throw Error.AllTestValuesMustHaveSameType(nameof(cases));
                         }
                     }
                 }
@@ -321,7 +321,7 @@ namespace System.Linq.Expressions
                 {
                     if (!TypeUtils.AreReferenceAssignable(resultType, @case.Type))
                     {
-                        throw new ArgumentException(Strings.ArgumentTypesMustMatch, parameterName);
+                        throw Error.ArgumentTypesMustMatch(parameterName);
                     }
                 }
             }
@@ -329,7 +329,7 @@ namespace System.Linq.Expressions
             {
                 if (!TypeUtils.AreEquivalent(resultType, @case.Type))
                 {
-                    throw new ArgumentException(Strings.AllCaseBodiesMustHaveSameType, parameterName);
+                    throw Error.AllCaseBodiesMustHaveSameType(parameterName);
                 }
             }
         }
