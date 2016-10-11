@@ -12,6 +12,7 @@ namespace System.Collections.Generic
     internal struct ArrayBuilder<T>
     {
         private const int DefaultCapacity = 4;
+        private const int MaxCoreClrArrayLength = 0x7fefffff; // For byte arrays the limit is slightly larger
 
         private T[] _array; // Starts out null, initialized on first Add.
         private int _count; // Number of items into _array we're using.
@@ -124,9 +125,14 @@ namespace System.Collections.Generic
         {
             Debug.Assert(minimum > Capacity);
 
-            int nextCapacity = Capacity == 0 ? DefaultCapacity : 2 * Capacity;
+            int capacity = Capacity;
+            int nextCapacity = capacity == 0 ? DefaultCapacity : 2 * capacity;
 
-            Debug.Assert(nextCapacity > 0); // Check for overflow.
+            if ((uint)nextCapacity > (uint)MaxCoreClrArrayLength)
+            {
+                nextCapacity = Math.Max(capacity + 1, MaxCoreClrArrayLength);
+            }
+
             nextCapacity = Math.Max(nextCapacity, minimum);
             
             // Array.Resize will unnecessarily copy the slots @ _count
