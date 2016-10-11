@@ -63,8 +63,8 @@ namespace System.Collections.Generic.Tests
         {
             Debug.Assert(count >= 0);
 
-            var sequence = Enumerable.Repeat(default(T), count);
-            var builder = CreateBuilderFromSequence(sequence);
+            IEnumerable<T> sequence = Enumerable.Repeat(default(T), count);
+            ArrayBuilder<T> builder = CreateBuilderFromSequence(sequence);
 
             Assert.Equal(count, builder.Count);
             Assert.Equal(CalculateExpectedCapacity(count), builder.Capacity);
@@ -72,7 +72,7 @@ namespace System.Collections.Generic.Tests
             // Indexing everything up to Count should succeed.
             for (int i = 0; i < count; i++)
             {
-                var item = builder[i];
+                T item = builder[i];
             }
             
             // Again, builder[count] may not throw for Release builds unless
@@ -88,7 +88,7 @@ namespace System.Collections.Generic.Tests
         public void AddAndIndexer(IEnumerable<T> seed)
         {
             // CreateBuilderFromSequence implicitly tests Add
-            var builder = CreateBuilderFromSequence(seed);
+            ArrayBuilder<T> builder = CreateBuilderFromSequence(seed);
 
             // Continuously shift the elements in the builder over
             // using the get/set indexers, until none are left.
@@ -114,10 +114,10 @@ namespace System.Collections.Generic.Tests
         [MemberData(nameof(EnumerableData))]
         public void ToArray(IEnumerable<T> seed)
         {
-            var builder = CreateBuilderFromSequence(seed);
+            ArrayBuilder<T> builder = CreateBuilderFromSequence(seed);
 
             int count = builder.Count; // Count needs to be called beforehand.
-            var array = builder.ToArray(); // ToArray should only be called once.
+            T[] array = builder.ToArray(); // ToArray should only be called once.
 
             Assert.Equal(count, array.Length);
             Assert.Equal(seed, array);
@@ -168,7 +168,7 @@ namespace System.Collections.Generic.Tests
         {
             var data = new TheoryData<IEnumerable<T>>();
             
-            var counts = CountData().Select(array => array[0]).Cast<int>();
+            IEnumerable<int> counts = CountData().Select(array => array[0]).Cast<int>();
 
             foreach (int count in counts)
             {
@@ -201,8 +201,8 @@ namespace System.Collections.Generic.Tests
             int count = 0;
             foreach (T item in sequence)
             {
+                count++;
                 builder.Add(item);
-                count += 1;
                 
                 Assert.Equal(count, builder.Count);
                 Assert.Equal(CalculateExpectedCapacity(count), builder.Capacity);
@@ -218,7 +218,7 @@ namespace System.Collections.Generic.Tests
         {
             Debug.Assert(expected != null);
 
-            using (var enumerator = expected.GetEnumerator())
+            using (IEnumerable<T> enumerator = expected.GetEnumerator())
             {
                 int index = 0;
                 while (enumerator.MoveNext())
