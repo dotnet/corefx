@@ -10,6 +10,7 @@
     <Compile Include="System.IO.UnmanagedMemoryStream.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- TODO: Remove this when package update happens -->
     <ProjectReference Include="../../System.Runtime.InteropServices/ref/System.Runtime.InteropServices.csproj"/>
   </ItemGroup>
   <ItemGroup>
