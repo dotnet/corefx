@@ -218,7 +218,7 @@ namespace System.Collections.Generic.Tests
         {
             Debug.Assert(expected != null);
 
-            using (IEnumerable<T> enumerator = expected.GetEnumerator())
+            using (IEnumerator<T> enumerator = expected.GetEnumerator())
             {
                 int index = 0;
                 while (enumerator.MoveNext())
