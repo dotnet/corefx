@@ -5,7 +5,4 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-using System.Runtime.CompilerServices;
-
-[assembly: TypeForwardedTo(typeof(System.Resources.IResourceReader))]
-[assembly: TypeForwardedTo(typeof(System.Resources.ResourceReader))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Resources.ResourceReader))]
