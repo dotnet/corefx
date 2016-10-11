@@ -63,6 +63,7 @@ namespace System.Resources.Tests
 
         [Theory]
         [MemberData(nameof(EnglishNonStringResourceData))]
+        [ActiveIssue(12565, TestPlatforms.AnyUnix)]
         public static void GetObject(string key, object expectedValue)
         {
             var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
@@ -82,6 +83,7 @@ namespace System.Resources.Tests
 
         [Theory]
         [MemberData(nameof(EnglishNonStringResourceData))]
+        [ActiveIssue(12565, TestPlatforms.AnyUnix)]
         public static void GetResourceSet_NonStrings(string key, object expectedValue)
         {
             var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
@@ -91,6 +93,7 @@ namespace System.Resources.Tests
         }
 
         [Fact]
+        [ActiveIssue(12565, TestPlatforms.AnyUnix)]
         public static void GetStream()
         {
             var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx.netstandard17", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
