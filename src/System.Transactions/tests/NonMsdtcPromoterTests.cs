@@ -875,7 +875,7 @@ namespace System.Transactions.Tests
             }
             catch (Exception ex)
             {
-                Assert.Equal(ex.GetType(), expectedExceptionType);
+                Assert.Equal(expectedExceptionType, ex.GetType());
             }
 
             for (int i = 0; i < count; i++)
@@ -894,7 +894,7 @@ namespace System.Transactions.Tests
                     passCount++;
                 }
             }
-            Assert.Equal(passCount, count);
+            Assert.Equal(count, passCount);
 
             TestPassed();
         }
@@ -1084,7 +1084,7 @@ namespace System.Transactions.Tests
                         }
                     }
                 }
-                Assert.Equal(passCount, numVolatiles);
+                Assert.Equal(numVolatiles, passCount);
             }
 
             Assert.True(completedEvent.WaitOne(TimeSpan.FromSeconds(5)));
@@ -1096,12 +1096,12 @@ namespace System.Transactions.Tests
             if (commit)
             {
                 Assert.False((spcResponse == TransactionStatus.Committed) && (nonDtcEnlistment.Aborted));
-                Assert.Equal(savedTransaction.TransactionInformation.Status, spcResponse);
+                Assert.Equal(spcResponse, savedTransaction.TransactionInformation.Status);
             }
             else
             {
                 Assert.True(nonDtcEnlistment.Aborted);
-                Assert.Equal(savedTransaction.TransactionInformation.Status, TransactionStatus.Aborted);
+                Assert.Equal(TransactionStatus.Aborted, savedTransaction.TransactionInformation.Status);
             }
 
             TestPassed();
@@ -1343,7 +1343,7 @@ namespace System.Transactions.Tests
             }
             catch (Exception ex)
             {
-                Assert.Equal(ex.GetType(), typeof(TransactionAbortedException));
+                Assert.IsType<TransactionAbortedException>(ex);
             }
 
             Assert.True(pspeCompleted.WaitOne(TimeSpan.FromSeconds(5)));
@@ -1462,7 +1462,7 @@ namespace System.Transactions.Tests
             }
             catch (Exception ex)
             {
-                Assert.Equal(ex.GetType(), typeof(TransactionAbortedException));
+                Assert.IsType<TransactionAbortedException>(ex);
             }
 
             Assert.True(pspeCompleted.WaitOne(TimeSpan.FromSeconds(5)));
@@ -1595,10 +1595,10 @@ namespace System.Transactions.Tests
                 using (TransactionScope ts = new TransactionScope())
                 {
                     TransactionStatus txStatus = Transaction.Current.TransactionInformation.Status;
-                    Assert.Equal(txStatus, TransactionStatus.Active);
+                    Assert.Equal(TransactionStatus.Active, txStatus);
 
                     Guid distId = Transaction.Current.TransactionInformation.DistributedIdentifier;
-                    Assert.Equal(distId, Guid.Empty);
+                    Assert.Equal(Guid.Empty, distId);
 
                     pspe = (NonMSDTCPromoterEnlistment)CreatePSPEEnlistment(NonMsdtcPromoterTests.PromoterType1,
                         NonMsdtcPromoterTests.PromotedToken1,
@@ -1610,15 +1610,15 @@ namespace System.Transactions.Tests
                         );
 
                     txStatus = Transaction.Current.TransactionInformation.Status;
-                    Assert.Equal(txStatus, TransactionStatus.Active);
+                    Assert.Equal(TransactionStatus.Active, txStatus);
 
                     distId = Transaction.Current.TransactionInformation.DistributedIdentifier;
-                    Assert.Equal(distId, Guid.Empty);
+                    Assert.Equal(Guid.Empty, distId);
 
                     Promote(testCaseDescription, NonMsdtcPromoterTests.PromotedToken1);
 
                     txStatus = Transaction.Current.TransactionInformation.Status;
-                    Assert.Equal(txStatus, TransactionStatus.Active);
+                    Assert.Equal(TransactionStatus.Active, txStatus);
 
                     distId = Transaction.Current.TransactionInformation.DistributedIdentifier;
                     Assert.NotEqual(distId, Guid.Empty);
@@ -1671,7 +1671,7 @@ namespace System.Transactions.Tests
             }
             catch (Exception ex)
             {
-                Assert.Equal(ex.GetType(), typeof(ObjectDisposedException));
+                Assert.IsType<ObjectDisposedException>(ex);
             }
 
             Assert.True(pspeCompleted.WaitOne(TimeSpan.FromSeconds(5)));
@@ -1687,7 +1687,7 @@ namespace System.Transactions.Tests
 
             Assert.True(pspe.Aborted);
 
-            Assert.Equal(savedTransaction.TransactionInformation.Status, TransactionStatus.Aborted);
+            Assert.Equal(TransactionStatus.Aborted, savedTransaction.TransactionInformation.Status);
 
             TestPassed();
         }
@@ -1714,7 +1714,7 @@ namespace System.Transactions.Tests
                 {
                     Trace("Completed event registered before PSPE");
                     numberOfCompletions++;
-                    Assert.Equal(completedArgs.Transaction.TransactionInformation.Status, TransactionStatus.Committed);
+                    Assert.Equal(TransactionStatus.Committed, completedArgs.Transaction.TransactionInformation.Status);
                 };
 
                 pspe = (NonMSDTCPromoterEnlistment)CreatePSPEEnlistment(NonMsdtcPromoterTests.PromoterType1,
@@ -1730,7 +1730,7 @@ namespace System.Transactions.Tests
                 {
                     Trace("Completed event registered after PSPE");
                     numberOfCompletions++;
-                    Assert.Equal(completedArgs.Transaction.TransactionInformation.Status, TransactionStatus.Committed);
+                    Assert.Equal(TransactionStatus.Committed, completedArgs.Transaction.TransactionInformation.Status);
                 };
 
                 if (promote)
@@ -1741,7 +1741,7 @@ namespace System.Transactions.Tests
                     {
                         Trace("Completed event registered after promote");
                         numberOfCompletions++;
-                        Assert.Equal(completedArgs.Transaction.TransactionInformation.Status, TransactionStatus.Committed);
+                        Assert.Equal(TransactionStatus.Committed, completedArgs.Transaction.TransactionInformation.Status);
                     };
                 }
 
@@ -1756,7 +1756,7 @@ namespace System.Transactions.Tests
             {
                 Trace("Completed event registered after commit");
                 numberOfCompletions++;
-                Assert.Equal(completedArgs.Transaction.TransactionInformation.Status, TransactionStatus.Committed);
+                Assert.Equal(TransactionStatus.Committed, completedArgs.Transaction.TransactionInformation.Status);
             };
 
             Assert.True(pspeCompleted.WaitOne(TimeSpan.FromSeconds(5)));
@@ -1770,7 +1770,7 @@ namespace System.Transactions.Tests
                 Assert.False(pspe.Promoted);
             }
 
-            Assert.Equal(numberOfCompletions, (promote ? 4 : 3));
+            Assert.Equal((promote ? 4 : 3), numberOfCompletions);
 
             TestPassed();
         }
@@ -1788,7 +1788,7 @@ namespace System.Transactions.Tests
             {
                 using (TransactionScope ts = new TransactionScope())
                 {
-                    Assert.Equal(TxPromoterType(Transaction.Current), Guid.Empty);
+                    Assert.Equal(Guid.Empty, TxPromoterType(Transaction.Current));
 
                     pspe = (NonMSDTCPromoterEnlistment)CreatePSPEEnlistment(NonMsdtcPromoterTests.PromoterType1,
                         NonMsdtcPromoterTests.PromotedToken1,
@@ -1799,11 +1799,11 @@ namespace System.Transactions.Tests
                         /*expectRejection=*/ false
                         );
 
-                    Assert.Equal(TxPromoterType(Transaction.Current), NonMsdtcPromoterTests.PromoterType1);
+                    Assert.Equal(NonMsdtcPromoterTests.PromoterType1, TxPromoterType(Transaction.Current));
 
                     Promote(testCaseDescription, NonMsdtcPromoterTests.PromotedToken1);
 
-                    Assert.Equal(TxPromoterType(Transaction.Current), NonMsdtcPromoterTests.PromoterType1);
+                    Assert.Equal(NonMsdtcPromoterTests.PromoterType1, TxPromoterType(Transaction.Current));
 
                     ts.Complete();
                 }
@@ -1833,7 +1833,7 @@ namespace System.Transactions.Tests
             {
                 using (TransactionScope ts = new TransactionScope())
                 {
-                    Assert.Equal(TxPromoterType(Transaction.Current), Guid.Empty);
+                    Assert.Equal(Guid.Empty, TxPromoterType(Transaction.Current));
 
                     vol = CreateVolatileEnlistment(volCompleted);
 
@@ -1841,7 +1841,7 @@ namespace System.Transactions.Tests
                     TransactionInterop.GetDtcTransaction(Transaction.Current);
 
                     // TransactionInterop.PromoterTypeDtc
-                    Assert.Equal(TxPromoterType(Transaction.Current), PromoterTypeDtc);
+                    Assert.Equal(PromoterTypeDtc, TxPromoterType(Transaction.Current));
 
                     ts.Complete();
                 }
@@ -1981,72 +1981,38 @@ namespace System.Transactions.Tests
 
             Guid guidToSet = new Guid("236BC646-FE3B-41F9-99F7-08BF448D8420");
 
-            try
+            using (TransactionScope ts = new TransactionScope())
             {
-                using (TransactionScope ts = new TransactionScope())
-                {
-                    Trace("Before EnlistPromotable");
-                    try
-                    {
-                        SetDistributedTransactionId(dummyPSPE, Transaction.Current, guidToSet);
-                        bool shouldNotBeExecuted = true;
-                        Assert.False(shouldNotBeExecuted);
-                    }
-                    catch (Exception ex)
-                    {
-                        Assert.True(ex is TransactionException || (ex is TargetInvocationException && ex.InnerException is TransactionException));
-                        Trace(string.Format("Caught expected exception {0}:{1}", ex.GetType().ToString(), ex.ToString()));
-                    }
+                Trace("Before EnlistPromotable");
+                Exception ex = Assert.ThrowsAny<Exception>(() => SetDistributedTransactionId(dummyPSPE, Transaction.Current, guidToSet));
+                Assert.True(ex is TransactionException || (ex is TargetInvocationException && ex.InnerException is TransactionException));
 
-                    pspe = (NonMSDTCPromoterEnlistment)CreatePSPEEnlistment(NonMsdtcPromoterTests.PromoterType1,
-                        NonMsdtcPromoterTests.PromotedToken1,
-                        pspeCompleted,
-                        /*nonMSDTC = */ true,
-                        /*tx = */ null,
-                        /*spcResponse=*/ TransactionStatus.Committed,
-                        /*expectRejection=*/ false,
-                        /*comparePromotedToken=*/ false,
-                        /*failInitialize=*/ false,
-                        /*failPromote=*/ false,
-                        /*failSPC=*/ false,
-                        /*failGetPromoterType=*/ false,
-                        /*failGetId=*/ false
-                        );
+                pspe = (NonMSDTCPromoterEnlistment)CreatePSPEEnlistment(NonMsdtcPromoterTests.PromoterType1,
+                    NonMsdtcPromoterTests.PromotedToken1,
+                    pspeCompleted,
+                    /*nonMSDTC = */ true,
+                    /*tx = */ null,
+                    /*spcResponse=*/ TransactionStatus.Committed,
+                    /*expectRejection=*/ false,
+                    /*comparePromotedToken=*/ false,
+                    /*failInitialize=*/ false,
+                    /*failPromote=*/ false,
+                    /*failSPC=*/ false,
+                    /*failGetPromoterType=*/ false,
+                    /*failGetId=*/ false
+                    );
 
-                    Trace("After EnlistPromotable");
-                    try
-                    {
-                        SetDistributedTransactionId(dummyPSPE, Transaction.Current, guidToSet);
-                        bool shouldNotBeExecuted = true;
-                        Assert.False(shouldNotBeExecuted);
-                    }
-                    catch (Exception ex)
-                    {
-                        Assert.True(ex is TransactionException || (ex is TargetInvocationException && ex.InnerException is TransactionException));
-                        Trace(string.Format("Caught expected exception {0}:{1}", ex.GetType().ToString(), ex.ToString()));
-                    }
+                Trace("After EnlistPromotable");
+                ex = Assert.ThrowsAny<Exception>(() => SetDistributedTransactionId(dummyPSPE, Transaction.Current, guidToSet));
+                Assert.True(ex is TransactionException || (ex is TargetInvocationException && ex.InnerException is TransactionException));
 
-                    Promote(testCaseDescription, NonMsdtcPromoterTests.PromotedToken1);
+                Promote(testCaseDescription, NonMsdtcPromoterTests.PromotedToken1);
 
-                    Trace("After Promotion");
-                    try
-                    {
-                        SetDistributedTransactionId(dummyPSPE, Transaction.Current, guidToSet);
-                        bool shouldNotBeExecuted = true;
-                        Assert.False(shouldNotBeExecuted);
-                    }
-                    catch (Exception ex)
-                    {
-                        Assert.True(ex is TransactionException || (ex is TargetInvocationException && ex.InnerException is TransactionException));
-                        Trace(string.Format("Caught expected exception {0}:{1}", ex.GetType().ToString(), ex.ToString()));
-                    }
+                Trace("After Promotion");
+                ex = Assert.ThrowsAny<Exception>(() => SetDistributedTransactionId(dummyPSPE, Transaction.Current, guidToSet));
+                Assert.True(ex is TransactionException || (ex is TargetInvocationException && ex.InnerException is TransactionException));
 
-                    ts.Complete();
-                }
-            }
-            catch (Exception ex)
-            {
-                Assert.Null(ex);
+                ts.Complete();
             }
 
             // The NonMSDTCPromoterEnlistment is coded to set "Promoted" at the beginning of Promote, before

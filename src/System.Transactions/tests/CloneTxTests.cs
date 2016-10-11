@@ -112,10 +112,10 @@ namespace System.Transactions.Tests
                 HelperFunctions.PromoteTx(tx);
             }
 
-            Assert.Equal(clone.IsolationLevel, tx.IsolationLevel);
-            Assert.Equal(clone.TransactionInformation.Status, tx.TransactionInformation.Status);
-            Assert.Equal(clone.TransactionInformation.LocalIdentifier, tx.TransactionInformation.LocalIdentifier);
-            Assert.Equal(clone.TransactionInformation.DistributedIdentifier, tx.TransactionInformation.DistributedIdentifier);
+            Assert.Equal(tx.IsolationLevel, clone.IsolationLevel);
+            Assert.Equal(tx.TransactionInformation.Status, clone.TransactionInformation.Status);
+            Assert.Equal(tx.TransactionInformation.LocalIdentifier, clone.TransactionInformation.LocalIdentifier);
+            Assert.Equal(tx.TransactionInformation.DistributedIdentifier, clone.TransactionInformation.DistributedIdentifier);
 
             CommittableTransaction cloneCommittable = clone as CommittableTransaction;
             Assert.Null(cloneCommittable);
@@ -134,12 +134,12 @@ namespace System.Transactions.Tests
                             // We shouldn't be getting TransactionAbortedException for "normal" clones,
                             // so we have these two Asserts to possibly help determine what went wrong.
                             Assert.Null(ex.InnerException);
-                            Assert.Equal(ex.Message, "There shouldn't be any exception with this Message property");
+                            Assert.Equal("There shouldn't be any exception with this Message property", ex.Message);
                             break;
                         }
                     case CloneType.BlockingDependent:
                         {
-                            Assert.Equal(ex.InnerException.GetType(), typeof(TimeoutException));
+                            Assert.IsType<TimeoutException>(ex.InnerException);
                             break;
                         }
                     case CloneType.RollbackDependent:
