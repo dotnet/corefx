@@ -11,8 +11,6 @@ using System.Diagnostics;
 
 namespace System.Runtime.Serialization
 {
-
-
     public class XsdDataContractExporter
     {
         private ExportOptions _options;
@@ -230,7 +228,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-        Type GetSurrogatedType(Type type)
+        private Type GetSurrogatedType(Type type)
         {
 #if SUPPORT_SURROGATE
             IDataContractSurrogate dataContractSurrogate;
@@ -240,26 +238,26 @@ namespace System.Runtime.Serialization
             return type;
         }
 
-        void CheckAndAddType(Type type)
+        private void CheckAndAddType(Type type)
         {
             type = GetSurrogatedType(type);
             if (!type.ContainsGenericParameters && DataContract.IsTypeSerializable(type))
                 AddType(type);
         }
 
-        void AddType(Type type)
+        private void AddType(Type type)
         {
             DataContractSet.Add(type);
         }
 
-        void Export()
+        private void Export()
         {
             AddKnownTypes();
             SchemaExporter schemaExporter = new SchemaExporter(GetSchemaSet(), DataContractSet);
             schemaExporter.Export();
         }
 
-        void AddKnownTypes()
+        private void AddKnownTypes()
         {
             if (Options != null)
             {

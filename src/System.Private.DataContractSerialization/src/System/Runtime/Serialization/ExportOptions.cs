@@ -10,17 +10,17 @@ namespace System.Runtime.Serialization
     {
         private Collection<Type> _knownTypes;
 #if SUPPORT_SURROGATE
-        IDataContractSurrogate dataContractSurrogate;
+        private IDataContractSurrogate _dataContractSurrogate;
 
         public IDataContractSurrogate DataContractSurrogate
         {
-            get { return dataContractSurrogate; }
-            set { dataContractSurrogate = value; }
+            get { return _dataContractSurrogate; }
+            set { _dataContractSurrogate = value; }
         }
 
         internal IDataContractSurrogate GetSurrogate()
         {
-            return dataContractSurrogate;
+            return _dataContractSurrogate;
         }
 #endif
 
