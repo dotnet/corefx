@@ -191,20 +191,17 @@ namespace System.Composition.TypedParts.Discovery
 
         public bool TryCloseGenericPart(Type[] typeArguments, out DiscoveredPart closed)
         {
-            // DevInstinct Fix Begin
-            // Make sure the typeArguments follow the generic type parameters constraints.
-            // If not, then the part is not a match and must be ignored.
-            // Otherwise, _partType.MakeGenericType throws a System.TypeLoadException.
-            // (Unlike MEF2, MEF on the full .NET framework filters correctly and ignores parts that do not match the constraints, 
-            // so this fix makes the behavior the same in both versions).
             for (int index = 0; index < _partType.GenericTypeParameters.Length; index++)
+            {
                 foreach (var genericParameterConstraints in _partType.GenericTypeParameters[index].GetTypeInfo().GetGenericParameterConstraints())
+                {
                     if (!genericParameterConstraints.GetTypeInfo().IsAssignableFrom(typeArguments[index].GetTypeInfo()))
                     {
                         closed = null;
                         return false;
                     }
-            // DevInstinct Fix End
+                }
+            }
 
             if (_appliedArguments.Any(args => Enumerable.SequenceEqual(args, typeArguments)))
             {
