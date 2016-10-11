@@ -198,18 +198,12 @@ namespace System.Data.Common
                     registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
                 }
 
-                try
+                return Task.Factory.StartNew<int>(s =>
                 {
-                    return Task.Run<int>(() => ExecuteNonQuery());
-                }
-                catch (Exception e)
-                {
-                    return TaskHelpers.FromException<int>(e);
-                }
-                finally
-                {
-                    registration.Dispose();
-                }
+                    var t = (Tuple<DbCommand, CancellationTokenRegistration>)s;
+                    try { return t.Item1.ExecuteNonQuery(); }
+                    finally { t.Item2.Dispose(); }
+                }, Tuple.Create(this, registration), CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
             }
         }
 
@@ -247,18 +241,12 @@ namespace System.Data.Common
                     registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
                 }
 
-                try
+                return Task.Factory.StartNew<DbDataReader>(s =>
                 {
-                    return Task.Run<DbDataReader>(() => ExecuteReader(behavior));
-                }
-                catch (Exception e)
-                {
-                    return TaskHelpers.FromException<DbDataReader>(e);
-                }
-                finally
-                {
-                    registration.Dispose();
-                }
+                    var t = (Tuple<DbCommand, CancellationTokenRegistration, CommandBehavior>)s;
+                    try { return t.Item1.ExecuteReader(t.Item3); }
+                    finally { t.Item2.Dispose(); }
+                }, Tuple.Create(this, registration, behavior), CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
             }
         }
 
@@ -281,18 +269,12 @@ namespace System.Data.Common
                     registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
                 }
 
-                try
+                return Task.Factory.StartNew<object>(s =>
                 {
-                    return Task.Run<object>(() => ExecuteScalar());
-                }
-                catch (Exception e)
-                {
-                    return TaskHelpers.FromException<object>(e);
-                }
-                finally
-                {
-                    registration.Dispose();
-                }
+                    var t = (Tuple<DbCommand, CancellationTokenRegistration>)s;
+                    try { return t.Item1.ExecuteScalar(); }
+                    finally { t.Item2.Dispose(); }
+                }, Tuple.Create(this, registration), CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
             }
         }
 
