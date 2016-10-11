@@ -187,7 +187,7 @@ namespace System.Collections.Generic.Tests
             uint seed = (uint)count;
             for (int i = 0; i < count; i++)
             {
-                seed = (seed << 5) | (seed >> 27);
+                seed ^= 0x9e3779b9 + (seed << 6) + (seed >> 2);
                 yield return s_generator.Generate((int)seed);
             }
         }
