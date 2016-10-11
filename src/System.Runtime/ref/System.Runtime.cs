@@ -929,21 +929,39 @@ namespace System
         public static bool TryParse(string s, out decimal result) { result = default(decimal); return default(bool); }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out decimal result) { result = default(decimal); return default(bool); }
     }
-    public abstract partial class Delegate: System.Runtime.Serialization.ISerializable
+    public abstract partial class Delegate: System.ICloneable, System.Runtime.Serialization.ISerializable
     {
+        protected Delegate(object target, string method) { }
+        protected Delegate(System.Type target, string method) { }
+        public System.Reflection.MethodInfo Method { get { throw null; } }
         internal Delegate() { }
         public object Target { get { return default(object); } }
+        public virtual object Clone() { throw null; }
         public static System.Delegate Combine(System.Delegate a, System.Delegate b) { return default(System.Delegate); }
         public static System.Delegate Combine(params System.Delegate[] delegates) { return default(System.Delegate); }
+        protected virtual System.Delegate CombineImpl(System.Delegate d) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, object firstArgument, System.Reflection.MethodInfo method) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, object firstArgument, System.Reflection.MethodInfo method, bool throwOnBindFailure) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, object target, string method) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, object target, string method, bool ignoreCase) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, object target, string method, bool ignoreCase, bool throwOnBindFailure) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, System.Reflection.MethodInfo method) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, System.Reflection.MethodInfo method, bool throwOnBindFailure) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, System.Type target, string method) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, System.Type target, string method, bool ignoreCase) { throw null; }
+        public static System.Delegate CreateDelegate(System.Type type, System.Type target, string method, bool ignoreCase, bool throwOnBindFailure) { throw null; }
         public object DynamicInvoke(params object[] args) { return default(object); }
+        protected virtual object DynamicInvokeImpl(object[] args) { throw null; }
         public override bool Equals(object obj) { return default(bool); }
         public override int GetHashCode() { return default(int); }
         public virtual System.Delegate[] GetInvocationList() { return default(System.Delegate[]); }
+        protected virtual System.Reflection.MethodInfo GetMethodImpl() { throw null; }
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public static bool operator ==(System.Delegate d1, System.Delegate d2) { return default(bool); }
         public static bool operator !=(System.Delegate d1, System.Delegate d2) { return default(bool); }
         public static System.Delegate Remove(System.Delegate source, System.Delegate value) { return default(System.Delegate); }
         public static System.Delegate RemoveAll(System.Delegate source, System.Delegate value) { return default(System.Delegate); }
+        protected virtual System.Delegate RemoveImpl(System.Delegate d) { throw null; }
     }
     public partial class DivideByZeroException : System.ArithmeticException
     {
@@ -1560,12 +1578,23 @@ namespace System
     public abstract partial class MulticastDelegate : System.Delegate
     {
         internal MulticastDelegate() { }
+        protected MulticastDelegate(object target, string method) : base(default(object), default(string)) { }
+        protected MulticastDelegate(System.Type target, string method) : base(default(object), default(string)) { }
+        protected sealed override System.Delegate CombineImpl(System.Delegate follow) { throw null; }
         public sealed override bool Equals(object obj) { return default(bool); }
         public sealed override int GetHashCode() { return default(int); }
         public sealed override System.Delegate[] GetInvocationList() { return default(System.Delegate[]); }
+        protected override System.Reflection.MethodInfo GetMethodImpl() { throw null; }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public static bool operator ==(System.MulticastDelegate d1, System.MulticastDelegate d2) { return default(bool); }
         public static bool operator !=(System.MulticastDelegate d1, System.MulticastDelegate d2) { return default(bool); }
+        protected sealed override System.Delegate RemoveImpl(System.Delegate value) { throw null; }
+    }
+    public sealed partial class MulticastNotSupportedException : System.SystemException
+    {
+        public MulticastNotSupportedException() { }
+        public MulticastNotSupportedException(string message) { }
+        public MulticastNotSupportedException(string message, System.Exception inner) { }
     }
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
     public sealed class NonSerializedAttribute : Attribute
@@ -4296,6 +4325,7 @@ namespace System.IO
         public FileLoadException(string message, string fileName, System.Exception inner) { }
         protected FileLoadException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         public string FileName { get { return default(string); } }
+        public string FusionLog { get { return default(string); } }
         public override string Message { get { return default(string); } }
         public override string ToString() { return default(string); }
     }
@@ -4308,6 +4338,7 @@ namespace System.IO
         public FileNotFoundException(string message, string fileName, System.Exception innerException) { }
         protected FileNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         public string FileName { get { return default(string); } }
+        public string FusionLog { get { return default(string); } }
         public override string Message { get { return default(string); } }
         public override string ToString() { return default(string); }
     }
@@ -4352,6 +4383,8 @@ namespace System.IO
         public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize) { return default(System.Threading.Tasks.Task); }
         public virtual System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
         public virtual void Close() { }
+        [System.ObsoleteAttribute("CreateWaitHandle will be removed eventually.  Please use \"new ManualResetEvent(false)\" instead.")]
+        protected virtual System.Threading.WaitHandle CreateWaitHandle() { return default(System.Threading.WaitHandle); }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public virtual int EndRead(System.IAsyncResult asyncResult) { return 0; }
@@ -4359,12 +4392,15 @@ namespace System.IO
         public abstract void Flush();
         public System.Threading.Tasks.Task FlushAsync() { return default(System.Threading.Tasks.Task); }
         public virtual System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
+        [System.ObsoleteAttribute("Do not call or override this method.")]
+        protected virtual void ObjectInvariant() { }
         public abstract int Read(byte[] buffer, int offset, int count);
         public System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count) { return default(System.Threading.Tasks.Task<int>); }
         public virtual System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task<int>); }
         public virtual int ReadByte() { return default(int); }
         public abstract long Seek(long offset, System.IO.SeekOrigin origin);
         public abstract void SetLength(long value);
+        public static System.IO.Stream Synchronized(System.IO.Stream stream) { return default(System.IO.Stream); ; }
         public abstract void Write(byte[] buffer, int offset, int count);
         public System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count) { return default(System.Threading.Tasks.Task); }
         public virtual System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { return default(System.Threading.Tasks.Task); }
