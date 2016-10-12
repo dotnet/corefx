@@ -135,9 +135,6 @@ namespace System.Collections.Generic
 
             nextCapacity = Math.Max(nextCapacity, minimum);
             
-            // Array.Resize will unnecessarily copy the slots @ _count
-            // and after which are all default-initialized, and adds
-            // an extra method call/branches/code for the jit to generate.
             T[] next = new T[nextCapacity];
             if (_count > 0)
             {
