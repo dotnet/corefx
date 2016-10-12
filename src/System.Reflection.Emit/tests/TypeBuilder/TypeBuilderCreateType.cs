@@ -30,7 +30,7 @@ namespace System.Reflection.Emit.Tests
             Type createdType = type.CreateTypeInfo().AsType();
             Assert.Equal(type.Name, createdType.Name);
 
-            Assert.Same(type.CreateTypeInfo(), type.CreateTypeInfo());
+            Assert.Equal(type.CreateTypeInfo(), type.CreateTypeInfo());
         }
         
         [Fact]

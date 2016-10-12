@@ -59,8 +59,8 @@ namespace System.Reflection.Emit.Tests
 
         public static void VerifyType(TypeBuilder type, Module module, TypeBuilder declaringType, string name, TypeAttributes attributes, Type baseType, int size, PackingSize packingSize, Type[] implementedInterfaces)
         {
-            Assert.Same(module, type.Module);
-            Assert.Same(module.Assembly, type.Assembly);
+            Assert.Equal(module, type.Module);
+            Assert.Equal(module.Assembly, type.Assembly);
 
             Assert.Equal(name, type.Name);
             if (declaringType == null)
@@ -105,8 +105,8 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(expectedName, constructor.Name);
             Assert.Equal(attributes | MethodAttributes.SpecialName, constructor.Attributes);
             Assert.Equal(CallingConventions.Standard, constructor.CallingConvention);
-            Assert.Same(type, constructor.DeclaringType);
-            Assert.Same(type.Module, constructor.Module);
+            Assert.Equal(type, constructor.DeclaringType);
+            Assert.Equal(type.Module, constructor.Module);
             Assert.Equal(MethodImplAttributes.IL, constructor.MethodImplementationFlags);
 
             Assert.Throws<NotSupportedException>(() => constructor.Invoke(null));
@@ -130,7 +130,7 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(expectedName, constructor.Name);
             Assert.Equal(expectedAttributes, createdConstructor.Attributes);
             Assert.Equal(expectedCallingConvention, createdConstructor.CallingConvention);
-            Assert.Same(createdType, createdConstructor.DeclaringType);
+            Assert.Equal(createdType, createdConstructor.DeclaringType);
             Assert.Equal(MethodImplAttributes.IL, constructor.MethodImplementationFlags);
         }
 

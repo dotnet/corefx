@@ -34,10 +34,10 @@ namespace System.Reflection.Emit.Tests
                 Assert.Null(parameter.FullName);
                 Assert.Null(parameter.AssemblyQualifiedName);
 
-                Assert.Same(type, parameter.DeclaringType);
+                Assert.Equal(type, parameter.DeclaringType);
                 Assert.Null(parameter.DeclaringMethod);
-                Assert.Same(type.Module, parameter.Module);
-                Assert.Same(type.Assembly, parameter.Assembly);
+                Assert.Equal(type.Module, parameter.Module);
+                Assert.Equal(type.Assembly, parameter.Assembly);
 
                 Assert.Null(parameter.BaseType);
 

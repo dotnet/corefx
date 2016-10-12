@@ -46,7 +46,7 @@ namespace System.Reflection.Emit.Tests
 
             EventInfo eventInfo = createdType.GetEvent(expectedName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             Assert.Equal(expectedName, eventInfo.Name);
-            Assert.Same(createdType, eventInfo.DeclaringType);
+            Assert.Equal(createdType, eventInfo.DeclaringType);
             Assert.Equal(expectedAttributes, eventInfo.Attributes);
             Assert.Equal((expectedAttributes & EventAttributes.SpecialName) != 0, eventInfo.IsSpecialName);
             Assert.Null(eventInfo.EventHandlerType);

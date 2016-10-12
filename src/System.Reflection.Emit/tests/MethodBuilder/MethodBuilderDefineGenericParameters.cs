@@ -31,7 +31,7 @@ namespace System.Reflection.Emit.Tests
             for (int i = 0; i < names.Length; i++)
             {
                 GenericTypeParameterBuilder parameter = parameters[i];
-                Assert.Same(method, parameter.DeclaringMethod);
+                Assert.Equal(method, parameter.DeclaringMethod);
                 Assert.Equal(names[i], parameters[i].Name);
                 Assert.Equal(i, parameters[i].GenericParameterPosition);
             }
