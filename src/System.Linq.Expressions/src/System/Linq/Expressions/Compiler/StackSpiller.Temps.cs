@@ -236,7 +236,6 @@ namespace System.Linq.Expressions.Compiler
                         return false;
 
                     // Emits calls to pure RuntimeOps methods with immutable arguments
-                    case ExpressionType.Quote:
                     case ExpressionType.RuntimeVariables:
                         return false;
 
@@ -260,6 +259,10 @@ namespace System.Linq.Expressions.Compiler
                 // NB: We omit Lambda because it may interfere with the Invoke/Lambda
                 //     inlining optimizations. Parameter is out too because we don't
                 //     have any sophisticated load/store analysis.
+
+                // NB: We omit Quote because the emitted call to RuntimeOps.Quote will
+                //     trigger reduction of extension nodes which can cause the timing
+                //     of exceptions thrown from Reduce methods to change.
 
                 return true;
             }
