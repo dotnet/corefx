@@ -105,7 +105,7 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(expectedName, constructor.Name);
             Assert.Equal(attributes | MethodAttributes.SpecialName, constructor.Attributes);
             Assert.Equal(CallingConventions.Standard, constructor.CallingConvention);
-            Assert.Equal(type, constructor.DeclaringType);
+            Assert.Equal(type.AsType(), constructor.DeclaringType);
             Assert.Equal(type.Module, constructor.Module);
             Assert.Equal(MethodImplAttributes.IL, constructor.MethodImplementationFlags);
 

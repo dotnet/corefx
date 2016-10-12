@@ -34,7 +34,7 @@ namespace System.Reflection.Emit.Tests
                 Assert.Null(parameter.FullName);
                 Assert.Null(parameter.AssemblyQualifiedName);
 
-                Assert.Equal(type, parameter.DeclaringType);
+                Assert.Equal(type.AsType(), parameter.DeclaringType);
                 Assert.Null(parameter.DeclaringMethod);
                 Assert.Equal(type.Module, parameter.Module);
                 Assert.Equal(type.Assembly, parameter.Assembly);

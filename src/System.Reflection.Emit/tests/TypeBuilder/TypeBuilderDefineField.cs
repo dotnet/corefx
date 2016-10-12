@@ -41,7 +41,7 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(name, field.Name);
             Assert.Equal(fieldType, field.FieldType);
             Assert.Equal(expectedAttributes, field.Attributes);
-            Assert.Equal(type, field.DeclaringType);
+            Assert.Equal(type.AsType(), field.DeclaringType);
             Assert.Equal(field.Module, field.Module);
 
             Type createdType = type.CreateTypeInfo().AsType();
