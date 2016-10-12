@@ -1141,7 +1141,7 @@ namespace System.Linq.Tests
                 using (IEnumerator<int> e = result.GetEnumerator())
                 {
                     while (e.MoveNext()) ; // Loop until we reach the end of the iterator, @ which pt it gets disposed.
-                    e.MoveNext(); // MoveNext should not throw an exception after Dispose.
+                    Assert.False(e.MoveNext()); // MoveNext should not throw an exception after Dispose.
                 }
             }
         }
