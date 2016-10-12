@@ -41,14 +41,14 @@ namespace System.Linq
     internal interface IPartition<TElement> : IIListProvider<TElement>
     {
         /// <summary>
-        /// Skips the specified number of elements in this sequence.
+        /// Creates a new partition that skips the specified number of elements from this sequence.
         /// </summary>
         /// <param name="count">The number of elements to skip.</param>
         /// <returns>An <see cref="IPartition{TElement}"/> with the first <paramref name="count"/> items removed.</returns>
         IPartition<TElement> Skip(int count);
 
         /// <summary>
-        /// Takes the specified number of elements from this sequence.
+        /// Creates a new partition that takes the specified number of elements from this sequence.
         /// </summary>
         /// <param name="count">The number of elements to take.</param>
         /// <returns>An <see cref="IPartition{TElement}"/> with only the first <paramref name="count"/> items.</returns>
@@ -65,14 +65,14 @@ namespace System.Linq
         /// <summary>
         /// Gets the first item in this sequence.
         /// </summary>
-        /// <param name="found"><c>true</c> if the sequence contains a first element, <c>false</c> otherwise.</param>
+        /// <param name="found"><c>true</c> if the sequence contains an element, <c>false</c> otherwise.</param>
         /// <returns>The element if <paramref name="found"/> is <c>true</c>, otherwise, the default value of <see cref="TElement"/>.</returns>
         TElement TryGetFirst(out bool found);
 
         /// <summary>
         /// Gets the last item in this sequence.
         /// </summary>
-        /// <param name="found"><c>true</c> if the sequence contains a last element, <c>false</c> otherwise.</param>
+        /// <param name="found"><c>true</c> if the sequence contains an element, <c>false</c> otherwise.</param>
         /// <returns>The element if <paramref name="found"/> is <c>true</c>, otherwise, the default value of <see cref="TElement"/>.</returns>
         TElement TryGetLast(out bool found);
     }
