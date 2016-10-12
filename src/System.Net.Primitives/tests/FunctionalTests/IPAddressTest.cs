@@ -251,6 +251,16 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Fact]
+        public static void Address_Property_Success()
+        {
+            IPAddress ip1 = IPAddress.Parse("192.168.0.9");
+            //192.168.0.10
+            long newIp4Address = 192 << 24 | 168 << 16 | 0 << 8 | 10;
+            ip1.Address = newIp4Address;
+            Assert.Equal(ip1.ToString(), "192.168.0.10");
+        }
+
+        [Fact]
         public static void Equals_Compare_Success()
         {
             IPAddress ip1 = IPAddress.Parse("192.168.0.9"); //IpV4

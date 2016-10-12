@@ -150,6 +150,42 @@ namespace System.Net
             PrivateScopeId = (uint)scopeid;
         }
 
+        public long Address
+        {
+            get
+            {
+                //
+                // IPv6 Changes: Can't do this for IPv6, so throw an exception.
+                //
+                //
+                if (AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    throw new SocketException(SocketError.OperationNotSupported);
+                }
+                else
+                {
+                    return (long)PrivateAddress;
+                }
+            }
+            set
+            {
+                //
+                // IPv6 Changes: Can't do this for IPv6 addresses
+                if (AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    throw new SocketException(SocketError.OperationNotSupported);
+                }
+                else
+                {
+                    if (PrivateAddress != value)
+                    {
+                        _toString = null;
+                        PrivateAddress = (uint)value;
+                    }
+                }
+            }
+        }
+
         private IPAddress(ushort[] numbers, uint scopeid)
         {
             Debug.Assert(numbers != null);
@@ -249,15 +285,7 @@ namespace System.Net
             {
                 return IsIPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
             }
-        }
-
-        // When IPv6 support was added to the .NET Framework, the public Address property was marked as Obsolete.
-        // The public obsolete Address property has not been carried forward in .NET Core, but remains here as
-        // internal to allow internal types that understand IPv4 to still access it without obsolete warnings.
-        internal long Address
-        {
-            get { return PrivateAddress; }
-        }
+        }  
 
         /// <devdoc>
         ///   <para>

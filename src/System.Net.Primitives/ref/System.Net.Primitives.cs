@@ -211,6 +211,7 @@ namespace System.Net
         public static System.Net.IPAddress Parse(string ipString) { return default(System.Net.IPAddress); }
         public override string ToString() { return default(string); }
         public static bool TryParse(string ipString, out System.Net.IPAddress address) { address = default(System.Net.IPAddress); return default(bool); }
+        public long Address { get; set; }
     }
     public partial class IPEndPoint : System.Net.EndPoint
     {
