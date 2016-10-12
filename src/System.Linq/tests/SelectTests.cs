@@ -1146,14 +1146,11 @@ namespace System.Linq.Tests
             }
         }
 
-        public static TheoryData<IEnumerable<int>> MoveNextAfterDisposeData()
+        public static IEnumerable<object[]> MoveNextAfterDisposeData()
         {
-            return new TheoryData<IEnumerable<int>>
-            {
-                { Array.Empty<int>() },
-                { new int[1] },
-                { Enumerable.Range(1, 30) }
-            };
+            yield return new object[] { Array.Empty<int>() };
+            yield return new object[] { new int[1] };
+            yield return new object[] { Enumerable.Range(1, 30) };
         }
     }
 }
