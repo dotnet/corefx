@@ -168,16 +168,10 @@ namespace System.Linq
             {
                 return new SelectArrayIterator<TSource, TResult>(_source, _selector);
             }
-            
-            public override void Dispose()
-            {
-                // Don't touch _state
-                _current = default(TResult);
-            }
 
             public override bool MoveNext()
             {
-                if (_state == 0 | _state == _source.Length + 1)
+                if (_state < 1 | _state == _source.Length + 1)
                 {
                     Dispose();
                     return false;
