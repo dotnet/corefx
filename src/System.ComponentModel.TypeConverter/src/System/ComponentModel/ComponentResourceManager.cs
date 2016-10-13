@@ -40,7 +40,7 @@ namespace System.ComponentModel
             {
                 if (_neutralResourcesCulture == null && MainAssembly != null)
                 {
-                    _neutralResourcesCulture = ResourceManager.GetNeutralResourcesLanguage(MainAssembly);
+                    _neutralResourcesCulture = GetNeutralResourcesLanguage(MainAssembly);
                 }
 
                 return _neutralResourcesCulture;
