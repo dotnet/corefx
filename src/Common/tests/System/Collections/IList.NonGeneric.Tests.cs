@@ -71,6 +71,8 @@ namespace System.Collections.Tests
 
         protected virtual Type IList_NonGeneric_Item_InvalidIndex_ThrowType => typeof(ArgumentOutOfRangeException);
 
+		protected virtual bool IList_NonGeneric_RemoveNonExistent_Throws => false;
+
         #endregion
 
         #region ICollection Helper Methods
@@ -863,19 +865,34 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Remove_NonNullNotContainedInCollection(int count)
         {
-            if (!IsReadOnly && !ExpectedFixedSize)
+            if (!IsReadOnly && !ExpectedFixedSize && !IList_NonGeneric_RemoveNonExistent_Throws)
             {
                 int seed = count * 251;
-                IList collection = NonGenericIListFactory(count);
+                IList list = NonGenericIListFactory(count);
                 object value = CreateT(seed++);
-                while (collection.Contains(value) || Enumerable.Contains(InvalidValues, value))
+                while (list.Contains(value) || Enumerable.Contains(InvalidValues, value))
                     value = CreateT(seed++);
-                collection.Remove(value);
-                Assert.Equal(count, collection.Count);
+                list.Remove(value);
+                Assert.Equal(count, list.Count);
             }
-        }
+		}
 
-        [Theory]
+		[Theory]
+		[MemberData(nameof(ValidCollectionSizes))]
+		public void IList_NonGeneric_Remove_NonNullNotContainedInCollection_Throws(int count)
+		{
+			if (IList_NonGeneric_RemoveNonExistent_Throws)
+			{
+				int seed = count * 251;
+				IList list = NonGenericIListFactory(count);
+				object value = CreateT(seed++);
+				while (list.Contains(value) || Enumerable.Contains(InvalidValues, value))
+					value = CreateT(seed++);
+				Assert.Throws<ArgumentException>(() => list.Remove(value));
+			}
+		}
+
+		[Theory]
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Remove_NullContainedInCollection(int count)
         {
