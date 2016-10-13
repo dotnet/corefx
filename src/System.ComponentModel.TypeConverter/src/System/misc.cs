@@ -21,28 +21,6 @@ namespace System
             //AppDomain.CurrentDomain.GetAssemblies()
             return null;
         }
-
-        public static Assembly ResourceManager_MainAssembly()
-        {
-            //MainAssembly
-            return null;
-        }
-
-        public static System.Globalization.CultureInfo ResourceManager_GetNeutralResourceLanguage(Assembly assembly)
-        {
-            //GetNeutralResourcesLanguage(MainAssembly) -- from class derived from ResourceManager 
-            return null;
-        }
-
-        public static bool ResourceManager_IgnoreCase()
-        {
-            return false;
-        }
-
-        public static System.Resources.ResourceSet ResourceManager_GetResourceSet(System.Globalization.CultureInfo a, bool b, bool c)
-        {
-            return null;
-        }
     }
 
 
