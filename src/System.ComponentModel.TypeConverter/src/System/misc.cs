@@ -15,12 +15,6 @@ namespace System
         {
             return null;
         }
-
-        public static IEnumerable<Assembly> AppDomain_CurrentDomain_GetAssemblies()
-        {
-            //AppDomain.CurrentDomain.GetAssemblies()
-            return null;
-        }
     }
 
 
