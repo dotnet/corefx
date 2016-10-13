@@ -127,9 +127,12 @@ namespace System.Net.WebSockets.Client.Tests
                 var recvBuffer = new byte[100];
                 var segment = new ArraySegment<byte>(recvBuffer);
 
-                var cts = new CancellationTokenSource(100);
-                // If this fails with OperationCancelledException, it was not yet being awaited - rerun test.
-                WebSocketException wse = await Assert.ThrowsAnyAsync<WebSocketException>(() => cws.ReceiveAsync(segment, cts.Token));
+                var cts = new CancellationTokenSource();
+                // OperationCancelledException is thrown only if the token is canceled before calling ReceiveAsync
+                // Once it returns (with a Task<>), any cancellation that occurs is treated as a WebSocketException
+                Task recieve = cws.ReceiveAsync(segment, cts.Token);
+                cts.Cancel();
+                WebSocketException wse = await Assert.ThrowsAnyAsync<WebSocketException>(() => recieve);
 
                 WebSocketException ex = await Assert.ThrowsAsync<WebSocketException>(() =>
                     cws.ReceiveAsync(segment, CancellationToken.None));
