@@ -250,6 +250,15 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.False(IPV4Address().IsIPv6Teredo);
         }
 
+#if NetStandard17
+#pragma warning disable 618
+        [Fact]
+        public static void Address_Property_Failure()
+        {
+            IPAddress ip1 = IPAddress.Parse("fe80::200:f8ff:fe21:67cf");
+            Assert.Throws<SocketException>(() => ip1.Address);
+        }
+
         [Fact]
         public static void Address_Property_Success()
         {
@@ -257,8 +266,10 @@ namespace System.Net.Primitives.Functional.Tests
             //192.168.0.10
             long newIp4Address = 192 << 24 | 168 << 16 | 0 << 8 | 10;
             ip1.Address = newIp4Address;
-            Assert.Equal(ip1.ToString(), "192.168.0.10");
+            Assert.Equal("10.0.168.192" , ip1.ToString());
         }
+#pragma warning restore 618
+#endif //NetStandard17
 
         [Fact]
         public static void Equals_Compare_Success()

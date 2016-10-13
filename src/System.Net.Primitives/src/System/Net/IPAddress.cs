@@ -150,42 +150,6 @@ namespace System.Net
             PrivateScopeId = (uint)scopeid;
         }
 
-        public long Address
-        {
-            get
-            {
-                //
-                // IPv6 Changes: Can't do this for IPv6, so throw an exception.
-                //
-                //
-                if (AddressFamily == AddressFamily.InterNetworkV6)
-                {
-                    throw new SocketException(SocketError.OperationNotSupported);
-                }
-                else
-                {
-                    return (long)PrivateAddress;
-                }
-            }
-            set
-            {
-                //
-                // IPv6 Changes: Can't do this for IPv6 addresses
-                if (AddressFamily == AddressFamily.InterNetworkV6)
-                {
-                    throw new SocketException(SocketError.OperationNotSupported);
-                }
-                else
-                {
-                    if (PrivateAddress != value)
-                    {
-                        _toString = null;
-                        PrivateAddress = (uint)value;
-                    }
-                }
-            }
-        }
-
         private IPAddress(ushort[] numbers, uint scopeid)
         {
             Debug.Assert(numbers != null);
@@ -285,7 +249,7 @@ namespace System.Net
             {
                 return IsIPv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
             }
-        }  
+        }
 
         /// <devdoc>
         ///   <para>
@@ -320,6 +284,43 @@ namespace System.Net
                 }
 
                 PrivateScopeId = (uint)value;
+            }
+        }
+
+        [Obsolete("This property has been deprecated. It is address family dependent. Please use IPAddress.Equals method to perform comparisons.http://go.microsoft.com/fwlink/?linkid=14202")]
+        public long Address
+        {
+            get
+            {
+                //
+                // IPv6 Changes: Can't do this for IPv6, so throw an exception.
+                //
+                //
+                if (AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    throw new SocketException(SocketError.OperationNotSupported);
+                }
+                else
+                {
+                    return PrivateAddress;
+                }
+            }
+            set
+            {
+                //
+                // IPv6 Changes: Can't do this for IPv6 addresses
+                if (AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    throw new SocketException(SocketError.OperationNotSupported);
+                }
+                else
+                {
+                    if (PrivateAddress != value)
+                    {
+                        _toString = null;
+                        PrivateAddress = (uint)value;
+                    }
+                }
             }
         }
 
