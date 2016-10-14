@@ -15,11 +15,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50aot_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
   <ItemGroup>
-    <TargetingPackReference Include="mscorlib" Condition="'$(TargetGroup)' == 'net46'" />
-    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' != 'net46'" />
+    <TargetingPackReference Include="mscorlib" Condition="'$(TargetGroup)' == 'net463'" />
+    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' != 'net463'" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcore50aot'">
     <TargetingPackReference Include="System.Private.Reflection" />
@@ -30,6 +30,19 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="System\Diagnostics\StackTraceSymbols.CoreCLR.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolBinder.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolDocument.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolMethod.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolNamespace.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolReader.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolScope.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolVariable.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolWriter.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\SymbolToken.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\SymAddressKind.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\SymDocumentType.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\SymLanguageType.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\SymLanguageVendor.cs" />
     <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
     <ProjectReference Include="..\..\System.IO\src\System.IO.csproj" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />

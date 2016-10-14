@@ -4,10 +4,7 @@
   <ItemGroup>
     <Project Include="System.Diagnostics.StackTrace.csproj" />
     <Project Include="System.Diagnostics.StackTrace.csproj">
-      <TargetGroup>net46</TargetGroup>
-    </Project>
-    <Project Include="System.Diagnostics.StackTrace.csproj">
-      <TargetGroup>netcore50aot</TargetGroup>
+      <TargetGroup>net463</TargetGroup>
     </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
