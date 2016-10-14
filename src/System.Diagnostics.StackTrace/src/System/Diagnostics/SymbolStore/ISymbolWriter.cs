@@ -12,7 +12,6 @@ namespace System.Diagnostics.SymbolStore
         // Set the IMetadataEmitter that this symbol writer is associated
         // with. This must be done only once before any other ISymbolWriter
         // methods are called.
-        [ResourceExposure(ResourceScope.Machine)]
         void Initialize(IntPtr emitter, string filename, bool fFullBuild);
         
         // Define a source document. Guid's will be provided for the

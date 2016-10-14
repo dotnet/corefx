@@ -27,9 +27,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Diagnostics\StackFrameExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == ''">
-    <Compile Include="System\Diagnostics\StackTraceSymbols.CoreCLR.cs" />
     <Compile Include="System\Diagnostics\SymbolStore\ISymbolBinder.cs" />
     <Compile Include="System\Diagnostics\SymbolStore\ISymbolDocument.cs" />
     <Compile Include="System\Diagnostics\SymbolStore\ISymbolMethod.cs" />
@@ -43,6 +40,9 @@
     <Compile Include="System\Diagnostics\SymbolStore\SymDocumentType.cs" />
     <Compile Include="System\Diagnostics\SymbolStore\SymLanguageType.cs" />
     <Compile Include="System\Diagnostics\SymbolStore\SymLanguageVendor.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == ''">
+    <Compile Include="System\Diagnostics\StackTraceSymbols.CoreCLR.cs" />
     <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
     <ProjectReference Include="..\..\System.IO\src\System.IO.csproj" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
@@ -57,6 +57,7 @@
     <Compile Include="System\Diagnostics\StackTrace.CoreRT.cs" />
     <Compile Include="System\Diagnostics\StackFrame.CoreRT.cs" />
     <Compile Include="System\Diagnostics\StackFrameExtensions.CoreRT.cs" />
+    <Compile Include="System\Diagnostics\SymbolStore\ISymbolDocumentWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
