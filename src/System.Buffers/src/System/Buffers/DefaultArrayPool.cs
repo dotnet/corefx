@@ -14,13 +14,18 @@ namespace System.Buffers
         private static T[] s_emptyArray; // we support contracts earlier than those with Array.Empty<T>()
 
         private readonly Bucket[] _buckets;
+        private readonly int _minShift;
 
-        internal DefaultArrayPool() : this(DefaultMaxArrayLength, DefaultMaxNumberOfArraysPerBucket)
+        internal DefaultArrayPool() : this(DefaultMinArrayLength, DefaultMaxArrayLength, DefaultMaxNumberOfArraysPerBucket)
         {
         }
 
-        internal DefaultArrayPool(int maxArrayLength, int maxArraysPerBucket)
+        internal DefaultArrayPool(int minArrayLength, int maxArrayLength, int maxArraysPerBucket)
         {
+            if (minArrayLength <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minArrayLength));
+            }
             if (maxArrayLength <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxArrayLength));
@@ -30,25 +35,33 @@ namespace System.Buffers
                 throw new ArgumentOutOfRangeException(nameof(maxArraysPerBucket));
             }
 
-            // Our bucketing algorithm has a min length of 2^4 and a max length of 2^30.
+            // Round min array length to a power of 2
+            minArrayLength = Utilities.RoundUpPowerOf2(minArrayLength);
+
+            // Our bucketing algorithm has a max length of 2^30.
             // Constrain the actual max used to those values.
-            const int MinimumArrayLength = 0x10, MaximumArrayLength = 0x40000000;
+            const int MaximumArrayLength = 0x40000000;
+            if (minArrayLength > MaximumArrayLength)
+            {
+                minArrayLength = MaximumArrayLength;
+            }
             if (maxArrayLength > MaximumArrayLength)
             {
                 maxArrayLength = MaximumArrayLength;
             }
-            else if (maxArrayLength < MinimumArrayLength)
+            else if (maxArrayLength < minArrayLength)
             {
-                maxArrayLength = MinimumArrayLength;
+                maxArrayLength = minArrayLength;
             }
 
             // Create the buckets.
+            _minShift = Utilities.GetShiftFromPowerOf2(minArrayLength);
             int poolId = Id;
-            int maxBuckets = Utilities.SelectBucketIndex(maxArrayLength);
+            int maxBuckets = Utilities.SelectBucketIndex(_minShift, maxArrayLength);
             var buckets = new Bucket[maxBuckets + 1];
             for (int i = 0; i < buckets.Length; i++)
             {
-                buckets[i] = new Bucket(Utilities.GetMaxSizeForBucket(i), maxArraysPerBucket, poolId);
+                buckets[i] = new Bucket(Utilities.GetMaxSizeForBucket(minArrayLength, i), maxArraysPerBucket, poolId);
             }
             _buckets = buckets;
         }
@@ -75,7 +88,7 @@ namespace System.Buffers
             var log = ArrayPoolEventSource.Log;
             T[] buffer = null;
 
-            int index = Utilities.SelectBucketIndex(minimumLength);
+            int index = Utilities.SelectBucketIndex(_minShift, minimumLength);
             if (index < _buckets.Length)
             {
                 // Search for an array starting at the 'index' bucket. If the bucket is empty, bump up to the
@@ -133,7 +146,7 @@ namespace System.Buffers
             }
 
             // Determine with what bucket this array length is associated
-            int bucket = Utilities.SelectBucketIndex(array.Length);
+            int bucket = Utilities.SelectBucketIndex(_minShift, array.Length);
 
             // If we can tell that the buffer was allocated, drop it. Otherwise, check if we have space in the pool
             if (bucket < _buckets.Length)
