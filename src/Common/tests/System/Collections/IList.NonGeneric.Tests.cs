@@ -71,7 +71,7 @@ namespace System.Collections.Tests
 
         protected virtual Type IList_NonGeneric_Item_InvalidIndex_ThrowType => typeof(ArgumentOutOfRangeException);
 
-		protected virtual bool IList_NonGeneric_RemoveNonExistent_Throws => false;
+        protected virtual bool IList_NonGeneric_RemoveNonExistent_Throws => false;
 
         #endregion
 
@@ -865,7 +865,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Remove_NonNullNotContainedInCollection(int count)
         {
-            if (!IsReadOnly && !ExpectedFixedSize && !IList_NonGeneric_RemoveNonExistent_Throws)
+            if (!IsReadOnly && !ExpectedFixedSize)
             {
                 int seed = count * 251;
                 IList list = NonGenericIListFactory(count);
@@ -873,26 +873,19 @@ namespace System.Collections.Tests
                 while (list.Contains(value) || Enumerable.Contains(InvalidValues, value))
                     value = CreateT(seed++);
                 list.Remove(value);
-                Assert.Equal(count, list.Count);
+
+                if (IList_NonGeneric_RemoveNonExistent_Throws)
+                {
+                    Assert.Throws<ArgumentException>(() => list.Remove(value));
+                }
+                else
+                {
+                    Assert.Equal(count, list.Count);
+                }
             }
-		}
+        }
 
-		[Theory]
-		[MemberData(nameof(ValidCollectionSizes))]
-		public void IList_NonGeneric_Remove_NonNullNotContainedInCollection_Throws(int count)
-		{
-			if (IList_NonGeneric_RemoveNonExistent_Throws)
-			{
-				int seed = count * 251;
-				IList list = NonGenericIListFactory(count);
-				object value = CreateT(seed++);
-				while (list.Contains(value) || Enumerable.Contains(InvalidValues, value))
-					value = CreateT(seed++);
-				Assert.Throws<ArgumentException>(() => list.Remove(value));
-			}
-		}
-
-		[Theory]
+        [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
         public void IList_NonGeneric_Remove_NullContainedInCollection(int count)
         {
