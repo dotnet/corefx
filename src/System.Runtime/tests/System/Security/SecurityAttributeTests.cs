@@ -11,6 +11,7 @@ namespace System.Tests
 #pragma warning disable 618
     public static class SecurityAttributeTests
     {
+        [Fact]
         public static void InstantiateSecurityAttributes()
         {
             var t = new SecurityTreatAsSafeAttribute();
@@ -22,6 +23,7 @@ namespace System.Tests
             var z = new AllowPartiallyTrustedCallersAttribute();
         }
 
+        [Fact]
         public static void SecurityCriticalAttribute_Test()
         {
             var att = new SecurityCriticalAttribute(SecurityCriticalScope.Everything);
@@ -29,6 +31,7 @@ namespace System.Tests
             Assert.Equal(SecurityCriticalScope.Everything, att.Scope);
         }
 
+        [Fact]
         public static void AllowPartiallyTrustedCallersAttribute_Test()
         {
             var att = new AllowPartiallyTrustedCallersAttribute();
@@ -37,13 +40,15 @@ namespace System.Tests
             Assert.Equal(PartialTrustVisibilityLevel.NotVisibleByDefault, att.PartialTrustVisibilityLevel);
         }
 
+        [Fact]
         public static void SecurityRulesAttribute_Test()
         {
             var att = new SecurityRulesAttribute(SecurityRuleSet.Level1);
             Assert.Equal(SecurityRuleSet.Level1, att.RuleSet);
+            Assert.Equal(false, att.SkipVerificationInFullTrust);
 
             att.SkipVerificationInFullTrust = true;
-            Assert.Equal(!true, att.SkipVerificationInFullTrust);
+            Assert.Equal(true, att.SkipVerificationInFullTrust);
         }
     }
 #pragma warning restore 618
