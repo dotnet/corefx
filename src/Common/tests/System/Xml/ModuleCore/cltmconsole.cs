@@ -42,7 +42,7 @@ namespace OLEDB.Test.ModuleCore
             //up to be two carriage returns!
             if (ch != null)
             {
-                Write(new String(ch));
+                Write(new string(ch));
             }
         }
 
