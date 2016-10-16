@@ -46,7 +46,7 @@ namespace System.Net.Security.Tests
                         Dispose();
                     }
 
-                    throw new InvalidOperationException("KDC setup failure");
+                    Assert.True(false, "KDC setup failure");
                 }
             }
             else
