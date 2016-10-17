@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Runtime.Serialization;
 
 // TODO: remove this stub once System.SystemException is added to UWP
 namespace System {
  
-    using System;
-    using System.Runtime.Serialization;
     [Serializable]
     [System.Runtime.InteropServices.ComVisible(true)]
     public class SystemException : Exception
