@@ -14,13 +14,11 @@
     <ProjectGuid>{142469EC-D665-4FE2-845A-FDA69F9CC557}</ProjectGuid>
     <NuGetPackageImportStamp>d2615b94</NuGetPackageImportStamp>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <!-- Compiled Source Files -->
   <ItemGroup>
     <Compile Include="AnonymousPipeTests\AnonymousPipeTest.CreateServer.cs" />
@@ -37,12 +35,14 @@
     <Compile Include="NamedPipeTests\NamedPipeTest.CrossProcess.cs" />
     <Compile Include="NamedPipeTests\NamedPipeTestBase.cs" />
     <Compile Include="NamedPipeTests\NamedPipeTest.Read.cs" />
+    <Compile Include="NamedPipeTests\NamedPipeTest.RunAsClient.cs" Condition="'$(TargetGroup)' == ''"/>
     <Compile Include="NamedPipeTests\NamedPipeTest.Write.cs" />
     <Compile Include="NamedPipeTests\NamedPipeTest.Specific.cs" />
     <Compile Include="NamedPipeTests\NamedPipeTest.Simple.cs" />
     <Compile Include="PipeTestBase.cs" />
     <Compile Include="PipeTest.Read.cs" />
     <Compile Include="PipeTest.Write.cs" />
+    <Compile Include="PipeTest.netstandard17.cs" Condition="'$(TargetGroup)' == ''"/>
     <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
       <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>

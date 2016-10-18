@@ -7,6 +7,15 @@
     </Project>
     <Project Include="System.IO.Pipes.Tests.csproj">
       <OSGroup>Windows_NT</OSGroup>
+    </Project>
+    <Project Include="System.IO.Pipes.Tests.csproj">
+      <OSGroup>Unix</OSGroup>      
+      <TargetGroup>netstandard1.3</TargetGroup>
+      <TestTFMs>netcoreapp1.0</TestTFMs>
+    </Project>
+    <Project Include="System.IO.Pipes.Tests.csproj">
+      <OSGroup>Windows_NT</OSGroup>
+      <TargetGroup>netstandard1.3</TargetGroup>
       <TestTFMs>netcoreapp1.0;net46</TestTFMs>
     </Project>
     <Project Include="Performance\System.IO.Pipes.Performance.Tests.csproj" />
