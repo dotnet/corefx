@@ -245,7 +245,7 @@ namespace System.IO.Tests
             {
                 source.CopyTo(destination);
                 Assert.InRange(source.Position, source.Length, int.MaxValue); // Copying the data should have read to the end of the stream or stayed past the end.
-                Assert.Equal(expected, destination.ToByteArray());
+                Assert.Equal(expected, destination.ToArray());
             }
         }
 
@@ -268,20 +268,6 @@ namespace System.IO.Tests
             var stream3 = new MemoryStream(data3) { Position = data3.Length + 1 };
 
             yield return new object[] { stream3, Array.Empty<byte>() };
-        }
-    }
-
-    public static class StreamExtensions
-    {
-        public static byte[] ToByteArray(this Stream stream)
-        {
-            stream.Position = 0;
-
-            using (var memoryStream = new MemoryStream())
-            {
-                stream.CopyTo(memoryStream);
-                return memoryStream.ToArray();
-            }
         }
     }
 }
