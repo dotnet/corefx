@@ -123,6 +123,7 @@
     <Compile Include="System\Linq\Expressions\IDynamicExpression.cs" />
     <Compile Include="System\Linq\Expressions\IndexExpression.cs" />
     <Compile Include="System\Linq\Expressions\InvocationExpression.cs" />
+    <Compile Include="System\Linq\Expressions\IParameterProvider.cs" />
     <Compile Include="System\Linq\Expressions\LabelExpression.cs" />
     <Compile Include="System\Linq\Expressions\LabelTarget.cs" />
     <Compile Include="System\Linq\Expressions\LambdaExpression.cs" />

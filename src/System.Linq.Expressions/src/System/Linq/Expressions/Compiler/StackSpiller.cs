@@ -109,7 +109,7 @@ namespace System.Linq.Expressions.Compiler
                 }
 
                 // Clone the lambda, replacing the body & variables
-                return new Expression<T>(newBody, lambda.Name, lambda.TailCall, lambda.Parameters);
+                return Expression<T>.Create(newBody, lambda.Name, lambda.TailCall, new ParameterList(lambda));
             }
 
             return lambda;

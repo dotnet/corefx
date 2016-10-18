@@ -67,6 +67,25 @@ namespace System.Dynamic.Utils
             return (ReadOnlyCollection<Expression>)collection;
         }
 
+        /// <summary>
+        /// See overload with <see cref="IArgumentProvider"/> for more information. 
+        /// </summary>
+        public static ReadOnlyCollection<ParameterExpression> ReturnReadOnly(IParameterProvider provider, ref object collection)
+        {
+            ParameterExpression tObj = collection as ParameterExpression;
+            if (tObj != null)
+            {
+                // otherwise make sure only one readonly collection ever gets exposed
+                Interlocked.CompareExchange(
+                    ref collection,
+                    new ReadOnlyCollection<ParameterExpression>(new ListParameterProvider(provider, tObj)),
+                    tObj
+                );
+            }
+
+            // and return what is not guaranteed to be a readonly collection
+            return (ReadOnlyCollection<ParameterExpression>)collection;
+        }
 
         /// <summary>
         /// Helper which is used for specialized subtypes which use ReturnReadOnly(ref object, ...). 
