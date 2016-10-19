@@ -318,6 +318,10 @@
                     "include": "compile"
                 }
             }
+        },
+        "net46":{
+            "xunit.runner.utility": "2.2.0-beta2-build3300",
+            "xunit.runner.console": "2.2.0-beta2-build3300",
         }
     },
     "supports": {
