@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Delegate | AttributeTargets.Interface)]
     public sealed class EditorBrowsableAttribute : Attribute
     {
