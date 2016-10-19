@@ -180,5 +180,9 @@ namespace System.ComponentModel
         {
             return base.GetHashCode();
         }
+
+        protected void SetValue(object value){
+            this.value = value;
+        }
     }
 }

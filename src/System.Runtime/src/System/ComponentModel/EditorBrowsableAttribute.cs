@@ -24,6 +24,11 @@ namespace System.ComponentModel
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
+        public EditorBrowsableAttribute () :this (EditorBrowsableState.Always) { }
+
+        /// <devdoc>
+        ///    <para>[To be supplied.]</para>
+        /// </devdoc>
         public EditorBrowsableState State
         {
             get { return browsableState; }
