@@ -158,7 +158,7 @@ If you are interested in building and running the tests only for a specific libr
 
 The easiest (and recommended) way to do it, is by simply building the test .builds file for that library.
 
-```
+```cmd
 cd src\System.Collections.Immutable\tests
 msbuild System.Collections.Immutable.Tests.builds
 ```
@@ -167,7 +167,7 @@ What that will do is to build the tests against all of the available configurati
 
 The second way to do it, is to build the .csproj and select to run the `BuildAndTest` target:
 
-```
+```cmd
 cd src\System.Collections.Immutable\tests
 msbuild /t:BuildAndTest (or /t:Test to just run the tests if the binaries are already built)
 ```
@@ -182,20 +182,42 @@ There may be multiple projects in some directories so you may need to specify th
 
 Tests participate in the incremental build.  This means that if tests have already been run, and inputs to the incremental build have not changed, rerunning the tests target will not execute the test runner again.  To force re-executing tests in this situation, use `msbuild /t:RebuildAndTest`.
 
+#### What is TestTFM and what possible values can it have
+
+`TestTFM` is the Framework that we will use to run your tests on. The same test assembly can be used to run tests on two different frameworks, for example, AssemblyWithMyTests.dll can be used to run your tests in TFM `A` and `B` as long as framworks `A` and `B` provide/support the NetStandard surface area needed for the test assembly to compile. For this reason, when you write your tests, you might want to run them against different frameworks, and the next section will point out how to do that.
+
+Some of the possible values for `TestTFM` are:
+
+_**`netcoreapp1.1` or `netcoreapp1.0`**_
+NetStandard implementations that run in CoreCLR.
+
+_**`netcore50` or `uap101aot`**_
+NetStandard implementations for UWP.
+
+-**`net46` or `net462` or `net463`**-
+NetStandard implementations for Desktop.
+
 #### Running tests in a different TFM
 
-Each test project corresponds to a test .builds file. There are some tests that might be OS specific, or might be testing API that is available only on some TFMs, which is what this tests.builds files are for. By default, we will build all of these different configurations always, but we will only execute the tests on one TFM. By default, our `TestTFM` is `netcoreapp1.1` which means that we will run tests for the configurations that either:
-- Have `netcoreapp` inside their `<TestTFMs>...</TestTFMs>` clause on the .builds files, or
-- Don't have a `<TestTFMs>...</TestTFMs>` metadata in the .builds file at all.
+Each test project corresponds to a test .builds file. There are some tests that might be OS specific, or might be testing API that is available only on some TFMs, which is what this tests.builds files are for. By default, we will build all of these different configurations always, but we will only execute the tests on one TFM. By default, our `TestTFM` is set to `netcoreapp1.1` [here](https://github.com/dotnet/corefx/blob/master/dir.props#L495) which means that we will run tests for the configurations that either:
+- Have `netcoreapp1.1` inside their `<TestTFMs>...</TestTFMs>` clause on the .builds files, or
+- Don't have a `<TestTFMs>...</TestTFMs>` metadata in the .builds file at all because we default it to netcoreapp1.1 [here](https://github.com/dotnet/corefx/blob/master/dir.traversal.targets#L146-L147)
 
 The rest of the configurations will still get built, but they won't be executed by default, or as part of the CI. In order to use a different TestTFM, pass in the `FilterToTestTFM` property like:
 
-```
+```cmd
 cd src\System.Runtime\tests
 msbuild System.Runtime.Tests.builds /p:FilterToTestTFM=net462
 ```
 
 The previous example will again build the System.Runtime csproj in all of it's different configurations, but will only execute the tests that have `net462` in their `<TestTFMs>...</TestTFMs>` metadata on System.Runtime.Tests.builds
+
+One more way to run tests on a specific TFM, is to do it by building the test csproj directly and set the value of `TestTFM` like:
+
+```cmd
+cd src\System.Runtime\tests
+msbuild System.Runtime.Tests.csproj /t:BuildAndTest /p:TestTFM=net462
+```
 
 #### Filtering tests using traits
 
