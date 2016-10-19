@@ -12,23 +12,13 @@ namespace System.ComponentModel
     {
         private EditorBrowsableState browsableState;
 
-
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public EditorBrowsableAttribute(EditorBrowsableState state)
         {
             browsableState = state;
         }
 
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public EditorBrowsableAttribute () :this (EditorBrowsableState.Always) { }
+        public EditorBrowsableAttribute () : this(EditorBrowsableState.Always) { }
 
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public EditorBrowsableState State
         {
             get { return browsableState; }
@@ -52,22 +42,10 @@ namespace System.ComponentModel
         }
     }
 
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public enum EditorBrowsableState
     {
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         Always,
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         Never,
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         Advanced
     }
 }
