@@ -23,10 +23,8 @@ namespace System.Net.Sockets
         // Send without using routing tables.
         DontRoute = 0x0004,
 
-        // This is defined in the .NET Framework and isn't being ported to CoreFx
-        // since it is Windows specific. However, leave this enum value reserved
-        // to prevent future numbering conflicts.
-        // MaxIOVectorLength = 0x0010
+        // This flag is ignored, but exists for compatibility.
+        MaxIOVectorLength = 0x0010,
         
         // Partial send or recv for message.
         Truncated = 0x0100,

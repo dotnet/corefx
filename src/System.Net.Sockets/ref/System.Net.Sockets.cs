@@ -372,6 +372,7 @@ namespace System.Net.Sockets
         Broadcast = 1024,
         ControlDataTruncated = 512,
         DontRoute = 4,
+        MaxIOVectorLength = 16,
         Multicast = 2048,
         None = 0,
         OutOfBand = 1,
