@@ -5,6 +5,14 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+namespace System
+{
+    public sealed partial class LocalDataStoreSlot
+    {
+        private LocalDataStoreSlot() { }
+        ~LocalDataStoreSlot() { }
+    }
+}
 namespace System.Threading
 {
     public enum ApartmentState

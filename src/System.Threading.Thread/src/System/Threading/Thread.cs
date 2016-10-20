@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-extern alias System_Collections;
-extern alias System_Runtime;
 extern alias System_Runtime_Extensions;
 extern alias System_Security_Principal;
-extern alias System_Threading;
 
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -18,21 +15,20 @@ namespace System.Threading
 {
     using AppDomain = System_Runtime_Extensions::System.AppDomain;
     using IPrincipal = System_Security_Principal::System.Security.Principal.IPrincipal;
-    using LocalDataStoreSlot = System_Runtime::System.LocalDataStoreSlot;
 
-    public sealed class Thread : CriticalFinalizerObject
+    public sealed partial class Thread : CriticalFinalizerObject
     {
         [ThreadStatic]
         private static Thread t_currentThread;
 
-        private readonly RuntimeThread m_runtimeThread;
-        private Delegate m_start;
-        private IPrincipal m_principal;
+        private readonly RuntimeThread _runtimeThread;
+        private Delegate _start;
+        private IPrincipal _principal;
 
         private Thread(RuntimeThread runtimeThread)
         {
             Debug.Assert(runtimeThread != null);
-            m_runtimeThread = runtimeThread;
+            _runtimeThread = runtimeThread;
         }
 
         public Thread(ThreadStart start)
@@ -42,9 +38,9 @@ namespace System.Threading
                 throw new ArgumentNullException(nameof(start));
             }
 
-            m_runtimeThread = RuntimeThread.Create(ThreadMain_ThreadStart);
-            Debug.Assert(m_runtimeThread != null);
-            m_start = start;
+            _runtimeThread = RuntimeThread.Create(ThreadMain_ThreadStart);
+            Debug.Assert(_runtimeThread != null);
+            _start = start;
         }
 
         public Thread(ThreadStart start, int maxStackSize)
@@ -58,9 +54,9 @@ namespace System.Threading
                 throw new ArgumentOutOfRangeException(nameof(maxStackSize), SR.ArgumentOutOfRange_NeedNonnegativeNumber);
             }
 
-            m_runtimeThread = RuntimeThread.Create(ThreadMain_ThreadStart, maxStackSize);
-            Debug.Assert(m_runtimeThread != null);
-            m_start = start;
+            _runtimeThread = RuntimeThread.Create(ThreadMain_ThreadStart, maxStackSize);
+            Debug.Assert(_runtimeThread != null);
+            _start = start;
         }
 
         public Thread(ParameterizedThreadStart start)
@@ -70,9 +66,9 @@ namespace System.Threading
                 throw new ArgumentNullException(nameof(start));
             }
 
-            m_runtimeThread = RuntimeThread.Create(ThreadMain_ParameterizedThreadStart);
-            Debug.Assert(m_runtimeThread != null);
-            m_start = start;
+            _runtimeThread = RuntimeThread.Create(ThreadMain_ParameterizedThreadStart);
+            Debug.Assert(_runtimeThread != null);
+            _start = start;
         }
 
         public Thread(ParameterizedThreadStart start, int maxStackSize)
@@ -86,17 +82,17 @@ namespace System.Threading
                 throw new ArgumentOutOfRangeException(nameof(maxStackSize), SR.ArgumentOutOfRange_NeedNonnegativeNumber);
             }
 
-            m_runtimeThread = RuntimeThread.Create(ThreadMain_ParameterizedThreadStart, maxStackSize);
-            Debug.Assert(m_runtimeThread != null);
-            m_start = start;
+            _runtimeThread = RuntimeThread.Create(ThreadMain_ParameterizedThreadStart, maxStackSize);
+            Debug.Assert(_runtimeThread != null);
+            _start = start;
         }
 
         private void ThreadMain_ThreadStart()
         {
             t_currentThread = this;
 
-            var start = m_start;
-            m_start = null;
+            var start = _start;
+            _start = null;
             Debug.Assert(start is ThreadStart);
             ((ThreadStart)start)();
         }
@@ -105,8 +101,8 @@ namespace System.Threading
         {
             t_currentThread = this;
 
-            var start = m_start;
-            m_start = null;
+            var start = _start;
+            _start = null;
             Debug.Assert(start is ParameterizedThreadStart);
             ((ParameterizedThreadStart)start)(parameter);
         }
@@ -164,22 +160,22 @@ namespace System.Threading
         {
             get
             {
-                return CurrentThread.m_principal;
+                return CurrentThread._principal;
             }
             set
             {
-                CurrentThread.m_principal = value;
+                CurrentThread._principal = value;
             }
         }
 
         public ExecutionContext ExecutionContext => ExecutionContext.Capture();
-        public bool IsAlive => m_runtimeThread.IsAlive;
-        public bool IsBackground { get { return m_runtimeThread.IsBackground; } set { m_runtimeThread.IsBackground = value; } }
-        public bool IsThreadPoolThread => m_runtimeThread.IsThreadPoolThread;
-        public int ManagedThreadId => m_runtimeThread.ManagedThreadId;
-        public string Name { get { return m_runtimeThread.Name; } set { m_runtimeThread.Name = value; } }
-        public ThreadPriority Priority { get { return m_runtimeThread.Priority; } set { m_runtimeThread.Priority = value; } }
-        public ThreadState ThreadState => m_runtimeThread.ThreadState;
+        public bool IsAlive => _runtimeThread.IsAlive;
+        public bool IsBackground { get { return _runtimeThread.IsBackground; } set { _runtimeThread.IsBackground = value; } }
+        public bool IsThreadPoolThread => _runtimeThread.IsThreadPoolThread;
+        public int ManagedThreadId => _runtimeThread.ManagedThreadId;
+        public string Name { get { return _runtimeThread.Name; } set { _runtimeThread.Name = value; } }
+        public ThreadPriority Priority { get { return _runtimeThread.Priority; } set { _runtimeThread.Priority = value; } }
+        public ThreadState ThreadState => _runtimeThread.ThreadState;
 
         public void Abort()
         {
@@ -233,24 +229,11 @@ namespace System.Threading
             }
         }
 
-        public ApartmentState GetApartmentState()
-        {
-#if PLATFORM_UNIX
-            return ApartmentState.Unknown;
-#else // !PLATFORM_UNIX
-            return m_runtimeThread.GetApartmentState();
-#endif // PLATFORM_UNIX
-        }
-
         public void SetApartmentState(ApartmentState state)
         {
             if (!TrySetApartmentState(state))
             {
-#if PLATFORM_UNIX
-                throw new PlatformNotSupportedException();
-#else // !PLATFORM_UNIX
-                throw new InvalidOperationException(SR.Thread_ApartmentState_ChangeFailed);
-#endif // PLATFORM_UNIX
+                throw GetApartmentStateChangeFailedException();
             }
         }
 
@@ -267,11 +250,7 @@ namespace System.Threading
                     throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_Enum, nameof(state));
             }
 
-#if PLATFORM_UNIX
-            return state == GetApartmentState();
-#else // !PLATFORM_UNIX
-            return m_runtimeThread.TrySetApartmentState(state);
-#endif // PLATFORM_UNIX
+            return TrySetApartmentStateUnchecked(state);
         }
 
         private static int ToTimeoutMilliseconds(TimeSpan timeout)
@@ -287,17 +266,17 @@ namespace System.Threading
         public static AppDomain GetDomain() => AppDomain.CurrentDomain;
         public static int GetDomainID() => GetDomain().Id;
         public override int GetHashCode() => ManagedThreadId;
-        public void Interrupt() => m_runtimeThread.Interrupt();
-        public void Join() => m_runtimeThread.Join();
-        public bool Join(int millisecondsTimeout) => m_runtimeThread.Join(millisecondsTimeout);
+        public void Interrupt() => _runtimeThread.Interrupt();
+        public void Join() => _runtimeThread.Join();
+        public bool Join(int millisecondsTimeout) => _runtimeThread.Join(millisecondsTimeout);
         public bool Join(TimeSpan timeout) => Join(ToTimeoutMilliseconds(timeout));
         public static void MemoryBarrier() => Interlocked.MemoryBarrier();
         public static void Sleep(int millisecondsTimeout) => RuntimeThread.Sleep(millisecondsTimeout);
         public static void Sleep(TimeSpan timeout) => Sleep(ToTimeoutMilliseconds(timeout));
         public static void SpinWait(int iterations) => RuntimeThread.SpinWait(iterations);
         public static bool Yield() => false; // TODO: RuntimeThread.Yield();
-        public void Start() => m_runtimeThread.Start();
-        public void Start(object parameter) => m_runtimeThread.Start(parameter);
+        public void Start() => _runtimeThread.Start();
+        public void Start(object parameter) => _runtimeThread.Start(parameter);
 
         public static byte VolatileRead(ref byte address) => Volatile.Read(ref address);
         public static double VolatileRead(ref double address) => Volatile.Read(ref address);
@@ -350,7 +329,7 @@ namespace System.Threading
 
             public static Dictionary<string, LocalDataStoreSlot> EnsureNameToSlotMap()
             {
-                var nameToSlotMap = s_nameToSlotMap;
+                Dictionary<string, LocalDataStoreSlot> nameToSlotMap = s_nameToSlotMap;
                 if (nameToSlotMap != null)
                 {
                     return nameToSlotMap;
@@ -362,8 +341,8 @@ namespace System.Threading
 
             public static LocalDataStoreSlot AllocateNamedSlot(string name)
             {
-                var slot = AllocateSlot();
-                var nameToSlotMap = EnsureNameToSlotMap();
+                LocalDataStoreSlot slot = AllocateSlot();
+                Dictionary<string, LocalDataStoreSlot> nameToSlotMap = EnsureNameToSlotMap();
                 lock (nameToSlotMap)
                 {
                     nameToSlotMap.Add(name, slot);
@@ -373,7 +352,7 @@ namespace System.Threading
 
             public static LocalDataStoreSlot GetNamedSlot(string name)
             {
-                var nameToSlotMap = EnsureNameToSlotMap();
+                Dictionary<string, LocalDataStoreSlot> nameToSlotMap = EnsureNameToSlotMap();
                 lock (nameToSlotMap)
                 {
                     LocalDataStoreSlot slot;
@@ -388,7 +367,7 @@ namespace System.Threading
 
             public static void FreeNamedSlot(string name)
             {
-                var nameToSlotMap = EnsureNameToSlotMap();
+                Dictionary<string, LocalDataStoreSlot> nameToSlotMap = EnsureNameToSlotMap();
                 lock (nameToSlotMap)
                 {
                     nameToSlotMap.Remove(name);
@@ -402,8 +381,8 @@ namespace System.Threading
                     throw new ArgumentNullException(nameof(slot));
                 }
 
-                Debug.Assert(slot.Data is ThreadLocal<object>);
-                return (ThreadLocal<object>)slot.Data;
+                Debug.Assert(slot.Data != null);
+                return slot.Data;
             }
 
             public static object GetData(LocalDataStoreSlot slot)

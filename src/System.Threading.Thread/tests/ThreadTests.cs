@@ -637,12 +637,16 @@ namespace System.Threading.Threads.Tests
                 Assert.NotEqual(slot, slot2);
                 VerifyLocalDataSlot(slot);
                 VerifyLocalDataSlot(slot2);
-            }
-            finally
-            {
+
                 // Free the same slot twice, should be fine
                 Thread.FreeNamedDataSlot(slotName2);
                 Thread.FreeNamedDataSlot(slotName2);
+            }
+            catch (Exception ex)
+            {
+                Thread.FreeNamedDataSlot(slotName);
+                Thread.FreeNamedDataSlot(slotName2);
+                throw new TargetInvocationException(ex);
             }
 
             try
@@ -653,6 +657,23 @@ namespace System.Threading.Threads.Tests
                 tempSlot = Thread.GetNamedDataSlot(slotName2);
                 Assert.NotEqual(slot2, tempSlot);
                 slot2 = tempSlot;
+                Assert.NotEqual(slot, slot2);
+                VerifyLocalDataSlot(slot);
+                VerifyLocalDataSlot(slot2);
+            }
+            finally
+            {
+                Thread.FreeNamedDataSlot(slotName);
+                Thread.FreeNamedDataSlot(slotName2);
+            }
+
+            try
+            {
+                // A named slot can be used after the name is freed, since only the name is freed, not the slot
+                slot = Thread.AllocateNamedDataSlot(slotName);
+                Thread.FreeNamedDataSlot(slotName);
+                slot2 = Thread.AllocateNamedDataSlot(slotName); // same name
+                Thread.FreeNamedDataSlot(slotName);
                 Assert.NotEqual(slot, slot2);
                 VerifyLocalDataSlot(slot);
                 VerifyLocalDataSlot(slot2);

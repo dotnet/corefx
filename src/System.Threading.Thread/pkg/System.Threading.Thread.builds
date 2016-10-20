@@ -3,7 +3,12 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <Project Include="System.Threading.Thread.pkgproj" />
+    <Project Include="win\System.Threading.Thread.pkgproj">
+      <OSGroup>Windows_NT</OSGroup>
+    </Project>
+    <Project Include="unix\System.Threading.Thread.pkgproj">
+      <OSGroup>Unix</OSGroup>
+    </Project>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
-

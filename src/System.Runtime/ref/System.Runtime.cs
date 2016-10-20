@@ -1563,11 +1563,6 @@ namespace System
         public T Value { get { throw null; } }
         public override string ToString() { throw null; }
     }
-    public sealed partial class LocalDataStoreSlot
-    {
-        private LocalDataStoreSlot() { }
-        ~LocalDataStoreSlot() { }
-    }
     public abstract partial class MarshalByRefObject
     {
         protected MarshalByRefObject() { }

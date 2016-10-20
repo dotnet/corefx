@@ -2737,6 +2737,16 @@
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0"
       }
+    },
+    "runtime.win.System.Threading.Thread": {
+      "AssemblyVersionInPackageVersion": {
+        "4.1.0.0": "4.4.0"
+      }
+    },
+    "runtime.unix.System.Threading.Thread": {
+      "AssemblyVersionInPackageVersion": {
+        "4.1.0.0": "4.4.0"
+      }
     }
   },
   "ModulesToPackages": {
