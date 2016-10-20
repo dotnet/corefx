@@ -127,8 +127,10 @@ namespace System.IO.Tests
             using (StoreFlushArgFileStream fs = new StoreFlushArgFileStream(GetTestFilePath(), FileMode.Create))
             {
                 fs.Flush();
+#pragma warning disable 1690
                 Assert.True(fs.LastFlushArg.HasValue);
                 Assert.False(fs.LastFlushArg.Value);
+#pragma warning restore 1690
             }
         }
 
