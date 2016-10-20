@@ -77,6 +77,7 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
                 try
                 {
                     key = new byte[invalidKeySize];
+                    byte[] cloneIV = (byte[])iv.Clone();  // Check memory for Cloning in CreateEncrpyor and CreateDecryptor
                 }
                 catch (OutOfMemoryException) // in case there isn't enough memory at test-time to allocate the large array
                 {
@@ -101,6 +102,7 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
                 try
                 {
                     iv = new byte[invalidIvSize];
+                    byte[] cloneIV = (byte[])iv.Clone();  // Check memory for Cloning in CreateEncrpyor and CreateDecryptor
                 }
                 catch (OutOfMemoryException) // in case there isn't enough memory at test-time to allocate the large array
                 {
