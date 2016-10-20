@@ -43,7 +43,6 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46, "dotnet/corefx#11324")]
         public void IDictionary_NonGeneric_ItemSet_KeyOfWrongType(int count)
         {
             if (!IsReadOnly)
