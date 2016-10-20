@@ -7,16 +7,16 @@ using Xunit;
 
 namespace System.ComponentModel.Tests
 {
-	public sealed class CustomDefaultValueAttribute : DefaultValueAttribute
+    public sealed class CustomDefaultValueAttribute : DefaultValueAttribute
     {
         public CustomDefaultValueAttribute(object value) : base(value) { }
 
         public new void SetValue(object value) => base.SetValue(value);
     }
 
-	public static class DefaultValueAttributeTestsNetStandard17
+    public static class DefaultValueAttributeTestsNetStandard17
     {
-    	[Fact]
+        [Fact]
         public static void SetValue()
         {
             var attr = new CustomDefaultValueAttribute(null);

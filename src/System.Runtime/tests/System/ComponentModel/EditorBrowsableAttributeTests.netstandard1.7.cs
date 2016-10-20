@@ -8,7 +8,7 @@ namespace System.ComponentModel.Tests
 {
     public static class EditorBrowsableAttributeTestsNetStandard17
     {
-    	[Fact]
+        [Fact]
         public static void DefaultCtor_EditableBrowserState()
         {
             Assert.Equal(EditorBrowsableState.Always, new EditorBrowsableAttribute().State);
