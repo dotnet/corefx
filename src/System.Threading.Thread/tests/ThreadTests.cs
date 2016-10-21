@@ -713,7 +713,7 @@ namespace System.Threading.Threads.Tests
             // Interrupting a dead thread does nothing
             t.Interrupt();
 
-            // Interrupting an unstarted thread does nothing (it does not interrupt after the thread is started)
+            // Interrupting an unstarted thread causes the thread to be interrupted after it is started and starts blocking
             t = CreateGuardedThread(out waitForThread, () =>
                     Assert.Throws<ThreadInterruptedException>(() => continueThread.CheckedWait()));
             t.IsBackground = true;

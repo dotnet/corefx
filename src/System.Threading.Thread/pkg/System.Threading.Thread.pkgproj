@@ -5,13 +5,16 @@
     <ProjectReference Include="..\ref\System.Threading.Thread.csproj">
       <SupportedFramework>net463;netcoreapp1.1;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Threading.Thread.csproj">
-      <TargetGroup>net463</TargetGroup>
-    </ProjectReference>
-    <ProjectReference Include="win\System.Threading.Thread.pkgproj" />
-    <ProjectReference Include="unix\System.Threading.Thread.pkgproj" />
+    <ProjectReference Include="..\src\System.Threading.Thread.builds" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Packages are now runtime-specific and they were not before, so this allows package verification during build to find
+         the implementation library when looking it up just by netstandard1.7, instead of not finding it and falling back to
+         the netstandard1.3 version. -->
+    <File Include="$(PlaceholderFile)">
+      <TargetPath>lib/netstandard1.7</TargetPath>
+    </File>
+
     <InboxOnTargetFramework Include="MonoAndroid10" />
     <InboxOnTargetFramework Include="MonoTouch10" />
     <InboxOnTargetFramework Include="xamarinios10" />
