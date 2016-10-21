@@ -19,8 +19,8 @@
   <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
     <Compile Include="System\LocalDataStoreSlot.cs" />
     <Compile Include="System\Threading\Thread.cs" />
-    <Compile Include="System\Threading\Thread.Unix.cs" Condition="'$(OSGroup)' == 'Unix'" />
-    <Compile Include="System\Threading\Thread.Windows.cs" Condition="'$(OSGroup)' == 'Windows_NT'" />
+    <Compile Include="System\Threading\Thread.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
+    <Compile Include="System\Threading\Thread.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Threading\ThreadAbortException.cs" />
     <Compile Include="System\Threading\ThreadExceptionEventArgs.cs" />
   </ItemGroup>

@@ -254,8 +254,22 @@ namespace System.Threading.Threads.Tests
             var t = new Thread(() => { });
             Assert.Equal(ApartmentState.Unknown, getApartmentState(t));
             Assert.Equal(0, setApartmentState(t, ApartmentState.Unknown));
-            Assert.Equal(3, setApartmentState(t, ApartmentState.STA));
-            Assert.Equal(3, setApartmentState(t, ApartmentState.MTA));
+
+            int expectedFailure;
+            switch (setType)
+            {
+                case 0:
+                    expectedFailure = 0; // ApartmentState setter - no exception, but value does not change
+                    break;
+                case 1:
+                    expectedFailure = 3; // SetApartmentState - InvalidOperationException
+                    break;
+                default:
+                    expectedFailure = 2; // TrySetApartmentState - returns false
+                    break;
+            }
+            Assert.Equal(expectedFailure, setApartmentState(t, ApartmentState.STA));
+            Assert.Equal(expectedFailure, setApartmentState(t, ApartmentState.MTA));
         }
 
         [Fact]
