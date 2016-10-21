@@ -4,6 +4,7 @@
 
 namespace System.Runtime.InteropServices.ComTypes
 {
+    [CLSCompliant(false)]
     public interface IEnumSTATDATA
     {
         void Clone(out IEnumSTATDATA newEnum);

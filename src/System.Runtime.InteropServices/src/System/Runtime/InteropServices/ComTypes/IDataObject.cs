@@ -4,6 +4,7 @@
 
 namespace System.Runtime.InteropServices.ComTypes
 {
+    [CLSCompliant(false)]
     public interface IDataObject
     {
         int DAdvise(ref FORMATETC pFormatetc, ADVF advf, IAdviseSink adviseSink, out int connection);
