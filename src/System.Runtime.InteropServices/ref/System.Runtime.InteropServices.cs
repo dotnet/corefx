@@ -117,8 +117,8 @@ namespace System.IO
 }
 namespace System.Runtime.CompilerServices
 {
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2304), Inherited=false)]
-    public sealed partial class IUnknownConstantAttribute : System.Runtime.CompilerServices.CustomConstantAttribute 
+    [System.AttributeUsageAttribute((System.AttributeTargets)(2304), Inherited = false)]
+    public sealed partial class IUnknownConstantAttribute : System.Runtime.CompilerServices.CustomConstantAttribute
     {
         public IUnknownConstantAttribute() { }
         public override object Value { get { throw null; } }
@@ -126,7 +126,7 @@ namespace System.Runtime.CompilerServices
 }
 namespace System.Runtime.InteropServices
 {
-    [System.AttributeUsageAttribute((System.AttributeTargets)(64), AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(64), AllowMultiple = false, Inherited = false)]
     public sealed class AllowReversePInvokeCallsAttribute : System.Attribute
     {
         public AllowReversePInvokeCallsAttribute() { }
@@ -189,7 +189,7 @@ namespace System.Runtime.InteropServices
         public CoClassAttribute(System.Type coClass) { }
         public System.Type CoClass { get { throw null; } }
     }
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false)] 
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false)]
     public sealed class ComAliasNameAttribute : System.Attribute
     {
         public ComAliasNameAttribute(string alias) { }
@@ -205,7 +205,7 @@ namespace System.Runtime.InteropServices
         public override string Name { get { throw null; } }
         public override void AddEventHandler(object target, System.Delegate handler) { }
         public override void RemoveEventHandler(object target, System.Delegate handler) { }
-        public override bool IsDefined(Type attributeType, bool inherit)  { throw null; }
+        public override bool IsDefined(Type attributeType, bool inherit) { throw null; }
         public override object[] GetCustomAttributes(bool inherit) { throw null; }
         public override System.Type ReflectedType { get { throw null; } }
         public override System.Reflection.MethodInfo GetRemoveMethod(bool nonPublic) { throw null; }
@@ -442,7 +442,7 @@ namespace System.Runtime.InteropServices
     }
     public struct HandleRef
     {
-        public HandleRef(object wrapper, System.IntPtr handle): this() { }
+        public HandleRef(object wrapper, System.IntPtr handle) : this() { }
         public System.IntPtr Handle { get; }
         public object Wrapper { get; }
         public static explicit operator System.IntPtr(HandleRef value) { throw null; }
@@ -660,7 +660,7 @@ namespace System.Runtime.InteropServices
         [System.Security.SecurityCriticalAttribute]
         public static string PtrToStringUTF8(System.IntPtr ptr) { throw null; }
         [System.Security.SecurityCriticalAttribute]
-        public static string PtrToStringUTF8(System.IntPtr ptr, int byteLen) { throw null; }        
+        public static string PtrToStringUTF8(System.IntPtr ptr, int byteLen) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.Security.SecurityCriticalAttribute]
         public static void PtrToStructure(System.IntPtr ptr, object structure) { }

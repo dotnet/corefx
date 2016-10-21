@@ -1,8 +1,12 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 
 namespace System.Runtime.InteropServices
 {
-    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Interface, Inherited = false)] 
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Interface, Inherited = false)]
     [ComVisible(true)]
     public sealed class AutomationProxyAttribute : Attribute
     {
@@ -12,7 +16,7 @@ namespace System.Runtime.InteropServices
         }
         public bool Value { get; }
     }
-    
+
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComAliasNameAttribute : Attribute
@@ -21,9 +25,9 @@ namespace System.Runtime.InteropServices
         {
             Value = alias;
         }
-        public string Value { get; }  
+        public string Value { get; }
     }
-    
+
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComCompatibleVersionAttribute : Attribute
@@ -35,19 +39,19 @@ namespace System.Runtime.InteropServices
             BuildNumber = build;
             RevisionNumber = revision;
         }
-        
+
         public int MajorVersion { get; }
         public int MinorVersion { get; }
         public int BuildNumber { get; }
         public int RevisionNumber { get; }
     }
-    
-    [AttributeUsage(AttributeTargets.All, Inherited = false)] 
+
+    [AttributeUsage(AttributeTargets.All, Inherited = false)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComConversionLossAttribute : Attribute
     {
     }
-    
+
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComRegisterFunctionAttribute : Attribute
@@ -59,7 +63,7 @@ namespace System.Runtime.InteropServices
     public sealed class ComUnregisterFunctionAttribute : Attribute
     {
     }
-    
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly, Inherited = false)]
     [Obsolete("This attribute is deprecated and will be removed in a future version.", false)]
     public sealed class IDispatchImplAttribute : Attribute
@@ -83,7 +87,7 @@ namespace System.Runtime.InteropServices
         InternalImpl = 1,
         SystemDefinedImpl = 0,
     }
-    
+
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class LCIDConversionAttribute : Attribute
@@ -92,9 +96,9 @@ namespace System.Runtime.InteropServices
         {
             Value = lcid;
         }
-        public int Value { get; } 
+        public int Value { get; }
     }
-    
+
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
     [System.Runtime.InteropServices.ComVisible(false)]
     public sealed class ManagedToNativeComInteropStubAttribute : Attribute
@@ -108,7 +112,7 @@ namespace System.Runtime.InteropServices
         public Type ClassType { get; }
         public string MethodName { get; }
     }
-    
+
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = true)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class PrimaryInteropAssemblyAttribute : Attribute
@@ -118,11 +122,11 @@ namespace System.Runtime.InteropServices
             MajorVersion = major;
             MinorVersion = minor;
         }
-        
+
         public int MajorVersion { get; }
         public int MinorVersion { get; }
     }
-    
+
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ProgIdAttribute : Attribute
@@ -131,9 +135,9 @@ namespace System.Runtime.InteropServices
         {
             Value = progId;
         }
-        public string Value { get; }  
+        public string Value { get; }
     }
-    
+
     [Obsolete("This attribute has been deprecated.  Application Domains no longer respect Activation Context boundaries in IDispatch calls.", false)]
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     public sealed class SetWin32ContextInIDispatchAttribute : Attribute
