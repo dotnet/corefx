@@ -8,7 +8,6 @@ namespace System.Runtime.CompilerServices
 {
     [Serializable]
     [System.AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed partial class IUnknownConstantAttribute : System.Runtime.CompilerServices.CustomConstantAttribute
     {
         public IUnknownConstantAttribute() { }

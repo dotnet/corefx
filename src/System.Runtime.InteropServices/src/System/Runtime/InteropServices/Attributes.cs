@@ -7,7 +7,6 @@ using System;
 namespace System.Runtime.InteropServices
 {
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Interface, Inherited = false)]
-    [ComVisible(true)]
     public sealed class AutomationProxyAttribute : Attribute
     {
         public AutomationProxyAttribute(bool val)
@@ -18,7 +17,6 @@ namespace System.Runtime.InteropServices
     }
 
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComAliasNameAttribute : Attribute
     {
         public ComAliasNameAttribute(string alias)
@@ -29,7 +27,6 @@ namespace System.Runtime.InteropServices
     }
 
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComCompatibleVersionAttribute : Attribute
     {
         public ComCompatibleVersionAttribute(int major, int minor, int build, int revision)
@@ -47,19 +44,16 @@ namespace System.Runtime.InteropServices
     }
 
     [AttributeUsage(AttributeTargets.All, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComConversionLossAttribute : Attribute
     {
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComRegisterFunctionAttribute : Attribute
     {
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComUnregisterFunctionAttribute : Attribute
     {
     }
@@ -89,7 +83,6 @@ namespace System.Runtime.InteropServices
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class LCIDConversionAttribute : Attribute
     {
         public LCIDConversionAttribute(int lcid)
@@ -100,7 +93,6 @@ namespace System.Runtime.InteropServices
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    [System.Runtime.InteropServices.ComVisible(false)]
     public sealed class ManagedToNativeComInteropStubAttribute : Attribute
     {
         public ManagedToNativeComInteropStubAttribute(Type classType, string methodName)
@@ -114,7 +106,6 @@ namespace System.Runtime.InteropServices
     }
 
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = true)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class PrimaryInteropAssemblyAttribute : Attribute
     {
         public PrimaryInteropAssemblyAttribute(int major, int minor)
@@ -128,7 +119,6 @@ namespace System.Runtime.InteropServices
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ProgIdAttribute : Attribute
     {
         public ProgIdAttribute(string progId)
