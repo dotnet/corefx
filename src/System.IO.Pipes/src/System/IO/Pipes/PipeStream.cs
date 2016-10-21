@@ -458,7 +458,6 @@ namespace System.IO.Pipes
 
         // anonymous pipe ends and named pipe server can get/set properties when broken 
         // or connected. Named client overrides
-        [SecurityCritical]
         protected internal virtual void CheckPipePropertyOperations()
         {
             if (CheckOperationsRequiresSetHandle && _handle == null)
@@ -475,8 +474,6 @@ namespace System.IO.Pipes
 
         // Reads can be done in Connected and Broken. In the latter,
         // read returns 0 bytes
-        [SecurityCritical]
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Consistent with security model")]
         protected internal void CheckReadOperations()
         {
             // Invalid operation
@@ -501,8 +498,6 @@ namespace System.IO.Pipes
         }
 
         // Writes can only be done in connected state
-        [SecurityCritical]
-        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Consistent with security model")]
         protected internal void CheckWriteOperations()
         {
             // Invalid operation

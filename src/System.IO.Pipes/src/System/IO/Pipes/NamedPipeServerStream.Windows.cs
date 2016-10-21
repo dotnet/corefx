@@ -162,8 +162,6 @@ namespace System.IO.Pipes
         // This method calls a delegate while impersonating the client. Note that we will not have
         // access to the client's security token until it has written at least once to the pipe 
         // (and has set its impersonationLevel argument appropriately). 
-        [SecurityCritical]
-        [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlPrincipal)]
         public void RunAsClient(PipeStreamImpersonationWorker impersonationWorker)
         {
             CheckWriteOperations();
@@ -186,7 +184,6 @@ namespace System.IO.Pipes
         private static RuntimeHelpers.TryCode tryCode = new RuntimeHelpers.TryCode(ImpersonateAndTryCode);
         private static RuntimeHelpers.CleanupCode cleanupCode = new RuntimeHelpers.CleanupCode(RevertImpersonationOnBackout);
 
-        [SecurityCritical]
         private static void ImpersonateAndTryCode(Object helper)
         {
             ExecuteHelper execHelper = (ExecuteHelper)helper;
@@ -212,7 +209,6 @@ namespace System.IO.Pipes
             }
         }
 
-        [SecurityCritical]
         private static void RevertImpersonationOnBackout(Object helper, bool exceptionThrown)
         {
             ExecuteHelper execHelper = (ExecuteHelper)helper;
@@ -243,7 +239,6 @@ namespace System.IO.Pipes
         }
 
         // Async version of WaitForConnection.  See the comments above for more info.
-        [SecurityCritical]
         private unsafe Task WaitForConnectionCoreAsync(CancellationToken cancellationToken)
         {
             CheckConnectOperationsServerWithHandle();

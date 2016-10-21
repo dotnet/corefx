@@ -204,11 +204,7 @@ namespace System.IO.Pipes
         // ---- PAL layer ends here ----
         // -----------------------------
 
-        // This method calls a delegate while impersonating the client. Note that we will not have
-        // access to the client's security token until it has written at least once to the pipe 
-        // (and has set its impersonationLevel argument appropriately). 
-        [SecurityCritical]
-        [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlPrincipal)]
+        // This method calls a delegate while impersonating the client.
         public void RunAsClient(PipeStreamImpersonationWorker impersonationWorker)
         {
             CheckWriteOperations();

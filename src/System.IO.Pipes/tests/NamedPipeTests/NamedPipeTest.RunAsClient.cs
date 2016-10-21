@@ -26,7 +26,9 @@ namespace System.IO.Pipes.Tests
                 client.Connect();
                 await serverTask;
 
-                server.RunAsClient(() => { });
+                bool ran = false;
+                server.RunAsClient(() => ran = true);
+                Assert.True(ran, "Expected delegate to have been invoked");
             }
         }
 
@@ -50,15 +52,6 @@ namespace System.IO.Pipes.Tests
             RemoteInvoke(ServerConnectAsId, pipeName, pairID.ToString()).Dispose();
         }
 
-        public class GetEuidTestClass
-        {
-            public uint pairID;
-            public void AssertEqual()
-            {
-                Assert.Equal(pairID, geteuid());
-            }
-        }
-
         private static int ServerConnectAsId(string pipeName, string pairIDString)
         {
             uint pairID = uint.Parse(pairIDString);
@@ -70,11 +63,16 @@ namespace System.IO.Pipes.Tests
                 outbound.WaitForConnection();
                 Assert.NotEqual(-1, seteuid(0));
 
-                var euidTest = new GetEuidTestClass { pairID = pairID };
-                outbound.RunAsClient(euidTest.AssertEqual);
+                bool ran = false;
+                uint ranAs = 0;
+                outbound.RunAsClient(() => {
+                    ran = true;
+                    ranAs = geteuid();
+                });
+                Assert.True(ran, "Expected delegate to have been invoked");
+                Assert.Equal(pairID, ranAs);
             }
             return SuccessExitCode;
-
         }
 
         private static int ClientConnectAsID(string pipeName, string pairIDString)
