@@ -15,7 +15,7 @@ namespace System.Runtime.InteropServices.Tests
         public void Exists()
         {
             var type = typeof(ComVisibleAttributeTests);
-            var attr = type.GetCustomAttributes(typeof(ComVisibleAttribute), false).OfType<ComVisibleAttribute>().Single();
+            var attr = type.GetCustomAttributes(typeof(ComVisibleAttribute), false).OfType<ComVisibleAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
             Assert.Equal(true, attr.Value);
         }

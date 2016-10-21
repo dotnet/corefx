@@ -21,7 +21,7 @@ namespace System.Runtime.InteropServices.Tests
         {
             var type = typeof(ComRegisterFunctionAttributeTests);
             var method = type.GetTypeInfo().DeclaredMethods.Single(m => m.Name == "Func");
-            var attr = method.GetCustomAttributes(typeof(ComRegisterFunctionAttribute), false).OfType<ComRegisterFunctionAttribute>().Single();
+            var attr = method.GetCustomAttributes(typeof(ComRegisterFunctionAttribute), false).OfType<ComRegisterFunctionAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
         }
     }

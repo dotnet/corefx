@@ -15,7 +15,7 @@ namespace System.Runtime.InteropServices.Tests
         public void Exists()
         {
             var type = typeof(ComConversionLossAttributeTests);
-            var attr = type.GetCustomAttributes(typeof(ComConversionLossAttribute), false).OfType<ComConversionLossAttribute>().Single();
+            var attr = type.GetCustomAttributes(typeof(ComConversionLossAttribute), false).OfType<ComConversionLossAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
         }
     }

@@ -20,7 +20,7 @@ namespace System.Runtime.InteropServices.Tests
         {
             var type = typeof(ComAliasNameAttributeTests);
             var field = type.GetTypeInfo().DeclaredFields.Single(f => f.Name == "_foo");
-            var attr = field.GetCustomAttributes(typeof(ComAliasNameAttribute), false).OfType<ComAliasNameAttribute>().Single();
+            var attr = field.GetCustomAttributes(typeof(ComAliasNameAttribute), false).OfType<ComAliasNameAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
             Assert.Equal("foo", attr.Value);
         }

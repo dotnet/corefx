@@ -18,7 +18,7 @@ namespace System.Runtime.InteropServices.Tests
         {
             var type = typeof(ComCompatibleVersionAttributeTests);
             var assembly = type.GetTypeInfo().Assembly;
-            var attr = assembly.GetCustomAttributes(typeof(ComCompatibleVersionAttribute), false).OfType<ComCompatibleVersionAttribute>().Single();
+            var attr = assembly.GetCustomAttributes(typeof(ComCompatibleVersionAttribute), false).OfType<ComCompatibleVersionAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
             Assert.Equal(1, attr.MajorVersion);
             Assert.Equal(2, attr.MinorVersion);

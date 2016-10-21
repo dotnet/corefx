@@ -18,7 +18,7 @@ namespace System.Runtime.InteropServices.Tests
         {
             var type = typeof(PrimaryInteropAssemblyAttributeTests);
             var assembly = type.GetTypeInfo().Assembly;
-            var attr = assembly.GetCustomAttributes(typeof(PrimaryInteropAssemblyAttribute), false).OfType<PrimaryInteropAssemblyAttribute>().Single();
+            var attr = assembly.GetCustomAttributes(typeof(PrimaryInteropAssemblyAttribute), false).OfType<PrimaryInteropAssemblyAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
             Assert.Equal(1, attr.MajorVersion);
             Assert.Equal(2, attr.MinorVersion);

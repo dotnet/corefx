@@ -15,7 +15,7 @@ namespace System.Runtime.InteropServices.Tests
         public void Exists()
         {
             var type = typeof(ProgIdAttributeTests);
-            var attr = type.GetCustomAttributes(typeof(ProgIdAttribute), false).OfType<ProgIdAttribute>().Single();
+            var attr = type.GetCustomAttributes(typeof(ProgIdAttribute), false).OfType<ProgIdAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
             Assert.Equal("pizza", attr.Value);
         }

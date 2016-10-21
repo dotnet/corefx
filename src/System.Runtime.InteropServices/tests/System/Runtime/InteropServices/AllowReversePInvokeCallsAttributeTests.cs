@@ -21,7 +21,7 @@ namespace System.Runtime.InteropServices.Tests
         {
             var type = typeof(AllowReversePInvokeCallsAttributeTests);
             var method = type.GetTypeInfo().DeclaredMethods.Single(m => m.Name == "Func");
-            var attr = method.GetCustomAttributes(typeof(AllowReversePInvokeCallsAttribute), false).Single(a => a is AllowReversePInvokeCallsAttribute);
+            var attr = method.GetCustomAttributes(typeof(AllowReversePInvokeCallsAttribute), false).OfType<AllowReversePInvokeCallsAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
         }
     }

@@ -21,7 +21,7 @@ namespace System.Runtime.InteropServices.Tests
         {
             var type = typeof(LCIDConversionAttributeTests);
             var method = type.GetTypeInfo().DeclaredMethods.Single(m => m.Name == "Func");
-            var attr = method.GetCustomAttributes(typeof(LCIDConversionAttribute), false).OfType<LCIDConversionAttribute>().Single();
+            var attr = method.GetCustomAttributes(typeof(LCIDConversionAttribute), false).OfType<LCIDConversionAttribute>().SingleOrDefault();
             Assert.NotNull(attr);
             Assert.Equal(1337, attr.Value);
         }
