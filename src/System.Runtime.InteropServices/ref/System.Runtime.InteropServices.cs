@@ -442,11 +442,11 @@ namespace System.Runtime.InteropServices
     }
     public struct HandleRef
     {
-        public HandleRef(object wrapper, IntPtr handle): this() { }
-        public IntPtr Handle { get; }
+        public HandleRef(object wrapper, System.IntPtr handle): this() { }
+        public System.IntPtr Handle { get; }
         public object Wrapper { get; }
-        public static explicit operator IntPtr(HandleRef value) { throw null; }
-        public static IntPtr ToIntPtr(HandleRef value) { throw null; }
+        public static explicit operator System.IntPtr(HandleRef value) { throw null; }
+        public static System.IntPtr ToIntPtr(HandleRef value) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     [System.ObsoleteAttribute("ICustomAdapter may be unavailable in future releases.")]
@@ -461,10 +461,10 @@ namespace System.Runtime.InteropServices
     public interface ICustomMarshaler
     {
         void CleanUpManagedData(object ManagedObj);
-        void CleanUpNativeData(IntPtr pNativeData);
+        void CleanUpNativeData(System.IntPtr pNativeData);
         int GetNativeDataSize();
-        IntPtr MarshalManagedToNative(object ManagedObj);
-        object MarshalNativeToManaged(IntPtr pNativeData);
+        System.IntPtr MarshalManagedToNative(object ManagedObj);
+        object MarshalNativeToManaged(System.IntPtr pNativeData);
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     [System.ObsoleteAttribute("ICustomQueryInterface may be unavailable in future releases.")]
