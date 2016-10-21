@@ -298,19 +298,7 @@
       "deleteTestResults": true
     }
   ],
-  "_links": {
-    "self": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/1053"
-    },
-    "web": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/_permalink/_build/index?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=1053"
-    },
-    "editor": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/_permalink/_build/definitionEditor?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=1053"
-    }
-  },
   "buildNumberFormat": "$(date:yyyyMMdd)$(rev:-rr)",
-  "comment": "Undo repo change, wrong build definition",
   "jobAuthorizationScope": "projectCollection",
   "jobTimeoutInMinutes": 60,
   "repository": {
@@ -328,13 +316,6 @@
   },
   "quality": "definition",
   "defaultBranch": "refs/heads/master",
-  "authoredBy": {
-    "id": "da8e23bb-3123-4efe-9074-87b88acf60b7",
-    "displayName": "Christopher Costa",
-    "uniqueName": "chcosta@microsoft.com",
-    "url": "https://app.vssps.visualstudio.com/Aa44b2c06-f247-425c-8464-4a0676af910a/_apis/Identities/da8e23bb-3123-4efe-9074-87b88acf60b7",
-    "imageUrl": "https://devdiv.visualstudio.com/_api/_common/identityImage?id=da8e23bb-3123-4efe-9074-87b88acf60b7"
-  },
   "queue": {
     "pool": {
       "id": 39,
@@ -343,11 +324,8 @@
     "id": 36,
     "name": "DotNet-Build"
   },
-  "uri": "vstfs:///Build/Definition/1053",
   "path": "\\",
   "type": "build",
-  "revision": 97,
-  "createdDate": "2016-10-05T01:09:52.347Z",
   "id": 1053,
   "name": "DotNet-CoreFx-Trusted-Mac-Native",
   "url": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/1053",
@@ -357,6 +335,6 @@
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418097363
+    "revision": 418097387
   }
 }

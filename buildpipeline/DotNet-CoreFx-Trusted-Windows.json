@@ -3,7 +3,7 @@
     {
       "enabled": true,
       "continueOnError": false,
-      "alwaysRun": true,
+      "alwaysRun": false,
       "displayName": "Delete 'corefx'",
       "timeoutInMinutes": 0,
       "task": {
@@ -33,7 +33,7 @@
       },
       "inputs": {
         "SourceFolder": "$(build.SourcesDirectory)",
-        "Contents": "corefx\\**\ncorefx"
+        "Contents": "**\n.gitignore"
       }
     },
     {
@@ -157,7 +157,25 @@
       },
       "inputs": {
         "filename": "build-native.cmd",
-        "arguments": "-buildArch=$(Platform) -$(ConfigurationGroup) -- toolsetDir=C:\\tools\\clr /p:SignType=$(SignType)",
+        "arguments": "-buildArch=$(Platform) -$(ConfigurationGroup)",
+        "workingFolder": "corefx",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run build-managed.cmd",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "build-managed.cmd",
+        "arguments": "-binaries -buildArch=$(Platform) -$(ConfigurationGroup) -- /p:SignType=$(SignType)",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
@@ -175,7 +193,7 @@
       },
       "inputs": {
         "filename": "build-packages.cmd",
-        "arguments": "-$(ConfigurationGroup) -buildArch=$(Platform) -DisableManagedPackage -FilterToOSGroup=Windows_NT",
+        "arguments": "-$(ConfigurationGroup) -BuildPackageLibraryReferences=false",
         "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
@@ -286,7 +304,7 @@
       },
       "inputs": {
         "CopyRoot": "",
-        "Contents": "*.log\ncorefx\\*.log",
+        "Contents": "*.log\ncorefx\\*.log\ncorefx\\src\\*.log",
         "ArtifactName": "BuildLogs",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
@@ -296,15 +314,33 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": false,
-      "displayName": "Publish Artifact: bin",
+      "displayName": "Zip",
       "timeoutInMinutes": 0,
       "task": {
-        "id": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe",
+        "id": "dc66d2f0-a7ba-11e5-ae62-3deab86d85e3",
         "versionSpec": "*",
         "definitionType": "task"
       },
       "inputs": {
-        "PathtoPublish": "corefx/bin",
+        "pathToZipFolder": "corefx\\bin",
+        "pathToZipFile": "bin.zip",
+        "overwrite": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Copy Publish Artifact: bin",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "1d341bb0-2106-458c-8422-d00bcea6512a",
+        "versionSpec": "*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "CopyRoot": "",
+        "Contents": "bin.zip",
         "ArtifactName": "bin",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
@@ -312,7 +348,7 @@
     },
     {
       "enabled": false,
-      "continueOnError": false,
+      "continueOnError": true,
       "alwaysRun": false,
       "displayName": "Copy Publish Artifact: symbols",
       "timeoutInMinutes": 0,
@@ -333,7 +369,7 @@
       "enabled": true,
       "continueOnError": true,
       "alwaysRun": false,
-      "displayName": "Final clean to remove lingering process",
+      "displayName": "Final clean to remove any lingering process",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -392,7 +428,7 @@
       "allowOverride": true
     },
     "Platform": {
-      "value": "x64",
+      "value": "AnyCPU",
       "allowOverride": true
     },
     "TeamName": {
@@ -421,6 +457,9 @@
       "value": "HEAD",
       "allowOverride": true
     },
+    "Build.Clean": {
+      "value": "all"
+    },
     "VsoAccountName": {
       "value": "dn-bot"
     },
@@ -434,6 +473,10 @@
     },
     "VsoCorefxGitUrl": {
       "value": "https://$(VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(VsoRepositoryName)/"
+    },
+    "SourceBranch": {
+      "value": "master",
+      "allowOverride": true
     }
   },
   "demands": [
@@ -444,30 +487,17 @@
       "branches": [
         "+refs/heads/*"
       ],
-      "artifacts": [],
-      "artifactTypesToDelete": [
-        "FilePath",
-        "SymbolStore"
+      "artifacts": [
+        "build.SourceLabel"
       ],
+      "artifactTypesToDelete": [],
       "daysToKeep": 10,
       "minimumToKeep": 1,
       "deleteBuildRecord": true,
       "deleteTestResults": true
     }
   ],
-  "_links": {
-    "self": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/1476"
-    },
-    "web": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/_permalink/_build/index?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=1476"
-    },
-    "editor": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/_permalink/_build/definitionEditor?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=1476"
-    }
-  },
   "buildNumberFormat": "$(date:yyyyMMdd)$(rev:-rr)",
-  "comment": "Make final clean \"continue on error\"",
   "jobAuthorizationScope": "projectCollection",
   "jobTimeoutInMinutes": 180,
   "repository": {
@@ -485,13 +515,6 @@
   },
   "quality": "definition",
   "defaultBranch": "refs/heads/master",
-  "authoredBy": {
-    "id": "9abb3885-754b-4c36-a36e-644c702aa0cb",
-    "displayName": "Alfredo Menendez Sancho",
-    "uniqueName": "alfremen@microsoft.com",
-    "url": "https://app.vssps.visualstudio.com/Aa44b2c06-f247-425c-8464-4a0676af910a/_apis/Identities/9abb3885-754b-4c36-a36e-644c702aa0cb",
-    "imageUrl": "https://devdiv.visualstudio.com/_api/_common/identityImage?id=9abb3885-754b-4c36-a36e-644c702aa0cb"
-  },
   "queue": {
     "pool": {
       "id": 39,
@@ -500,20 +523,17 @@
     "id": 36,
     "name": "DotNet-Build"
   },
-  "uri": "vstfs:///Build/Definition/1476",
   "path": "\\",
   "type": "build",
-  "revision": 59,
-  "createdDate": "2016-10-14T20:57:38.48Z",
-  "id": 1476,
-  "name": "DotNet-CoreFx-Trusted-Windows-Native",
-  "url": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/1476",
+  "id": 893,
+  "name": "DotNet-CoreFx-Trusted-Windows",
+  "url": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/893",
   "project": {
     "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "name": "DevDiv",
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418097375
+    "revision": 418097387
   }
 }

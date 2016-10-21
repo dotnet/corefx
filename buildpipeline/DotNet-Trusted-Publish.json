@@ -286,7 +286,7 @@
         "scriptType": "inlineScript",
         "scriptName": "",
         "arguments": "-gitHubAuthToken $(UpdatePublishedVersions.AuthToken) -root $(Pipeline.SourcesDirectory)",
-        "inlineScript": "param($gitHubAuthToken, $root)\nif ($env:ConfigurationGroup -ne \"Release\") { exit }\ncd $root\n. $root\\UpdatePublishedVersions.ps1 `\n  -gitHubUser dotnet-bot -gitHubEmail dotnet-bot@microsoft.com `\n  -gitHubAuthToken $gitHubAuthToken `\n  -versionsRepoOwner $env:VersionsRepoOwner -versionsRepo versions `\n  -versionsRepoPath build-info/dotnet/$env:GitHubRepositoryName/$env:SourceBranch `\n  -nupkgPath $root\\packages\\AzureTransfer\\$env:ConfigurationGroup\\$env:AzureContainerPackageGlob",
+        "inlineScript": "param($gitHubAuthToken, $root)\nif ($env:ConfigurationGroup -ne \"Release\") { exit }\ncd $root\n. $root\\UpdatePublishedVersions.ps1 `\n  -gitHubUser dotnet-helix-bot -gitHubEmail dotnet-helix-bot@microsoft.com `\n  -gitHubAuthToken $gitHubAuthToken `\n  -versionsRepoOwner $env:VersionsRepoOwner -versionsRepo versions `\n  -versionsRepoPath build-info/dotnet/$env:GitHubRepositoryName/$env:SourceBranch `\n  -nupkgPath $root\\packages\\AzureTransfer\\$env:ConfigurationGroup\\$env:AzureContainerPackageGlob",
         "workingFolder": "",
         "failOnStandardError": "true"
       }
@@ -581,19 +581,7 @@
       "deleteTestResults": true
     }
   ],
-  "_links": {
-    "self": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/2943"
-    },
-    "web": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/_permalink/_build/index?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=2943"
-    },
-    "editor": {
-      "href": "https://devdiv.visualstudio.com/DefaultCollection/_permalink/_build/definitionEditor?collectionId=011b8bdf-6d56-4f87-be0d-0092136884d9&projectId=0bdbc590-a062-4c3f-b0f6-9383f67865ee&definitionId=2943"
-    }
-  },
   "buildNumberFormat": "$(date:yyyyMMdd)$(rev:-rr)",
-  "comment": "Disable fail on standard error during sync -ab to avoid warnings failing the publish.",
   "jobAuthorizationScope": "projectCollection",
   "jobTimeoutInMinutes": 180,
   "repository": {
@@ -611,13 +599,6 @@
   },
   "quality": "definition",
   "defaultBranch": "refs/heads/master",
-  "authoredBy": {
-    "id": "3fc1c7d1-b7fc-4da9-90e8-ee20ddaebe53",
-    "displayName": "Davis Goodin",
-    "uniqueName": "dagood@microsoft.com",
-    "url": "https://app.vssps.visualstudio.com/Aa44b2c06-f247-425c-8464-4a0676af910a/_apis/Identities/3fc1c7d1-b7fc-4da9-90e8-ee20ddaebe53",
-    "imageUrl": "https://devdiv.visualstudio.com/_api/_common/identityImage?id=3fc1c7d1-b7fc-4da9-90e8-ee20ddaebe53"
-  },
   "queue": {
     "pool": {
       "id": 39,
@@ -626,11 +607,8 @@
     "id": 36,
     "name": "DotNet-Build"
   },
-  "uri": "vstfs:///Build/Definition/2943",
   "path": "\\",
   "type": "build",
-  "revision": 51,
-  "createdDate": "2016-09-08T19:31:16.377Z",
   "id": 2943,
   "name": "DotNet-Trusted-Publish",
   "url": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/2943",
@@ -640,6 +618,6 @@
     "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
     "state": "wellFormed",
-    "revision": 418097363
+    "revision": 418097387
   }
 }

@@ -1,7 +1,7 @@
 {
   "Repository": "corefx",
   "Definitions": {
-    "Path": "..\\definitions",
+    "Path": ".",
     "Type": "VSTS",
     "BaseUrl":  "https://devdiv.visualstudio.com/DefaultCollection"
   },
@@ -10,7 +10,7 @@
       "Name": "Product-Build",
       "Definitions": [
         {
-          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "debian82_prereqs_2"
           },
@@ -21,7 +21,7 @@
           }
         },
         {
-          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "fedora23_prereqs"
           },
@@ -32,7 +32,7 @@
           }
         },
         {
-          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "opensuse132_prereqs_v4"
           },
@@ -43,7 +43,7 @@
           }
         },
         {
-          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "opensuse421_prereqs_v3"
           },
@@ -54,7 +54,7 @@
           }
         },
         {
-          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "rhel7_prereqs_2"
           },
@@ -65,7 +65,7 @@
           }
         },
         {
-          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "ubuntu1404_prereqs_v3"
           },
@@ -76,7 +76,7 @@
           }
         },
         {
-          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "ubuntu1604_prereqs"
           },
@@ -87,7 +87,7 @@
           }
         },
         {
-          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "ubuntu1610_prereqs_v2"
           },
@@ -98,7 +98,7 @@
           }
         },
         {
-          "Name": "CoreFx-OSX-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Mac-Native",
           "ReportingParameters": {
             "SubType": "native",
             "OperatingSystem": "OSX",
@@ -106,10 +106,10 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-Trusted"
+          "Name": "DotNet-CoreFx-Trusted-Windows"
         },
         {
-          "Name": "CoreFx-Windows-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
           "Parameters": {
             "Platform": "arm"
           },
@@ -120,7 +120,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
           "Parameters": {
             "Platform": "arm64"
           },
@@ -131,7 +131,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
           "Parameters": {
             "Platform": "x64"
           },
@@ -142,7 +142,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-Product-Native-Trusted",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Native",
           "Parameters": {
             "Platform": "x86"
           },
@@ -203,7 +203,7 @@
       },
       "Definitions": [
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10"
@@ -214,7 +214,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Core.Amd64",
             "TestContainerSuffix": "windows10core"
@@ -225,7 +225,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10ilc",
@@ -240,7 +240,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10uwp",
@@ -254,7 +254,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10desktop",
@@ -268,7 +268,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.7.Amd64",
             "TestContainerSuffix": "windows7"
@@ -279,7 +279,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.81.Amd64",
             "TestContainerSuffix": "windows81"
@@ -342,7 +342,7 @@
       },
       "Definitions": [
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Centos.71.Amd64",
             "TestContainerSuffix": "centos71",
@@ -354,7 +354,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Debian.82.Amd64",
             "TestContainerSuffix": "debian82",
@@ -366,7 +366,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Redhat.72.Amd64",
             "TestContainerSuffix": "redhat72",
@@ -378,7 +378,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Ubuntu.1404.Amd64",
             "TestContainerSuffix": "ubuntu1404",
@@ -390,7 +390,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Ubuntu.1604.Amd64",
             "TestContainerSuffix": "ubuntu1604",
@@ -402,7 +402,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Fedora.23.Amd64",
             "TestContainerSuffix": "fedora23",
@@ -414,7 +414,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Suse.132.Amd64",
             "TestContainerSuffix": "suse132",
@@ -437,7 +437,7 @@
       },
       "Definitions": [
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "Branch": "corefx",
             "ConfigurationGroup": "Release",
@@ -481,7 +481,7 @@
       },
       "Definitions": [
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10"
@@ -492,7 +492,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Core.Amd64",
             "TestContainerSuffix": "windows10core"
@@ -503,7 +503,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10ilc",
@@ -518,7 +518,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10uwp",
@@ -532,7 +532,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10desktop",
@@ -546,7 +546,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.7.Amd64",
             "TestContainerSuffix": "windows7"
@@ -557,7 +557,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.81.Amd64",
             "TestContainerSuffix": "windows81"
@@ -590,7 +590,7 @@
       },
       "Definitions": [
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Centos.71.Amd64",
             "TestContainerSuffix": "centos71",
@@ -602,7 +602,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Debian.82.Amd64",
             "TestContainerSuffix": "debian82",
@@ -614,7 +614,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Redhat.72.Amd64",
             "TestContainerSuffix": "redhat72",
@@ -626,7 +626,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Ubuntu.1404.Amd64",
             "TestContainerSuffix": "ubuntu1404",
@@ -638,7 +638,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Ubuntu.1604.Amd64",
             "TestContainerSuffix": "ubuntu1604",
@@ -650,7 +650,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Fedora.23.Amd64",
             "TestContainerSuffix": "fedora23",
@@ -662,7 +662,7 @@
           }
         },
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Suse.132.Amd64",
             "TestContainerSuffix": "suse132",
@@ -685,7 +685,7 @@
       },
       "Definitions": [
         {
-          "Name": "CoreFx-Windows-BuildTests",
+          "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "Branch": "corefx",
             "ConfigurationGroup": "Debug",
@@ -720,7 +720,7 @@
       },
       "Definitions": [
         {
-          "Name": "Package-Publish",
+          "Name": "DotNet-Trusted-Publish",
           "Parameters": {
             "VstsRepositoryName": "DotNet-CoreFX-Trusted",
             "GitHubRepositoryName": "corefx"
@@ -745,7 +745,7 @@
       },
       "Definitions": [
         {
-          "Name": "Package-Publish",
+          "Name": "DotNet-Trusted-Publish",
           "Parameters": {
             "VstsRepositoryName": "DotNet-CoreFX-Trusted",
             "GitHubRepositoryName": "corefx"
