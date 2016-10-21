@@ -17,11 +17,11 @@ namespace System.Runtime.InteropServices
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ComAliasNameAttribute : Attribute
     {
-        public ComAliasNameAttribute(String alias)
+        public ComAliasNameAttribute(string alias)
         {
             Value = alias;
         }
-        public String Value { get; }  
+        public string Value { get; }  
     }
     
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
@@ -99,14 +99,14 @@ namespace System.Runtime.InteropServices
     [System.Runtime.InteropServices.ComVisible(false)]
     public sealed class ManagedToNativeComInteropStubAttribute : Attribute
     {
-        public ManagedToNativeComInteropStubAttribute(Type classType, String methodName)
+        public ManagedToNativeComInteropStubAttribute(Type classType, string methodName)
         {
             ClassType = classType;
             MethodName = methodName;
         }
 
         public Type ClassType { get; }
-        public String MethodName { get; }
+        public string MethodName { get; }
     }
     
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = true)]
@@ -127,11 +127,11 @@ namespace System.Runtime.InteropServices
     [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class ProgIdAttribute : Attribute
     {
-        public ProgIdAttribute(String progId)
+        public ProgIdAttribute(string progId)
         {
             Value = progId;
         }
-        public String Value { get; }  
+        public string Value { get; }  
     }
     
     [Obsolete("This attribute has been deprecated.  Application Domains no longer respect Activation Context boundaries in IDispatch calls.", false)]
