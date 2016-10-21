@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,7 +15,7 @@ namespace System.Linq.Expressions
     /// <summary>
     /// Represents indexing a property or array.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.IndexExpressionProxy))]
+    [DebuggerTypeProxy(typeof(IndexExpressionProxy))]
     public sealed class IndexExpression : Expression, IArgumentProvider
     {
         private readonly Expression _instance;

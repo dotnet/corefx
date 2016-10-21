@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,7 +15,7 @@ namespace System.Linq.Expressions
     /// Needed to implement "eval" in some dynamic languages.
     /// Evaluates to an instance of <see cref="IList{IStrongBox}" /> when executed.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.RuntimeVariablesExpressionProxy))]
+    [DebuggerTypeProxy(typeof(RuntimeVariablesExpressionProxy))]
     public sealed class RuntimeVariablesExpression : Expression
     {
         private readonly ReadOnlyCollection<ParameterExpression> _variables;

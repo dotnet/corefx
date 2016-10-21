@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Dynamic.Utils;
 using System.Diagnostics;
 
@@ -13,7 +12,7 @@ namespace System.Linq.Expressions
     /// <summary>
     /// Represents an expression that has a conditional operator.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.ConditionalExpressionProxy))]
+    [DebuggerTypeProxy(typeof(ConditionalExpressionProxy))]
     public class ConditionalExpression : Expression
     {
         private readonly Expression _test;
@@ -131,7 +130,7 @@ namespace System.Linq.Expressions
         }
     }
 
-    internal class FullConditionalExpressionWithType : FullConditionalExpression
+    internal sealed class FullConditionalExpressionWithType : FullConditionalExpression
     {
         private readonly Type _type;
 

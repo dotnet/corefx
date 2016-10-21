@@ -50,9 +50,9 @@ namespace System.IO
                 // and if no one else is currently using the preallocated overlapped.  This is the fast-path for cases 
                 // where the user-provided buffer is smaller than the FileStream's buffer (such that the FileStream's 
                 // buffer is used) and where operations on the FileStream are not being performed concurrently.
-                _overlapped = ReferenceEquals(bytes, _stream._buffer) && Interlocked.CompareExchange(ref _stream._currentOverlappedOwner, this, null) == null ?
-                    _stream._handle.ThreadPoolBinding.AllocateNativeOverlapped(_stream._preallocatedOverlapped) :
-                    _stream._handle.ThreadPoolBinding.AllocateNativeOverlapped(s_ioCallback, this, bytes);
+                _overlapped = ReferenceEquals(bytes, _stream._buffer) && _stream.CompareExchangeCurrentOverlappedOwner(this, null) == null ?
+                    _stream._fileHandle.ThreadPoolBinding.AllocateNativeOverlapped(_stream._preallocatedOverlapped) :
+                    _stream._fileHandle.ThreadPoolBinding.AllocateNativeOverlapped(s_ioCallback, this, bytes);
                 Debug.Assert(_overlapped != null, "AllocateNativeOverlapped returned null");
             }
 
@@ -114,13 +114,13 @@ namespace System.IO
                 // (this is why we disposed the registration above).
                 if (_overlapped != null)
                 {
-                    _stream._handle.ThreadPoolBinding.FreeNativeOverlapped(_overlapped);
+                    _stream._fileHandle.ThreadPoolBinding.FreeNativeOverlapped(_overlapped);
                     _overlapped = null;
                 }
 
                 // Ensure we're no longer set as the current completion source (we may not have been to begin with).
                 // Only one operation at a time is eligible to use the preallocated overlapped, 
-                Interlocked.CompareExchange(ref _stream._currentOverlappedOwner, null, this);
+                _stream.CompareExchangeCurrentOverlappedOwner(null, this);
             }
 
             // When doing IO asynchronously (i.e. _isAsync==true), this callback is 
@@ -203,8 +203,8 @@ namespace System.IO
                 Debug.Assert(completionSource._overlapped != null && !completionSource.Task.IsCompleted, "IO should not have completed yet");
 
                 // If the handle is still valid, attempt to cancel the IO
-                if (!completionSource._stream._handle.IsInvalid && 
-                    !Interop.mincore.CancelIoEx(completionSource._stream._handle, completionSource._overlapped))
+                if (!completionSource._stream._fileHandle.IsInvalid && 
+                    !Interop.mincore.CancelIoEx(completionSource._stream._fileHandle, completionSource._overlapped))
                 {
                     int errorCode = Marshal.GetLastWin32Error();
 

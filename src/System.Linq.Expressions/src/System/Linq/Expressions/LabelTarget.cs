@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
@@ -46,7 +45,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="String"/> that represents the current <see cref="Object"/>. </returns>
         public override string ToString()
         {
-            return String.IsNullOrEmpty(this.Name) ? "UnamedLabel" : this.Name;
+            return string.IsNullOrEmpty(this.Name) ? "UnamedLabel" : this.Name;
         }
     }
 

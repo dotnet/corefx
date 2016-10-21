@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
@@ -13,7 +12,7 @@ namespace System.Linq.Expressions
     /// <summary>
     /// Represents an operation between an expression and a type. 
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.TypeBinaryExpressionProxy))]
+    [DebuggerTypeProxy(typeof(TypeBinaryExpressionProxy))]
     public sealed class TypeBinaryExpression : Expression
     {
         private readonly Expression _expression;

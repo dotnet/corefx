@@ -2,21 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic.Utils;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions
 {
     /// <summary>
     /// Represents a call to either static or an instance method.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.MethodCallExpressionProxy))]
+    [DebuggerTypeProxy(typeof(MethodCallExpressionProxy))]
     public class MethodCallExpression : Expression, IArgumentProvider
     {
         private readonly MethodInfo _method;

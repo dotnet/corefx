@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -15,7 +14,7 @@ namespace System.Linq.Expressions
     /// <summary>
     /// Represents a block that contains a sequence of expressions where variables can be defined.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.BlockExpressionProxy))]
+    [DebuggerTypeProxy(typeof(BlockExpressionProxy))]
     public class BlockExpression : Expression
     {
         /// <summary>
@@ -539,7 +538,7 @@ namespace System.Linq.Expressions
         }
     }
 
-    internal class ScopeWithType : ScopeN
+    internal sealed class ScopeWithType : ScopeN
     {
         private readonly Type _type;
 

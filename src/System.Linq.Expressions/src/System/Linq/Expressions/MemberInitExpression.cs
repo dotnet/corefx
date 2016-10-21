@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,7 +13,7 @@ namespace System.Linq.Expressions
     /// <summary>
     /// Represents calling a constructor and initializing one or more members of the new object.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.MemberInitExpressionProxy))]
+    [DebuggerTypeProxy(typeof(MemberInitExpressionProxy))]
     public sealed class MemberInitExpression : Expression
     {
         private readonly NewExpression _newExpression;

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -19,7 +18,7 @@ namespace System.Linq.Expressions
     /// Use the <see cref="M:ListInit"/> factory methods to create a ListInitExpression. 
     /// The value of the NodeType property of a ListInitExpression is ListInit. 
     /// </remarks>
-    [DebuggerTypeProxy(typeof(Expression.ListInitExpressionProxy))]
+    [DebuggerTypeProxy(typeof(ListInitExpressionProxy))]
     public sealed class ListInitExpression : Expression
     {
         private readonly NewExpression _newExpression;

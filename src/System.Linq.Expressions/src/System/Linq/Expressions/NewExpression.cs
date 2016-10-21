@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -15,7 +14,7 @@ namespace System.Linq.Expressions
     /// <summary>
     /// Represents a constructor call.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.NewExpressionProxy))]
+    [DebuggerTypeProxy(typeof(NewExpressionProxy))]
     public class NewExpression : Expression, IArgumentProvider
     {
         private readonly ConstructorInfo _constructor;
@@ -113,7 +112,7 @@ namespace System.Linq.Expressions
         }
     }
 
-    internal class NewValueTypeExpression : NewExpression
+    internal sealed class NewValueTypeExpression : NewExpression
     {
         private readonly Type _valueType;
 

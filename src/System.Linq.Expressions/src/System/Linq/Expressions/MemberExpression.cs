@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic.Utils;
@@ -13,7 +12,7 @@ namespace System.Linq.Expressions
     /// <summary>
     /// Represents accessing a field or property.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.MemberExpressionProxy))]
+    [DebuggerTypeProxy(typeof(MemberExpressionProxy))]
     public class MemberExpression : Expression
     {
         private readonly Expression _expression;
@@ -98,7 +97,7 @@ namespace System.Linq.Expressions
         }
     }
 
-    internal class FieldExpression : MemberExpression
+    internal sealed class FieldExpression : MemberExpression
     {
         private readonly FieldInfo _field;
 
@@ -119,7 +118,7 @@ namespace System.Linq.Expressions
         }
     }
 
-    internal class PropertyExpression : MemberExpression
+    internal sealed class PropertyExpression : MemberExpression
     {
         private readonly PropertyInfo _property;
         public PropertyExpression(Expression expression, PropertyInfo member)

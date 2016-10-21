@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -20,7 +19,7 @@ namespace System.Linq.Expressions
     /// Only one of fault or finally can be supplied.
     /// The return type of the try block must match the return type of any associated catch statements.
     /// </summary>
-    [DebuggerTypeProxy(typeof(Expression.TryExpressionProxy))]
+    [DebuggerTypeProxy(typeof(TryExpressionProxy))]
     public sealed class TryExpression : Expression
     {
         private readonly Type _type;
