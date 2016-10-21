@@ -30,6 +30,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\System.Xml.XmlSerializer\pkg\System.Xml.XmlSerializer.pkgproj" />
+    <ProjectReference Include="..\..\..\System.Private.Xml\pkg\System.Private.Xml.pkgproj" />
+    <!-- To remove the following reference -->
+    <ProjectReference Include="..\..\..\System.Runtime.Serialization.Xml\pkg\System.Runtime.Serialization.Xml.pkgproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
