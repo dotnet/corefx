@@ -77,14 +77,16 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
                 try
                 {
                     key = new byte[invalidKeySize];
-                    byte[] cloneIV = (byte[])iv.Clone();  // Check memory for Cloning in CreateEncrpyor and CreateDecryptor
                 }
                 catch (OutOfMemoryException) // in case there isn't enough memory at test-time to allocate the large array
                 {
                     return;
                 }
-                Assert.Throws<ArgumentException>("rgbKey", () => aes.CreateEncryptor(key, iv));
-                Assert.Throws<ArgumentException>("rgbKey", () => aes.CreateDecryptor(key, iv));
+                Exception e = Record.Exception(() => aes.CreateEncryptor(key, iv));
+                Assert.True(e is ArgumentException || e is OutOfMemoryException, $"Got {e}");
+                
+                e = Record.Exception(() => aes.CreateDecryptor(key, iv));
+                Assert.True(e is ArgumentException || e is OutOfMemoryException, $"Got {e}");
             }
         }
 
@@ -102,14 +104,16 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
                 try
                 {
                     iv = new byte[invalidIvSize];
-                    byte[] cloneIV = (byte[])iv.Clone();  // Check memory for Cloning in CreateEncrpyor and CreateDecryptor
                 }
                 catch (OutOfMemoryException) // in case there isn't enough memory at test-time to allocate the large array
                 {
                     return;
                 }
-                Assert.Throws<ArgumentException>("rgbIV", () => aes.CreateEncryptor(key, iv));
-                Assert.Throws<ArgumentException>("rgbIV", () => aes.CreateDecryptor(key, iv));
+                Exception e = Record.Exception(() => aes.CreateEncryptor(key, iv));
+                Assert.True(e is ArgumentException || e is OutOfMemoryException, $"Got {e}");
+                
+                e = Record.Exception(() => aes.CreateDecryptor(key, iv));
+                Assert.True(e is ArgumentException || e is OutOfMemoryException, $"Got {e}");
             }
         }
 
