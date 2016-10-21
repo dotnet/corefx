@@ -567,6 +567,8 @@ namespace System.IO
             }
         }
 
+        private FileStreamCompletionSource CompareExchangeCurrentOverlappedOwner(FileStreamCompletionSource newSource, FileStreamCompletionSource existingSource) => Interlocked.CompareExchange(ref _currentOverlappedOwner, newSource, existingSource);
+
         public override int Read(byte[] array, int offset, int count)
         {
             if (array == null)
