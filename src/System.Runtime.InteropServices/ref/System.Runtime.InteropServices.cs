@@ -231,6 +231,7 @@ namespace System.Runtime.InteropServices
         public COMException(string message) { }
         public COMException(string message, System.Exception inner) { }
         public COMException(string message, int errorCode) { }
+        public override string ToString() { return default(string); }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1028), Inherited = false)]
     public sealed partial class ComImportAttribute : System.Attribute
@@ -401,6 +402,16 @@ namespace System.Runtime.InteropServices
         public string Name { get { throw null; } }
         public void Add() { }
         public void Remove() { }
+    }
+    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct HandleRef
+    {
+        public HandleRef(object wrapper, System.IntPtr handle) { throw null; }
+        public System.IntPtr Handle { get { throw null; } }
+        public object Wrapper { get { throw null; } }
+        public static explicit operator System.IntPtr (System.Runtime.InteropServices.HandleRef value) { throw null; }
+        public static System.IntPtr ToIntPtr(System.Runtime.InteropServices.HandleRef value) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     [System.ObsoleteAttribute("ICustomAdapter may be unavailable in future releases.")]

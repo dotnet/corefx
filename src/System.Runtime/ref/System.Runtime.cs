@@ -3128,6 +3128,8 @@ namespace System.Runtime.InteropServices
         protected abstract bool ReleaseHandle();
         protected void SetHandle(System.IntPtr handle) { }
         public void SetHandleAsInvalid() { }
+        [System.Security.SecurityCriticalAttribute]
+        public void Close() { }
     }
     public partial class ExternalException : System.SystemException
     {
