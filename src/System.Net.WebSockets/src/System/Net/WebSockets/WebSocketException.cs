@@ -5,6 +5,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace System.Net.WebSockets
 {
@@ -137,6 +138,16 @@ namespace System.Net.WebSockets
             }
         }
 
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException("info");
+            }
+            info.AddValue("WebSocketErrorCode", _webSocketErrorCode);
+            base.GetObjectData(info, context);
+        }
+        
         private static string GetErrorMessage(WebSocketError error)
         {
             // Provide a canned message for the error type.
