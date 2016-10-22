@@ -9,7 +9,7 @@ namespace System.Reflection.Emit.Tests
 {
     public class TypeBuilderDefineConstructor
     {
-        public static IEnumerable<object[]> DefineConstructor_TestData()
+        public static IEnumerable<object[]> TestData()
         {
             yield return new object[] { MethodAttributes.Public, new Type[] { typeof(int), typeof(int) }, CallingConventions.HasThis };
             yield return new object[] { MethodAttributes.Family, new Type[] { typeof(int), typeof(int) }, CallingConventions.HasThis };
@@ -35,7 +35,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Theory]
-        [MemberData(nameof(DefineConstructor_TestData))]
+        [MemberData(nameof(TestData))]
         public void DefineConstructor(MethodAttributes attributes, Type[] parameterTypes, CallingConventions callingConvention)
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Class | TypeAttributes.Public);
@@ -64,7 +64,7 @@ namespace System.Reflection.Emit.Tests
         }
 
         [Theory]
-        [MemberData(nameof(DefineConstructor_TestData))]
+        [MemberData(nameof(TestData))]
         public void DefineConstructor_NullRequiredAndOptionalCustomModifiers(MethodAttributes attributes, Type[] parameterTypes, CallingConventions callingConvention)
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Class | TypeAttributes.Public);
