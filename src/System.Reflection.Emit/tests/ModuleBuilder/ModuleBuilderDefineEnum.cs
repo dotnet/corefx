@@ -9,26 +9,20 @@ namespace System.Reflection.Emit.Tests
 {
     public class ModuleBuilderDefineEnum
     {
-        private static Type[] s_builtInIntegerTypes = new Type[] { typeof(byte), typeof(sbyte), typeof(short), typeof(ushort),
-        typeof(int), typeof(uint), typeof(long), typeof(ulong) };
-
         public static IEnumerable<object[]> DefineEnum_TestData()
         {
-            foreach (string name in new string[] { "TestEnum", "testenum", "enum", "\uD800\uDC00", "a\0b\0c" })
-            {
-                foreach (object[] attributesData in VisibilityAttributes(true))
-                {
-                    foreach (Type underlyingType in s_builtInIntegerTypes)
-                    {
-                        yield return new object[] { name, attributesData[0], underlyingType };
-                    }
-                }
-            }
+            yield return new object[] { "TestEnum", TypeAttributes.Public, typeof(byte) };
+            yield return new object[] { "testenum", TypeAttributes.NotPublic, typeof(sbyte) };
+            yield return new object[] { "enum", TypeAttributes.Public, typeof(short) };
+            yield return new object[] { "\uD800\uDC00", TypeAttributes.Public, typeof(ushort) };
+            yield return new object[] { "a\0b\0c", TypeAttributes.Public, typeof(int) };
+            yield return new object[] { "Name", TypeAttributes.Public, typeof(uint) };
+            yield return new object[] { "Name", TypeAttributes.Public, typeof(long) };
         }
 
         [Theory]
         [MemberData(nameof(DefineEnum_TestData))]
-        public void DefineEnum_ValueType(string name, TypeAttributes visibility, Type underlyingType)
+        public void DefineEnum(string name, TypeAttributes visibility, Type underlyingType)
         {
             ModuleBuilder module = Helpers.DynamicModule();
             EnumBuilder enumBuilder = module.DefineEnum(name, visibility, underlyingType);
@@ -42,7 +36,7 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(enumBuilder.FullName + ", " + module.Assembly.FullName, enumBuilder.AssemblyQualifiedName);
 
             Assert.Equal(typeof(Enum), enumBuilder.BaseType);
-            Assert.Equal(null, enumBuilder.DeclaringType);
+            Assert.Null(enumBuilder.DeclaringType);
 
             Assert.True(enumBuilder.Attributes.HasFlag(visibility));
             Assert.Equal(underlyingType, enumBuilder.UnderlyingField.FieldType);
@@ -50,136 +44,83 @@ namespace System.Reflection.Emit.Tests
             enumBuilder.CreateTypeInfo().AsType();
         }
 
-        [Theory]
-        [MemberData(nameof(VisibilityAttributes), false)]
-        public void DefineEnum_NonVisibilityAttributes_ThrowsArgumentException(TypeAttributes visibility)
         {
             ModuleBuilder module = Helpers.DynamicModule();
-            Assert.Throws<ArgumentException>("name", () => module.DefineEnum("MyEnum", visibility, typeof(int)));
+        }
+
+        [Fact]
+        public void DefineEnum_EnumWithSameNameExists_ThrowsArgumentException()
+        {
+            ModuleBuilder module = Helpers.DynamicModule();
+            module.DefineEnum("Name", TypeAttributes.Public, typeof(int));
+            Assert.Throws<ArgumentException>(null, () => module.DefineEnum("Name", TypeAttributes.Public, typeof(int)));
+        }
+
+        [Fact]
+        public void DefineEnum_NullName_ThrowsArgumentNullException()
+        {
+            ModuleBuilder module = Helpers.DynamicModule();
+            Assert.Throws<ArgumentNullException>("fullname", () => module.DefineEnum(null, TypeAttributes.Public, typeof(object)));
         }
 
         [Theory]
-        [MemberData(nameof(VisibilityAttributes), true)]
-        public void DefineEnum_EnumWithSameNameExists_ThrowsArgumentException(TypeAttributes visibility)
+        [InlineData("")]
+        public void DefineEnum_EmptyName_ThrowsArgumentNullException(string name)
         {
             ModuleBuilder module = Helpers.DynamicModule();
-            module.DefineEnum("MyEnum", visibility, typeof(int));
-            Assert.Throws<ArgumentException>(null, () => module.DefineEnum("MyEnum", visibility, typeof(int)));
+            Assert.Throws<ArgumentException>("fullname", () => module.DefineEnum(name, TypeAttributes.Public, typeof(object)));
         }
 
         [Theory]
-        [MemberData(nameof(VisibilityAttributes), true)]
-        public void DefineEnum_NullName_ThrowsArgumentNullException(TypeAttributes visibility)
+        [InlineData(TypeAttributes.Abstract, "name")]
+        [InlineData(TypeAttributes.AutoClass, "name")]
+        [InlineData(TypeAttributes.BeforeFieldInit, "name")]
+        [InlineData(TypeAttributes.ClassSemanticsMask, "name")]
+        [InlineData(TypeAttributes.CustomFormatClass, "name")]
+        [InlineData(TypeAttributes.CustomFormatMask, "name")]
+        [InlineData(TypeAttributes.ExplicitLayout, "name")]
+        [InlineData(TypeAttributes.HasSecurity, "name")]
+        [InlineData(TypeAttributes.Import, "name")]
+        [InlineData(TypeAttributes.ClassSemanticsMask, "name")]
+        [InlineData(TypeAttributes.LayoutMask, "name")]
+        [InlineData(TypeAttributes.RTSpecialName, "name")]
+        [InlineData(TypeAttributes.Sealed, "name")]
+        [InlineData(TypeAttributes.SequentialLayout, "name")]
+        [InlineData(TypeAttributes.Serializable, "name")]
+        [InlineData(TypeAttributes.SpecialName, "name")]
+        [InlineData(TypeAttributes.CustomFormatClass, "name")]
+        [InlineData(TypeAttributes.UnicodeClass, "name")]
+        [InlineData(TypeAttributes.NestedAssembly, null)]
+        [InlineData(TypeAttributes.NestedFamANDAssem, null)]
+        [InlineData(TypeAttributes.NestedFamily, null)]
+        [InlineData(TypeAttributes.NestedFamORAssem, null)]
+        [InlineData(TypeAttributes.NestedPrivate, null)]
+        [InlineData(TypeAttributes.NestedPublic, null)]
+        public void DefineEnum_IncorrectVisibilityAttributes_ThrowsArgumentException(TypeAttributes visibility, string paramName)
         {
             ModuleBuilder module = Helpers.DynamicModule();
-            Assert.Throws<ArgumentNullException>("fullname", () => module.DefineEnum(null, visibility, typeof(object)));
+            Assert.Throws<ArgumentException>(paramName, () => module.DefineEnum("Enum", visibility, typeof(int)));
         }
 
-        [Theory]
-        [MemberData(nameof(VisibilityAttributes), true)]
-        public void DefineEnum_EmptyName_ThrowsArgumentNullException(TypeAttributes visibility)
-        {
-            ModuleBuilder module = Helpers.DynamicModule();
-            Assert.Throws<ArgumentException>("fullname", () => module.DefineEnum("", visibility, typeof(object)));
-        }
-
-        [Theory]
-        [MemberData(nameof(NestedVisibilityAttributes), true)]
-        public void DefineEnum_IncorrectVisibilityAttributes_ThrowsArgumentException(TypeAttributes visibility)
-        {
-            ModuleBuilder module = Helpers.DynamicModule();
-            Assert.Throws<ArgumentException>(null, () => module.DefineEnum("MyEnum", visibility, typeof(object)));
-        }
-
-        [Theory]
-        [MemberData(nameof(VisibilityAttributes), true)]
-        public void DefineEnum_ReferecnceType_ThrowsTypeLoadException(TypeAttributes visibility)
         {
             ModuleBuilder module = Helpers.DynamicModule();
             EnumBuilder enumBuilder = module.DefineEnum("MyEnum", visibility, typeof(string));
             Assert.Throws<TypeLoadException>(() => enumBuilder.CreateTypeInfo().AsType());
         }
 
-        public static IEnumerable<object[]> NestedVisibilityAttributes(bool flag)
         {
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.NestedAssembly, flag))
-                yield return new object[] { TypeAttributes.NestedAssembly };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.NestedFamANDAssem, flag))
-                yield return new object[] { TypeAttributes.NestedFamANDAssem };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.NestedFamily, flag))
-                yield return new object[] { TypeAttributes.NestedFamily };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.NestedFamANDAssem, flag))
-                yield return new object[] { TypeAttributes.NestedFamANDAssem };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.NestedFamORAssem, flag))
-                yield return new object[] { TypeAttributes.NestedFamORAssem };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.NestedPrivate, flag))
-                yield return new object[] { TypeAttributes.NestedPrivate };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.NestedPublic, flag))
-                yield return new object[] { TypeAttributes.NestedPublic };
         }
 
-        public static IEnumerable<object[]> VisibilityAttributes(bool flag)
         {
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.Abstract, flag))
-                yield return new object[] { TypeAttributes.Abstract };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.AnsiClass, flag))
-                yield return new object[] { TypeAttributes.AnsiClass };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.AutoClass, flag))
-                yield return new object[] { TypeAttributes.AutoClass };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.AutoLayout, flag))
-                yield return new object[] { TypeAttributes.AutoLayout };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.BeforeFieldInit, flag))
-                yield return new object[] { TypeAttributes.BeforeFieldInit };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.Class, flag))
-                yield return new object[] { TypeAttributes.Class };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.ClassSemanticsMask, flag))
-                yield return new object[] { TypeAttributes.ClassSemanticsMask };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.CustomFormatClass, flag))
-                yield return new object[] { TypeAttributes.CustomFormatClass };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.CustomFormatMask, flag))
-                yield return new object[] { TypeAttributes.CustomFormatMask };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.ExplicitLayout, flag))
-                yield return new object[] { TypeAttributes.ExplicitLayout };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.HasSecurity, flag))
-                yield return new object[] { TypeAttributes.HasSecurity };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.Import, flag))
-                yield return new object[] { TypeAttributes.Import };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.Interface, flag))
-                yield return new object[] { TypeAttributes.Interface };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.LayoutMask, flag))
-                yield return new object[] { TypeAttributes.LayoutMask };
-
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.NotPublic, flag))
-                yield return new object[] { TypeAttributes.NotPublic };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.Public, flag))
-                yield return new object[] { TypeAttributes.Public };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.RTSpecialName, flag))
-                yield return new object[] { TypeAttributes.RTSpecialName };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.Sealed, flag))
-                yield return new object[] { TypeAttributes.Sealed };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.SequentialLayout, flag))
-                yield return new object[] { TypeAttributes.SequentialLayout };
-
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.Serializable, flag))
-                yield return new object[] { TypeAttributes.Serializable };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.SpecialName, flag))
-                yield return new object[] { TypeAttributes.SpecialName };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.StringFormatMask, flag))
-                yield return new object[] { TypeAttributes.StringFormatMask };
-            if (JudgeVisibilityMaskAttributes(TypeAttributes.UnicodeClass, flag))
-                yield return new object[] { TypeAttributes.UnicodeClass };
         }
 
-        private static bool JudgeVisibilityMaskAttributes(TypeAttributes visibility, bool flag)
+        [Theory]
+        public void DefineEnum_InvalidUnderlyingType_ThrowsTypeLoadExceptionOnCreation(Type underlyingType)
         {
-            if (flag)
-            {
-                return (visibility & ~TypeAttributes.VisibilityMask) == 0;
-            }
-            else
-            {
-                return (visibility & ~TypeAttributes.VisibilityMask) != 0;
-            }
+            ModuleBuilder module = Helpers.DynamicModule();
+            EnumBuilder enumBuilder = module.DefineEnum("Name", TypeAttributes.Public, underlyingType);
+            Assert.Equal(underlyingType, enumBuilder.UnderlyingField.FieldType);
+            Assert.Throws<TypeLoadException>(() => enumBuilder.CreateTypeInfo().AsType());
         }
     }
 }
