@@ -329,7 +329,6 @@ namespace System.ComponentModel
             return td.GetDefaultProperty(instance);
         }
 
-#if FEATURE_EDITOR
         /// <summary>
         ///     Retrieves the editor for the given base type.
         /// </summary>
@@ -338,7 +337,6 @@ namespace System.ComponentModel
             ReflectedTypeData td = GetTypeData(type, true);
             return td.GetEditor(instance, editorBaseType);
         }
-#endif
 
         /// <summary> 
         ///      Retrieves a default editor table for the given editor base type. 
@@ -457,7 +455,6 @@ namespace System.ComponentModel
             return null; // extender properties are never the default.
         }
 
-#if FEATURE_EDITOR
         /// <summary>
         ///     Retrieves the editor for the given base type.
         /// </summary>
@@ -465,7 +462,6 @@ namespace System.ComponentModel
         {
             return GetEditor(instance.GetType(), instance, editorBaseType);
         }
-#endif
 
         /// <summary>
         ///     Retrieves the events for this type.
