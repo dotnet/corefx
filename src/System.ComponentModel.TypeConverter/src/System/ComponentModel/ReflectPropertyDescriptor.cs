@@ -523,7 +523,6 @@ namespace System.ComponentModel
             // Otherwise let the base class add the handler to its ValueChanged event for this component
             else
             {
-#if FEATURE_PROPERTY_CHANGED_EVENT_HANDLER
                 // Special case: If this will be the FIRST handler added for this component, and the component implements
                 // INotifyPropertyChanged, the property descriptor must START listening to the generic PropertyChanged event
                 if (GetValueChangedHandler(component) == null)
@@ -534,7 +533,6 @@ namespace System.ComponentModel
                         iPropChangedEvent.AddEventHandler(component, new PropertyChangedEventHandler(OnINotifyPropertyChanged));
                     }
                 }
-#endif
 
                 base.AddValueChanged(component, handler);
             }
@@ -1007,7 +1005,6 @@ namespace System.ComponentModel
             return null;
         }
 
-#if FEATURE_PROPERTY_CHANGED_EVENT_HANDLER
         /// <summary>
         ///     Handles INotifyPropertyChanged.PropertyChange events from components.
         ///     If event pertains to this property, issue a ValueChanged event.
@@ -1021,7 +1018,6 @@ namespace System.ComponentModel
                 OnValueChanged(component, e);
             }
         }
-#endif
 
         /// <summary>
         ///     This should be called by your property descriptor implementation
@@ -1057,7 +1053,6 @@ namespace System.ComponentModel
             {
                 base.RemoveValueChanged(component, handler);
 
-#if FEATURE_PROPERTY_CHANGED_EVENT_HANDLER
                 // Special case: If that was the LAST handler removed for this component, and the component implements
                 // INotifyPropertyChanged, the property descriptor must STOP listening to the generic PropertyChanged event
                 if (GetValueChangedHandler(component) == null)
@@ -1068,7 +1063,6 @@ namespace System.ComponentModel
                         iPropChangedEvent.RemoveEventHandler(component, new PropertyChangedEventHandler(OnINotifyPropertyChanged));
                     }
                 }
-#endif
             }
         }
 
