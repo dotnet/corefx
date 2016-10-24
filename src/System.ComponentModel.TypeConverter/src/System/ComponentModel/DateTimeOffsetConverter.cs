@@ -4,8 +4,8 @@
 
 // The code was copied from DateTimeConverter and adapted for DateTimeOffset.
 
-using System.Globalization;
 using System.ComponentModel.Design.Serialization;
+using System.Globalization;
 
 namespace System.ComponentModel
 {
