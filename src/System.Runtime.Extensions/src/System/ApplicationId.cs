@@ -11,7 +11,7 @@ namespace System
 {
     public sealed class ApplicationId
     {
-        private byte[] m_publicKeyToken;
+        private readonly byte[] _publicKeyToken;
 
         public ApplicationId(byte[] publicKeyToken, string name, Version version, string processorArchitecture, string culture)
         {
@@ -20,8 +20,7 @@ namespace System
             if (version == null) throw new ArgumentNullException(nameof(version));
             if (publicKeyToken == null) throw new ArgumentNullException(nameof(publicKeyToken));
 
-            m_publicKeyToken = new byte[publicKeyToken.Length];
-            Array.Copy(publicKeyToken, m_publicKeyToken, publicKeyToken.Length);
+            _publicKeyToken = (byte[])publicKeyToken.Clone();
             Name = name;
             Version = version;
             ProcessorArchitecture = processorArchitecture;
@@ -36,41 +35,34 @@ namespace System
 
         public Version Version { get; }
 
-        public byte[] PublicKeyToken
-        {
-            get
-            {
-                var result = new byte[m_publicKeyToken.Length];
-                Array.Copy(m_publicKeyToken, result, m_publicKeyToken.Length);
-                return result;
-            }
-        }
+        public byte[] PublicKeyToken => (byte[])_publicKeyToken.Clone();
 
-        public ApplicationId Copy() => new ApplicationId(m_publicKeyToken, Name, Version, ProcessorArchitecture, Culture);
+        public ApplicationId Copy() => new ApplicationId(_publicKeyToken, Name, Version, ProcessorArchitecture, Culture);
 
         public override string ToString ()
         {
             StringBuilder sb = StringBuilderCache.Acquire();
-            sb.Append(this.Name);
+            sb.Append(Name);
             if (Culture != null)
             {
                 sb.Append(", culture=\"");
                 sb.Append(Culture);
-                sb.Append("\"");
+                sb.Append('"');
             }
             sb.Append(", version=\"");
             sb.Append(Version.ToString());
-            sb.Append("\"");
-            if (m_publicKeyToken != null) {
+            sb.Append('"');
+            if (_publicKeyToken != null)
+            {
                 sb.Append(", publicKeyToken=\"");
-                sb.Append(EncodeHexString(m_publicKeyToken));
-                sb.Append("\"");
+                sb.Append(EncodeHexString(_publicKeyToken));
+                sb.Append('"');
             }
             if (ProcessorArchitecture != null)
             {
                 sb.Append(", processorArchitecture =\"");
-                sb.Append(this.ProcessorArchitecture);
-                sb.Append("\"");
+                sb.Append(ProcessorArchitecture);
+                sb.Append('"');
             }
             return StringBuilderCache.GetStringAndRelease(sb);
         }
@@ -78,11 +70,12 @@ namespace System
         private static char HexDigit(int num) =>
             (char)((num < 10) ? (num + '0') : (num + ('A' - 10)));
         
-        private static String EncodeHexString(byte[] sArray) 
+        private static string EncodeHexString(byte[] sArray) 
         {
-            String result = null;
+            string result = null;
     
-            if(sArray != null) {
+            if (sArray != null)
+            {
                 char[] hexOrder = new char[sArray.Length * 2];
             
                 int digit;
@@ -92,29 +85,29 @@ namespace System
                     digit = (int)(sArray[i] & 0x0f);
                     hexOrder[j++] = HexDigit(digit);
                 }
-                result = new String(hexOrder);
+                result = new string(hexOrder);
             }
             return result;
         }
  
-        public override bool Equals (Object o)
+        public override bool Equals (object o)
         {
             ApplicationId other = (o as ApplicationId);
             if (other == null)
                 return false;
  
-            if (!(Equals(this.Name, other.Name) &&
-                  Equals(this.Version, other.Version) &&
-                  Equals(this.ProcessorArchitecture, other.ProcessorArchitecture) &&
-                  Equals(this.Culture, other.Culture)))
+            if (!(Equals(Name, other.Name) &&
+                  Equals(Version, other.Version) &&
+                  Equals(ProcessorArchitecture, other.ProcessorArchitecture) &&
+                  Equals(Culture, other.Culture)))
                 return false;
  
-            if (this.m_publicKeyToken.Length != other.m_publicKeyToken.Length)
+            if (_publicKeyToken.Length != other._publicKeyToken.Length)
                 return false;
  
-            for (int i = 0; i < this.m_publicKeyToken.Length; ++i)
+            for (int i = 0; i < _publicKeyToken.Length; i++)
             {
-                if (this.m_publicKeyToken[i] != other.m_publicKeyToken[i])
+                if (_publicKeyToken[i] != other._publicKeyToken[i])
                     return false;
             }
  
