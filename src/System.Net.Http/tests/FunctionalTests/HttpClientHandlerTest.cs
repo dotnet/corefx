@@ -982,6 +982,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(200)]
         [InlineData(500)]
@@ -1007,6 +1008,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(99)]
         [InlineData(1000)]
