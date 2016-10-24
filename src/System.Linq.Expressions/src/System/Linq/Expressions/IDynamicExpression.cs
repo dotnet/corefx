@@ -7,7 +7,7 @@ namespace System.Linq.Expressions
     public interface IDynamicExpression : IArgumentProvider
     {
         /// <summary>
-        /// Gets the type of the delegate used by the CallSite />.
+        /// Gets the type of the delegate used by the CallSite.
         /// </summary>
         Type DelegateType { get; }
 

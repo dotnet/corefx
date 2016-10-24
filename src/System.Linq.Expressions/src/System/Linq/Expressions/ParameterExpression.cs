@@ -73,16 +73,16 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression" /> represents. (Inherited from <see cref="Expression"/>.)
+        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
         /// </summary>
-        /// <returns>The <see cref="Type"/> that represents the static type of the expression.</returns>
+        /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public override Type Type
         {
             get { return typeof(object); }
         }
 
         /// <summary>
-        /// Returns the node type of this <see cref="Expression" />. (Inherited from <see cref="Expression" />.)
+        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
         /// </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType
@@ -99,7 +99,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Indicates that this ParameterExpression is to be treated as a ByRef parameter.
+        /// Indicates that this <see cref="ParameterExpression"/> is to be treated as a ByRef parameter.
         /// </summary>
         public bool IsByRef
         {
@@ -181,31 +181,31 @@ namespace System.Linq.Expressions
     public partial class Expression
     {
         /// <summary>
-        /// Creates a <see cref="ParameterExpression" /> node that can be used to identify a parameter or a variable in an expression tree.
+        /// Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree.
         /// </summary>
         /// <param name="type">The type of the parameter or variable.</param>
-        /// <returns>A <see cref="ParameterExpression" /> node with the specified name and type.</returns>
+        /// <returns>A <see cref="ParameterExpression"/> node with the specified name and type.</returns>
         public static ParameterExpression Parameter(Type type)
         {
             return Parameter(type, null);
         }
 
         /// <summary>
-        /// Creates a <see cref="ParameterExpression" /> node that can be used to identify a parameter or a variable in an expression tree.
+        /// Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree.
         /// </summary>
         /// <param name="type">The type of the parameter or variable.</param>
-        /// <returns>A <see cref="ParameterExpression" /> node with the specified name and type.</returns>
+        /// <returns>A <see cref="ParameterExpression"/> node with the specified name and type.</returns>
         public static ParameterExpression Variable(Type type)
         {
             return Variable(type, null);
         }
 
         /// <summary>
-        /// Creates a <see cref="ParameterExpression" /> node that can be used to identify a parameter or a variable in an expression tree.
+        /// Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree.
         /// </summary>
         /// <param name="type">The type of the parameter or variable.</param>
         /// <param name="name">The name of the parameter or variable, used for debugging or pretty printing purpose only.</param>
-        /// <returns>A <see cref="ParameterExpression" /> node with the specified name and type.</returns>
+        /// <returns>A <see cref="ParameterExpression"/> node with the specified name and type.</returns>
         public static ParameterExpression Parameter(Type type, string name)
         {
             ContractUtils.RequiresNotNull(type, nameof(type));
@@ -230,11 +230,11 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a <see cref="ParameterExpression" /> node that can be used to identify a parameter or a variable in an expression tree.
+        /// Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree.
         /// </summary>
         /// <param name="type">The type of the parameter or variable.</param>
         /// <param name="name">The name of the parameter or variable, used for debugging or pretty printing purpose only.</param>
-        /// <returns>A <see cref="ParameterExpression" /> node with the specified name and type.</returns>
+        /// <returns>A <see cref="ParameterExpression"/> node with the specified name and type.</returns>
         public static ParameterExpression Variable(Type type, string name)
         {
             ContractUtils.RequiresNotNull(type, nameof(type));

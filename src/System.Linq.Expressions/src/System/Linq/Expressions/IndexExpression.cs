@@ -39,7 +39,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Returns the node type of this <see cref="Expression" />. (Inherited from <see cref="Expression" />.)
+        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
         /// </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType
@@ -48,9 +48,9 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression" /> represents. (Inherited from <see cref="Expression"/>.)
+        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
         /// </summary>
-        /// <returns>The <see cref="Type"/> that represents the static type of the expression.</returns>
+        /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type
         {
             get
@@ -92,8 +92,8 @@ namespace System.Linq.Expressions
         /// supplied children. If all of the children are the same, it will
         /// return this expression.
         /// </summary>
-        /// <param name="object">The <see cref="Object" /> property of the result.</param>
-        /// <param name="arguments">The <see cref="Arguments" /> property of the result.</param>
+        /// <param name="object">The <see cref="Object"/> property of the result.</param>
+        /// <param name="arguments">The <see cref="Arguments"/> property of the result.</param>
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public IndexExpression Update(Expression @object, IEnumerable<Expression> arguments)
         {
@@ -158,12 +158,12 @@ namespace System.Linq.Expressions
         #region ArrayAccess
 
         /// <summary>
-        /// Creates an <see cref="IndexExpression"></see> to access an array.
+        /// Creates an <see cref="IndexExpression"/> to access an array.
         /// </summary>
         /// <param name="array">An expression representing the array to index.</param>
         /// <param name="indexes">An array containing expressions used to index the array.</param>
-        /// <remarks>The expression representing the array can be obtained by using the MakeMemberAccess method, 
-        /// or through NewArrayBounds or NewArrayInit.</remarks>
+        /// <remarks>The expression representing the array can be obtained by using the <see cref="MakeMemberAccess"/> method,
+        /// or through <see cref="NewArrayBounds"/> or <see cref="NewArrayInit"/>.</remarks>
         /// <returns>The created <see cref="IndexExpression"/>.</returns>
         public static IndexExpression ArrayAccess(Expression array, params Expression[] indexes)
         {
@@ -171,12 +171,12 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates an <see cref="IndexExpression"></see> to access an array.
+        /// Creates an <see cref="IndexExpression"/> to access an array.
         /// </summary>
         /// <param name="array">An expression representing the array to index.</param>
-        /// <param name="indexes">An <see cref="IEnumerable{Expression}"/> containing expressions used to index the array.</param>
-        /// <remarks>The expression representing the array can be obtained by using the MakeMemberAccess method, 
-        /// or through NewArrayBounds or NewArrayInit.</remarks>
+        /// <param name="indexes">An <see cref="IEnumerable{T}"/> containing expressions used to index the array.</param>
+        /// <remarks>The expression representing the array can be obtained by using the <see cref="MakeMemberAccess"/> method,
+        /// or through <see cref="NewArrayBounds"/> or <see cref="NewArrayInit"/>.</remarks>
         /// <returns>The created <see cref="IndexExpression"/>.</returns>
         public static IndexExpression ArrayAccess(Expression array, IEnumerable<Expression> indexes)
         {
