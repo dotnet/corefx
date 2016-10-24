@@ -162,7 +162,6 @@ namespace System.ComponentModel
             if (component != null)
             {
                 ISite site = GetSite(component);
-#if FEATURE_ICOMPONENTCHANGESERVICE
                 IComponentChangeService changeService = null;
 
                 // Announce that we are about to change this component
@@ -184,11 +183,9 @@ namespace System.ComponentModel
                         }
                         throw coEx;
                     }
-#else
                     changeService.OnComponentChanging(component, this);
 #endif // FEATURE_CHECKOUTEXCEPTION
                 }
-#endif // FEATURE_ICOMPONENTCHANGESERVICE
 
                 bool shadowed = false;
 
@@ -214,14 +211,12 @@ namespace System.ComponentModel
                     _addMethod.Invoke(component, new[] { value });
                 }
 
-#if FEATURE_ICOMPONENTCHANGESERVICE
                 // Now notify the change service that the change was successful.
                 //
                 if (changeService != null)
                 {
                     changeService.OnComponentChanged(component, this, null, value);
                 }
-#endif
             }
         }
 
@@ -479,7 +474,6 @@ namespace System.ComponentModel
             if (component != null)
             {
                 ISite site = GetSite(component);
-#if FEATURE_ICOMPONENTCHANGESERVICE
                 IComponentChangeService changeService = null;
 
                 // Announce that we are about to change this component
@@ -501,11 +495,10 @@ namespace System.ComponentModel
                         }
                         throw coEx;
                     }
-#else
                     changeService.OnComponentChanging(component, this);
 #endif // FEATURE_CHECKOUTEXCEPTION
                 }
-#endif // FEATURE_ICOMPONENTCHANGESERVICE
+
                 bool shadowed = false;
 
                 if (site != null && site.DesignMode)
@@ -525,14 +518,12 @@ namespace System.ComponentModel
                     _removeMethod.Invoke(component, new[] { value });
                 }
 
-#if FEATURE_ICOMPONENTCHANGESERVICE
                 // Now notify the change service that the change was successful.
                 //
                 if (changeService != null)
                 {
                     changeService.OnComponentChanged(component, this, null, value);
                 }
-#endif
             }
         }
     }
