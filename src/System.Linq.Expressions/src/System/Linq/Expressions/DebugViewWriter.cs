@@ -58,28 +58,17 @@ namespace System.Linq.Expressions
             _out = file;
         }
 
-        private int Base
-        {
-            get
-            {
-                return _stack.Count > 0 ? _stack.Peek() : 0;
-            }
-        }
+        private int Base => _stack.Count > 0 ? _stack.Peek() : 0;
 
-        private int Delta
-        {
-            get { return _delta; }
-        }
+        private int Delta => _delta;
 
-        private int Depth
-        {
-            get { return Base + Delta; }
-        }
+        private int Depth => Base + Delta;
 
         private void Indent()
         {
             _delta += Tab;
         }
+
         private void Dedent()
         {
             _delta -= Tab;
@@ -205,6 +194,7 @@ namespace System.Linq.Expressions
             _out.WriteLine();
             _column = 0;
         }
+
         private void Write(string s)
         {
             _out.Write(s);
@@ -1074,7 +1064,7 @@ namespace System.Linq.Expressions
 
         protected override SwitchCase VisitSwitchCase(SwitchCase node)
         {
-            foreach (var test in node.TestValues)
+            foreach (Expression test in node.TestValues)
             {
                 Out(".Case (");
                 Visit(test);
@@ -1278,6 +1268,7 @@ namespace System.Linq.Expressions
                 return name;
             }
         }
+
         #endregion
     }
 }

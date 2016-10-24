@@ -35,52 +35,34 @@ namespace System.Linq.Expressions
         /// Gets the static type of the expression that this <see cref="Expression"/> represents.
         /// </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
-        public sealed override Type Type
-        {
-            get { return _type; }
-        }
+        public sealed override Type Type => _type;
 
         /// <summary>
         /// Returns the node type of this Expression. Extension nodes should return
         /// ExpressionType.Extension when overriding this method.
         /// </summary>
         /// <returns>The <see cref="ExpressionType"/> of the expression.</returns>
-        public sealed override ExpressionType NodeType
-        {
-            get { return ExpressionType.Switch; }
-        }
+        public sealed override ExpressionType NodeType => ExpressionType.Switch;
 
         /// <summary>
         /// Gets the test for the switch.
         /// </summary>
-        public Expression SwitchValue
-        {
-            get { return _switchValue; }
-        }
+        public Expression SwitchValue => _switchValue;
 
         /// <summary>
         /// Gets the collection of <see cref="SwitchCase"/> objects for the switch.
         /// </summary>
-        public ReadOnlyCollection<SwitchCase> Cases
-        {
-            get { return _cases; }
-        }
+        public ReadOnlyCollection<SwitchCase> Cases => _cases;
 
         /// <summary>
         /// Gets the test for the switch.
         /// </summary>
-        public Expression DefaultBody
-        {
-            get { return _defaultBody; }
-        }
+        public Expression DefaultBody => _defaultBody;
 
         /// <summary>
         /// Gets the equality comparison method, if any.
         /// </summary>
-        public MethodInfo Comparison
-        {
-            get { return _comparison; }
-        }
+        public MethodInfo Comparison => _comparison;
 
         /// <summary>
         /// Dispatches to the specific visit method for this node type.
@@ -237,7 +219,7 @@ namespace System.Linq.Expressions
                 }
 
                 ParameterInfo rightParam = pms[1];
-                foreach (var c in caseList)
+                foreach (SwitchCase c in caseList)
                 {
                     ContractUtils.RequiresNotNull(c, nameof(cases));
                     ValidateSwitchCaseType(c.Body, customType, resultType, nameof(cases));
@@ -272,7 +254,7 @@ namespace System.Linq.Expressions
                 // When comparison method is not present, all the test values must have
                 // the same type. Use the first test value's type as the baseline.
                 Expression firstTestValue = caseList[0].TestValues[0];
-                foreach (var c in caseList)
+                foreach (SwitchCase c in caseList)
                 {
                     ContractUtils.RequiresNotNull(c, nameof(cases));
                     ValidateSwitchCaseType(c.Body, customType, resultType, nameof(cases));
