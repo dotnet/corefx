@@ -173,7 +173,6 @@ namespace System.ComponentModel
 
                 if (changeService != null)
                 {
-#if FEATURE_CHECKOUTEXCEPTION
                     try {
                         changeService.OnComponentChanging(component, this);
                     }
@@ -184,7 +183,6 @@ namespace System.ComponentModel
                         throw coEx;
                     }
                     changeService.OnComponentChanging(component, this);
-#endif // FEATURE_CHECKOUTEXCEPTION
                 }
 
                 bool shadowed = false;
@@ -485,7 +483,6 @@ namespace System.ComponentModel
 
                 if (changeService != null)
                 {
-#if FEATURE_CHECKOUTEXCEPTION
                     try {
                         changeService.OnComponentChanging(component, this);
                     }
@@ -496,7 +493,6 @@ namespace System.ComponentModel
                         throw coEx;
                     }
                     changeService.OnComponentChanging(component, this);
-#endif // FEATURE_CHECKOUTEXCEPTION
                 }
 
                 bool shadowed = false;
