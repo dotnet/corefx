@@ -186,7 +186,6 @@ namespace System.ComponentModel
 
                             _state[s_bitDefaultValueQueried] = true;
                         }
-#if FEATURE_AMBIENTVALUE
                         else
                         {
                             AmbientValueAttribute ava = a as AmbientValueAttribute;
@@ -196,13 +195,11 @@ namespace System.ComponentModel
                                 _state[s_bitAmbientValueQueried] = true;
                             }
                         }
-#endif
                     }
                 }
             }
         }
 
-#if FEATURE_AMBIENTVALUE
         /// <summary>
         ///      Retrieves the ambient value for this property.
         /// </summary>
@@ -226,7 +223,6 @@ namespace System.ComponentModel
                 return _ambientValue;
             }
         }
-#endif
 
         /// <summary>
         ///     The EventDescriptor for the "{propertyname}Changed" event on the component, or null if there isn't one for this property.
@@ -597,12 +593,10 @@ namespace System.ComponentModel
             {
                 ExtenderSetValue(provider, component, DefaultValue, notifyDesc);
             }
-#if FEATURE_AMBIENTVALUE
             else if (AmbientValue != s_noValue)
             {
                 ExtenderSetValue(provider, component, AmbientValue, notifyDesc);
             }
-#endif
             else if (ResetMethodValue != null)
             {
                 ISite site = GetSite(component);
@@ -772,12 +766,10 @@ namespace System.ComponentModel
                 return true;
             }
 
-#if FEATURE_AMBIENTVALUE
             if (AmbientValue != s_noValue)
             {
                 return ShouldSerializeValue(component);
             }
-#endif
 
             return false;
         }
@@ -1096,12 +1088,10 @@ namespace System.ComponentModel
             {
                 SetValue(component, DefaultValue);
             }
-#if FEATURE_AMBIENTVALUE
             else if (AmbientValue != s_noValue)
             {
                 SetValue(component, AmbientValue);
             }
-#endif
 #if FEATURE_COMPONENT_CHANGE_SERVICE
             else if (ResetMethodValue != null)
             {
