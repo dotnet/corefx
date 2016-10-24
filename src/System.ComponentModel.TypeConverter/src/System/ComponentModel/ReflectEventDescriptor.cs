@@ -266,11 +266,7 @@ namespace System.ComponentModel
         {
             string eventName = realEventInfo.Name;
             BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
-#if FEATURE_MEMBERINFO_REFLECTEDTYPE
             Type currentReflectType = realEventInfo.ReflectedType;
-#else
-            Type currentReflectType = _componentClass;
-#endif
             Debug.Assert(currentReflectType != null, "currentReflectType cannot be null");
             int depth = 0;
 
@@ -287,11 +283,7 @@ namespace System.ComponentModel
             {
                 // Now build up an array in reverse order
                 //
-#if FEATURE_MEMBERINFO_REFLECTEDTYPE
                 currentReflectType = realEventInfo.ReflectedType;
-#else
-                currentReflectType = _componentClass;
-#endif
                 Attribute[][] attributeStack = new Attribute[depth][];
 
                 while (currentReflectType != typeof(object))
@@ -399,11 +391,7 @@ namespace System.ComponentModel
         {
             string methodName = realMethodInfo.Name;
             BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
-#if FEATURE_MEMBERINFO_REFLECTEDTYPE
-            Type currentReflectType = realEventInfo.ReflectedType;
-#else
-            Type currentReflectType = _componentClass;
-#endif
+            Type currentReflectType = realMethodInfo.ReflectedType;
             Debug.Assert(currentReflectType != null, "currentReflectType cannot be null");
 
             // First, calculate the depth of the object hierarchy.  We do this so we can do a single
@@ -420,11 +408,7 @@ namespace System.ComponentModel
             {
                 // Now build up an array in reverse order
                 //
-#if FEATURE_MEMBERINFO_REFLECTEDTYPE
-                currentReflectType = realEventInfo.ReflectedType;
-#else
-                currentReflectType = _componentClass;
-#endif
+                currentReflectType = realMethodInfo.ReflectedType;
                 Attribute[][] attributeStack = new Attribute[depth][];
 
                 while (currentReflectType != null && currentReflectType != typeof(object))
