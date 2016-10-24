@@ -56,7 +56,7 @@ namespace System.Linq.Expressions
         /// Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a field or property.
         /// </summary>
         /// <param name="member">The <see cref="MemberInfo"/> to set the <see cref="MemberBinding.Member"/> property equal to.</param>
-        /// <param name="bindings">An array of <see cref="MemberBinding"/> objects to use to populate the <see cref="MemberMemberBindings.Bindings"/> collection.</param>
+        /// <param name="bindings">An array of <see cref="MemberBinding"/> objects to use to populate the <see cref="MemberMemberBinding.Bindings"/> collection.</param>
         /// <returns>A <see cref="MemberMemberBinding"/> that has the <see cref="MemberBinding.BindingType"/> property equal to <see cref="MemberBinding"/> and the <see cref="MemberBinding.Member"/> and <see cref="MemberMemberBinding.Bindings"/> properties set to the specified values.</returns>
         public static MemberMemberBinding MemberBind(MemberInfo member, params MemberBinding[] bindings)
         {
@@ -88,7 +88,7 @@ namespace System.Linq.Expressions
         /// <returns>
         /// A <see cref="MemberMemberBinding"/> that has the <see cref="MemberBinding.BindingType"/> property equal to <see cref="MemberBinding"/>,
         /// the Member property set to the <see cref="PropertyInfo"/> that represents the property accessed in <paramref name="propertyAccessor"/>,
-        /// and <see cref="MemberMemberBindings.Bindings"/> properties set to the specified values.
+        /// and <see cref="MemberMemberBinding.Bindings"/> properties set to the specified values.
         /// </returns>
         public static MemberMemberBinding MemberBind(MethodInfo propertyAccessor, params MemberBinding[] bindings)
         {
@@ -103,7 +103,7 @@ namespace System.Linq.Expressions
         /// <returns>
         /// A <see cref="MemberMemberBinding"/> that has the <see cref="MemberBinding.BindingType"/> property equal to <see cref="MemberBinding"/>,
         /// the Member property set to the <see cref="PropertyInfo"/> that represents the property accessed in <paramref name="propertyAccessor"/>,
-        /// and <see cref="MemberMemberBindings.Bindings"/> properties set to the specified values.
+        /// and <see cref="MemberMemberBinding.Bindings"/> properties set to the specified values.
         /// </returns>
         public static MemberMemberBinding MemberBind(MethodInfo propertyAccessor, IEnumerable<MemberBinding> bindings)
         {

@@ -562,7 +562,7 @@ namespace System.Linq.Expressions
         /// </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
-        /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see ref="F:ExpressionType.Assign"/> 
+        /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Assign"/> 
         /// and the <see cref="BinaryExpression.Left"/> and <see cref="BinaryExpression.Right"/> properties set to the specified values.
         /// </returns>
         public static BinaryExpression Assign(Expression left, Expression right)
@@ -842,7 +842,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a BinaryExpression, given the left and right operands, by calling an appropriate factory method.
+        /// Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method.
         /// </summary>
         /// <param name="binaryType">The ExpressionType that specifies the type of binary operation.</param>
         /// <param name="left">An Expression that represents the left operand.</param>
@@ -854,7 +854,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a BinaryExpression, given the left and right operands, by calling an appropriate factory method.
+        /// Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method.
         /// </summary>
         /// <param name="binaryType">The ExpressionType that specifies the type of binary operation.</param>
         /// <param name="left">An Expression that represents the left operand.</param>
@@ -869,7 +869,7 @@ namespace System.Linq.Expressions
 
         ///
         /// <summary>
-        /// Creates a BinaryExpression, given the left and right operands, by calling an appropriate factory method.
+        /// Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method.
         /// </summary>
         /// <param name="binaryType">The ExpressionType that specifies the type of binary operation.</param>
         /// <param name="left">An Expression that represents the left operand.</param>
@@ -1375,25 +1375,27 @@ namespace System.Linq.Expressions
         #endregion
 
         #region Coalescing Expressions
-        
+
         /// <summary>
-        /// Creates a BinaryExpression that represents a coalescing operation.
+        /// Creates a <see cref="BinaryExpression" /> that represents a coalescing operation.
         /// </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
-        /// <returns>A BinaryExpression that has the NodeType property equal to Coalesce and the Left and Right properties set to the specified values.</returns>
+        /// <returns>A <see cref="BinaryExpression" /> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Coalesce"/> 
+        /// and the <see cref="BinaryExpression.Left"/> and <see cref="BinaryExpression.Right"/> properties set to the specified values.</returns>
         public static BinaryExpression Coalesce(Expression left, Expression right)
         {
             return Coalesce(left, right, null);
         }
-        
+
         /// <summary>
-        /// Creates a BinaryExpression that represents a coalescing operation.
+        /// Creates a <see cref="BinaryExpression" /> that represents a coalescing operation.
         /// </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="conversion">A LambdaExpression to set the Conversion property equal to.</param>
-        /// <returns>A BinaryExpression that has the NodeType property equal to Coalesce and the Left, Right and Conversion properties set to the specified values.
+        /// <returns>A <see cref="BinaryExpression" /> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Coalesce"/> 
+        /// and the <see cref="BinaryExpression.Left"/>, <see cref="BinaryExpression.Right"/> and <see cref="BinaryExpression.Conversion"/> properties set to the specified values.
         /// </returns>
         public static BinaryExpression Coalesce(Expression left, Expression right, LambdaExpression conversion)
         {
@@ -2839,8 +2841,8 @@ namespace System.Linq.Expressions
         /// <summary>
         /// Creates a <see cref="BinaryExpression"/> that represents applying an array index operator to an array of rank one.
         /// </summary>
-        /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
-        /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
+        /// <param name="array">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
+        /// <param name="index">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.ArrayIndex"/> 
         /// and the <see cref="BinaryExpression.Left"/> and <see cref="BinaryExpression.Right"/> properties set to the specified values.</returns>
         public static BinaryExpression ArrayIndex(Expression array, Expression index)

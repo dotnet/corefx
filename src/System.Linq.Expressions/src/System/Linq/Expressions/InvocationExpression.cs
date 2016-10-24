@@ -73,12 +73,20 @@ namespace System.Linq.Expressions
             throw ContractUtils.Unreachable;
         }
 
+        /// <summary>
+        /// Gets the argument expression with the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The index of the argument expression to get.</param>
+        /// <returns>The expression representing the argument at the specified <paramref name="index"/>.</returns>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual Expression GetArgument(int index)
         {
             throw ContractUtils.Unreachable;
         }
 
+        /// <summary>
+        /// Gets the number of argument expressions of the node.
+        /// </summary>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual int ArgumentCount
         {

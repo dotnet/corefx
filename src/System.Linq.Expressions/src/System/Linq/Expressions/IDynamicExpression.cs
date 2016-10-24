@@ -4,6 +4,9 @@
 
 namespace System.Linq.Expressions
 {
+    /// <summary>
+    /// Interface implemented by expression nodes that represent a dynamically bound operation.
+    /// </summary>
     public interface IDynamicExpression : IArgumentProvider
     {
         /// <summary>

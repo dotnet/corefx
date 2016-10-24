@@ -45,7 +45,7 @@ namespace System.Linq.Expressions
         public sealed override Type Type => _type;
 
         /// <summary>
-        /// Gets the bounds of the array if the value of the <see cref="NodeType"/> property is NewArrayBounds, or the values to initialize the elements of the new array if the value of the <see cref="NodeType"/> property is NewArrayInit. 
+        /// Gets the bounds of the array if the value of the <see cref="ExpressionType"/> property is NewArrayBounds, or the values to initialize the elements of the new array if the value of the <see cref="Expression.NodeType"/> property is NewArrayInit. 
         /// </summary>
         public ReadOnlyCollection<Expression> Expressions => _expressions;
 
@@ -112,22 +112,22 @@ namespace System.Linq.Expressions
         #region NewArrayInit
 
         /// <summary>
-        /// Creates a new array expression of the specified type from the provided initializers.
+        /// Creates a <see cref="NewArrayExpression"/> of the specified type from the provided initializers.
         /// </summary>
         /// <param name="type">A Type that represents the element type of the array.</param>
         /// <param name="initializers">The expressions used to create the array elements.</param>
-        /// <returns>An instance of the <see cref="NewArrayExpression"/>.</returns>
+        /// <returns>A <see cref="NewArrayExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.NewArrayInit"/> and the <see cref="NewArrayExpression.Expressions"/> property set to the specified value.</returns>
         public static NewArrayExpression NewArrayInit(Type type, params Expression[] initializers)
         {
             return NewArrayInit(type, (IEnumerable<Expression>)initializers);
         }
 
         /// <summary>
-        /// Creates a new array expression of the specified type from the provided initializers.
+        /// Creates a <see cref="NewArrayExpression"/> of the specified type from the provided initializers.
         /// </summary>
         /// <param name="type">A Type that represents the element type of the array.</param>
         /// <param name="initializers">The expressions used to create the array elements.</param>
-        /// <returns>An instance of the <see cref="NewArrayExpression"/>.</returns>
+        /// <returns>A <see cref="NewArrayExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.NewArrayInit"/> and the <see cref="NewArrayExpression.Expressions"/> property set to the specified value.</returns>
         public static NewArrayExpression NewArrayInit(Type type, IEnumerable<Expression> initializers)
         {
             ContractUtils.RequiresNotNull(type, nameof(type));
@@ -193,7 +193,7 @@ namespace System.Linq.Expressions
         /// </summary>
         /// <param name="type">A <see cref="System.Type"/> that represents the element type of the array.</param>
         /// <param name="bounds">An array that contains Expression objects to use to populate the <see cref="NewArrayExpression.Expressions"/> collection.</param>
-        /// <returns>A <see cref="NewArrayExpression"/> that has the <see cref="NodeType"/> property equal to type and the <see cref="NewArrayExpression.Expressions"/> property set to the specified value.</returns>
+        /// <returns>A <see cref="NewArrayExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.NewArrayBounds"/> and the <see cref="NewArrayExpression.Expressions"/> property set to the specified value.</returns>
         public static NewArrayExpression NewArrayBounds(Type type, params Expression[] bounds)
         {
             return NewArrayBounds(type, (IEnumerable<Expression>)bounds);
@@ -204,7 +204,7 @@ namespace System.Linq.Expressions
         /// </summary>
         /// <param name="type">A <see cref="System.Type"/> that represents the element type of the array.</param>
         /// <param name="bounds">An <see cref="IEnumerable{T}"/> that contains <see cref="Expression"/> objects to use to populate the <see cref="NewArrayExpression.Expressions"/> collection.</param>
-        /// <returns>A <see cref="NewArrayExpression"/> that has the <see cref="NodeType"/> property equal to type and the <see cref="NewArrayExpression.Expressions"/> property set to the specified value.</returns>
+        /// <returns>A <see cref="NewArrayExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.NewArrayBounds"/> and the <see cref="NewArrayExpression.Expressions"/> property set to the specified value.</returns>
         public static NewArrayExpression NewArrayBounds(Type type, IEnumerable<Expression> bounds)
         {
             ContractUtils.RequiresNotNull(type, nameof(type));

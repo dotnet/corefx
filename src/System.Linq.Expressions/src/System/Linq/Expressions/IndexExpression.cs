@@ -95,8 +95,16 @@ namespace System.Linq.Expressions
             return Expression.MakeIndex(@object, Indexer, arguments);
         }
 
+        /// <summary>
+        /// Gets the argument expression with the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The index of the argument expression to get.</param>
+        /// <returns>The expression representing the argument at the specified <paramref name="index"/>.</returns>
         public Expression GetArgument(int index) => _arguments[index];
 
+        /// <summary>
+        /// Gets the number of argument expressions of the node.
+        /// </summary>
         public int ArgumentCount => _arguments.Count;
 
         /// <summary>
@@ -123,7 +131,7 @@ namespace System.Linq.Expressions
         /// </summary>
         /// <param name="instance">The object to which the property belongs. Should be null if the property is static(shared).</param>
         /// <param name="indexer">An <see cref="Expression"/> representing the property to index.</param>
-        /// <param name="arguments">An IEnumerable{Expression} containing the arguments to be used to index the property.</param>
+        /// <param name="arguments">An <see cref="IEnumerable{Expression}"/> containing the arguments to be used to index the property.</param>
         /// <returns>The created <see cref="IndexExpression"/>.</returns>
         public static IndexExpression MakeIndex(Expression instance, PropertyInfo indexer, IEnumerable<Expression> arguments)
         {

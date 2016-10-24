@@ -182,8 +182,8 @@ namespace System.Linq.Expressions
         /// supplied children. If all of the children are the same, it will
         /// return this expression.
         /// </summary>
-        /// <param name="body">The <see cref="LambdaExpression.Body">Body</see> property of the result.</param>
-        /// <param name="parameters">The <see cref="LambdaExpression.Parameters">Parameters</see> property of the result.</param>
+        /// <param name="body">The <see cref="LambdaExpression.Body" /> property of the result.</param>
+        /// <param name="parameters">The <see cref="LambdaExpression.Parameters" /> property of the result.</param>
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public Expression<TDelegate> Update(Expression body, IEnumerable<ParameterExpression> parameters)
         {
@@ -345,9 +345,9 @@ namespace System.Linq.Expressions
             ValidateLambdaArgs(typeof(TDelegate), ref body, parameterList, nameof(TDelegate));
             return new Expression<TDelegate>(body, name, tailCall, parameterList);
         }
-        
+
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="parameters">An array that contains <see cref="ParameterExpression"/> objects to use to populate the <see cref="LambdaExpression.Parameters"/> collection.</param>
@@ -358,7 +358,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="tailCall">A <see cref="bool"/> that indicates if tail call optimization will be applied when compiling the created expression.</param>
@@ -370,7 +370,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="parameters">An <see cref="IEnumerable{T}"/> that contains <see cref="ParameterExpression"/> objects to use to populate the <see cref="LambdaExpression.Parameters"/> collection.</param>
@@ -381,7 +381,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="tailCall">A <see cref="bool"/> that indicates if tail call optimization will be applied when compiling the created expression.</param>
@@ -393,7 +393,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="parameters">An array that contains <see cref="ParameterExpression"/> objects to use to populate the <see cref="LambdaExpression.Parameters"/> collection.</param>
@@ -405,7 +405,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="tailCall">A <see cref="bool"/> that indicates if tail call optimization will be applied when compiling the created expression.</param>
@@ -418,7 +418,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="parameters">An <see cref="IEnumerable{T}"/> that contains <see cref="ParameterExpression"/> objects to use to populate the <see cref="LambdaExpression.Parameters"/> collection.</param>
@@ -430,7 +430,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="tailCall">A <see cref="bool"/> that indicates if tail call optimization will be applied when compiling the created expression.</param>
@@ -443,7 +443,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="parameters">An <see cref="IEnumerable{T}"/> that contains <see cref="ParameterExpression"/> objects to use to populate the <see cref="LambdaExpression.Parameters"/> collection.</param>
@@ -455,7 +455,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="name">The name for the lambda. Used for emitting debug information.</param>
@@ -492,7 +492,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
         /// <param name="parameters">An <see cref="IEnumerable{T}"/> that contains <see cref="ParameterExpression"/> objects to use to populate the <see cref="LambdaExpression.Parameters"/> collection.</param>
@@ -508,7 +508,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a LambdaExpression by first constructing a delegate type. 
+        /// Creates a <see cref="LambdaExpression"/> by first constructing a delegate type.
         /// </summary>
         /// <param name="delegateType">A <see cref="Type"/> representing the delegate signature for the lambda.</param>
         /// <param name="body">An <see cref="Expression"/> to set the <see cref="LambdaExpression.Body"/> property equal to.</param>
@@ -630,7 +630,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a <see cref="Type"/> object that represents a generic System.Func delegate type that has specific type arguments.
+        /// Creates a <see cref="System.Type"/> object that represents a generic System.Func delegate type that has specific type arguments.
         /// The last type argument specifies the return type of the created delegate.
         /// </summary>
         /// <param name="typeArgs">An array of <see cref="System.Type"/> objects that specify the type arguments for the System.Func delegate type.</param>
@@ -658,7 +658,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a <see cref="Type"/> object that represents a generic System.Func delegate type that has specific type arguments.
+        /// Creates a <see cref="System.Type"/> object that represents a generic System.Func delegate type that has specific type arguments.
         /// The last type argument specifies the return type of the created delegate.
         /// </summary>
         /// <param name="typeArgs">An array of <see cref="System.Type"/> objects that specify the type arguments for the System.Func delegate type.</param>
@@ -676,7 +676,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a <see cref="Type"/> object that represents a generic System.Action delegate type that has specific type arguments. 
+        /// Creates a <see cref="System.Type"/> object that represents a generic System.Action delegate type that has specific type arguments. 
         /// </summary>
         /// <param name="typeArgs">An array of <see cref="System.Type"/> objects that specify the type arguments for the System.Action delegate type.</param>
         /// <returns>The type of a System.Action delegate that has the specified type arguments.</returns>
@@ -703,7 +703,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Creates a <see cref="Type"/> object that represents a generic System.Action delegate type that has specific type arguments.
+        /// Creates a <see cref="System.Type"/> object that represents a generic System.Action delegate type that has specific type arguments.
         /// </summary>
         /// <param name="typeArgs">An array of <see cref="System.Type"/> objects that specify the type arguments for the System.Action delegate type.</param>
         /// <param name="actionType">When this method returns, contains the generic System.Action delegate type that has specific type arguments. Contains null if there is no generic System.Action delegate that matches the <paramref name="typeArgs"/>.This parameter is passed uninitialized.</param>
@@ -720,7 +720,7 @@ namespace System.Linq.Expressions
         }
 
         /// <summary>
-        /// Gets a <see cref="Type"/> object that represents a generic System.Func or System.Action delegate type that has specific type arguments.
+        /// Gets a <see cref="System.Type"/> object that represents a generic System.Func or System.Action delegate type that has specific type arguments.
         /// The last type argument determines the return type of the delegate. If no Func or Action is large enough, it will generate a custom
         /// delegate type.
         /// </summary>

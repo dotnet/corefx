@@ -50,8 +50,16 @@ namespace System.Linq.Expressions
         /// </summary>
         public ReadOnlyCollection<Expression> Arguments => ReturnReadOnly(ref _arguments);
 
+        /// <summary>
+        /// Gets the argument expression with the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The index of the argument expression to get.</param>
+        /// <returns>The expression representing the argument at the specified <paramref name="index"/>.</returns>
         public Expression GetArgument(int index) => _arguments[index];
 
+        /// <summary>
+        /// Gets the number of argument expressions of the node.
+        /// </summary>
         public int ArgumentCount => _arguments.Count;
 
         /// <summary>

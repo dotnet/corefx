@@ -80,7 +80,7 @@ namespace System.Linq.Expressions
         /// <param name="value">An <see cref="Object"/> to set the <see cref="ConstantExpression.Value"/> property equal to.</param>
         /// <returns>
         /// A <see cref="ConstantExpression"/> that has the <see cref="NodeType"/> property equal to 
-        /// <see cref="ExpressionType.Constant"/> and the <see cref="Expression.Value"/> property set to the specified value.
+        /// <see cref="ExpressionType.Constant"/> and the <see cref="ConstantExpression.Value"/> property set to the specified value.
         /// </returns>
         public static ConstantExpression Constant(object value)
         {

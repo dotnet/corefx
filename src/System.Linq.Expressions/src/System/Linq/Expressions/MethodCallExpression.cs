@@ -104,12 +104,20 @@ namespace System.Linq.Expressions
 
         #region IArgumentProvider Members
 
+        /// <summary>
+        /// Gets the argument expression with the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The index of the argument expression to get.</param>
+        /// <returns>The expression representing the argument at the specified <paramref name="index"/>.</returns>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual Expression GetArgument(int index)
         {
             throw ContractUtils.Unreachable;
         }
 
+        /// <summary>
+        /// Gets the number of argument expressions of the node.
+        /// </summary>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual int ArgumentCount
         {
@@ -944,7 +952,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="MethodCallExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Call"/> and the <see cref="MethodCallExpression.Object"/>, <see cref="MethodCallExpression.Method"/>, and <see cref="MethodCallExpression.Arguments"/> properties set to the specified values.</returns>
         /// <param name="instance">An <see cref="Expression"/> to set the <see cref="MethodCallExpression.Object"/> property equal to (pass null for a static (Shared in Visual Basic) method).</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="MethodCallExpression.Method"/> property equal to.</param>
-        /// <param name="arguments">An <see cref=IEnumerable{Expression}"/> that contains <see cref="Expression"/> objects to use to populate the <see cref="MethodCallExpression.Arguments"/> collection.</param>
+        /// <param name="arguments">An <see cref="IEnumerable{Expression}"/> that contains <see cref="Expression"/> objects to use to populate the <see cref="MethodCallExpression.Arguments"/> collection.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="method"/> is null.-or-<paramref name="instance"/> is null and <paramref name="method"/> represents an instance method.</exception>
         /// <exception cref="ArgumentException">
