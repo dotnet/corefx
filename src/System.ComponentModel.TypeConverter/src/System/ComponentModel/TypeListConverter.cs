@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.ComponentModel.Design.Serialization;
 
 namespace System.ComponentModel
 {
@@ -47,12 +48,10 @@ namespace System.ComponentModel
         /// </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-#if FEATURE_INSTANCEDESCRIPTOR
             if (destinationType == typeof(InstanceDescriptor))
             {
                 return true;
             }
-#endif
             return base.CanConvertTo(context, destinationType);
         }
 

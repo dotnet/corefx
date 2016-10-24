@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
+using System.ComponentModel.Design.Serialization;
 
 namespace System.Drawing
 {
@@ -23,12 +24,10 @@ namespace System.Drawing
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-#if FEATURE_INSTANCEDESCRIPTOR
             if (destinationType == typeof(InstanceDescriptor))
             {
                 return true;
             }
-#endif
             return base.CanConvertTo(context, destinationType);
         }
 
@@ -102,7 +101,7 @@ namespace System.Drawing
 
                 return string.Join(sep, args);
             }
-#if FEATURE_INSTANCEDESCRIPTOR
+            
             if (destinationType == typeof(InstanceDescriptor) && value is SizeF)
             {
                 SizeF size = (SizeF)value;
@@ -113,7 +112,6 @@ namespace System.Drawing
                     return new InstanceDescriptor(ctor, new object[] { size.Width, size.Height });
                 }
             }
-#endif
 
             return base.ConvertTo(context, culture, value, destinationType);
         }

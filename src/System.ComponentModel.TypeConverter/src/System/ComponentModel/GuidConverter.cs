@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.ComponentModel.Design.Serialization;
+using System.Reflection;
 
 namespace System.ComponentModel
 {
@@ -31,12 +33,10 @@ namespace System.ComponentModel
         /// </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-#if FEATURE_INSTANCEDESCRIPTOR
             if (destinationType == typeof(InstanceDescriptor))
             {
                 return true;
             }
-#endif
             return base.CanConvertTo(context, destinationType);
         }
 
@@ -67,7 +67,6 @@ namespace System.ComponentModel
             {
                 throw new ArgumentNullException(nameof(destinationType));
             }
-#if FEATURE_INSTANCEDESCRIPTOR
             if (destinationType == typeof(InstanceDescriptor) && value is Guid)
             {
                 ConstructorInfo ctor = typeof(Guid).GetConstructor(new Type[] { typeof(string) });
@@ -76,7 +75,6 @@ namespace System.ComponentModel
                     return new InstanceDescriptor(ctor, new object[] { value.ToString() });
                 }
             }
-#endif
             return base.ConvertTo(context, culture, value, destinationType);
         }
     }

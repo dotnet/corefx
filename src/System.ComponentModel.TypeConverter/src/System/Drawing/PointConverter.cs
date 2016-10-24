@@ -7,6 +7,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.ComponentModel.Design.Serialization;
+using System.Reflection;
 
 namespace System.Drawing
 {
@@ -23,12 +25,10 @@ namespace System.Drawing
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-#if FEATURE_INSTANCEDESCRIPTOR
             if (destinationType == typeof(InstanceDescriptor))
             {
                 return true;
             }
-#endif
             return base.CanConvertTo(context, destinationType);
         }
 
@@ -107,7 +107,7 @@ namespace System.Drawing
 
                     return string.Join(sep, args);
                 }
-#if FEATURE_INSTANCEDESCRIPTOR
+                
                 if (destinationType == typeof(InstanceDescriptor))
                 {
                     Point pt = (Point)value;
@@ -118,7 +118,6 @@ namespace System.Drawing
                         return new InstanceDescriptor(ctor, new object[] { pt.X, pt.Y });
                     }
                 }
-#endif
             }
 
             return base.ConvertTo(context, culture, value, destinationType);

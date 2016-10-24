@@ -11,6 +11,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.ComponentModel.Design.Serialization;
 
 namespace System.Drawing
 {
@@ -34,12 +35,10 @@ namespace System.Drawing
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-#if FEATURE_INSTANCEDESCRIPTOR
             if (destinationType == typeof(InstanceDescriptor))
             {
                 return true;
             }
-#endif
             return base.CanConvertTo(context, destinationType);
         }
 
@@ -210,7 +209,7 @@ namespace System.Drawing
                         }
                     }
                 }
-#if FEATURE_INSTANCEDESCRIPTOR
+                
                 if (destinationType == typeof(InstanceDescriptor))
                 {
                     MemberInfo member = null;
@@ -256,7 +255,6 @@ namespace System.Drawing
                         return null;
                     }
                 }
-#endif
             }
 
             return base.ConvertTo(context, culture, value, destinationType);
