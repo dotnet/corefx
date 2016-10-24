@@ -764,7 +764,6 @@ namespace System.ComponentModel
         /// </summary>
         public override string GetFullComponentName(object component)
         {
-#if FEATURE_NESTED_SITE
             IComponent comp = component as IComponent;
             if (comp != null)
             {
@@ -774,7 +773,6 @@ namespace System.ComponentModel
                     return ns.FullName;
                 }
             }
-#endif
 
             return TypeDescriptor.GetComponentName(component);
         }

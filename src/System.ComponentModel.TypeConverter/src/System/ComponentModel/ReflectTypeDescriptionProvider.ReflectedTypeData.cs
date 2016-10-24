@@ -178,14 +178,12 @@ namespace System.ComponentModel
                     ISite site = comp.Site;
                     if (site != null)
                     {
-#if FEATURE_NESTED_SITE
                         INestedSite nestedSite = site as INestedSite;
                         if (nestedSite != null)
                         {
                             return nestedSite.FullName;
                         }
                         else
-#endif
                         {
                             return site.Name;
                         }
