@@ -14,6 +14,8 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     public class DiagnosticsTest : RemoteExecutorTestBase
     {
         // Diagnostic tests are each invoked in their own process as they enable/disable
@@ -25,6 +27,7 @@ namespace System.Net.Http.Functional.Tests
         /// This test must be in the same test collection as any others testing HttpClient/WinHttpHandler
         /// DiagnosticSources, since the global logging mechanism makes them conflict inherently.
         /// </remarks>
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceLogging()
         {
@@ -79,6 +82,7 @@ namespace System.Net.Http.Functional.Tests
         /// This test must be in the same test collection as any others testing HttpClient/WinHttpHandler
         /// DiagnosticSources, since the global logging mechanism makes them conflict inherently.
         /// </remarks>
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceNoLogging()
         {
@@ -113,6 +117,7 @@ namespace System.Net.Http.Functional.Tests
             }).Dispose();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void SendAsync_HttpTracingEnabled_Succeeds()
         {

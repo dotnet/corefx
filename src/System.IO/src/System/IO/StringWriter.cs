@@ -10,7 +10,7 @@ namespace System.IO
 {
     // This class implements a text writer that writes to a string buffer and allows
     // the resulting sequence of characters to be presented as a string.
-    //
+    [Serializable]
     public class StringWriter : TextWriter
     {
         private static volatile UnicodeEncoding s_encoding = null;
@@ -45,6 +45,11 @@ namespace System.IO
 
             _sb = sb;
             _isOpen = true;
+        }
+
+        public override void Close()
+        {
+            Dispose(true);
         }
 
         protected override void Dispose(bool disposing)

@@ -148,7 +148,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void MaxPath_Windows()
         {
             // Create a destination path longer than the traditional Windows limit of 256 characters,
@@ -177,7 +177,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void LongPath()
         {
             //Create a destination path longer than the traditional Windows limit of 256 characters
@@ -197,7 +197,7 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsPathWithIllegalColons()
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
@@ -209,7 +209,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsWildCharacterPath()
         {
             Assert.Throws<ArgumentException>(() => Move("*", GetTestFilePath()));
@@ -219,7 +219,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void UnixWildCharacterPath()
         {
             string testDir = GetTestFilePath();
@@ -243,7 +243,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsWhitespacePath()
         {
             FileInfo testFile = new FileInfo(GetTestFilePath());
@@ -254,7 +254,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void UnixWhitespacePath()
         {
             FileInfo testFileSource = new FileInfo(GetTestFilePath());

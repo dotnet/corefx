@@ -39,12 +39,17 @@ namespace System.Dynamic.Utils
 
         public static void ValidateType(Type type, string paramName)
         {
+            ValidateType(type, paramName, -1);
+        }
+
+        public static void ValidateType(Type type, string paramName, int index)
+        {
             if (type != typeof(void))
             {
                 // A check to avoid a bunch of reflection (currently not supported) during cctor
                 if (type.GetTypeInfo().ContainsGenericParameters)
                 {
-                    throw type.GetTypeInfo().IsGenericTypeDefinition ? Error.TypeIsGeneric(type, paramName) : Error.TypeContainsGenericParameters(type, paramName);
+                    throw type.GetTypeInfo().IsGenericTypeDefinition ? Error.TypeIsGeneric(type, paramName, index) : Error.TypeContainsGenericParameters(type, paramName, index);
                 }
             }
         }
@@ -79,7 +84,7 @@ namespace System.Dynamic.Utils
             // that allows mscorlib types to be specialized by types in other
             // assemblies.
 
-            var asm = t.GetTypeInfo().Assembly;
+            Assembly asm = t.GetTypeInfo().Assembly;
             if (asm != _mscorlib)
             {
                 // Not in mscorlib or our assembly

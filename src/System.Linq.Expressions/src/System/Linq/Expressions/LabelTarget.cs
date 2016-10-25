@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
@@ -12,41 +11,32 @@ namespace System.Linq.Expressions
     /// </summary>
     public sealed class LabelTarget
     {
-        private readonly Type _type;
-        private readonly string _name;
-
         internal LabelTarget(Type type, string name)
         {
-            _type = type;
-            _name = name;
+            Type = type;
+            Name = name;
         }
 
         /// <summary>
         /// Gets the name of the label.
         /// </summary>
         /// <remarks>The label's name is provided for information purposes only.</remarks>
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
         /// <summary>
         /// The type of value that is passed when jumping to the label
         /// (or System.Void if no value should be passed).
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
-        public Type Type
-        {
-            get { return _type; }
-        }
+        public Type Type { get; }
 
         /// <summary>
         /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>. 
         /// </summary>
-        /// <returns>A <see cref="String"/> that represents the current <see cref="Object"/>. </returns>
+        /// <returns>A <see cref="String"/> that represents the current <see cref="Object"/>.</returns>
         public override string ToString()
         {
-            return String.IsNullOrEmpty(this.Name) ? "UnamedLabel" : this.Name;
+            return string.IsNullOrEmpty(Name) ? "UnamedLabel" : Name;
         }
     }
 

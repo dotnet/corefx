@@ -17,9 +17,9 @@ namespace System.IO
 
         public override int MaxDirectoryPath { get { return Interop.Sys.MaxPath; } }
 
-        public override FileStreamBase Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
+        public override FileStream Open(string fullPath, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, FileStream parent)
         {
-            return new UnixFileStream(fullPath, mode, access, share, bufferSize, options, parent);
+            return new FileStream(fullPath, mode, access, share, bufferSize, options);
         }
 
         public override void CopyFile(string sourceFullPath, string destFullPath, bool overwrite)
@@ -37,6 +37,21 @@ namespace System.IO
             {
                 Interop.CheckIo(Interop.Sys.CopyFile(src.SafeFileHandle, dst.SafeFileHandle));
             }
+        }
+
+        public override void ReplaceFile(string sourceFullPath, string destFullPath, string destBackupFullPath, bool ignoreMetadataErrors)
+        {
+            // Copy the destination file to a backup.
+            if (destBackupFullPath != null)
+            {
+                CopyFile(destFullPath, destBackupFullPath, overwrite: true);
+            }
+
+            // Then copy the contents of the source file to the destination file.
+            CopyFile(sourceFullPath, destFullPath, overwrite: true);
+
+            // Finally, delete the source file.
+            DeleteFile(sourceFullPath);
         }
 
         public override void MoveFile(string sourceFullPath, string destFullPath)
@@ -652,6 +667,11 @@ namespace System.IO
             return asDirectory ?
                 (IFileSystemObject)new DirectoryInfo(fullPath, null) :
                 (IFileSystemObject)new FileInfo(fullPath, null);
+        }
+
+        public override string[] GetLogicalDrives()
+        {
+            return DriveInfoInternal.GetLogicalDrives();
         }
     }
 }

@@ -15,6 +15,8 @@ using Xunit.Abstractions;
 
 namespace System.Net.Security.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     public class ServerAsyncAuthenticateTest : IDisposable
     {
         private readonly ITestOutputHelper _log;
@@ -33,6 +35,7 @@ namespace System.Net.Security.Tests
             _serverCertificate.Dispose();
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
         public async Task ServerAsyncAuthenticate_EachSupportedProtocol_Success(SslProtocols protocol)
@@ -40,6 +43,7 @@ namespace System.Net.Security.Tests
             await ServerAsyncSslHelper(protocol, protocol);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [ClassData(typeof(SslProtocolSupport.UnsupportedSslProtocolsTestData))]
         public async Task ServerAsyncAuthenticate_EachServerUnsupportedProtocol_Fail(SslProtocols protocol)
@@ -53,6 +57,8 @@ namespace System.Net.Security.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(11170)]
         [Theory]
         [MemberData(nameof(ProtocolMismatchData))]
         public async Task ServerAsyncAuthenticate_MismatchProtocols_Fails(
@@ -71,6 +77,7 @@ namespace System.Net.Security.Tests
                 });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task ServerAsyncAuthenticate_UnsuportedAllServer_Fail()
         {
@@ -83,6 +90,7 @@ namespace System.Net.Security.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
         public async Task ServerAsyncAuthenticate_AllClientVsIndividualServerSupportedProtocols_Success(

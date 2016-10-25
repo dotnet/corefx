@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <UseECMAKey Condition="'$(UseECMAKey)' == ''">true</UseECMAKey>
+    <UseECMAKey>true</UseECMAKey>
     <!-- 
          NOTE: Suppress false positive warning for the special case where we're building System.Runtime.WindowsRuntime itself
                at a version other than 4.0.0.0, which is referenced indirectly via the mscorlib.dll design-time facade, which
@@ -13,9 +13,7 @@
                        match the output assembly name 'System.Runtime.WindowsRuntime, Version=4.0.10.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'. 
      -->
     <NoWarn>1698</NoWarn>
-    <AssemblyVersion>4.0.12.0</AssemblyVersion>
     <OutputType>Library</OutputType>
-    <PackageTargetFramework>netstandard1.2</PackageTargetFramework>
     <NuGetTargetMoniker>.NETStandard,Version=v1.2</NuGetTargetMoniker>
   </PropertyGroup>
   <ItemGroup>

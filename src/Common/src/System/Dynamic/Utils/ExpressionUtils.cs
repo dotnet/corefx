@@ -14,9 +14,9 @@ namespace System.Dynamic.Utils
 {
     internal static class ExpressionUtils
     {
-        public static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IList<T> collection)
+        public static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IReadOnlyList<T> collection)
         {
-            IList<T> value = collection;
+            IReadOnlyList<T> value = collection;
 
             // if it's already read-only just return it.
             ReadOnlyCollection<T> res = value as ReadOnlyCollection<T>;
@@ -26,7 +26,7 @@ namespace System.Dynamic.Utils
             }
 
             // otherwise make sure only readonly collection every gets exposed
-            Interlocked.CompareExchange<IList<T>>(
+            Interlocked.CompareExchange<IReadOnlyList<T>>(
                 ref collection,
                 value.ToReadOnly(),
                 value
@@ -87,7 +87,7 @@ namespace System.Dynamic.Utils
             return ((ReadOnlyCollection<T>)collectionOrT)[0];
         }
 
-        public static void ValidateArgumentTypes(MethodBase method, ExpressionType nodeKind, ref ReadOnlyCollection<Expression> arguments)
+        public static void ValidateArgumentTypes(MethodBase method, ExpressionType nodeKind, ref ReadOnlyCollection<Expression> arguments, string methodParamName)
         {
             Debug.Assert(nodeKind == ExpressionType.Invoke || nodeKind == ExpressionType.Call || nodeKind == ExpressionType.Dynamic || nodeKind == ExpressionType.New);
 
@@ -100,7 +100,7 @@ namespace System.Dynamic.Utils
             {
                 Expression arg = arguments[i];
                 ParameterInfo pi = pis[i];
-                arg = ValidateOneArgument(method, nodeKind, arg, pi);
+                arg = ValidateOneArgument(method, nodeKind, arg, pi, methodParamName, nameof(arguments), i);
 
                 if (newArgs == null && arg != arguments[i])
                 {
@@ -134,22 +134,22 @@ namespace System.Dynamic.Utils
                         throw Error.IncorrectNumberOfLambdaArguments();
                     case ExpressionType.Dynamic:
                     case ExpressionType.Call:
-                        throw Error.IncorrectNumberOfMethodCallArguments(method);
+                        throw Error.IncorrectNumberOfMethodCallArguments(method, nameof(method));
                     default:
                         throw ContractUtils.Unreachable;
                 }
             }
         }
 
-        public static Expression ValidateOneArgument(MethodBase method, ExpressionType nodeKind, Expression arguments, ParameterInfo pi)
+        public static Expression ValidateOneArgument(MethodBase method, ExpressionType nodeKind, Expression arguments, ParameterInfo pi, string methodParamName, string argumentParamName, int index = -1)
         {
-            RequiresCanRead(arguments, nameof(arguments));
+            RequiresCanRead(arguments, argumentParamName, index);
             Type pType = pi.ParameterType;
             if (pType.IsByRef)
             {
                 pType = pType.GetElementType();
             }
-            TypeUtils.ValidateType(pType, nameof(pi));
+            TypeUtils.ValidateType(pType, methodParamName);
             if (!TypeUtils.AreReferenceAssignable(pType, arguments.Type))
             {
                 if (!TryQuote(pType, ref arguments))
@@ -158,12 +158,12 @@ namespace System.Dynamic.Utils
                     switch (nodeKind)
                     {
                         case ExpressionType.New:
-                            throw Error.ExpressionTypeDoesNotMatchConstructorParameter(arguments.Type, pType);
+                            throw Error.ExpressionTypeDoesNotMatchConstructorParameter(arguments.Type, pType, argumentParamName, index);
                         case ExpressionType.Invoke:
-                            throw Error.ExpressionTypeDoesNotMatchParameter(arguments.Type, pType);
+                            throw Error.ExpressionTypeDoesNotMatchParameter(arguments.Type, pType, argumentParamName, index);
                         case ExpressionType.Dynamic:
                         case ExpressionType.Call:
-                            throw Error.ExpressionTypeDoesNotMatchMethodParameter(arguments.Type, pType, method);
+                            throw Error.ExpressionTypeDoesNotMatchMethodParameter(arguments.Type, pType, method, argumentParamName, index);
                         default:
                             throw ContractUtils.Unreachable;
                     }
@@ -172,12 +172,9 @@ namespace System.Dynamic.Utils
             return arguments;
         }
 
-        public static void RequiresCanRead(Expression expression, string paramName)
+        public static void RequiresCanRead(Expression expression, string paramName, int idx)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(paramName);
-            }
+            ContractUtils.RequiresNotNull(expression, paramName, idx);
 
             // validate that we can read the node
             switch (expression.NodeType)
@@ -186,7 +183,7 @@ namespace System.Dynamic.Utils
                     IndexExpression index = (IndexExpression)expression;
                     if (index.Indexer != null && !index.Indexer.CanRead)
                     {
-                        throw new ArgumentException(Strings.ExpressionMustBeReadable, paramName);
+                        throw Error.ExpressionMustBeReadable(paramName, idx);
                     }
                     break;
                 case ExpressionType.MemberAccess:
@@ -196,7 +193,7 @@ namespace System.Dynamic.Utils
                     {
                         if (!prop.CanRead)
                         {
-                            throw new ArgumentException(Strings.ExpressionMustBeReadable, paramName);
+                            throw Error.ExpressionMustBeReadable(paramName, idx);
                         }
                     }
                     break;

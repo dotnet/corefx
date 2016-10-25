@@ -12,6 +12,8 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     public class HttpClientHandler_ClientCertificates_Test
     {
         [Fact]
@@ -46,6 +48,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(BackendDoesNotSupportCustomCertificateHandling))]
         public async Task Automatic_SSLBackendNotSupported_ThrowsPlatformNotSupportedException()
         {
@@ -55,6 +58,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(BackendDoesNotSupportCustomCertificateHandling))]
         public async Task Manual_SSLBackendNotSupported_ThrowsPlatformNotSupportedException()
         {
@@ -66,7 +70,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(9543, PlatformID.Windows)] // reuseClient==false fails in debug/release, reuseClient==true fails sporadically in release
+        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(9543, TestPlatforms.Windows)] // reuseClient==false fails in debug/release, reuseClient==true fails sporadically in release
         [ConditionalTheory(nameof(BackendSupportsCustomCertificateHandling))]
         [InlineData(6, false)]
         [InlineData(3, true)]
@@ -93,6 +98,7 @@ namespace System.Net.Http.Functional.Tests
                             SslStream sslStream = Assert.IsType<SslStream>(stream);
                             Assert.Equal(cert, sslStream.RemoteCertificate);
                             await LoopbackServer.ReadWriteAcceptedAsync(socket, reader, writer);
+                            return null;
                         }, options));
                 };
 

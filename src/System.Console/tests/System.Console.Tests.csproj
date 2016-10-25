@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,7 +9,6 @@
     <AssemblyName>System.Console.Tests</AssemblyName>
     <RootNamespace>System.Console.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IncludePerformanceTests>true</IncludePerformanceTests>
     <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
@@ -36,9 +35,6 @@
     <Compile Include="$(CommonTestPath)\System\IO\InterceptStreamWriter.cs">
       <Link>Common\System\IO\InterceptStreamWriter.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\Diagnostics\AssertWithCallerAttributes.cs">
-      <Link>Common\System\Diagnostics\AssertWithCallerAttributes.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
       <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
     </Compile>
@@ -49,11 +45,6 @@
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
     </Compile>
     <Compile Include="WindowAndCursorProps.cs" />
-    <!-- Performance Tests -->
-    <Compile Include="Performance\Perf.Console.cs" />
-    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
-      <Link>Common\System\PerfUtils.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.Console.pkgproj">
@@ -66,9 +57,6 @@
       <Name>RemoteExecutorConsoleApp</Name>
       <OSGroup>$(InputOSGroup)</OSGroup>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

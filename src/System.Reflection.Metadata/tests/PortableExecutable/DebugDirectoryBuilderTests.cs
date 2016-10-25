@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
+using System.Reflection.Internal;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Tests;
 using Xunit;
@@ -11,10 +13,32 @@ namespace System.Reflection.PortableExecutable.Tests
     public class DebugDirectoryBuilderTests
     {
         [Fact]
-        public void Errors()
+        public void AddEmbeddedPortablePdbEntry_Args()
         {
-            var b = new DebugDirectoryBuilder();
-            Assert.Throws<ArgumentNullException>(() => b.AddCodeViewEntry(null, default(BlobContentId), 0));
+            var bb = new BlobBuilder();
+
+            var builder = new DebugDirectoryBuilder();
+            Assert.Throws<ArgumentNullException>(() => builder.AddEmbeddedPortablePdbEntry(null, 0x0100));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddEmbeddedPortablePdbEntry(bb, 0x0000));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddEmbeddedPortablePdbEntry(bb, 0x00ff));
+            builder.AddEmbeddedPortablePdbEntry(bb, 0x0100);
+            builder.AddEmbeddedPortablePdbEntry(bb, 0xffff);
+        }
+
+        [Fact]
+        public void AddCodeViewEntry_Args()
+        {
+            var builder = new DebugDirectoryBuilder();
+            Assert.Throws<ArgumentException>(() => builder.AddCodeViewEntry("", default(BlobContentId), 0x0100));
+            Assert.Throws<ArgumentException>(() => builder.AddCodeViewEntry("\0", default(BlobContentId), 0x0100));
+            Assert.Throws<ArgumentException>(() => builder.AddCodeViewEntry("\0xx", default(BlobContentId), 0x0100));
+            builder.AddCodeViewEntry("foo\0", default(BlobContentId), 0x0100);
+            Assert.Throws<ArgumentNullException>(() => builder.AddCodeViewEntry(null, default(BlobContentId), 0x0100));
+            builder.AddCodeViewEntry("foo", default(BlobContentId), 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddCodeViewEntry("foo", default(BlobContentId), 0x0001));
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.AddCodeViewEntry("foo", default(BlobContentId), 0x00ff));
+            builder.AddCodeViewEntry("foo", default(BlobContentId), 0x0100);
+            builder.AddCodeViewEntry("foo", default(BlobContentId), 0xffff);
         }
 
         [Fact]
@@ -63,6 +87,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(0, actual[0].MajorVersion);
                 Assert.Equal(0, actual[0].MinorVersion);
                 Assert.Equal(DebugDirectoryEntryType.CodeView, actual[0].Type);
+                Assert.False(actual[0].IsPortableCodeView);
                 Assert.Equal(0x00000020, actual[0].DataSize);
                 Assert.Equal(0x0000106c, actual[0].DataRelativeVirtualAddress);
                 Assert.Equal(0x0000206c, actual[0].DataPointer);
@@ -121,6 +146,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(0xABCD, actual[0].MajorVersion);
                 Assert.Equal(0x504d, actual[0].MinorVersion);
                 Assert.Equal(DebugDirectoryEntryType.CodeView, actual[0].Type);
+                Assert.True(actual[0].IsPortableCodeView);
                 Assert.Equal(0x0000011c, actual[0].DataSize);
                 Assert.Equal(0x0000106c, actual[0].DataRelativeVirtualAddress);
                 Assert.Equal(0x0000206c, actual[0].DataPointer);
@@ -156,6 +182,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Equal(0, actual[0].MajorVersion);
                 Assert.Equal(0, actual[0].MinorVersion);
                 Assert.Equal(DebugDirectoryEntryType.Reproducible, actual[0].Type);
+                Assert.False(actual[0].IsPortableCodeView);
                 Assert.Equal(0, actual[0].DataSize);
                 Assert.Equal(0, actual[0].DataRelativeVirtualAddress);
                 Assert.Equal(0, actual[0].DataPointer);
@@ -221,6 +248,57 @@ namespace System.Reflection.PortableExecutable.Tests
                 0x01, 0x00, 0x00, 0x00, // age
                 (byte)'y', 0x00, // path
             }, blob.ToArray());
+        }
+
+        [Fact]
+        public void EmbeddedPortablePdb()
+        {
+            var b = new DebugDirectoryBuilder();
+
+            var pdb = new BlobBuilder();
+            pdb.WriteInt64(0x1122334455667788);
+
+            b.AddEmbeddedPortablePdbEntry(pdb, portablePdbVersion: 0x0100);
+
+            var blob = new BlobBuilder();
+            b.Serialize(blob, new SectionLocation(0, 0), sectionOffset: 0);
+            var bytes = blob.ToImmutableArray();
+
+            AssertEx.Equal(new byte[]
+            {
+                0x00, 0x00, 0x00, 0x00, // Characteristics
+                0x00, 0x00, 0x00, 0x00, // Stamp
+                0x00, 0x01, 0x00, 0x01, // Version
+                0x11, 0x00, 0x00, 0x00, // Type
+                0x12, 0x00, 0x00, 0x00, // SizeOfData
+                0x1C, 0x00, 0x00, 0x00, // AddressOfRawData
+                0x1C, 0x00, 0x00, 0x00, // PointerToRawData
+
+                0x4D, 0x50, 0x44, 0x42, // signature
+                0x08, 0x00, 0x00, 0x00, // uncompressed size
+                0xEB, 0x28, 0x4F, 0x0B, 0x75, 0x31, 0x56, 0x12, 0x04, 0x00 // compressed data
+            }, bytes);
+
+            using (var pinned = new PinnedBlob(bytes))
+            {
+                var actual = PEReader.ReadDebugDirectoryEntries(pinned.CreateReader(0, DebugDirectoryEntry.Size));
+                Assert.Equal(1, actual.Length);
+                Assert.Equal(0u, actual[0].Stamp);
+                Assert.Equal(0x0100, actual[0].MajorVersion);
+                Assert.Equal(0x0100, actual[0].MinorVersion);
+                Assert.Equal(DebugDirectoryEntryType.EmbeddedPortablePdb, actual[0].Type);
+                Assert.False(actual[0].IsPortableCodeView);
+                Assert.Equal(0x00000012, actual[0].DataSize);
+                Assert.Equal(0x0000001c, actual[0].DataRelativeVirtualAddress);
+                Assert.Equal(0x0000001c, actual[0].DataPointer);
+
+                var provider = new ByteArrayMemoryProvider(bytes);
+                using (var block = provider.GetMemoryBlock(actual[0].DataPointer, actual[0].DataSize))
+                {
+                    var decoded = PEReader.DecodeEmbeddedPortablePdbDebugDirectoryData(block);
+                    AssertEx.Equal(new byte[] { 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 }, decoded);
+                }
+            }
         }
     }
 }

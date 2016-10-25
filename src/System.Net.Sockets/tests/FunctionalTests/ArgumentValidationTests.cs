@@ -12,17 +12,6 @@ using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
-    // TODO (#7852):
-    //
-    // - Connect(EndPoint):
-    //   - disconnected socket
-    // - Accept(EndPoint):
-    //   - disconnected socket
-    //
-    // End*:
-    // - Invalid asyncresult type
-    // - asyncresult from different object
-    // - asyncresult with end already called
     public class ArgumentValidation
     {
         // This type is used to test Socket.Select's argument validation.
@@ -709,7 +698,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Socket_Connect_DnsEndPoint_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -737,7 +726,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Socket_Connect_StringHost_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -783,7 +772,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Socket_Connect_MultipleAddresses_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -793,7 +782,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Socket_ConnectAsync_DnsEndPoint_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -820,7 +809,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Socket_ConnectAsync_StringHost_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -864,7 +853,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Socket_ConnectAsync_MultipleAddresses_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -874,7 +863,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Connect_ConnectTwice_NotSupported()
         {
             using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -893,7 +882,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void ConnectAsync_ConnectTwice_NotSupported()
         {
             AutoResetEvent completed = new AutoResetEvent(false);
@@ -965,7 +954,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginConnect_EndPoint_AddressFamily_Throws_NotSupported()
         {
             Assert.Throws<NotSupportedException>(() => GetSocket(AddressFamily.InterNetwork).BeginConnect(new DnsEndPoint("localhost", 1, AddressFamily.InterNetworkV6), TheAsyncCallback, null));
@@ -985,7 +974,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginConnect_Host_ListeningSocket_Throws_InvalidOperation()
         {
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -1035,7 +1024,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginConnect_IPAddresses_ListeningSocket_Throws_InvalidOperation()
         {
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -1285,8 +1274,7 @@ namespace System.Net.Sockets.Tests
             EndPoint remote = new IPEndPoint(IPAddress.IPv6Loopback, 1);
             IPPacketInformation packetInfo;
 
-            // Behavior difference from Desktop: used to throw ArgumentException.
-            Assert.Throws<ArgumentNullException>(() => GetSocket(AddressFamily.InterNetwork).EndReceiveMessageFrom(null, ref flags, ref remote, out packetInfo));
+            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).EndReceiveMessageFrom(null, ref flags, ref remote, out packetInfo));
         }
 
         [Fact]
@@ -1300,7 +1288,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void TcpClient_ConnectAsync_StringHost_NotSupportedAfterClientAccess()
         {
             using (TcpClient client = new TcpClient())
@@ -1311,7 +1299,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void TcpClient_ConnectAsync_ArrayOfAddresses_NotSupportedAfterClientAccess()
         {
             using (TcpClient client = new TcpClient())

@@ -8,6 +8,7 @@ using System.Globalization;
 
 namespace System.Numerics
 {
+    [Serializable]
     public struct BigInteger : IFormattable, IComparable, IComparable<BigInteger>, IEquatable<BigInteger>
     {
         private const int knMaskHighBit = int.MinValue;
@@ -993,7 +994,7 @@ namespace System.Numerics
             return _bits[cuDiff - 1] < other._bits[cuDiff - 1] ? -_sign : _sign;
         }
 
-        int IComparable.CompareTo(object obj)
+        public int CompareTo(object obj)
         {
             if (obj == null)
                 return 1;

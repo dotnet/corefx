@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -16,65 +16,18 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Assembly\AssemblyExtensionTests.cs" />
-    <Compile Include="ConstructorInfo\InvokeArrayCtors.cs" />
-    <Compile Include="ConstructorInfo\ConstructorInfoInvoke1.cs" />
-    <Compile Include="ConstructorInfo\ConstructorInfoInvoke2.cs" />
-    <Compile Include="ConstructorInfo\ConstructorInfoMemberType.cs" />
-    <Compile Include="ConstructorInfo\ConstructorInfoTypeConstructorName.cs" />
-    <Compile Include="EventInfo\EventInfoAddEventHandler.cs" />
-    <Compile Include="EventInfo\EventInfoAttributesProperty.cs" />
-    <Compile Include="EventInfo\EventInfoEventHandlerType.cs" />
-    <Compile Include="EventInfo\EventInfoGetAddMethod1.cs" />
-    <Compile Include="EventInfo\EventInfoGetAddMethod2.cs" />
-    <Compile Include="EventInfo\EventInfoGetRaiseMethod1.cs" />
-    <Compile Include="EventInfo\EventInfoGetRaiseMethod2.cs" />
-    <Compile Include="EventInfo\EventInfoGetRemoveMethod1.cs" />
-    <Compile Include="EventInfo\EventInfoGetRemoveMethod2.cs" />
-    <Compile Include="EventInfo\EventInfoIsSpecialName.cs" />
-    <Compile Include="EventInfo\EventInfoMemberType.cs" />
-    <Compile Include="EventInfo\EventInfoRemoveEventHandler.cs" />
-    <Compile Include="FieldInfo\FieldInfoAttributes.cs" />
-    <Compile Include="FieldInfo\FieldInfoFieldType.cs" />
-    <Compile Include="FieldInfo\FieldInfoGetValue1.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsAssembly.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsFamily.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsFamilyAndAssembly.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsFamilyOrAssembly.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsInitOnly.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsLiteral.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsPrivate.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsPublic.cs" />
-    <Compile Include="FieldInfo\FieldInfoIsStatic.cs" />
-    <Compile Include="FieldInfo\FieldInfoMemberType.cs" />
-    <Compile Include="ConstructorInfo\ConstructorInfoConstructorName.cs" />
-    <Compile Include="MemberInfo\MemberInfoMemberType.cs" />
-    <Compile Include="MemberInfo\MemberInfoModule.cs" />
-    <Compile Include="MemberInfo\MemberInfoName.cs" />
-    <Compile Include="MemberInfo\MetadataToken.cs" />
-    <Compile Include="MethodBase\MethodBaseContainsGenericParameters.cs" />
-    <Compile Include="MethodInfo\GetBaseDefinition.cs" />
-    <Compile Include="MethodInfo\MethodInfoGetGenericArguments.cs" />
-    <Compile Include="Module\ModuleVersionId.cs" />
-    <Compile Include="Nullable\NullableMisc.cs" />
-    <Compile Include="PropertyCompat\PropertyCompat.cs" />
-    <Compile Include="PropertyInfo\GetAccessors.cs" />
-    <Compile Include="PropertyInfo\PropertyGetAccessors2.cs" />
-    <Compile Include="PropertyInfo\PropertyInfoGetAccessors1.cs" />
-    <Compile Include="Type\GetDefaultMembers.cs" />
-    <Compile Include="Type\GetEvents.cs" />
-    <Compile Include="Type\GetFields.cs" />
-    <Compile Include="Type\GetInterfaces.cs" />
-    <Compile Include="Type\GetMember.cs" />
-    <Compile Include="Type\GetMembers.cs" />
-    <Compile Include="Type\GetMethods.cs" />
-    <Compile Include="Type\GetProperties.cs" />
-    <Compile Include="Type\GetProperty.cs" />
-    <Compile Include="Type\IsAssignableFrom.cs" />
-    <Compile Include="Type\TypeInfoAPIs.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
+    <Compile Include="AssemblyExtensionTests.cs" />
+    <Compile Include="ConstructorInfo\ConstructorInfoInvokeArrayTests.cs" />
+    <Compile Include="ConstructorInfo\ConstructorInfoTests.cs" />
+    <Compile Include="MethodInfoTests.cs" />
+    <Compile Include="TypeTests.cs" />
+    <Compile Include="PropertyInfoTests.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="EventInfoTests.cs" />
+    <Compile Include="FieldInfoTests.cs" />
+    <Compile Include="MemberInfoTests.cs" />
+    <Compile Include="MethodBaseTests.cs" />
+    <Compile Include="ModuleTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.Reflection.TypeExtensions.pkgproj">

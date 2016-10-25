@@ -180,7 +180,7 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ValidExtendedPathExists_ReturnsTrue()
         {
             Assert.All((IOInputs.GetValidPathComponentNames()), (component) =>
@@ -192,7 +192,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ExtendedPathAlreadyExistsAsFile()
         {
             string path = IOInputs.ExtendedPrefix + GetTestFilePath();
@@ -204,7 +204,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ExtendedPathAlreadyExistsAsDirectory()
         {
             string path = IOInputs.ExtendedPrefix + GetTestFilePath();
@@ -216,7 +216,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void DirectoryLongerThanMaxDirectoryAsPath_DoesntThrow()
         {
             Assert.All((IOInputs.GetPathsLongerThanMaxDirectory(GetTestFilePath())), (path) =>
@@ -226,7 +226,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // Unix equivalent tested already in CreateDirectory
+        [PlatformSpecific(TestPlatforms.Windows)] // Unix equivalent tested already in CreateDirectory
         public void WindowsWhiteSpaceAsPath_ReturnsFalse()
         {
             // Checks that errors aren't thrown when calling Exists() on impossible paths
@@ -257,7 +257,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // In Windows, trailing whitespace in a path is trimmed appropriately
+        [PlatformSpecific(TestPlatforms.Windows)] // In Windows, trailing whitespace in a path is trimmed appropriately
         public void TrailingWhitespaceExistence()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -278,7 +278,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // alternate data stream
+        [PlatformSpecific(TestPlatforms.Windows)] // alternate data stream
         public void PathWithAlternateDataStreams_ReturnsFalse()
         {
             Assert.All(IOInputs.GetWhiteSpace(), (component) =>
@@ -289,7 +289,7 @@ namespace System.IO.Tests
 
         [Fact]
         [OuterLoop]
-        [PlatformSpecific(PlatformID.Windows)] // device names
+        [PlatformSpecific(TestPlatforms.Windows)] // device names
         public void PathWithReservedDeviceNameAsPath_ReturnsFalse()
         {
             Assert.All((IOInputs.GetPathsWithReservedDeviceNames()), (component) =>
@@ -299,7 +299,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // UNC paths
+        [PlatformSpecific(TestPlatforms.Windows)] // UNC paths
         public void UncPathWithoutShareNameAsPath_ReturnsFalse()
         {
             Assert.All((IOInputs.GetUncPathsWithoutShareName()), (component) =>
@@ -309,7 +309,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // max directory length not fixed on Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // max directory length not fixed on Unix
         public void DirectoryEqualToMaxDirectory_ReturnsTrue()
         {
             // Creates directories up to the maximum directory length all at once
@@ -320,7 +320,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // max directory length not fixed on Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // max directory length not fixed on Unix
         public void DirectoryWithComponentLongerThanMaxComponentAsPath_ReturnsFalse()
         {
             Assert.All((IOInputs.GetPathsWithComponentLongerThanMaxComponent()), (component) =>
@@ -331,7 +331,7 @@ namespace System.IO.Tests
 
         [Fact]
         [ActiveIssue(1221)]
-        [PlatformSpecific(PlatformID.Windows)] // drive labels
+        [PlatformSpecific(TestPlatforms.Windows)] // drive labels
         public void NotReadyDriveAsPath_ReturnsFalse()
         {
             var drive = IOServices.GetNotReadyDrive();
@@ -348,7 +348,7 @@ namespace System.IO.Tests
 
         [Fact]
         [ActiveIssue(1221)]
-        [PlatformSpecific(PlatformID.Windows)] // drive labels
+        [PlatformSpecific(TestPlatforms.Windows)] // drive labels
         public void SubdirectoryOnNotReadyDriveAsPath_ReturnsFalse()
         {
             var drive = IOServices.GetNotReadyDrive();
@@ -364,21 +364,21 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // drive labels
+        [PlatformSpecific(TestPlatforms.Windows)] // drive labels
         public void NonExistentDriveAsPath_ReturnsFalse()
         {
             Assert.False(Exists(IOServices.GetNonExistentDrive()));
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // drive labels
+        [PlatformSpecific(TestPlatforms.Windows)] // drive labels
         public void SubdirectoryOnNonExistentDriveAsPath_ReturnsFalse()
         {
             Assert.False(Exists(Path.Combine(IOServices.GetNonExistentDrive(), "nonexistentsubdir")));
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void FalseForNonRegularFile()
         {
             string fileName = GetTestFilePath();

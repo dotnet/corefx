@@ -2,82 +2,70 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Xunit;
 
-namespace System.ComponentModel.DataAnnotations
+namespace System.ComponentModel.DataAnnotations.Tests
 {
-    public class MinLengthAttributeTests
+    public class MinLengthAttributeTests : ValidationAttributeTestBase
     {
-        private static readonly ValidationContext s_testValidationContext = new ValidationContext(new object());
-
-        [Fact]
-        public static void Length_returns_set_length()
+        protected override IEnumerable<TestCase> ValidValues()
         {
-            Assert.Equal(10, new MinLengthAttribute(10).Length);
-            Assert.Equal(0, new MinLengthAttribute(0).Length);
+            yield return new TestCase(new MinLengthAttribute(10), null);
+            yield return new TestCase(new MinLengthAttribute(0), "");
+            yield return new TestCase(new MinLengthAttribute(12), "OverMinLength");
+            yield return new TestCase(new MinLengthAttribute(16), "EqualToMinLength");
 
-            // This only throws when GetValidationResult is called
-            Assert.Equal(-1, new MinLengthAttribute(-1).Length);
+            yield return new TestCase(new MinLengthAttribute(0), new int[0]);
+            yield return new TestCase(new MinLengthAttribute(12), new int[14]);
+            yield return new TestCase(new MinLengthAttribute(16), new string[16]);
+
+            yield return new TestCase(new MinLengthAttribute(0), new Collection<int>(new int[0]));
+            yield return new TestCase(new MinLengthAttribute(12), new Collection<int>(new int[14]));
+            yield return new TestCase(new MinLengthAttribute(16), new Collection<string>(new string[16]));
+
+            yield return new TestCase(new MinLengthAttribute(0), new List<int>(new int[0]));
+            yield return new TestCase(new MinLengthAttribute(12), new List<int>(new int[14]));
+            yield return new TestCase(new MinLengthAttribute(16), new List<string>(new string[16]));
+        }
+
+        protected override IEnumerable<TestCase> InvalidValues()
+        {
+            yield return new TestCase(new MinLengthAttribute(15), "UnderMinLength");
+            yield return new TestCase(new MinLengthAttribute(15), new byte[14]);
+            yield return new TestCase(new MinLengthAttribute(15), new Collection<byte>(new byte[14]));
+            yield return new TestCase(new MinLengthAttribute(15), new List<byte>(new byte[14]));
+
+            yield return new TestCase(new MinLengthAttribute(12), new int[3, 3]);
+        }
+        
+        [Theory]
+        [InlineData(10)]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public static void Ctor(int length)
+        {
+            Assert.Equal(length, new MinLengthAttribute(length).Length);
         }
 
         [Fact]
-        public static void GetValidationResult_throws_for_negative_lengths()
+        public static void GetValidationResult_InvalidLength_ThrowsInvalidOperationException()
         {
             var attribute = new MinLengthAttribute(-1);
-            Assert.Throws<InvalidOperationException>(
-                () => attribute.GetValidationResult("Rincewind", s_testValidationContext));
+            Assert.Throws<InvalidOperationException>(() => attribute.GetValidationResult("Rincewind", new ValidationContext(new object())));
         }
 
         [Fact]
-        public static void GetValidationResult_throws_for_object_that_is_not_string_or_array()
+        public static void GetValidationResult_ValueNotStringOrICollection_ThrowsInvalidCastException()
         {
-            Assert.Throws<InvalidCastException>(
-                () => new MinLengthAttribute(0).GetValidationResult(new Random(), s_testValidationContext));
+            Assert.Throws<InvalidCastException>(() => new MinLengthAttribute(0).GetValidationResult(new Random(), new ValidationContext(new object())));
         }
 
         [Fact]
-        public static void GetValidationResult_returns_success_for_null_target()
+        public static void GetValidationResult_ValueGenericICollection_ThrowsInvalidCastException()
         {
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(10).GetValidationResult(null, s_testValidationContext));
-        }
-
-        [Fact]
-        public static void GetValidationResult_validates_string_length()
-        {
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(0).GetValidationResult(string.Empty, s_testValidationContext));
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(12).GetValidationResult("OverMinLength", s_testValidationContext));
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(16).GetValidationResult("EqualToMinLength", s_testValidationContext));
-            Assert.NotNull((new MinLengthAttribute(15).GetValidationResult("UnderMinLength", s_testValidationContext)).ErrorMessage);
-        }
-
-        [Fact]
-        public static void GetValidationResult_validates_array_length()
-        {
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(0).GetValidationResult(new int[0], s_testValidationContext));
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(12).GetValidationResult(new int[13], s_testValidationContext));
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(16).GetValidationResult(new string[16], s_testValidationContext));
-            Assert.NotNull((new MinLengthAttribute(15).GetValidationResult(new byte[14], s_testValidationContext)).ErrorMessage);
-        }
-
-        [Fact]
-        public static void GetValidationResult_validates_collection_length()
-        {
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(0).GetValidationResult(new Collection<int>(new int[0]), s_testValidationContext));
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(12).GetValidationResult(new Collection<int>(new int[13]), s_testValidationContext));
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(16).GetValidationResult(new Collection<string>(new string[16]), s_testValidationContext));
-            Assert.NotNull((new MinLengthAttribute(15).GetValidationResult(new Collection<byte>(new byte[14]), s_testValidationContext)).ErrorMessage);
-        }
-
-        [Fact]
-        public static void GetValidationResult_validates_list_length()
-        {
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(0).GetValidationResult(new List<int>(new int[0]), s_testValidationContext));
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(12).GetValidationResult(new List<int>(new int[13]), s_testValidationContext));
-            Assert.Equal(ValidationResult.Success, new MinLengthAttribute(16).GetValidationResult(new List<string>(new string[16]), s_testValidationContext));
-            Assert.NotNull((new MinLengthAttribute(15).GetValidationResult(new List<byte>(new byte[14]), s_testValidationContext)).ErrorMessage);
+            Assert.Throws<InvalidCastException>(() => new MinLengthAttribute(0).GetValidationResult(new GenericICollectionClass(), new ValidationContext(new object())));
         }
     }
 }

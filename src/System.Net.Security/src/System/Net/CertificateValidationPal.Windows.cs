@@ -104,7 +104,7 @@ namespace System.Net
             SafeFreeCertContext remoteContext = null;
             try
             {
-                remoteContext = SSPIWrapper.QueryContextAttributes(GlobalSSPI.SSPISecureChannel, securityContext, Interop.SspiCli.ContextAttribute.RemoteCertificate) as SafeFreeCertContext;
+                remoteContext = SSPIWrapper.QueryContextAttributes(GlobalSSPI.SSPISecureChannel, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_REMOTE_CERT_CONTEXT) as SafeFreeCertContext;
                 if (remoteContext != null && !remoteContext.IsInvalid)
                 {
                     result = new X509Certificate2(remoteContext.DangerousGetHandle());
@@ -138,11 +138,11 @@ namespace System.Net
         //
         internal static string[] GetRequestCertificateAuthorities(SafeDeleteContext securityContext)
         {
-            Interop.SspiCli.IssuerListInfoEx issuerList =
-                (Interop.SspiCli.IssuerListInfoEx)SSPIWrapper.QueryContextAttributes(
+            Interop.SspiCli.SecPkgContext_IssuerListInfoEx issuerList =
+                (Interop.SspiCli.SecPkgContext_IssuerListInfoEx)SSPIWrapper.QueryContextAttributes(
                     GlobalSSPI.SSPISecureChannel,
                     securityContext,
-                    Interop.SspiCli.ContextAttribute.IssuerListInfoEx);
+                    Interop.SspiCli.ContextAttribute.SECPKG_ATTR_ISSUER_LIST_EX);
 
             string[] issuers = Array.Empty<string>();
 
@@ -154,10 +154,10 @@ namespace System.Net
                     {
                         uint count = issuerList.cIssuers;
                         issuers = new string[issuerList.cIssuers];
-                        Interop.SspiCli._CERT_CHAIN_ELEMENT* pIL = (Interop.SspiCli._CERT_CHAIN_ELEMENT*)issuerList.aIssuers.DangerousGetHandle();
+                        Interop.SspiCli.CERT_CHAIN_ELEMENT* pIL = (Interop.SspiCli.CERT_CHAIN_ELEMENT*)issuerList.aIssuers.DangerousGetHandle();
                         for (int i = 0; i < count; ++i)
                         {
-                            Interop.SspiCli._CERT_CHAIN_ELEMENT* pIL2 = pIL + i;
+                            Interop.SspiCli.CERT_CHAIN_ELEMENT* pIL2 = pIL + i;
                             if (pIL2->cbSize <= 0)
                             {
                                 if (GlobalLog.IsEnabled)
@@ -208,12 +208,12 @@ namespace System.Net
             X509Store store = isMachineStore ? s_myMachineCertStoreEx : s_myCertStoreEx;
 
             // TODO #3862 Investigate if this can be switched to either the static or Lazy<T> patterns.
-            if (Volatile.Read(ref store) == null)
+            if (store == null)
             {
                 lock (s_syncObject)
                 {
                     store = isMachineStore ? s_myMachineCertStoreEx : s_myCertStoreEx;
-                    if (Volatile.Read(ref store) == null)
+                    if (store == null)
                     {
                         // NOTE: that if this call fails we won't keep track and the next time we enter we will try to open the store again.
                         StoreLocation storeLocation = isMachineStore ? StoreLocation.LocalMachine : StoreLocation.CurrentUser;

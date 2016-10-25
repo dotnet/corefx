@@ -21,6 +21,8 @@ using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
     public class HttpClientHandlerTest
@@ -50,6 +52,7 @@ namespace System.Net.Http.Functional.Tests
                 hops:1) },
         };
         public readonly static object[][] Http2Servers = Configuration.Http.Http2Servers;
+        public readonly static object[][] Http2NoPushServers = Configuration.Http.Http2NoPushServers;
 
         public readonly static object[][] RedirectStatusCodes = {
             new object[] { 300 },
@@ -67,7 +70,9 @@ namespace System.Net.Http.Functional.Tests
             GetMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "CUSTOM1");
         public readonly static IEnumerable<object[]> HttpMethodsThatDontAllowContent =
             GetMethods("HEAD", "TRACE");
-        
+
+        private static bool IsWindows10Version1607OrGreater => PlatformDetection.IsWindows10Version1607OrGreater;
+
         private static IEnumerable<object[]> GetMethods(params string[] methods)
         {
             foreach (string method in methods)
@@ -173,6 +178,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(item, value);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(EchoServers))]
         public async Task SendAsync_SimpleGet_Success(Uri remoteServer)
         {
@@ -191,7 +197,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Theory]
+        [OuterLoop] // TODO: Issue #11345
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [MemberData(nameof(GetAsync_IPBasedUri_Success_MemberData))]
         public async Task GetAsync_IPBasedUri_Success(IPAddress address)
         {
@@ -218,6 +225,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_MultipleRequestsReusingSameClient_Success()
         {
@@ -233,6 +241,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
         
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_ResponseContentAfterClientAndHandlerDispose_Success()
         {
@@ -252,6 +261,7 @@ namespace System.Net.Http.Functional.Tests
                 null);                    
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_Cancel_CancellationTokenPropagates()
         {
@@ -267,6 +277,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(CompressedServers))]
         public async Task GetAsync_DefaultAutomaticDecompression_ContentDecompressed(Uri server)
         {
@@ -286,6 +297,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(CompressedServers))]
         public async Task GetAsync_DefaultAutomaticDecompression_HeadersRemoved(Uri server)
         {
@@ -299,6 +311,23 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task GetAsync_ServerNeedsBasicAuthAndSetDefaultCredentials_StatusCodeUnauthorized()
+        {
+            var handler = new HttpClientHandler();
+            handler.Credentials = CredentialCache.DefaultCredentials;
+            using (var client = new HttpClient(handler))
+            {
+                Uri uri = Configuration.Http.BasicAuthUriForCreds(secure:false, userName:Username, password:Password);
+                using (HttpResponseMessage response = await client.GetAsync(uri))
+                {
+                    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                }
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_ServerNeedsAuthAndSetCredential_StatusCodeOK()
         {
@@ -314,6 +343,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_ServerNeedsAuthAndNoCredential_StatusCodeUnauthorized()
         {
@@ -327,6 +357,34 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData("WWW-Authenticate: CustomAuth\r\n")]
+        [InlineData("")] // RFC7235 requires servers to send this header with 401 but some servers don't.
+        public async Task GetAsync_ServerNeedsNonStandardAuthAndSetCredential_StatusCodeUnauthorized(string authHeaders)
+        {
+            string responseHeaders =
+                $"HTTP/1.1 401 Unauthorized\r\nDate: {DateTimeOffset.UtcNow:R}\r\n{authHeaders}Content-Length: 0\r\n\r\n";
+            _output.WriteLine(responseHeaders);
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                var handler = new HttpClientHandler();
+                handler.Credentials = new NetworkCredential("unused", "unused");
+                using (var client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server, responseHeaders);
+
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                    }
+                }
+            });
+        }
+
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectFalse_RedirectFromHttpToHttp_StatusCodeRedirect(int statusCode)
         {
@@ -348,6 +406,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttp_StatusCodeOK(int statusCode)
         {
@@ -369,6 +428,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttps_StatusCodeOK()
         {
@@ -390,6 +450,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpsToHttp_StatusCodeRedirect()
         {
@@ -411,6 +472,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectToUriWithParams_RequestMsgUriSet()
         {
@@ -433,7 +495,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(8945, PlatformID.Windows)]
+        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(8945, TestPlatforms.Windows)]
         [Theory]
         [InlineData(3, 2)]
         [InlineData(3, 3)]
@@ -463,6 +526,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectWithRelativeLocation()
         {
@@ -484,6 +548,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(200)]
         [InlineData(201)]
@@ -518,8 +583,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         [InlineData("#origFragment", "", "#origFragment", false)]
         [InlineData("#origFragment", "", "#origFragment", true)]
         [InlineData("", "#redirFragment", "#redirFragment", false)]
@@ -563,6 +629,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
         {
@@ -582,6 +649,7 @@ namespace System.Net.Http.Functional.Tests
             }
        }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_CredentialIsCredentialCacheUriRedirect_StatusCodeOK(int statusCode)
         {
@@ -608,6 +676,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_DefaultCoookieContainer_NoCookieSent()
         {
@@ -622,6 +691,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("cookieName1", "cookieValue1")]
         public async Task GetAsync_SetCookieContainer_CookieSent(string cookieName, string cookieValue)
@@ -642,6 +712,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("cookieName1", "cookieValue1")]
         public async Task GetAsync_RedirectResponseHasCookie_CookieSentToFinalUri(string cookieName, string cookieValue)
@@ -665,6 +736,7 @@ namespace System.Net.Http.Functional.Tests
             }            
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HeaderValueAndUris))]
         public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndValueSent(string name, string value, Uri uri)
         {
@@ -726,6 +798,7 @@ namespace System.Net.Http.Functional.Tests
             }
         };
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(CookieNameValues))]
         public async Task GetAsync_ResponseWithSetCookieHeaders_AllCookiesRead(KeyValuePair<string, string> cookie1)
@@ -762,6 +835,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_ResponseHeadersRead_ReadFromEachIterativelyDoesntDeadlock()
         {
@@ -786,6 +860,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_HttpRequestMsgResponseHeadersRead_StatusCodeOK()
         {
@@ -805,6 +880,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_ReadFromSlowStreamingServer_PartialDataReturned()
         {
@@ -834,11 +910,14 @@ namespace System.Net.Http.Functional.Tests
                                 Assert.True(bytesRead < buffer.Length, "bytesRead should be less than buffer.Length");
                             }
                         }
+                        
+                        return null;
                     });
                 }
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task Dispose_DisposingHandlerCancelsActiveOperationsWithoutResponses()
         {
@@ -854,6 +933,7 @@ namespace System.Net.Http.Functional.Tests
                         Task server1 = LoopbackServer.AcceptSocketAsync(socket1, async (s, stream, reader, writer) =>
                         {
                             await unblockServers.Task;
+                            return null;
                         });
 
                         // Second server connects and sends some but not all headers
@@ -862,6 +942,7 @@ namespace System.Net.Http.Functional.Tests
                             while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) ;
                             await writer.WriteAsync($"HTTP/1.1 200 OK\r\n");
                             await unblockServers.Task;
+                            return null;
                         });
 
                         // Third server connects and sends all headers and some but not all of the body
@@ -873,6 +954,7 @@ namespace System.Net.Http.Functional.Tests
                             await unblockServers.Task;
                             await writer.WriteAsync("1234567890");
                             s.Shutdown(SocketShutdown.Send);
+                            return null;
                         });
 
                         // Make three requests
@@ -900,8 +982,56 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(200)]
+        [InlineData(500)]
+        [InlineData(600)]
+        [InlineData(900)]
+        [InlineData(999)]
+        public async Task GetAsync_ExpectedStatusCode(int statusCode)
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 {statusCode}\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(statusCode, (int)response.StatusCode);
+                    }
+                }
+            });
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(99)]
+        [InlineData(1000)]
+        public async Task GetAsync_StatusCodeOutOfRange_ExpectedException(int statusCode)
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 {statusCode}\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+
+                    await Assert.ThrowsAsync<HttpRequestException>(() => getResponse);
+                }
+            });
+        }
+
         #region Post Methods Tests
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(VerifyUploadServers))]
         public async Task PostAsync_CallMethodTwice_StringContent(Uri remoteServer)
         {
@@ -926,6 +1056,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(VerifyUploadServers))]
         public async Task PostAsync_CallMethod_UnicodeStringContent(Uri remoteServer)
         {
@@ -942,6 +1073,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(VerifyUploadServersStreamsAndExpectedData))]
         public async Task PostAsync_CallMethod_StreamContent(Uri remoteServer, HttpContent content, byte[] expectedData)
         {
@@ -1082,6 +1214,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(EchoServers))]
         public async Task PostAsync_CallMethod_NullContent(Uri remoteServer)
         {
@@ -1102,6 +1235,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(EchoServers))]
         public async Task PostAsync_CallMethod_EmptyContent(Uri remoteServer)
         {
@@ -1123,6 +1257,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1174,6 +1309,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task PostAsync_ResponseContentRead_RequestContentDisposedAfterResponseBuffered()
         {
@@ -1215,11 +1351,14 @@ namespace System.Net.Http.Functional.Tests
                             Assert.True(contentDisposed, "Expected request content to be disposed");
                             Assert.Equal("abcdefghij", await response.Content.ReadAsStringAsync());
                         }
+                        
+                        return null;
                     });
                 });
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task PostAsync_ResponseHeadersRead_RequestContentDisposedAfterRequestFullySentAndResponseHeadersReceived()
         {
@@ -1257,7 +1396,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Assert.False(contentDisposed, "Expected request content to not be disposed while request data still being sent");
                         }
-                        else // [ActiveIssue(9006, PlatformID.AnyUnix)]
+                        else // [ActiveIssue(9006, TestPlatforms.AnyUnix)]
                         {
                             await post;
                             Assert.True(contentDisposed, "Current implementation will dispose of the request content once response headers arrive");
@@ -1276,6 +1415,8 @@ namespace System.Net.Http.Functional.Tests
                             Assert.True(contentDisposed, "Expected request content to be disposed");
                             Assert.Equal("abcdefghij", await response.Content.ReadAsStringAsync());
                         }
+                        
+                        return null;
                     });
                 });
             }
@@ -1311,6 +1452,7 @@ namespace System.Net.Http.Functional.Tests
                 DisposeDelegate?.Invoke(disposing);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(HttpStatusCode.MethodNotAllowed, "Custom description")]
         [InlineData(HttpStatusCode.MethodNotAllowed, "")]
@@ -1329,7 +1471,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [PlatformSpecific(PlatformID.Windows)] // CopyToAsync(Stream, TransportContext) isn't used on unix
+        [OuterLoop] // TODO: Issue #11345
+        [PlatformSpecific(TestPlatforms.Windows)] // CopyToAsync(Stream, TransportContext) isn't used on unix
         [Fact]
         public async Task PostAsync_Post_ChannelBindingHasExpectedValue()
         {
@@ -1352,6 +1495,7 @@ namespace System.Net.Http.Functional.Tests
 
         #region Various HTTP Method Tests
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HttpMethods))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithNoContent_MethodCorrectlySent(
             string method,
@@ -1370,6 +1514,7 @@ namespace System.Net.Http.Functional.Tests
             }        
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HttpMethodsThatAllowContent))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithContent_Success(
             string method,
@@ -1398,6 +1543,7 @@ namespace System.Net.Http.Functional.Tests
             }        
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("12345678910", 0)]
         [InlineData("12345678910", 5)]
@@ -1431,6 +1577,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(10702)]
         [Theory, MemberData(nameof(HttpMethodsThatDontAllowContent))]
         public async Task SendAsync_SendRequestUsingNoBodyMethodToEchoServerWithContent_NoBodySent(
             string method,
@@ -1449,7 +1597,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && method == "TRACE")
                     {
-                        // [ActiveIssue(9023, PlatformID.Windows)]
+                        // [ActiveIssue(9023, TestPlatforms.Windows)]
                         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
                     }
                     else
@@ -1465,6 +1613,7 @@ namespace System.Net.Http.Functional.Tests
         #endregion
 
         #region Version tests
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_RequestVersion10_ServerReceivesVersion10Request()
         {
@@ -1472,6 +1621,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 0), receivedRequestVersion);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_RequestVersion11_ServerReceivesVersion11Request()
         {
@@ -1479,6 +1629,7 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task SendAsync_RequestVersionNotSpecified_ServerReceivesVersion11Request()
         {
@@ -1488,7 +1639,9 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(Http2Servers))]
+        [ActiveIssue(10958, TestPlatforms.Windows)]
         public async Task SendAsync_RequestVersion20_ResponseVersion20IfHttp2Supported(Uri server)
         {
             // We don't currently have a good way to test whether HTTP/2 is supported without
@@ -1532,6 +1685,25 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [ConditionalTheory(nameof(IsWindows10Version1607OrGreater)), MemberData(nameof(Http2NoPushServers))]
+        public async Task SendAsync_RequestVersion20_ResponseVersion20(Uri server)
+        {
+            _output.WriteLine(server.AbsoluteUri.ToString());
+            var request = new HttpRequestMessage(HttpMethod.Get, server);
+            request.Version = new Version(2, 0);
+
+            var handler = new HttpClientHandler();
+            using (var client = new HttpClient(handler))
+            {
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.Equal(new Version(2, 0), response.Version);
+                }
+            }
+        }
+
         private async Task<Version> SendRequestAndGetRequestVersionAsync(Version requestVersion)
         {
             Version receivedRequestVersion = null;
@@ -1545,36 +1717,27 @@ namespace System.Net.Http.Functional.Tests
                 {
                     Task<HttpResponseMessage> getResponse = client.SendAsync(request);
 
-                    await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
-                    {
-                        string statusLine = reader.ReadLine();
-                        while (!string.IsNullOrEmpty(reader.ReadLine())) ;
-
-                        if (statusLine.Contains("/1.0"))
-                        {
-                            receivedRequestVersion = new Version(1, 0);
-                        }
-                        else if (statusLine.Contains("/1.1"))
-                        {
-                            receivedRequestVersion = new Version(1, 1);
-                        }
-                        else
-                        {
-                            Assert.True(false, "Invalid HTTP request version");
-                        }
-
-                        await writer.WriteAsync(
-                            $"HTTP/1.1 200 OK\r\n" +
-                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-                            "Content-Length: 0\r\n" +
-                            "\r\n");
-                        s.Shutdown(SocketShutdown.Send);
-                    });
+                    List<string> receivedRequest = await LoopbackServer.ReadRequestAndSendResponseAsync(server);
 
                     using (HttpResponseMessage response = await getResponse)
                     {
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     }
+
+                    string statusLine = receivedRequest[0];
+                    if (statusLine.Contains("/1.0"))
+                    {
+                        receivedRequestVersion = new Version(1, 0);
+                    }
+                    else if (statusLine.Contains("/1.1"))
+                    {
+                        receivedRequestVersion = new Version(1, 1);
+                    }
+                    else
+                    {
+                        Assert.True(false, "Invalid HTTP request version");
+                    }
+                    
                 }
             });
             
@@ -1583,6 +1746,7 @@ namespace System.Net.Http.Functional.Tests
         #endregion
         
         #region Proxy tests
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(CredentialsForProxy))]
         public void Proxy_BypassFalse_GetRequestGoesThroughCustomProxy(ICredentials creds, bool wrapCredsInCache)
@@ -1622,6 +1786,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(BypassedProxies))]
         public async Task Proxy_BypassTrue_GetRequestDoesntGoesThroughCustomProxy(IWebProxy proxy)
@@ -1637,6 +1802,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void Proxy_HaveNoCredsAndUseAuthenticatedCustomProxy_ProxyAuthenticationRequiredStatusCode()
         {
@@ -1673,6 +1839,34 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { new NetworkCredential("user:name", "password"), wrapCredsInCache };
                 yield return new object[] { new NetworkCredential("username", "password", "dom:\\ain"), wrapCredsInCache };
             }
+        }
+        #endregion
+
+        #region Uri wire transmission encoding tests
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task SendRequest_UriPathHasReservedChars_ServerReceivedExpectedPath()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, rootUrl) =>
+            {
+                var uri = new Uri($"http://{rootUrl.Host}:{rootUrl.Port}/test[]");
+                _output.WriteLine(uri.AbsoluteUri.ToString());
+                var request = new HttpRequestMessage(HttpMethod.Get, uri);
+                string statusLine = string.Empty;
+
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.SendAsync(request);
+
+                    List<string> receivedRequest = await LoopbackServer.ReadRequestAndSendResponseAsync(server);
+
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.True(receivedRequest[0].Contains(uri.PathAndQuery), $"statusLine should contain {uri.PathAndQuery}");
+                    }
+                }
+            });
         }
         #endregion
     }

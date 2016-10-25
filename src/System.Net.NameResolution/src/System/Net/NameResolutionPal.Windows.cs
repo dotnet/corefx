@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using ProtocolFamily = System.Net.Internals.ProtocolFamily;
 
 namespace System.Net
 {
@@ -173,6 +174,7 @@ namespace System.Net
 
                 throw socketException;
             }
+
             return NativeToHostEntry(nativePointer);
         }
 
@@ -193,8 +195,7 @@ namespace System.Net
                     ref addressAsInt,
                     Marshal.SizeOf<int>(),
                     ProtocolFamily.InterNetwork);
-
-
+            
             if (nativePointer != IntPtr.Zero)
             {
                 return NativeToHostEntry(nativePointer);
@@ -350,7 +351,6 @@ namespace System.Net
             // execution, but this might still happen and we would want to
             // react to that change.
             //
-            EnsureSocketsAreInitialized();
 
             StringBuilder sb = new StringBuilder(HostNameBufferLength);
             SocketError errorCode =

@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -115,10 +113,7 @@ namespace System.Linq.Expressions
         /// Indicates that the node can be reduced to a simpler node. If this 
         /// returns true, Reduce() can be called to produce the reduced form.
         /// </summary>
-        public virtual bool CanReduce
-        {
-            get { return false; }
-        }
+        public virtual bool CanReduce => false;
 
         /// <summary>
         /// Reduces this node to a simpler expression. If CanReduce returns
@@ -152,14 +147,14 @@ namespace System.Linq.Expressions
 
         /// <summary>
         /// Dispatches to the specific visit method for this node type. For
-        /// example, <see cref="MethodCallExpression" /> will call into
-        /// <see cref="ExpressionVisitor.VisitMethodCall" />.
+        /// example, <see cref="MethodCallExpression"/> will call into
+        /// <see cref="ExpressionVisitor.VisitMethodCall"/>.
         /// </summary>
         /// <param name="visitor">The visitor to visit this node with.</param>
         /// <returns>The result of visiting this node.</returns>
         /// <remarks>
-        /// This default implementation for <see cref="ExpressionType.Extension" />
-        /// nodes will call <see cref="ExpressionVisitor.VisitExtension" />.
+        /// This default implementation for <see cref="ExpressionType.Extension"/>
+        /// nodes will call <see cref="ExpressionVisitor.VisitExtension"/>.
         /// Override this method to call into a more specific method on a derived
         /// visitor class of ExprressionVisitor. However, it should still
         /// support unknown visitors by calling VisitExtension.
@@ -183,7 +178,7 @@ namespace System.Linq.Expressions
         {
             if (!CanReduce) throw Error.MustBeReducible();
 
-            var newNode = Reduce();
+            Expression newNode = Reduce();
 
             // 1. Reduction must return a new, non-null node
             // 2. Reduction must return a new node whose result type can be assigned to the type of the original node
@@ -199,14 +194,13 @@ namespace System.Linq.Expressions
         /// <returns>The reduced expression.</returns>
         public Expression ReduceExtensions()
         {
-            var node = this;
+            Expression node = this;
             while (node.NodeType == ExpressionType.Extension)
             {
                 node = node.ReduceAndCheck();
             }
             return node;
         }
-
 
         /// <summary>
         /// Creates a <see cref="String"/> representation of the Expression.
@@ -246,10 +240,11 @@ namespace System.Linq.Expressions
         /// Ultimately this saves us from having to allocate a ReadOnlyCollection for our
         /// data types because the compiler is capable of going directly to the IList of T.
         /// </summary>
-        internal static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IList<T> collection)
+        internal static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IReadOnlyList<T> collection)
         {
             return ExpressionUtils.ReturnReadOnly<T>(ref collection);
         }
+
         /// <summary>
         /// Helper used for ensuring we only return 1 instance of a ReadOnlyCollection of T.
         /// 
@@ -284,16 +279,21 @@ namespace System.Linq.Expressions
 
         private static void RequiresCanRead(Expression expression, string paramName)
         {
-            ExpressionUtils.RequiresCanRead(expression, paramName);
+            ExpressionUtils.RequiresCanRead(expression, paramName, -1);
+        }
+
+        private static void RequiresCanRead(Expression expression, string paramName, int index)
+        {
+            ExpressionUtils.RequiresCanRead(expression, paramName, index);
         }
 
         private static void RequiresCanRead(IReadOnlyList<Expression> items, string paramName)
         {
             Debug.Assert(items != null);
             // this is called a lot, avoid allocating an enumerator if we can...
-            for (int i = 0; i < items.Count; i++)
+            for (int i = 0, n = items.Count; i < n; i++)
             {
-                RequiresCanRead(items[i], paramName);
+                RequiresCanRead(items[i], paramName, i);
             }
         }
 
@@ -337,7 +337,7 @@ namespace System.Linq.Expressions
                     return;
             }
 
-            throw new ArgumentException(Strings.ExpressionMustBeWriteable, paramName);
+            throw Error.ExpressionMustBeWriteable(paramName);
         }
     }
 }

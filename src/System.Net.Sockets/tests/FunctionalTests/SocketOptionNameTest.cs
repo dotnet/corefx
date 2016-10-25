@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 using Xunit;
 
@@ -17,7 +18,8 @@ namespace System.Net.Sockets.Tests
         {
             get
             {
-                return Capability.SocketsReuseUnicastPortSupport();
+                return Capability.SocketsReuseUnicastPortSupport().HasValue &&
+                    Capability.SocketsReuseUnicastPortSupport().Value;
             }
         }
 
@@ -25,10 +27,12 @@ namespace System.Net.Sockets.Tests
         {
             get
             {
-                return !Capability.SocketsReuseUnicastPortSupport();
+                return Capability.SocketsReuseUnicastPortSupport().HasValue &&
+                    !Capability.SocketsReuseUnicastPortSupport().Value;
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(NoSocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketGetOption_NoSocketsReuseUnicastPortSupport_Throws()
         {
@@ -38,15 +42,17 @@ namespace System.Net.Sockets.Tests
                 socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseUnicastPort));
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(SocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketGetOption_SocketsReuseUnicastPortSupport_OptionIsZero()
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            
+
             var optionValue = (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseUnicastPort);
             Assert.Equal(0, optionValue);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(NoSocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketSetOption_NoSocketsReuseUnicastPortSupport_Throws()
         {
@@ -56,6 +62,7 @@ namespace System.Net.Sockets.Tests
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseUnicastPort, 1));
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(SocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketSetOptionToZeroAndGetOption_SocketsReuseUnicastPortSupport_OptionIsZero()
         {
@@ -70,6 +77,7 @@ namespace System.Net.Sockets.Tests
         // The socket option 'ReuseUnicastPost' only works on Windows 10 systems. In addition, setting the option
         // is a no-op unless specialized network settings using PowerShell configuration are first applied to the
         // machine. This is currently difficult to test in the CI environment. So, this ests will be disabled for now
+        [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(4887)]
         public void ReuseUnicastPort_CreateSocketSetOptionToOneAndGetOption_SocketsReuseUnicastPortSupport_OptionIsOne()
         {
@@ -80,6 +88,7 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(1, optionValue);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void MulticastOption_CreateSocketSetGetOption_GroupAndInterfaceIndex_SetSucceeds_GetThrows()
         {
@@ -94,54 +103,61 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        private static bool IsNotFedora23 => !PlatformDetection.IsFedora23;
-
-        [ConditionalFact(nameof(IsNotFedora23))] // (#9538) Receive times out
-        public void MulticastInterface_Set_AnyInterface_Succeeds()
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task MulticastInterface_Set_AnyInterface_Succeeds()
         {
             // On all platforms, index 0 means "any interface"
-            MulticastInterface_Set_Helper(0);
+            await MulticastInterface_Set_Helper(0);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // see comment below
-        public void MulticastInterface_Set_Loopback_Succeeds()
+        [PlatformSpecific(TestPlatforms.Windows)] // see comment below
+        public async Task MulticastInterface_Set_Loopback_Succeeds()
         {
             // On Windows, we can apparently assume interface 1 is "loopback."  On other platforms, this is not a
             // valid assumption.  We could maybe use NetworkInterface.LoopbackInterfaceIndex to get the index, but
             // this would introduce a dependency on System.Net.NetworkInformation, which depends on System.Net.Sockets,
             // which is what we're testing here....  So for now, we'll just assume "loopback == 1" and run this on
             // Windows only.
-            MulticastInterface_Set_Helper(1);
+            await MulticastInterface_Set_Helper(1);
         }
 
-        private void MulticastInterface_Set_Helper(int interfaceIndex)
+        private async Task MulticastInterface_Set_Helper(int interfaceIndex)
         {
             IPAddress multicastAddress = IPAddress.Parse("239.1.2.3");
             string message = "hello";
             int port;
 
             using (Socket receiveSocket = CreateBoundUdpSocket(out port),
-                          sendSocket    = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                          sendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
                 receiveSocket.ReceiveTimeout = 1000;
                 receiveSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(multicastAddress, interfaceIndex));
 
-                sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex));
+                // https://github.com/Microsoft/BashOnWindows/issues/990
+                if (!PlatformDetection.IsWindowsSubsystemForLinux)
+                {
+                    sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex));
+                }
+
+                var receiveBuffer = new byte[1024];
+                var receiveTask = receiveSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), SocketFlags.None);
 
                 for (int i = 0; i < TestSettings.UDPRedundancy; i++)
                 {
                     sendSocket.SendTo(Encoding.UTF8.GetBytes(message), new IPEndPoint(multicastAddress, port));
                 }
 
-                var receiveBuffer = new byte[1024];
-                int bytesReceived = receiveSocket.Receive(receiveBuffer);
+                int bytesReceived = await receiveTask;
                 string receivedMessage = Encoding.UTF8.GetString(receiveBuffer, 0, bytesReceived);
 
                 Assert.Equal(receivedMessage, message);
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void MulticastInterface_Set_InvalidIndex_Throws()
         {
@@ -153,7 +169,8 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Theory]
+        [OuterLoop] // TODO: Issue #11345
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // In WSL, the connect() call fails immediately.
         [InlineData(false)]
         [InlineData(true)]
         public void FailedConnect_GetSocketOption_SocketOptionNameError(bool simpleGet)
@@ -215,6 +232,115 @@ namespace System.Net.Sockets.Tests
 
             localPort = (receiveSocket.LocalEndPoint as IPEndPoint).Port;
             return receiveSocket;
+        }
+
+        [Theory]
+        [InlineData(null, null, null, true)]
+        [InlineData(null, null, false, true)]
+        [InlineData(null, false, false, true)]
+        [InlineData(null, true, false, true)]
+        [InlineData(null, true, true, false)]
+        [InlineData(true, null, null, true)]
+        [InlineData(true, null, false, true)]
+        [InlineData(true, null, true, true)]
+        [InlineData(true, false, null, true)]
+        [InlineData(true, false, false, true)]
+        [InlineData(true, false, true, true)]
+        public void ReuseAddress(bool? exclusiveAddressUse, bool? firstSocketReuseAddress, bool? secondSocketReuseAddress, bool expectFailure)
+        {
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                if (exclusiveAddressUse.HasValue)
+                {
+                    a.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, exclusiveAddressUse.Value);
+                }
+                if (firstSocketReuseAddress.HasValue)
+                {
+                    a.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, firstSocketReuseAddress.Value);
+                }
+
+                a.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+
+                using (Socket b = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                {
+                    if (secondSocketReuseAddress.HasValue)
+                    {
+                        b.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, secondSocketReuseAddress.Value);
+                    }
+
+                    if (expectFailure)
+                    {
+                        Assert.ThrowsAny<SocketException>(() => b.Bind(a.LocalEndPoint));
+                    }
+                    else
+                    {
+                        b.Bind(a.LocalEndPoint);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [InlineData(false, null, null, true)]
+        [InlineData(false, null, false, true)]
+        [InlineData(false, false, null, true)]
+        [InlineData(false, false, false, true)]
+        [InlineData(false, true, null, true)]
+        [InlineData(false, true, false, true)]
+        [InlineData(false, true, true, false)]
+        public void ReuseAddress_Windows(bool? exclusiveAddressUse, bool? firstSocketReuseAddress, bool? secondSocketReuseAddress, bool expectFailure)
+        {
+            ReuseAddress(exclusiveAddressUse, firstSocketReuseAddress, secondSocketReuseAddress, expectFailure);
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [InlineData(IPProtectionLevel.EdgeRestricted, AddressFamily.InterNetwork, SocketOptionLevel.IP)]
+        [InlineData(IPProtectionLevel.Restricted, AddressFamily.InterNetwork, SocketOptionLevel.IP)]
+        [InlineData(IPProtectionLevel.Unrestricted, AddressFamily.InterNetwork, SocketOptionLevel.IP)]
+        [InlineData(IPProtectionLevel.EdgeRestricted, AddressFamily.InterNetworkV6, SocketOptionLevel.IPv6)]
+        [InlineData(IPProtectionLevel.Restricted, AddressFamily.InterNetworkV6, SocketOptionLevel.IPv6)]
+        [InlineData(IPProtectionLevel.Unrestricted, AddressFamily.InterNetworkV6, SocketOptionLevel.IPv6)]
+        public void SetIPProtectionLevel_Windows(IPProtectionLevel level, AddressFamily family, SocketOptionLevel optionLevel)
+        {
+            using (var socket = new Socket(family, SocketType.Stream, ProtocolType.Tcp))
+            {
+                socket.SetIPProtectionLevel(level);
+
+                int result = (int)socket.GetSocketOption(optionLevel, SocketOptionName.IPProtectionLevel);
+                Assert.Equal(result, (int)level);
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [InlineData(IPProtectionLevel.EdgeRestricted, AddressFamily.InterNetwork)]
+        [InlineData(IPProtectionLevel.Restricted, AddressFamily.InterNetwork)]
+        [InlineData(IPProtectionLevel.Unrestricted, AddressFamily.InterNetwork)]
+        [InlineData(IPProtectionLevel.EdgeRestricted, AddressFamily.InterNetworkV6)]
+        [InlineData(IPProtectionLevel.Restricted, AddressFamily.InterNetworkV6)]
+        [InlineData(IPProtectionLevel.Unrestricted, AddressFamily.InterNetworkV6)]
+        public void SetIPProtectionLevel_Unix(IPProtectionLevel level, AddressFamily family)
+        {
+            using (var socket = new Socket(family, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => socket.SetIPProtectionLevel(level));
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public void SetIPProtectionLevel_ArgumentException(AddressFamily family)
+        {
+            using (var socket = new Socket(family, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<ArgumentException>("level", () => socket.SetIPProtectionLevel(IPProtectionLevel.Unspecified));
+            }
         }
     }
 }

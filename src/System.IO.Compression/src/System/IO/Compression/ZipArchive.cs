@@ -230,30 +230,25 @@ namespace System.IO.Compression
         {
             if (disposing && !_isDisposed)
             {
-                switch (_mode)
+                try
                 {
-                    case ZipArchiveMode.Read:
-                        break;
-                    case ZipArchiveMode.Create:
-                    case ZipArchiveMode.Update:
-                    default:
-                        Debug.Assert(_mode == ZipArchiveMode.Update || _mode == ZipArchiveMode.Create);
-                        try
-                        {
+                    switch (_mode)
+                    {
+                        case ZipArchiveMode.Read:
+                            break;
+                        case ZipArchiveMode.Create:
+                        case ZipArchiveMode.Update:
+                        default:
+                            Debug.Assert(_mode == ZipArchiveMode.Update || _mode == ZipArchiveMode.Create);
                             WriteFile();
-                        }
-                        catch (InvalidDataException)
-                        {
-                            CloseStreams();
-                            _isDisposed = true;
-                            throw;
-                        }
-                        break;
+                            break;
+                    }
                 }
-
-                CloseStreams();
-
-                _isDisposed = true;
+                finally
+                {
+                    CloseStreams();
+                    _isDisposed = true;
+                }
             }
         }
 
@@ -496,12 +491,15 @@ namespace System.IO.Compression
                 }
 
                 _mode = mode;
-                _archiveStream = stream;
+                if (mode == ZipArchiveMode.Create && !stream.CanSeek)
+                    _archiveStream = new PositionPreservingWriteOnlyStreamWrapper(stream);
+                else
+                    _archiveStream = stream;
                 _archiveStreamOwner = null;
                 if (mode == ZipArchiveMode.Create)
                     _archiveReader = null;
                 else
-                    _archiveReader = new BinaryReader(stream);
+                    _archiveReader = new BinaryReader(_archiveStream);
                 _entries = new List<ZipArchiveEntry>();
                 _entriesCollection = new ReadOnlyCollection<ZipArchiveEntry>(_entries);
                 _entriesDictionary = new Dictionary<String, ZipArchiveEntry>();
@@ -671,7 +669,6 @@ namespace System.IO.Compression
         }
 
 
-        //the only exceptions that this function will throw directly are InvalidDataExceptions
         private void WriteFile()
         {
             //if we are in create mode, we always set readEntries to true in Init
@@ -691,7 +688,6 @@ namespace System.IO.Compression
 
                 _archiveStream.Seek(0, SeekOrigin.Begin);
                 _archiveStream.SetLength(0);
-                //nothing after this should throw an exception
             }
 
             foreach (ZipArchiveEntry entry in _entries)

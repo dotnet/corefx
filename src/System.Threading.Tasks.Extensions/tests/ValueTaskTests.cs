@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Threading.Tasks.Tests
@@ -309,6 +312,20 @@ namespace System.Threading.Tasks.Tests
             Assert.Same(string.Empty, new ValueTask<string>(Task.FromResult<string>(null)).ToString());
 
             Assert.Same(string.Empty, new ValueTask<DateTime>(new TaskCompletionSource<DateTime>().Task).ToString());
+        }
+
+        [Theory]
+        [InlineData(typeof(ValueTask<>))]
+        [InlineData(typeof(ValueTask<int>))]
+        [InlineData(typeof(ValueTask<string>))]
+        public void AsyncMethodBuilderAttribute_ValueTaskAttributed(Type valueTaskType)
+        {
+            CustomAttributeData cad = valueTaskType.GetTypeInfo().CustomAttributes.Single(attr => attr.AttributeType == typeof(AsyncMethodBuilderAttribute));
+            Type builderTypeCtorArg = (Type)cad.ConstructorArguments[0].Value;
+            Assert.Equal(typeof(AsyncValueTaskMethodBuilder<>), builderTypeCtorArg);
+
+            AsyncMethodBuilderAttribute amba = valueTaskType.GetTypeInfo().GetCustomAttribute<AsyncMethodBuilderAttribute>();
+            Assert.Equal(builderTypeCtorArg, amba.BuilderType);
         }
 
         private sealed class TrackingSynchronizationContext : SynchronizationContext

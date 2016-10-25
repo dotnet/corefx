@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Runtime.InteropServices;
 
@@ -12,6 +13,8 @@ namespace System.Data.SqlClient
         private const string SNI = "sni.dll";
 
         private static int s_sniMaxComposedSpnLength = -1;
+
+        private const int SniOpenTimeOut = -1; // infinite
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         internal delegate void SqlAsyncCallbackDelegate(IntPtr m_ConsKey, IntPtr pPacket, uint dwError);
@@ -116,6 +119,13 @@ namespace System.Data.SqlClient
             SNI_QUERY_CONN_SUPPORTS_SYNC_OVER_ASYNC,
         }
 
+        internal enum TransparentNetworkResolutionMode : byte
+        {
+            DisabledMode = 0,
+            SequentialMode,
+            ParallelMode
+        };
+
         [StructLayout(LayoutKind.Sequential)]
         private struct Sni_Consumer_Info
         {
@@ -127,7 +137,7 @@ namespace System.Data.SqlClient
             public IntPtr fnAcceptComp;
             public uint dwNumProts;
             public IntPtr rgListenInfo;
-            public uint NodeAffinity;
+            public IntPtr NodeAffinity;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -148,6 +158,9 @@ namespace System.Data.SqlClient
             public int timeout;
             [MarshalAs(UnmanagedType.Bool)]
             public bool fParallel;
+            public TransparentNetworkResolutionMode transparentNetworkResolution;
+            public int totalTimeout;
+            public bool isAzureSqlServerEndpoint;
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -315,6 +328,10 @@ namespace System.Data.SqlClient
                 clientConsumerInfo.timeout = timeout;
                 clientConsumerInfo.fParallel = fParallel;
 
+                clientConsumerInfo.transparentNetworkResolution = TransparentNetworkResolutionMode.DisabledMode;
+                clientConsumerInfo.totalTimeout = SniOpenTimeOut;
+                clientConsumerInfo.isAzureSqlServerEndpoint = ADP.IsAzureSqlServerEndpoint(constring);
+
                 if (spnBuffer != null)
                 {
                     fixed (byte* pin_spnBuffer = &spnBuffer[0])
@@ -363,7 +380,7 @@ namespace System.Data.SqlClient
                     ref sendLength,
                     out local_fDone,
                     pin_serverUserName,
-                    (uint)(serverUserName == null ? 0 : serverUserName.Length),
+                    (uint)serverUserName.Length,
                     null,
                     null);
             }

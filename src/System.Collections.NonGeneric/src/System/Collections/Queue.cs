@@ -20,7 +20,8 @@ namespace System.Collections
     // buffer, so Enqueue can be O(n).  Dequeue is O(1).
     [DebuggerTypeProxy(typeof(System.Collections.Queue.QueueDebugView))]
     [DebuggerDisplay("Count = {Count}")]
-    public class Queue : ICollection
+    [Serializable]
+    public class Queue : ICollection, ICloneable
     {
         private Object[] _array;
         private int _head;       // First valid element in the queue
@@ -28,6 +29,7 @@ namespace System.Collections
         private int _size;       // Number of elements.
         private int _growFactor; // 100 == 1.0, 130 == 1.3, 200 == 2.0
         private int _version;
+        [NonSerialized]
         private Object _syncRoot;
 
         private const int _MinimumGrow = 4;
@@ -319,6 +321,7 @@ namespace System.Collections
 
 
         // Implements a synchronization wrapper around a queue.
+        [Serializable]
         private class SynchronizedQueue : Queue
         {
             private Queue _q;
@@ -441,7 +444,8 @@ namespace System.Collections
         // Implements an enumerator for a Queue.  The enumerator uses the
         // internal version number of the list to ensure that no modifications are
         // made to the list while an enumeration is in progress.
-        private class QueueEnumerator : IEnumerator
+        [Serializable]
+        private class QueueEnumerator : IEnumerator, ICloneable
         {
             private Queue _q;
             private int _index;
@@ -457,6 +461,8 @@ namespace System.Collections
                 if (_q._size == 0)
                     _index = -1;
             }
+
+            public object Clone() => MemberwiseClone();
 
             public virtual bool MoveNext()
             {

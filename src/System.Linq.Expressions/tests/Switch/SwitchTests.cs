@@ -371,12 +371,12 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory, MemberData(nameof(ComparisonsWithInvalidParmeterCounts))]
-        public void InvalidComparisonMethodParameterCount(MethodInfo comparer)
+        public void InvalidComparisonMethodParameterCount(MethodInfo comparison)
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Switch(Expression.Constant(0), Expression.Empty(), comparer));
-            Assert.Throws<ArgumentException>(null, () => Expression.Switch(Expression.Constant(0), Expression.Empty(), comparer, Enumerable.Empty<SwitchCase>()));
-            Assert.Throws<ArgumentException>(null, () => Expression.Switch(typeof(int), Expression.Constant(0), Expression.Constant(1), comparer));
-            Assert.Throws<ArgumentException>(null, () => Expression.Switch(typeof(int), Expression.Constant(0), Expression.Constant(1), comparer, Enumerable.Empty<SwitchCase>()));
+            Assert.Throws<ArgumentException>("comparison", () => Expression.Switch(Expression.Constant(0), Expression.Empty(), comparison));
+            Assert.Throws<ArgumentException>("comparison", () => Expression.Switch(Expression.Constant(0), Expression.Empty(), comparison, Enumerable.Empty<SwitchCase>()));
+            Assert.Throws<ArgumentException>("comparison", () => Expression.Switch(typeof(int), Expression.Constant(0), Expression.Constant(1), comparison));
+            Assert.Throws<ArgumentException>("comparison", () => Expression.Switch(typeof(int), Expression.Constant(0), Expression.Constant(1), comparison, Enumerable.Empty<SwitchCase>()));
         }
 
         [Fact]
@@ -617,5 +617,44 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal("case (0, \"A\"): ...", sc.ToString());
         }
 
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void SwitchOnString(bool useInterpreter)
+        {
+            var values = new string[] { "foobar", "foo", "bar", "baz", "qux", "quux", "corge", "grault", "garply", "waldo", "fred", "plugh", "xyzzy", "thud" };
+
+            for (var i = 1; i <= values.Length; i++)
+            {
+                var cases = values.Take(i).Select((s, j) => Expression.SwitchCase(Expression.Constant(j), Expression.Constant(values[j]))).ToArray();
+                var value = Expression.Parameter(typeof(string));
+                var e = Expression.Lambda<Func<string, int>>(Expression.Switch(value, Expression.Constant(-1), cases), value);
+                var f = e.Compile(useInterpreter);
+
+                var k = 0;
+                foreach (var str in values.Take(i))
+                {
+                    Assert.Equal(k, f(str));
+                    k++;
+                }
+
+                foreach (var str in values.Skip(i).Concat(new[] { default(string), "whatever", "FOO" }))
+                {
+                    Assert.Equal(-1, f(str));
+                    k++;
+                }
+            }
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            var e1 = Expression.Switch(Expression.Parameter(typeof(int), "x"), Expression.SwitchCase(Expression.Empty(), Expression.Constant(1)));
+            Assert.Equal("switch (x) { ... }", e1.ToString());
+
+            var e2 = Expression.SwitchCase(Expression.Parameter(typeof(int), "x"), Expression.Constant(1));
+            Assert.Equal("case (1): ...", e2.ToString());
+
+            var e3 = Expression.SwitchCase(Expression.Parameter(typeof(int), "x"), Expression.Constant(1), Expression.Constant(2));
+            Assert.Equal("case (1, 2): ...", e3.ToString());
+        }
     }
 }

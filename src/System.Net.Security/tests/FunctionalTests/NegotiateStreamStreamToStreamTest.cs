@@ -12,11 +12,15 @@ using Xunit;
 
 namespace System.Net.Security.Tests
 {
-    [PlatformSpecific(PlatformID.Windows)] // NegotiateStream only supports client-side functionality on Unix
-    public class NegotiateStreamStreamToStreamTest
+    [PlatformSpecific(TestPlatforms.Windows)] // NegotiateStream only supports client-side functionality on Unix
+    public abstract class NegotiateStreamStreamToStreamTest
     {
         private readonly byte[] _sampleMsg = Encoding.UTF8.GetBytes("Sample Test Message");
 
+        protected abstract Task AuthenticateAsClientAsync(NegotiateStream client, NetworkCredential credential, string targetName);
+        protected abstract Task AuthenticateAsServerAsync(NegotiateStream server);
+
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Authentication_Success()
         {
@@ -31,8 +35,8 @@ namespace System.Net.Security.Tests
                 Assert.False(server.IsAuthenticated);
 
                 Task[] auth = new Task[2];
-                auth[0] = client.AuthenticateAsClientAsync();
-                auth[1] = server.AuthenticateAsServerAsync();
+                auth[0] = AuthenticateAsClientAsync(client, CredentialCache.DefaultNetworkCredentials, string.Empty);
+                auth[1] = AuthenticateAsServerAsync(server);
 
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Handshake completed in the allotted time");
@@ -68,6 +72,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Authentication_TargetName_Success()
         {
@@ -85,8 +90,8 @@ namespace System.Net.Security.Tests
 
                 Task[] auth = new Task[2];
 
-                auth[0] = client.AuthenticateAsClientAsync(CredentialCache.DefaultNetworkCredentials, targetName);
-                auth[1] = server.AuthenticateAsServerAsync();
+                auth[0] = AuthenticateAsClientAsync(client, CredentialCache.DefaultNetworkCredentials, targetName);
+                auth[1] = AuthenticateAsServerAsync(server);
 
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Handshake completed in the allotted time");
@@ -122,6 +127,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Authentication_EmptyCredentials_Fails()
         {
@@ -145,8 +151,8 @@ namespace System.Net.Security.Tests
 
                 Task[] auth = new Task[2];
 
-                auth[0] = client.AuthenticateAsClientAsync(emptyNetworkCredential, targetName);
-                auth[1] = server.AuthenticateAsServerAsync();
+                auth[0] = AuthenticateAsClientAsync(client, emptyNetworkCredential, targetName);
+                auth[1] = AuthenticateAsServerAsync(server);
 
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Handshake completed in the allotted time");
@@ -185,6 +191,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
@@ -200,8 +207,8 @@ namespace System.Net.Security.Tests
                 Assert.False(server.IsAuthenticated);
 
                 Task[] auth = new Task[2];
-                auth[0] = client.AuthenticateAsClientAsync();
-                auth[1] = server.AuthenticateAsServerAsync();
+                auth[0] = AuthenticateAsClientAsync(client, CredentialCache.DefaultNetworkCredentials, string.Empty);
+                auth[1] = AuthenticateAsServerAsync(server);
 
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Handshake completed in the allotted time");
@@ -218,6 +225,7 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void NegotiateStream_StreamToStream_Successive_ClientWrite_Async_Success()
         {
@@ -233,8 +241,8 @@ namespace System.Net.Security.Tests
                 Assert.False(server.IsAuthenticated);
 
                 Task[] auth = new Task[2];
-                auth[0] = client.AuthenticateAsClientAsync();
-                auth[1] = server.AuthenticateAsServerAsync();
+                auth[0] = AuthenticateAsClientAsync(client, CredentialCache.DefaultNetworkCredentials, string.Empty);
+                auth[1] = AuthenticateAsServerAsync(server);
 
                 bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
                 Assert.True(finished, "Handshake completed in the allotted time");
@@ -252,5 +260,32 @@ namespace System.Net.Security.Tests
                 Assert.True(_sampleMsg.SequenceEqual(recvBuf));
             }
         }
+    }
+
+    public sealed class NegotiateStreamStreamToStreamTest_Async : NegotiateStreamStreamToStreamTest
+    {
+        protected override Task AuthenticateAsClientAsync(NegotiateStream client, NetworkCredential credential, string targetName) =>
+            client.AuthenticateAsClientAsync(credential, targetName);
+
+        protected override Task AuthenticateAsServerAsync(NegotiateStream server) =>
+            server.AuthenticateAsServerAsync();
+    }
+
+    public sealed class NegotiateStreamStreamToStreamTest_BeginEnd : NegotiateStreamStreamToStreamTest
+    {
+        protected override Task AuthenticateAsClientAsync(NegotiateStream client, NetworkCredential credential, string targetName) =>
+            Task.Factory.FromAsync(client.BeginAuthenticateAsClient, client.EndAuthenticateAsClient, credential, targetName, null);
+
+        protected override Task AuthenticateAsServerAsync(NegotiateStream server) =>
+            Task.Factory.FromAsync(server.BeginAuthenticateAsServer, server.EndAuthenticateAsServer, null);
+    }
+
+    public sealed class NegotiateStreamStreamToStreamTest_Sync : NegotiateStreamStreamToStreamTest
+    {
+        protected override Task AuthenticateAsClientAsync(NegotiateStream client, NetworkCredential credential, string targetName) =>
+            Task.Run(() => client.AuthenticateAsClient(credential, targetName));
+
+        protected override Task AuthenticateAsServerAsync(NegotiateStream server) =>
+            Task.Run(() => server.AuthenticateAsServer());
     }
 }

@@ -304,7 +304,6 @@ namespace System.ComponentModel
             }
         }
 
-        /// <include file='doc\MemberDescriptor.uex' path='docs/doc[@for="MemberDescriptor.CreateAttributeCollection"]/*' />
         /// <summary>
         ///    <para>
         ///       Creates a collection of attributes using the
@@ -429,7 +428,7 @@ namespace System.ComponentModel
 
                 for (int i = 0; i < list.Count;)
                 {
-                    if (set.Add(list[i].GetTypeId()))
+                    if (set.Add(list[i].TypeId))
                     {
                         ++i;
                     }
@@ -536,6 +535,22 @@ namespace System.ComponentModel
             }
 
             return ((IComponent)component).Site;
+        }
+
+        [Obsolete("This method has been deprecated. Use GetInvocationTarget instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        protected static object GetInvokee(Type componentClass, object component) {
+
+            if (componentClass == null)
+            {
+                throw new ArgumentNullException(nameof(componentClass));
+            }
+
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            return TypeDescriptor.GetAssociation(componentClass, component);
         }
     }
 }

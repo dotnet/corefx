@@ -578,6 +578,15 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { @"(?(cat)|catdog)", "catdog", RegexOptions.None, new string[] { "" } };
             yield return new object[] { @"(?(cat)|dog)", "dog", RegexOptions.None, new string[] { "dog" } };
 
+            // Invalid unicode
+            yield return new object[] { "([\u0000-\uFFFF-[azAZ09]]|[\u0000-\uFFFF-[^azAZ09]])+", "azAZBCDE1234567890BCDEFAZza", RegexOptions.None, new string[] { "azAZBCDE1234567890BCDEFAZza", "a" } };
+            yield return new object[] { "[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[a]]]]]]+", "abcxyzABCXYZ123890", RegexOptions.None, new string[] { "bcxyzABCXYZ123890" } };
+            yield return new object[] { "[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[a]]]]]]]+", "bcxyzABCXYZ123890a", RegexOptions.None, new string[] { "a" } };
+            yield return new object[] { "[\u0000-\uFFFF-[\\p{P}\\p{S}\\p{C}]]+", "!@`';.,$+<>=\x0001\x001FazAZ09", RegexOptions.None, new string[] { "azAZ09" } };
+
+            yield return new object[] { @"[\uFFFD-\uFFFF]+", "\uFFFC\uFFFD\uFFFE\uFFFF", RegexOptions.IgnoreCase, new string[] { "\uFFFD\uFFFE\uFFFF" } };
+            yield return new object[] { @"[\uFFFC-\uFFFE]+", "\uFFFB\uFFFC\uFFFD\uFFFE\uFFFF", RegexOptions.IgnoreCase, new string[] { "\uFFFC\uFFFD\uFFFE" } };
+
             // Empty Match
             yield return new object[] { @"([a*]*)+?$", "ab", RegexOptions.None, new string[] { "", "" } };
             yield return new object[] { @"(a*)+?$", "b", RegexOptions.None, new string[] { "", "" } };
@@ -613,12 +622,16 @@ namespace System.Text.RegularExpressions.Tests
         [MemberData(nameof(Groups_CustomCulture_TestData))]
         public void Groups(string pattern, string input, RegexOptions options, CultureInfo cultureInfo, string[] expectedGroups)
         {
-            CultureInfo originalCulture = null;
+            CultureInfo originalCulture = CultureInfo.CurrentCulture;
             try
             {
+                // In invariant culture, the unicode char matches differ from expected values provided.
+                if (originalCulture.Equals(CultureInfo.InvariantCulture))
+                {
+                    CultureInfo.CurrentCulture = s_enUSCulture;
+                }
                 if (cultureInfo != null)
                 {
-                    originalCulture = CultureInfo.CurrentCulture;
                     CultureInfo.CurrentCulture = cultureInfo;
                 }
                 Regex regex = new Regex(pattern, options);
@@ -626,7 +639,7 @@ namespace System.Text.RegularExpressions.Tests
                 Assert.True(match.Success);
 
                 Assert.Equal(expectedGroups.Length, match.Groups.Count);
-                Assert.Equal(expectedGroups[0], match.Value);
+                Assert.True(expectedGroups[0] == match.Value, string.Format("Culture used: {0}", CultureInfo.CurrentCulture));
 
                 int[] groupNumbers = regex.GetGroupNumbers();
                 string[] groupNames = regex.GetGroupNames();
@@ -641,23 +654,11 @@ namespace System.Text.RegularExpressions.Tests
             }
             finally
             {
-                if (cultureInfo != null)
+                if (cultureInfo != null || originalCulture.Equals(CultureInfo.InvariantCulture))
                 {
                     CultureInfo.CurrentCulture = originalCulture;
                 }
             }
-        }
-
-        [Fact]
-        public void Groups_InvalidUnicode()
-        {
-            Groups("([\u0000-\uFFFF-[azAZ09]]|[\u0000-\uFFFF-[^azAZ09]])+", "azAZBCDE1234567890BCDEFAZza", RegexOptions.None, new string[] { "azAZBCDE1234567890BCDEFAZza", "a" });
-            Groups("[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[a]]]]]]+", "abcxyzABCXYZ123890", RegexOptions.None, new string[] { "bcxyzABCXYZ123890" });
-            Groups("[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[\u0000-\uFFFF-[a]]]]]]]+", "bcxyzABCXYZ123890a", RegexOptions.None, new string[] { "a" });
-            Groups("[\u0000-\uFFFF-[\\p{P}\\p{S}\\p{C}]]+", "!@`';.,$+<>=\x0001\x001FazAZ09", RegexOptions.None, new string[] { "azAZ09" });
-
-            Groups(@"[\uFFFD-\uFFFF]+", "\uFFFC\uFFFD\uFFFE\uFFFF", RegexOptions.IgnoreCase, new string[] { "\uFFFD\uFFFE\uFFFF" });
-            Groups(@"[\uFFFC-\uFFFE]+", "\uFFFB\uFFFC\uFFFD\uFFFE\uFFFF", RegexOptions.IgnoreCase, new string[] { "\uFFFC\uFFFD\uFFFE" });
         }
     }
 }

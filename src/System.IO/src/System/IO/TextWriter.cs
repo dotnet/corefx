@@ -5,7 +5,6 @@
 using System.Text;
 using System.Threading;
 using System.Globalization;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace System.IO
@@ -16,7 +15,8 @@ namespace System.IO
     //
     // This class is intended for character output, not bytes.  
     // There are methods on the Stream class for writing bytes. 
-    public abstract class TextWriter : IDisposable
+    [Serializable]
+    public abstract partial class TextWriter : MarshalByRefObject, IDisposable
     {
         public static readonly TextWriter Null = new NullTextWriter();
 
@@ -49,6 +49,12 @@ namespace System.IO
                     return _internalFormatProvider;
                 }
             }
+        }
+
+        public virtual void Close()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -551,6 +557,7 @@ namespace System.IO
         }
         #endregion
 
+        [Serializable]
         private sealed class NullTextWriter : TextWriter
         {
             internal NullTextWriter() : base(CultureInfo.InvariantCulture)
@@ -565,7 +572,6 @@ namespace System.IO
                 }
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override void Write(char[] buffer, int index, int count)
             {
             }

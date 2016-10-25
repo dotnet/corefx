@@ -27,27 +27,36 @@ namespace System.Net.NetworkInformation
         public unsafe static NetworkInterface[] GetOsxNetworkInterfaces()
         {
             Dictionary<string, OsxNetworkInterface> interfacesByName = new Dictionary<string, OsxNetworkInterface>();
-            if (Interop.Sys.EnumerateInterfaceAddresses(
-                (name, ipAddr, maskAddr) =>
-                {
-                    OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
-                    oni.ProcessIpv4Address(ipAddr, maskAddr);
-                },
-                (name, ipAddr, scopeId) =>
-                {
-                    OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
-                    oni.ProcessIpv6Address(ipAddr, *scopeId);
-                },
-                (name, llAddr) =>
-                {
-                    OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
-                    oni.ProcessLinkLayerAddress(llAddr);
-                }) != 0)
+            const int MaxTries = 3;
+            for (int attempt = 0; attempt < MaxTries; attempt++)
             {
-                throw new NetworkInformationException(SR.net_PInvokeError);
+                int result = Interop.Sys.EnumerateInterfaceAddresses(
+                    (name, ipAddr, maskAddr) =>
+                    {
+                        OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
+                        oni.ProcessIpv4Address(ipAddr, maskAddr);
+                    },
+                    (name, ipAddr, scopeId) =>
+                    {
+                        OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
+                        oni.ProcessIpv6Address( ipAddr, *scopeId);
+                    },
+                    (name, llAddr) =>
+                    {
+                        OsxNetworkInterface oni = GetOrCreate(interfacesByName, name);
+                        oni.ProcessLinkLayerAddress(llAddr);
+                    });
+                if (result == 0)
+                {
+                    return interfacesByName.Values.ToArray();
+                }
+                else
+                {
+                    interfacesByName.Clear();
+                }
             }
 
-            return interfacesByName.Values.ToArray();
+            throw new NetworkInformationException(SR.net_PInvokeError);
         }
 
         /// <summary>
@@ -77,6 +86,11 @@ namespace System.Net.NetworkInformation
         public override IPInterfaceStatistics GetIPStatistics()
         {
             return new OsxIpInterfaceStatistics(Name);
+        }
+
+        public override IPv4InterfaceStatistics GetIPv4Statistics()
+        {
+            return new OsxIPv4InterfaceStatistics(Name);
         }
 
         public override OperationalStatus OperationalStatus

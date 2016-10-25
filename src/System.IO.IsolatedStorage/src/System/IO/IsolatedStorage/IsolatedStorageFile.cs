@@ -2,33 +2,46 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
-using Microsoft.Win32.SafeHandles;
-using System.Collections.Generic;
-using System.Security;
-using System.Runtime.InteropServices;
+using System.Collections;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Text;
 
 namespace System.IO.IsolatedStorage
 {
-    public sealed class IsolatedStorageFile : IDisposable
+    public sealed partial class IsolatedStorageFile : IsolatedStorage, IDisposable
     {
-        private string _appFilesPath;
+        internal const string s_files = "Files";
+        internal const string s_assemFiles = "AssemFiles";
+        internal const string s_appFiles = "AppFiles";
+        private string _rootDirectory;
 
         private bool _disposed;
         private bool _closed;
 
         private readonly object _internalLock = new object();
-        private static string s_RootFromHost;
-        private static string s_IsolatedStorageRoot;
 
-        /*
-         * Constructors
-         */
+        // Data file notes
+        // ===============
+
+        // "identity.dat" is the serialized identity object, such as StrongName or Url. It is used to
+        // enumerate stores, which we currently do not support.
+        //
+        // private const string IDFile = "identity.dat";
+
+        // "info.dat" is used to track disk space usage (against quota). The accounting file for Silverlight
+        // stores is "appInfo.dat". CoreFX is always in full trust so we can safely ignore these.
+        //
+        // private const string InfoFile = "info.dat";
+        // private const string AppInfoFile = "appInfo.dat";
+
         internal IsolatedStorageFile() { }
+
+        // Using this property to match NetFX for testing
+        private string RootDirectory
+        {
+            get { return _rootDirectory; }
+        }
 
         internal bool Disposed
         {
@@ -38,32 +51,13 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        internal static string IsolatedStorageRoot
-        {
-            get
-            {
-                if (s_IsolatedStorageRoot == null)
-                {
-                    // No need to lock here, FetchOrCreateRoot is idempotent.
-                    s_IsolatedStorageRoot = FetchOrCreateRoot();
-                }
-
-                return s_IsolatedStorageRoot;
-            }
-
-            private set
-            {
-                s_IsolatedStorageRoot = value;
-            }
-        }
-
         internal bool IsDeleted
         {
             get
             {
                 try
                 {
-                    return !Directory.Exists(IsolatedStorageRoot);
+                    return !Directory.Exists(RootDirectory);
                 }
                 catch (IOException)
                 {
@@ -78,8 +72,11 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        internal void Close()
+        public void Close()
         {
+            if (Helper.IsRoaming(Scope))
+                return;
+
             lock (_internalLock)
             {
                 if (!_closed)
@@ -90,17 +87,16 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        public void DeleteFile(String file)
+        public void DeleteFile(string file)
         {
             if (file == null)
                 throw new ArgumentNullException(nameof(file));
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
             try
             {
-                String fullPath = GetFullPath(file);
+                string fullPath = GetFullPath(file);
                 File.Delete(fullPath);
             }
             catch (Exception e)
@@ -125,22 +121,20 @@ namespace System.IO.IsolatedStorage
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
             return Directory.Exists(GetFullPath(path));
         }
 
-        public void CreateDirectory(String dir)
+        public void CreateDirectory(string dir)
         {
             if (dir == null)
                 throw new ArgumentNullException(nameof(dir));
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
-            String isPath = GetFullPath(dir); // Prepend IS root
+            string isPath = GetFullPath(dir); // Prepend IS root
 
             // We can save a bunch of work if the directory we want to create already exists.  This also
             // saves us in the case where sub paths are inaccessible (due to ERROR_ACCESS_DENIED) but the
@@ -169,11 +163,10 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        public void DeleteDirectory(String dir)
+        public void DeleteDirectory(string dir)
         {
             if (dir == null)
                 throw new ArgumentNullException(nameof(dir));
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
@@ -188,19 +181,16 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        public String[] GetFileNames()
+        public string[] GetFileNames()
         {
             return GetFileNames("*");
         }
 
-        /*
-         * foo\abc*.txt will give all abc*.txt files in foo directory
-         */
-        public String[] GetFileNames(String searchPattern)
+        // foo\abc*.txt will give all abc*.txt files in foo directory
+        public string[] GetFileNames(string searchPattern)
         {
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
@@ -208,7 +198,7 @@ namespace System.IO.IsolatedStorage
             {
                 // FileSystem APIs return the complete path of the matching files however Iso store only provided the FileName
                 // and hid the IsoStore root. Hence we find all the matching files from the fileSystem and simply return the fileNames.
-                return Directory.EnumerateFiles(_appFilesPath, searchPattern).Select(f => Path.GetFileName(f)).ToArray();
+                return Directory.EnumerateFiles(RootDirectory, searchPattern).Select(f => Path.GetFileName(f)).ToArray();
             }
             catch (UnauthorizedAccessException e)
             {
@@ -216,20 +206,16 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        public String[] GetDirectoryNames()
+        public string[] GetDirectoryNames()
         {
             return GetDirectoryNames("*");
         }
 
-        /*
-         * foo\data* will give all directory names in foo directory that
-         * starts with data
-         */
-        public String[] GetDirectoryNames(String searchPattern)
+        // foo\data* will give all directory names in foo directory that starts with data
+        public string[] GetDirectoryNames(string searchPattern)
         {
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
@@ -237,13 +223,15 @@ namespace System.IO.IsolatedStorage
             {
                 // FileSystem APIs return the complete path of the matching directories however Iso store only provided the directory name
                 // and hid the IsoStore root. Hence we find all the matching directories from the fileSystem and simply return their names.
-                return Directory.EnumerateDirectories(_appFilesPath, searchPattern).Select(m => m.Substring(Path.GetDirectoryName(m).Length + 1)).ToArray();
+                return Directory.EnumerateDirectories(RootDirectory, searchPattern).Select(m => m.Substring(Path.GetDirectoryName(m).Length + 1)).ToArray();
             }
             catch (UnauthorizedAccessException e)
             {
                 throw GetIsolatedStorageException(SR.IsolatedStorage_Operation, e);
             }
         }
+
+        // When constructing an IsolatedStorageFileStream we pass the partial path- it will call back for the full path
 
         public IsolatedStorageFileStream OpenFile(string path, FileMode mode)
         {
@@ -274,12 +262,10 @@ namespace System.IO.IsolatedStorage
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            if (path == String.Empty)
+            if (path == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
             }
-
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
@@ -298,12 +284,10 @@ namespace System.IO.IsolatedStorage
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            if (path == String.Empty)
+            if (path == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
             }
-
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
@@ -322,12 +306,10 @@ namespace System.IO.IsolatedStorage
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            if (path == String.Empty)
+            if (path == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(path));
             }
-
-            Contract.EndContractBlock();
 
             EnsureStoreIsValid();
 
@@ -341,7 +323,6 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-
         public void CopyFile(string sourceFileName, string destinationFileName)
         {
             if (sourceFileName == null)
@@ -350,17 +331,15 @@ namespace System.IO.IsolatedStorage
             if (destinationFileName == null)
                 throw new ArgumentNullException(nameof(destinationFileName));
 
-            if (sourceFileName == String.Empty)
+            if (sourceFileName == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(sourceFileName));
             }
 
-            if (destinationFileName == String.Empty)
+            if (destinationFileName == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(destinationFileName));
             }
-
-            Contract.EndContractBlock();
 
             CopyFile(sourceFileName, destinationFileName, false);
         }
@@ -373,22 +352,20 @@ namespace System.IO.IsolatedStorage
             if (destinationFileName == null)
                 throw new ArgumentNullException(nameof(destinationFileName));
 
-            if (sourceFileName == String.Empty)
+            if (sourceFileName == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(sourceFileName));
             }
 
-            if (destinationFileName == String.Empty)
+            if (destinationFileName == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(destinationFileName));
             }
 
-            Contract.EndContractBlock();
-
             EnsureStoreIsValid();
 
-            String sourceFileNameFullPath = GetFullPath(sourceFileName);
-            String destinationFileNameFullPath = GetFullPath(destinationFileName);
+            string sourceFileNameFullPath = GetFullPath(sourceFileName);
+            string destinationFileNameFullPath = GetFullPath(destinationFileName);
 
             try
             {
@@ -396,7 +373,7 @@ namespace System.IO.IsolatedStorage
             }
             catch (FileNotFoundException)
             {
-                throw new FileNotFoundException(String.Format(SR.PathNotFound_Path, sourceFileName));
+                throw new FileNotFoundException(string.Format(SR.PathNotFound_Path, sourceFileName));
             }
             catch (PathTooLongException)
             {
@@ -416,22 +393,20 @@ namespace System.IO.IsolatedStorage
             if (destinationFileName == null)
                 throw new ArgumentNullException(nameof(destinationFileName));
 
-            if (sourceFileName == String.Empty)
+            if (sourceFileName == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(sourceFileName));
             }
 
-            if (destinationFileName == String.Empty)
+            if (destinationFileName == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(destinationFileName));
             }
 
-            Contract.EndContractBlock();
-
             EnsureStoreIsValid();
 
-            String sourceFileNameFullPath = GetFullPath(sourceFileName);
-            String destinationFileNameFullPath = GetFullPath(destinationFileName);
+            string sourceFileNameFullPath = GetFullPath(sourceFileName);
+            string destinationFileNameFullPath = GetFullPath(destinationFileName);
 
             try
             {
@@ -439,7 +414,7 @@ namespace System.IO.IsolatedStorage
             }
             catch (FileNotFoundException)
             {
-                throw new FileNotFoundException(String.Format(SR.PathNotFound_Path, sourceFileName));
+                throw new FileNotFoundException(string.Format(SR.PathNotFound_Path, sourceFileName));
             }
             catch (PathTooLongException)
             {
@@ -459,22 +434,20 @@ namespace System.IO.IsolatedStorage
             if (destinationDirectoryName == null)
                 throw new ArgumentNullException(nameof(destinationDirectoryName));
 
-            if (sourceDirectoryName == String.Empty)
+            if (sourceDirectoryName == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(sourceDirectoryName));
             }
 
-            if (destinationDirectoryName == String.Empty)
+            if (destinationDirectoryName == string.Empty)
             {
                 throw new ArgumentException(SR.Argument_EmptyPath, nameof(destinationDirectoryName));
             }
 
-            Contract.EndContractBlock();
-
             EnsureStoreIsValid();
 
-            String sourceDirectoryNameFullPath = GetFullPath(sourceDirectoryName);
-            String destinationDirectoryNameFullPath = GetFullPath(destinationDirectoryName);
+            string sourceDirectoryNameFullPath = GetFullPath(sourceDirectoryName);
+            string destinationDirectoryNameFullPath = GetFullPath(destinationDirectoryName);
 
             try
             {
@@ -482,7 +455,7 @@ namespace System.IO.IsolatedStorage
             }
             catch (DirectoryNotFoundException)
             {
-                throw new DirectoryNotFoundException(String.Format(SR.PathNotFound_Path, sourceDirectoryName));
+                throw new DirectoryNotFoundException(string.Format(SR.PathNotFound_Path, sourceDirectoryName));
             }
             catch (PathTooLongException)
             {
@@ -494,26 +467,168 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        /*
-         * Public Static Methods
-         */
-        public static IsolatedStorageFile GetUserStoreForApplication()
+        public static IEnumerator GetEnumerator(IsolatedStorageScope scope)
         {
-            return GetUserStore();
+            // Not currently supported: https://github.com/dotnet/corefx/issues/10936
+
+            // Implementing this would require serializing/deserializing identity objects which is particularly
+            // complicated given the normal identity objects used by NetFX aren't available on CoreFX.
+            //
+            // Starting expectation is that a given store's location would be identical between implementations
+            // (say, for a particular StrongName). You could iterate any store opened at least once by NetFX on
+            // NetFX as it would create the needed identity file. You wouldn't be able to iterate if it was only
+            // ever opened by CoreFX, as the needed file isn't there yet.
+            return new IsolatedStorageFileEnumerator();
         }
 
-        internal static IsolatedStorageFile GetUserStore()
+        internal sealed class IsolatedStorageFileEnumerator : IEnumerator
         {
-            IsolatedStorageRoot = FetchOrCreateRoot();
+            public object Current
+            {
+                get
+                {
+                    // Getting current throws on NetFX if there is no current item.
+                    throw new InvalidOperationException();
+                }
+            }
 
+            public bool MoveNext()
+            {
+                // Nothing to return
+                return false;
+            }
+
+            public void Reset()
+            {
+                // Do nothing
+            }
+        }
+
+        public static IsolatedStorageFile GetUserStoreForApplication()
+        {
+            return GetStore(IsolatedStorageScope.Application | IsolatedStorageScope.User);
+        }
+
+        public static IsolatedStorageFile GetUserStoreForAssembly()
+        {
+            return GetStore(IsolatedStorageScope.Assembly | IsolatedStorageScope.User);
+        }
+
+        public static IsolatedStorageFile GetUserStoreForDomain()
+        {
+            return GetStore(IsolatedStorageScope.Assembly | IsolatedStorageScope.Domain | IsolatedStorageScope.User);
+        }
+
+        public static IsolatedStorageFile GetUserStoreForSite()
+        {
+            // NetFX and Mono both throw for this method
+            throw new NotSupportedException(SR.IsolatedStorage_NotValidOnDesktop);
+        }
+
+        public static IsolatedStorageFile GetMachineStoreForApplication()
+        {
+            return GetStore(IsolatedStorageScope.Application | IsolatedStorageScope.Machine);
+        }
+
+        public static IsolatedStorageFile GetMachineStoreForAssembly()
+        {
+            return GetStore(IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine);
+        }
+
+        public static IsolatedStorageFile GetMachineStoreForDomain()
+        {
+            return GetStore(IsolatedStorageScope.Assembly | IsolatedStorageScope.Domain | IsolatedStorageScope.Machine);
+        }
+
+        private static IsolatedStorageFile GetStore(IsolatedStorageScope scope)
+        {
             IsolatedStorageFile isf = new IsolatedStorageFile();
-            isf._appFilesPath = IsolatedStorageRoot;
+            isf.Initialize(scope);
             return isf;
         }
 
-        /*
-         * Private Instance Methods
-         */
+        // Notes on the GetStore methods:
+        //
+        // The System.Security types that NetFX would be getting aren't available. We could potentially map the two
+        // we implicitly support (StrongName and Url) to AssemblyName and Uri. We could also consider accepting those two
+        // types.
+        //
+        // For the methods that take actual evidence objects we would have to do the same mapping and implement the
+        // hashing required if it wasn't the two types we know. The hash is a two part hash of {typehash}.{instancehash}.
+        // The hashing logic is basically this:
+        //
+        //  - if not a "known type" the type hash is from a BinaryFormatter serialized object.GetType()
+        //  - if the identity object is INomalizeForIsolatedStorage, use .Normalize() result for hashing identity, otherwise the object itself
+        //  - again, use BinaryFormatter to serialize the selected identity object for getting the instance hash
+        // 
+        // Hashing for the streams created is done in Helper.GetStrongHashSuitableForObjectName()
+        //
+        // "Known" types are Publisher, StrongName, Url, Site, and Zone.
+
+        public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, Type applicationEvidenceType)
+        {
+            // Scope MUST be Application
+
+            // https://github.com/dotnet/corefx/issues/10935
+            throw new PlatformNotSupportedException();
+        }
+
+        public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, object applicationIdentity)
+        {
+            // Scope MUST be Application
+
+            // https://github.com/dotnet/corefx/issues/10935
+            throw new PlatformNotSupportedException();
+        }
+
+        public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, Type domainEvidenceType, Type assemblyEvidenceType)
+        {
+            // Scope MUST NOT be Application (assembly is assumed otherwise)
+
+            // https://github.com/dotnet/corefx/issues/10935
+            throw new PlatformNotSupportedException();
+        }
+
+        public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, object domainIdentity, object assemblyIdentity)
+        {
+            // Scope MUST NOT be Application (assembly is assumed otherwise)
+
+            // https://github.com/dotnet/corefx/issues/10935
+            throw new PlatformNotSupportedException();
+        }
+
+        // https://github.com/dotnet/corefx/issues/10935
+        // Evidence isn't currently available
+        // public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, Evidence domainEvidence, Type domainEvidenceType, Evidence assemblyEvidence, Type assemblyEvidenceType) { return default(IsolatedStorageFile); }
+
+        private void Initialize(IsolatedStorageScope scope)
+        {
+            // InitStore will set up the IdentityHash
+            InitStore(scope, null, null);
+
+            StringBuilder sb = new StringBuilder(Helper.GetRootDirectory(scope));
+            sb.Append(SeparatorExternal);
+            sb.Append(IdentityHash);
+            sb.Append(SeparatorExternal);
+
+            if (Helper.IsApplication(scope))
+            {
+                sb.Append(s_appFiles);
+            }
+            else if (Helper.IsDomain(scope))
+            {
+                sb.Append(s_files);
+            }
+            else
+            {
+                sb.Append(s_assemFiles);
+            }
+            sb.Append(SeparatorExternal);
+
+            _rootDirectory = sb.ToString();
+            Helper.CreateDirectory(_rootDirectory, scope);
+        }
+
         internal string GetFullPath(string partialPath)
         {
             Debug.Assert(partialPath != null, "partialPath should be non null");
@@ -531,55 +646,14 @@ namespace System.IO.IsolatedStorage
 
             partialPath = partialPath.Substring(i);
 
-            return Path.Combine(_appFilesPath, partialPath);
-        }
-
-        /*
-         * Private Static Methods
-         */
-        private static void CreatePathPrefixIfNeeded(string path)
-        {
-            string root = Path.GetPathRoot(path);
-
-            Debug.Assert(!String.IsNullOrEmpty(root), "Path.GetPathRoot returned null or empty for: " + path);
-
-            try
-            {
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-            }
-            catch (IOException e)
-            {
-                throw GetIsolatedStorageException(SR.IsolatedStorage_Operation, e);
-            }
-            catch (UnauthorizedAccessException e)
-            {
-                throw GetIsolatedStorageException(SR.IsolatedStorage_Operation, e);
-            }
-        }
-
-        internal static string FetchOrCreateRoot()
-        {
-            string rootFromHost = s_RootFromHost;
-
-            if (s_RootFromHost == null)
-            {
-                string root = IsolatedStorageSecurityState.GetRootUserDirectory();
-                s_RootFromHost = root;
-            }
-
-            CreatePathPrefixIfNeeded(s_RootFromHost);
-
-            return s_RootFromHost;
+            return Path.Combine(RootDirectory, partialPath);
         }
 
         internal void EnsureStoreIsValid()
         {
+            // This validation is something we only did in Silverlight previously.
             if (Disposed)
                 throw new ObjectDisposedException(null, SR.IsolatedStorage_StoreNotOpen);
-            Contract.EndContractBlock();
 
             if (IsDeleted)
             {
@@ -596,13 +670,158 @@ namespace System.IO.IsolatedStorage
             _disposed = true;
         }
 
-
-        [SecurityCritical]
         internal static Exception GetIsolatedStorageException(string exceptionMsg, Exception rootCause)
         {
             IsolatedStorageException e = new IsolatedStorageException(exceptionMsg, rootCause);
             e._underlyingException = rootCause;
             return e;
         }
+
+        public override bool IncreaseQuotaTo(long newQuotaSize)
+        {
+            // We don't support quotas, just call it ok
+            return true;
+        }
+
+        public override void Remove()
+        {
+            // Deletes the current IsoFile's directory and the identity folder if possible.
+            // (e.g. @"C:\Users\jerem\AppData\Local\IsolatedStorage\10v31ho4.bo2\eeolfu22.f2w\Url.qgeirsoc3cznuklvq5xlalurh1m0unxl\AssemFiles\")
+
+            // This matches NetFX logic. We want to try and clean as well as possible without being more aggressive with the identity folders.
+            // (e.g. Url.qgeirsoc3cznuklvq5xlalurh1m0unxl, etc.) We don't want to inadvertently yank folders for a different scope under the same
+            // identity (at least no more so than NetFX).
+
+            try
+            {
+                Directory.Delete(RootDirectory, recursive: true);
+            }
+            catch
+            {
+                throw new IsolatedStorageException(SR.IsolatedStorage_DeleteDirectories);
+            }
+
+            Close();
+
+            string parentDirectory = Path.GetDirectoryName(RootDirectory.TrimEnd(Path.DirectorySeparatorChar));
+
+            if (ContainsUnknownFiles(parentDirectory))
+                return;
+
+            try
+            {
+                Directory.Delete(parentDirectory, recursive: true);
+            }
+            catch
+            {
+                return;
+            }
+
+            // Domain paths are doubly nested
+            // @"C:\Users\jerem\AppData\Local\IsolatedStorage\10v31ho4.bo2\eeolfu22.f2w\Url.qgeirsoc3cznuklvq5xlalurh1m0unxl\Url.qgeirsoc3cznuklvq5xlalurh1m0unxl\Files\"
+            if (Helper.IsDomain(Scope))
+            {
+                parentDirectory = Path.GetDirectoryName(parentDirectory);
+
+                if (ContainsUnknownFiles(parentDirectory))
+                    return;
+
+                try
+                {
+                    Directory.Delete(parentDirectory, recursive: true);
+                }
+                catch
+                {
+                    return;
+                }
+            }
+        }
+
+        public static void Remove(IsolatedStorageScope scope)
+        {
+            // The static Remove() deletes ALL IsoStores for the given scope
+            VerifyGlobalScope(scope);
+
+            string root = Helper.GetRootDirectory(scope);
+
+            try
+            {
+                Directory.Delete(root, recursive: true);
+                Directory.CreateDirectory(root);
+            }
+            catch
+            {
+                throw new IsolatedStorageException(SR.IsolatedStorage_DeleteDirectories);
+            }
+        }
+
+        public static bool IsEnabled
+        {
+            // Isolated storage is always available
+            get { return true; }
+        }
+
+        private static void VerifyGlobalScope(IsolatedStorageScope scope)
+        {
+            if ((scope != IsolatedStorageScope.User) &&
+                (scope != (IsolatedStorageScope.User |
+                          IsolatedStorageScope.Roaming)) &&
+                (scope != IsolatedStorageScope.Machine))
+            {
+                throw new ArgumentException(SR.IsolatedStorage_Scope_U_R_M);
+            }
+        }
+
+        private bool ContainsUnknownFiles(string directory)
+        {
+            string[] dirs, files;
+
+            try
+            {
+                files = Directory.GetFiles(directory);
+                dirs = Directory.GetDirectories(directory);
+            }
+            catch
+            {
+                throw new IsolatedStorageException(SR.IsolatedStorage_DeleteDirectories);
+            }
+
+            if (dirs.Length > 1 || (dirs.Length > 0 && !IsMatchingScopeDirectory(dirs[0])))
+            {
+                // Unknown folder present
+                return true;
+            }
+
+            if (files.Length == 0)
+                return false;
+
+            // Check if we have unknown files
+
+            // Note that we don't generate these files in CoreFX, but we want to match
+            // NetFX removal semantics as NetFX will generate these.
+
+            if (Helper.IsRoaming(Scope))
+                return ((files.Length > 1) || !IsIdFile(files[0]));
+
+            return (files.Length > 2 ||
+                (
+                    (!IsIdFile(files[0]) && !IsInfoFile(files[0]))) ||
+                    (files.Length == 2 && !IsIdFile(files[1]) && !IsInfoFile(files[1]))
+                );
+        }
+
+        private bool IsMatchingScopeDirectory(string directory)
+        {
+            string directoryName = Path.GetFileName(directory);
+
+            return
+                (Helper.IsApplication(Scope) && string.Equals(directoryName, s_appFiles, StringComparison.Ordinal))
+                || (Helper.IsAssembly(Scope) && string.Equals(directoryName, s_assemFiles, StringComparison.Ordinal))
+                || (Helper.IsDomain(Scope) && string.Equals(directoryName, s_files, StringComparison.Ordinal));
+        }
+
+        private static bool IsIdFile(string file) => string.Equals(Path.GetFileName(file), "identity.dat");
+
+        private static bool IsInfoFile(string file) => string.Equals(Path.GetFileName(file), "info.dat");
     }
 }

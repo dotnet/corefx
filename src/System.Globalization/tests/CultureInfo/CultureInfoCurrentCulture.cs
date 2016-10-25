@@ -100,7 +100,7 @@ namespace System.Globalization.Tests
             Assert.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentUICulture = null);
         }
 
-        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Theory]
         [InlineData("en-US.UTF-8", "en-US")]
         [InlineData("en-US", "en-US")]
@@ -112,7 +112,8 @@ namespace System.Globalization.Tests
             var psi = new ProcessStartInfo();
             psi.Environment.Clear();
 
-            CopyHomeIfPresent(psi.Environment);
+            CopyEssentialTestEnvironment(psi.Environment);
+
             psi.Environment["LANG"] = langEnvVar;
 
             RemoteInvoke(expected =>
@@ -127,7 +128,7 @@ namespace System.Globalization.Tests
             }, expectedCultureName, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
-        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Theory]
         [InlineData("")]
         [InlineData(null)]
@@ -136,7 +137,8 @@ namespace System.Globalization.Tests
             var psi = new ProcessStartInfo();
             psi.Environment.Clear();
 
-            CopyHomeIfPresent(psi.Environment);
+            CopyEssentialTestEnvironment(psi.Environment);
+
             if (langEnvVar != null)
             {
                psi.Environment["LANG"] = langEnvVar;
@@ -154,13 +156,17 @@ namespace System.Globalization.Tests
             }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
-        private static void CopyHomeIfPresent(IDictionary<string, string> environment)
+        private static void CopyEssentialTestEnvironment(IDictionary<string, string> environment)
         {
-            string currentHome = Environment.GetEnvironmentVariable("HOME");
-
-            if (currentHome != null)
+            string[] essentialVariables = { "HOME", "LD_LIBRARY_PATH" };
+            foreach(string essentialVariable in essentialVariables)
             {
-                environment["HOME"] = currentHome;
+                string varValue = Environment.GetEnvironmentVariable(essentialVariable);
+
+                if (varValue != null)
+                {
+                    environment[essentialVariable] = varValue;
+                }
             }
         }
     }

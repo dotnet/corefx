@@ -87,6 +87,7 @@ namespace System.Net
     // CookieContainer
     //
     // Manage cookies for a user (implicit). Based on RFC 2965.
+    [Serializable]
     public class CookieContainer
     {
         public const int DefaultCookieLimit = 300;
@@ -99,7 +100,7 @@ namespace System.Net
         };
 
         // NOTE: all accesses of _domainTable must be performed with _domainTable locked.
-        private Dictionary<string, PathList> _domainTable = new Dictionary<string, PathList>();
+        private readonly Dictionary<string, PathList> _domainTable = new Dictionary<string, PathList>();
         private int _maxCookieSize = DefaultCookieLengthLimit;
         private int _maxCookies = DefaultCookieLimit;
         private int _maxCookiesPerDomain = DefaultPerDomainCookieLimit;
@@ -116,7 +117,7 @@ namespace System.Net
             // Otherwise it will remain string.Empty.
         }
 
-        internal CookieContainer(int capacity) : this()
+        public CookieContainer(int capacity) : this()
         {
             if (capacity <= 0)
             {
@@ -125,7 +126,7 @@ namespace System.Net
             _maxCookies = capacity;
         }
 
-        internal CookieContainer(int capacity, int perDomainCapacity, int maxCookieSize) : this(capacity)
+        public CookieContainer(int capacity, int perDomainCapacity, int maxCookieSize) : this(capacity)
         {
             if (perDomainCapacity != Int32.MaxValue && (perDomainCapacity <= 0 || perDomainCapacity > capacity))
             {
@@ -213,7 +214,7 @@ namespace System.Net
         }
 
         // This method will construct a faked URI: the Domain property is required for param.
-        internal void Add(Cookie cookie)
+        public void Add(Cookie cookie)
         {
             if (cookie == null)
             {
@@ -356,13 +357,8 @@ namespace System.Net
         // Param. 'domain' == null means to age in the whole container.
         private bool AgeCookies(string domain)
         {
-            // Border case: shrunk to zero
-            if (_maxCookies == 0 || _maxCookiesPerDomain == 0)
-            {
-                _domainTable = new Dictionary<string, PathList>();
-                _count = 0;
-                return false;
-            }
+            Debug.Assert(_maxCookies != 0);
+            Debug.Assert(_maxCookiesPerDomain != 0);
 
             int removed = 0;
             DateTime oldUsed = DateTime.MaxValue;
@@ -524,7 +520,7 @@ namespace System.Net
             }
         }
 
-        internal void Add(CookieCollection cookies)
+        public void Add(CookieCollection cookies)
         {
             if (cookies == null)
             {
@@ -982,6 +978,7 @@ namespace System.Net
         }
     }
 
+    [Serializable]
     internal struct PathList
     {
         // Usage of PathList depends on it being shallowly immutable;
@@ -1059,6 +1056,7 @@ namespace System.Net
             }
         }
 
+        [Serializable]
         private sealed class PathListComparer : IComparer<string>
         {
             internal static readonly PathListComparer StaticInstance = new PathListComparer();

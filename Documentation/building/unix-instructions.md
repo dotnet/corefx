@@ -1,21 +1,22 @@
 Building CoreFX on FreeBSD, Linux and OS X
 ==========================================
+##Building
 
-The CoreFX build has two logical components, the native build which produces the
-"shims" (which provide a stable interface between the OS and managed code) and
-the managed build which produces the MSIL code and nuget packages that make up
-CoreFX.
+1. Install the prerequisites ([Linux](#user-content-linux), [macOS](#user-content-macos))
+2. Clone the corefx repo `git clone https://github.com/dotnet/corefx.git`
+3. Navigate to the `corefx` directory
+4. Run the build script `./build.sh`
 
-The native component should be buildable on any system, but the managed
-components require a version of the .NET Core CLI (which the build will
-download) so managed components can only be built on a subset of distros.
+Calling the script `build.sh` builds both the native and managed code.
+Only use it when the parameters that you are passing to the script apply for both components. Otherwise, use the scripts `build-native.sh` and `build-managed.sh` respectively.
 
-### Prerequsites (native build)
+For more information about the different options when building, run `build.sh -?` and look at examples in the [developer-guide](../project-docs/developer-guide.md).
 
-The native build produces shims over libc, openssl, gssapi, libcurl and
-libz. The build system uses CMake (2.8.12 or higher) to generate Makefiles using
-clang (3.5 or higher).  The build also uses git for generating some version
-information.
+## Prerequisites (native build)
+
+### Linux
+
+#### Native build
 
 For Ubuntu 14.04, the following packages should be installed to build the native
 components
@@ -33,31 +34,7 @@ components
 `sudo apt-get install git clang-3.5 cmake make libc6-dev libssl-dev libkrb5-dev
 libcurl4-openssl-dev zlib1g-dev`
 
-On OS X, all the needed libraries are provided by XCode, with the exception of
-openssl. To install openssl, we recommend that you use
-[Homebrew](http://brew.sh) and do the following:
-
-```
-brew install openssl
-brew link --force openssl
-```
-
-Once installed, the native components can be built by running:
-
-```bash
-./build.sh native
-```
-
-from the root of the repository
-
-### Prerequsites (managed build)
-
-Since the managed build uses the .NET Core CLI, there are some additional
-pre-requesties from the CLI which need to be installed. Both libicu and
-libunwind are used by CoreCLR to execute managed code, so they must be
-installed. Since CoreFX does not actually link against these packages, runtime
-versions are sufficent.  We also require curl to be present, which we use to
-download the .NET Core CLI.
+#### Managed build
 
 For Ubuntu 14.04, install the following packages:
 
@@ -67,49 +44,52 @@ For Ubuntu 14.04, install the following packages:
 
 `sudo apt-get install libunwind8 libicu52 curl`
 
-In addition to the above pacakges, the runtime versions of the packages listed
+For Ubuntu 16.x you may need to replace libicu52 with libicu57.
+
+In addition to the above packages, the runtime versions of the packages listed
 in the native section should also be installed (this happens automatically on
 most systems when you install the development packages).
 
-On OS X, we also require that openssl has been installed via Homebrew.
+### macOS
 
-Once installed, the managed components can be built by running:
+On macOS a few components are needed which are not provided by a default developer setup:
+* CMake
+* pkgconfig
+* OpenSSL 1.0.1 or 1.0.2
 
-```bash
-./build.sh managed
+One way of obtaining these components is via [Homebrew](http://brew.sh):
+```sh
+$ brew install cmake pkgconfig openssl
 ```
 
-### `build.sh` Usage
-When run without any arguments, `build.sh` will attempt to build both the native
-and managed code.
+As of El Capitan (OS X 10.11), Apple still has the libraries for OpenSSL 0.9.8 in `/usr/lib`,
+but the headers are no longer available since that library version is out of support.
+Some compilers get upset over new headers being in `/usr/local/include` with the old library being present at
+`/usr/lib/libcrypto.dylib` (the tools have no issue with the versioned files, e.g. `/usr/lib/libcrypto.0.9.8.dylib`),
+and so Homebrew does not allow the OpenSSL package to be installed into system default paths. A minimal installation
+is presented here to facilitiate simplifying runtime requirements and compile-time requirements (for build systems using
+CMake's `find_package`, like ours):
+```sh
+# We need to make the runtime libraries discoverable, as well as make
+# pkg-config be able to find the headers and current ABI version.
+#
+# Ensure the paths we will need exist
+mkdir -p /usr/local/lib/pkgconfig
 
-There many flags that can be passed to `build.sh` to control its behavior.
+# The rest of these instructions assume a default Homebrew path of
+# /usr/local/opt/<module>, with /usr/local being the answer to
+# `brew --prefix`.
+#
+# Runtime dependencies
+ln -s /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib /usr/local/lib/
+ln -s /usr/local/opt/openssl/lib/libssl.1.0.0.dylib /usr/local/lib/
 
-`./build.sh [managed] [native] [BuildArch] [BuildType] [clean] [verbose] [clangx.y] [platform] [cross] [skiptests] [cmakeargs]`
-
-**Example:**
-
-`./build.sh native x64 verbose clang3.9`
-
-**Options:**
-
-```bash
-managed            # optional argument to build the managed code
-native             # optional argument to build the native code
-platform           # OS to compile for (FreeBSD, Linux, NetBSD, OSX, Windows)
-skiptests          # build, but do not run, the managed unit tests
-BuildType          # build configuration type (Debug, Release)
-
-# The following arguments affect native builds only:
-
-BuildArch          # build architecture (x64, x86, arm, arm64)
-clean              # optional argument to force a clean build
-verbose            # optional argument to enable verbose build output
-clangx.y           # optional argument to build using clang version x.y
-cross              # optional argument to signify cross compilation, uses ROOTFS_DIR environment variable if set
-cmakeargs          # user-settable additional arguments passed to CMake
-
+# Compile-time dependencies (for pkg-config)
+ln -s /usr/local/opt/openssl/lib/pkgconfig/libcrypto.pc /usr/local/lib/pkgconfig/
+ln -s /usr/local/opt/openssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
+ln -s /usr/local/opt/openssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
 ```
+
 ### Known Issues
 If you see errors along the lines of `SendFailure (Error writing headers)` you may need to import trusted root certificates:
 
@@ -117,12 +97,3 @@ If you see errors along the lines of `SendFailure (Error writing headers)` you m
 mozroots --import --sync
 ```
 
-## Steps to build on Ubuntu 14.04 LTS
-
-
-1. Install the prerequisites
- * `sudo apt-get install git clang-3.5 cmake make libc6-dev libssl-dev
-   libkrb5-dev libcurl4-openssl-dev zlib1g-dev libunwind8 libicu52 curl`
-2. Clone the corefx repo `git clone https://github.com/dotnet/corefx.git`
-3. Navigate to the `corefx` directory
-4. Run the build script `./build.sh`

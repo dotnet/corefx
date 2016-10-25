@@ -12,6 +12,8 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     public class HttpClientHandler_MaxResponseHeadersLength_Test : RemoteExecutorTestBase
     {
         [Fact]
@@ -59,6 +61,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n", 37, false)]
         [InlineData("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n", 38, true)]
@@ -91,6 +94,8 @@ namespace System.Net.Http.Functional.Tests
                         {
                             await Assert.ThrowsAsync<HttpRequestException>(() => getAsync);
                         }
+                        
+                        return null;
                     });
                 }
             });

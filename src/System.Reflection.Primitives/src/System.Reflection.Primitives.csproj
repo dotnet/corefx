@@ -1,34 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Reflection.Primitives</AssemblyName>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
-    <AssemblyVersion Condition="'$(AssemblyVersionTransition)' == 'true'">4.0.2.0</AssemblyVersion>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'!='netcore50'">true</IsPartialFacadeAssembly>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.0</NuGetTargetMoniker>
+    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
+    <PackageTargetFramework Condition="'$(TargetGroup)'==''">netstandard1.7;uap10.1</PackageTargetFramework>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcore50_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)'!='netcore50'">
-    <TargetingPackReference Include="mscorlib" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcore50'">
-    <Compile Include="System\Reflection\CallingConventions.cs" />
-    <Compile Include="System\Reflection\EventAttributes.cs" />
-    <Compile Include="System\Reflection\FieldAttributes.cs" />
-    <Compile Include="System\Reflection\GenericParameterAttributes.cs" />
-    <Compile Include="System\Reflection\MethodAttributes.cs" />
-    <Compile Include="System\Reflection\MethodImplAttributes.cs" />
-    <Compile Include="System\Reflection\ParameterAttributes.cs" />
-    <Compile Include="System\Reflection\PropertyAttributes.cs" />
-    <Compile Include="System\Reflection\TypeAttributes.cs" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)'=='uap101aot'">
     <Compile Include="System\Reflection\Emit\FlowControl.cs" />
     <Compile Include="System\Reflection\Emit\Opcode.cs" />
     <Compile Include="System\Reflection\Emit\OpCodes.cs" />
@@ -36,6 +20,10 @@
     <Compile Include="System\Reflection\Emit\OperandType.cs" />
     <Compile Include="System\Reflection\Emit\PackingSize.cs" />
     <Compile Include="System\Reflection\Emit\StackBehaviour.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <TargetingPackReference Include="mscorlib" Condition="'$(TargetGroup)' == 'net463'" />
+    <TargetingPackReference Include="System.Private.CoreLib" Condition="'$(TargetGroup)' != 'net463'" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

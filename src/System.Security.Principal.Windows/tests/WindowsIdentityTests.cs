@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.Serialization.Formatters.Tests;
 using System.Security.Principal;
 using Xunit;
 
@@ -37,12 +38,16 @@ public class WindowsIdentityTests
         CheckDispose(windowsIdentity2);
     }
 
-    [Fact]
-    public static void CloneAndProperties()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public static void CloneAndProperties(bool cloneViaSerialization)
     {
         IntPtr logonToken = WindowsIdentity.GetCurrent().AccessToken.DangerousGetHandle();
         WindowsIdentity winId = new WindowsIdentity(logonToken);
-        WindowsIdentity cloneWinId = winId.Clone() as WindowsIdentity;
+        WindowsIdentity cloneWinId = cloneViaSerialization ?
+            BinaryFormatterHelpers.Clone(winId) :
+            winId.Clone() as WindowsIdentity;
         Assert.NotNull(cloneWinId);
 
         Assert.Equal(winId.IsSystem, cloneWinId.IsSystem);
@@ -58,6 +63,13 @@ public class WindowsIdentityTests
 
         CheckDispose(winId);
         CheckDispose(cloneWinId);        
+    }
+
+    [Fact]
+    public static void GetTokenHandle()
+    {
+        WindowsIdentity id = WindowsIdentity.GetCurrent();
+        Assert.Equal(id.AccessToken.DangerousGetHandle(), id.Token);
     }
 
     private static void CheckDispose(WindowsIdentity identity, bool anonymous = false)

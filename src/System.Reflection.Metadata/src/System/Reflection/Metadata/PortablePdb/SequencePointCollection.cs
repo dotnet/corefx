@@ -149,7 +149,7 @@ namespace System.Reflection.Metadata
             private int AddOffsets(int value, int delta)
             {
                 int result = unchecked(value + delta);
-                if (result < 0 || result > int.MaxValue)
+                if (result < 0)
                 {
                     Throw.SequencePointValueOutOfRange();
                 }
@@ -202,7 +202,7 @@ namespace System.Reflection.Metadata
 
             public void Reset()
             {
-                _reader.SeekOffset(0);
+                _reader.Reset();
                 _current = default(SequencePoint);
             }
 

@@ -1,21 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Net.Primitives</AssemblyName>
-    <AssemblyVersion>4.0.10.0</AssemblyVersion>
-    <AssemblyVersion Condition="'$(AssemblyVersionTransition)' == 'true'">4.0.12.0</AssemblyVersion>
     <OutputType>Library</OutputType>
     <ProjectGuid>{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <EnableWinRT Condition="'$(TargetGroup)' == 'netcore50'">true</EnableWinRT>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
-    <PackageTargetFramework Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">netcore50</PackageTargetFramework>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
+    <EnableWinRT Condition="'$(TargetGroup)' == 'uap101'">true</EnableWinRT>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition="'$(EnableWinRT)' != 'true' AND '$(TargetGroup)' == ''">
     <DefineConstants>$(DefineConstants);FEATURE_CORECLR</DefineConstants>
@@ -28,14 +24,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_uap101_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_uap101_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
   <PropertyGroup>
     <!-- SYSTEM_NET_PRIMITIVES_DLL is required to allow source-level code sharing for types defined within the 
          System.Net.Internals namespace. -->
     <DefineConstants>$(DefineConstants);SYSTEM_NET_PRIMITIVES_DLL</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
     <Compile Include="System\Net\AuthenticationSchemes.cs" />
     <Compile Include="System\Net\Cookie.cs" />
     <Compile Include="System\Net\CookieContainer.cs" />
@@ -55,12 +53,15 @@
     <Compile Include="System\Net\NetworkCredential.cs" />
     <Compile Include="System\Net\TransportContext.cs" />
     <Compile Include="System\Net\SocketException.cs" />
+    <Compile Include="System\Net\SocketException.netstandard17.cs" Condition="'$(TargetGroup)' == ''" />
     <Compile Include="System\Net\SecureProtocols\NegotiateEnumTypes.cs" />
     <Compile Include="System\Net\SecureProtocols\SslEnumTypes.cs" />
     <Compile Include="System\Net\Security\SslPolicyErrors.cs" />
     <Compile Include="System\Net\Sockets\AddressFamily.cs" />
     <Compile Include="System\Net\Sockets\SocketError.cs" />
     <Compile Include="System\Net\NetworkInformation\IPAddressCollection.cs" />
+    <Compile Include="System\Net\Cache\RequestCacheLevel.cs" />
+    <Compile Include="System\Net\Cache\RequestCachePolicy.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ChannelBinding.cs" />
     <Compile Include="System\Security\Authentication\ExtendedProtection\ChannelBindingKind.cs" />
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
@@ -119,7 +120,7 @@
       <Link>Common\Interop\Windows\Winsock\Interop.ErrorCodes.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'net46' ">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' != 'net463' ">
     <Compile Include="System\Net\IPAddressPal.Windows.cs" />
     <Compile Include="System\Net\SocketException.Windows.cs" />
     <Compile Include="$(CommonPath)\System\Net\SocketAddressPal.Windows.cs">
@@ -154,7 +155,7 @@
     </Compile>
   </ItemGroup>
   <!-- Windows : Win32 only -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' != 'true' AND '$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' != 'true' AND '$(TargetGroup)' != 'net463'">
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Windows.cs">
       <Link>Common\System\Net\NetworkInformation\HostInformationPal.Windows.cs</Link>
     </Compile>
@@ -175,12 +176,12 @@
     </Compile>
   </ItemGroup>
   <!-- Windows : Win32 + WinRT -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true' AND '$(TargetGroup)' != 'net46'">
-    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.NetNative.cs">
-      <Link>Common\System\Net\NetworkInformation\HostInformationPal.NetNative.cs</Link>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true' AND '$(TargetGroup)' != 'net463'">
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Uap.cs">
+      <Link>Common\System\Net\NetworkInformation\HostInformationPal.Uap.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetGroup)' != 'net46' ">
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetGroup)' != 'net463' ">
     <Compile Include="System\Net\IPAddressPal.Unix.cs" />
     <Compile Include="System\Net\SocketException.Unix.cs" />
     <Compile Include="$(CommonPath)\System\Net\SocketAddressPal.Unix.cs">
@@ -217,12 +218,16 @@
       <Link>Interop\Unix\System.Native\Interop.SocketAddress.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcore50'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap101'">
     <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" />
+    <!-- ToDo: Remove this reference once prerelease gets updated again -->
+    <ProjectReference Include="..\..\System.Globalization\pkg\System.Globalization.pkgproj" />
+    <!-- ToDo: Remove this reference once prerelease gets updated again -->
+    <ProjectReference Include="..\..\System.Threading.Tasks\pkg\System.Threading.Tasks.pkgproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

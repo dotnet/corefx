@@ -1,82 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{17CB2E3C-2904-4241-94DB-3894D24F35DA}</ProjectGuid>
     <AssemblyName>System.Xml.XPath.XmlDocument</AssemblyName>
-    <AssemblyVersion>4.0.2.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="$(CommonPath)\System\Xml\Schema\XmlUntypedConverter.cs">
-      <Link>Common\System\Xml\Schema\XmlUntypedConverter.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\Schema\XsdDateTime.cs">
-      <Link>Common\System\Xml\Schema\XsdDateTime.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\Base64Encoder.cs">
-      <Link>Common\System\Xml\Base64Encoder.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\Bits.cs">
-      <Link>Common\System\Xml\Bits.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\Ref.cs">
-      <Link>Common\System\Xml\Ref.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XmlRawWriter.cs">
-      <Link>Common\System\Xml\XmlRawWriter.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\SecureStringHasher.cs">
-      <Link>Common\System\Xml\SecureStringHasher.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XmlRawWriterBase64Encoder.cs">
-      <Link>Common\System\Xml\XmlRawWriterBase64Encoder.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\ValidateNames.cs">
-      <Link>Common\System\Xml\ValidateNames.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XmlCharType.cs">
-      <Link>Common\System\Xml\XmlCharType.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XmlStandalone.cs">
-      <Link>Common\System\Xml\XmlStandalone.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XmlConvertEx.cs">
-      <Link>Common\System\Xml\XmlConvertEx.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\ExceptionType.cs">
-      <Link>Common\System\Xml\ExceptionType.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XPathNavigatorEx.cs">
-      <Link>Common\System\Xml\XPathNavigatorEx.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XmlParsingHelper.cs">
-      <Link>Common\System\Xml\XmlParsingHelper.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XmlAttributeCollectionEx.cs">
-      <Link>Common\System\Xml\XmlAttributeCollectionEx.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Xml\XmlConst.cs">
-      <Link>Common\System\Xml\XmlConst.cs</Link>
-    </Compile>
+  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
+    <TargetingPackReference Include="mscorlib" />
+    <TargetingPackReference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="System\Xml\XmlAttributeEx.cs" />
-    <Compile Include="System\Xml\XmlDocumentEx.cs" />
-    <Compile Include="System\Xml\XmlNodeEx.cs" />
-    <Compile Include="System\Xml\XmlWellformedWriter.cs" />
-    <Compile Include="System\Xml\XmlWellformedWriterHelpers.cs" />
-    <Compile Include="System\Xml\DocumentXmlWriter.cs" />
-    <Compile Include="System\Xml\DocumentXPathNavigator.cs" />
     <Compile Include="System\Xml\XmlDocumentXPathExtensions.cs" />
-    <Compile Include="System\Xml\XPathNodeList.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">

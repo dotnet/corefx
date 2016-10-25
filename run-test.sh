@@ -40,9 +40,16 @@ usage()
     echo "                                      default: detect current OS"
     echo
     echo "Execution options:"
+    echo "    --sequential                      Run tests sequentially (default is to run in parallel)."
     echo "    --restrict-proj <regex>           Run test projects that match regex"
     echo "                                      default: .* (all projects)"
     echo "    --useServerGC                     Enable Server GC for this test run"
+    echo "    --test-dir <path>                 Run tests only in the specified directory. Path is relative to the directory"
+    echo "                                      specified by --corefx-tests"
+    echo "    --test-dir-file <path>            Run tests only in the directories specified by the file at <path>. Paths are"
+    echo "                                      listed one line, relative to the directory specified by --corefx-tests"
+    echo "    --testRelPath <project>           Set tests relative path from project name"
+    echo "                                      default: default.netcoreapp1.1/netcoreapp1.1"
     echo
     echo "Runtime Code Coverage options:"
     echo "    --coreclr-coverage                Optional argument to get coreclr code coverage reports"
@@ -98,6 +105,9 @@ esac
 TestSelection=".*"
 TestsFailed=0
 
+# TestTFM default
+TestRelPath="default.netcoreapp1.1/netcoreapp1.1"
+
 ensure_binaries_are_present()
 {
   local LowerConfigurationGroup="$(echo $ConfigurationGroup | awk '{print tolower($0)}')"
@@ -151,10 +161,36 @@ link_files_in_directory()
     done
 }
 
+# $1 is the path of list file
+read_array()
+{
+  local theArray=()
+
+  while IFS='' read -r line || [ -n "$line" ]; do
+    theArray[${#theArray[@]}]=$line
+  done < "$1"
+  echo ${theArray[@]}
+}
+
+run_selected_tests()
+{
+  local selectedTests=()
+
+  if [ -n "$TestDirFile" ]; then
+    selectedTests=($(read_array "$TestDirFile"))
+  fi
+
+  if [ -n "$TestDir" ]; then
+    selectedTests[${#selectedTests[@]}]="$TestDir"
+  fi
+
+  run_all_tests ${selectedTests[@]/#/$CoreFxTests/}
+}
+
 # $1 is the name of the platform folder (e.g Unix.AnyCPU.Debug)
 run_all_tests()
 {
-  for testFolder in "$CoreFxTests/$1/"*
+  for testFolder in $@
   do
      run_test $testFolder &
      pids="$pids $!"
@@ -183,7 +219,7 @@ run_test()
     exit 0
   fi
 
-  dirName="$1/netcoreapp1.0"
+  dirName="$1/$TestRelPath"
   copy_test_overlay $dirName
 
   pushd $dirName > /dev/null
@@ -260,6 +296,7 @@ coreclr_code_coverage()
 
 # Parse arguments
 
+RunTestSequential=0
 ((serverGC = 0))
 
 while [[ $# > 0 ]]
@@ -302,8 +339,20 @@ do
         --coreclr-src)
         CoreClrSrc=$2
         ;;
+        --sequential)
+        RunTestSequential=1
+        ;;
         --useServerGC)
         ((serverGC = 1))
+        ;;
+        --test-dir)
+        TestDir=$2
+        ;;
+        --test-dir-file)
+        TestDirFile=$2
+        ;;
+        --testRelPath)
+        TestRelPath=$2
         ;;
         --outerloop)
         OuterLoop=""
@@ -392,15 +441,25 @@ ensure_binaries_are_present
 TestsFailed=0
 numberOfProcesses=0
 
-if [ `uname` = "NetBSD" ]; then
-  maxProcesses=$(($(getconf NPROCESSORS_ONLN)+1))
+if [ $RunTestSequential -eq 1 ]
+then
+    maxProcesses=1;
 else
-  maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
+    if [ `uname` = "NetBSD" ]; then
+      maxProcesses=$(($(getconf NPROCESSORS_ONLN)+1))
+    else
+      maxProcesses=$(($(getconf _NPROCESSORS_ONLN)+1))
+    fi
 fi
 
-run_all_tests "AnyOS.AnyCPU.$ConfigurationGroup"
-run_all_tests "Unix.AnyCPU.$ConfigurationGroup"
-run_all_tests "$OS.AnyCPU.$ConfigurationGroup"
+if [ -n "$TestDirFile" ] || [ -n "$TestDir" ]
+then
+    run_selected_tests
+else
+    run_all_tests "$CoreFxTests/AnyOS.AnyCPU.$ConfigurationGroup/"*
+    run_all_tests "$CoreFxTests/Unix.AnyCPU.$ConfigurationGroup/"*
+    run_all_tests "$CoreFxTests/$OS.AnyCPU.$ConfigurationGroup/"*
+fi
 
 if [ "$CoreClrCoverage" == "ON" ]
 then

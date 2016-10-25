@@ -63,7 +63,8 @@ namespace System.Collections
 #if FEATURE_CORECLR
     [Obsolete("Non-generic collections have been deprecated. Please use collections in System.Collections.Generic.")]
 #endif
-    public class SortedList : IDictionary
+    [Serializable]
+    public class SortedList : IDictionary, ICloneable
     {
         private Object[] _keys;
         private Object[] _values;
@@ -72,6 +73,7 @@ namespace System.Collections
         private IComparer _comparer;
         private KeyList _keyList;
         private ValueList _valueList;
+        [NonSerialized]
         private Object _syncRoot;
 
         private const int _defaultCapacity = 16;
@@ -608,6 +610,7 @@ namespace System.Collections
             Capacity = _size;
         }
 
+        [Serializable]
         private class SyncSortedList : SortedList
         {
             private SortedList _list;
@@ -828,8 +831,8 @@ namespace System.Collections
             }
         }
 
-
-        private class SortedListEnumerator : IDictionaryEnumerator
+        [Serializable]
+        private class SortedListEnumerator : IDictionaryEnumerator, ICloneable
         {
             private SortedList _sortedList;
             private Object _key;
@@ -856,6 +859,8 @@ namespace System.Collections
                 _getObjectRetType = getObjRetType;
                 _current = false;
             }
+
+            public object Clone() => MemberwiseClone();
 
             public virtual Object Key
             {
@@ -929,6 +934,7 @@ namespace System.Collections
             }
         }
 
+        [Serializable]
         private class KeyList : IList
         {
             private SortedList _sortedList;
@@ -1034,6 +1040,7 @@ namespace System.Collections
             }
         }
 
+        [Serializable]
         private class ValueList : IList
         {
             private SortedList _sortedList;

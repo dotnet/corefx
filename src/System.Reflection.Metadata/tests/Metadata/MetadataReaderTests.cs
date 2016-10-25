@@ -91,17 +91,6 @@ namespace System.Reflection.Metadata.Tests
             return pinned;
         }
 
-        private List<CustomAttributeHandle> GetCustomAttributes(MetadataReader reader, int token)
-        {
-            var attributes = new List<CustomAttributeHandle>();
-            foreach (var caHandle in reader.GetCustomAttributes(new EntityHandle((uint)token)))
-            {
-                attributes.Add(caHandle);
-            }
-
-            return attributes;
-        }
-
         #endregion
 
         [Fact]
@@ -230,6 +219,114 @@ namespace System.Reflection.Metadata.Tests
             }
 
             Assert.Equal(3, reader.AssemblyReferences.Count);
+        }
+
+        [Fact]
+        public void GetBlobReader_VirtualBlob()
+        {
+            var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
+            var handle = reader.AssemblyReferences.Skip(3).First();
+            Assert.True(handle.IsVirtual);
+
+            var assemblyRef = reader.GetAssemblyReference(handle);
+            Assert.Equal("System.Runtime", reader.GetString(assemblyRef.Name));
+
+            AssertEx.Equal(
+                new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A },
+                reader.GetBlobBytes(assemblyRef.PublicKeyOrToken));
+
+            var blobReader = reader.GetBlobReader(assemblyRef.PublicKeyOrToken);
+            Assert.Equal(new byte[] { 0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A }, blobReader.ReadBytes(8));
+            Assert.Equal(0, blobReader.RemainingBytes);
+        }
+
+        [Fact]
+        public void GetString_WinRTPrefixed_Projected()
+        {
+            var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
+
+            // .class /*02000002*/ public auto ansi sealed beforefieldinit Lib.Class1
+            var winrtDefHandle = MetadataTokens.TypeDefinitionHandle(2);
+            var winrtDef = reader.GetTypeDefinition(winrtDefHandle);
+            Assert.Equal(StringKind.Plain, winrtDef.Name.StringKind);
+            Assert.Equal("Class1", reader.GetString(winrtDef.Name));
+            Assert.Equal(
+                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
+                TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit, 
+                winrtDef.Attributes);
+
+            var strReader = reader.GetBlobReader(winrtDef.Name);
+            Assert.Equal(Encoding.UTF8.GetBytes("Class1"), strReader.ReadBytes("Class1".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+
+            // .class /*02000003*/ private auto ansi import windowsruntime sealed beforefieldinit Lib.'<WinRT>Class1'
+            var clrDefHandle = MetadataTokens.TypeDefinitionHandle(3);
+            var clrDef = reader.GetTypeDefinition(clrDefHandle);
+            Assert.Equal(StringKind.WinRTPrefixed, clrDef.Name.StringKind);
+            Assert.Equal("<WinRT>Class1", reader.GetString(clrDef.Name));
+            Assert.Equal(
+                TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass | 
+                TypeAttributes.Import | TypeAttributes.WindowsRuntime | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
+                clrDef.Attributes);
+
+            strReader = reader.GetBlobReader(clrDef.Name);
+            Assert.Equal(Encoding.UTF8.GetBytes("<WinRT>Class1"), strReader.ReadBytes("<WinRT>Class1".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+        }
+
+        [Fact]
+        public void GetString_WinRTPrefixed_NotProjected()
+        {
+            var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.None);
+
+            // .class /*02000002*/ private auto ansi sealed beforefieldinit specialname Lib.'<CLR>Class1'
+            var winrtDefHandle = MetadataTokens.TypeDefinitionHandle(2);
+            var winrtDef = reader.GetTypeDefinition(winrtDefHandle);
+            Assert.Equal(StringKind.Plain, winrtDef.Name.StringKind);
+            Assert.Equal("<CLR>Class1", reader.GetString(winrtDef.Name));
+            Assert.Equal(
+                TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
+                TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit | TypeAttributes.SpecialName,
+                winrtDef.Attributes);
+
+            var strReader = reader.GetBlobReader(winrtDef.Name);
+            Assert.Equal(Encoding.UTF8.GetBytes("<CLR>Class1"), strReader.ReadBytes("<CLR>Class1".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+
+            // .class /*02000003*/ public auto ansi windowsruntime sealed beforefieldinit Lib.Class1
+            var clrDefHandle = MetadataTokens.TypeDefinitionHandle(3);
+            var clrDef = reader.GetTypeDefinition(clrDefHandle);
+            Assert.Equal(StringKind.Plain, clrDef.Name.StringKind);
+            Assert.Equal("Class1", reader.GetString(clrDef.Name));
+            Assert.Equal(
+                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AutoLayout | TypeAttributes.AnsiClass |
+                TypeAttributes.WindowsRuntime | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit,
+                clrDef.Attributes);
+
+            strReader = reader.GetBlobReader(clrDef.Name);
+            Assert.Equal(Encoding.UTF8.GetBytes("Class1"), strReader.ReadBytes("Class1".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+        }
+
+        [Fact]
+        public void GetString_DotTerminated()
+        {
+            var reader = GetMetadataReader(WinRT.Lib, options: MetadataReaderOptions.None);
+
+            //  4: 0x23000001 (AssemblyRef)  'CompilationRelaxationsAttribute' (#1c3)  'System.Runtime.CompilerServices' (#31a)
+            var typeRef = reader.GetTypeReference(MetadataTokens.TypeReferenceHandle(4));
+            Assert.Equal("System.Runtime.CompilerServices", reader.GetString(typeRef.Namespace));
+
+            var strReader = reader.GetBlobReader(typeRef.Namespace);
+            Assert.Equal(Encoding.UTF8.GetBytes("System.Runtime.CompilerServices"), strReader.ReadBytes("System.Runtime.CompilerServices".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
+
+            var dotTerminated = typeRef.Namespace.WithDotTermination();
+            Assert.Equal("System", reader.GetString(dotTerminated));
+
+            strReader = reader.GetBlobReader(dotTerminated);
+            Assert.Equal(Encoding.UTF8.GetBytes("System"), strReader.ReadBytes("System".Length));
+            Assert.Equal(0, strReader.RemainingBytes);
         }
 
         /// <summary>
@@ -2047,6 +2144,20 @@ namespace System.Reflection.Metadata.Tests
             }
         }
 
+        [Fact]
+        public void GetCustomAttributes()
+        {
+            var reader = GetMetadataReader(Interop.Interop_Mock01);
+
+            var attributes1 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x02000006));
+            AssertEx.Equal(new[] { 0x16, 0x17, 0x18, 0x19 }, attributes1.Select(a => a.RowId));
+            Assert.Equal(4, attributes1.Count);
+
+            var attributes2 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x02000000));
+            AssertEx.Equal(new int[0], attributes2.Select(a => a.RowId));
+            Assert.Equal(0, attributes2.Count);
+        }
+
         /// <summary>
         /// MethodSemantics Table
         ///     Semantic (2-byte unsigned)
@@ -2317,6 +2428,22 @@ namespace System.Reflection.Metadata.Tests
 
             Assert.Equal("Class1", name);
             Assert.Equal(0, genericParams.Count);
+        }
+
+        [Fact]
+        public void GetCustomDebugInformation()
+        {
+            using (var provider = MetadataReaderProvider.FromPortablePdbStream(new MemoryStream(PortablePdbs.DocumentsPdb)))
+            {
+                var reader = provider.GetMetadataReader();
+                var cdi1 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x30000001));
+                AssertEx.Equal(new int[0], cdi1.Select(a => a.RowId));
+                Assert.Equal(0, cdi1.Count);
+
+                var cdi2 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x03000000));
+                AssertEx.Equal(new int[0], cdi2.Select(a => a.RowId));
+                Assert.Equal(0, cdi2.Count);
+            }
         }
 
         [Fact]
@@ -2623,13 +2750,13 @@ namespace System.Reflection.Metadata.Tests
                     offsetToModuleTable = offsetToMetadata + peReader.GetMetadataReader().GetTableMetadataOffset(TableIndex.Module);
 
                     // skip root header
-                    BlobReader blobReader = new BlobReader(metadata.Pointer, metadata.Length);
+                    BlobReader blobReader = metadata.GetReader();
                     blobReader.ReadUInt32(); // signature
                     blobReader.ReadUInt16(); // major version
                     blobReader.ReadUInt16(); // minor version
                     blobReader.ReadUInt32(); // reserved
                     int versionStringSize = blobReader.ReadInt32();
-                    blobReader.SkipBytes(versionStringSize);
+                    blobReader.Offset += versionStringSize;
 
                     // read stream headers to collect offsets and sizes to adjust later
                     blobReader.ReadUInt16(); // reserved

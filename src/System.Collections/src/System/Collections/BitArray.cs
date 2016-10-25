@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 
 namespace System.Collections
@@ -10,7 +11,8 @@ namespace System.Collections
     // A vector of bits.  Use this to store bits efficiently, without having to do bit 
     // shifting yourself.
     [System.Runtime.InteropServices.ComVisible(true)]
-    public sealed class BitArray : ICollection
+    [Serializable]
+    public sealed class BitArray : ICollection, ICloneable
     {
         private BitArray()
         {
@@ -90,8 +92,8 @@ namespace System.Collections
                 j += 4;
             }
 
-            Contract.Assert(bytes.Length - j >= 0, "BitArray byteLength problem");
-            Contract.Assert(bytes.Length - j < 4, "BitArray byteLength problem #2");
+            Debug.Assert(bytes.Length - j >= 0, "BitArray byteLength problem");
+            Debug.Assert(bytes.Length - j < 4, "BitArray byteLength problem #2");
 
             switch (bytes.Length - j)
             {
@@ -381,8 +383,7 @@ namespace System.Collections
             }
         }
 
-        // ICollection implementation
-        void ICollection.CopyTo(Array array, int index)
+        public void CopyTo(Array array, int index)
         {
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
@@ -395,19 +396,52 @@ namespace System.Collections
 
             Contract.EndContractBlock();
 
-            if (array is int[])
+            int[] intArray = array as int[];
+            if (intArray != null)
             {
-                Array.Copy(m_array, 0, array, index, GetArrayLength(m_length, BitsPerInt32));
+                int last = GetArrayLength(m_length, BitsPerInt32) - 1;
+                int extraBits = m_length % BitsPerInt32;
+
+                if (extraBits == 0)
+                {
+                    // we have perfect bit alignment, no need to sanitize, just copy
+                    Array.Copy(m_array, 0, intArray, index, GetArrayLength(m_length, BitsPerInt32));
+                }
+                else
+                {
+                    // do not copy the last int, as it is not completely used
+                    Array.Copy(m_array, 0, intArray, index, GetArrayLength(m_length, BitsPerInt32) - 1);
+
+                    // the last int needs to be masked
+                    intArray[last] = m_array[last] & ((1 << extraBits) - 1);
+                }
             }
             else if (array is byte[])
             {
+                int extraBits = m_length % BitsPerByte;
+
                 int arrayLength = GetArrayLength(m_length, BitsPerByte);
                 if ((array.Length - index) < arrayLength)
                     throw new ArgumentException(SR.Argument_InvalidOffLen);
 
+                if (extraBits > 0)
+                {
+                    // last byte is not aligned, we will directly copy one less byte
+                    arrayLength -= 1;
+                }
+
                 byte[] b = (byte[])array;
+
+                // copy all the perfectly-aligned bytes
                 for (int i = 0; i < arrayLength; i++)
                     b[index + i] = (byte)((m_array[i / 4] >> ((i % 4) * 8)) & 0x000000FF); // Shift to bring the required byte to LSB, then mask
+
+                if (extraBits > 0)
+                {
+                    // mask the final byte
+                    int i = arrayLength;
+                    b[index + i] = (byte)((m_array[i / 4] >> ((i % 4) * 8)) & ((1 << extraBits) - 1));
+                }
             }
             else if (array is bool[])
             {
@@ -422,7 +456,7 @@ namespace System.Collections
                 throw new ArgumentException(SR.Arg_BitArrayTypeUnsupported, nameof(array));
         }
 
-        int ICollection.Count
+        public int Count
         {
             get
             {
@@ -432,7 +466,7 @@ namespace System.Collections
             }
         }
 
-        object ICollection.SyncRoot
+        public Object SyncRoot
         {
             get
             {
@@ -444,12 +478,25 @@ namespace System.Collections
             }
         }
 
-        bool ICollection.IsSynchronized
+        public bool IsSynchronized
         {
             get
             {
                 return false;
             }
+        }
+
+        public bool IsReadOnly
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public object Clone()
+        {
+            return new BitArray(this);
         }
 
         public IEnumerator GetEnumerator()
@@ -479,11 +526,12 @@ namespace System.Collections
         /// <returns></returns>
         private static int GetArrayLength(int n, int div)
         {
-            Contract.Assert(div > 0, "GetArrayLength: div arg must be greater than 0");
+            Debug.Assert(div > 0, "GetArrayLength: div arg must be greater than 0");
             return n > 0 ? (((n - 1) / div) + 1) : 0;
         }
 
-        private class BitArrayEnumeratorSimple : IEnumerator
+        [Serializable]
+        private class BitArrayEnumeratorSimple : IEnumerator, ICloneable
         {
             private BitArray bitarray;
             private int index;
@@ -540,6 +588,7 @@ namespace System.Collections
         private int[] m_array;
         private int m_length;
         private int _version;
+        [NonSerialized]
         private object _syncRoot;
 
         private const int _ShrinkThreshold = 256;

@@ -12,10 +12,10 @@ namespace System.Runtime.Serialization
     using System.Xml;
     using DataContractDictionary = System.Collections.Generic.Dictionary<System.Xml.XmlQualifiedName, DataContract>;
     using System.Security;
-    using XmlSchemaType = System.Object;
     using System.Text.RegularExpressions;
     using System.Runtime.CompilerServices;
     using System.Linq;
+    using Xml.Schema;
 
 #if USE_REFEMIT || NET_NATIVE
     public abstract class DataContract
@@ -36,7 +36,6 @@ namespace System.Runtime.Serialization
         /// </SecurityNote>
         private XmlDictionaryString _ns;
 
-#if NET_NATIVE
         // this the global dictionary for data contracts introduced for multi-file.
         private static Dictionary<Type, DataContract> s_dataContracts = new Dictionary<Type, DataContract>();
 
@@ -44,7 +43,6 @@ namespace System.Runtime.Serialization
         {
             return s_dataContracts;
         }
-#endif
 
         [SecurityCritical]
         /// <SecurityNote>
@@ -66,7 +64,6 @@ namespace System.Runtime.Serialization
             _ns = helper.Namespace;
         }
 
-#if NET_NATIVE
         private static DataContract GetGeneratedDataContract(Type type)
         {
             // this method used to be rewritten by an IL transform
@@ -83,6 +80,11 @@ namespace System.Runtime.Serialization
 
         internal static DataContract GetDataContractFromGeneratedAssembly(Type type)
         {
+#if NET_NATIVE
+            if (DataContractSerializer.Option == SerializationOption.ReflectionOnly)
+            {
+                return null;
+            }
             DataContract dataContract = GetGeneratedDataContract(type);
             if (dataContract == null)
             {
@@ -93,19 +95,23 @@ namespace System.Runtime.Serialization
                 }
                 if (dataContract == null)
                 {
-                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, type.ToString()));
+                    if (DataContractSerializer.Option == SerializationOption.CodeGenOnly)
+                    {
+                        throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, type.ToString()));
+                    }
                 }
             }
             return dataContract;
-        }
+#else
+            return null;
 #endif
+        }
 
-#if !NET_NATIVE
         internal MethodInfo ParseMethod
         {
             get { return _helper.ParseMethod; }
         }
-#endif
+
         internal static DataContract GetDataContract(Type type)
         {
             return GetDataContract(type.TypeHandle, type);
@@ -268,7 +274,11 @@ namespace System.Runtime.Serialization
             set { _helper.UnderlyingType = value; }
         }
 
-        public Type OriginalUnderlyingType { get; set; }
+        public Type OriginalUnderlyingType
+        {
+            get { return _helper.OriginalUnderlyingType; }
+            set { _helper.OriginalUnderlyingType = value; }
+        }
 
         public virtual bool IsBuiltInDataContract
         {
@@ -310,6 +320,16 @@ namespace System.Runtime.Serialization
         }
 
         public virtual object ReadXmlValue(XmlReaderDelegator xmlReader, XmlObjectSerializerReadContext context)
+        {
+            throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.UnexpectedContractType, DataContract.GetClrTypeFullName(this.GetType()), DataContract.GetClrTypeFullName(UnderlyingType))));
+        }
+
+        public virtual void WriteXmlElement(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context, XmlDictionaryString name, XmlDictionaryString ns)
+        {
+            throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.UnexpectedContractType, DataContract.GetClrTypeFullName(this.GetType()), DataContract.GetClrTypeFullName(UnderlyingType))));
+        }
+
+        public virtual object ReadXmlElement(XmlReaderDelegator xmlReader, XmlObjectSerializerReadContext context)
         {
             throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(SR.Format(SR.UnexpectedContractType, DataContract.GetClrTypeFullName(this.GetType()), DataContract.GetClrTypeFullName(UnderlyingType))));
         }
@@ -522,16 +542,15 @@ namespace System.Runtime.Serialization
             private static object s_clrTypeStringsLock = new object();
 
             private Type _underlyingType;
+            private Type _originalUnderlyingType;
             private bool _isReference;
             private bool _isValueType;
             private XmlQualifiedName _stableName;
             private XmlDictionaryString _name;
             private XmlDictionaryString _ns;
 
-#if !NET_NATIVE
             private MethodInfo _parseMethod;
             private bool _parseMethodSet;
-#endif
 
             /// <SecurityNote>
             /// Critical - in deserialization, we initialize an object instance passing this Type to GetUninitializedObject method
@@ -660,11 +679,19 @@ namespace System.Runtime.Serialization
                         {
                             if (type == null)
                                 type = Type.GetTypeFromHandle(typeHandle);
-#if !NET_NATIVE
+
                             type = UnwrapNullableType(type);
-#endif
+                            var originalType = type;
+
+                            type = GetDataContractAdapterTypeForGeneratedAssembly(type);
+                            dataContract = DataContract.GetDataContractFromGeneratedAssembly(type);
+                            if (dataContract != null)
+                            {
+                                AssignDataContractToId(dataContract, id);
+                                return dataContract;
+                            }
+
                             type = GetDataContractAdapterType(type);
-#if !NET_NATIVE
                             dataContract = GetBuiltInDataContract(type);
                             if (dataContract == null)
                             {
@@ -690,15 +717,18 @@ namespace System.Runtime.Serialization
                                             ThrowInvalidDataContractException(SR.Format(SR.TypeNotSerializable, type), type);
                                         }
                                         dataContract = new ClassDataContract(type);
+                                        if (type != originalType)
+                                        {
+                                            var originalDataContract = new ClassDataContract(originalType);
+                                            if (dataContract.StableName != originalDataContract.StableName)
+                                            {
+                                                // for non-DC types, type adapters will not have the same stable name (contract name).
+                                                dataContract.StableName = originalDataContract.StableName;
+                                            }
+                                        }
                                     }
                                 }
                             }
-#else
-                            dataContract = DataContract.GetDataContractFromGeneratedAssembly(type);
-#endif
-#if NET_NATIVE
-                            AssignDataContractToId(dataContract, id);
-#endif
                         }
                     }
                 }
@@ -742,6 +772,19 @@ namespace System.Runtime.Serialization
                 return dataContract;
             }
 
+            // This method returns adapter types used to get DataContract from
+            // generated assembly. 
+            private static Type GetDataContractAdapterTypeForGeneratedAssembly(Type type)
+            {
+                if (type == Globals.TypeOfDateTimeOffset)
+                {
+                    return Globals.TypeOfDateTimeOffsetAdapter;
+                }
+
+                return type;
+            }
+
+            // This method returns adapter types used at runtime to create DataContract.
             internal static Type GetDataContractAdapterType(Type type)
             {
                 // Replace the DataTimeOffset ISerializable type passed in with the internal DateTimeOffsetAdapter DataContract type.
@@ -751,15 +794,23 @@ namespace System.Runtime.Serialization
                 {
                     return Globals.TypeOfDateTimeOffsetAdapter;
                 }
-#if !NET_NATIVE
                 if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == Globals.TypeOfKeyValuePair)
                 {
                     return Globals.TypeOfKeyValuePairAdapter.MakeGenericType(type.GetGenericArguments());
                 }
-#endif
                 return type;
             }
 
+            // Maps adapted types back to the original type
+            // Any change to this method should be reflected in GetDataContractAdapterType
+            internal static Type GetDataContractOriginalType(Type type)
+            {
+                if (type == Globals.TypeOfDateTimeOffsetAdapter)
+                {
+                    return Globals.TypeOfDateTimeOffset;
+                }
+                return type;
+            }
             private static RuntimeTypeHandle GetDataContractAdapterTypeHandle(RuntimeTypeHandle typeHandle)
             {
                 if (Globals.TypeOfDateTimeOffset.TypeHandle.Equals(typeHandle))
@@ -1061,6 +1112,21 @@ namespace System.Runtime.Serialization
                 set { _underlyingType = value; }
             }
 
+            internal Type OriginalUnderlyingType
+            {
+                get
+                {
+                    if (_originalUnderlyingType == null)
+                    {
+                        _originalUnderlyingType = GetDataContractOriginalType(this._underlyingType);
+                    }
+                    return _originalUnderlyingType;
+                }
+                set
+                {
+                    _originalUnderlyingType = value;
+                }
+            }
             internal virtual bool IsBuiltInDataContract
             {
                 get
@@ -1159,7 +1225,6 @@ namespace System.Runtime.Serialization
                 get { return false; }
             }
 
-#if !NET_NATIVE
             internal MethodInfo ParseMethod
             {
                 get
@@ -1178,7 +1243,6 @@ namespace System.Runtime.Serialization
                     return _parseMethod;
                 }
             }
-#endif
 
             internal virtual void WriteRootElement(XmlWriterDelegator writer, XmlDictionaryString name, XmlDictionaryString ns)
             {

@@ -29,24 +29,36 @@ namespace System.Net.NetworkInformation
         public unsafe static NetworkInterface[] GetLinuxNetworkInterfaces()
         {
             Dictionary<string, LinuxNetworkInterface> interfacesByName = new Dictionary<string, LinuxNetworkInterface>();
-            Interop.Sys.EnumerateInterfaceAddresses(
-                (name, ipAddr, maskAddr) =>
+            const int MaxTries = 3;
+            for (int attempt = 0; attempt < MaxTries; attempt++)
+            {
+                int result = Interop.Sys.EnumerateInterfaceAddresses(
+                    (name, ipAddr, maskAddr) =>
+                    {
+                        LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
+                        lni.ProcessIpv4Address(ipAddr, maskAddr);
+                    },
+                    (name, ipAddr, scopeId) =>
+                    {
+                        LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
+                        lni.ProcessIpv6Address( ipAddr, *scopeId);
+                    },
+                    (name, llAddr) =>
+                    {
+                        LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
+                        lni.ProcessLinkLayerAddress(llAddr);
+                    });
+                if (result == 0)
                 {
-                    LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
-                    lni.ProcessIpv4Address(ipAddr, maskAddr);
-                },
-                (name, ipAddr, scopeId) =>
+                    return interfacesByName.Values.ToArray();
+                }
+                else
                 {
-                    LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
-                    lni.ProcessIpv6Address( ipAddr, *scopeId);
-                },
-                (name, llAddr) =>
-                {
-                    LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name);
-                    lni.ProcessLinkLayerAddress(llAddr);
-                });
+                    interfacesByName.Clear();
+                }
+            }
 
-            return interfacesByName.Values.ToArray();
+            throw new NetworkInformationException(SR.net_PInvokeError);
         }
 
         /// <summary>
@@ -111,6 +123,11 @@ namespace System.Net.NetworkInformation
         public override IPInterfaceStatistics GetIPStatistics()
         {
             return new LinuxIPInterfaceStatistics(_name);
+        }
+
+        public override IPv4InterfaceStatistics GetIPv4Statistics()
+        {
+            return new LinuxIPv4InterfaceStatistics(_name);
         }
 
         public override OperationalStatus OperationalStatus { get { return _operationalStatus; } }

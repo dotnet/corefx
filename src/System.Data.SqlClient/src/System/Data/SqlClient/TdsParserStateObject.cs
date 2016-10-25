@@ -1957,7 +1957,7 @@ namespace System.Data.SqlClient
                 Debug.Assert(_longlenleft == 0);
                 if (buff == null)
                 {
-                    buff = new byte[0];
+                    buff = Array.Empty<byte>();
                 }
 
                 AssertValidState();
@@ -4194,7 +4194,7 @@ namespace System.Data.SqlClient
 
             internal void PushBuffer(byte[] buffer, int read)
             {
-                Debug.Assert(!_snapshotInBuffs.Any(b => object.ReferenceEquals(b, buffer)));
+                Debug.Assert(!_snapshotInBuffs.Any(b => object.ReferenceEquals(b.Buffer, buffer)));
 
                 PacketData packetData = new PacketData();
                 packetData.Buffer = buffer;

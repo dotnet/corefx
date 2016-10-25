@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'=='' AND '$(TargetGroup)' == ''">Windows_Debug</Configuration>
   </PropertyGroup>
@@ -7,13 +7,15 @@
   <PropertyGroup>
     <ProjectGuid>{879C23DC-D828-4DFB-8E92-ABBC11B71035}</ProjectGuid>
     <AssemblyName>System.IO.FileSystem</AssemblyName>
-    <AssemblyVersion>4.0.2.0</AssemblyVersion>
+    <!--
+      Disabling APICompat for the older builds because we are hitting
+      bug https://github.com/dotnet/buildtools/issues/1056
+    -->
+    <RunApiCompat Condition="'$(AssemblyVersion)'=='4.0.2.0'">false</RunApiCompat>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <EnableWinRT Condition="'$(PackageTargetFramework)' == 'netcore50'">true</EnableWinRT>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
-    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net46'">None</ResourcesSourceOutputDirectory>
-    <PackageTargetFramework Condition="'$(PackageTargetFramework)' == ''">netstandard1.3</PackageTargetFramework>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
+    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net463'">None</ResourcesSourceOutputDirectory>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsUnix)' == 'true'">
     <NoWarn>$(NoWarn);414</NoWarn>
@@ -27,15 +29,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
   <ItemGroup Condition="'$(EnableWinRT)' == 'true'">
     <TargetingPackReference Include="Windows" />
     <ProjectReference Include="$(SourceDir)/mscorlib.WinRT-Facade/mscorlib.WinRT-Facade.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
     <Compile Include="System\IO\Error.cs" />
     <Compile Include="System\IO\Directory.cs" />
     <Compile Include="System\IO\DirectoryInfo.cs" />
@@ -43,7 +43,6 @@
     <Compile Include="System\IO\FileInfo.cs" />
     <Compile Include="System\IO\FileOptions.cs" />
     <Compile Include="System\IO\FileStream.cs" />
-    <Compile Include="System\IO\FileStreamBase.cs" />
     <Compile Include="System\IO\FileSystem.cs" />
     <Compile Include="System\IO\FileSystemInfo.cs" />
     <Compile Include="System\IO\IFileSystemObject.cs" />
@@ -53,6 +52,9 @@
     <Compile Include="System\IO\ReadLinesIterator.cs" />
     <Compile Include="System\IO\SearchOption.cs" />
     <Compile Include="System\IO\SearchTarget.cs" />
+    <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
+      <Link>Common\System\Collections\Generic\ArrayBuilder.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
       <Link>Common\System\Collections\Generic\EnumerableHelpers.cs</Link>
     </Compile>
@@ -65,18 +67,30 @@
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitivity.cs">
       <Link>Common\System\IO\PathInternal.CaseSensitivity.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.ArrayPoolCopy.cs">
+      <Link>Common\System\IO\StreamHelpers.ArrayPoolCopy.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.CopyValidation.cs">
+      <Link>Common\System\IO\StreamHelpers.CopyValidation.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- .NET Standard 1.7 -->
+  <ItemGroup Condition="'$(TargetGroup)' == ''">
+    <Compile Include="System\IO\FileStream.NetStandard17.cs" />
   </ItemGroup>
   <!-- Windows -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'net463'">
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs" />
     <Compile Include="System\IO\DirectoryInfo.Windows.cs" />
     <Compile Include="System\IO\FileInfo.Windows.cs" />
-    <Compile Include="System\IO\FileStream.Win32.cs" />
     <Compile Include="System\IO\FileSystemInfo.Windows.cs" />
     <Compile Include="System\IO\PathHelpers.Windows.cs" />
-    <Compile Include="System\IO\Win32FileStream.cs" />
-    <Compile Include="System\IO\Win32FileStreamCompletionSource.cs" />
+    <Compile Include="System\IO\FileStream.Win32.cs" />
+    <Compile Include="System\IO\FileStreamCompletionSource.Win32.cs" />
     <Compile Include="System\IO\Win32FileSystem.cs" />
     <Compile Include="System\IO\Win32FileSystemEnumerable.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
@@ -196,14 +210,23 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SafeCreateFile.cs">
       <Link>Common\Interop\Windows\Interop.SafeCreateFile.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.ReplaceFile.cs">
+      <Link>Common\Interop\Windows\Interop.ReplaceFile.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Windows : Win32 only -->
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' != 'true' And '$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(EnableWinRT)' != 'true' and '$(TargetGroup)' != 'net463'">
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.UnsafeCreateFile.cs">
       <Link>Common\Interop\Windows\Interop.UnsafeCreateFile.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CopyFile.cs">
       <Link>Common\Interop\Windows\Interop.CopyFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.GetLogicalDrive.cs">
+      <Link>Common\Interop\Windows\Interop.GetLogicalDrive.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Win32.cs">
+      <Link>Common\System\IO\DriveInfoInternal.Win32.cs</Link>
     </Compile>
     <Compile Include="System\IO\FileSystem.Current.Win32.cs" />
     <Compile Include="System\IO\FileSystemInfo.Win32.cs" />
@@ -216,23 +239,32 @@
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.DeleteVolumeMountPoint.cs">
       <Link>Common\Interop\Windows\Interop.DeleteVolumeMountPoint.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.LockFile.cs">
+      <Link>Common\Interop\Windows\Interop.LockFile.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetErrorMode.cs">
       <Link>Common\Interop\Windows\Interop.SetErrorMode.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- Windows : Win32 + WinRT -->
+  <!-- Windows : UAP - Win32 + WinRT -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\WinRT\Interop.UnsafeCreateFile.cs">
-      <Link>Common\Interop\Windows\WinRT\Interop.UnsafeCreateFile.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.UnsafeCreateFile.Uap.cs">
+      <Link>Common\Interop\Windows\Interop.UnsafeCreateFile.Uap.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\WinRT\Interop.CopyFile.cs">
-      <Link>Common\Interop\Windows\WinRT\Interop.CopyFile.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CopyFile.Uap.cs">
+      <Link>Common\Interop\Windows\Interop.CopyFile.Uap.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\WinRT\Interop.DeleteVolumeMountPoint.cs">
-      <Link>Common\Interop\Windows\WinRT\Interop.DeleteVolumeMountPoint.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.DeleteVolumeMountPoint.Uap.cs">
+      <Link>Common\Interop\Windows\Interop.DeleteVolumeMountPoint.Uap.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\mincore\WinRT\Interop.SetErrorMode.cs">
-      <Link>Common\Interop\Windows\WinRT\Interop.SetErrorMode.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.LockFile.Uap.cs">
+      <Link>Common\Interop\Windows\Interop.LockFile.Uap.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.SetErrorMode.Uap.cs">
+      <Link>Common\Interop\Windows\Interop.SetErrorMode.Uap.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Uap.cs">
+      <Link>Common\System\IO\DriveInfoInternal.Uap.cs</Link>
     </Compile>
     <Compile Include="System\IO\FileSystem.Current.MuxWin32WinRT.cs" />
     <Compile Include="System\IO\FileSystemInfo.WinRT.cs" />
@@ -242,24 +274,20 @@
     <Compile Include="System\IO\WinRTFileSystem.cs" />
     <Compile Include="System\IO\WinRTFileSystemObject.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CopyFile2.cs">
-      <Link>Common\Interop\Windows\WinRT\Interop.CopyFile2.cs</Link>
+      <Link>Common\Interop\Windows\Interop.CopyFile2.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\mincore\Interop.CreateFile2.cs">
-      <Link>Common\Interop\Windows\WinRT\Interop.CreateFile2.cs</Link>
+      <Link>Common\Interop\Windows\Interop.CreateFile2.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Unix -->
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Compile Include="Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs" />
-    <Compile Include="System\IO\FileStream.Unix.cs" />
     <Compile Include="System\IO\FileSystem.Current.Unix.cs" />
     <Compile Include="System\IO\FileSystemInfo.Unix.cs" />
     <Compile Include="System\IO\PathHelpers.Unix.cs" />
-    <Compile Include="System\IO\UnixFileStream.cs" />
+    <Compile Include="System\IO\FileStream.Unix.cs" />
     <Compile Include="System\IO\UnixFileSystem.cs" />
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeFileHandle.Unix.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
@@ -311,9 +339,6 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
       <Link>Common\Interop\Unix\Interop.Stat.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
-      <Link>Common\System\IO\PathInternal.Unix.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ReadDir.cs">
       <Link>Common\Interop\Unix\Interop.ReadDir.cs</Link>
     </Compile>
@@ -338,6 +363,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Link.cs">
       <Link>Common\Interop\Unix\Interop.Link.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MountPoints.cs">
+      <Link>Common\Interop\Unix\Interop.MountPoints.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PosixFAdvise.cs">
       <Link>Common\Interop\Unix\Interop.PosixFAdvise.cs</Link>
     </Compile>
@@ -359,8 +387,14 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeDirectoryHandle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeDirectoryHandle.Unix.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\IO\PathInternal.Unix.cs">
+      <Link>Common\System\IO\PathInternal.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\DriveInfoInternal.Unix.cs">
+      <Link>Common\System\IO\DriveInfoInternal.Unix.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
     <TargetingPackReference Include="mscorlib" />
   </ItemGroup>
   <ItemGroup>

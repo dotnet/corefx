@@ -10,13 +10,8 @@ namespace System.ComponentModel
     /// <summary>
     ///    <para>Provides a description of a property.</para>
     /// </summary>
-#if NETSTANDARD10
-    public abstract class PropertyDescriptor
-#else
     public abstract class PropertyDescriptor : MemberDescriptor
-#endif
     {
-#if !NETSTANDARD10
         private TypeConverter _converter = null;
         private Hashtable _valueChangedHandlers;
         private object[] _editors;
@@ -200,9 +195,9 @@ namespace System.ComponentModel
                 // of an instanceof call.
                 PropertyDescriptor pd = obj as PropertyDescriptor;
 
-                if (pd != null && pd.NameHashCode == this.NameHashCode
-                    && pd.PropertyType == this.PropertyType
-                    && pd.Name.Equals(this.Name))
+                if (pd != null && pd.NameHashCode == NameHashCode
+                    && pd.PropertyType == PropertyType
+                    && pd.Name.Equals(Name))
                 {
                     return true;
                 }
@@ -247,7 +242,6 @@ namespace System.ComponentModel
             base.FillAttributes(attributeList);
         }
 
-        /// <include file='doc\PropertyDescriptor.uex' path='docs/doc[@for="PropertyDescriptor.GetChildProperties"]/*' />
         /// <summary>
         ///    <para>[To be supplied.]</para>
         /// </summary>
@@ -380,7 +374,7 @@ namespace System.ComponentModel
         /// </summary>
         public override int GetHashCode()
         {
-            return this.NameHashCode ^ PropertyType.GetHashCode();
+            return NameHashCode ^ PropertyType.GetHashCode();
         }
 
         /// <summary>
@@ -532,6 +526,5 @@ namespace System.ComponentModel
                 return false;
             }
         }
-#endif // NETSTANDARD10
     }
 }

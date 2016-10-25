@@ -2,15 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace System.Net.WebSockets
 {
+    [Serializable]
     public sealed class WebSocketException : Win32Exception
     {
         private readonly WebSocketError _webSocketErrorCode;
+
+        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
+           Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
+        public WebSocketException()
+            : this(Marshal.GetLastWin32Error())
+        {
+        }
 
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands",
             Justification = "This ctor is harmless, because it does not pass arbitrary data into the native code.")]
@@ -114,7 +123,23 @@ namespace System.Net.WebSockets
         {
         }
 
-        public int ErrorCode
+        private WebSocketException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
+            _webSocketErrorCode = (WebSocketError)serializationInfo.GetInt32(nameof(WebSocketErrorCode));
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info));
+            }
+            info.AddValue(nameof(WebSocketErrorCode), (int)_webSocketErrorCode);
+            base.GetObjectData(info, context);
+        }
+
+        public override int ErrorCode
         {
             get
             {
@@ -162,7 +187,10 @@ namespace System.Net.WebSockets
         // as the Exception..ctor() throws on setting HResult to 0. The default for HResult is -2147467259.
         private void SetErrorCodeOnError(int nativeError)
         {
-            HResult = nativeError;
+            if (!Succeeded(nativeError))
+            {
+                HResult = nativeError;
+            }
         }
 
         private static bool Succeeded(int hr)

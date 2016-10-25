@@ -12,6 +12,7 @@ function usage {
     echo '    --emulatorPath=/opt/linux-arm-emulator'
     echo '    --mountPath=/opt/linux-arm-emulator-root'
     echo '    --buildConfig=Release'
+    echo '    --softfp'
     echo '    --verbose'
     echo ''
     echo 'Required Arguments:'
@@ -22,6 +23,7 @@ function usage {
     echo '    --buildConfig=<config>             : The value of config should be either Debug or Release'
     echo '                                         Any other value is not accepted'
     echo 'Optional Arguments:'
+    echo '    --softfp                           : Build as arm-softfp'
     echo '    -v --verbose                       : Build made verbose'
     echo '    -h --help                          : Prints this usage message and exits'
     echo ''
@@ -78,7 +80,15 @@ function check_git_head {
 function unmount_rootfs {
     local rootfsFolder="$1"
 
-    if grep -qs "$rootfsFolder" /proc/mounts; then
+    #Check if there are any open files in this directory.
+    if [ -d $rootfsFolder ]; then
+        #If we find information about the file
+        if sudo lsof +D $rootfsFolder; then
+            (set +x; echo 'See above for lsof information. Continuing with the build.')
+        fi
+    fi
+
+    if mountpoint -q -- "$rootfsFolder"; then
         sudo umount "$rootfsFolder"
     fi
 }
@@ -98,9 +108,6 @@ function unmount_emulator {
 
 #Clean the changes made to the environment by the script
 function clean_env {
-    #Unmount the emulator
-    unmount_emulator
-
     #Check for revert of git changes
     check_git_head
 }
@@ -111,11 +118,34 @@ function handle_ctrl_c {
 
     echo 'ERROR: Ctrl-C handled. Script aborted before complete execution.'
 
-    clean_env
-
     exit 1
 }
 trap handle_ctrl_c INT
+
+#Trap Exit and handle it
+ function handle_exit {
+    set +x
+
+    echo 'The script is exited. Cleaning environment..'
+
+    clean_env
+ }
+trap handle_exit EXIT
+
+#Mount with checking to be already existed
+function mount_with_checking {
+    set +x
+    local options="$1"
+    local from="$2"
+    local rootfsFolder="$3"
+
+    if mountpoint -q -- "$rootfsFolder"; then
+        (set +x; echo "$rootfsFolder is already mounted.")
+    else {
+        (set -x; sudo mount $options "$from" "$rootfsFolder")
+    }
+    fi
+}
 
 #Mount emulator to the target mount path
 function mount_emulator {
@@ -124,15 +154,13 @@ function mount_emulator {
         sudo mkdir "$__ARMRootfsMountPath"
     fi
 
-    #Unmount the emulator if already mounted at the mount path and mount again
-    unmount_emulator
-
-    sudo mount "$__ARMEmulPath"/platform/rootfs-t30.ext4 "$__ARMRootfsMountPath"
-    sudo mount -t proc /proc    "$__ARMRootfsMountPath"/proc
-    sudo mount -o bind /dev/    "$__ARMRootfsMountPath"/dev
-    sudo mount -o bind /dev/pts "$__ARMRootfsMountPath"/dev/pts
-    sudo mount -t tmpfs shm     "$__ARMRootfsMountPath"/run/shm
-    sudo mount -o bind /sys     "$__ARMRootfsMountPath"/sys
+    set +x
+    mount_with_checking "" "$__ARMEmulPath/platform/$__ARMRootfsImageBase" "$__ARMRootfsMountPath"
+    mount_with_checking "-t proc" "/proc"    "$__ARMRootfsMountPath/proc"
+    mount_with_checking "-o bind" "/dev/"    "$__ARMRootfsMountPath/dev"
+    mount_with_checking "-o bind" "/dev/pts" "$__ARMRootfsMountPath/dev/pts"
+    mount_with_checking "-t tmpfs" "shm"     "$__ARMRootfsMountPath/run/shm"
+    mount_with_checking "-o bind" "/sys"     "$__ARMRootfsMountPath/sys"
 }
 
 #Cross builds corefx
@@ -146,7 +174,8 @@ function cross_build_corefx {
     git am < "$__ARMRootfsMountPath"/dotnet/setenv/corefx_cross.patch
 
     #Cross building for emulator rootfs
-    ROOTFS_DIR="$__ARMRootfsMountPath" CPLUS_INCLUDE_PATH=$LINUX_ARM_INCPATH CXXFLAGS=$LINUX_ARM_CXXFLAGS ./build.sh $__buildArch clean cross $__verboseFlag $__buildConfig skiptests
+    ROOTFS_DIR="$__ARMRootfsMountPath" CPLUS_INCLUDE_PATH=$LINUX_ARM_INCPATH CXXFLAGS=$LINUX_ARM_CXXFLAGS ./build-native.sh -buildArch=$__buildArch -$__buildConfig -- cross $__verboseFlag
+    ROOTFS_DIR="$__ARMRootfsMountPath" CPLUS_INCLUDE_PATH=$LINUX_ARM_INCPATH CXXFLAGS=$LINUX_ARM_CXXFLAGS ./build-managed.sh -$__buildConfig -skipTests
 
     #Reset the code to the upstream version
     (set +x; echo 'Rewinding HEAD to master code')
@@ -155,10 +184,11 @@ function cross_build_corefx {
 
 #Define script variables
 __ARMEmulPath=
+__ARMRootfsImageBase="rootfs-u1404.ext4"
 __ARMRootfsMountPath=
 __buildConfig=
 __verboseFlag=
-__buildArch="arm-softfp"
+__buildArch="arm"
 __initialGitHead=`git rev-parse --verify HEAD`
 
 #Parse command line arguments
@@ -176,6 +206,10 @@ do
         if [[ "$__buildConfig" != "debug" && "$__buildConfig" != "release" ]]; then
             exit_with_error "--buildConfig can be only Debug or Release" true
         fi
+        ;;
+    --softfp)
+        __ARMRootfsImageBase="rootfs-t30.ext4"
+        __buildArch="arm-softfp"
         ;;
     -v|--verbose)
         __verboseFlag="verbose"
@@ -201,7 +235,7 @@ fi
 exit_if_empty "$__ARMEmulPath" "--emulatorPath is a mandatory argument, not provided" true
 exit_if_empty "$__ARMRootfsMountPath" "--mountPath is a mandatory argument, not provided" true
 exit_if_empty "$__buildConfig" "--buildConfig is a mandatory argument, not provided" true
-exit_if_path_absent "$__ARMEmulPath/platform/rootfs-t30.ext4" "Path specified in --emulatorPath does not have the rootfs" false
+exit_if_path_absent "$__ARMEmulPath/platform/$__ARMRootfsImageBase" "Path specified in --emulatorPath does not have the rootfs" false
 
 set -x
 set -e

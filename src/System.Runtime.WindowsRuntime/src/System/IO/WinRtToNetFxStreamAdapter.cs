@@ -60,12 +60,12 @@ namespace System.IO
 
         private WinRtToNetFxStreamAdapter(Object winRtStream, bool canRead, bool canWrite, bool canSeek)
         {
-            Contract.Requires(winRtStream != null);
-            Contract.Requires(winRtStream is IInputStream || winRtStream is IOutputStream || winRtStream is IRandomAccessStream);
+            Debug.Assert(winRtStream != null);
+            Debug.Assert(winRtStream is IInputStream || winRtStream is IOutputStream || winRtStream is IRandomAccessStream);
 
-            Contract.Requires((canSeek && (winRtStream is IRandomAccessStream)) || (!canSeek && !(winRtStream is IRandomAccessStream)));
+            Debug.Assert((canSeek && (winRtStream is IRandomAccessStream)) || (!canSeek && !(winRtStream is IRandomAccessStream)));
 
-            Contract.Requires((canRead && (winRtStream is IInputStream))
+            Debug.Assert((canRead && (winRtStream is IInputStream))
                                  ||
                                (!canRead && (
                                     !(winRtStream is IInputStream)
@@ -74,7 +74,7 @@ namespace System.IO
                                ))
                              );
 
-            Contract.Requires((canWrite && (winRtStream is IOutputStream))
+            Debug.Assert((canWrite && (winRtStream is IOutputStream))
                                  ||
                                (!canWrite && (
                                     !(winRtStream is IOutputStream)
@@ -479,11 +479,7 @@ namespace System.IO
             return asyncResult;
         }
 
-#if netstandard
         public override Int32 EndRead(IAsyncResult asyncResult)
-#else
-        public Int32 EndRead(IAsyncResult asyncResult)
-#endif
         {
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
@@ -556,7 +552,7 @@ namespace System.IO
         }
 
 
-        public override Int32 Read([In, Out] Byte[] buffer, Int32 offset, Int32 count)
+        public override Int32 Read(Byte[] buffer, Int32 offset, Int32 count)
         {
             // Arguments validation and not-disposed validation are done in BeginRead.
 
@@ -589,11 +585,7 @@ namespace System.IO
         #region Writing
 
 
-#if netstandard
         public override IAsyncResult BeginWrite(Byte[] buffer, Int32 offset, Int32 count, AsyncCallback callback, Object state)
-#else
-        public IAsyncResult BeginWrite(Byte[] buffer, Int32 offset, Int32 count, AsyncCallback callback, Object state)
-#endif
         {
             return BeginWrite(buffer, offset, count, callback, state, usedByBlockingWrapper: false);
         }
@@ -640,11 +632,7 @@ namespace System.IO
             return asyncResult;
         }
 
-#if netstandard
         public override void EndWrite(IAsyncResult asyncResult)
-#else
-        public void EndWrite(IAsyncResult asyncResult)
-#endif
         {
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
@@ -814,11 +802,11 @@ namespace System.IO
 
         private async Task<Int32> ReadAsyncInternal(Byte[] buffer, Int32 offset, Int32 count, CancellationToken cancellationToken)
         {
-            Contract.Requires(buffer != null);
-            Contract.Requires(offset >= 0);
-            Contract.Requires(count >= 0);
-            Contract.Requires(buffer.Length - offset >= count);
-            Contract.Requires(_canRead);
+            Debug.Assert(buffer != null);
+            Debug.Assert(offset >= 0);
+            Debug.Assert(count >= 0);
+            Debug.Assert(buffer.Length - offset >= count);
+            Debug.Assert(_canRead);
 
             IInputStream wrtStr = EnsureNotDisposed<IInputStream>();
 

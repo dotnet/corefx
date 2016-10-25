@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace System.IO
 {
     // This class implements a text reader that reads from a string.
-    //
+    [Serializable]
     public class StringReader : TextReader
     {
         private string _s;
@@ -23,9 +23,13 @@ namespace System.IO
             }
 
             _s = s;
-            _length = s == null ? 0 : s.Length;
+            _length = s.Length;
         }
 
+        public override void Close()
+        {
+            Dispose(true);
+        }
 
         protected override void Dispose(bool disposing)
         {

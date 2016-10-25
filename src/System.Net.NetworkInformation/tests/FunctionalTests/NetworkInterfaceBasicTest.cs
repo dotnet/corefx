@@ -20,14 +20,14 @@ namespace System.Net.NetworkInformation.Tests
             _log = TestLogging.GetInstance();
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void BasicTest_GetNetworkInterfaces_AtLeastOne()
         {
             Assert.NotEqual<int>(0, NetworkInterface.GetAllNetworkInterfaces().Length);
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BasicTest_AccessInstanceProperties_NoExceptions()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -51,7 +51,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux)]
+        [PlatformSpecific(TestPlatforms.Linux)]
         public void BasicTest_AccessInstanceProperties_NoExceptions_Linux()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -71,7 +71,7 @@ namespace System.Net.NetworkInformation.Tests
                 try
                 {
                     _log.WriteLine("Speed: " + nic.Speed);
-                    Assert.InRange(nic.Speed, 0, long.MaxValue);
+                    Assert.InRange(nic.Speed, -1, long.MaxValue);
                 }
                 // We cannot guarantee this works on all devices.
                 catch (PlatformNotSupportedException pnse)
@@ -85,7 +85,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX)]
         public void BasicTest_AccessInstanceProperties_NoExceptions_Osx()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -108,7 +108,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv4", "true")]
         public void BasicTest_StaticLoopbackIndex_MatchesLoopbackNetworkInterface()
         {
@@ -130,7 +130,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv4", "true")]
         public void BasicTest_StaticLoopbackIndex_ExceptionIfV4NotSupported()
         {
@@ -139,7 +139,7 @@ namespace System.Net.NetworkInformation.Tests
             _log.WriteLine("Loopback IPv4 index: " + NetworkInterface.LoopbackInterfaceIndex);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv6", "true")]
         public void BasicTest_StaticIPv6LoopbackIndex_MatchesLoopbackNetworkInterface()
         {
@@ -163,7 +163,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv6", "true")]
         public void BasicTest_StaticIPv6LoopbackIndex_ExceptionIfV6NotSupported()
         {
@@ -172,10 +172,9 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BasicTest_GetIPInterfaceStatistics_Success()
         {
-            // This API is not actually IPv4 specific.
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
             {
                 IPInterfaceStatistics stats = nic.GetIPStatistics();
@@ -197,10 +196,9 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Linux)]
+        [PlatformSpecific(TestPlatforms.Linux)]
         public void BasicTest_GetIPInterfaceStatistics_Success_Linux()
         {
-            // This API is not actually IPv4 specific.
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
             {
                 IPInterfaceStatistics stats = nic.GetIPStatistics();
@@ -222,10 +220,9 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX)]
         public void BasicTest_GetIPInterfaceStatistics_Success_OSX()
         {
-            // This API is not actually IPv4 specific.
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
             {
                 IPInterfaceStatistics stats = nic.GetIPStatistics();
@@ -246,14 +243,14 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void BasicTest_GetIsNetworkAvailable_Success()
         {
             Assert.True(NetworkInterface.GetIsNetworkAvailable());
         }
 
-        [Theory]
-        [PlatformSpecific(~PlatformID.OSX)]
+        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [PlatformSpecific(~TestPlatforms.OSX)]
         [InlineData(false)]
         [InlineData(true)]
         public async Task NetworkInterface_LoopbackInterfaceIndex_MatchesReceivedPackets(bool ipv6)

@@ -2,92 +2,102 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Threading;
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Reflection.Emit.Tests
 {
     public class TypeBuilderSetParent
     {
-        public const string ModuleName = "ModuleName";
-        public const string TypeName = "TypeName";
-
-
-        private TypeBuilder GetTypeBuilder()
+        public static IEnumerable<object[]> SetParent_TestData()
         {
-            AssemblyName assemblyname = new AssemblyName("assemblyname");
+            yield return new object[] { TypeAttributes.NotPublic, typeof(string), typeof(string) };
+            yield return new object[] { TypeAttributes.NotPublic, typeof(EmptyNonGenericClass), typeof(EmptyNonGenericClass) };
+            yield return new object[] { TypeAttributes.NotPublic, typeof(EmptyGenericClass<>), typeof(EmptyGenericClass<>) };
+            yield return new object[] { TypeAttributes.NotPublic, typeof(int?), typeof(int?) };
+            yield return new object[] { TypeAttributes.NotPublic, typeof(object), typeof(object) };
+            yield return new object[] { TypeAttributes.NotPublic, null, typeof(object) };
+            yield return new object[] { TypeAttributes.Interface | TypeAttributes.Abstract, null, null };
+        }
 
-            AssemblyBuilder assemblybuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyname, AssemblyBuilderAccess.Run);
-            ModuleBuilder modulebuilder = TestLibrary.Utilities.GetModuleBuilder(assemblybuilder, "Module1");
-            return modulebuilder.DefineType(TypeName);
+        [Theory]
+        [MemberData(nameof(SetParent_TestData))]
+        public void SetParent(TypeAttributes attributes, Type parent, Type expected)
+        {
+            TypeBuilder type = Helpers.DynamicType(attributes);
+            type.SetParent(parent);
+            Assert.Equal(expected, type.BaseType);
         }
 
         [Fact]
-        public void TestWithStringParent()
+        public void SetParent_TypeCreated_ThrowsInvalidOperationException()
         {
-            TypeBuilder typebuilder = GetTypeBuilder();
-            typebuilder.SetParent(typeof(string));
+            TypeBuilder type = Helpers.DynamicType(TypeAttributes.NotPublic);
+            type.CreateTypeInfo().AsType();
+            Assert.Throws<InvalidOperationException>(() => type.SetParent(typeof(string)));
         }
 
         [Fact]
-        public void TestWithCustomClassParent()
+        public void SetParent_InterfaceType_ThrowsArgumentException()
         {
-            TypeBuilder typebuilder = GetTypeBuilder();
-            typebuilder.SetParent(typeof(TBSetParentTestClass));
+            TypeBuilder type = Helpers.DynamicType(TypeAttributes.NotPublic);
+            Assert.Throws<ArgumentException>(null, () => type.SetParent(typeof(EmptyNonGenericInterface1)));
         }
 
         [Fact]
-        public void TestWithCustomGenericClassParent()
+        public void SetParent_ByRefType_ThrowsArgumentExceptionOnCreation()
         {
-            TypeBuilder typebuilder = GetTypeBuilder();
-            typebuilder.SetParent(typeof(TBSetParentGenClass<>));
+            TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
+            type.SetParent(typeof(int).MakeByRefType());
+
+            Assert.Throws<ArgumentException>(null, () => type.CreateTypeInfo());
         }
 
         [Fact]
-        public void TestWithNullableValueTypeParent()
+        public void ParentNotCreated_ThrowsNotSupportedExceptionOnCreation()
         {
-            TypeBuilder typebuilder = GetTypeBuilder();
-            typebuilder.SetParent(typeof(int?));
+            ModuleBuilder module = Helpers.DynamicModule();
+            TypeBuilder type = module.DefineType("Daughter", TypeAttributes.Public);
+            TypeBuilder parentType = module.DefineType("Parent", TypeAttributes.Public);
+
+            type.SetParent(parentType.AsType());
+            Assert.Throws<NotSupportedException>(() => type.CreateTypeInfo());
+        }
+
+        [Theory]
+        [InlineData(typeof(void))]
+        [InlineData(typeof(EmptyNonGenericStruct))]
+        [InlineData(typeof(EmptyGenericStruct<>))]
+        [InlineData(typeof(EmptyGenericStruct<int>))]
+        [InlineData(typeof(SealedClass))]
+        public void ParentNotInheritable_ThrowsTypeLoadExceptionOnCreation(Type parentType)
+        {
+            TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
+
+            type.SetParent(parentType);
+            Assert.Throws<TypeLoadException>(() => type.CreateTypeInfo());
+        }
+
+        [Theory]
+        [InlineData(typeof(string))]
+        [InlineData(typeof(StaticClass))]
+        [InlineData(typeof(int*))]
+        [InlineData(typeof(EmptyNonGenericClass[]))]
+        public void ParentHasNoDefaultConstructor_ThrowsNotSupportedExceptionOnCreation(Type parentType)
+        {
+            TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
+
+            type.SetParent(parentType);
+            Assert.Throws<NotSupportedException>(() => type.CreateTypeInfo());
         }
 
         [Fact]
-        public void TestWithNullParent()
+        public void ParentOpenGenericClass_ThrowsBadImageFormatExceptionOnCreation()
         {
-            TypeBuilder typebuilder = GetTypeBuilder();
-            typebuilder.SetParent(null);
+            TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
+
+            type.SetParent(typeof(EmptyGenericClass<>));
+            Assert.Throws<BadImageFormatException>(() => type.CreateTypeInfo());
         }
-
-        [Fact]
-        public void TestThrowsExceptionForCreateTypeCalled()
-        {
-            TypeBuilder typebuilder = GetTypeBuilder();
-            typebuilder.CreateTypeInfo().AsType();
-            Assert.Throws<InvalidOperationException>(() => { typebuilder.SetParent(typeof(string)); });
-        }
-
-        [Fact]
-        public void TestThrowsExceptionForNullParentAndInstanceIsInterfaceWithoutAbstractAttribute()
-        {
-            AssemblyName assemblyname = new AssemblyName("assemblyname");
-
-            AssemblyBuilder assemblybuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyname, AssemblyBuilderAccess.Run);
-            ModuleBuilder modulebuilder = TestLibrary.Utilities.GetModuleBuilder(assemblybuilder, "Module1");
-
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                TypeBuilder typebuilder = modulebuilder.DefineType(TypeName, TypeAttributes.Interface);
-                typebuilder.SetParent(null);
-            });
-        }
-    }
-
-    public class TBSetParentTestClass
-    {
-    }
-    public class TBSetParentGenClass<T>
-    {
     }
 }

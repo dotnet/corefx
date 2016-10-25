@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
@@ -1196,6 +1197,68 @@ namespace System.Linq.Expressions.Tests
         {
             TryExpression tryExp = Expression.TryFault(Expression.Empty(), Expression.Empty());
             Assert.NotSame(tryExp, tryExp.Update(tryExp.Body, tryExp.Handlers, tryExp.Finally, Expression.Empty()));
+        }
+
+        [Fact]
+        public void OpenGenericExceptionType()
+        {
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(List<>), Expression.Constant(0)));
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(List<>), Expression.Constant(0), Expression.Constant(true)));
+            Assert.Throws<ArgumentException>("type", () => Expression.MakeCatchBlock(typeof(List<>), null, Expression.Constant(0), null));
+        }
+
+        [Fact]
+        public void ExceptionTypeContainingGenericParameters()
+        {
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(List<>.Enumerator), Expression.Constant(0)));
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(List<>.Enumerator), Expression.Constant(0), Expression.Constant(true)));
+            Assert.Throws<ArgumentException>("type", () => Expression.MakeCatchBlock(typeof(List<>.Enumerator), null, Expression.Constant(0), null));
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(List<>).MakeGenericType(typeof(List<>)), Expression.Constant(0)));
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(List<>).MakeGenericType(typeof(List<>)), Expression.Constant(0), Expression.Constant(true)));
+            Assert.Throws<ArgumentException>("type", () => Expression.MakeCatchBlock(typeof(List<>).MakeGenericType(typeof(List<>)), null, Expression.Constant(0), null));
+        }
+
+        [Fact]
+        public void PointerExceptionType()
+        {
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(int*), Expression.Constant(0)));
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(int*), Expression.Constant(0), Expression.Constant(true)));
+            Assert.Throws<ArgumentException>("type", () => Expression.MakeCatchBlock(typeof(int*), null, Expression.Constant(0), null));
+        }
+
+        [Fact]
+        public void TypedByRefExceptionType()
+        {
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(int).MakeByRefType(), Expression.Constant(0)));
+            Assert.Throws<ArgumentException>("type", () => Expression.Catch(typeof(int).MakeByRefType(), Expression.Constant(0), Expression.Constant(true)));
+            Assert.Throws<ArgumentException>("type", () => Expression.MakeCatchBlock(typeof(int).MakeByRefType(), null, Expression.Constant(0), null));
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            var e1 = Expression.Throw(Expression.Parameter(typeof(Exception), "ex"));
+            Assert.Equal("throw(ex)", e1.ToString());
+
+            var e2 = Expression.TryFinally(Expression.Empty(), Expression.Empty());
+            Assert.Equal("try { ... }", e2.ToString());
+
+            var e3 = Expression.TryFault(Expression.Empty(), Expression.Empty());
+            Assert.Equal("try { ... }", e3.ToString());
+
+            var e4 = Expression.TryCatch(Expression.Empty(), Expression.Catch(typeof(Exception), Expression.Empty()));
+            Assert.Equal("try { ... }", e4.ToString());
+
+            var e5 = Expression.Catch(typeof(Exception), Expression.Empty());
+            Assert.Equal("catch (Exception) { ... }", e5.ToString());
+
+            var e6 = Expression.Catch(Expression.Parameter(typeof(Exception), "ex"), Expression.Empty());
+            Assert.Equal("catch (Exception ex) { ... }", e6.ToString());
+
+            // NB: No ToString form for filters
+
+            var e7 = Expression.Catch(Expression.Parameter(typeof(Exception), "ex"), Expression.Empty(), Expression.Constant(true));
+            Assert.Equal("catch (Exception ex) { ... }", e7.ToString());
         }
     }
 }

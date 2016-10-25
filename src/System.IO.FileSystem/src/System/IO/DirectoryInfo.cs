@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Security;
+using System.Runtime.Serialization;
 
 namespace System.IO
 {
+    [Serializable]
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
         [System.Security.SecuritySafeCritical]
@@ -31,6 +33,11 @@ namespace System.IO
             // Fast path when we know a DirectoryInfo exists.
             OriginalPath = originalPath ?? Path.GetFileName(fullPath);
             FullPath = fullPath;
+            DisplayPath = GetDisplayName(OriginalPath);
+        }
+
+        private DirectoryInfo(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
             DisplayPath = GetDisplayName(OriginalPath);
         }
 
@@ -78,7 +85,7 @@ namespace System.IO
         [System.Security.SecurityCritical]  // auto-generated
         private DirectoryInfo CreateSubdirectoryHelper(String path)
         {
-            Contract.Requires(path != null);
+            Debug.Assert(path != null);
 
             PathHelpers.ThrowIfEmptyOrRootedPath(path);
 
@@ -152,8 +159,8 @@ namespace System.IO
         // given search criteria (i.e. "*.txt").
         private FileInfo[] InternalGetFiles(String searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(searchPattern != null);
-            Contract.Requires(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
+            Debug.Assert(searchPattern != null);
+            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
 
             IEnumerable<FileInfo> enumerable = (IEnumerable<FileInfo>)FileSystem.Current.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Files);
             return EnumerableHelpers.ToArray(enumerable);
@@ -199,8 +206,8 @@ namespace System.IO
         // given search criteria (i.e. "*.txt").
         private FileSystemInfo[] InternalGetFileSystemInfos(String searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(searchPattern != null);
-            Contract.Requires(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
+            Debug.Assert(searchPattern != null);
+            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
 
             IEnumerable<FileSystemInfo> enumerable = FileSystem.Current.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Both);
             return EnumerableHelpers.ToArray(enumerable);
@@ -244,8 +251,8 @@ namespace System.IO
         // directories).
         private DirectoryInfo[] InternalGetDirectories(String searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(searchPattern != null);
-            Contract.Requires(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
+            Debug.Assert(searchPattern != null);
+            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
 
             IEnumerable<DirectoryInfo> enumerable = (IEnumerable<DirectoryInfo>)FileSystem.Current.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Directories);
             return EnumerableHelpers.ToArray(enumerable);
@@ -278,8 +285,8 @@ namespace System.IO
 
         private IEnumerable<DirectoryInfo> InternalEnumerateDirectories(String searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(searchPattern != null);
-            Contract.Requires(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
+            Debug.Assert(searchPattern != null);
+            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
 
             return (IEnumerable<DirectoryInfo>)FileSystem.Current.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Directories);
         }
@@ -311,8 +318,8 @@ namespace System.IO
 
         private IEnumerable<FileInfo> InternalEnumerateFiles(String searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(searchPattern != null);
-            Contract.Requires(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
+            Debug.Assert(searchPattern != null);
+            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
 
             return (IEnumerable<FileInfo>)FileSystem.Current.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Files);
         }
@@ -344,8 +351,8 @@ namespace System.IO
 
         private IEnumerable<FileSystemInfo> InternalEnumerateFileSystemInfos(String searchPattern, SearchOption searchOption)
         {
-            Contract.Requires(searchPattern != null);
-            Contract.Requires(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
+            Debug.Assert(searchPattern != null);
+            Debug.Assert(searchOption == SearchOption.AllDirectories || searchOption == SearchOption.TopDirectoryOnly);
 
             return FileSystem.Current.EnumerateFileSystemInfos(FullPath, searchPattern, searchOption, SearchTarget.Both);
         }

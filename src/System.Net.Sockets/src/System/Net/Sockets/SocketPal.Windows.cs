@@ -291,7 +291,7 @@ namespace System.Net.Sockets
         public static unsafe SocketError Receive(SafeCloseSocket handle, byte[] buffer, int offset, int size, SocketFlags socketFlags, out int bytesTransferred)
         {
             int bytesReceived;
-            if (buffer.Length == 0)
+            if (buffer?.Length == 0)
             {
                 bytesReceived = Interop.Winsock.recv(handle.DangerousGetHandle(), null, 0, socketFlags);
             }
@@ -490,6 +490,11 @@ namespace System.Net.Sockets
                 ref lngopt,
                 4);
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
+        }
+
+        public static void SetIPProtectionLevel(Socket socket, SocketOptionLevel optionLevel, int protectionLevel)
+        {
+            socket.SetSocketOption(optionLevel, SocketOptionName.IPProtectionLevel, protectionLevel);
         }
 
         public static SocketError GetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, out int optionValue)
@@ -938,6 +943,33 @@ namespace System.Net.Sockets
         public static void CheckDualModeReceiveSupport(Socket socket)
         {
             // Dual-mode sockets support received packet info on Windows.
+        }
+
+        internal static SocketError DisconnectAsync(Socket socket, SafeCloseSocket handle, bool reuseSocket, DisconnectOverlappedAsyncResult asyncResult)
+        {
+            asyncResult.SetUnmanagedStructures(null);
+
+            // This can throw ObjectDisposedException
+            SocketError errorCode = SocketError.Success;
+            if (!socket.DisconnectEx(handle, asyncResult.OverlappedHandle, (int)(reuseSocket ? TransmitFileOptions.ReuseSocket : 0), 0))
+            {
+                errorCode = GetLastSocketError();
+            }
+
+            return errorCode;
+        }
+
+        internal static SocketError Disconnect(Socket socket, SafeCloseSocket handle, bool reuseSocket)
+        {
+            SocketError errorCode = SocketError.Success;
+
+            // This can throw ObjectDisposedException (handle, and retrieving the delegate).
+            if (!socket.DisconnectExBlocking(handle, IntPtr.Zero, (int)(reuseSocket ? TransmitFileOptions.ReuseSocket : 0), 0))
+            {
+                errorCode = (SocketError)Marshal.GetLastWin32Error();
+            }
+
+            return errorCode;
         }
     }
 }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.Globalization;
 
 namespace System.Diagnostics
@@ -11,12 +12,10 @@ namespace System.Diagnostics
     ///     a particular process.  Using this component, you can determine
     ///     information about the module.
     /// </devdoc>
-    public class ProcessModule
+    public class ProcessModule : Component
     {
         private readonly ModuleInfo _moduleInfo;
-#if FEATURE_FILEVERSIONINFO
         private FileVersionInfo _fileVersionInfo;
-#endif
 
         /// <devdoc>
         ///     Initialize the module.
@@ -86,14 +85,11 @@ namespace System.Diagnostics
             }
         }
 
-#if FEATURE_FILEVERSIONINFO
         /// <devdoc>
         ///     Returns version information about the module.
         /// </devdoc>
         public FileVersionInfo FileVersionInfo
         {
-            [ResourceExposure(ResourceScope.Machine)]  // Let's review callers - why do they want this?
-            [ResourceConsumption(ResourceScope.Machine)]
             get
             {
                 if (_fileVersionInfo == null)
@@ -101,7 +97,6 @@ namespace System.Diagnostics
                 return _fileVersionInfo;
             }
         }
-#endif
 
         public override string ToString()
         {

@@ -13,6 +13,8 @@ using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     public class SchSendAuxRecordHttpTest
     {
         readonly ITestOutputHelper _output;
@@ -22,8 +24,9 @@ namespace System.Net.Http.Functional.Tests
             _output = output;
         }
         
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public async Task HttpClient_ClientUsesAuxRecord_Ok()
         {
             X509Certificate2 serverCert = Configuration.Certificates.GetServerCertificate();

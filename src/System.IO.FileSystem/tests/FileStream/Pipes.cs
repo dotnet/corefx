@@ -41,7 +41,7 @@ namespace System.IO.Tests
             }
         }
 
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public async Task FifoReadWriteViaFileStream()
         {
             string fifoPath = GetTestFilePath();
@@ -90,7 +90,7 @@ namespace System.IO.Tests
             }
         }
 
-        [PlatformSpecific(PlatformID.Windows)] // Uses P/Invokes to create async pipe handle
+        [PlatformSpecific(TestPlatforms.Windows)] // Uses P/Invokes to create async pipe handle
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -124,7 +124,7 @@ namespace System.IO.Tests
             }
         }
 
-        [PlatformSpecific(PlatformID.Windows)] // Uses P/Invokes to create async pipe handle
+        [PlatformSpecific(TestPlatforms.Windows)] // Uses P/Invokes to create async pipe handle
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

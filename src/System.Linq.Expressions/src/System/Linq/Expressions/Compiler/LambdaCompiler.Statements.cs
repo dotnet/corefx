@@ -5,9 +5,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic.Utils;
+using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Globalization;
+using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions.Compiler
 {
@@ -35,8 +36,8 @@ namespace System.Linq.Expressions.Compiler
             CompilationFlags tailCall = flags & CompilationFlags.EmitAsTailCallMask;
             for (int index = 0; index < count - 1; index++)
             {
-                var e = node.GetExpression(index);
-                var next = node.GetExpression(index + 1);
+                Expression e = node.GetExpression(index);
+                Expression next = node.GetExpression(index + 1);
 
                 CompilationFlags tailCallFlag;
                 if (tailCall != CompilationFlags.EmitAsNoTail)
@@ -175,7 +176,7 @@ namespace System.Linq.Expressions.Compiler
                 {
                     // If there are no cases and no default then the type must be void.
                     // Assert that earlier validation caught any exceptions to that.
-                    Debug.Assert(expr.Type == typeof(void));
+                    Debug.Assert(node.Type == typeof(void));
                 }
 
                 return;
@@ -198,8 +199,8 @@ namespace System.Linq.Expressions.Compiler
             // transform the tree to avoid stack overflow on a big switch.
             //
 
-            var switchValue = Expression.Parameter(node.SwitchValue.Type, "switchValue");
-            var testValue = Expression.Parameter(GetTestValueType(node), "testValue");
+            ParameterExpression switchValue = Expression.Parameter(node.SwitchValue.Type, "switchValue");
+            ParameterExpression testValue = Expression.Parameter(GetTestValueType(node), "testValue");
             _scope.AddLocal(this, switchValue);
             _scope.AddLocal(this, testValue);
 
@@ -284,7 +285,7 @@ namespace System.Linq.Expressions.Compiler
                 Default = @default;
                 Type = Node.SwitchValue.Type;
                 IsUnsigned = TypeUtils.IsUnsigned(Type);
-                var code = Type.GetTypeCode();
+                TypeCode code = Type.GetTypeCode();
                 Is64BitSwitch = code == TypeCode.UInt64 || code == TypeCode.Int64;
             }
         }
@@ -417,7 +418,7 @@ namespace System.Linq.Expressions.Compiler
             // Sort the keys, and group them into buckets.
             keys.Sort((x, y) => Math.Sign(x.Key - y.Key));
             var buckets = new List<List<SwitchLabel>>();
-            foreach (var key in keys)
+            foreach (SwitchLabel key in keys)
             {
                 AddToBuckets(buckets, key);
             }
@@ -631,8 +632,8 @@ namespace System.Linq.Expressions.Compiler
         private bool TryEmitHashtableSwitch(SwitchExpression node, CompilationFlags flags)
         {
             // If we have a comparison other than string equality, bail
-            MethodInfo equality = typeof(string).GetMethod("op_Equality", new[] { typeof(string), typeof(string) });
-            if (!equality.IsStatic)
+            MethodInfo equality = String_op_Equality_String_String;
+            if (equality != null && !equality.IsStatic)
             {
                 equality = null;
             }
@@ -666,10 +667,10 @@ namespace System.Linq.Expressions.Compiler
             // immediately. But that would cause the two code paths to be more
             // different than they really need to be.
             var initializers = new List<ElementInit>(tests);
-            var cases = new List<SwitchCase>(node.Cases.Count);
+            var cases = new ArrayBuilder<SwitchCase>(node.Cases.Count);
 
             int nullCase = -1;
-            MethodInfo add = typeof(Dictionary<string, int>).GetMethod("Add", new[] { typeof(string), typeof(int) });
+            MethodInfo add = DictionaryOfStringInt32_Add_String_Int32;
             for (int i = 0, n = node.Cases.Count; i < n; i++)
             {
                 foreach (ConstantExpression t in node.Cases[i].TestValues)
@@ -683,7 +684,7 @@ namespace System.Linq.Expressions.Compiler
                         nullCase = i;
                     }
                 }
-                cases.Add(Expression.SwitchCase(node.Cases[i].Body, Expression.Constant(i)));
+                cases.UncheckedAdd(Expression.SwitchCase(node.Cases[i].Body, Expression.Constant(i)));
             }
 
             // Create the field to hold the lazily initialized dictionary
@@ -698,7 +699,7 @@ namespace System.Linq.Expressions.Compiler
                     dictField,
                     Expression.ListInit(
                         Expression.New(
-                            typeof(Dictionary<string, int>).GetConstructor(new[] { typeof(int) }),
+                            DictionaryOfStringInt32_Ctor_Int32,
                             Expression.Constant(initializers.Count)
                         ),
                         initializers
@@ -728,9 +729,9 @@ namespace System.Linq.Expressions.Compiler
             //     default:
             // }
             //
-            var switchValue = Expression.Variable(typeof(string), "switchValue");
-            var switchIndex = Expression.Variable(typeof(int), "switchIndex");
-            var reduced = Expression.Block(
+            ParameterExpression switchValue = Expression.Variable(typeof(string), "switchValue");
+            ParameterExpression switchIndex = Expression.Variable(typeof(int), "switchIndex");
+            BlockExpression reduced = Expression.Block(
                 new[] { switchIndex, switchValue },
                 Expression.Assign(switchValue, node.SwitchValue),
                 Expression.IfThenElse(
@@ -738,11 +739,11 @@ namespace System.Linq.Expressions.Compiler
                     Expression.Assign(switchIndex, Expression.Constant(nullCase)),
                     Expression.IfThenElse(
                         Expression.Call(dictInit, "TryGetValue", null, switchValue, switchIndex),
-                        Expression.Empty(),
+                        Utils.Empty(),
                         Expression.Assign(switchIndex, Expression.Constant(-1))
                     )
                 ),
-                Expression.Switch(node.Type, switchIndex, node.DefaultBody, null, cases)
+                Expression.Switch(node.Type, switchIndex, node.DefaultBody, null, cases.ToReadOnly())
             );
 
             EmitExpression(reduced, flags);
@@ -817,7 +818,7 @@ namespace System.Linq.Expressions.Compiler
 
             EmitExpression(node.Body);
 
-            Type tryType = expr.Type;
+            Type tryType = node.Type;
             LocalBuilder value = null;
             if (tryType != typeof(void))
             {

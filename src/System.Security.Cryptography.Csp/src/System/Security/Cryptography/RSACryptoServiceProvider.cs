@@ -112,10 +112,10 @@ namespace System.Security.Cryptography
                         SafeKeyHandle keyHandle = _safeKeyHandle;
                         _safeKeyHandle = null;
                         keyHandle?.Dispose();
+                        current.Dispose();
                     }
 
                     _safeProvHandle = value;
-                    current?.Dispose();
                 }
             }
         }
@@ -355,14 +355,14 @@ namespace System.Security.Cryptography
             if (IsPublic(keyBlob))
             {
                 SafeProvHandle safeProvHandleTemp = AcquireSafeProviderHandle();
-                CapiHelper.ImportKeyBlob(safeProvHandleTemp, (CspProviderFlags)0, keyBlob, out safeKeyHandle);
+                CapiHelper.ImportKeyBlob(safeProvHandleTemp, (CspProviderFlags)0, false, keyBlob, out safeKeyHandle);
 
                 // The property set will take care of releasing any already-existing resources.
                 SafeProvHandle = safeProvHandleTemp;
             }
             else
             {
-                CapiHelper.ImportKeyBlob(SafeProvHandle, _parameters.Flags, keyBlob, out safeKeyHandle);
+                CapiHelper.ImportKeyBlob(SafeProvHandle, _parameters.Flags, false, keyBlob, out safeKeyHandle);
             }
 
             // The property set will take care of releasing any already-existing resources.

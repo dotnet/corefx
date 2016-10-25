@@ -48,7 +48,7 @@ namespace System.IO.Tests
 
         [Theory]
         [InlineData(FileAttributes.ReadOnly)]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void UnixAttributeSetting(FileAttributes attr)
         {
             var test = new DirectoryInfo(GetTestFilePath());
@@ -64,7 +64,7 @@ namespace System.IO.Tests
         [InlineData(FileAttributes.System)]
         [InlineData(FileAttributes.Archive)]
         [InlineData(FileAttributes.ReadOnly | FileAttributes.Hidden)]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsAttributeSetting(FileAttributes attr)
         {
             var test = new DirectoryInfo(GetTestFilePath());
@@ -81,7 +81,7 @@ namespace System.IO.Tests
         [InlineData(FileAttributes.SparseFile)]
         [InlineData(FileAttributes.ReparsePoint)]
         [InlineData(FileAttributes.Compressed)]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void UnixInvalidAttributes(FileAttributes attr)
         {
             var path = GetTestFilePath();
@@ -96,7 +96,7 @@ namespace System.IO.Tests
         [InlineData(FileAttributes.SparseFile)]
         [InlineData(FileAttributes.ReparsePoint)]
         [InlineData(FileAttributes.Compressed)]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsInvalidAttributes(FileAttributes attr)
         {
             var path = GetTestFilePath();
@@ -108,7 +108,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(~FileAttributes.ReadOnly)]
         [InlineData(-1)]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void UnixInvalidAttributes_ThrowArgumentException(FileAttributes attr)
         {
             var test = new DirectoryInfo(GetTestFilePath());
@@ -120,7 +120,7 @@ namespace System.IO.Tests
         [InlineData(FileAttributes.Temporary)]
         [InlineData(~FileAttributes.ReadOnly)]
         [InlineData(-1)]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsInvalidAttributes_ThrowArgumentException(FileAttributes attr)
         {
             var test = new DirectoryInfo(GetTestFilePath());

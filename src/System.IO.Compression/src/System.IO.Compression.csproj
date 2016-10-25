@@ -1,28 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
   </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.IO.Compression</AssemblyName>
-    <AssemblyVersion>4.1.2.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)'=='netstandard1.3' OR '$(TargetGroup)'=='net46'">4.1.2.0</AssemblyVersion>
+    <ContractProject Condition="'$(AssemblyVersion)'=='4.1.2.0'">../ref/4.1.0/System.IO.Compression.depproj</ContractProject>
     <OutputType>Library</OutputType>
     <ProjectGuid>{5471BFE8-8071-466F-838E-5ADAA779E742}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <UseECMAKey Condition="'$(UseECMAKey)'==''">true</UseECMAKey>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.3</PackageTargetFramework>
-    <DefineConstants Condition="'$(TargetGroup)' != 'net46'">$(DefineConstants);FEATURE_ZLIB</DefineConstants>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.3</NuGetTargetMoniker>
+    <UseECMAKey>true</UseECMAKey>
+    <DefineConstants Condition="'$(TargetGroup)' != 'net46' And '$(TargetGroup)' != 'net463'">$(DefineConstants);FEATURE_ZLIB</DefineConstants>
+    <DefineConstants Condition="'$(AssemblyVersion)'!='4.1.2.0'">$(DefineConstants);netstandard17</DefineConstants>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net46' Or '$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_netstandard1.3_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_netstandard1.3_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netstandard1.3_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netstandard1.3_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46_Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
   <!-- Files shared between net46 and core -->
   <ItemGroup>
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\Crc32Helper.cs" />
@@ -33,20 +40,50 @@
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipCustomStreams.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipHelper.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipVersion.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\BlockType.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\CopyEncoder.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\DeflateInput.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\DeflaterManaged.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\DeflateManagedStream.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\FastEncoder.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\FastEncoderStatus.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\FastEncoderWindow.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\FileFormats.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\HuffmanTree.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\InflaterManaged.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\InflaterState.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\InputBuffer.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\Match.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\MatchState.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\OutputBuffer.cs" />
+    <Compile Include="System\IO\Compression\DeflateManaged\OutputWindow.cs" />
     <Compile Include="$(CommonPath)\System\IO\PathInternal.cs">
       <Link>Common\System\IO\PathInternal.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    </Compile>
+    <Compile Include="System\IO\Compression\PositionPreservingWriteOnlyStreamWrapper.cs" />
   </ItemGroup>
   <!-- Files exclusive to Core -->
-  <ItemGroup Condition="'$(TargetGroup)' != 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'net46' And '$(TargetGroup)' != 'net463'">
     <Compile Include="System\IO\Compression\CompressionLevel.cs" />
     <Compile Include="System\IO\Compression\CompressionMode.cs" />
-    <Compile Include="System\IO\Compression\Deflater.cs" />
-    <Compile Include="System\IO\Compression\DeflateStream.cs" />
     <Compile Include="System\IO\Compression\GZipStream.cs" />
-    <Compile Include="System\IO\Compression\Inflater.cs" />
-    <Compile Include="System\IO\Compression\ZLibException.cs" />
-    <Compile Include="System\IO\Compression\ZLibNative.cs" />
+    <Compile Include="System\IO\Compression\DeflateZLib\Deflater.cs" />
+    <Compile Include="System\IO\Compression\DeflateZLib\DeflateStream.cs" />
+    <Compile Include="System\IO\Compression\DeflateZLib\Inflater.cs" />
+    <Compile Include="System\IO\Compression\DeflateZLib\ZLibException.cs" />
+    <Compile Include="System\IO\Compression\DeflateZLib\ZLibNative.cs" />
+    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.ArrayPoolCopy.cs">
+      <Link>Common\System\IO\StreamHelpers.ArrayPoolCopy.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.CopyValidation.cs">
+      <Link>Common\System\IO\StreamHelpers.CopyValidation.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == '' ">
+    <Compile Include="System\IO\Compression\ZLibException.Serialization.cs" />
   </ItemGroup>
   <!-- Windows specific files common to both net46 and Core -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
@@ -56,8 +93,8 @@
     </Compile>
   </ItemGroup>
   <!-- Windows specific files exclusive to Core -->
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46'">
-    <Compile Include="System\IO\Compression\ZLibNative.Windows.cs" />
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' != 'net46' And '$(TargetGroup)' != 'net463'">
+    <Compile Include="System\IO\Compression\DeflateZLib\ZLibNative.Windows.cs" />
     <Compile Include="Interop\Interop.zlib.Windows.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -65,7 +102,7 @@
   </ItemGroup>
   <!-- Unix specific files -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="System\IO\Compression\ZLibNative.Unix.cs" />
+    <Compile Include="System\IO\Compression\DeflateZLib\ZLibNative.Unix.cs" />
     <Compile Include="System\IO\Compression\ZipArchiveEntry.Unix.cs" />
     <Compile Include="Interop\Interop.zlib.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
@@ -79,7 +116,7 @@
     </Compile>
   </ItemGroup>
   <!-- Files exclusive to net46 -->
-  <ItemGroup Condition="'$(TargetGroup)' == 'net46'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'net46' Or '$(TargetGroup)' == 'net463'">
     <Compile Include="AssemblyInfo.cs" />
     <TargetingPackReference Include="mscorlib" />
     <TargetingPackReference Include="System" />

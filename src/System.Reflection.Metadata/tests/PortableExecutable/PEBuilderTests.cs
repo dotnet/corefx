@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -69,8 +70,7 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var peBlob = new BlobBuilder();
 
-            BlobContentId contentId;
-            peBuilder.Serialize(peBlob, out contentId);
+            var contentId = peBuilder.Serialize(peBlob);
 
             if (!mvidFixup.IsDefault)
             {
@@ -205,16 +205,14 @@ namespace System.Reflection.PortableExecutable.Tests
                 MethodSignature().
                 Parameters(0, returnType => returnType.Void(), parameters => { });
 
-            var methodBodies = new MethodBodiesEncoder(ilBuilder);
+            var methodBodyStream = new MethodBodyStreamEncoder(ilBuilder);
 
             var codeBuilder = new BlobBuilder();
-            var branchBuilder = new BranchBuilder();
             InstructionEncoder il;
 
             //
             // Program::.ctor
             //
-            int ctorBodyOffset;
             il = new InstructionEncoder(codeBuilder);
 
             // ldarg.0
@@ -226,18 +224,23 @@ namespace System.Reflection.PortableExecutable.Tests
             // ret
             il.OpCode(ILOpCode.Ret);
 
-            methodBodies.AddMethodBody().WriteInstructions(codeBuilder, out ctorBodyOffset);
+            int ctorBodyOffset = methodBodyStream.AddMethodBody(il);
             codeBuilder.Clear();
 
             //
             // Program::Main
             //
-            int mainBodyOffset;
-            il = new InstructionEncoder(codeBuilder, branchBuilder);
-            var endLabel = il.DefineLabel();
+            var flowBuilder = new ControlFlowBuilder();
+            il = new InstructionEncoder(codeBuilder, flowBuilder);
+
+            var tryStart = il.DefineLabel();
+            var tryEnd = il.DefineLabel();
+            var finallyStart = il.DefineLabel();
+            var finallyEnd = il.DefineLabel();
+            flowBuilder.AddFinallyRegion(tryStart, tryEnd, finallyStart, finallyEnd);
 
             // .try
-            int tryOffset = il.Offset;
+            il.MarkLabel(tryStart);
 
             //   ldstr "hello"
             il.LoadString(metadata.GetOrAddUserString("hello"));
@@ -246,10 +249,11 @@ namespace System.Reflection.PortableExecutable.Tests
             il.Call(consoleWriteLineMemberRef);
 
             //   leave.s END
-            il.Branch(ILOpCode.Leave, endLabel);
-            
+            il.Branch(ILOpCode.Leave_s, finallyEnd);
+            il.MarkLabel(tryEnd);
+
             // .finally
-            int handlerOffset = il.Offset;
+            il.MarkLabel(finallyStart);
 
             //   ldstr "world"
             il.LoadString(metadata.GetOrAddUserString("world"));
@@ -259,22 +263,14 @@ namespace System.Reflection.PortableExecutable.Tests
 
             // .endfinally
             il.OpCode(ILOpCode.Endfinally);
-            int handlerEnd = il.Offset;
-
-            // END: 
-            il.MarkLabel(endLabel);
+            il.MarkLabel(finallyEnd);
 
             // ret
             il.OpCode(ILOpCode.Ret);
 
-            var body = methodBodies.AddMethodBody(exceptionRegionCount: 1);
-            var eh = body.WriteInstructions(codeBuilder, branchBuilder, out mainBodyOffset);
-            eh.StartRegions();
-            eh.AddFinally(tryOffset, handlerOffset - tryOffset, handlerOffset, handlerEnd - handlerOffset);
-            eh.EndRegions();
-
+            int mainBodyOffset = methodBodyStream.AddMethodBody(il);
             codeBuilder.Clear();
-            branchBuilder.Clear();
+            flowBuilder.Clear();
 
             var mainMethodDef = metadata.AddMethodDefinition(
                 MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig,
@@ -335,10 +331,13 @@ namespace System.Reflection.PortableExecutable.Tests
 
         private static MethodDefinitionHandle ComplexEmit(MetadataBuilder metadata, BlobBuilder ilBuilder, out Blob mvidFixup)
         {
+            var mvid = metadata.ReserveGuid();
+            mvidFixup = mvid.Content;
+
             metadata.AddModule(
                 0,
                 metadata.GetOrAddString("ConsoleApplication.exe"),
-                metadata.ReserveGuid(out mvidFixup),
+                mvid.Handle,
                 default(GuidHandle),
                 default(GuidHandle));
 
@@ -431,24 +430,20 @@ namespace System.Reflection.PortableExecutable.Tests
               metadata.GetOrAddString("_bc"),
               metadata.GetOrAddBlob(BuildSignature(e => e.FieldSignature().Type(type: baseClassTypeDef, isValueType: false))));
 
-            var methodBodies = new MethodBodiesEncoder(ilBuilder);
+            var methodBodyStream = new MethodBodyStreamEncoder(ilBuilder);
 
             var buffer = new BlobBuilder();
-            InstructionEncoder il;
+            var il = new InstructionEncoder(buffer);
 
             //
             // Foo
             //
-            int fooBodyOffset;
-            il = new InstructionEncoder(buffer);
-
             il.LoadString(metadata.GetOrAddUserString("asdsad"));
             il.OpCode(ILOpCode.Newobj);
             il.Token(invalidOperationExceptionTypeRef);
             il.OpCode(ILOpCode.Throw);
 
-            methodBodies.AddMethodBody().WriteInstructions(buffer, out fooBodyOffset);
-            buffer.Clear();
+            int fooBodyOffset = methodBodyStream.AddMethodBody(il);
 
             // Method1
             var derivedClassFooMethodDef = metadata.AddMethodDefinition(
@@ -493,8 +488,7 @@ namespace System.Reflection.PortableExecutable.Tests
             
             var peBlob = new BlobBuilder();
             
-            BlobContentId contentId;
-            peBuilder.Serialize(peBlob, out contentId);
+            var contentId = peBuilder.Serialize(peBlob);
             
             peBlob.WriteContentTo(peStream);
 
@@ -538,9 +532,264 @@ namespace System.Reflection.PortableExecutable.Tests
 
             var peBlob = new BlobBuilder();
 
-            BlobContentId contentId;
+            Assert.Throws<NotImplementedException>(() => peBuilder.Serialize(peBlob));
+        }
 
-            Assert.Throws<NotImplementedException>(() => peBuilder.Serialize(peBlob, out contentId));
+        [Fact]
+        public void GetContentToSign_AllInOneBlob()
+        {
+            var builder = new BlobBuilder(16);
+            builder.WriteBytes(1, 5);
+            var snFixup = builder.ReserveBytes(5);
+            builder.WriteBytes(2, 6);
+            Assert.Equal(1, builder.GetBlobs().Count());
+
+            AssertEx.Equal(
+                new[]
+                {
+                    "0: [0, 2)",
+                    "0: [4, 5)",
+                    "0: [10, 16)"
+                },
+                GetBlobRanges(builder, PEBuilder.GetContentToSign(builder, peHeadersSize: 2, peHeaderAlignment: 4, strongNameSignatureFixup: snFixup)));
+        }
+
+        [Fact]
+        public void GetContentToSign_MultiBlobHeader()
+        {
+            var builder = new BlobBuilder(16);
+            builder.WriteBytes(0, 16);
+            builder.WriteBytes(1, 16);
+            builder.WriteBytes(2, 16);
+            builder.WriteBytes(3, 16);
+            builder.WriteBytes(4, 2);
+            var snFixup = builder.ReserveBytes(1);
+            builder.WriteBytes(4, 13);
+            builder.WriteBytes(5, 10);
+            Assert.Equal(6, builder.GetBlobs().Count());
+
+            AssertEx.Equal(
+                new[]
+                {
+                    "0: [0, 16)",
+                    "1: [0, 16)",
+                    "2: [0, 1)",
+                    "4: [0, 2)",
+                    "4: [3, 16)",
+                    "5: [0, 10)"
+                },
+                GetBlobRanges(builder, PEBuilder.GetContentToSign(builder, peHeadersSize: 33, peHeaderAlignment: 64, strongNameSignatureFixup: snFixup)));
+        }
+
+        [Fact]
+        public void GetContentToSign_HeaderAndFixupInDistinctBlobs()
+        {
+            var builder = new BlobBuilder(16);
+            builder.WriteBytes(0, 16);
+            builder.WriteBytes(1, 16);
+            builder.WriteBytes(2, 16);
+            builder.WriteBytes(3, 16);
+            var snFixup = builder.ReserveBytes(16);
+            builder.WriteBytes(5, 16);
+            builder.WriteBytes(6, 1);
+            Assert.Equal(7, builder.GetBlobs().Count());
+
+            AssertEx.Equal(
+                new[]
+                {
+                    "0: [0, 1)",
+                    "0: [4, 16)",
+                    "1: [0, 16)",
+                    "2: [0, 16)",
+                    "3: [0, 16)",
+                    "4: [0, 0)",
+                    "4: [16, 16)",
+                    "5: [0, 16)",
+                    "6: [0, 1)"
+                },
+                GetBlobRanges(builder, PEBuilder.GetContentToSign(builder, peHeadersSize: 1, peHeaderAlignment: 4, strongNameSignatureFixup: snFixup)));
+        }
+
+        private static IEnumerable<string> GetBlobRanges(BlobBuilder builder, IEnumerable<Blob> blobs)
+        {
+            var blobIndex = new Dictionary<byte[], int>();
+            int i = 0;
+            foreach (var blob in builder.GetBlobs())
+            {
+                blobIndex.Add(blob.Buffer, i++);
+            }
+
+            foreach (var blob in blobs)
+            {
+                yield return $"{blobIndex[blob.Buffer]}: [{blob.Start}, {blob.Start + blob.Length})";
+            }
+        }
+
+        [Fact]
+        public void Checksum()
+        {
+            Assert.True(TestChecksumAndAuthenticodeSignature(new MemoryStream(Misc.Signed), Misc.KeyPair));
+            Assert.False(TestChecksumAndAuthenticodeSignature(new MemoryStream(Misc.Deterministic)));
+        }
+
+        [Fact]
+        public void ChecksumFXAssemblies()
+        {
+            var paths = new[]
+            {
+                typeof(object).GetTypeInfo().Assembly.Location,
+                typeof(Enumerable).GetTypeInfo().Assembly.Location,
+                typeof(Linq.Expressions.Expression).GetTypeInfo().Assembly.Location,
+                typeof(ComponentModel.EditorBrowsableAttribute).GetTypeInfo().Assembly.Location,
+                typeof(IEnumerable<>).GetTypeInfo().Assembly.Location,
+                typeof(Text.Encoding).GetTypeInfo().Assembly.Location,
+                typeof(Threading.Tasks.Task).GetTypeInfo().Assembly.Location,
+                typeof(IO.MemoryMappedFiles.MemoryMappedFile).GetTypeInfo().Assembly.Location,
+                typeof(Diagnostics.Debug).GetTypeInfo().Assembly.Location,
+                typeof(ImmutableArray).GetTypeInfo().Assembly.Location,
+                typeof(Text.RegularExpressions.Regex).GetTypeInfo().Assembly.Location,
+                typeof(Threading.Tasks.ParallelLoopResult).GetTypeInfo().Assembly.Location,
+            };
+
+            foreach (string path in paths.Distinct())
+            {
+                using (var peStream = File.OpenRead(path))
+                {
+                    TestChecksumAndAuthenticodeSignature(peStream);
+                }
+            }
+        }
+
+        private static bool TestChecksumAndAuthenticodeSignature(Stream peStream, byte[] privateKeyOpt = null)
+        {
+            var peHeaders = new PEHeaders(peStream);
+            bool is32bit = peHeaders.PEHeader.Magic == PEMagic.PE32;
+            uint expectedChecksum = peHeaders.PEHeader.CheckSum;
+            int peHeadersSize = peHeaders.PEHeaderStartOffset + PEHeader.Size(is32bit) + SectionHeader.Size * peHeaders.SectionHeaders.Length;
+
+            peStream.Position = 0;
+
+            if (expectedChecksum == 0)
+            {
+                // not signed
+                return false;
+            }
+
+            int peSize = (int)peStream.Length;
+            var peImage = new BlobBuilder(peSize);
+            Assert.Equal(peSize, peImage.TryWriteBytes(peStream, peSize));
+
+            var buffer = peImage.GetBlobs().Single().Buffer;
+            var checksumBlob = new Blob(buffer, peHeaders.PEHeaderStartOffset + PEHeader.OffsetOfChecksum, sizeof(uint));
+
+            uint checksum = PEBuilder.CalculateChecksum(peImage, checksumBlob);
+            Assert.Equal(expectedChecksum, checksum);
+
+            // validate signature:
+            if (privateKeyOpt != null)
+            {
+                // signature is calculated with checksum zeroed:
+                new BlobWriter(checksumBlob).WriteUInt32(0);
+
+                int snOffset;
+                Assert.True(peHeaders.TryGetDirectoryOffset(peHeaders.CorHeader.StrongNameSignatureDirectory, out snOffset));
+                var snBlob = new Blob(buffer, snOffset, peHeaders.CorHeader.StrongNameSignatureDirectory.Size);
+                var expectedSignature = snBlob.GetBytes().ToArray();
+                var signature = SigningUtilities.CalculateRsaSignature(PEBuilder.GetContentToSign(peImage, peHeadersSize, peHeaders.PEHeader.FileAlignment, snBlob), privateKeyOpt);
+                AssertEx.Equal(expectedSignature, signature);
+            }
+
+            return true;
+        }
+
+        [Fact]
+        public void GetPrefixBlob()
+        {
+            byte[] buffer = new byte[] { 0, 1, 2, 3, 4, 5 };
+
+            // [0, 1, <2, 3>, 4, 5]
+            var b = PEBuilder.GetPrefixBlob(new Blob(buffer, start: 0, length: 6), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(0, b.Start);
+            Assert.Equal(2, b.Length);
+
+            // [0, 1, <2, 3>, 4], 5
+            b = PEBuilder.GetPrefixBlob(new Blob(buffer, start: 0, length: 5), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(0, b.Start);
+            Assert.Equal(2, b.Length);
+            
+            // 0, [1, <2, 3>, 4], 5
+            b = PEBuilder.GetPrefixBlob(new Blob(buffer, start: 1, length: 4), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(1, b.Start);
+            Assert.Equal(1, b.Length);
+
+            // 0, 1, [<2, 3>, 4], 5
+            b = PEBuilder.GetPrefixBlob(new Blob(buffer, start: 2, length: 3), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(2, b.Start);
+            Assert.Equal(0, b.Length);
+
+            // 0, 1, [<2, 3>], 4, 5
+            b = PEBuilder.GetPrefixBlob(new Blob(buffer, start: 2, length: 2), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(2, b.Start);
+            Assert.Equal(0, b.Length);
+
+            // 0, 1, [<2>], 3, 4, 5
+            b = PEBuilder.GetPrefixBlob(new Blob(buffer, start: 2, length: 1), new Blob(buffer, start: 2, length: 1));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(2, b.Start);
+            Assert.Equal(0, b.Length);
+
+            // 0, 1, [<>]2, 3, 4, 5
+            b = PEBuilder.GetPrefixBlob(new Blob(buffer, start: 2, length: 0), new Blob(buffer, start: 2, length: 0));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(2, b.Start);
+            Assert.Equal(0, b.Length);
+        }
+
+        [Fact]
+        public void GetSuffixBlob()
+        {
+            byte[] buffer = new byte[] { 0, 1, 2, 3, 4, 5 };
+
+            // [0, 1, <2, 3>], 4, 5
+            var b = PEBuilder.GetSuffixBlob(new Blob(buffer, start: 0, length: 4), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(4, b.Start);
+            Assert.Equal(0, b.Length);
+
+            // 0, [1, <2, 3>, 4], 5
+            b = PEBuilder.GetSuffixBlob(new Blob(buffer, start: 1, length: 4), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(4, b.Start);
+            Assert.Equal(1, b.Length);
+
+            // 0, 1, [<2, 3>, 4, 5]
+            b = PEBuilder.GetSuffixBlob(new Blob(buffer, start: 2, length: 4), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(4, b.Start);
+            Assert.Equal(2, b.Length);
+
+            // [0, 1, <2, 3>, 4, 5]
+            b = PEBuilder.GetSuffixBlob(new Blob(buffer, start: 0, length: 6), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(4, b.Start);
+            Assert.Equal(2, b.Length);
+
+            // 0, 1, [<2, 3>], 4, 5
+            b = PEBuilder.GetSuffixBlob(new Blob(buffer, start: 2, length: 2), new Blob(buffer, start: 2, length: 2));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(4, b.Start);
+            Assert.Equal(0, b.Length);
+
+            // 0, 1, [<>]2, 3, 4, 5
+            b = PEBuilder.GetSuffixBlob(new Blob(buffer, start: 2, length: 0), new Blob(buffer, start: 2, length: 0));
+            Assert.Same(buffer, b.Buffer);
+            Assert.Equal(2, b.Start);
+            Assert.Equal(0, b.Length);
         }
     }
 }

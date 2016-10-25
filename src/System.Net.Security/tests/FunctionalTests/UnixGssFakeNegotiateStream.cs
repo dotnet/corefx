@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -50,7 +54,10 @@ namespace System.Net.Security.Tests
                 byte[] outBuf = null;
                 try
                 {
-                    handshakeDone = EstablishSecurityContext(ref thisRef._context, inBuf, out outBuf);
+                    SafeGssContextHandle context = thisRef._context; // workaround warning about a ref to a field on a MarshalByRefObject
+                    handshakeDone = EstablishSecurityContext(ref context, inBuf, out outBuf);
+                    thisRef._context = context;
+
                     thisRef._framer.WriteHandshakeFrame(outBuf, 0, outBuf.Length);
                 }
                 catch (Interop.NetSecurityNative.GssApiException e)
