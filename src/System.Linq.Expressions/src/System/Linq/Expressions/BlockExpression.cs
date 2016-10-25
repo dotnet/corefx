@@ -445,10 +445,7 @@ namespace System.Linq.Expressions
 
         protected IReadOnlyList<Expression> Body => _body;
 
-        internal override Expression GetExpression(int index)
-        {
-            return _body[index];
-        }
+        internal override Expression GetExpression(int index) => _body[index];
 
         internal override int ExpressionCount => _body.Count;
 
@@ -474,15 +471,13 @@ namespace System.Linq.Expressions
 
     internal sealed class ScopeWithType : ScopeN
     {
-        private readonly Type _type;
-
         internal ScopeWithType(IReadOnlyList<ParameterExpression> variables, IReadOnlyList<Expression> expressions, Type type)
             : base(variables, expressions)
         {
-            _type = type;
+            Type = type;
         }
 
-        public sealed override Type Type => _type;
+        public sealed override Type Type { get; }
 
         internal override BlockExpression Rewrite(ReadOnlyCollection<ParameterExpression> variables, Expression[] args)
         {
@@ -490,12 +485,12 @@ namespace System.Linq.Expressions
             {
                 Debug.Assert(variables.Count == Variables.Count);
                 ValidateVariables(variables, nameof(variables));
-                return new ScopeWithType(variables, Body, _type);
+                return new ScopeWithType(variables, Body, Type);
             }
             Debug.Assert(args.Length == ExpressionCount);
             Debug.Assert(variables == null || variables.Count == Variables.Count);
 
-            return new ScopeWithType(ReuseOrValidateVariables(variables), args, _type);
+            return new ScopeWithType(ReuseOrValidateVariables(variables), args, Type);
         }
     }
 
