@@ -61,28 +61,6 @@ namespace System
     // from Misc/SecurityUtils.cs
     internal static class SecurityUtils
     {
-        private static volatile ReflectionPermission memberAccessPermission = null;
-        private static volatile ReflectionPermission restrictedMemberAccessPermission = null;
-
-        private static ReflectionPermission MemberAccessPermission
-        {
-            get {
-                if (memberAccessPermission == null) {
-                    memberAccessPermission = new ReflectionPermission(ReflectionPermissionFlag.MemberAccess);
-                }
-                return memberAccessPermission;
-            }
-        }
-
-        private static ReflectionPermission RestrictedMemberAccessPermission {
-            get {
-                if (restrictedMemberAccessPermission == null) {
-                    restrictedMemberAccessPermission = new ReflectionPermission(ReflectionPermissionFlag.RestrictedMemberAccess);
-                }
-                return restrictedMemberAccessPermission;
-            }
-        }
-
         /// <summary>
         ///     This helper method provides safe access to Activator.CreateInstance.
         ///     NOTE: This overload will work only with public .ctors. 
@@ -108,46 +86,8 @@ namespace System
 
         internal static object MethodInfoInvoke(MethodInfo method, object target, object[] args) {
             Type type = method.DeclaringType;
-            if (type == null) {
-                // Type is null for Global methods. In this case we would need to demand grant set on 
-                // the containing assembly for internal methods.
-                if (!(method.IsPublic && GenericArgumentsAreVisible(method))) {
-                    DemandGrantSet(method.Module.Assembly);
-                }
-            } else if (!(type.IsVisible && method.IsPublic && GenericArgumentsAreVisible(method))) {
-                // this demand is required for internal types in system.dll and its friend assemblies. 
-                DemandReflectionAccess(type);
-            }
             return method.Invoke(target, args);
         }
-
-        private static void DemandGrantSet(Assembly assembly) {
-            PermissionSet targetGrantSet = assembly.PermissionSet;
-            targetGrantSet.AddPermission(RestrictedMemberAccessPermission);
-            targetGrantSet.Demand();
-        }
-
-        private static bool GenericArgumentsAreVisible(MethodInfo method) {
-            if (method.IsGenericMethod) {
-                Type[] parameterTypes = method.GetGenericArguments();
-                foreach (Type type in parameterTypes) {
-                    if (!type.IsVisible) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        private static void DemandReflectionAccess(Type type) {
-            try {
-                MemberAccessPermission.Demand();
-            }
-            catch (SecurityException) {
-                DemandGrantSet(type.Assembly);
-            }
-        }
-
     }
 
     internal static class HResults
