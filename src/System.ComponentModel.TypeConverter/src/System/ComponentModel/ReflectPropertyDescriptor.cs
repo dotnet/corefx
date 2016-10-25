@@ -7,6 +7,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.ComponentModel.Design;
 
 namespace System.ComponentModel
 {
@@ -586,7 +587,6 @@ namespace System.ComponentModel
 
         internal void ExtenderResetValue(IExtenderProvider provider, object component, PropertyDescriptor notifyDesc)
         {
-#if FEATURE_COMPONENT_CHANGE_SERVICE
             if (DefaultValue != s_noValue)
             {
                 ExtenderSetValue(provider, component, DefaultValue, notifyDesc);
@@ -643,12 +643,10 @@ namespace System.ComponentModel
                     }
                 }
             }
-#endif
         }
 
         internal void ExtenderSetValue(IExtenderProvider provider, object component, object value, PropertyDescriptor notifyDesc)
         {
-#if FEATURE_COMPONENT_CHANGE_SERVICE
             if (provider != null)
             {
                 ISite site = GetSite(component);
@@ -696,7 +694,6 @@ namespace System.ComponentModel
                     }
                 }
             }
-#endif
         }
 
         internal bool ExtenderShouldSerializeValue(IExtenderProvider provider, object component)
@@ -1086,7 +1083,6 @@ namespace System.ComponentModel
             {
                 SetValue(component, AmbientValue);
             }
-#if FEATURE_COMPONENT_CHANGE_SERVICE
             else if (ResetMethodValue != null)
             {
                 ISite site = GetSite(component);
@@ -1135,7 +1131,6 @@ namespace System.ComponentModel
                     }
                 }
             }
-#endif
         }
 
         /// <summary>
@@ -1159,7 +1154,6 @@ namespace System.ComponentModel
 
                 if (!IsReadOnly)
                 {
-#if FEATURE_COMPONENT_CHANGE_SERVICE
                     IComponentChangeService changeService = null;
 
                     // Announce that we are about to change this component
@@ -1192,34 +1186,32 @@ namespace System.ComponentModel
 
                     try
                     {
-#endif
-                    try
-                    {
-                        SetMethodValue.Invoke(invokee, new object[] { value });
-                        OnValueChanged(invokee, EventArgs.Empty);
-                    }
-                    catch (Exception t)
-                    {
-                        // Give ourselves a chance to unwind properly before rethrowing the exception.
-                        //
-                        value = oldValue;
-
-                        // If there was a problem setting the controls property then we get:
-                        // ArgumentException (from properties set method)
-                        // ==> Becomes inner exception of TargetInvocationException
-                        // ==> caught here
-
-                        if (t is TargetInvocationException && t.InnerException != null)
+                        try
                         {
-                            // Propagate the original exception up
-                            throw t.InnerException;
+                            SetMethodValue.Invoke(invokee, new object[] { value });
+                            OnValueChanged(invokee, EventArgs.Empty);
                         }
-                        else
+                        catch (Exception t)
                         {
-                            throw t;
+                            // Give ourselves a chance to unwind properly before rethrowing the exception.
+                            //
+                            value = oldValue;
+
+                            // If there was a problem setting the controls property then we get:
+                            // ArgumentException (from properties set method)
+                            // ==> Becomes inner exception of TargetInvocationException
+                            // ==> caught here
+
+                            if (t is TargetInvocationException && t.InnerException != null)
+                            {
+                                // Propagate the original exception up
+                                throw t.InnerException;
+                            }
+                            else
+                            {
+                                throw t;
+                            }
                         }
-                    }
-#if FEATURE_COMPONENT_CHANGE_SERVICE
                     }
                     finally
                     {
@@ -1230,7 +1222,6 @@ namespace System.ComponentModel
                             changeService.OnComponentChanged(component, this, oldValue, value);
                         }
                     }
-#endif
                 }
             }
         }
