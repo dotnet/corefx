@@ -97,7 +97,7 @@ namespace System.Linq.Expressions
         /// subclass of MethodCallExpression which is being used. 
         /// </summary>
         [ExcludeFromCodeCoverage] // Unreachable
-        internal virtual MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal virtual MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             throw ContractUtils.Unreachable;
         }
@@ -146,9 +146,9 @@ namespace System.Linq.Expressions
 
     internal sealed class MethodCallExpressionN : MethodCallExpression, IArgumentProvider
     {
-        private IList<Expression> _arguments;
+        private IReadOnlyList<Expression> _arguments;
 
-        public MethodCallExpressionN(MethodInfo method, IList<Expression> args)
+        public MethodCallExpressionN(MethodInfo method, IReadOnlyList<Expression> args)
             : base(method)
         {
             _arguments = args;
@@ -163,7 +163,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(ref _arguments);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance == null);
             Debug.Assert(args == null || args.Count == _arguments.Count);
@@ -174,9 +174,9 @@ namespace System.Linq.Expressions
 
     internal sealed class InstanceMethodCallExpressionN : InstanceMethodCallExpression, IArgumentProvider
     {
-        private IList<Expression> _arguments;
+        private IReadOnlyList<Expression> _arguments;
 
-        public InstanceMethodCallExpressionN(MethodInfo method, Expression instance, IList<Expression> args)
+        public InstanceMethodCallExpressionN(MethodInfo method, Expression instance, IReadOnlyList<Expression> args)
             : base(method, instance)
         {
             _arguments = args;
@@ -191,7 +191,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(ref _arguments);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance != null);
             Debug.Assert(args == null || args.Count == _arguments.Count);
@@ -219,7 +219,7 @@ namespace System.Linq.Expressions
             return EmptyReadOnlyCollection<Expression>.Instance;
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance == null);
             Debug.Assert(args == null || args.Count == 0);
@@ -254,7 +254,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(this, ref _arg0);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance == null);
             Debug.Assert(args == null || args.Count == 1);
@@ -297,7 +297,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(this, ref _arg0);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance == null);
             Debug.Assert(args == null || args.Count == 2);
@@ -341,7 +341,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(this, ref _arg0);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance == null);
             Debug.Assert(args == null || args.Count == 3);
@@ -387,7 +387,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(this, ref _arg0);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance == null);
             Debug.Assert(args == null || args.Count == 4);
@@ -435,7 +435,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(this, ref _arg0);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance == null);
             Debug.Assert(args == null || args.Count == 5);
@@ -468,7 +468,7 @@ namespace System.Linq.Expressions
             return EmptyReadOnlyCollection<Expression>.Instance;
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance != null);
             Debug.Assert(args == null || args.Count == 0);
@@ -503,7 +503,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(this, ref _arg0);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance != null);
             Debug.Assert(args == null || args.Count == 1);
@@ -545,7 +545,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(this, ref _arg0);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance != null);
             Debug.Assert(args == null || args.Count == 2);
@@ -589,7 +589,7 @@ namespace System.Linq.Expressions
             return ReturnReadOnly(this, ref _arg0);
         }
 
-        internal override MethodCallExpression Rewrite(Expression instance, IList<Expression> args)
+        internal override MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
         {
             Debug.Assert(instance != null);
             Debug.Assert(args == null || args.Count == 3);

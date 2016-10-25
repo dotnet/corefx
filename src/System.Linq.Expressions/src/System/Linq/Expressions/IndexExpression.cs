@@ -20,12 +20,12 @@ namespace System.Linq.Expressions
     {
         private readonly Expression _instance;
         private readonly PropertyInfo _indexer;
-        private IList<Expression> _arguments;
+        private IReadOnlyList<Expression> _arguments;
 
         internal IndexExpression(
             Expression instance,
             PropertyInfo indexer,
-            IList<Expression> arguments)
+            IReadOnlyList<Expression> arguments)
         {
             if (indexer == null)
             {

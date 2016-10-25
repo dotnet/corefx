@@ -18,10 +18,10 @@ namespace System.Linq.Expressions
     public class NewExpression : Expression, IArgumentProvider
     {
         private readonly ConstructorInfo _constructor;
-        private IList<Expression> _arguments;
+        private IReadOnlyList<Expression> _arguments;
         private readonly ReadOnlyCollection<MemberInfo> _members;
 
-        internal NewExpression(ConstructorInfo constructor, IList<Expression> arguments, ReadOnlyCollection<MemberInfo> members)
+        internal NewExpression(ConstructorInfo constructor, IReadOnlyList<Expression> arguments, ReadOnlyCollection<MemberInfo> members)
         {
             _constructor = constructor;
             _arguments = arguments;
