@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "System.Runtime": "4.3.0-preview1-24530-04",
+    "System.Runtime": "4.3.0-preview1-24625-02",
     "test-runtime": {
       "target": "project",
       "exclude": "compile"
