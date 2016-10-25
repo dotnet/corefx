@@ -26,6 +26,19 @@ namespace System.Net.Sockets.Tests
             handle.Set();
         }
 
+        [Fact]
+        public void TestInnerLoop()
+        {
+            throw new Exception("inner");
+        }
+
+        [OuterLoop]
+        [Fact]
+        public void TestOuterLoop()
+        {
+            throw new Exception("outer");
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SocketImplementationType.APM)]
