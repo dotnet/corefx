@@ -6,6 +6,8 @@
     <OutputType>Library</OutputType>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
+    <!-- Don't allow project reference to package dependency conversion -->
+    <KeepAllProjectReferences>true</KeepAllProjectReferences>
     <!-- Type being defined conflicts with imported type from dependency assembly -->
     <NoWarn>436</NoWarn>
   </PropertyGroup>

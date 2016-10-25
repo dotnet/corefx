@@ -8,9 +8,9 @@
     <ProjectReference Include="..\src\System.Threading.Thread.builds" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Packages are now runtime-specific and they were not before, so this allows package verification during build to find
-         the implementation library when looking it up just by netstandard1.7, instead of not finding it and falling back to
-         the netstandard1.3 version. -->
+    <!-- The implementation library is now runtime-specific and it was not before, so this allows package verification during
+         build to find the implementation library when looking it up just by netstandard1.7, instead of not finding it and
+         falling back to the netstandard1.3 version. -->
     <File Include="$(PlaceholderFile)">
       <TargetPath>lib/netstandard1.7</TargetPath>
     </File>
