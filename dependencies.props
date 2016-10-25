@@ -6,27 +6,27 @@
        Use the property below to control this behavior
   -->
   <PropertyGroup>
-    <DisableProjectNTfsAutoUpgrade Condition="'$(DisableProjectNTfsAutoUpgrade)'==''">true</DisableProjectNTfsAutoUpgrade>
+    <DisableProjectNTfsAutoUpgrade Condition="'$(DisableProjectNTfsAutoUpgrade)'==''">false</DisableProjectNTfsAutoUpgrade>
   </PropertyGroup>
 
   <PropertyGroup>
-    <CoreFxCurrentRef>80ecd400b5e763c9431197187a76088dac600c01</CoreFxCurrentRef>
-    <CoreClrCurrentRef>80ecd400b5e763c9431197187a76088dac600c01</CoreClrCurrentRef>
-    <ExternalCurrentRef>43ba6daa90c341491c7ffb65207e20cec1b66794</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>f981c5e06d00accf1063a87ba2e9791752a4f6b1</ProjectNTfsCurrentRef>
+    <CoreFxCurrentRef>d06586e86a06eb566a8671d13710f0d5da83a0d7</CoreFxCurrentRef>
+    <CoreClrCurrentRef>d06586e86a06eb566a8671d13710f0d5da83a0d7</CoreClrCurrentRef>
+    <ExternalCurrentRef>d06586e86a06eb566a8671d13710f0d5da83a0d7</ExternalCurrentRef>
+    <ProjectNTfsCurrentRef>b347d05cef00bd4b4d129b1d470cd653d9e97a7b</ProjectNTfsCurrentRef>
   </PropertyGroup>
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <CoreFxExpectedPrerelease>beta-24617-03</CoreFxExpectedPrerelease>
-    <CoreClrExpectedPrerelease>beta-24617-03</CoreClrExpectedPrerelease>
-    <ExternalExpectedPrerelease>beta-24617-00</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-24607-01</ProjectNTfsExpectedPrerelease>
+    <CoreFxExpectedPrerelease>beta-24625-01</CoreFxExpectedPrerelease>
+    <CoreClrExpectedPrerelease>beta-24625-02</CoreClrExpectedPrerelease>
+    <ExternalExpectedPrerelease>beta-24625-00</ExternalExpectedPrerelease>
+    <ProjectNTfsExpectedPrerelease>beta-24625-00</ProjectNTfsExpectedPrerelease>
   </PropertyGroup>
 
   <!-- Full package version strings that are used in other parts of the build. -->
   <PropertyGroup>
-    <AppXRunnerVersion>1.0.3-prerelease-00903-02</AppXRunnerVersion>
+    <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
     <XunitPerfAnalysisPackageVersion>1.0.0-alpha-build0040</XunitPerfAnalysisPackageVersion>
   </PropertyGroup>
 
@@ -89,20 +89,23 @@
     <TargetingPackDependency Include="Microsoft.TargetingPack.NETFramework.v4.6" />
     <TargetingPackDependency Include="Microsoft.TargetingPack.NETFramework.v4.6.1" />
     <TargetingPackDependency Include="Microsoft.TargetingPack.NETFramework.v4.6.2" />
-    <TargetingPackDependency Include="Microsoft.TargetingPack.Private.WinRT" />
     <StaticDependency Include="@(TargetingPackDependency)">
       <Version>1.0.1</Version>
+    </StaticDependency>
+
+    <StaticDependency Include="Microsoft.TargetingPack.Private.WinRT">
+      <Version>1.0.2</Version>
     </StaticDependency>
 
     <XUnitDependency Include="xunit"/>
     <XUnitDependency Include="xunit.runner.utility"/>
     <XUnitDependency Include="xunit.runner.console"/>
     <StaticDependency Include="@(XUnitDependency)">
-      <Version>2.1.0</Version>
+      <Version>2.2.0-beta2-build3300</Version>
     </StaticDependency>
-
+   
     <StaticDependency Include="Microsoft.xunit.netcore.extensions;Microsoft.DotNet.BuildTools.TestSuite">
-      <Version>1.0.0-prerelease-00830-02</Version>
+      <Version>1.0.0-prerelease-00925-01</Version>
     </StaticDependency>
 
     <PerformancePackDependency Include="Microsoft.DotNet.xunit.performance" />

@@ -13,7 +13,8 @@ namespace System.Net
     ///       response from a Uniform Resource Identifier (Uri). This is an abstract class.
     ///    </para>
     /// </devdoc>
-    public abstract class WebResponse : ISerializable, IDisposable
+    [Serializable]
+    public abstract class WebResponse : MarshalByRefObject, ISerializable, IDisposable
     {
         /// <devdoc>
         ///    <para>Initializes a new

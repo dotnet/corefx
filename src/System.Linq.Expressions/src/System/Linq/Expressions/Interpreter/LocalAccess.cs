@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -23,7 +23,7 @@ namespace System.Linq.Expressions.Interpreter
             _index = index;
         }
 
-        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IList<object> objects)
+        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IReadOnlyList<object> objects)
         {
             return cookie == null ?
                 InstructionName + "(" + _index + ")" :
@@ -85,7 +85,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            var box = frame.Closure[_index];
+            IStrongBox box = frame.Closure[_index];
             frame.Data[frame.StackIndex++] = box.Value;
             return +1;
         }
@@ -103,7 +103,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            var box = frame.Closure[_index];
+            IStrongBox box = frame.Closure[_index];
             frame.Data[frame.StackIndex++] = box;
             return +1;
         }
@@ -209,7 +209,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            var box = frame.Closure[_index];
+            IStrongBox box = frame.Closure[_index];
             box.Value = frame.Peek();
             return +1;
         }
@@ -415,7 +415,7 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var value = default(object);
+                object value = default(object);
 
                 try
                 {

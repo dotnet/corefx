@@ -106,16 +106,16 @@ namespace System.Linq.Expressions.Interpreter
                     );
             }
 
-            internal static InstructionView[] GetInstructionViews(IList<Instruction> instructions, IList<object> objects,
-                Func<int, int> labelIndexer, IList<KeyValuePair<int, object>> debugCookies)
+            internal static InstructionView[] GetInstructionViews(IReadOnlyList<Instruction> instructions, IReadOnlyList<object> objects,
+                Func<int, int> labelIndexer, IReadOnlyList<KeyValuePair<int, object>> debugCookies)
             {
                 var result = new List<InstructionView>();
                 int index = 0;
                 int stackDepth = 0;
                 int continuationsDepth = 0;
 
-                var cookieEnumerator = (debugCookies ?? Array.Empty<KeyValuePair<int, object>>()).GetEnumerator();
-                var hasCookie = cookieEnumerator.MoveNext();
+                IEnumerator<KeyValuePair<int, object>> cookieEnumerator = (debugCookies ?? Array.Empty<KeyValuePair<int, object>>()).GetEnumerator();
+                bool hasCookie = cookieEnumerator.MoveNext();
 
                 for (int i = 0, n = instructions.Count; i < n; i++)
                 {
@@ -409,7 +409,7 @@ namespace System.Linq.Expressions.Interpreter
 
             if (instruction != null)
             {
-                var newInstruction = instruction.BoxIfIndexMatches(index);
+                Instruction newInstruction = instruction.BoxIfIndexMatches(index);
                 if (newInstruction != null)
                 {
                     _instructions[instructionIndex] = newInstruction;

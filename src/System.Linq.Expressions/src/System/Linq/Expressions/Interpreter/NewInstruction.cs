@@ -25,7 +25,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             int first = frame.StackIndex - _argumentCount;
 
-            var args = GetArgs(frame, first);
+            object[] args = GetArgs(frame, first);
 
             object ret;
             try
@@ -82,7 +82,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             int first = frame.StackIndex - _argumentCount;
 
-            var args = GetArgs(frame, first);
+            object[] args = GetArgs(frame, first);
 
             try
             {
@@ -103,7 +103,7 @@ namespace System.Linq.Expressions.Interpreter
             {
                 if (args != null)
                 {
-                    foreach (var arg in _byrefArgs)
+                    foreach (ByRefUpdater arg in _byrefArgs)
                     {
                         arg.Update(frame, args[arg.ArgumentIndex]);
                     }

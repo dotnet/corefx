@@ -72,7 +72,7 @@ namespace System.Linq.Expressions.Interpreter
             // Once defined, validate all jumps
             if (HasDefinitions && !HasMultipleDefinitions)
             {
-                foreach (var r in _references)
+                foreach (LabelScopeInfo r in _references)
                 {
                     ValidateJump(r);
                 }
@@ -219,7 +219,7 @@ namespace System.Linq.Expressions.Interpreter
 
         internal static T CommonNode<T>(T first, T second, Func<T, T> parent) where T : class
         {
-            var cmp = EqualityComparer<T>.Default;
+            EqualityComparer<T> cmp = EqualityComparer<T>.Default;
             if (cmp.Equals(first, second))
             {
                 return first;

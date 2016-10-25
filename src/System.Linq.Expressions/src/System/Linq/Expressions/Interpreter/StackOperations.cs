@@ -46,9 +46,9 @@ namespace System.Linq.Expressions.Interpreter
             return +1;
         }
 
-        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IList<object> objects)
+        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IReadOnlyList<object> objects)
         {
-            return String.Format(CultureInfo.InvariantCulture, "LoadCached({0}: {1})", _index, objects[(int)_index]);
+            return string.Format(CultureInfo.InvariantCulture, "LoadCached({0}: {1})", _index, objects[(int)_index]);
         }
 
         public override string ToString() => "LoadCached(" + _index + ")";
@@ -84,7 +84,7 @@ namespace System.Linq.Expressions.Interpreter
         
         public override int Run(InterpretedFrame frame)
         {
-            var value = frame.Peek();
+            object value = frame.Peek();
             frame.Data[frame.StackIndex++] = value;
             return +1;
         }

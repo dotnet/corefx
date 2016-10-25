@@ -147,6 +147,8 @@
     <Compile Include="TimeZoneInfoTests.netstandard1.7.cs" />
     <Compile Include="TimeZoneNotFoundExceptionTests.netstandard1.7.cs" />
     <Compile Include="VersionTests.netstandard1.7.cs" />
+    <Compile Include="System\ComponentModel\DefaultValueAttributeTests.netstandard1.7.cs" />
+    <Compile Include="System\ComponentModel\EditorBrowsableAttributeTests.netstandard1.7.cs" />
     <Compile Include="System\Reflection\AssemblyTests.cs" />
     <Compile Include="System\Reflection\AssemblyNameTests.cs" />
     <Compile Include="System\Reflection\ConstructorInfoTests.cs" />
@@ -188,6 +190,17 @@
     <Compile Include="System\AppContext\AppContext.Switch.Validation.cs" />
     <Compile Include="System\Reflection\StrongNameKeyPairTests.netstandard1.7.cs" />
     <Compile Include="System\ActivatorTest.netstandard1.7.cs" />
+    <Compile Include="System\GCTests.netstandard1.7.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
+      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
+   </Compile>
+   <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
+      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
+    </Compile>
+   <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestModule\System.Reflection.TestModule.dll">
@@ -199,11 +212,6 @@
     <ProjectReference Include="..\..\System.Private.Uri\pkg\System.Private.Uri.pkgproj">
       <Project>{4AC5343E-6E31-4BA5-A795-0493AE7E9008}</Project>
       <Name>System.Private.Uri</Name>
-    </ProjectReference>
-    <!-- TODO Remove once System.Security.Permissions has been published -->
-    <ProjectReference Include="..\..\System.Security.Permissions\pkg\System.Security.Permissions.pkgproj">
-      <Project>{4AC5343E-6E31-4BA5-A795-0493AE7E9008}</Project>
-      <Name>System.Security.Permissions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

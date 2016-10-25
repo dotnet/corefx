@@ -54,6 +54,15 @@ namespace System.Security.Cryptography
         public abstract byte[] GetBytes(int cb);
         public abstract void Reset();
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public abstract partial class DES : System.Security.Cryptography.SymmetricAlgorithm
+    {
+        protected DES() { }
+        public override byte[] Key { get { return default(byte[]); } set { } }
+        public static System.Security.Cryptography.DES Create() { return default(System.Security.Cryptography.DES); }
+        public static bool IsSemiWeakKey(byte[] rgbKey) { return default(bool); }
+        public static bool IsWeakKey(byte[] rgbKey) { return default(bool); }
+    }
     public abstract partial class DSA : System.Security.Cryptography.AsymmetricAlgorithm
     {
         protected DSA() { }
@@ -274,6 +283,40 @@ namespace System.Security.Cryptography
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public abstract void GetBytes(byte[] data);
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public abstract partial class RC2 : System.Security.Cryptography.SymmetricAlgorithm
+    {
+        protected int EffectiveKeySizeValue;
+        protected RC2() { }
+        public virtual int EffectiveKeySize { get { return default(int); } set { } }
+        public override int KeySize { get { return default(int); } set { } }
+        public static System.Security.Cryptography.RC2 Create() { return default(System.Security.Cryptography.RC2); }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public abstract partial class Rijndael : System.Security.Cryptography.SymmetricAlgorithm
+    {
+        protected Rijndael() { }
+        public static System.Security.Cryptography.Rijndael Create() { return default(System.Security.Cryptography.Rijndael); }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public sealed partial class RijndaelManaged : System.Security.Cryptography.Rijndael
+    {
+        public RijndaelManaged() { }
+        public override int BlockSize { get { return default(int); } set { } }
+        public override byte[] IV { get { return default(byte[]); } set { } }
+        public override byte[] Key { get { return default(byte[]); } set { } }
+        public override int KeySize { get { return default(int); } set { } }
+        public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { return default(System.Security.Cryptography.KeySizes[]); } }
+        public override System.Security.Cryptography.CipherMode Mode { get { return default(System.Security.Cryptography.CipherMode); } set { } }
+        public override System.Security.Cryptography.PaddingMode Padding { get { return default(System.Security.Cryptography.PaddingMode); } set { } }
+        public override System.Security.Cryptography.ICryptoTransform CreateDecryptor() { return default(System.Security.Cryptography.ICryptoTransform); }
+        public override System.Security.Cryptography.ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV) { return default(System.Security.Cryptography.ICryptoTransform); }
+        public override System.Security.Cryptography.ICryptoTransform CreateEncryptor() { return default(System.Security.Cryptography.ICryptoTransform); }
+        public override System.Security.Cryptography.ICryptoTransform CreateEncryptor(byte[] rgbKey, byte[] rgbIV) { return default(System.Security.Cryptography.ICryptoTransform); }
+        protected override void Dispose(bool disposing) { }
+        public override void GenerateIV() { }
+        public override void GenerateKey() { }
     }
     public partial class Rfc2898DeriveBytes : System.Security.Cryptography.DeriveBytes
     {

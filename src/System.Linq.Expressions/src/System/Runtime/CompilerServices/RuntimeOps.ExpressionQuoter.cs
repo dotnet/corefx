@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Linq.Expressions;
 using System.Linq.Expressions.Compiler;
-using System.Reflection;
 using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Runtime.CompilerServices
@@ -89,7 +88,7 @@ namespace System.Runtime.CompilerServices
                 {
                     _shadowedVars.Push(new HashSet<ParameterExpression>(node.Variables));
                 }
-                var b = ExpressionVisitorUtils.VisitBlockExpressions(this, node);
+                Expression[] b = ExpressionVisitorUtils.VisitBlockExpressions(this, node);
                 if (node.Variables.Count > 0)
                 {
                     _shadowedVars.Pop();
@@ -147,7 +146,7 @@ namespace System.Runtime.CompilerServices
                     return node;
                 }
 
-                var boxesConst = Expression.Constant(new RuntimeVariables(boxes.ToArray()), typeof(IRuntimeVariables));
+                ConstantExpression boxesConst = Expression.Constant(new RuntimeVariables(boxes.ToArray()), typeof(IRuntimeVariables));
                 // All of them were rewritten. Just return the array as a constant
                 if (vars.Count == 0)
                 {

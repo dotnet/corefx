@@ -96,10 +96,10 @@ namespace System.Linq.Expressions.Compiler
         {
             Node = node;
             IsMethod = isMethod;
-            var variables = GetVariables(node);
+            IReadOnlyList<ParameterExpression> variables = GetVariables(node);
 
             Definitions = new Dictionary<ParameterExpression, VariableStorageKind>(variables.Count);
-            foreach (var v in variables)
+            foreach (ParameterExpression v in variables)
             {
                 Definitions.Add(v, VariableStorageKind.Local);
             }
@@ -174,7 +174,7 @@ namespace System.Linq.Expressions.Compiler
                 // Find what array each variable is on & its index
                 var indexes = new ArrayBuilder<long>(vars.Count);
 
-                foreach (var variable in vars)
+                foreach (ParameterExpression variable in vars)
                 {
                     // For each variable, find what array it's defined on
                     ulong parents = 0;
@@ -293,7 +293,7 @@ namespace System.Linq.Expressions.Compiler
                 _closureHoistedLocals = _parent.NearestHoistedLocals;
             }
 
-            var hoistedVars = GetVariables().Where(p => Definitions[p] == VariableStorageKind.Hoisted).ToReadOnly();
+            ReadOnlyCollection<ParameterExpression> hoistedVars = GetVariables().Where(p => Definitions[p] == VariableStorageKind.Hoisted).ToReadOnly();
 
             if (hoistedVars.Count > 0)
             {
@@ -364,7 +364,7 @@ namespace System.Linq.Expressions.Compiler
                 return;
             }
 
-            foreach (var refCount in ReferenceCount)
+            foreach (KeyValuePair<ParameterExpression, int> refCount in ReferenceCount)
             {
                 if (ShouldCache(refCount.Key, refCount.Value))
                 {
@@ -417,7 +417,7 @@ namespace System.Linq.Expressions.Compiler
 
             while ((locals = locals.Parent) != null)
             {
-                var v = locals.SelfVariable;
+                ParameterExpression v = locals.SelfVariable;
                 var local = new LocalStorage(lc, v);
                 local.EmitStore(ResolveVariable(v));
                 _locals.Add(v, local);
@@ -470,7 +470,7 @@ namespace System.Linq.Expressions.Compiler
                 yield return param;
             }
 
-            foreach (var scope in MergedScopes)
+            foreach (BlockExpression scope in MergedScopes)
             {
                 foreach (ParameterExpression param in scope.Variables)
                 {
@@ -479,7 +479,7 @@ namespace System.Linq.Expressions.Compiler
             }
         }
 
-        private static IList<ParameterExpression> GetVariables(object scope)
+        private static IReadOnlyList<ParameterExpression> GetVariables(object scope)
         {
             var lambda = scope as LambdaExpression;
             if (lambda != null)

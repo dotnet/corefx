@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace System.Net
 {
     [Serializable]
-    public abstract class WebRequest : ISerializable
+    public abstract class WebRequest :  MarshalByRefObject, ISerializable
     {
         internal class WebRequestPrefixElement
         {
@@ -370,13 +370,15 @@ namespace System.Net
                         if (s_prefixList == null)
                         {
                             var httpRequestCreator = new HttpRequestCreator();
+                            var ftpRequestCreator = new FtpWebRequestCreator();
                             var fileRequestCreator = new FileWebRequestCreator();
 
-                            const int Count = 3;
+                            const int Count = 4;
                             var prefixList = new List<WebRequestPrefixElement>(Count)
                             {
                                 new WebRequestPrefixElement("http:", httpRequestCreator),
                                 new WebRequestPrefixElement("https:", httpRequestCreator),
+                                new WebRequestPrefixElement("ftp:", ftpRequestCreator),
                                 new WebRequestPrefixElement("file:", fileRequestCreator),
                             };
                             Debug.Assert(prefixList.Count == Count, $"Expected {Count}, got {prefixList.Count}");

@@ -33,10 +33,12 @@
     <Compile Include="IPAddressMappingTest.cs" />
     <Compile Include="IPEndPointTest.cs" />
     <Compile Include="NetworkCredentialTest.cs" />
+    <Compile Include="RequestCachePolicyTest.cs" Condition="'$(TargetGroup)' == ''" />
     <Compile Include="SocketAddressTest.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="SerializationTest.cs" />
+    <Compile Include="CookieContainerAddTest.cs" />
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>

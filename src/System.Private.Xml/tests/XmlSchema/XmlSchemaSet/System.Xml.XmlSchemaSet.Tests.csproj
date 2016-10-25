@@ -9,7 +9,6 @@
     <AssemblyName>System.Xml.XmlSchema.XmlSchemaSet.Tests</AssemblyName>
     <NuGetTargetMoniker>.NETStandard,Version=v1.7</NuGetTargetMoniker>
     <RootNamespace>System.Xml.Tests</RootNamespace>
-    <KeepAllProjectReferences>true</KeepAllProjectReferences>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -59,9 +58,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\System.Xml.ReaderWriter\pkg\System.Xml.ReaderWriter.pkgproj" />
     <ProjectReference Include="..\..\..\..\System.Xml.XPath\pkg\System.Xml.XPath.pkgproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -9,13 +9,15 @@ using System.Net.Cache;
 using System.Net.Http;
 using System.Net.Security;
 using System.Runtime.Serialization;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net
 {
-    public class HttpWebRequest : WebRequest ,ISerializable
+    [Serializable]
+    public class HttpWebRequest : WebRequest, ISerializable
     {
         private const int DefaultContinueTimeout = 350; // Current default value from .NET Desktop.
 
@@ -1138,6 +1140,7 @@ namespace System.Net
                 handler.ClientCertificates.AddRange(ClientCertificates);
 
                 // Set relevant properties from ServicePointManager
+                handler.SslProtocols = (SslProtocols)ServicePointManager.SecurityProtocol;
                 handler.CheckCertificateRevocationList = ServicePointManager.CheckCertificateRevocationList;
                 RemoteCertificateValidationCallback rcvc = ServerCertificateValidationCallback != null ? 
                                                 ServerCertificateValidationCallback :

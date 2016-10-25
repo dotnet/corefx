@@ -21,15 +21,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                var shift = frame.Pop();
-                var value = frame.Pop();
+                object shift = frame.Pop();
+                object value = frame.Pop();
                 if (value == null || shift == null)
                 {
                     frame.Push(null);
                 }
                 else
                 {
-                    frame.Push((SByte)(((SByte)value) >> ((int)shift)));
+                    frame.Push((sbyte)(((sbyte)value) >> ((int)shift)));
                 }
                 return +1;
             }
@@ -39,15 +39,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                var shift = frame.Pop();
-                var value = frame.Pop();
+                object shift = frame.Pop();
+                object value = frame.Pop();
                 if (value == null || shift == null)
                 {
                     frame.Push(null);
                 }
                 else
                 {
-                    frame.Push((Int16)(((Int16)value) >> ((int)shift)));
+                    frame.Push((short)(((short)value) >> ((int)shift)));
                 }
                 return +1;
             }
@@ -57,15 +57,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                var shift = frame.Pop();
-                var value = frame.Pop();
+                object shift = frame.Pop();
+                object value = frame.Pop();
                 if (value == null || shift == null)
                 {
                     frame.Push(null);
                 }
                 else
                 {
-                    frame.Push(((Int32)value) >> ((int)shift));
+                    frame.Push(((int)value) >> ((int)shift));
                 }
                 return +1;
             }
@@ -75,15 +75,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                var shift = frame.Pop();
-                var value = frame.Pop();
+                object shift = frame.Pop();
+                object value = frame.Pop();
                 if (value == null || shift == null)
                 {
                     frame.Push(null);
                 }
                 else
                 {
-                    frame.Push(((Int64)value) >> ((int)shift));
+                    frame.Push(((long)value) >> ((int)shift));
                 }
                 return +1;
             }
@@ -93,15 +93,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                var shift = frame.Pop();
-                var value = frame.Pop();
+                object shift = frame.Pop();
+                object value = frame.Pop();
                 if (value == null || shift == null)
                 {
                     frame.Push(null);
                 }
                 else
                 {
-                    frame.Push((Byte)(((Byte)value) >> ((int)shift)));
+                    frame.Push((byte)(((byte)value) >> ((int)shift)));
                 }
                 return +1;
             }
@@ -111,15 +111,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                var shift = frame.Pop();
-                var value = frame.Pop();
+                object shift = frame.Pop();
+                object value = frame.Pop();
                 if (value == null || shift == null)
                 {
                     frame.Push(null);
                 }
                 else
                 {
-                    frame.Push((UInt16)(((UInt16)value) >> ((int)shift)));
+                    frame.Push((ushort)(((ushort)value) >> ((int)shift)));
                 }
                 return +1;
             }
@@ -129,15 +129,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                var shift = frame.Pop();
-                var value = frame.Pop();
+                object shift = frame.Pop();
+                object value = frame.Pop();
                 if (value == null || shift == null)
                 {
                     frame.Push(null);
                 }
                 else
                 {
-                    frame.Push(((UInt32)value) >> ((int)shift));
+                    frame.Push(((uint)value) >> ((int)shift));
                 }
                 return +1;
             }
@@ -147,15 +147,15 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                var shift = frame.Pop();
-                var value = frame.Pop();
+                object shift = frame.Pop();
+                object value = frame.Pop();
                 if (value == null || shift == null)
                 {
                     frame.Push(null);
                 }
                 else
                 {
-                    frame.Push(((UInt64)value) >> ((int)shift));
+                    frame.Push(((ulong)value) >> ((int)shift));
                 }
                 return +1;
             }
@@ -165,7 +165,9 @@ namespace System.Linq.Expressions.Interpreter
         public static Instruction Create(Type type)
         {
             // Boxed enums can be unboxed as their underlying types:
-            switch (System.Dynamic.Utils.TypeExtensions.GetTypeCode(type.GetTypeInfo().IsEnum ? Enum.GetUnderlyingType(type) : TypeUtils.GetNonNullableType(type)))
+            Type underlyingType = type.GetTypeInfo().IsEnum ? Enum.GetUnderlyingType(type) : TypeUtils.GetNonNullableType(type);
+
+            switch (underlyingType.GetTypeCode())
             {
                 case TypeCode.SByte: return s_SByte ?? (s_SByte = new RightShiftSByte());
                 case TypeCode.Byte: return s_byte ?? (s_byte = new RightShiftByte());

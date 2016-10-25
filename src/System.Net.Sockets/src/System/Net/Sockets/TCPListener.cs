@@ -123,6 +123,16 @@ namespace System.Net.Sockets
             }
         }
 
+        public void AllowNatTraversal(bool allowed)
+        {
+            if (_active)
+            {
+                throw new InvalidOperationException(SR.net_tcplistener_mustbestopped);
+            }
+
+            _serverSocket.SetIPProtectionLevel(allowed ? IPProtectionLevel.Unrestricted : IPProtectionLevel.EdgeRestricted);
+        }
+
         // Starts listening to network requests.
         public void Start()
         {
@@ -385,6 +395,31 @@ namespace System.Net.Sockets
                 (callback, state) => ((TcpListener)state).BeginAcceptTcpClient(callback, state),
                 asyncResult => ((TcpListener)asyncResult.AsyncState).EndAcceptTcpClient(asyncResult),
                 state: this);
+        }
+
+
+        // This creates a TcpListener that listens on both IPv4 and IPv6 on the given port.
+        public static TcpListener Create(int port)
+        {
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Enter(NetEventSource.ComponentType.Socket, "TcpListener.Create", "Port: " + port, null);
+            }
+
+            if (!TcpValidationHelpers.ValidatePortNumber(port))
+            {
+                throw new ArgumentOutOfRangeException(nameof(port));
+            }
+
+            TcpListener listener = new TcpListener(IPAddress.IPv6Any, port);
+            listener.Server.DualMode = true;
+
+            if (NetEventSource.Log.IsEnabled())
+            {
+                NetEventSource.Exit(NetEventSource.ComponentType.Socket, "TcpListener.Create", "Port: " + port, null);
+            }
+
+            return listener;
         }
     }
 }

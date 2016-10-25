@@ -11,7 +11,7 @@ namespace System.Linq.Expressions.Interpreter
 {
     internal abstract class OffsetInstruction : Instruction
     {
-        internal const int Unknown = Int32.MinValue;
+        internal const int Unknown = int.MinValue;
         internal const int CacheSize = 32;
 
         // the offset to jump to (relative to this instruction):
@@ -24,7 +24,7 @@ namespace System.Linq.Expressions.Interpreter
             Debug.Assert(_offset == Unknown && offset != Unknown);
             _offset = offset;
 
-            var cache = Cache;
+            Instruction[] cache = Cache;
             if (cache != null && offset >= 0 && offset < cache.Length)
             {
                 return cache[offset] ?? (cache[offset] = this);
@@ -33,7 +33,7 @@ namespace System.Linq.Expressions.Interpreter
             return this;
         }
 
-        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IList<object> objects)
+        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IReadOnlyList<object> objects)
         {
             return ToString() + (_offset != Unknown ? " -> " + (instructionIndex + _offset) : "");
         }
@@ -209,7 +209,7 @@ namespace System.Linq.Expressions.Interpreter
             return frame.Interpreter._labels[_labelIndex];
         }
 
-        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IList<object> objects)
+        public override string ToDebugString(int instructionIndex, object cookie, Func<int, int> labelIndexer, IReadOnlyList<object> objects)
         {
             Debug.Assert(_labelIndex != UnknownInstrIndex);
             int targetIndex = labelIndexer(_labelIndex);
@@ -282,7 +282,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             if (labelIndex < CacheSize)
             {
-                var index = Variants * labelIndex | (labelTargetGetsValue ? 4 : 0) | (hasResult ? 2 : 0) | (hasValue ? 1 : 0);
+                int index = Variants * labelIndex | (labelTargetGetsValue ? 4 : 0) | (hasResult ? 2 : 0) | (hasValue ? 1 : 0);
                 return s_cache[index] ?? (s_cache[index] = new GotoInstruction(labelIndex, hasResult, hasValue, labelTargetGetsValue));
             }
             return new GotoInstruction(labelIndex, hasResult, hasValue, labelTargetGetsValue);
@@ -344,7 +344,7 @@ namespace System.Linq.Expressions.Interpreter
             frame.InstructionIndex++;
 
             // Start to run the try/catch/finally blocks
-            var instructions = frame.Interpreter.Instructions.Instructions;
+            Instruction[] instructions = frame.Interpreter.Instructions.Instructions;
             ExceptionHandler exHandler;
             try
             {
@@ -471,7 +471,7 @@ namespace System.Linq.Expressions.Interpreter
             frame.InstructionIndex++;
 
             // Start to run the try/fault blocks
-            var instructions = frame.Interpreter.Instructions.Instructions;
+            Instruction[] instructions = frame.Interpreter.Instructions.Instructions;
 
             // C# 6 has no direct support for fault blocks, but they can be faked or coerced out of the compiler
             // in several ways. Catch-and-rethrow can work in specific cases, but not generally as the double-pass

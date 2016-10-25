@@ -121,49 +121,49 @@ namespace System.Linq.Expressions.Interpreter
         {
             object result;
 
-            switch (System.Dynamic.Utils.TypeExtensions.GetTypeCode(type))
+            switch (type.GetTypeCode())
             {
                 case TypeCode.Boolean:
                     result = ScriptingRuntimeHelpers.False;
                     break;
                 case TypeCode.SByte:
-                    result = default(SByte);
+                    result = default(sbyte);
                     break;
                 case TypeCode.Byte:
-                    result = default(Byte);
+                    result = default(byte);
                     break;
                 case TypeCode.Char:
-                    result = default(Char);
+                    result = default(char);
                     break;
                 case TypeCode.Int16:
-                    result = default(Int16);
+                    result = default(short);
                     break;
                 case TypeCode.Int32:
                     result = ScriptingRuntimeHelpers.Int32_0;
                     break;
                 case TypeCode.Int64:
-                    result = default(Int64);
+                    result = default(long);
                     break;
                 case TypeCode.UInt16:
-                    result = default(UInt16);
+                    result = default(ushort);
                     break;
                 case TypeCode.UInt32:
-                    result = default(UInt32);
+                    result = default(uint);
                     break;
                 case TypeCode.UInt64:
-                    result = default(UInt64);
+                    result = default(ulong);
                     break;
 
                 case TypeCode.Single:
-                    return default(Single);
+                    return default(float);
                 case TypeCode.Double:
-                    return default(Double);
+                    return default(double);
                 //            case TypeCode.DBNull: 
                 //                  return default(DBNull); 
                 case TypeCode.DateTime:
                     return default(DateTime);
                 case TypeCode.Decimal:
-                    return default(Decimal);
+                    return default(decimal);
                 default:
                     return null;
             }

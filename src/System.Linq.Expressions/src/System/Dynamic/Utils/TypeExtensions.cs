@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace System.Dynamic.Utils
 {
@@ -43,7 +43,7 @@ namespace System.Dynamic.Utils
             {
                 return false;
             }
-            var ps = mi.GetParameters();
+            ParameterInfo[] ps = mi.GetParameters();
 
             if (ps.Length != argTypes.Length)
             {
@@ -90,19 +90,19 @@ namespace System.Dynamic.Utils
                 return TypeCode.Double;
             else if (type == typeof(decimal))
                 return TypeCode.Decimal;
-            else if (type == typeof(System.DateTime))
+            else if (type == typeof(DateTime))
                 return TypeCode.DateTime;
             else if (type == typeof(string))
                 return TypeCode.String;
             else if (type.GetTypeInfo().IsEnum)
-                return GetTypeCode(Enum.GetUnderlyingType(type));
+                return Enum.GetUnderlyingType(type).GetTypeCode();
             else
                 return TypeCode.Object;
         }
 
         public static IEnumerable<MethodInfo> GetStaticMethods(this Type type)
         {
-            foreach (var method in type.GetRuntimeMethods())
+            foreach (MethodInfo method in type.GetRuntimeMethods())
             {
                 if (method.IsStatic)
                 {
