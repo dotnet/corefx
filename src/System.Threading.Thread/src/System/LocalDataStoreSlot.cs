@@ -8,15 +8,13 @@ namespace System
 {
     public sealed class LocalDataStoreSlot
     {
-        private readonly ThreadLocal<object> _data;
-
         internal LocalDataStoreSlot(ThreadLocal<object> data)
         {
-            _data = data;
+            Data = data;
             GC.SuppressFinalize(this);
         }
 
-        internal ThreadLocal<object> Data => _data;
+        internal ThreadLocal<object> Data { get; private set; }
 
         ~LocalDataStoreSlot()
         {

@@ -91,7 +91,7 @@ namespace System.Threading
         {
             t_currentThread = this;
 
-            var start = _start;
+            Delegate start = _start;
             _start = null;
             Debug.Assert(start is ThreadStart);
             ((ThreadStart)start)();
@@ -101,7 +101,7 @@ namespace System.Threading
         {
             t_currentThread = this;
 
-            var start = _start;
+            Delegate start = _start;
             _start = null;
             Debug.Assert(start is ParameterizedThreadStart);
             ((ParameterizedThreadStart)start)(parameter);
@@ -111,7 +111,7 @@ namespace System.Threading
         {
             get
             {
-                var currentThread = t_currentThread;
+                Thread currentThread = t_currentThread;
                 if (currentThread == null)
                 {
                     t_currentThread = currentThread = new Thread(RuntimeThread.CurrentThread);

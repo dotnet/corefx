@@ -16,7 +16,7 @@ namespace System.Threading.Threads.Tests
 
             var ex = new Exception();
             e = new ThreadExceptionEventArgs(ex);
-            Assert.Equal(ex, e.Exception);
+            Assert.Same(ex, e.Exception);
         }
     }
 }
