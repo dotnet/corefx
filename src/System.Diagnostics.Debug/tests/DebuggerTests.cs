@@ -15,13 +15,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void Break()
-        {
-            if (!Debugger.IsAttached)
-                Debugger.Break();
-        }
-
-        [Fact]
         public void IsLogging()
         {
             if (Debugger.IsAttached)
