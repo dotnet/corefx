@@ -265,6 +265,7 @@ namespace System.Net
     {
         protected TransportContext() { }
         public abstract System.Security.Authentication.ExtendedProtection.ChannelBinding GetChannelBinding(System.Security.Authentication.ExtendedProtection.ChannelBindingKind kind);
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Authentication.ExtendedProtection.TokenBinding> GetTlsTokenBindings() { throw null; }
     }
 }
 namespace System.Net.Cache
@@ -470,5 +471,18 @@ namespace System.Security.Authentication.ExtendedProtection
         Endpoint = 26,
         Unique = 25,
         Unknown = 0,
+    }
+    public sealed class TokenBinding
+    {
+#if netcoreapp11
+        public TokenBinding(TokenBindingType bindingType, byte[] rawTokenBindingId) { }
+#endif
+        public byte[] GetRawTokenBindingId() { throw null; }
+        public TokenBindingType BindingType { get { throw null; } }
+    }
+    public enum TokenBindingType
+    {
+        Provided = 0,
+        Referred = 1
     }
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
@@ -10,9 +10,9 @@
     <ProjectGuid>{4FE5ECEE-ACC5-4558-A946-573426599B73}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NugetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NugetTargetMoniker>
-  </PropertyGroup> 
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == ''">
-     <DefineConstants>NetStandard17</DefineConstants>
+    <DefineConstants>NetStandard17</DefineConstants>
   </PropertyGroup>
   <!-- Help VS understand available configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
@@ -39,6 +39,7 @@
   <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="SerializationTest.cs" />
     <Compile Include="CookieContainerAddTest.cs" />
+    <Compile Include="TransportContextTest.cs" />
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
