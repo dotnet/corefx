@@ -159,6 +159,7 @@ namespace System.Diagnostics
         public string UserName { get { throw null; } set { } }
         public bool UseShellExecute { get { throw null; } set { } }
         public string WorkingDirectory { get { throw null; } set { } }
+        public bool ErrorDialog { get { throw null; } set { } }
     }
     public partial class ProcessThread : System.ComponentModel.Component
     {
