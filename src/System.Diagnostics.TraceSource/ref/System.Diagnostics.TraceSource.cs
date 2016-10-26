@@ -74,6 +74,7 @@ namespace System.Diagnostics
         protected string Value { get { throw null; } set { } }
         protected virtual void OnSwitchSettingChanged() { }
         protected virtual void OnValueChanged() { }
+        public System.Collections.Specialized.StringDictionary Attributes { get { throw null; } }
     }
     public sealed partial class Trace
     {
