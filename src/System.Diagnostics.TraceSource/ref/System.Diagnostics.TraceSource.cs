@@ -53,6 +53,7 @@ namespace System.Diagnostics
         Information = 15,
         Off = 0,
         Verbose = 31,
+        ActivityTracing = 0xFF00,
         Warning = 7,
     }
     public partial class SourceSwitch : System.Diagnostics.Switch
