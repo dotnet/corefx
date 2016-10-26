@@ -474,7 +474,9 @@ namespace System.Security.Authentication.ExtendedProtection
     }
     public sealed class TokenBinding
     {
+#if netcoreapp11
         public TokenBinding(TokenBindingType bindingType, byte[] rawTokenBindingId) { }
+#endif
         public byte[] GetRawTokenBindingId() { throw null; }
         public TokenBindingType BindingType { get { throw null; } }
     }
