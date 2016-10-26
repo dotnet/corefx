@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Security;
 using System.Text;
+using System.ComponentModel;
 
 namespace System.Diagnostics
 {
@@ -27,6 +28,7 @@ namespace System.Diagnostics
         private bool _errorDialog;
         private IntPtr _errorDialogParentHandle;
         private SecureString _password;
+        private string _verb;
 
         private bool _createNoWindow = false;
         internal Dictionary<string, string> _environmentVariables;
@@ -192,6 +194,20 @@ namespace System.Diagnostics
         {
             get { return _password; } 
             set { _password = value; }
+        }
+
+        [DefaultValueAttribute("")]
+        public string Verb 
+        {
+            get 
+            {
+                if (_verb == null) return string.Empty;
+                return _verb;
+            }
+            set 
+            {
+                _verb = value;
+            }
         }
     }
 }
