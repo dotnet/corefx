@@ -68,14 +68,14 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData(new object[] { true, -1 })]
-        [InlineData(new object[] { false, -1 })]
-        [InlineData(new object[] { true, 0 })]
-        [InlineData(new object[] { false, 0 })]
-        [InlineData(new object[] { true, 100 })]
-        [InlineData(new object[] { false, 100 })]
-        [InlineData(new object[] { true, int.MaxValue })]
-        [InlineData(new object[] { false, int.MaxValue })]
+        [InlineData(true, -1)]
+        [InlineData(false, -1)]
+        [InlineData(true, 0)]
+        [InlineData(false, 0)]
+        [InlineData(true, 100)]
+        [InlineData(false, 100)]
+        [InlineData(true, int.MaxValue)]
+        [InlineData(false, int.MaxValue)]
         [OuterLoop]
         public static void GCNotificationTests(bool approach, int timeout)
         {
@@ -87,6 +87,7 @@ namespace System.Tests
                     return SuccessExitCode;
                 }, options).Dispose();
         }
+
         [Fact]
         [OuterLoop]
         public static void TryStartNoGCRegionNegTest()
