@@ -164,6 +164,9 @@ namespace System.Diagnostics
         public System.Security.SecureString Password { get { throw null; } set { } }
         [System.ComponentModel.DefaultValueAttribute(null)]
         public string Verb { get { throw null; } set { } }
+        public string[] Verbs { get { throw null; } }
+        [System.ComponentModel.DefaultValueAttribute(null)]
+        public System.Diagnostics.ProcessWindowStyle WindowStyle { get { throw null ; } set { } }
     }
     public partial class ProcessThread : System.ComponentModel.Component
     {

@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Security;
 using System.Text;
 using System.ComponentModel;
+using System.Runtime.Versioning;
+using System.IO;
+using Microsoft.Win32;
 
 namespace System.Diagnostics
 {
@@ -29,6 +32,7 @@ namespace System.Diagnostics
         private IntPtr _errorDialogParentHandle;
         private SecureString _password;
         private string _verb;
+        private ProcessWindowStyle _windowStyle;
 
         private bool _createNoWindow = false;
         internal Dictionary<string, string> _environmentVariables;
@@ -207,6 +211,57 @@ namespace System.Diagnostics
             set 
             {
                 _verb = value;
+            }
+        }
+
+        public string[] Verbs {
+            [ResourceExposure(ResourceScope.None)]
+            [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
+            get 
+            {
+                ArrayList verbs = new ArrayList();
+                RegistryKey key = null;
+                string extension = Path.GetExtension(FileName);
+                try {
+                    if (extension != null && extension.Length > 0) {
+                        key = Registry.ClassesRoot.OpenSubKey(extension);
+                        if (key != null) {
+                            string value = (string)key.GetValue(String.Empty);
+                            key.Dispose();
+                            key = Registry.ClassesRoot.OpenSubKey(value + "\\shell");
+                            if (key != null) {
+                                string[] names = key.GetSubKeyNames();
+                                for (int i = 0; i < names.Length; i++)
+                                    if (string.Compare(names[i], "new", StringComparison.OrdinalIgnoreCase) != 0)
+                                        verbs.Add(names[i]);
+                                key.Dispose();
+                                key = null;
+                            }
+                        }
+                    }
+                }
+                finally {
+                    if (key != null) key.Dispose();
+                }
+                string[] temp = new string[verbs.Count];
+                verbs.CopyTo(temp, 0);
+                return temp;
+            }
+        }
+
+        [DefaultValueAttribute(System.Diagnostics.ProcessWindowStyle.Normal)]
+        public ProcessWindowStyle WindowStyle
+        {
+            get 
+            { 
+                return _windowStyle; 
+            }
+            set 
+            {
+                if (!Enum.IsDefined(typeof(ProcessWindowStyle), value)) 
+                    throw new InvalidEnumArgumentException("value", (int)value, typeof(ProcessWindowStyle));
+                    
+                _windowStyle = value;
             }
         }
     }
