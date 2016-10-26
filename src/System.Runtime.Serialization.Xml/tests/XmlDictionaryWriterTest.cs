@@ -339,7 +339,7 @@ public static class XmlDictionaryWriterTest
         textReader.Close();
     }
 
-    static bool ReadTest(MemoryStream ms, Encoding encoding, ReaderWriterFactory.ReaderWriterType rwType, byte[] byteArray)
+    private static bool ReadTest(MemoryStream ms, Encoding encoding, ReaderWriterFactory.ReaderWriterType rwType, byte[] byteArray)
     {
         ms.Position = 0;
         XmlDictionaryReader reader = (XmlDictionaryReader)ReaderWriterFactory.CreateXmlReader(rwType, ms, encoding);
@@ -347,7 +347,6 @@ public static class XmlDictionaryWriterTest
         byte[] bytesFromReader = reader.ReadElementContentAsBase64();
         if (bytesFromReader.Length != byteArray.Length)
         {
-            Console.WriteLine("Error, different array lengths!");
             return false;
         }
         else
@@ -356,15 +355,12 @@ public static class XmlDictionaryWriterTest
             {
                 if (byteArray[i] != bytesFromReader[i])
                 {
-                    Console.WriteLine("Error, array values are different!");
                     return false;
                 }
             }
         }
         return true;
     }
-
-
 
     static bool WriteTest(MemoryStream ms, ReaderWriterFactory.ReaderWriterType rwType, Encoding encoding, MyStreamProvider myStreamProvider)
     {

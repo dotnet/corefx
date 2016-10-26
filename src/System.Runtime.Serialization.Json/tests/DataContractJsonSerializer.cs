@@ -2199,7 +2199,7 @@ public static partial class DataContractJsonSerializerTests
     #endregion
 
     [Fact]
-    public static void CreateJsonReaderTest()
+    public static void DCJS_CreateJsonReaderTest()
     {
         const string json = @"{
                                 ""Toy"":""Car"",
@@ -2217,20 +2217,19 @@ public static partial class DataContractJsonSerializerTests
             Utils.CompareResult result = Utils.Compare(expected, xml.ToString());
             Assert.True(result.Equal);
         }
-
     }
 
     [Fact]
-    public static void CreateJsonWriterTest()
+    public static void DCJS_CreateJsonWriterTest()
     {
         using (var mo = new MemoryStream())
-        using (var sr = new StreamReader(mo))
         {
             var p = new Person1();
             p.Name = "David";
             p.Age = 15;
             XmlDictionaryWriter writer = JsonReaderWriterFactory.CreateJsonWriter(mo, Encoding.UTF8);
             var serializer = new DataContractJsonSerializer(typeof(Person1));
+            var sr = new StreamReader(mo);
             serializer.WriteObject(writer, p);
             writer.Flush();
             mo.Position = 0;

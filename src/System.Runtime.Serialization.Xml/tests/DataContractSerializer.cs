@@ -2603,7 +2603,7 @@ public static partial class DataContractSerializerTests
 
     [ActiveIssue(12767)]
     [Fact]
-    public static void ExtensionDataObjectTest()
+    public static void DCS_ExtensionDataObjectTest()
     {
         PersonV2 p2 = new PersonV2();
         p2.Name = "Elizabeth";
@@ -2623,7 +2623,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    public static void XPathQueryGeneratorTest()
+    public static void DCS_XPathQueryGeneratorTest()
     {
         Type t = typeof(Order);
         MemberInfo[] mi = t.GetMember("Product");

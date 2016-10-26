@@ -2500,6 +2500,16 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         return stream;
     }
 
+    [Fact]
+    public static void  SoapAttributeTests()
+    {
+        SoapAttributes soapAttrs = new SoapAttributes();
+        SoapAttributeOverrides soapOverrides = new SoapAttributeOverrides();
+        SoapElementAttribute soapElement1 = new SoapElementAttribute("Truck");
+        soapAttrs.SoapElement = soapElement1;
+        soapOverrides.Add(typeof(Transportation), "Vehicle", soapAttrs);
+    }
+
     [ActiveIssue(12799)]
     [Fact]
     public static void XmlTypeMappingTest()

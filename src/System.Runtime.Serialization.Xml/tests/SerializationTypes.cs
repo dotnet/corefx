@@ -3654,7 +3654,6 @@ public class Line
         get { return itemsValue; }
         set { itemsValue = value; }
     }
-
 }
 
 public class Transportation
