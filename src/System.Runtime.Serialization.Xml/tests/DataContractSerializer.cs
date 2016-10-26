@@ -1390,6 +1390,9 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(((SimpleKnownTypeValue)actual.SimpleTypeValue).StrProperty, "PropertyValue");
     }
 
+#if ReflectionOnly
+    [ActiveIssue(13071)]
+#endif
     [Fact]
     public static void DCS_ExceptionObject()
     {
@@ -1404,6 +1407,9 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(value.HelpLink, actual.HelpLink);
     }
 
+#if ReflectionOnly
+    [ActiveIssue(13071)]
+#endif
     [Fact]
     public static void DCS_ArgumentExceptionObject()
     {
@@ -1418,6 +1424,9 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(value.HelpLink, actual.HelpLink);
     }
 
+#if ReflectionOnly
+    [ActiveIssue(13071)]
+#endif
     [Fact]
     public static void DCS_ExceptionMesageWithSpecialChars()
     {
@@ -1432,6 +1441,9 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(value.HelpLink, actual.HelpLink);
     }
 
+#if ReflectionOnly
+    [ActiveIssue(13071)]
+#endif
     [Fact]
     public static void DCS_InnerExceptionMesageWithSpecialChars()
     {
@@ -2303,7 +2315,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(x.IntMember, y.IntMember);
     }
 
-    #region Array of primitive types
+#region Array of primitive types
 
     [Fact]
     public static void DCS_ArrayOfBoolean()
@@ -2420,9 +2432,9 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.ID, actual.ID);
     }
 
-    #endregion
+#endregion
 
-    #region Collection
+#region Collection
 
     [Fact]
     public static void DCS_GenericICollectionOfBoolean()
@@ -2526,9 +2538,9 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value[0].Name, actual[0].Name);
     }
 
-    #endregion
+#endregion
 
-    #region Generic Dictionary
+#region Generic Dictionary
 
     [Fact]
     public static void DCS_GenericDictionaryOfInt32Boolean()
@@ -2563,9 +2575,9 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value.ToArray(), deserialized.ToArray()));
     }
 
-    #endregion
+#endregion
 
-    #region Non-Generic Dictionary
+#region Non-Generic Dictionary
 
     [Fact]
     public static void DCS_NonGenericDictionaryOfInt32Boolean()
@@ -2603,7 +2615,7 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value.Values.Cast<int>().ToArray(), deserialized.Values.Cast<int>().ToArray()));
     }
 
-    #endregion
+#endregion
 
     [Fact]
     public static void DCS_BasicRoundTripResolveDTOTypes()
@@ -2680,6 +2692,9 @@ public static partial class DataContractSerializerTests
         }
     }
 
+#if ReflectionOnly
+    [ActiveIssue(13071)]
+#endif
     [Fact]
     public static void DCS_MyISerializableType()
     {

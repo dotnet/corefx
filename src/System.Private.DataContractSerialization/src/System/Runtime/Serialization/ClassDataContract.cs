@@ -841,7 +841,7 @@ namespace System.Runtime.Serialization
         /// </SecurityNote>
         private class ClassDataContractCriticalHelper : DataContract.DataContractCriticalHelper
         {
-            private static Type[] _serInfoCtorArgs;
+            private static Type[] s_serInfoCtorArgs;
 
             private ClassDataContract _baseContract;
             private List<DataMember> _members;
@@ -1558,9 +1558,9 @@ namespace System.Runtime.Serialization
             {
                 get
                 {
-                    if (_serInfoCtorArgs == null)
-                        _serInfoCtorArgs = new Type[] { typeof(SerializationInfo), typeof(StreamingContext) };
-                    return _serInfoCtorArgs;
+                    if (s_serInfoCtorArgs == null)
+                        s_serInfoCtorArgs = new Type[] { typeof(SerializationInfo), typeof(StreamingContext) };
+                    return s_serInfoCtorArgs;
                 }
             }
 
