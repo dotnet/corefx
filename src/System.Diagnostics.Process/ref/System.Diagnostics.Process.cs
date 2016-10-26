@@ -160,6 +160,8 @@ namespace System.Diagnostics
         public bool UseShellExecute { get { throw null; } set { } }
         public string WorkingDirectory { get { throw null; } set { } }
         public bool ErrorDialog { get { throw null; } set { } }
+        public System.IntPtr ErrorDialogParentHandle { get { throw null; } set { } }
+        public System.Security.SecureString Password { get { throw null; } set { } }
     }
     public partial class ProcessThread : System.ComponentModel.Component
     {

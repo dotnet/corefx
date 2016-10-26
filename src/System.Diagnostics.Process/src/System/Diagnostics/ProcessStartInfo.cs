@@ -24,7 +24,9 @@ namespace System.Diagnostics
         private bool _redirectStandardError = false;
         private Encoding _standardOutputEncoding;
         private Encoding _standardErrorEncoding;
-        bool errorDialog;
+        private bool _errorDialog;
+        private IntPtr _errorDialogParentHandle;
+        private SecureString _password;
 
         private bool _createNoWindow = false;
         internal Dictionary<string, string> _environmentVariables;
@@ -174,9 +176,22 @@ namespace System.Diagnostics
             set { _directory = value; }
         }
 
-        public bool ErrorDialog {
-            get { return errorDialog;}
-            set { errorDialog = value;}
+        public bool ErrorDialog
+        {
+            get { return _errorDialog; }
+            set { _errorDialog = value; }
+        }
+
+        public IntPtr ErrorDialogParentHandle 
+        {
+            get { return _errorDialogParentHandle; }
+            set { _errorDialogParentHandle = value; }
+        }
+
+        public SecureString Password 
+        {
+            get { return _password; } 
+            set { _password = value; }
         }
     }
 }
