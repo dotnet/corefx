@@ -425,11 +425,12 @@ namespace System.Buffers.ArrayPool.Tests
         }
 
         [Fact]
+        [ActiveIssue(13064)]
         public static void ReturningANonPooledBufferOfDifferentSizeToThePoolThrows()
         {
             ArrayPool<byte> pool = ArrayPool<byte>.Create(maxArrayLength: 16, maxArraysPerBucket: 1);
             byte[] buffer = pool.Rent(15);
-            Assert.Throws<ArgumentException>(null, () => pool.Return(new byte[1]));
+            Assert.Throws<ArgumentException>("array", () => pool.Return(new byte[1]));
             buffer = pool.Rent(15);
             Assert.Equal(buffer.Length, 16);
         }
