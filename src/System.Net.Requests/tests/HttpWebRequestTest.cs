@@ -379,6 +379,7 @@ namespace System.Net.Tests
             new object[] { Configuration.Http.StatusCodeUri(true, 404) },
         };
 
+        [ActiveIssue(12236, PlatformID.Linux)]
         [Theory, MemberData(nameof(StatusCodeServers))]
         public async Task GetResponseAsync_ResourceNotFound_ThrowsWebException(Uri remoteServer)
         {
