@@ -67,22 +67,23 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => GC.WaitForFullGCComplete(-2));
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(new object[] { true, -1 })]
+        [InlineData(new object[] { false, -1 })]
+        [InlineData(new object[] { true, 0 })]
+        [InlineData(new object[] { false, 0 })]
+        [InlineData(new object[] { true, 100 })]
+        [InlineData(new object[] { false, 100 })]
+        [InlineData(new object[] { true, int.MaxValue })]
+        [InlineData(new object[] { false, int.MaxValue })]
         [OuterLoop]
-        public static void GCNotifiicationTests()
+        public static void GCNotificationTests(bool approach, int timeout)
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.TimeOut = TimeoutMilliseconds;
             RemoteInvoke(() =>
                 {
-                    Assert.True(TestWait(true, -1));
-                    Assert.True(TestWait(false, -1));
-                    Assert.True(TestWait(true, 0));
-                    Assert.True(TestWait(false, 0));
-                    Assert.True(TestWait(true, 100));
-                    Assert.True(TestWait(false, 100));
-                    Assert.True(TestWait(true, int.MaxValue));
-                    Assert.True(TestWait(false, int.MaxValue));
+                    TestWait(approach, timeout);
                     return SuccessExitCode;
                 }, options).Dispose();
         }
@@ -147,7 +148,7 @@ namespace System.Tests
                 }, options).Dispose();
         }
 
-        public static bool TestWait(bool approach, int timeout)
+        public static void TestWait(bool approach, int timeout)
         {
             GCNotificationStatus result = GCNotificationStatus.Failed;
             Thread cancelProc = null;
@@ -174,8 +175,7 @@ namespace System.Tests
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error - Unexpected exception received: {0}", e.ToString());
-                return false;
+                Assert.True(false, $"({approach}, {timeout}) Error - Unexpected exception received: {e.ToString()}");
             }
             finally
             {
@@ -185,22 +185,12 @@ namespace System.Tests
 
             if (cancelTimeout)
             {
-                if (result != GCNotificationStatus.Canceled)
-                {
-                    Console.WriteLine("Error - WaitForFullGCApproach result not Cancelled");
-                    return false;
-                }
+                Assert.True(result == GCNotificationStatus.Canceled, $"({approach}, {timeout}) Error - WaitForFullGCApproach result not Cancelled");
             }
             else
             {
-                if (result != GCNotificationStatus.Timeout)
-                {
-                    Console.WriteLine("Error - WaitForFullGCApproach result not Timeout");
-                    return false;
-                }
+                Assert.True(result == GCNotificationStatus.Timeout, $"({approach}, {timeout}) Error - WaitForFullGCApproach result not Timeout");
             }
-
-            return true;
         }
 
         public static void CancelProc()
