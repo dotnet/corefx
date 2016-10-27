@@ -45,7 +45,6 @@ namespace System.IO.Pipes.Tests
 
         [ConditionalFact(nameof(IsSuperUser))]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [ActiveIssue(0)]
         public void RunAsClient_Unix()
         {
             string pipeName = Path.GetRandomFileName();
@@ -57,7 +56,7 @@ namespace System.IO.Pipes.Tests
         {
             uint pairID = uint.Parse(pairIDString);
             Assert.NotEqual(-1, seteuid(pairID));
-            using (var outbound = new NamedPipeServerStream(pipeName, PipeDirection.Out))
+            using (var outbound = new NamedPipeServerStream(pipeName, PipeDirection.InOut))
             using (var handle = RemoteInvoke(ClientConnectAsID, pipeName, pairIDString))
             {
                 // Connect as the unpriveleged user, but RunAsClient as the superuser
@@ -79,7 +78,7 @@ namespace System.IO.Pipes.Tests
         private static int ClientConnectAsID(string pipeName, string pairIDString)
         {
             uint pairID = uint.Parse(pairIDString);
-            using (var inbound = new NamedPipeClientStream(".", pipeName, PipeDirection.In))
+            using (var inbound = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut))
             {
                 Assert.NotEqual(-1, seteuid(pairID));
                 inbound.Connect();
