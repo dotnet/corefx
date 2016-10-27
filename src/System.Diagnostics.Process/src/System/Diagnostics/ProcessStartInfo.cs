@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Security;
 using System.Text;
 using System.ComponentModel;
@@ -35,7 +36,8 @@ namespace System.Diagnostics
         private ProcessWindowStyle _windowStyle;
 
         private bool _createNoWindow = false;
-        internal Dictionary<string, string> _environmentVariables;
+        internal Dictionary<string, string> _environment;
+        private StringDictionary _environmentVariables;
 
         /// <devdoc>
         ///     Default constructor.  At least the <see cref='System.Diagnostics.ProcessStartInfo.FileName'/>
@@ -88,16 +90,40 @@ namespace System.Diagnostics
             set { _createNoWindow = value; }
         }
 
+        public StringDictionary EnvironmentVariables {
+            get {
+                // Note:
+                // Creating a detached ProcessStartInfo will pre-populate the environment
+                // with current environmental variables. 
+
+                // When used with an existing Process.ProcessStartInfo the following behavior
+                //  * Desktop - Populates with current Environment (rather than that of the process)
+                                
+                if (_environmentVariables == null) {
+#if PLATFORM_UNIX
+                    _environmentVariables = new CaseSensitiveStringDictionary();
+#else
+                    _environmentVariables = new StringDictionaryWithComparer ();
+#endif // PLATFORM_UNIX
+
+                        foreach (DictionaryEntry entry in System.Environment.GetEnvironmentVariables())
+                            _environmentVariables.Add((string)entry.Key, (string)entry.Value);
+                
+                }
+                return _environmentVariables;
+            }
+        }
+
         public IDictionary<string, string> Environment
         {
             get
             {
-                if (_environmentVariables == null)
+                if (_environment == null)
                 {
                     IDictionary envVars = System.Environment.GetEnvironmentVariables();
 
 #pragma warning disable 0429 // CaseSensitiveEnvironmentVaribles is constant but varies depending on if we build for Unix or Windows
-                    _environmentVariables = new Dictionary<string, string>(
+                    _environment = new Dictionary<string, string>(
                         envVars.Count,
                         CaseSensitiveEnvironmentVariables ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
 #pragma warning restore 0429
@@ -109,7 +135,7 @@ namespace System.Diagnostics
                         while (e.MoveNext())
                         {
                             DictionaryEntry entry = e.Entry;
-                            _environmentVariables.Add((string)entry.Key, (string)entry.Value);
+                            _environment.Add((string)entry.Key, (string)entry.Value);
                         }
                     }
                     finally
@@ -117,7 +143,7 @@ namespace System.Diagnostics
                         (e as IDisposable)?.Dispose();
                     }
                 }
-                return _environmentVariables;
+                return _environment;
             }
         }
 

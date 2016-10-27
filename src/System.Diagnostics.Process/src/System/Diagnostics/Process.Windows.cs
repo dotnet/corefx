@@ -623,10 +623,10 @@ namespace System.Diagnostics
 
                     // set up the environment block parameter
                     IntPtr environmentPtr = (IntPtr)0;
-                    if (startInfo._environmentVariables != null)
+                    if (startInfo._environment != null)
                     {
                         creationFlags |= Interop.mincore.StartupInfoOptions.CREATE_UNICODE_ENVIRONMENT;
-                        byte[] environmentBytes = EnvironmentVariablesToByteArray(startInfo._environmentVariables);
+                        byte[] environmentBytes = EnvironmentVariablesToByteArray(startInfo._environment);
                         environmentHandle = GCHandle.Alloc(environmentBytes, GCHandleType.Pinned);
                         environmentPtr = environmentHandle.AddrOfPinnedObject();
                     }
