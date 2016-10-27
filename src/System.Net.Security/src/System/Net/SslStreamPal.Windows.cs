@@ -33,6 +33,7 @@ namespace System.Net
         }
 
         internal const bool StartMutualAuthAsAnonymous = true;
+        internal const bool CanEncryptEmptyMessage = true;
 
         public static void VerifyPackageInfo()
         {
