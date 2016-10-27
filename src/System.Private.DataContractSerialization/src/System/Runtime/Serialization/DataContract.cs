@@ -1835,7 +1835,7 @@ namespace System.Runtime.Serialization
                 StringBuilder localNameBuilder = new StringBuilder();
                 StringBuilder argNamespacesBuilder = new StringBuilder();
                 bool parametersFromBuiltInNamespaces = true;
-                IList<int> nestedParamCounts = GetDataContractNameForGenericName(localName, localNameBuilder);
+                List<int> nestedParamCounts = GetDataContractNameForGenericName(localName, localNameBuilder);
                 foreach (CodeTypeReference typeArg in typeReference.TypeArguments)
                 {
                     string typeArgName, typeArgNs;
