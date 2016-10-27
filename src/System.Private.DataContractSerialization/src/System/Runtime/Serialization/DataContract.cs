@@ -1755,7 +1755,7 @@ namespace System.Runtime.Serialization
             return ns;
         }
 
-        internal static IList<int> GetDataContractNameForGenericName(string typeName, StringBuilder localName)
+        internal static List<int> GetDataContractNameForGenericName(string typeName, StringBuilder localName)
         {
             List<int> nestedParamCounts = new List<int>();
             for (int startIndex = 0, endIndex; ;)
@@ -1841,7 +1841,7 @@ namespace System.Runtime.Serialization
                     string typeArgName, typeArgNs;
                     GetDefaultStableName(typeArg, out typeArgName, out typeArgNs);
                     localNameBuilder.Append(typeArgName);
-                    argNamespacesBuilder.Append(" ").Append(typeArgNs);
+                    argNamespacesBuilder.Append(' ').Append(typeArgNs);
                     if (parametersFromBuiltInNamespaces)
                     {
                         parametersFromBuiltInNamespaces = IsBuiltInNamespace(typeArgNs);
@@ -1852,7 +1852,7 @@ namespace System.Runtime.Serialization
                 {
                     foreach (int count in nestedParamCounts)
                     {
-                        argNamespacesBuilder.Insert(0, count).Insert(0, " ");
+                        argNamespacesBuilder.Insert(0, count).Insert(0, ' ');
                     }
 
                     localNameBuilder.Append(GetNamespacesDigest(argNamespacesBuilder.ToString()));
