@@ -267,7 +267,6 @@ namespace System.Runtime.Serialization
         private static Type s_typeOfISerializable;
         internal static Type TypeOfISerializable
         {
-            [SecuritySafeCritical]
             get
             {
                 if (s_typeOfISerializable == null)

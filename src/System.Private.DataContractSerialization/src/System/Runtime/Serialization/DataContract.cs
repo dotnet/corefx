@@ -1373,7 +1373,7 @@ namespace System.Runtime.Serialization
                 type.GetTypeInfo().IsDefined(Globals.TypeOfDataContractAttribute, false) ||
                 type.GetTypeInfo().IsInterface ||
                 type.IsPointer ||
-                //Special casing DateTimeOffset and DBNull as its considered a Primitive but is no longer Serializable
+                //Special casing DBNull as its considered a Primitive but is no longer Serializable
                 type == Globals.TypeOfDBNull ||
                 Globals.TypeOfIXmlSerializable.IsAssignableFrom(type))
             {

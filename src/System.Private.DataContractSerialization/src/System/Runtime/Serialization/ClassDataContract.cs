@@ -652,20 +652,6 @@ namespace System.Runtime.Serialization
             if (this.BaseContract != null && this.BaseContract.RequiresMemberAccessForRead(securityException))
                 return true;
 
-            if (ConstructorRequiresMemberAccess(GetISerializableConstructor()))
-            {
-                if (securityException != null)
-                {
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(
-                        new SecurityException(SR.Format(
-                                SR.PartialTrustISerializableNoPublicConstructor,
-                                DataContract.GetClrTypeFullName(UnderlyingType)),
-                            securityException));
-                }
-
-                return true;
-            }
-
             if (ConstructorRequiresMemberAccess(GetNonAttributedTypeConstructor()))
             {
                 if (Globals.TypeOfScriptObject_IsAssignableFrom(UnderlyingType))
