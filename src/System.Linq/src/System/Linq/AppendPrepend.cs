@@ -166,12 +166,33 @@ namespace System.Linq
                 }
             }
 
+            private TSource[] LazyToArray()
+            {
+                Debug.Assert(GetCount(onlyIfCheap: true) == -1);
+
+                var builder = new LargeArrayBuilder<TSource>(initialize: true);
+                
+                if (!_appending)
+                {
+                    builder.SlowAdd(_item);
+                }
+
+                builder.AddRange(_source);
+
+                if (_appending)
+                {
+                    builder.SlowAdd(_item);
+                }
+
+                return builder.ToArray();
+            }
+
             public override TSource[] ToArray()
             {
                 int count = GetCount(onlyIfCheap: true);
                 if (count == -1)
                 {
-                    return EnumerableHelpers.ToArray(this);
+                    return LazyToArray();
                 }
 
                 TSource[] array = new TSource[count];
@@ -352,12 +373,33 @@ namespace System.Linq
                 return new AppendPrependN<TSource>(_source, _prepended != null ? _prepended.Add(item) : new SingleLinkedNode<TSource>(item), _appended);
             }
 
+            private TSource[] LazyToArray()
+            {
+                Debug.Assert(GetCount(onlyIfCheap: true) == -1);
+
+                var builder = new LargeArrayBuilder<TSource>(initialize: true);
+
+                for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
+                {
+                    builder.Add(node.Item);
+                }
+
+                builder.AddRange(_source);
+
+                if (_appended != null)
+                {
+                    builder.AddRange(_appended.GetEnumerator());
+                }
+
+                return builder.ToArray();
+            }
+
             public override TSource[] ToArray()
             {
                 int count = GetCount(onlyIfCheap: true);
                 if (count == -1)
                 {
-                    return EnumerableHelpers.ToArray(this);
+                    return LazyToArray();
                 }
 
                 TSource[] array = new TSource[count];

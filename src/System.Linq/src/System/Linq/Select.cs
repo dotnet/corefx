@@ -143,7 +143,17 @@ namespace System.Linq
                 return new SelectEnumerableIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
             }
 
-            public TResult[] ToArray() => EnumerableHelpers.ToArray(this);
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(initialize: true);
+                
+                foreach (TSource item in _source)
+                {
+                    builder.Add(_selector(item));
+                }
+
+                return builder.ToArray();
+            }
 
             public List<TResult> ToList() => new List<TResult>(this);
 
@@ -625,13 +635,25 @@ namespace System.Linq
                 return sourceFound ? _selector(input) : default(TResult);
             }
 
+            private TResult[] LazyToArray()
+            {
+                Debug.Assert(_source.GetCount(onlyIfCheap: true) == -1);
+
+                var builder = new LargeArrayBuilder<TResult>(initialize: true);
+                foreach (TSource input in _source)
+                {
+                    builder.Add(_selector(input));
+                }
+                return builder.ToArray();
+            }
+
             public TResult[] ToArray()
             {
                 int count = _source.GetCount(onlyIfCheap: true);
                 switch (count)
                 {
                     case -1:
-                        return EnumerableHelpers.ToArray(this);
+                        return LazyToArray();
                     case 0:
                         return Array.Empty<TResult>();
                     default:
