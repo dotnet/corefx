@@ -169,8 +169,6 @@ namespace System.Collections.Generic
 
             Debug.Assert(_index == _current.Length, $"{nameof(AllocateBuffer)} was called, but there's more space.");
 
-            T[] result;
-
             if (_count < ResizeLimit)
             {
                 // We haven't passed ResizeLimit. Resize _first, copying over the previous items.
@@ -178,9 +176,9 @@ namespace System.Collections.Generic
 
                 int nextCapacity = _count == 0 ? StartingCapacity : _count * 2;
 
-                result = new T[nextCapacity];
-                Array.Copy(_first, 0, result, 0, _count);
-                _first = result;
+                _current = new T[nextCapacity];
+                Array.Copy(_first, 0, _current, 0, _count);
+                _first = _current;
             }
             else
             {
@@ -197,12 +195,11 @@ namespace System.Collections.Generic
                     nextCapacity = _current.Length * 2;
                 }
 
-                result = new T[nextCapacity];
+                _current = new T[nextCapacity];
                 _index = 0;
             }
-
-            _current = result;
-            return result;
+            
+            return _current;
         }
     }
 }
