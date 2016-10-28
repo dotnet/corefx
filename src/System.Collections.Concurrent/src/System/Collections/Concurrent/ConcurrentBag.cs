@@ -18,7 +18,7 @@ using System.Threading;
 namespace System.Collections.Concurrent
 {
     /// <summary>
-    /// Represents an thread-safe, unordered collection of objects. 
+    /// Represents an thread-safe, unordered collection of objects.
     /// </summary>
     /// <typeparam name="T">Specifies the type of elements in the bag.</typeparam>
     /// <remarks>
@@ -28,7 +28,7 @@ namespace System.Collections.Concurrent
     /// scenarios where the same thread will be both producing and consuming data stored in the bag.
     /// </para>
     /// <para>
-    /// <see cref="ConcurrentBag{T}"/> accepts null reference (Nothing in Visual Basic) as a valid 
+    /// <see cref="ConcurrentBag{T}"/> accepts null reference (Nothing in Visual Basic) as a valid
     /// value for reference types.
     /// </para>
     /// <para>
@@ -80,9 +80,9 @@ namespace System.Collections.Concurrent
             {
                 throw new ArgumentNullException(nameof(collection), SR.ConcurrentBag_Ctor_ArgumentNullException);
             }
+
             Initialize(collection);
         }
-
 
         /// <summary>
         /// Local helper function to initialize a new bag object
@@ -129,6 +129,7 @@ namespace System.Collections.Concurrent
             {
                 list.Add(item, false);
             }
+
             _headList = list;
             _tailList = list;
 
@@ -143,8 +144,8 @@ namespace System.Collections.Concurrent
         /// (Nothing in Visual Basic) for reference types.</param>
         public void Add(T item)
         {
-            // Get the local list for that thread, create a new list if this thread doesn't exist 
-            //(first time to call add)
+            // Get the local list for that thread, create a new list if this thread doesn't exist
+            // (first time to call add)
             ThreadLocalList list = GetThreadList(true);
             AddInternal(list, item);
         }
@@ -156,20 +157,22 @@ namespace System.Collections.Concurrent
         private void AddInternal(ThreadLocalList list, T item)
         {
             bool lockTaken = false;
+
             try
             {
 #pragma warning disable 0420
                 Interlocked.Exchange(ref list._currentOp, (int)ListOperation.Add);
 #pragma warning restore 0420
-                //Synchronization cases:
+                // Synchronization cases:
                 // if the list count is less than two to avoid conflict with any stealing thread
                 // if _needSync is set, this means there is a thread that needs to freeze the bag
                 if (list.Count < 2 || _needSync)
                 {
-                    // reset it back to zero to avoid deadlock with stealing thread
+                    // Reset it back to zero to avoid deadlock with stealing thread
                     list._currentOp = (int)ListOperation.None;
                     Monitor.Enter(list, ref lockTaken);
                 }
+
                 list.Add(item, lockTaken);
             }
             finally
@@ -185,7 +188,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Attempts to add an object to the <see cref="ConcurrentBag{T}"/>.
         /// </summary>
-        /// <param name="item">The object to be added to the 
+        /// <param name="item">The object to be added to the
         /// <see cref="ConcurrentBag{T}"/>. The value can be a null reference
         /// (Nothing in Visual Basic) for reference types.</param>
         /// <returns>Always returns true</returns>
@@ -229,8 +232,8 @@ namespace System.Collections.Concurrent
         /// <returns>True if succeeded, false otherwise</returns>
         private bool TryTakeOrPeek(out T result, bool take)
         {
-            // Get the local list for that thread, return null if the thread doesn't exit 
-            //(this thread never add before) 
+            // Get the local list for that thread, return null if the thread doesn't exit
+            // (this thread never add before)
             ThreadLocalList list = GetThreadList(false);
             if (list == null || list.Count == 0)
             {
@@ -245,12 +248,13 @@ namespace System.Collections.Concurrent
 #pragma warning disable 0420
                     Interlocked.Exchange(ref list._currentOp, (int)ListOperation.Take);
 #pragma warning restore 0420
-                    //Synchronization cases:
+
+                    // Synchronization cases:
                     // if the list count is less than or equal two to avoid conflict with any stealing thread
                     // if _needSync is set, this means there is a thread that needs to freeze the bag
                     if (list.Count <= 2 || _needSync)
                     {
-                        // reset it back to zero to avoid deadlock with stealing thread
+                        // Reset it back to zero to avoid deadlock with stealing thread
                         list._currentOp = (int)ListOperation.None;
                         Monitor.Enter(list, ref lockTaken);
 
@@ -260,16 +264,20 @@ namespace System.Collections.Concurrent
                             // Release the lock before stealing
                             if (lockTaken)
                             {
-                                try { }
+                                try
+                                {
+                                }
                                 finally
                                 {
                                     lockTaken = false; // reset lockTaken to avoid calling Monitor.Exit again in the finally block
                                     Monitor.Exit(list);
                                 }
                             }
+
                             return Steal(out result, true);
                         }
                     }
+
                     list.Remove(out result);
                 }
                 else
@@ -288,9 +296,9 @@ namespace System.Collections.Concurrent
                     Monitor.Exit(list);
                 }
             }
+
             return true;
         }
-
 
         /// <summary>
         /// Local helper function to retrieve a thread local list by a thread object
@@ -319,6 +327,7 @@ namespace System.Collections.Concurrent
                     else
                     {
                         list = GetUnownedList();
+
                         if (list == null)
                         {
                             list = new ThreadLocalList(Environment.CurrentManagedThreadId);
@@ -326,6 +335,7 @@ namespace System.Collections.Concurrent
                             _tailList = list;
                         }
                     }
+
                     _locals.Value = list;
                 }
             }
@@ -333,7 +343,9 @@ namespace System.Collections.Concurrent
             {
                 return null;
             }
+
             Debug.Assert(list != null);
+
             return list;
         }
 
@@ -345,22 +357,24 @@ namespace System.Collections.Concurrent
         /// <returns>The list object, null if all lists are owned</returns>
         private ThreadLocalList GetUnownedList()
         {
-            //the global lock must be held at this point
+            // The global lock must be held at this point
             Debug.Assert(Monitor.IsEntered(GlobalListsLock));
 
             int currentThreadId = Environment.CurrentManagedThreadId;
             ThreadLocalList currentList = _headList;
+
             while (currentList != null)
             {
                 if (currentList._ownerThreadId == currentThreadId)
                 {
                     return currentList;
                 }
+
                 currentList = currentList._nextList;
             }
+
             return null;
         }
-
 
         /// <summary>
         /// Local helper method to steal an item from any other non empty thread
@@ -372,18 +386,22 @@ namespace System.Collections.Concurrent
         {
 #if FEATURE_TRACING
             if (take)
+            {
                 CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryTakeSteals();
+            }
             else
+            {
                 CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryPeekSteals();
+            }
 #endif
 
             bool loop;
-            List<int> versionsList = new List<int>(); // save the lists version
+            List<int> versionsList = new List<int>(); // Save the lists version
+
             do
             {
-                versionsList.Clear(); //clear the list from the previous iteration
+                versionsList.Clear(); // Clear the list from the previous iteration
                 loop = false;
-
 
                 ThreadLocalList currentList = _headList;
                 while (currentList != null)
@@ -393,23 +411,26 @@ namespace System.Collections.Concurrent
                     {
                         return true;
                     }
+
                     currentList = currentList._nextList;
                 }
 
-                // verify versioning, if other items are added to this list since we last visit it, we should retry
+                // Verify versioning, if other items are added to this list since we last visit it, we should retry
                 currentList = _headList;
                 foreach (int version in versionsList)
                 {
-                    if (version != currentList._version) //oops state changed
+                    if (version != currentList._version) // Oops state changed
                     {
                         loop = true;
                         if (currentList._head != null && TrySteal(currentList, out result, take))
+                        {
                             return true;
+                        }
                     }
+
                     currentList = currentList._nextList;
                 }
             } while (loop);
-
 
             result = default(T);
             return false;
@@ -427,10 +448,12 @@ namespace System.Collections.Concurrent
                     list.Steal(out result, take);
                     return true;
                 }
+
                 result = default(T);
                 return false;
             }
         }
+
         /// <summary>
         /// Local helper function to check the list if it became empty after acquiring the lock
         /// and wait if there is unsynchronized Add/Take operation in the list to be done
@@ -442,11 +465,13 @@ namespace System.Collections.Concurrent
             if (list.Count <= 2 && list._currentOp != (int)ListOperation.None)
             {
                 SpinWait spinner = new SpinWait();
+
                 while (list._currentOp != (int)ListOperation.None)
                 {
                     spinner.SpinOnce();
                 }
             }
+
             return list.Count > 0;
         }
 
@@ -476,17 +501,20 @@ namespace System.Collections.Concurrent
             {
                 throw new ArgumentNullException(nameof(array), SR.ConcurrentBag_CopyTo_ArgumentNullException);
             }
+
             if (index < 0)
             {
-                throw new ArgumentOutOfRangeException
-                    (nameof(index), SR.ConcurrentBag_CopyTo_ArgumentOutOfRangeException);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ConcurrentBag_CopyTo_ArgumentOutOfRangeException);
             }
 
             // Short path if the bag is empty
             if (_headList == null)
+            {
                 return;
+            }
 
             bool lockTaken = false;
+
             try
             {
                 FreezeBag(ref lockTaken);
@@ -531,6 +559,7 @@ namespace System.Collections.Concurrent
             }
 
             bool lockTaken = false;
+
             try
             {
                 FreezeBag(ref lockTaken);
@@ -542,7 +571,6 @@ namespace System.Collections.Concurrent
             }
         }
 
-
         /// <summary>
         /// Copies the <see cref="ConcurrentBag{T}"/> elements to a new array.
         /// </summary>
@@ -552,7 +580,9 @@ namespace System.Collections.Concurrent
         {
             // Short path if the bag is empty
             if (_headList == null)
+            {
                 return Array.Empty<T>();
+            }
 
             bool lockTaken = false;
             try
@@ -574,7 +604,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentBag{T}"/>.</returns>
         /// <remarks>
         /// The enumeration represents a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any updates to the collection after 
+        /// of the bag.  It does not reflect any updates to the collection after
         /// <see cref="GetEnumerator"/> was called.  The enumerator is safe to use
         /// concurrently with reads from and writes to the bag.
         /// </remarks>
@@ -582,9 +612,12 @@ namespace System.Collections.Concurrent
         {
             // Short path if the bag is empty
             if (_headList == null)
+            {
                 return ((IEnumerable<T>)Array.Empty<T>()).GetEnumerator();
+            }
 
             bool lockTaken = false;
+
             try
             {
                 FreezeBag(ref lockTaken);
@@ -604,7 +637,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentBag{T}"/>.</returns>
         /// <remarks>
         /// The items enumerated represent a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any update to the collection after 
+        /// of the bag.  It does not reflect any update to the collection after
         /// <see cref="GetEnumerator"/> was called.
         /// </remarks>
         IEnumerator IEnumerable.GetEnumerator()
@@ -618,7 +651,7 @@ namespace System.Collections.Concurrent
         /// <value>The number of elements contained in the <see cref="ConcurrentBag{T}"/>.</value>
         /// <remarks>
         /// The count returned represents a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any updates to the collection after 
+        /// of the bag.  It does not reflect any updates to the collection after
         /// <see cref="GetEnumerator"/> was called.
         /// </remarks>
         public int Count
@@ -627,9 +660,12 @@ namespace System.Collections.Concurrent
             {
                 // Short path if the bag is empty
                 if (_headList == null)
+                {
                     return 0;
+                }
 
                 bool lockTaken = false;
+
                 try
                 {
                     FreezeBag(ref lockTaken);
@@ -651,7 +687,9 @@ namespace System.Collections.Concurrent
             get
             {
                 if (_headList == null)
+                {
                     return true;
+                }
 
                 bool lockTaken = false;
                 try
@@ -660,13 +698,14 @@ namespace System.Collections.Concurrent
                     ThreadLocalList currentList = _headList;
                     while (currentList != null)
                     {
-                        if (currentList._head != null)
-                        //at least this list is not empty, we return false
+                        if (currentList._head != null) // At least this list is not empty, we return false
                         {
                             return false;
                         }
+
                         currentList = currentList._nextList;
                     }
+
                     return true;
                 }
                 finally
@@ -685,7 +724,10 @@ namespace System.Collections.Concurrent
         /// returns false.</value>
         bool ICollection.IsSynchronized
         {
-            get { return false; }
+            get
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -701,7 +743,6 @@ namespace System.Collections.Concurrent
             }
         }
 
-
         /// <summary>
         ///  A global lock object, used in two cases:
         ///  1- To  maintain the _tailList pointer for each new list addition process ( first time a thread called Add )
@@ -716,8 +757,8 @@ namespace System.Collections.Concurrent
             }
         }
 
-
         #region Freeze bag helper methods
+
         /// <summary>
         /// Local helper method to freeze all bag operations, it
         /// 1- Acquire the global lock to prevent any other thread to freeze the bag, and also new thread can be added
@@ -730,13 +771,13 @@ namespace System.Collections.Concurrent
         {
             Debug.Assert(!Monitor.IsEntered(GlobalListsLock));
 
-            // global lock to be safe against multi threads calls count and corrupt _needSync
+            // Global lock to be safe against multi threads calls count and corrupt _needSync
             Monitor.Enter(GlobalListsLock, ref lockTaken);
 
             // This will force any future add/take operation to be synchronized
             _needSync = true;
 
-            //Acquire all local lists locks
+            // Acquire all local lists locks
             AcquireAllLocks();
 
             // Wait for all un-synchronized operation to be done
@@ -751,6 +792,7 @@ namespace System.Collections.Concurrent
         {
             ReleaseAllLocks();
             _needSync = false;
+
             if (lockTaken)
             {
                 Monitor.Exit(GlobalListsLock);
@@ -758,7 +800,7 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// local helper method to acquire all local lists locks
+        /// Local helper method to acquire all local lists locks
         /// </summary>
         private void AcquireAllLocks()
         {
@@ -766,6 +808,7 @@ namespace System.Collections.Concurrent
 
             bool lockTaken = false;
             ThreadLocalList currentList = _headList;
+
             while (currentList != null)
             {
                 // Try/Finally block to avoid thread abort between acquiring the lock and setting the taken flag
@@ -781,6 +824,7 @@ namespace System.Collections.Concurrent
                         lockTaken = false;
                     }
                 }
+
                 currentList = currentList._nextList;
             }
         }
@@ -791,6 +835,7 @@ namespace System.Collections.Concurrent
         private void ReleaseAllLocks()
         {
             ThreadLocalList currentList = _headList;
+
             while (currentList != null)
             {
                 if (currentList._lockTaken)
@@ -798,6 +843,7 @@ namespace System.Collections.Concurrent
                     currentList._lockTaken = false;
                     Monitor.Exit(currentList);
                 }
+
                 currentList = currentList._nextList;
             }
         }
@@ -810,16 +856,19 @@ namespace System.Collections.Concurrent
             Debug.Assert(Monitor.IsEntered(GlobalListsLock));
 
             ThreadLocalList currentList = _headList;
+
             while (currentList != null)
             {
                 if (currentList._currentOp != (int)ListOperation.None)
                 {
                     SpinWait spinner = new SpinWait();
+
                     while (currentList._currentOp != (int)ListOperation.None)
                     {
                         spinner.SpinOnce();
                     }
                 }
+
                 currentList = currentList._nextList;
             }
         }
@@ -834,14 +883,17 @@ namespace System.Collections.Concurrent
 
             int count = 0;
             ThreadLocalList currentList = _headList;
+
             while (currentList != null)
             {
                 checked
                 {
                     count += currentList.Count;
                 }
+
                 currentList = currentList._nextList;
             }
+
             return count;
         }
 
@@ -856,6 +908,7 @@ namespace System.Collections.Concurrent
 
             List<T> list = new List<T>();
             ThreadLocalList currentList = _headList;
+
             while (currentList != null)
             {
                 Node currentNode = currentList._head;
@@ -864,6 +917,7 @@ namespace System.Collections.Concurrent
                     list.Add(currentNode._value);
                     currentNode = currentNode._next;
                 }
+
                 currentList = currentList._nextList;
             }
 
@@ -871,7 +925,6 @@ namespace System.Collections.Concurrent
         }
 
         #endregion
-
 
         #region Inner Classes
 
@@ -884,6 +937,7 @@ namespace System.Collections.Concurrent
             {
                 _value = value;
             }
+
             public readonly T _value;
             public Node _next;
             public Node _prev;
@@ -929,6 +983,7 @@ namespace System.Collections.Concurrent
             {
                 _ownerThreadId = ownerThreadId;
             }
+
             /// <summary>
             /// Add new item to head of the list
             /// </summary>
@@ -940,13 +995,15 @@ namespace System.Collections.Concurrent
                 {
                     _count++;
                 }
+
                 Node node = new Node(item);
+
                 if (_head == null)
                 {
                     Debug.Assert(_tail == null);
                     _head = node;
                     _tail = node;
-                    _version++; // changing from empty state to non empty state
+                    _version++; // Changing from empty state to non empty state
                 }
                 else
                 {
@@ -954,7 +1011,8 @@ namespace System.Collections.Concurrent
                     _head._prev = node;
                     _head = node;
                 }
-                if (updateCount) // update the count to avoid overflow if this add is synchronized
+
+                if (updateCount) // Update the count to avoid overflow if this add is synchronized
                 {
                     _count = _count - _stealCount;
                     _stealCount = 0;
@@ -968,8 +1026,10 @@ namespace System.Collections.Concurrent
             internal void Remove(out T result)
             {
                 Debug.Assert(_head != null);
+
                 Node head = _head;
                 _head = _head._next;
+
                 if (_head != null)
                 {
                     _head._prev = null;
@@ -978,6 +1038,7 @@ namespace System.Collections.Concurrent
                 {
                     _tail = null;
                 }
+
                 _count--;
                 result = head._value;
             }
@@ -990,11 +1051,13 @@ namespace System.Collections.Concurrent
             internal bool Peek(out T result)
             {
                 Node head = _head;
+
                 if (head != null)
                 {
                     result = head._value;
                     return true;
                 }
+
                 result = default(T);
                 return false;
             }
@@ -1008,6 +1071,7 @@ namespace System.Collections.Concurrent
             {
                 Node tail = _tail;
                 Debug.Assert(tail != null);
+
                 if (remove) // Take operation
                 {
                     _tail = _tail._prev;
@@ -1019,12 +1083,13 @@ namespace System.Collections.Concurrent
                     {
                         _head = null;
                     }
+
                     // Increment the steal count
                     _stealCount++;
                 }
+
                 result = tail._value;
             }
-
 
             /// <summary>
             /// Gets the total list count, it's not thread safe, may provide incorrect count if it is called concurrently
@@ -1037,6 +1102,7 @@ namespace System.Collections.Concurrent
                 }
             }
         }
+
         #endregion
     }
 
@@ -1048,6 +1114,5 @@ namespace System.Collections.Concurrent
         None,
         Add,
         Take
-    };
-
+    }
 }

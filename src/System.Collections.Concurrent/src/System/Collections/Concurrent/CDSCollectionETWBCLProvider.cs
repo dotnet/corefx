@@ -6,9 +6,9 @@
 //
 // CDSCollectionETWBCLProvider.cs
 //
-// A helper class for firing ETW events related to the Coordination Data Structure 
-// collection types. This provider is used by CDS collections in both mscorlib.dll 
-// and System.dll. The purpose of sharing the provider class is to be able to enable 
+// A helper class for firing ETW events related to the Coordination Data Structure
+// collection types. This provider is used by CDS collections in both mscorlib.dll
+// and System.dll. The purpose of sharing the provider class is to be able to enable
 // ETW tracing on all CDS collection with a single ETW provider GUID, and to minimize
 // the number of providers in use.
 //
@@ -17,7 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 #if FEATURE_TRACING
+
 using System.Diagnostics.Tracing;
 
 namespace System.Collections.Concurrent
@@ -26,7 +28,7 @@ namespace System.Collections.Concurrent
     [EventSource(
         Name = "System.Collections.Concurrent.ConcurrentCollectionsEventSource",
         Guid = "35167F8E-49B2-4b96-AB86-435B59336B5E"
-        //TODO:Bug455853:Add support for reading localized string in the EventSource il2il transform
+        // TODO:Bug455853:Add support for reading localized string in the EventSource il2il transform
         //,LocalizationResources = "mscorlib"
         )]
     internal sealed class CDSCollectionETWBCLProvider : EventSource
@@ -36,43 +38,48 @@ namespace System.Collections.Concurrent
         /// The collection provider GUID is {35167F8E-49B2-4b96-AB86-435B59336B5E}.
         /// </summary>
         public static CDSCollectionETWBCLProvider Log = new CDSCollectionETWBCLProvider();
-        /// <summary>Prevent external instantiation.  All logging should go through the Log instance.</summary>
-        private CDSCollectionETWBCLProvider() { }
+
+        /// <summary>
+        /// Prevent external instantiation.  All logging should go through the Log instance.
+        /// </summary>
+        private CDSCollectionETWBCLProvider()
+        {
+        }
 
         /// <summary>Enabled for all keywords.</summary>
-        private const EventKeywords ALL_KEYWORDS = (EventKeywords)(-1);
+        private const EventKeywords AllKeywords = (EventKeywords)(-1);
 
         //-----------------------------------------------------------------------------------
-        //        
+        //
         // CDS Collection Event IDs (must be unique)
         //
 
-        private const int CONCURRENTSTACK_FASTPUSHFAILED_ID = 1;
-        private const int CONCURRENTSTACK_FASTPOPFAILED_ID = 2;
-        private const int CONCURRENTDICTIONARY_ACQUIRINGALLLOCKS_ID = 3;
-        private const int CONCURRENTBAG_TRYTAKESTEALS_ID = 4;
-        private const int CONCURRENTBAG_TRYPEEKSTEALS_ID = 5;
+        private const int ConcurrentstackFastpushfailedId = 1;
+        private const int ConcurrentstackFastpopfailedId = 2;
+        private const int ConcurrentdictionaryAcquiringalllocksId = 3;
+        private const int ConcurrentbagTrytakestealsId = 4;
+        private const int ConcurrentbagTrypeekstealsId = 5;
 
         /////////////////////////////////////////////////////////////////////////////////////
         //
         // ConcurrentStack Events
         //
 
-        [Event(CONCURRENTSTACK_FASTPUSHFAILED_ID, Level = EventLevel.Warning)]
+        [Event(ConcurrentstackFastpushfailedId, Level = EventLevel.Warning)]
         public void ConcurrentStack_FastPushFailed(int spinCount)
         {
-            if (IsEnabled(EventLevel.Warning, ALL_KEYWORDS))
+            if (IsEnabled(EventLevel.Warning, AllKeywords))
             {
-                WriteEvent(CONCURRENTSTACK_FASTPUSHFAILED_ID, spinCount);
+                WriteEvent(ConcurrentstackFastpushfailedId, spinCount);
             }
         }
 
-        [Event(CONCURRENTSTACK_FASTPOPFAILED_ID, Level = EventLevel.Warning)]
+        [Event(ConcurrentstackFastpopfailedId, Level = EventLevel.Warning)]
         public void ConcurrentStack_FastPopFailed(int spinCount)
         {
-            if (IsEnabled(EventLevel.Warning, ALL_KEYWORDS))
+            if (IsEnabled(EventLevel.Warning, AllKeywords))
             {
-                WriteEvent(CONCURRENTSTACK_FASTPOPFAILED_ID, spinCount);
+                WriteEvent(ConcurrentstackFastpopfailedId, spinCount);
             }
         }
 
@@ -81,12 +88,12 @@ namespace System.Collections.Concurrent
         // ConcurrentDictionary Events
         //
 
-        [Event(CONCURRENTDICTIONARY_ACQUIRINGALLLOCKS_ID, Level = EventLevel.Warning)]
+        [Event(ConcurrentdictionaryAcquiringalllocksId, Level = EventLevel.Warning)]
         public void ConcurrentDictionary_AcquiringAllLocks(int numOfBuckets)
         {
-            if (IsEnabled(EventLevel.Warning, ALL_KEYWORDS))
+            if (IsEnabled(EventLevel.Warning, AllKeywords))
             {
-                WriteEvent(CONCURRENTDICTIONARY_ACQUIRINGALLLOCKS_ID, numOfBuckets);
+                WriteEvent(ConcurrentdictionaryAcquiringalllocksId, numOfBuckets);
             }
         }
 
@@ -99,23 +106,24 @@ namespace System.Collections.Concurrent
         // ConcurrentBag Events
         //
 
-        [Event(CONCURRENTBAG_TRYTAKESTEALS_ID, Level = EventLevel.Verbose)]
+        [Event(ConcurrentbagTrytakestealsId, Level = EventLevel.Verbose)]
         public void ConcurrentBag_TryTakeSteals()
         {
-            if (IsEnabled(EventLevel.Verbose, ALL_KEYWORDS))
+            if (IsEnabled(EventLevel.Verbose, AllKeywords))
             {
-                WriteEvent(CONCURRENTBAG_TRYTAKESTEALS_ID);
+                WriteEvent(ConcurrentbagTrytakestealsId);
             }
         }
 
-        [Event(CONCURRENTBAG_TRYPEEKSTEALS_ID, Level = EventLevel.Verbose)]
+        [Event(ConcurrentbagTrypeekstealsId, Level = EventLevel.Verbose)]
         public void ConcurrentBag_TryPeekSteals()
         {
-            if (IsEnabled(EventLevel.Verbose, ALL_KEYWORDS))
+            if (IsEnabled(EventLevel.Verbose, AllKeywords))
             {
-                WriteEvent(CONCURRENTBAG_TRYPEEKSTEALS_ID);
+                WriteEvent(ConcurrentbagTrypeekstealsId);
             }
         }
     }
 }
+
 #endif // FEATURE_TRACING
