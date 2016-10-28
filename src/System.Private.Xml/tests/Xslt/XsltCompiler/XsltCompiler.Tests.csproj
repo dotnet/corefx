@@ -42,7 +42,7 @@
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Xml\ModuleCore\ModuleCore.csproj" />
     <ProjectReference Include="$(CommonTestPath)\System\Xml\XmlCoreTest\XmlCoreTest.csproj" />
-    <ProjectReference Include="$(CommonTestPath)\System\Xml\xmlDiff\XmlDiff.csproj" />
+    <ProjectReference Include="$(CommonTestPath)\System\Xml\XmlDiff\XmlDiff.csproj" />
     <ProjectReference Include="..\..\..\..\System.Xml.ReaderWriter\pkg\System.Xml.ReaderWriter.pkgproj" />
   </ItemGroup>
   <ItemGroup>
