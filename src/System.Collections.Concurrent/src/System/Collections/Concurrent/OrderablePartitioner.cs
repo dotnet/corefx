@@ -8,7 +8,7 @@
 //
 
 //
-// 
+//
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -173,10 +173,11 @@ namespace System.Collections.Concurrent
             }
 
             IEnumerator<TSource>[] partitions = new IEnumerator<TSource>[partitionCount];
-            for (int i = 0; i < partitionCount; i++)
+            for (int index = 0; index < partitionCount; index++)
             {
-                partitions[i] = new EnumeratorDropIndices(orderablePartitions[i]);
+                partitions[index] = new EnumeratorDropIndices(orderablePartitions[index]);
             }
+
             return partitions;
         }
 
@@ -216,21 +217,26 @@ namespace System.Collections.Concurrent
         private class EnumerableDropIndices : IEnumerable<TSource>, IDisposable
         {
             private readonly IEnumerable<KeyValuePair<long, TSource>> _source;
+
             public EnumerableDropIndices(IEnumerable<KeyValuePair<long, TSource>> source)
             {
                 _source = source;
             }
+
             public IEnumerator<TSource> GetEnumerator()
             {
                 return new EnumeratorDropIndices(_source.GetEnumerator());
             }
+
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return ((EnumerableDropIndices)this).GetEnumerator();
             }
+
             public void Dispose()
             {
                 IDisposable d = _source as IDisposable;
+
                 if (d != null)
                 {
                     d.Dispose();
@@ -241,14 +247,17 @@ namespace System.Collections.Concurrent
         private class EnumeratorDropIndices : IEnumerator<TSource>
         {
             private readonly IEnumerator<KeyValuePair<long, TSource>> _source;
+
             public EnumeratorDropIndices(IEnumerator<KeyValuePair<long, TSource>> source)
             {
                 _source = source;
             }
+
             public bool MoveNext()
             {
                 return _source.MoveNext();
             }
+
             public TSource Current
             {
                 get
@@ -256,6 +265,7 @@ namespace System.Collections.Concurrent
                     return _source.Current.Value;
                 }
             }
+
             Object IEnumerator.Current
             {
                 get
@@ -263,10 +273,12 @@ namespace System.Collections.Concurrent
                     return ((EnumeratorDropIndices)this).Current;
                 }
             }
+
             public void Dispose()
             {
                 _source.Dispose();
             }
+
             public void Reset()
             {
                 _source.Reset();

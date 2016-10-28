@@ -7,7 +7,7 @@
 // BlockingCollection.cs
 //
 // A class that implements the bounding and blocking functionality while abstracting away
-// the underlying storage mechanism. This file also contains BlockingCollection's 
+// the underlying storage mechanism. This file also contains BlockingCollection's
 // associated debugger view type.
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -20,23 +20,23 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-    /// <summary> 
-    /// Provides blocking and bounding capabilities for thread-safe collections that 
-    /// implement <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. 
+    /// <summary>
+    /// Provides blocking and bounding capabilities for thread-safe collections that
+    /// implement <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>.
     /// </summary>
     /// <remarks>
     /// <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/> represents a collection
-    /// that allows for thread-safe adding and removing of data. 
+    /// that allows for thread-safe adding and removing of data.
     /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> is used as a wrapper
     /// for an <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/> instance, allowing
     /// removal attempts from the collection to block until data is available to be removed.  Similarly,
     /// a <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> can be created to enforce
-    /// an upper-bound on the number of data elements allowed in the 
+    /// an upper-bound on the number of data elements allowed in the
     /// <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>; addition attempts to the
     /// collection may then block until space is available to store the added items.  In this manner,
     /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> is similar to a traditional
     /// blocking queue data structure, except that the underlying data storage mechanism is abstracted
-    /// away as an <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. 
+    /// away as an <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>.
     /// </remarks>
     /// <typeparam name="T">Specifies the type of elements in the collection.</typeparam>
     [DebuggerTypeProxy(typeof(BlockingCollectionDebugView<>))]
@@ -45,7 +45,7 @@ namespace System.Collections.Concurrent
     {
         private IProducerConsumerCollection<T> _collection;
         private int _boundedCapacity;
-        private const int NON_BOUNDED = -1;
+        private const int NonBounded = -1;
         private SemaphoreSlim _freeNodes;
         private SemaphoreSlim _occupiedNodes;
         private bool _isDisposed;
@@ -53,9 +53,10 @@ namespace System.Collections.Concurrent
         private CancellationTokenSource _producersCancellationTokenSource;
 
         private volatile int _currentAdders;
-        private const int COMPLETE_ADDING_ON_MASK = unchecked((int)0x80000000);
+        private const int CompleteAddingOnMask = unchecked((int)0x80000000);
 
         #region Properties
+
         /// <summary>Gets the bounded capacity of this <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</summary>
         /// <value>The bounded capacity of this collection, or int.MaxValue if no bound was supplied.</value>
         /// <exception cref="T:System.ObjectDisposedException">The <see
@@ -78,7 +79,7 @@ namespace System.Collections.Concurrent
             get
             {
                 CheckDisposed();
-                return (_currentAdders == COMPLETE_ADDING_ON_MASK);
+                return (_currentAdders == CompleteAddingOnMask);
             }
         }
 
@@ -132,10 +133,10 @@ namespace System.Collections.Concurrent
                 throw new NotSupportedException(SR.ConcurrentCollection_SyncRoot_NotSupported);
             }
         }
+
         #endregion
 
-
-        /// <summary>Initializes a new instance of the 
+        /// <summary>Initializes a new instance of the
         /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>
         /// class without an upper-bound.
         /// </summary>
@@ -163,37 +164,39 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>Initializes a new instance of the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>
-        /// class with the specified upper-bound and using the provided 
+        /// class with the specified upper-bound and using the provided
         /// <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/> as its underlying data store.</summary>
         /// <param name="collection">The collection to use as the underlying data store.</param>
         /// <param name="boundedCapacity">The bounded size of the collection.</param>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collection"/> argument is
         /// null.</exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">The <paramref name="boundedCapacity"/> is not a positive value.</exception>
-        /// <exception cref="System.ArgumentException">The supplied <paramref name="collection"/> contains more values 
+        /// <exception cref="System.ArgumentException">The supplied <paramref name="collection"/> contains more values
         /// than is permitted by <paramref name="boundedCapacity"/>.</exception>
         public BlockingCollection(IProducerConsumerCollection<T> collection, int boundedCapacity)
         {
             if (boundedCapacity < 1)
             {
-                throw new ArgumentOutOfRangeException(
-nameof(boundedCapacity), boundedCapacity,
+                throw new ArgumentOutOfRangeException(nameof(boundedCapacity), boundedCapacity,
                     SR.BlockingCollection_ctor_BoundedCapacityRange);
             }
+
             if (collection == null)
             {
                 throw new ArgumentNullException(nameof(collection));
             }
+
             int count = collection.Count;
             if (count > boundedCapacity)
             {
                 throw new ArgumentException(SR.BlockingCollection_ctor_CountMoreThanCapacity);
             }
+
             Initialize(collection, boundedCapacity, count);
         }
 
         /// <summary>Initializes a new instance of the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>
-        /// class without an upper-bound and using the provided 
+        /// class without an upper-bound and using the provided
         /// <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/> as its underlying data store.</summary>
         /// <param name="collection">The collection to use as the underlying data store.</param>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collection"/> argument is
@@ -204,7 +207,8 @@ nameof(boundedCapacity), boundedCapacity,
             {
                 throw new ArgumentNullException(nameof(collection));
             }
-            Initialize(collection, NON_BOUNDED, collection.Count);
+
+            Initialize(collection, NonBounded, collection.Count);
         }
 
         /// <summary>Initializes the BlockingCollection instance.</summary>
@@ -213,7 +217,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="collectionCount">The number of items currently in the underlying collection.</param>
         private void Initialize(IProducerConsumerCollection<T> collection, int boundedCapacity, int collectionCount)
         {
-            Debug.Assert(boundedCapacity > 0 || boundedCapacity == NON_BOUNDED);
+            Debug.Assert(boundedCapacity > 0 || boundedCapacity == NonBounded);
 
             _collection = collection;
             _boundedCapacity = boundedCapacity; ;
@@ -221,7 +225,7 @@ nameof(boundedCapacity), boundedCapacity,
             _consumersCancellationTokenSource = new CancellationTokenSource();
             _producersCancellationTokenSource = new CancellationTokenSource();
 
-            if (boundedCapacity == NON_BOUNDED)
+            if (boundedCapacity == NonBounded)
             {
                 _freeNodes = null;
             }
@@ -231,10 +235,8 @@ nameof(boundedCapacity), boundedCapacity,
                 _freeNodes = new SemaphoreSlim(boundedCapacity - collectionCount);
             }
 
-
             _occupiedNodes = new SemaphoreSlim(collectionCount);
         }
-
 
         /// <summary>
         /// Adds the item to the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
@@ -247,8 +249,8 @@ nameof(boundedCapacity), boundedCapacity,
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         /// <remarks>
-        /// If a bounded capacity was specified when this instance of 
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> was initialized, 
+        /// If a bounded capacity was specified when this instance of
+        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> was initialized,
         /// a call to Add may block until space is available to store the provided item.
         /// </remarks>
         public void Add(T item)
@@ -277,8 +279,8 @@ nameof(boundedCapacity), boundedCapacity,
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         /// <remarks>
-        /// If a bounded capacity was specified when this instance of 
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> was initialized, 
+        /// If a bounded capacity was specified when this instance of
+        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> was initialized,
         /// a call to <see cref="Add(T,System.Threading.CancellationToken)"/> may block until space is available to store the provided item.
         /// </remarks>
         public void Add(T item, CancellationToken cancellationToken)
@@ -315,7 +317,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
-        /// <returns>true if the <paramref name="item"/> could be added to the collection within 
+        /// <returns>true if the <paramref name="item"/> could be added to the collection within
         /// the alloted time; otherwise, false.</returns>
         /// <exception cref="T:System.InvalidOperationException">The <see
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
@@ -338,7 +340,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="item">The item to be added to the collection.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
-        /// <returns>true if the <paramref name="item"/> could be added to the collection within 
+        /// <returns>true if the <paramref name="item"/> could be added to the collection within
         /// the alloted time; otherwise, false.</returns>
         /// <exception cref="T:System.InvalidOperationException">The <see
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
@@ -363,7 +365,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
-        /// <returns>true if the <paramref name="item"/> could be added to the collection within 
+        /// <returns>true if the <paramref name="item"/> could be added to the collection within
         /// the alloted time; otherwise, false.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
         /// <exception cref="T:System.InvalidOperationException">The <see
@@ -380,10 +382,10 @@ nameof(boundedCapacity), boundedCapacity,
             return TryAddWithNoTimeValidation(item, millisecondsTimeout, cancellationToken);
         }
 
-        /// <summary>Adds an item into the underlying data store using its IProducerConsumerCollection&lt;T&gt;.Add 
-        /// method. If a bounded capacity was specified and the collection was full, 
-        /// this method will wait for, at most, the timeout period trying to add the item. 
-        /// If the timeout period was exhausted before successfully adding the item this method will 
+        /// <summary>Adds an item into the underlying data store using its IProducerConsumerCollection&lt;T&gt;.Add
+        /// method. If a bounded capacity was specified and the collection was full,
+        /// this method will wait for, at most, the timeout period trying to add the item.
+        /// If the timeout period was exhausted before successfully adding the item this method will
         /// return false.</summary>
         /// <param name="item">The item to be added to the collection.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait for the collection to accept the item,
@@ -400,7 +402,9 @@ nameof(boundedCapacity), boundedCapacity,
             CheckDisposed();
 
             if (cancellationToken.IsCancellationRequested)
+            {
                 throw new OperationCanceledException(SR.Common_OperationCanceled, cancellationToken);
+            }
 
             if (IsAddingCompleted)
             {
@@ -411,8 +415,8 @@ nameof(boundedCapacity), boundedCapacity,
 
             if (_freeNodes != null)
             {
-                //If the _freeNodes semaphore threw OperationCanceledException then this means that CompleteAdding()
-                //was called concurrently with Adding which is not supported by BlockingCollection.
+                // If the _freeNodes semaphore threw OperationCanceledException then this means that CompleteAdding()
+                // was called concurrently with Adding which is not supported by BlockingCollection.
                 CancellationTokenSource linkedTokenSource = null;
                 try
                 {
@@ -426,15 +430,16 @@ nameof(boundedCapacity), boundedCapacity,
                 }
                 catch (OperationCanceledException)
                 {
-                    //if cancellation was via external token, throw an OCE
+                    // If cancellation was via external token, throw an OCE
                     if (cancellationToken.IsCancellationRequested)
+                    {
                         throw new OperationCanceledException(SR.Common_OperationCanceled, cancellationToken);
+                    }
 
-                    //if cancellation was via internal token, this indicates invalid use, hence InvalidOpEx.
+                    // If cancellation was via internal token, this indicates invalid use, hence InvalidOpEx.
                     //Debug.Assert(_ProducersCancellationTokenSource.Token.IsCancellationRequested);
 
-                    throw new InvalidOperationException
-                        (SR.BlockingCollection_Add_ConcurrentCompleteAdd);
+                    throw new InvalidOperationException(SR.BlockingCollection_Add_ConcurrentCompleteAdd);
                 }
                 finally
                 {
@@ -444,6 +449,7 @@ nameof(boundedCapacity), boundedCapacity,
                     }
                 }
             }
+
             if (waitForSemaphoreWasSuccessful)
             {
                 // Update the adders count if the complete adding was not requested, otherwise
@@ -454,20 +460,27 @@ nameof(boundedCapacity), boundedCapacity,
                 while (true)
                 {
                     int observedAdders = _currentAdders;
-                    if ((observedAdders & COMPLETE_ADDING_ON_MASK) != 0)
+                    if ((observedAdders & CompleteAddingOnMask) != 0)
                     {
                         spinner.Reset();
+
                         // CompleteAdding is requested, spin then throw
-                        while (_currentAdders != COMPLETE_ADDING_ON_MASK) spinner.SpinOnce();
+                        while (_currentAdders != CompleteAddingOnMask)
+                        {
+                            spinner.SpinOnce();
+                        }
+
                         throw new InvalidOperationException(SR.BlockingCollection_Completed);
                     }
+
 #pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
                     if (Interlocked.CompareExchange(ref _currentAdders, observedAdders + 1, observedAdders) == observedAdders)
 #pragma warning restore 0420
                     {
-                        Debug.Assert((observedAdders + 1) <= (~COMPLETE_ADDING_ON_MASK), "The number of concurrent adders thread exceeded the maximum limit.");
+                        Debug.Assert((observedAdders + 1) <= (~CompleteAddingOnMask), "The number of concurrent adders thread exceeded the maximum limit.");
                         break;
                     }
+
                     spinner.SpinOnce();
                 }
 
@@ -483,29 +496,30 @@ nameof(boundedCapacity), boundedCapacity,
                     //existing item and thus TryAdd returns false indicating that the size of the underlying
                     //store did not increase.
 
-
                     bool addingSucceeded = false;
+
                     try
                     {
-                        //The token may have been canceled before the collection had space available, so we need a check after the wait has completed.
-                        //This fixes bug #702328, case 2 of 2.
+                        // The token may have been canceled before the collection had space available, so we need a check after the wait has completed.
+                        // This fixes bug #702328, case 2 of 2.
                         cancellationToken.ThrowIfCancellationRequested();
                         addingSucceeded = _collection.TryAdd(item);
                     }
                     catch
                     {
-                        //TryAdd did not result in increasing the size of the underlying store and hence we need
-                        //to increment back the count of the _freeNodes semaphore.
+                        // TryAdd did not result in increasing the size of the underlying store and hence we need
+                        // to increment back the count of the _freeNodes semaphore.
                         if (_freeNodes != null)
                         {
                             _freeNodes.Release();
                         }
+
                         throw;
                     }
                     if (addingSucceeded)
                     {
-                        //After adding an element to the underlying storage, signal to the consumers 
-                        //waiting on _occupiedNodes that there is a new item added ready to be consumed.
+                        // After adding an element to the underlying storage, signal to the consumers
+                        // waiting on _occupiedNodes that there is a new item added ready to be consumed.
                         _occupiedNodes.Release();
                     }
                     else
@@ -515,13 +529,14 @@ nameof(boundedCapacity), boundedCapacity,
                 }
                 finally
                 {
-                    // decrement the adders count
-                    Debug.Assert((_currentAdders & ~COMPLETE_ADDING_ON_MASK) > 0);
+                    // Decrement the adders count
+                    Debug.Assert((_currentAdders & ~CompleteAddingOnMask) > 0);
 #pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
                     Interlocked.Decrement(ref _currentAdders);
 #pragma warning restore 0420
                 }
             }
+
             return waitForSemaphoreWasSuccessful;
         }
 
@@ -594,7 +609,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
-        /// <returns>true if an item could be removed from the collection within 
+        /// <returns>true if an item could be removed from the collection within
         /// the alloted time; otherwise, false.</returns>
         /// <exception cref="T:System.ObjectDisposedException">The <see
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
@@ -616,7 +631,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="item">The item removed from the collection.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
-        /// <returns>true if an item could be removed from the collection within 
+        /// <returns>true if an item could be removed from the collection within
         /// the alloted time; otherwise, false.</returns>
         /// <exception cref="T:System.ObjectDisposedException">The <see
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
@@ -640,7 +655,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
-        /// <returns>true if an item could be removed from the collection within 
+        /// <returns>true if an item could be removed from the collection within
         /// the alloted time; otherwise, false.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The <see
@@ -656,18 +671,18 @@ nameof(boundedCapacity), boundedCapacity,
             return TryTakeWithNoTimeValidation(out item, millisecondsTimeout, cancellationToken, null);
         }
 
-        /// <summary>Takes an item from the underlying data store using its IProducerConsumerCollection&lt;T&gt;.Take 
+        /// <summary>Takes an item from the underlying data store using its IProducerConsumerCollection&lt;T&gt;.Take
         /// method. If the collection was empty, this method will wait for, at most, the timeout period (if AddingIsCompleted is false)
-        /// trying to remove an item. If the timeout period was exhausted before successfully removing an item 
+        /// trying to remove an item. If the timeout period was exhausted before successfully removing an item
         /// this method will return false.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
         /// canceled.
         /// </summary>
         /// <param name="item">The item removed from the collection.</param>
-        /// <param name="millisecondsTimeout">The number of milliseconds to wait for the collection to have an item available 
+        /// <param name="millisecondsTimeout">The number of milliseconds to wait for the collection to have an item available
         /// for removal, or Timeout.Infinite to wait indefinitely.</param>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
-        /// <param name="combinedTokenSource">A combined cancellation token if created, it is only created by GetConsumingEnumerable to avoid creating the linked token 
+        /// <param name="combinedTokenSource">A combined cancellation token if created, it is only created by GetConsumingEnumerable to avoid creating the linked token
         /// multiple times.</param>
         /// <returns>False if the collection remained empty till the timeout period was exhausted. True otherwise.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
@@ -678,40 +693,47 @@ nameof(boundedCapacity), boundedCapacity,
             item = default(T);
 
             if (cancellationToken.IsCancellationRequested)
+            {
                 throw new OperationCanceledException(SR.Common_OperationCanceled, cancellationToken);
+            }
 
-            //If the collection is completed then there is no need to wait.
+            // If the collection is completed then there is no need to wait.
             if (IsCompleted)
             {
                 return false;
             }
+
             bool waitForSemaphoreWasSuccessful = false;
 
-            // set the combined token source to the combinedToken parameter if it is not null (came from GetConsumingEnumerable)
+            // Set the combined token source to the combinedToken parameter if it is not null (came from GetConsumingEnumerable)
             CancellationTokenSource linkedTokenSource = combinedTokenSource;
             try
             {
                 waitForSemaphoreWasSuccessful = _occupiedNodes.Wait(0);
                 if (waitForSemaphoreWasSuccessful == false && millisecondsTimeout != 0)
                 {
-                    // create the linked token if it is not created yet
+                    // Create the linked token if it is not created yet
                     if (combinedTokenSource == null)
+                    {
                         linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
-                                                                                          _consumersCancellationTokenSource.Token);
+                            _consumersCancellationTokenSource.Token);
+                    }
+
                     waitForSemaphoreWasSuccessful = _occupiedNodes.Wait(millisecondsTimeout, linkedTokenSource.Token);
                 }
             }
-            //The collection became completed while waiting on the semaphore.
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) // The collection became completed while waiting on the semaphore.
             {
                 if (cancellationToken.IsCancellationRequested)
+                {
                     throw new OperationCanceledException(SR.Common_OperationCanceled, cancellationToken);
+                }
 
                 return false;
             }
             finally
             {
-                // only dispose the combined token source if we created it here, otherwise the caller (GetConsumingEnumerable) is responsible for disposing it
+                // Only dispose the combined token source if we created it here, otherwise the caller (GetConsumingEnumerable) is responsible for disposing it
                 if (linkedTokenSource != null && combinedTokenSource == null)
                 {
                     linkedTokenSource.Dispose();
@@ -722,13 +744,14 @@ nameof(boundedCapacity), boundedCapacity,
             {
                 bool removeSucceeded = false;
                 bool removeFaulted = true;
+
                 try
                 {
-                    //The token may have been canceled before an item arrived, so we need a check after the wait has completed.
-                    //This fixes bug #702328, case 1 of 2.
+                    // The token may have been canceled before an item arrived, so we need a check after the wait has completed.
+                    // This fixes bug #702328, case 1 of 2.
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    //If an item was successfully removed from the underlying collection.
+                    // If an item was successfully removed from the underlying collection.
                     removeSucceeded = _collection.TryTake(out item);
                     removeFaulted = false;
                     if (!removeSucceeded)
@@ -740,12 +763,12 @@ nameof(boundedCapacity), boundedCapacity,
                 }
                 finally
                 {
-                    // removeFaulted implies !removeSucceeded, but the reverse is not true.
+                    // RemoveFaulted implies !removeSucceeded, but the reverse is not true.
                     if (removeSucceeded)
                     {
                         if (_freeNodes != null)
                         {
-                            Debug.Assert(_boundedCapacity != NON_BOUNDED);
+                            Debug.Assert(_boundedCapacity != NonBounded);
                             _freeNodes.Release();
                         }
                     }
@@ -753,20 +776,20 @@ nameof(boundedCapacity), boundedCapacity,
                     {
                         _occupiedNodes.Release();
                     }
-                    //Last remover will detect that it has actually removed the last item from the 
-                    //collection and that CompleteAdding() was called previously. Thus, it will cancel the semaphores
-                    //so that any thread waiting on them wakes up. Note several threads may call CancelWaitingConsumers
-                    //but this is not a problem.
+
+                    // Last remover will detect that it has actually removed the last item from the
+                    // collection and that CompleteAdding() was called previously. Thus, it will cancel the semaphores
+                    // so that any thread waiting on them wakes up. Note several threads may call CancelWaitingConsumers
+                    // but this is not a problem.
                     if (IsCompleted)
                     {
                         CancelWaitingConsumers();
                     }
                 }
             }
+
             return waitForSemaphoreWasSuccessful;
         }
-
-
 
         /// <summary>
         /// Adds the specified item to any one of the specified
@@ -787,7 +810,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>
         /// If a bounded capacity was specified when all of the
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances were initialized, 
+        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances were initialized,
         /// a call to AddToAny may block until space is available in one of the collections
         /// to store the provided item.
         /// </remarks>
@@ -810,7 +833,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// Adds the specified item to any one of the specified
         /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
-        /// canceled. 
+        /// canceled.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item to be added to one of the collections.</param>
@@ -829,7 +852,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>
         /// If a bounded capacity was specified when all of the
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances were initialized, 
+        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances were initialized,
         /// a call to AddToAny may block until space is available in one of the collections
         /// to store the provided item.
         /// </remarks>
@@ -854,7 +877,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item to be added to one of the collections.</param>
-        /// <returns>The index of the collection in the <paramref name="collections"/> 
+        /// <returns>The index of the collection in the <paramref name="collections"/>
         /// array to which the item was added, or -1 if the item could not be added.</returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
@@ -880,7 +903,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
-        /// <returns>The index of the collection in the <paramref name="collections"/> 
+        /// <returns>The index of the collection in the <paramref name="collections"/>
         /// array to which the item was added, or -1 if the item could not be added.</returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
@@ -908,7 +931,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item to be added to one of the collections.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
-        /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>        /// <returns>The index of the collection in the <paramref name="collections"/> 
+        /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>        /// <returns>The index of the collection in the <paramref name="collections"/>
         /// array to which the item was added, or -1 if the item could not be added.</returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
@@ -937,8 +960,8 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item to be added to one of the collections.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
-        /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>        
-        /// <returns>The index of the collection in the <paramref name="collections"/> 
+        /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
+        /// <returns>The index of the collection in the <paramref name="collections"/>
         /// array to which the item was added, or -1 if the item could not be added.</returns>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
@@ -962,24 +985,24 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>Adds an item to anyone of the specified collections.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
-        /// canceled. 
+        /// canceled.
         /// </summary>
         /// <param name="collections">The collections into which the item can be added.</param>
         /// <param name="item">The item to be added .</param>
-        /// <param name="millisecondsTimeout">The number of milliseconds to wait for a collection to accept the 
+        /// <param name="millisecondsTimeout">The number of milliseconds to wait for a collection to accept the
         /// operation, or -1 to wait indefinitely.</param>
         /// <param name="externalCancellationToken">A cancellation token to observe.</param>
-        /// <returns>The index into collections for the collection which accepted the 
+        /// <returns>The index into collections for the collection which accepted the
         /// adding of the item; -1 if the item could not be added.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
         /// <exception cref="System.ArgumentNullException">If the collections argument is null.</exception>
-        /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a 
+        /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a
         /// null element. Also, if at least one of the collections has been marked complete for adds.</exception>
         /// <exception cref="System.ObjectDisposedException">If at least one of the collections has been disposed.</exception>
         private static int TryAddToAnyCore(BlockingCollection<T>[] collections, T item, int millisecondsTimeout, CancellationToken externalCancellationToken)
         {
             ValidateCollectionsArray(collections, true);
-            const int OPERATION_FAILED = -1;
+            const int OperationFailed = -1;
 
             // Copy the wait time to another local variable to update it
             int timeout = millisecondsTimeout;
@@ -993,8 +1016,9 @@ nameof(boundedCapacity), boundedCapacity,
             // Fast path for adding if there is at least one unbounded collection
             int index = TryAddToAnyFast(collections, item);
             if (index > -1)
+            {
                 return index;
-
+            }
 
             // Get wait handles and the tokens for all collections,
             // and construct a single combined token from all the tokens,
@@ -1017,38 +1041,48 @@ nameof(boundedCapacity), boundedCapacity,
 
                 using (CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(collatedCancellationTokens))
                 {
-                    handles.Add(linkedTokenSource.Token.WaitHandle); // add the combined token to the handles list
+                    handles.Add(linkedTokenSource.Token.WaitHandle); // Add the combined token to the handles list
 
-                    //Wait for any collection to become available.
+                    // Wait for any collection to become available.
                     index = WaitHandle.WaitAny(handles.ToArray(), timeout);
 
-                    handles.RemoveAt(handles.Count - 1); //remove the linked token
+                    handles.RemoveAt(handles.Count - 1); // Remove the linked token
 
                     if (linkedTokenSource.IsCancellationRequested)
                     {
                         if (externalCancellationToken.IsCancellationRequested) //case#3
+                        {
                             throw new OperationCanceledException(SR.Common_OperationCanceled, externalCancellationToken);
-                        else //case#4
+                        }
+                        else // case #4
+                        {
                             throw new ArgumentException(SR.BlockingCollection_CantAddAnyWhenCompleted, nameof(collections));
+                        }
                     }
                 }
 
                 Debug.Assert((index == WaitHandle.WaitTimeout) || (index >= 0 && index < handles.Count));
 
                 if (index == WaitHandle.WaitTimeout) //case#2
-                    return OPERATION_FAILED;
+                {
+                    return OperationFailed;
+                }
 
-                //If the timeout period was not exhausted and the appropriate operation succeeded.
+                // If the timeout period was not exhausted and the appropriate operation succeeded.
                 if (collections[index].TryAdd(item)) //case#1
+                {
                     return index;
+                }
 
                 // Update the timeout
                 if (millisecondsTimeout != Timeout.Infinite)
+                {
                     timeout = UpdateTimeOut(startTime, millisecondsTimeout);
+                }
             }
 
             // case #2
-            return OPERATION_FAILED;
+            return OperationFailed;
         }
 
         /// <summary>
@@ -1059,22 +1093,24 @@ nameof(boundedCapacity), boundedCapacity,
         /// <returns>The index which the item has been added, -1 if failed</returns>
         private static int TryAddToAnyFast(BlockingCollection<T>[] collections, T item)
         {
-            for (int i = 0; i < collections.Length; i++)
+            for (int index = 0; index < collections.Length; index++)
             {
-                if (collections[i]._freeNodes == null)
+                if (collections[index]._freeNodes == null)
                 {
 #if DEBUG
                     bool result =
 #endif
-                    collections[i].TryAdd(item);
+                    collections[index].TryAdd(item);
 #if DEBUG
                     Debug.Assert(result);
 #endif
-                    return i;
+                    return index;
                 }
             }
+
             return -1;
         }
+
         /// <summary>
         /// Local static method, used by TryAddTakeAny to get the wait handles for the collection, with exclude option to exclude the Completed collections
         /// </summary>
@@ -1090,27 +1126,29 @@ nameof(boundedCapacity), boundedCapacity,
             List<CancellationToken> tokensList = new List<CancellationToken>(collections.Length + 1); // + 1 for the external token
             tokensList.Add(externalCancellationToken);
 
-            //Read the appropriate WaitHandle based on the operation mode.
+            // Read the appropriate WaitHandle based on the operation mode.
             if (isAddOperation)
             {
-                for (int i = 0; i < collections.Length; i++)
+                for (int index = 0; index < collections.Length; index++)
                 {
-                    if (collections[i]._freeNodes != null)
+                    if (collections[index]._freeNodes != null)
                     {
-                        handlesList.Add(collections[i]._freeNodes.AvailableWaitHandle);
-                        tokensList.Add(collections[i]._producersCancellationTokenSource.Token);
+                        handlesList.Add(collections[index]._freeNodes.AvailableWaitHandle);
+                        tokensList.Add(collections[index]._producersCancellationTokenSource.Token);
                     }
                 }
             }
             else
             {
-                for (int i = 0; i < collections.Length; i++)
+                for (int index = 0; index < collections.Length; index++)
                 {
-                    if (collections[i].IsCompleted) //exclude Completed collections if it is take operation
+                    if (collections[index].IsCompleted) //exclude Completed collections if it is take operation
+                    {
                         continue;
+                    }
 
-                    handlesList.Add(collections[i]._occupiedNodes.AvailableWaitHandle);
-                    tokensList.Add(collections[i]._consumersCancellationTokenSource.Token);
+                    handlesList.Add(collections[index]._occupiedNodes.AvailableWaitHandle);
+                    tokensList.Add(collections[index]._consumersCancellationTokenSource.Token);
                 }
             }
 
@@ -1130,6 +1168,7 @@ nameof(boundedCapacity), boundedCapacity,
             {
                 return 0;
             }
+
             // The function must be called in case the time out is not infinite
             Debug.Assert(originalWaitMillisecondsTimeout != Timeout.Infinite);
 
@@ -1150,13 +1189,14 @@ nameof(boundedCapacity), boundedCapacity,
 
             return currentWaitTimeout;
         }
+
         /// <summary>
         /// Takes an item from any one of the specified
         /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item removed from one of the collections.</param>
-        /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
+        /// <returns>The index of the collection in the <paramref name="collections"/> array from which
         /// the item was removed, or -1 if an item could not be removed.</returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
@@ -1184,7 +1224,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item removed from one of the collections.</param>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
-        /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
+        /// <returns>The index of the collection in the <paramref name="collections"/> array from which
         /// the item was removed, or -1 if an item could not be removed.</returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
@@ -1196,14 +1236,15 @@ nameof(boundedCapacity), boundedCapacity,
         /// <exception cref="T:System.InvalidOperationException">At least one of the underlying collections was modified
         /// outside of its <see
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of 
+        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>A call to TakeFromAny may block until an item is available to be removed.</remarks>
         public static int TakeFromAny(BlockingCollection<T>[] collections, out T item, CancellationToken cancellationToken)
         {
             int returnValue = TryTakeFromAnyCore(collections, out item, Timeout.Infinite, true, cancellationToken);
-            Debug.Assert((returnValue >= 0 && returnValue < collections.Length)
-                                          , "TryTakeFromAny() was expected to return an index within the bounds of the collections array.");
+            Debug.Assert((returnValue >= 0 && returnValue < collections.Length),
+                "TryTakeFromAny() was expected to return an index within the bounds of the collections array.");
+
             return returnValue;
         }
 
@@ -1213,7 +1254,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item removed from one of the collections.</param>
-        /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
+        /// <returns>The index of the collection in the <paramref name="collections"/> array from which
         /// the item was removed, or -1 if an item could not be removed.</returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
@@ -1241,7 +1282,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
-        /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
+        /// <returns>The index of the collection in the <paramref name="collections"/> array from which
         /// the item was removed, or -1 if an item could not be removed.</returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
@@ -1272,7 +1313,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="item">The item removed from one of the collections.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
-        /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
+        /// <returns>The index of the collection in the <paramref name="collections"/> array from which
         /// the item was removed, or -1 if an item could not be removed.</returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
@@ -1298,14 +1339,14 @@ nameof(boundedCapacity), boundedCapacity,
         /// Attempts to remove an item from any one of the specified
         /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
-        /// canceled. 
+        /// canceled.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item removed from one of the collections.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
-        /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
+        /// <returns>The index of the collection in the <paramref name="collections"/> array from which
         /// the item was removed, or -1 if an item could not be removed.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
@@ -1330,58 +1371,59 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>Takes an item from anyone of the specified collections.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
-        /// canceled. 
+        /// canceled.
         /// </summary>
         /// <param name="collections">The collections from which the item can be removed.</param>
         /// <param name="item">The item removed and returned to the caller.</param>
-        /// <param name="millisecondsTimeout">The number of milliseconds to wait for a collection to accept the 
+        /// <param name="millisecondsTimeout">The number of milliseconds to wait for a collection to accept the
         /// operation, or -1 to wait indefinitely.</param>
         /// <param name="isTakeOperation">True if Take, false if TryTake.</param>
         /// <param name="externalCancellationToken">A cancellation token to observe.</param>
-        /// <returns>The index into collections for the collection which accepted the 
+        /// <returns>The index into collections for the collection which accepted the
         /// removal of the item; -1 if the item could not be removed.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
         /// <exception cref="System.ArgumentNullException">If the collections argument is null.</exception>
-        /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a 
+        /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a
         /// null element. Also, if at least one of the collections has been marked complete for adds.</exception>
         /// <exception cref="System.ObjectDisposedException">If at least one of the collections has been disposed.</exception>
         private static int TryTakeFromAnyCore(BlockingCollection<T>[] collections, out T item, int millisecondsTimeout, bool isTakeOperation, CancellationToken externalCancellationToken)
         {
             ValidateCollectionsArray(collections, false);
 
-            //try the fast path first
+            // Try the fast path first
             for (int i = 0; i < collections.Length; i++)
             {
                 // Check if the collection is not completed, and potentially has at least one element by checking the semaphore count
                 if (!collections[i].IsCompleted && collections[i]._occupiedNodes.CurrentCount > 0 && collections[i].TryTake(out item))
+                {
                     return i;
+                }
             }
 
-            //Fast path failed, try the slow path
+            // Fast path failed, try the slow path
             return TryTakeFromAnyCoreSlow(collections, out item, millisecondsTimeout, isTakeOperation, externalCancellationToken);
         }
 
-
         /// <summary>Takes an item from anyone of the specified collections.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
-        /// canceled. 
+        /// canceled.
         /// </summary>
         /// <param name="collections">The collections copy from which the item can be removed.</param>
         /// <param name="item">The item removed and returned to the caller.</param>
-        /// <param name="millisecondsTimeout">The number of milliseconds to wait for a collection to accept the 
+        /// <param name="millisecondsTimeout">The number of milliseconds to wait for a collection to accept the
         /// operation, or -1 to wait indefinitely.</param>
         /// <param name="isTakeOperation">True if Take, false if TryTake.</param>
         /// <param name="externalCancellationToken">A cancellation token to observe.</param>
-        /// <returns>The index into collections for the collection which accepted the 
+        /// <returns>The index into collections for the collection which accepted the
         /// removal of the item; -1 if the item could not be removed.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
         /// <exception cref="System.ArgumentNullException">If the collections argument is null.</exception>
-        /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a 
+        /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a
         /// null element. Also, if at least one of the collections has been marked complete for adds.</exception>
         /// <exception cref="System.ObjectDisposedException">If at least one of the collections has been disposed.</exception>
         private static int TryTakeFromAnyCoreSlow(BlockingCollection<T>[] collections, out T item, int millisecondsTimeout, bool isTakeOperation, CancellationToken externalCancellationToken)
         {
-            const int OPERATION_FAILED = -1;
+            const int OperationFailed = -1;
 
             // Copy the wait time to another local variable to update it
             int timeout = millisecondsTimeout;
@@ -1392,8 +1434,7 @@ nameof(boundedCapacity), boundedCapacity,
                 startTime = (uint)Environment.TickCount;
             }
 
-
-            //Loop until one of these conditions is met:
+            // Loop until one of these conditions is met:
             // 1- The operation is succeeded
             // 2- The timeout expired for try* versions
             // 3- The external token is cancelled, throw
@@ -1411,30 +1452,34 @@ nameof(boundedCapacity), boundedCapacity,
                 CancellationToken[] collatedCancellationTokens;
                 List<WaitHandle> handles = GetHandles(collections, externalCancellationToken, false, out collatedCancellationTokens);
 
-                if (handles.Count == 0 && isTakeOperation) //case#5
+                if (handles.Count == 0 && isTakeOperation) // case#5
+                {
                     throw new ArgumentException(SR.BlockingCollection_CantTakeAnyWhenAllDone, nameof(collections));
-
-                else if (handles.Count == 0) //case#4
+                }
+                else if (handles.Count == 0) // case#4
+                {
                     break;
+                }
 
-
-                //Wait for any collection to become available.
+                // Wait for any collection to become available.
                 using (CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(collatedCancellationTokens))
                 {
-                    handles.Add(linkedTokenSource.Token.WaitHandle); // add the combined token to the handles list
+                    handles.Add(linkedTokenSource.Token.WaitHandle); // Add the combined token to the handles list
                     int index = WaitHandle.WaitAny(handles.ToArray(), timeout);
 
                     if (linkedTokenSource.IsCancellationRequested && externalCancellationToken.IsCancellationRequested)//case#3
+                    {
                         throw new OperationCanceledException(SR.Common_OperationCanceled, externalCancellationToken);
-
-
-                    else if (!linkedTokenSource.IsCancellationRequested) // if neither internal nor external cancellation requested
+                    }
+                    else if (!linkedTokenSource.IsCancellationRequested) // If neither internal nor external cancellation requested
                     {
                         Debug.Assert((index == WaitHandle.WaitTimeout) || (index >= 0 && index < handles.Count));
-                        if (index == WaitHandle.WaitTimeout) //case#2
+                        if (index == WaitHandle.WaitTimeout) // case#2
+                        {
                             break;
+                        }
 
-                        // adjust the index in case one or more handles removed because they are completed
+                        // Adjust the index in case one or more handles removed because they are completed
                         if (collections.Length != handles.Count - 1) // -1 because of the combined token handle
                         {
                             for (int i = 0; i < collections.Length; i++)
@@ -1448,25 +1493,29 @@ nameof(boundedCapacity), boundedCapacity,
                         }
 
                         if (collections[index].TryTake(out item)) //case#1
+                        {
                             return index;
+                        }
                     }
                 }
 
                 // Update the timeout
                 if (millisecondsTimeout != Timeout.Infinite)
+                {
                     timeout = UpdateTimeOut(startTime, millisecondsTimeout);
+                }
             }
 
-            item = default(T); //case#2
-            return OPERATION_FAILED;
+            item = default(T); // case#2
+            return OperationFailed;
         }
 
         /// <summary>
         /// Marks the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances
-        /// as not accepting any more additions.  
+        /// as not accepting any more additions.
         /// </summary>
         /// <remarks>
-        /// After a collection has been marked as complete for adding, adding to the collection is not permitted 
+        /// After a collection has been marked as complete for adding, adding to the collection is not permitted
         /// and attempts to remove from the collection will not wait when the collection is empty.
         /// </remarks>
         /// <exception cref="T:System.ObjectDisposedException">The <see
@@ -1476,25 +1525,37 @@ nameof(boundedCapacity), boundedCapacity,
             CheckDisposed();
 
             if (IsAddingCompleted)
+            {
                 return;
+            }
 
             SpinWait spinner = new SpinWait();
+
             while (true)
             {
                 int observedAdders = _currentAdders;
-                if ((observedAdders & COMPLETE_ADDING_ON_MASK) != 0)
+                if ((observedAdders & CompleteAddingOnMask) != 0)
                 {
                     spinner.Reset();
+
                     // If there is another CompleteAdding in progress waiting the current adders, then spin until it finishes
-                    while (_currentAdders != COMPLETE_ADDING_ON_MASK) spinner.SpinOnce();
+                    while (_currentAdders != CompleteAddingOnMask)
+                    {
+                        spinner.SpinOnce();
+                    }
+
                     return;
                 }
+
 #pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
-                if (Interlocked.CompareExchange(ref _currentAdders, observedAdders | COMPLETE_ADDING_ON_MASK, observedAdders) == observedAdders)
+                if (Interlocked.CompareExchange(ref _currentAdders, observedAdders | CompleteAddingOnMask, observedAdders) == observedAdders)
 #pragma warning restore 0420
                 {
                     spinner.Reset();
-                    while (_currentAdders != COMPLETE_ADDING_ON_MASK) spinner.SpinOnce();
+                    while (_currentAdders != CompleteAddingOnMask)
+                    {
+                        spinner.SpinOnce();
+                    }
 
                     if (Count == 0)
                     {
@@ -1504,8 +1565,10 @@ nameof(boundedCapacity), boundedCapacity,
                     // We should always wake waiting producers, and have them throw exceptions as
                     // Add&CompleteAdding should not be used concurrently.
                     CancelWaitingProducers();
+
                     return;
                 }
+
                 spinner.SpinOnce();
             }
         }
@@ -1520,7 +1583,6 @@ nameof(boundedCapacity), boundedCapacity,
         {
             _producersCancellationTokenSource.Cancel();
         }
-
 
         /// <summary>
         /// Releases resources used by the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.
@@ -1563,16 +1625,16 @@ nameof(boundedCapacity), boundedCapacity,
             return _collection.ToArray();
         }
 
-        /// <summary>Copies all of the items in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance 
+        /// <summary>Copies all of the items in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance
         /// to a compatible one-dimensional array, starting at the specified index of the target array.
         /// </summary>
-        /// <param name="array">The one-dimensional array that is the destination of the elements copied from 
+        /// <param name="array">The one-dimensional array that is the destination of the elements copied from
         /// the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance. The array must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying begins.</param>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="array"/> argument is
         /// null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="index"/> argument is less than zero.</exception>
-        /// <exception cref="System.ArgumentException">The <paramref name="index"/> argument is equal to or greater 
+        /// <exception cref="System.ArgumentException">The <paramref name="index"/> argument is equal to or greater
         /// than the length of the <paramref name="array"/>.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The <see
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
@@ -1581,17 +1643,17 @@ nameof(boundedCapacity), boundedCapacity,
             ((ICollection)this).CopyTo(array, index);
         }
 
-        /// <summary>Copies all of the items in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance 
+        /// <summary>Copies all of the items in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance
         /// to a compatible one-dimensional array, starting at the specified index of the target array.
         /// </summary>
-        /// <param name="array">The one-dimensional array that is the destination of the elements copied from 
+        /// <param name="array">The one-dimensional array that is the destination of the elements copied from
         /// the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance. The array must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying begins.</param>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="array"/> argument is
         /// null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="index"/> argument is less than zero.</exception>
-        /// <exception cref="System.ArgumentException">The <paramref name="index"/> argument is equal to or greater 
-        /// than the length of the <paramref name="array"/>, the array is multidimensional, or the type parameter for the collection 
+        /// <exception cref="System.ArgumentException">The <paramref name="index"/> argument is equal to or greater
+        /// than the length of the <paramref name="array"/>, the array is multidimensional, or the type parameter for the collection
         /// cannot be cast automatically to the type of the destination array.</exception>
         /// <exception cref="T:System.ObjectDisposedException">The <see
         /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
@@ -1599,8 +1661,8 @@ nameof(boundedCapacity), boundedCapacity,
         {
             CheckDisposed();
 
-            //We don't call _collection.CopyTo() directly because we rely on Array.Copy method to customize 
-            //all array exceptions.  
+            // We don't call _collection.CopyTo() directly because we rely on Array.Copy method to customize
+            // all array exceptions.
             T[] collectionSnapShot = _collection.ToArray();
 
             try
@@ -1654,9 +1716,11 @@ nameof(boundedCapacity), boundedCapacity,
         public IEnumerable<T> GetConsumingEnumerable(CancellationToken cancellationToken)
         {
             CancellationTokenSource linkedTokenSource = null;
+
             try
             {
                 linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _consumersCancellationTokenSource.Token);
+
                 while (!IsCompleted)
                 {
                     T item;
@@ -1697,9 +1761,9 @@ nameof(boundedCapacity), boundedCapacity,
         /// <summary>Centralizes the logic for validating the BlockingCollections array passed to TryAddToAny()
         /// and TryTakeFromAny().</summary>
         /// <param name="collections">The collections to/from which an item should be added/removed.</param>
-        /// <param name="operationMode">Indicates whether this method is called to Add or Take.</param>
+        /// <param name="isAddOperation">Indicates whether this method is called to Add or Take.</param>
         /// <exception cref="System.ArgumentNullException">If the collections argument is null.</exception>
-        /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a 
+        /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a
         /// null element. Also, if at least one of the collections has been marked complete for adds.</exception>
         /// <exception cref="System.ObjectDisposedException">If at least one of the collections has been disposed.</exception>
         private static void ValidateCollectionsArray(BlockingCollection<T>[] collections, bool isAddOperation)
@@ -1714,25 +1778,26 @@ nameof(boundedCapacity), boundedCapacity,
                     SR.BlockingCollection_ValidateCollectionsArray_ZeroSize, nameof(collections));
             }
             else if ((!IsSTAThread && collections.Length > 63) || (IsSTAThread && collections.Length > 62))
-            //The number of WaitHandles must be <= 64 for MTA, and <=63 for STA, and we reserve one for CancellationToken                
             {
-                throw new ArgumentOutOfRangeException(
-nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_LargeSize);
+                // The number of WaitHandles must be <= 64 for MTA, and <=63 for STA, and we reserve one for CancellationToken
+                throw new ArgumentOutOfRangeException(nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_LargeSize);
             }
 
-            for (int i = 0; i < collections.Length; ++i)
+            for (int index = 0; index < collections.Length; ++index)
             {
-                if (collections[i] == null)
+                if (collections[index] == null)
                 {
                     throw new ArgumentException(
                         SR.BlockingCollection_ValidateCollectionsArray_NullElems, nameof(collections));
                 }
 
-                if (collections[i]._isDisposed)
+                if (collections[index]._isDisposed)
+                {
                     throw new ObjectDisposedException(
-nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_DispElems);
+                        nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_DispElems);
+                }
 
-                if (isAddOperation && collections[i].IsAddingCompleted)
+                if (isAddOperation && collections[index].IsAddingCompleted)
                 {
                     throw new ArgumentException(
                         SR.BlockingCollection_CantAddAnyWhenCompleted, nameof(collections));
@@ -1752,29 +1817,29 @@ nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_DispElems);
         // Private Helpers.
         /// <summary>Centralizes the logic of validating the timeout input argument.</summary>
         /// <param name="timeout">The TimeSpan to wait for to successfully complete an operation on the collection.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">If the number of milliseconds represented by the timeout 
+        /// <exception cref="System.ArgumentOutOfRangeException">If the number of milliseconds represented by the timeout
         /// TimeSpan is less than 0 or is larger than Int32.MaxValue and not Timeout.Infinite</exception>
         private static void ValidateTimeout(TimeSpan timeout)
         {
             long totalMilliseconds = (long)timeout.TotalMilliseconds;
-            if ((totalMilliseconds < 0 || totalMilliseconds > Int32.MaxValue) && (totalMilliseconds != Timeout.Infinite))
+            if ((totalMilliseconds < 0 || totalMilliseconds > int.MaxValue) && (totalMilliseconds != Timeout.Infinite))
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout), timeout,
-                    String.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, Int32.MaxValue));
+                    string.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, int.MaxValue));
             }
         }
 
         /// <summary>Centralizes the logic of validating the millisecondsTimeout input argument.</summary>
-        /// <param name="millisecondsTimeout">The number of milliseconds to wait for to successfully complete an 
+        /// <param name="millisecondsTimeout">The number of milliseconds to wait for to successfully complete an
         /// operation on the collection.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">If the number of milliseconds is less than 0 and not 
+        /// <exception cref="System.ArgumentOutOfRangeException">If the number of milliseconds is less than 0 and not
         /// equal to Timeout.Infinite.</exception>
         private static void ValidateMillisecondsTimeout(int millisecondsTimeout)
         {
             if ((millisecondsTimeout < 0) && (millisecondsTimeout != Timeout.Infinite))
             {
                 throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout), millisecondsTimeout,
-                    String.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, Int32.MaxValue));
+                    string.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, int.MaxValue));
             }
         }
 
