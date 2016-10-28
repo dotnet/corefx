@@ -90,24 +90,31 @@ namespace System.Diagnostics
             set { _createNoWindow = value; }
         }
 
-        public StringDictionary EnvironmentVariables {
-            get {
-                // Note:
-                // Creating a detached ProcessStartInfo will pre-populate the environment
-                // with current environmental variables. 
-
-                // When used with an existing Process.ProcessStartInfo the following behavior
-                //  * Desktop - Populates with current Environment (rather than that of the process)
+        public StringDictionary EnvironmentVariables 
+        {
+            get 
+            {
                                 
-                if (_environmentVariables == null) {
+                if (_environmentVariables == null)
+                {
 #if PLATFORM_UNIX
-                    _environmentVariables = new CaseSensitiveStringDictionary();
+                    _environmentVariables = new StringDictionaryWithComparer(StringComparer.Ordinal);
 #else
-                    _environmentVariables = new StringDictionaryWithComparer ();
+                    _environmentVariables = new StringDictionaryWithComparer(StringComparer.OrdinalIgnoreCase);
 #endif // PLATFORM_UNIX
 
-                        foreach (DictionaryEntry entry in System.Environment.GetEnvironmentVariables())
-                            _environmentVariables.Add((string)entry.Key, (string)entry.Value);
+                    IEnumerator<KeyValuePair<string,string>> e = Environment.GetEnumerator();
+                    try
+                    {
+                        while (e.MoveNext())
+                        {
+                            _environmentVariables.Add((string)e.Current.Key, (string)e.Current.Value);
+                        }
+                    }
+                    finally
+                    {
+                        (e as IDisposable)?.Dispose();
+                    }
                 
                 }
                 return _environmentVariables;

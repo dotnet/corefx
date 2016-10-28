@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -432,6 +433,187 @@ namespace System.Diagnostics.Tests
             }
 
             return userNames;
+        }
+
+         [Fact]
+        public void TestEnvironmentVariablesProperty()
+        {
+            Assert.NotEqual(0, new Process().StartInfo.EnvironmentVariables.Count);
+
+            ProcessStartInfo psi = new ProcessStartInfo();
+
+            // Creating a detached ProcessStartInfo will pre-populate the environment
+            // with current environmental variables.
+
+            StringDictionary environmentVariables = psi.EnvironmentVariables;
+
+            Assert.NotEqual(environmentVariables.Count, 0);
+
+            int CountItems = environmentVariables.Count;
+
+            environmentVariables.Add("NewKey", "NewValue");
+            environmentVariables.Add("NewKey2", "NewValue2");
+
+            Assert.Equal(CountItems + 2, environmentVariables.Count);
+            environmentVariables.Remove("NewKey");
+            Assert.Equal(CountItems + 1, environmentVariables.Count);
+
+            //Exception not thrown with invalid key
+            Assert.Throws<ArgumentException>(() => { environmentVariables.Add("NewKey2", "NewValue2"); });
+
+            //Clear
+            environmentVariables.Clear();
+            Assert.Equal(0, environmentVariables.Count);
+
+            //ContainsKey 
+            environmentVariables.Add("NewKey", "NewValue");
+            environmentVariables.Add("NewKey2", "NewValue2");
+            Assert.True(environmentVariables.ContainsKey("NewKey"));
+            Assert.True(environmentVariables.ContainsKey("NewKey2"));
+            Assert.False(environmentVariables.ContainsKey("NewKey99"));
+
+            //Contains Value
+            Assert.True(environmentVariables.ContainsValue("NewValue"));
+            Assert.True(environmentVariables.ContainsValue("NewValue2"));
+
+            //Iterating
+            string result = null;
+            int index = 0;
+            foreach (string e1 in environmentVariables.Values)
+            {
+                index++;
+                result += e1;
+            }
+            Assert.Equal(2, index);
+            Assert.Equal("NewValueNewValue2", result);
+
+            result = null;
+            index = 0;
+            foreach (string e1 in environmentVariables.Keys)
+            {
+                index++;
+                result += e1;
+            }
+            Assert.Equal("NewKeyNewKey2", result);
+            Assert.Equal(2, index);
+
+            result = null;
+            index = 0;
+            foreach (KeyValuePair<string, string> e1 in environmentVariables)
+            {
+                index++;
+                result += e1.Key;
+            }
+            Assert.Equal("NewKeyNewKey2", result);
+            Assert.Equal(2, index);
+
+            //Exception not thrown with invalid key
+            Assert.Throws<ArgumentNullException>(() => environmentVariables.ContainsKey(null));
+
+            environmentVariables.Add("NewKey98","NewValue98");
+
+            //Indexed
+            string newIndexItem = environmentVariables["NewKey98"];
+            Assert.Equal("NewValue98", newIndexItem);
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.True(environmentVariables.ContainsKey("NeWkEy"));
+                Assert.Equal("NewValue", environmentVariables["NeWkEy"]);
+            }
+
+            Assert.False(environmentVariables.ContainsKey("NewKey99"));
+
+            //Key not found
+            Assert.Throws<KeyNotFoundException>(() =>
+            {
+                string stringout = environmentVariables["NewKey99"];
+            });            
+
+            //Exception not thrown with invalid key
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                string stringout = environmentVariables[null];
+            });
+
+            //Exception not thrown with invalid key
+            Assert.Throws<ArgumentNullException>(() => environmentVariables.Add(null, "NewValue2"));
+
+            //Invalid Key to add
+            Assert.Throws<ArgumentException>(() => environmentVariables.Add("NewKey2", "NewValue2"));
+
+            //Remove Item
+            environmentVariables.Remove("NewKey98");
+
+            //Exception not thrown with null key
+            Assert.Throws<ArgumentNullException>(() => { environmentVariables.Remove(null); });
+
+            //"Exception not thrown with null key"
+            Assert.Throws<KeyNotFoundException>(() => environmentVariables["1bB"]);
+
+            Assert.True(environmentVariables.ContainsKey("NewKey2"));
+            Assert.True(environmentVariables.ContainsValue("NewValue2"));
+
+            Assert.False(environmentVariables.ContainsValue("newvalue2"));
+            /*Assert.False(environmentVariables.ContainsKey("newkey2"));*/
+
+            //Use KeyValuePair Enumerator
+            var x = environmentVariables.GetEnumerator() as IEnumerator<KeyValuePair<string, string>>;
+            x.MoveNext();
+            var y1 = x.Current;
+            Assert.Equal("NewKey NewValue", y1.Key + " " + y1.Value);
+            x.MoveNext();
+            y1 = x.Current;
+            Assert.Equal("NewKey2 NewValue2", y1.Key + " " + y1.Value);
+
+            environmentVariables.Add("NewKey3", "NewValue3");
+            //CopyTo
+            KeyValuePair<string, string>[] kvpa = new KeyValuePair<string, string>[10];
+            environmentVariables.CopyTo(kvpa, 0);
+            Assert.Equal("NewKey", kvpa[0].Key);
+            Assert.Equal("NewKey3", kvpa[2].Key);
+            Assert.Equal("NewValue3", kvpa[2].Value);
+
+            string[] kvp = new string[10];
+            Assert.Throws<ArrayTypeMismatchException>(() => { environmentVariables.CopyTo(kvp, 6); });
+            environmentVariables.CopyTo(kvpa, 6);
+            Assert.Equal("NewKey", kvpa[6].Key);
+            Assert.Equal("NewValue", kvpa[6].Value);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { environmentVariables.CopyTo(kvpa, -1); });
+
+            Assert.Throws<ArgumentException>(() => { environmentVariables.CopyTo(kvpa, 9); });
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                KeyValuePair<string, string>[] kvpanull = null;
+                environmentVariables.CopyTo(kvpanull, 0);
+            });
+        }
+
+        [Fact]
+        public void TestVerbsProperty()
+        {
+            var psi = new ProcessStartInfo();
+            psi.FileName = $"{Process.GetCurrentProcess().ProcessName}.exe";
+
+            Assert.True(FindString(psi.Verbs, "open"));
+            Assert.True(FindString(psi.Verbs, "runas"));
+            Assert.True(FindString(psi.Verbs, "runasuser"));
+            Assert.False(FindString(psi.Verbs, "printto"));
+            Assert.False(FindString(psi.Verbs, "closed"));
+        }
+
+        private bool FindString(string[] array, string query)
+        {
+            foreach(var str in array)
+            {
+                if(str.Equals(query))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
