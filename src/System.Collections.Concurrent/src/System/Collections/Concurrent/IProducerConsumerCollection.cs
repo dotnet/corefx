@@ -77,7 +77,6 @@ namespace System.Collections.Concurrent
         T[] ToArray();
     }
 
-
     /// <summary>
     /// A debugger view of the IProducerConsumerCollection that makes it simple to browse the
     /// collection's contents at a point in time.
@@ -107,7 +106,10 @@ namespace System.Collections.Concurrent
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] Items
         {
-            get { return _collection.ToArray(); }
+            get
+            {
+                return _collection.ToArray();
+            }
         }
     }
 }

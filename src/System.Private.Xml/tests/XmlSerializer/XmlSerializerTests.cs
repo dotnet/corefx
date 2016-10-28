@@ -9,14 +9,17 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
+#if !NET_NATIVE
 using System.Xml.Schema;
+#endif
 using System.Xml.Serialization;
 using Xunit;
 
 public static partial class XmlSerializerTests
-{ 
+{
     [Fact]
     public static void Xml_BoolAsRoot()
     {
@@ -1511,7 +1514,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
 #if NET_NATIVE
-    [ActiveIssue(7991)]
 #endif
     [Fact]
     public static void Xml_ConstructorWithXmlRootAttr()
@@ -1529,7 +1531,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     }
 
 #if NET_NATIVE
-    [ActiveIssue(7991)]
 #endif
     [Fact]
     public static void Xml_ConstructorWithXmlAttributeOverrides()
@@ -1538,7 +1539,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         {
             Instruments = new Music.Instrument[]
             {
-                new Music.Brass() { Name = "Trumpet", IsValved = true }, 
+                new Music.Brass() { Name = "Trumpet", IsValved = true },
                 new Music.Brass() { Name = "Cornet", IsValved = true }
             }
         };
@@ -2028,7 +2029,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         var actualStringArray = (string[])actual.StringArrayValue;
         Assert.NotNull(actualStringArray);
         Assert.True(Enumerable.SequenceEqual(stringArray, actualStringArray));
-        Assert.Equal(stringArray.Length, actualStringArray.Length);      
+        Assert.Equal(stringArray.Length, actualStringArray.Length);
     }
 
     [Fact]
@@ -2364,6 +2365,177 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.Equal(dog1.Name, dog2.Name);
         Assert.Equal(dog1.Age, dog2.Age);
         Assert.Equal(dog1.Breed, dog2.Breed);
+    }
+
+    [Fact]
+    public static void XmlUnknownElementAndEventHandlerTest()
+    {
+        List<string> grouplists = new List<string>();
+        int count = 0;
+        XmlSerializer serializer = new XmlSerializer(typeof(Group));
+        serializer.UnknownElement += new XmlElementEventHandler((o, args) =>
+        {
+            Group myGroup = (Group)args.ObjectBeingDeserialized;
+            Assert.NotNull(myGroup);
+            grouplists.Add(args.Element.Name);
+            ++count;
+        });
+        string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <Group xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd = ""http://www.w3.org/2001/XMLSchema"">
+         <GroupName>MyGroup</GroupName>
+         <GroupSize>Large</GroupSize>
+         <GroupNumber>444</GroupNumber>
+         <GroupBase>West</GroupBase>
+       </Group >";
+        Group group = (Group)serializer.Deserialize(GetStreamFromString(xmlFileContent));
+        Assert.NotNull(group);
+        Assert.NotNull(group.GroupName);
+        Assert.Null(group.GroupVehicle);
+        Assert.Equal(3, count);
+        Assert.Equal(3, grouplists.Count());
+        bool b = grouplists.Contains("GroupSize") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase");
+        Assert.True(b);
+    }
+
+    [Fact]
+    public static void XmlUnknownNodeAndEventHandlerTest()
+    {
+        List<string> grouplists = new List<string>();
+        int count = 0;
+        XmlSerializer serializer = new XmlSerializer(typeof(Group));
+        serializer.UnknownNode += new XmlNodeEventHandler((o, args) =>
+        {
+            Group myGroup = (Group)args.ObjectBeingDeserialized;
+            Assert.NotNull(myGroup);
+            grouplists.Add(args.LocalName);
+            ++count;
+        });
+        string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  <Group xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:coho=""http://www.cohowinery.com"" xmlns:cp=""http://www.cpandl.com"">
+              <coho:GroupName>MyGroup</coho:GroupName>
+              <cp:GroupSize>Large</cp:GroupSize>
+              <cp:GroupNumber>444</cp:GroupNumber>
+              <coho:GroupBase>West</coho:GroupBase>
+              <coho:ThingInfo>
+                    <Number>1</Number>
+                    <Name>Thing1</Name>
+                    <Elmo>
+                        <Glue>element</Glue>
+                    </Elmo>
+              </coho:ThingInfo>
+  </Group>";
+        Group group = (Group)serializer.Deserialize(GetStreamFromString(xmlFileContent));
+        Assert.NotNull(group);
+        Assert.Null(group.GroupName);
+        Assert.Equal(5, count);
+        Assert.Equal(5, grouplists.Count());
+        bool b = grouplists.Contains("GroupName") && grouplists.Contains("GroupSize") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase") && grouplists.Contains("ThingInfo");
+        Assert.True(b);
+    }
+
+    [Fact]
+    public static void XmlUnknownAttributeAndEventHandlerTest()
+    {
+        List<string> grouplists = new List<string>();
+        int count = 0;
+        XmlSerializer serializer = new XmlSerializer(typeof(Group));
+        serializer.UnknownAttribute += new XmlAttributeEventHandler((o, args) =>
+        {
+            Group myGroup = (Group)args.ObjectBeingDeserialized;
+            Assert.NotNull(myGroup);
+            grouplists.Add(args.Attr.LocalName);
+            ++count;
+        });
+        string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+   <Group xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" GroupType='Technical' GroupNumber='42' GroupBase='Red'>
+           <GroupName>MyGroup</GroupName>
+         </Group>";
+        Group group = (Group)serializer.Deserialize(GetStreamFromString(xmlFileContent));
+        Assert.NotNull(group);
+        Assert.NotNull(group.GroupName);
+        Assert.Null(group.GroupVehicle);
+        Assert.Equal(3, count);
+        Assert.Equal(3, grouplists.Count());
+        bool b = grouplists.Contains("GroupType") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase");
+        Assert.True(b);
+    }
+
+    [Fact]
+    public static void XmlDeserializationEventsTest()
+    {
+        List<string> grouplists = new List<string>();
+        int count = 0;
+        // Create an instance of the XmlSerializer class.
+        XmlSerializer serializer = new XmlSerializer(typeof(Group));
+        XmlDeserializationEvents events = new XmlDeserializationEvents();
+        events.OnUnknownAttribute += new XmlAttributeEventHandler((o, args) =>
+        {
+            Group myGroup = (Group)args.ObjectBeingDeserialized;
+            Assert.NotNull(myGroup);
+            grouplists.Add(args.Attr.LocalName);
+            ++count;
+        });
+        string xmlFileContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+   <Group xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" GroupType='Technical' GroupNumber='42' GroupBase='Red'>
+           <GroupName>MyGroup</GroupName>
+         </Group>";
+        Group group = (Group)serializer.Deserialize(XmlReader.Create(GetStreamFromString(xmlFileContent)), events);
+        Assert.NotNull(group);
+        Assert.NotNull(group.GroupName);
+        Assert.Null(group.GroupVehicle);
+        Assert.Equal(3, count);
+        Assert.Equal(3, grouplists.Count());
+        bool b = grouplists.Contains("GroupType") && grouplists.Contains("GroupNumber") && grouplists.Contains("GroupBase");
+        Assert.True(b);
+    }
+    private static Stream GetStreamFromString(string s)
+    {
+        MemoryStream stream = new MemoryStream();
+        StreamWriter writer = new StreamWriter(stream);
+        writer.Write(s);
+        writer.Flush();
+        stream.Position = 0;
+        return stream;
+    }
+
+    [Fact]
+    public static void  SoapAttributeTests()
+    {
+        SoapAttributes soapAttrs = new SoapAttributes();
+        SoapAttributeOverrides soapOverrides = new SoapAttributeOverrides();
+        SoapElementAttribute soapElement1 = new SoapElementAttribute("Truck");
+        soapAttrs.SoapElement = soapElement1;
+        soapOverrides.Add(typeof(Transportation), "Vehicle", soapAttrs);
+    }
+
+    [ActiveIssue(12799)]
+    [Fact]
+    public static void XmlTypeMappingTest()
+    {
+        SoapAttributes soapAttrs = new SoapAttributes();
+        SoapAttributeOverrides soapOverrides = new SoapAttributeOverrides();
+        SoapElementAttribute soapElement1 = new SoapElementAttribute("Truck");
+        soapAttrs.SoapElement = soapElement1;
+        soapOverrides.Add(typeof(Transportation), "Vehicle", soapAttrs);
+        XmlTypeMapping myTypeMapping = (new SoapReflectionImporter(soapOverrides)).ImportTypeMapping(typeof(Transportation));
+        XmlSerializer ser = new XmlSerializer(myTypeMapping);
+        Transportation myTransportation = new Transportation();
+        myTransportation.Vehicle = "MyCar";
+        myTransportation.CreationDate = DateTime.Now;
+        myTransportation.thing = new Thing();
+        using (MemoryStream ms = new MemoryStream())
+        {
+            ser.Serialize(ms, myTransportation);
+        }
+    }
+
+    [Fact]
+    public static void XmlSerializationReaderWriterTest()
+    {
+        string s = "XmlSerializationReaderWriterTest";
+        byte[] original = System.Text.Encoding.Default.GetBytes(s);
+        byte[] converted = MyReader.HexToBytes(MyWriter.BytesToHex(original));
+        Assert.Equal(original, converted);
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, Func<XmlSerializer> serializerFactory = null,

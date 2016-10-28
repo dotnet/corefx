@@ -10,7 +10,7 @@ namespace System.IO.Tests
 {
     public class File_Delete_Tests : FileSystemWatcherTest
     {
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Fact]
         public void FileSystemWatcher_File_Delete()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -27,7 +27,7 @@ namespace System.IO.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Fact]
         public void FileSystemWatcher_File_Delete_ForcedRestart()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -48,7 +48,7 @@ namespace System.IO.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Fact]
         public void FileSystemWatcher_File_Delete_InNestedDirectory()
         {
             using (var dir = new TempDirectory(GetTestFilePath()))
@@ -68,8 +68,8 @@ namespace System.IO.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
-        [OuterLoop]
+        [Fact]
+        [OuterLoop("This test has a longer than average timeout and may fail intermittently")]
         public void FileSystemWatcher_File_Delete_DeepDirectoryStructure()
         {
             using (var dir = new TempDirectory(GetTestFilePath()))
@@ -85,11 +85,11 @@ namespace System.IO.Tests
                 Action cleanup = () => File.Create(fileName).Dispose();
                 cleanup();
 
-                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, cleanup, fileName, timeout: 10000);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, action, cleanup, fileName, LongWaitTimeout);
             }
         }
 
-        [ConditionalFact(nameof(CanCreateSymbolicLinks), nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
         public void FileSystemWatcher_File_Delete_SymLink()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))

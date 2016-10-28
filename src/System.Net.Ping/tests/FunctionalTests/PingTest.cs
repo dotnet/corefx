@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Net.Test.Common;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -41,25 +42,45 @@ namespace System.Net.NetworkInformation.Tests
             // Null address
             Assert.Throws<ArgumentNullException>("address", () => { p.SendPingAsync((IPAddress)null); });
             Assert.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.SendPingAsync((string)null); });
+            Assert.Throws<ArgumentNullException>("address", () => { p.SendAsync((IPAddress)null, null); });
+            Assert.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.SendAsync((string)null, null); });
+            Assert.Throws<ArgumentNullException>("address", () => { p.Send((IPAddress)null); });
+            Assert.Throws<ArgumentNullException>("hostNameOrAddress", () => { p.Send((string)null); });
 
             // Invalid address
             Assert.Throws<ArgumentException>("address", () => { p.SendPingAsync(IPAddress.Any); });
             Assert.Throws<ArgumentException>("address", () => { p.SendPingAsync(IPAddress.IPv6Any); });
+            Assert.Throws<ArgumentException>("address", () => { p.SendAsync(IPAddress.Any, null); });
+            Assert.Throws<ArgumentException>("address", () => { p.SendAsync(IPAddress.IPv6Any, null); });
+            Assert.Throws<ArgumentException>("address", () => { p.Send(IPAddress.Any); });
+            Assert.Throws<ArgumentException>("address", () => { p.Send(IPAddress.IPv6Any); });
 
             // Negative timeout
             Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendPingAsync(localIpAddress, -1); });
             Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendPingAsync(TestSettings.LocalHost, -1); });
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendAsync(localIpAddress, -1, null); });
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.SendAsync(TestSettings.LocalHost, -1, null); });
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.Send(localIpAddress, -1); });
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => { p.Send(TestSettings.LocalHost, -1); });
 
             // Null byte[]
             Assert.Throws<ArgumentNullException>("buffer", () => { p.SendPingAsync(localIpAddress, 0, null); });
             Assert.Throws<ArgumentNullException>("buffer", () => { p.SendPingAsync(TestSettings.LocalHost, 0, null); });
+            Assert.Throws<ArgumentNullException>("buffer", () => { p.SendAsync(localIpAddress, 0, null, null); });
+            Assert.Throws<ArgumentNullException>("buffer", () => { p.SendAsync(TestSettings.LocalHost, 0, null, null); });
+            Assert.Throws<ArgumentNullException>("buffer", () => { p.Send(localIpAddress, 0, null); });
+            Assert.Throws<ArgumentNullException>("buffer", () => { p.Send(TestSettings.LocalHost, 0, null); });
 
             // Too large byte[]
             Assert.Throws<ArgumentException>("buffer", () => { p.SendPingAsync(localIpAddress, 1, new byte[65501]); });
             Assert.Throws<ArgumentException>("buffer", () => { p.SendPingAsync(TestSettings.LocalHost, 1, new byte[65501]); });
+            Assert.Throws<ArgumentException>("buffer", () => { p.SendAsync(localIpAddress, 1, new byte[65501], null); });
+            Assert.Throws<ArgumentException>("buffer", () => { p.SendAsync(TestSettings.LocalHost, 1, new byte[65501], null); });
+            Assert.Throws<ArgumentException>("buffer", () => { p.Send(localIpAddress, 1, new byte[65501]); });
+            Assert.Throws<ArgumentException>("buffer", () => { p.Send(TestSettings.LocalHost, 1, new byte[65501]); });
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [Fact]
         public async Task SendPingAsyncWithIPAddress()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -73,7 +94,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [Fact]
         public async Task SendPingAsyncWithIPAddress_AddressAsString()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -87,7 +108,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeout()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -101,7 +122,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBuffer()
         {
@@ -119,8 +140,8 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(PlatformID.AnyUnix)]
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBuffer_Unix()
         {
             byte[] buffer = TestSettings.PayloadAsBytes;
@@ -145,7 +166,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions()
         {
@@ -164,8 +185,8 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(PlatformID.AnyUnix)]
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -190,7 +211,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [Fact]
         public async Task SendPingAsyncWithHost()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -204,7 +225,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [Fact]
         public async Task SendPingAsyncWithHostAndTimeout()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -218,7 +239,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBuffer()
         {
@@ -236,8 +257,8 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(PlatformID.AnyUnix)]
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBuffer_Unix()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -262,7 +283,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBufferAndPingOptions()
         {
@@ -280,8 +301,8 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [PlatformSpecific(PlatformID.AnyUnix)]
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBufferAndPingOptions_Unix()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -306,7 +327,7 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [Fact]
         public static async Task SendPings_ReuseInstance_Hostname()
         {
             IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
@@ -319,6 +340,63 @@ namespace System.Net.NetworkInformation.Tests
                     Assert.Equal(IPStatus.Success, pingReply.Status);
                     Assert.True(pingReply.Address.Equals(localIpAddress));
                 }
+            }
+        }
+
+        [Fact]
+        public static async Task Sends_ReuseInstance_Hostname()
+        {
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+
+            using (Ping p = new Ping())
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    PingReply pingReply = p.Send(TestSettings.LocalHost);
+                    Assert.Equal(IPStatus.Success, pingReply.Status);
+                    Assert.True(pingReply.Address.Equals(localIpAddress));
+                }
+            }
+        }
+
+        [Fact]
+        public static async Task SendAsyncs_ReuseInstance_Hostname()
+        {
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+
+            using (Ping p = new Ping())
+            {
+                var mres = new ManualResetEventSlim();
+                PingCompletedEventArgs ea = null;
+                p.PingCompleted += (s, e) =>
+                {
+                    ea = e;
+                    mres.Set();
+                };
+
+                // Several normal iterations
+                for (int i = 0; i < 3; i++)
+                {
+                    ea = null;
+                    mres.Reset();
+                    p.SendAsync(TestSettings.LocalHost, null);
+                    mres.Wait();
+
+                    Assert.NotNull(ea);
+                    Assert.Equal(IPStatus.Success, ea.Reply.Status);
+                    Assert.True(ea.Reply.Address.Equals(localIpAddress));
+                }
+
+                // Several canceled iterations
+                for (int i = 0; i < 3; i++)
+                {
+                    ea = null;
+                    mres.Reset();
+                    p.SendAsync(TestSettings.LocalHost, null);
+                    p.SendAsyncCancel(); // will block until operation can be started again
+                }
+                mres.Wait();
+                Assert.True(ea.Cancelled ^ (ea.Error != null) ^ (ea.Reply != null));
             }
         }
 

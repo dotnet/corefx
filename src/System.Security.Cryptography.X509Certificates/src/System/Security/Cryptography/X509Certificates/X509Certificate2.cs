@@ -2,18 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
-using System.Text;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.InteropServices;
-
 using Internal.Cryptography;
 using Internal.Cryptography.Pal;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace System.Security.Cryptography.X509Certificates
 {
+    [Serializable]
     public class X509Certificate2 : X509Certificate
     {
         public X509Certificate2()
@@ -58,6 +55,16 @@ namespace System.Security.Cryptography.X509Certificates
 
         public X509Certificate2(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
             : base(fileName, password, keyStorageFlags)
+        {
+        }
+
+        public X509Certificate2(X509Certificate cert)
+            : base(cert)
+        {
+        }
+
+        protected X509Certificate2(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
 

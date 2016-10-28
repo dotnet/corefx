@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Runtime.InteropServices;
 
@@ -327,6 +328,10 @@ namespace System.Data.SqlClient
                 clientConsumerInfo.timeout = timeout;
                 clientConsumerInfo.fParallel = fParallel;
 
+                clientConsumerInfo.transparentNetworkResolution = TransparentNetworkResolutionMode.DisabledMode;
+                clientConsumerInfo.totalTimeout = SniOpenTimeOut;
+                clientConsumerInfo.isAzureSqlServerEndpoint = ADP.IsAzureSqlServerEndpoint(constring);
+
                 if (spnBuffer != null)
                 {
                     fixed (byte* pin_spnBuffer = &spnBuffer[0])
@@ -375,7 +380,7 @@ namespace System.Data.SqlClient
                     ref sendLength,
                     out local_fDone,
                     pin_serverUserName,
-                    (uint)(serverUserName == null ? 0 : serverUserName.Length),
+                    (uint)serverUserName.Length,
                     null,
                     null);
             }

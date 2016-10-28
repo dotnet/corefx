@@ -57,7 +57,7 @@ namespace System.Linq.Expressions.Tests
                     object a = array.GetValue(i);
                     object b = array.GetValue(j);
                     BinaryExpression equal = Expression.Equal(Expression.Constant(a, type), Expression.Constant(b, type));
-                    GeneralBinaryTests.CompileBinaryExpression(equal, useInterpreter, CustomEquals(a, b));
+                    GeneralBinaryTests.CompileBinaryExpression(equal, useInterpreter, GeneralBinaryTests.CustomEquals(a, b));
                 }
             }
         }
@@ -74,7 +74,7 @@ namespace System.Linq.Expressions.Tests
                     object a = array.GetValue(i);
                     object b = array.GetValue(j);
                     BinaryExpression equal = Expression.NotEqual(Expression.Constant(a, type), Expression.Constant(b, type));
-                    GeneralBinaryTests.CompileBinaryExpression(equal, useInterpreter, !CustomEquals(a, b));
+                    GeneralBinaryTests.CompileBinaryExpression(equal, useInterpreter, !GeneralBinaryTests.CustomEquals(a, b));
                 }
             }
         }
@@ -203,24 +203,6 @@ namespace System.Linq.Expressions.Tests
         {
             var e = Expression.NotEqual(Expression.Parameter(typeof(int), "a"), Expression.Parameter(typeof(int), "b"));
             Assert.Equal("(a != b)", e.ToString());
-        }
-
-        private static bool CustomEquals(object a, object b)
-        {
-            // Allow for NaN
-            if (a is double && b is double)
-            {
-                return (double)a == (double)b;
-            }
-            else if (a is float && b is float)
-            {
-                return (float)a == (float)b;
-            }
-            else if (a is decimal && b is decimal)
-            {
-                return (decimal)a == (decimal)b;
-            }
-            return a == null ? b == null : a.Equals(b);
         }
 
         public class TestClass { }

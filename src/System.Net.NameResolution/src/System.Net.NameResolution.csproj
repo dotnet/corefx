@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
   </PropertyGroup>
@@ -134,8 +134,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
       <Link>Interop\Windows\Winsock\Interop.WSASocketW.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\ProtocolFamily.cs">
-      <Link>Interop\Windows\Winsock\ProtocolFamily.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Sockets\ProtocolFamily.cs">
+      <Link>Common\System\Net\Sockets\ProtocolFamily.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\SafeFreeAddrInfo.cs">
       <Link>Interop\Windows\Winsock\SafeFreeAddrInfo.cs</Link>
@@ -149,8 +149,8 @@
   </ItemGroup>
   <!-- Windows : Win32 + WinRT -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(EnableWinRT)' == 'true'">
-    <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.netcore50.cs">
-      <Link>Common\System\Net\ContextAwareResult.netcore50.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Uap.cs">
+      <Link>Common\System\Net\ContextAwareResult.Uap.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">

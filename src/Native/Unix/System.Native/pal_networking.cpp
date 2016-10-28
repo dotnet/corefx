@@ -4,6 +4,7 @@
 
 #include "pal_config.h"
 #include "pal_networking.h"
+#include "pal_io.h"
 #include "pal_utilities.h"
 
 #include <stdlib.h>
@@ -1285,8 +1286,12 @@ cmsghdr* GET_CMSG_NXTHDR(msghdr* mhdr, cmsghdr* cmsg)
 // In musl-libc, CMSG_NXTHDR typecasts char* to cmsghdr* which causes
 // clang to throw cast-align warning. This is to suppress the warning
 // inline.
+// There is also a problem in the CMSG_NXTHDR macro in musl-libc.
+// It compares signed and unsigned value and clang warns about that.
+// So we suppress the warning inline too.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-align"
+#pragma clang diagnostic ignored "-Wsign-compare"
 #endif
     return CMSG_NXTHDR(mhdr, cmsg);
 #ifndef __GLIBC__
@@ -2071,6 +2076,51 @@ extern "C" Error SystemNative_GetSockOpt(
 
     int fd = ToFileDescriptor(socket);
 
+    //
+    // Handle some special cases for compatibility with Windows
+    //
+    if (socketOptionLevel == PAL_SOL_SOCKET)
+    {
+        if (socketOptionName == PAL_SO_EXCLUSIVEADDRUSE)
+        {
+            //
+            // SO_EXCLUSIVEADDRUSE makes Windows behave like Unix platforms do WRT the SO_REUSEADDR option.
+            // So, for non-Windows platforms, we act as if SO_EXCLUSIVEADDRUSE is always enabled.
+            //
+            if (*optionLen != sizeof(int32_t))
+            {
+                return PAL_EINVAL;
+            }
+
+            *reinterpret_cast<int32_t*>(optionValue) = 1;
+            return PAL_SUCCESS;
+        }
+        else if (socketOptionName == PAL_SO_REUSEADDR)
+        {
+            //
+            // On Windows, SO_REUSEADDR allows the address *and* port to be reused.  It's equivalent to 
+            // SO_REUSEADDR + SO_REUSEPORT other systems.  Se we only return "true" if both of those options are true.
+            //
+            auto optLen = static_cast<socklen_t>(*optionLen);
+
+            int err = getsockopt(fd, SOL_SOCKET, SO_REUSEADDR, optionValue, &optLen);
+
+            if (err == 0 && *reinterpret_cast<uint32_t*>(optionValue) != 0)
+            {
+                err = getsockopt(fd, SOL_SOCKET, SO_REUSEPORT, optionValue, &optLen);
+            }
+
+            if (err != 0)
+            {
+                return SystemNative_ConvertErrorPlatformToPal(errno);
+            }
+
+            assert(optLen <= static_cast<socklen_t>(*optionLen));
+            *optionLen = static_cast<int32_t>(optLen);
+            return PAL_SUCCESS;
+        }
+    }
+
     int optLevel, optName;
     if (!TryGetPlatformSocketOption(socketOptionLevel, socketOptionName, optLevel, optName))
     {
@@ -2098,6 +2148,47 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
     }
 
     int fd = ToFileDescriptor(socket);
+
+    //
+    // Handle some special cases for compatibility with Windows
+    //
+    if (socketOptionLevel == PAL_SOL_SOCKET)
+    {
+        if (socketOptionName == PAL_SO_EXCLUSIVEADDRUSE)
+        {
+            //
+            // SO_EXCLUSIVEADDRUSE makes Windows behave like Unix platforms do WRT the SO_REUSEADDR option.
+            // So, on Unix platforms, we consider SO_EXCLUSIVEADDRUSE to always be set.  We allow manually setting this
+            // to "true", but not "false."
+            //
+            if (optionLen != sizeof(int32_t))
+            {
+                return PAL_EINVAL;
+            }
+
+            if (*reinterpret_cast<int32_t*>(optionValue) == 0)
+            {
+                return PAL_ENOTSUP;
+            }
+            else
+            {
+                return PAL_SUCCESS;
+            }
+        }
+        else if (socketOptionName == PAL_SO_REUSEADDR)
+        {
+            //
+            // On Windows, SO_REUSEADDR allows the address *and* port to be reused.  It's equivalent to 
+            // SO_REUSEADDR + SO_REUSEPORT other systems. 
+            //
+            int err = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, optionValue, static_cast<socklen_t>(optionLen));
+            if (err == 0)
+            {
+                err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, optionValue, static_cast<socklen_t>(optionLen));
+            }
+            return err == 0 ? PAL_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+        }
+    }
 
     int optLevel, optName;
     if (!TryGetPlatformSocketOption(socketOptionLevel, socketOptionName, optLevel, optName))
@@ -2627,23 +2718,10 @@ static char* GetNameFromUid(uid_t uid)
 
 extern "C" char* SystemNative_GetPeerUserName(intptr_t socket)
 {
-    int fd = ToFileDescriptor(socket);
-#ifdef SO_PEERCRED
-    struct ucred creds;
-    socklen_t len = sizeof(creds);
-    return getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &creds, &len) == 0 ?
-        GetNameFromUid(creds.uid) :
-        nullptr;
-#elif HAVE_GETPEEREID
-    uid_t euid, egid;
-    return getpeereid(fd, &euid, &egid) == 0 ?
+    uid_t euid;
+    return SystemNative_GetPeerID(socket, &euid) == 0 ?
         GetNameFromUid(euid) :
         nullptr;
-#else
-    (void)fd;
-    errno = ENOTSUP;
-    return nullptr;
-#endif
 }
 
 extern "C" void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, int32_t* addressSize)

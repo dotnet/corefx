@@ -15,16 +15,16 @@ namespace System
         {
             get
             {
-                if (SR.s_resourceManager == null)
+                if (s_resourceManager == null)
                 {
-                    SR.s_resourceManager = new ResourceManager(SR.ResourceType);
+                    s_resourceManager = new ResourceManager(ResourceType);
                 }
 
-                return SR.s_resourceManager;
+                return s_resourceManager;
             }
         }
 
-        // This method is used to decide if we need to append the exception message parameters to the message when calling SR.Format. 
+        // This method is used to decide if we need to append the exception message parameters to the message when calling SR.Format.
         // by default it returns false.
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool UsingResourceKeys()
@@ -35,8 +35,14 @@ namespace System
         internal static string GetResourceString(string resourceKey, string defaultString)
         {
             string resourceString = null;
-            try { resourceString = ResourceManager.GetString(resourceKey); }
-            catch (MissingManifestResourceException) { }
+
+            try
+            {
+                resourceString = ResourceManager.GetString(resourceKey);
+            }
+            catch (MissingManifestResourceException)
+            {
+            }
 
             if (defaultString != null && resourceKey.Equals(resourceString, StringComparison.Ordinal))
             {

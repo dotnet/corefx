@@ -147,6 +147,22 @@ namespace System.IO
                 _buffer = new byte[_bufferSize];
         }
 
+        public Stream UnderlyingStream
+        {
+            get
+            {
+                return _stream;
+            }
+        }
+
+        public int BufferSize
+        {
+            get
+            {
+                return _bufferSize;
+            }
+        }
+
         public override bool CanRead
         {
             [Pure]
@@ -436,7 +452,7 @@ namespace System.IO
             }
         }
 
-        public override int Read(/*[TODO: Enable after System.Private.Interop is built against S.P.CoreLib and not S.Runtime] [In, Out]*/ byte[] array, int offset, int count)
+        public override int Read(byte[] array, int offset, int count)
         {
             if (array == null)
                 throw new ArgumentNullException(nameof(array), SR.ArgumentNull_Buffer);
@@ -1091,6 +1107,22 @@ namespace System.IO
 
             Flush();
             _stream.SetLength(value);
+        }
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+            
+            Task flushTask = FlushAsync(cancellationToken);
+            return flushTask.Status == TaskStatus.RanToCompletion ?
+                _stream.CopyToAsync(destination, bufferSize, cancellationToken) :
+                CopyToAsyncCore(flushTask, destination, bufferSize, cancellationToken);
+        }
+
+        private async Task CopyToAsyncCore(Task flushTask, Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            await flushTask.ConfigureAwait(false);
+            await _stream.CopyToAsync(destination, bufferSize, cancellationToken).ConfigureAwait(false);
         }
     }  // class BufferedStream
 }  // namespace

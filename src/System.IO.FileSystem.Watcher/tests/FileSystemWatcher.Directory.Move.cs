@@ -9,39 +9,39 @@ namespace System.IO.Tests
     public class Directory_Move_Tests : FileSystemWatcherTest
     {
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Directory_Move_To_Same_Directory()
         {
             DirectoryMove_SameDirectory(WatcherChangeTypes.Renamed);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Fact]
         public void Directory_Move_From_Watched_To_Unwatched()
         {
             DirectoryMove_FromWatchedToUnwatched(WatcherChangeTypes.Deleted);
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Windows_Directory_Move_To_Different_Watched_Directory()
         {
             DirectoryMove_DifferentWatchedDirectory(WatcherChangeTypes.Changed);
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Unix_Directory_Move_To_Different_Watched_Directory()
         {
             DirectoryMove_DifferentWatchedDirectory(0);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Fact]
         public void Directory_Move_From_Unwatched_To_Watched()
         {
             DirectoryMove_FromUnwatchedToWatched(WatcherChangeTypes.Created);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public void Directory_Move_In_Nested_Directory(bool includeSubdirectories)
@@ -49,7 +49,7 @@ namespace System.IO.Tests
             DirectoryMove_NestedDirectory(includeSubdirectories ? WatcherChangeTypes.Renamed : 0, includeSubdirectories);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Fact]
         public void Directory_Move_With_Set_NotifyFilter()
         {
             DirectoryMove_WithNotifyFilter(WatcherChangeTypes.Renamed);

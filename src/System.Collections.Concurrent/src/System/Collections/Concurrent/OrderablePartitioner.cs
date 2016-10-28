@@ -173,10 +173,11 @@ namespace System.Collections.Concurrent
             }
 
             IEnumerator<TSource>[] partitions = new IEnumerator<TSource>[partitionCount];
-            for (int i = 0; i < partitionCount; i++)
+            for (int index = 0; index < partitionCount; index++)
             {
-                partitions[i] = new EnumeratorDropIndices(orderablePartitions[i]);
+                partitions[index] = new EnumeratorDropIndices(orderablePartitions[index]);
             }
+
             return partitions;
         }
 

@@ -1344,11 +1344,14 @@ namespace System.Collections.Generic
                 if (Contains(item))
                 {
                     toSave.Add(item);
-                    Remove(item);
                 }
             }
-            Clear();
-            AddAllElements(toSave);
+
+            if (toSave.Count < Count)
+            {
+                Clear();
+                AddAllElements(toSave);
+            }
         }
 
         /// <summary>
@@ -1845,9 +1848,18 @@ namespace System.Collections.Generic
         {
             get
             {
-                T ret = default(T);
-                InOrderTreeWalk(delegate (SortedSet<T>.Node n) { ret = n.Item; return false; });
-                return ret;
+                if (_root == null)
+                {
+                    return default(T);
+                }
+
+                Node current = _root;
+                while (current.Left != null)
+                {
+                    current = current.Left;
+                }
+
+                return current.Item;
             }
         }
 
@@ -1855,9 +1867,18 @@ namespace System.Collections.Generic
         {
             get
             {
-                T ret = default(T);
-                InOrderTreeWalk(delegate (SortedSet<T>.Node n) { ret = n.Item; return false; }, true);
-                return ret;
+                if (_root == null)
+                {
+                    return default(T);
+                }
+
+                Node current = _root;
+                while (current.Right != null)
+                {
+                    current = current.Right;
+                }
+
+                return current.Item;
             }
         }
 
@@ -2178,23 +2199,13 @@ namespace System.Collections.Generic
                 return ret;
             }
 
+#if DEBUG
             internal override void IntersectWithEnumerable(IEnumerable<T> other)
             {
-                List<T> toSave = new List<T>(this.Count);
-                foreach (T item in other)
-                {
-                    if (Contains(item))
-                    {
-                        toSave.Add(item);
-                        Remove(item);
-                    }
-                }
-                Clear();
-                AddAllElements(toSave);
-#if DEBUG
-                Debug.Assert(this.versionUpToDate() && _root == _underlying.FindRange(_min, _max));
-#endif
+                base.IntersectWithEnumerable(other);
+                Debug.Assert(versionUpToDate() && _root == _underlying.FindRange(_min, _max));
             }
+#endif
 
             void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
             {

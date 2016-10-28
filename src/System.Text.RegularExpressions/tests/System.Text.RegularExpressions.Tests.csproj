@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
@@ -9,20 +9,18 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>System.Text.RegularExpressions.Tests</AssemblyName>
-    <NugetTargetMoniker>.NETStandard,Version=v1.6</NugetTargetMoniker>
+    <NugetTargetMoniker Condition=" '$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NugetTargetMoniker>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Debug|AnyCPU' ">
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Release|AnyCPU' ">
   </PropertyGroup>
   <!-- Compiled Source Files -->
   <ItemGroup>
     <Compile Include="CaptureCollectionTests.cs" />
     <Compile Include="GroupCollectionTests.cs" />
     <Compile Include="MatchCollectionTests.cs" />
-    <Compile Include="PrecompiledRegexScenarioTest.cs" />
-    <Compile Include="RegexGroupNameTests.cs" />
     <Compile Include="Regex.EscapeUnescape.Tests.cs" />
     <Compile Include="Regex.GetGroupNames.Tests.cs" />
     <Compile Include="Regex.Ctor.Tests.cs" />
@@ -34,6 +32,22 @@
     <Compile Include="Regex.Match.Tests.cs" />
     <Compile Include="Regex.Tests.Common.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp1.1'">
+    <Compile Include="PrecompiledRegexScenarioTest.cs" />
+    <Compile Include="RegexGroupNameTests.cs" />
+    <Compile Include="CaptureCollectionTests.netcoreapp1.1.cs" />
+    <Compile Include="GroupCollectionTests.netcoreapp1.1.cs" />
+    <Compile Include="MatchCollectionTests.netcoreapp1.1.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
+      <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetGroup)' == ''">
+    <Compile Include="Regex.Serialization.cs" />
+    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
+      <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pkg\System.Text.RegularExpressions.pkgproj">
       <Project>{be28323e-327a-4e0f-b7f9-16ab7eab59dd}</Project>
@@ -44,9 +58,6 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

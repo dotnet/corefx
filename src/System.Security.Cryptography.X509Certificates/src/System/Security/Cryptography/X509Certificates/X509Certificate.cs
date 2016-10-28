@@ -2,19 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
-using System.Text;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.InteropServices;
-
 using Internal.Cryptography;
 using Internal.Cryptography.Pal;
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-    public class X509Certificate : IDisposable
+    [Serializable]
+    public class X509Certificate : IDisposable, IDeserializationCallback, ISerializable
     {
         public X509Certificate()
         {
@@ -35,8 +33,8 @@ namespace System.Security.Cryptography.X509Certificates
         {
             if (rawData == null || rawData.Length == 0)
                 throw new ArgumentException(SR.Arg_EmptyOrNullArray, nameof(rawData));
-            if ((keyStorageFlags & ~KeyStorageFlagsAll) != 0)
-                throw new ArgumentException(SR.Argument_InvalidFlag, nameof(keyStorageFlags));
+ 
+            ValidateKeyStorageFlags(keyStorageFlags);
 
             Pal = CertificatePal.FromBlob(rawData, password, keyStorageFlags);
         }
@@ -66,11 +64,38 @@ namespace System.Security.Cryptography.X509Certificates
         {
             if (fileName == null)
                 throw new ArgumentNullException(nameof(fileName));
-            if ((keyStorageFlags & ~KeyStorageFlagsAll) != 0)
-                throw new ArgumentException(SR.Argument_InvalidFlag, nameof(keyStorageFlags));
+            
+            ValidateKeyStorageFlags(keyStorageFlags);
 
             Pal = CertificatePal.FromFile(fileName, password, keyStorageFlags);
         }
+
+        public X509Certificate(X509Certificate cert)
+        {
+            if (cert == null)
+                throw new ArgumentNullException(nameof(cert));
+
+            if (cert.Pal != null)
+            {
+                Pal = CertificatePal.FromOtherCert(cert);
+            }
+        }
+
+        public X509Certificate(SerializationInfo info, StreamingContext context) : this()
+        {
+            byte[] rawData = (byte[])info.GetValue("RawData", typeof(byte[]));
+            if (rawData != null)
+            {
+                Pal = CertificatePal.FromBlob(rawData, null, X509KeyStorageFlags.DefaultKeySet);
+            }
+        }
+
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("RawData", Pal?.RawData);
+        }
+
+        void IDeserializationCallback.OnDeserialization(object sender) { }
 
         public IntPtr Handle
         {
@@ -177,10 +202,22 @@ namespace System.Security.Cryptography.X509Certificates
             }
         }
 
+        public virtual string GetRawCertDataString()
+        {
+            ThrowIfInvalid();
+            return GetRawCertData().ToHexStringUpper();
+        }
+
         public virtual byte[] GetCertHash()
         {
             ThrowIfInvalid();
             return GetRawCertHash().CloneByteArray();
+        }
+
+        public virtual string GetCertHashString()
+        {
+            ThrowIfInvalid();
+            return GetRawCertHash().ToHexStringUpper();
         }
 
         // Only use for internal purposes when the returned byte[] will not be mutated
@@ -189,9 +226,31 @@ namespace System.Security.Cryptography.X509Certificates
             return _lazyCertHash ?? (_lazyCertHash = Pal.Thumbprint);
         }
 
+        public virtual string GetEffectiveDateString()
+        {
+            return GetNotBefore().ToString();
+        }
+
+        public virtual string GetExpirationDateString()
+        {
+            return GetNotAfter().ToString();
+        }
+
         public virtual string GetFormat()
         {
             return "X509";
+        }
+
+        public virtual string GetPublicKeyString()
+        {
+            return GetPublicKey().ToHexStringUpper();
+        }
+
+        public virtual byte[] GetRawCertData()
+        {
+            ThrowIfInvalid();
+
+            return Pal.RawData.CloneByteArray();
         }
 
         public override int GetHashCode()
@@ -253,10 +312,29 @@ namespace System.Security.Cryptography.X509Certificates
             return GetRawSerialNumber().CloneByteArray();
         }
 
+        public virtual string GetSerialNumberString()
+        {
+            ThrowIfInvalid();
+
+            return GetRawSerialNumber().ToHexStringUpper();
+        }
+
         // Only use for internal purposes when the returned byte[] will not be mutated
         private byte[] GetRawSerialNumber()
         {
             return _lazySerialNumber ?? (_lazySerialNumber = Pal.SerialNumber);
+        }
+
+        [Obsolete("This method has been deprecated.  Please use the Subject property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public virtual string GetName()
+        {
+            return Subject;
+        }
+
+        [Obsolete("This method has been deprecated.  Please use the Issuer property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        public virtual string GetIssuerName()
+        {
+            return Issuer;
         }
 
         public override string ToString()
@@ -370,6 +448,24 @@ namespace System.Security.Cryptography.X509Certificates
             return date.ToString(culture);
         }
 
+        internal static void ValidateKeyStorageFlags(X509KeyStorageFlags keyStorageFlags)
+        {
+            if ((keyStorageFlags & ~KeyStorageFlagsAll) != 0)
+                throw new ArgumentException(SR.Argument_InvalidFlag, nameof(keyStorageFlags));
+
+            const X509KeyStorageFlags EphemeralPersist =
+                X509KeyStorageFlags.EphemeralKeySet | X509KeyStorageFlags.PersistKeySet;
+
+            X509KeyStorageFlags persistenceFlags = keyStorageFlags & EphemeralPersist;
+
+            if (persistenceFlags == EphemeralPersist)
+            {
+                throw new ArgumentException(
+                    SR.Format(SR.Cryptography_X509_InvalidFlagCombination, persistenceFlags),
+                    nameof(keyStorageFlags));
+            }
+        }
+
         private volatile byte[] _lazyCertHash;
         private volatile string _lazyIssuer;
         private volatile string _lazySubject;
@@ -380,6 +476,12 @@ namespace System.Security.Cryptography.X509Certificates
         private DateTime _lazyNotBefore = DateTime.MinValue;
         private DateTime _lazyNotAfter = DateTime.MinValue;
 
-        private const X509KeyStorageFlags KeyStorageFlagsAll = (X509KeyStorageFlags)0x1f;
+        internal const X509KeyStorageFlags KeyStorageFlagsAll =
+            X509KeyStorageFlags.UserKeySet |
+            X509KeyStorageFlags.MachineKeySet |
+            X509KeyStorageFlags.Exportable |
+            X509KeyStorageFlags.UserProtected |
+            X509KeyStorageFlags.PersistKeySet |
+            X509KeyStorageFlags.EphemeralKeySet;
     }
 }

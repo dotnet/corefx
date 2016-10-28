@@ -14,7 +14,7 @@ namespace System.IO.Pipes.Tests
     /// Tests that cover Read and ReadAsync behaviors that are shared between
     /// AnonymousPipes and NamedPipes
     /// </summary>
-    public abstract class PipeTest_Read : PipeTestBase
+    public abstract partial class PipeTest_Read : PipeTestBase
     {
         [Fact]
         public void ReadWithNullBuffer_Throws_ArgumentNullException()
@@ -277,6 +277,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Theory]
+        [OuterLoop]
         [MemberData(nameof(AsyncReadWriteChain_MemberData))]
         public async Task AsyncReadWriteChain_ReadWrite(int iterations, int writeBufferSize, int readBufferSize, bool cancelableToken)
         {
@@ -308,6 +309,32 @@ namespace System.IO.Pipes.Tests
 
                     await writerTask;
                 }
+            }
+        }
+
+        [Theory]
+        [OuterLoop]
+        [MemberData(nameof(AsyncReadWriteChain_MemberData))]
+        public async Task AsyncReadWriteChain_CopyToAsync(int iterations, int writeBufferSize, int readBufferSize, bool cancelableToken)
+        {
+            var writeBuffer = new byte[writeBufferSize * iterations];
+            new Random().NextBytes(writeBuffer);
+            var cancellationToken = cancelableToken ? new CancellationTokenSource().Token : CancellationToken.None;
+
+            using (ServerClientPair pair = CreateServerClientPair())
+            {
+                var readData = new MemoryStream();
+                Task copyTask = pair.readablePipe.CopyToAsync(readData, readBufferSize, cancellationToken);
+
+                for (int iter = 0; iter < iterations; iter++)
+                {
+                    await pair.writeablePipe.WriteAsync(writeBuffer, iter * writeBufferSize, writeBufferSize, cancellationToken);
+                }
+                pair.writeablePipe.Dispose();
+
+                await copyTask;
+                Assert.Equal(writeBuffer.Length, readData.Length);
+                Assert.Equal(writeBuffer, readData.ToArray());
             }
         }
 

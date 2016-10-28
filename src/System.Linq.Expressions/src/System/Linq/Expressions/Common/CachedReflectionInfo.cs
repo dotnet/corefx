@@ -18,17 +18,17 @@ namespace System.Linq.Expressions
         private static ConstructorInfo s_Decimal_Ctor_Int32;
         public  static ConstructorInfo   Decimal_Ctor_Int32 =>
                                        s_Decimal_Ctor_Int32 ??
-                                      (s_Decimal_Ctor_Int32 = typeof(Decimal).GetConstructor(new[] { typeof(int) }));
+                                      (s_Decimal_Ctor_Int32 = typeof(decimal).GetConstructor(new[] { typeof(int) }));
 
         private static ConstructorInfo s_Decimal_Ctor_Int64;
         public  static ConstructorInfo   Decimal_Ctor_Int64 =>
                                        s_Decimal_Ctor_Int64 ??
-                                      (s_Decimal_Ctor_Int64 = typeof(Decimal).GetConstructor(new[] { typeof(long) }));
+                                      (s_Decimal_Ctor_Int64 = typeof(decimal).GetConstructor(new[] { typeof(long) }));
 
         private static ConstructorInfo s_Decimal_Ctor_Int32_Int32_Int32_Bool_Byte;
         public  static ConstructorInfo   Decimal_Ctor_Int32_Int32_Int32_Bool_Byte => 
                                        s_Decimal_Ctor_Int32_Int32_Int32_Bool_Byte ??
-                                      (s_Decimal_Ctor_Int32_Int32_Int32_Bool_Byte = typeof(Decimal).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(bool), typeof(byte) }));
+                                      (s_Decimal_Ctor_Int32_Int32_Int32_Bool_Byte = typeof(decimal).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(bool), typeof(byte) }));
 
         private static ConstructorInfo s_Closure_ObjectArray_ObjectArray;
         public  static ConstructorInfo   Closure_ObjectArray_ObjectArray =>
@@ -149,5 +149,10 @@ namespace System.Linq.Expressions
         public  static MethodInfo   Decimal_op_Implicit_Char =>
                                   s_Decimal_op_Implicit_Char ?? 
                                  (s_Decimal_op_Implicit_Char = typeof(decimal).GetMethod("op_Implicit", new[] { typeof(char) }));
+
+        private static MethodInfo s_Math_Pow_Double_Double;
+        public  static MethodInfo   Math_Pow_Double_Double =>
+                                  s_Math_Pow_Double_Double ??
+                                 (s_Math_Pow_Double_Double = typeof(Math).GetMethod(nameof(Math.Pow), new[] { typeof(double), typeof(double) }));
     }
 }

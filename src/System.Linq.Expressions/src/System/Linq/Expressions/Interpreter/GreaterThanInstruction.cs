@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -17,12 +14,9 @@ namespace System.Linq.Expressions.Interpreter
         private static Instruction s_SByte, s_int16, s_char, s_int32, s_int64, s_byte, s_UInt16, s_UInt32, s_UInt64, s_single, s_double;
         private static Instruction s_liftedToNullSByte, s_liftedToNullInt16, s_liftedToNullChar, s_liftedToNullInt32, s_liftedToNullInt64, s_liftedToNullByte, s_liftedToNullUInt16, s_liftedToNullUInt32, s_liftedToNullUInt64, s_liftedToNullSingle, s_liftedToNullDouble;
 
-        public override int ConsumedStack { get { return 2; } }
-        public override int ProducedStack { get { return 1; } }
-        public override string InstructionName
-        {
-            get { return "GreaterThan"; }
-        }
+        public override int ConsumedStack => 2;
+        public override int ProducedStack => 1;
+        public override string InstructionName => "GreaterThan";
 
         private GreaterThanInstruction(object nullValue)
         {
@@ -38,15 +32,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((SByte)left) > (SByte)right);
+                    frame.Push(((sbyte)left) > (sbyte)right);
                 }
                 return +1;
             }
@@ -61,15 +55,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Int16)left) > (Int16)right);
+                    frame.Push(((short)left) > (short)right);
                 }
                 return +1;
             }
@@ -84,15 +78,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Char)left) > (Char)right);
+                    frame.Push(((char)left) > (char)right);
                 }
                 return +1;
             }
@@ -107,15 +101,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Int32)left) > (Int32)right);
+                    frame.Push(((int)left) > (int)right);
                 }
                 return +1;
             }
@@ -130,15 +124,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Int64)left) > (Int64)right);
+                    frame.Push(((long)left) > (long)right);
                 }
                 return +1;
             }
@@ -153,15 +147,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Byte)left) > (Byte)right);
+                    frame.Push(((byte)left) > (byte)right);
                 }
                 return +1;
             }
@@ -176,15 +170,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((UInt16)left) > (UInt16)right);
+                    frame.Push(((ushort)left) > (ushort)right);
                 }
                 return +1;
             }
@@ -199,15 +193,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((UInt32)left) > (UInt32)right);
+                    frame.Push(((uint)left) > (uint)right);
                 }
                 return +1;
             }
@@ -222,15 +216,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((UInt64)left) > (UInt64)right);
+                    frame.Push(((ulong)left) > (ulong)right);
                 }
                 return +1;
             }
@@ -245,15 +239,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Single)left) > (Single)right);
+                    frame.Push(((float)left) > (float)right);
                 }
                 return +1;
             }
@@ -268,15 +262,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Double)left) > (Double)right);
+                    frame.Push(((double)left) > (double)right);
                 }
                 return +1;
             }
@@ -287,7 +281,7 @@ namespace System.Linq.Expressions.Interpreter
             Debug.Assert(!type.GetTypeInfo().IsEnum);
             if (liftedToNull)
             {
-                switch (System.Dynamic.Utils.TypeExtensions.GetTypeCode(TypeUtils.GetNonNullableType(type)))
+                switch (TypeUtils.GetNonNullableType(type).GetTypeCode())
                 {
                     case TypeCode.SByte: return s_liftedToNullSByte ?? (s_liftedToNullSByte = new GreaterThanSByte(null));
                     case TypeCode.Byte: return s_liftedToNullByte ?? (s_liftedToNullByte = new GreaterThanByte(null));
@@ -307,7 +301,7 @@ namespace System.Linq.Expressions.Interpreter
             }
             else
             {
-                switch (System.Dynamic.Utils.TypeExtensions.GetTypeCode(TypeUtils.GetNonNullableType(type)))
+                switch (TypeUtils.GetNonNullableType(type).GetTypeCode())
                 {
                     case TypeCode.SByte: return s_SByte ?? (s_SByte = new GreaterThanSByte(ScriptingRuntimeHelpers.False));
                     case TypeCode.Byte: return s_byte ?? (s_byte = new GreaterThanByte(ScriptingRuntimeHelpers.False));
@@ -327,10 +321,7 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        public override string ToString()
-        {
-            return "GreaterThan()";
-        }
+        public override string ToString() => "GreaterThan()";
     }
 
     internal abstract class GreaterThanOrEqualInstruction : Instruction
@@ -339,12 +330,10 @@ namespace System.Linq.Expressions.Interpreter
         private static Instruction s_SByte, s_int16, s_char, s_int32, s_int64, s_byte, s_UInt16, s_UInt32, s_UInt64, s_single, s_double;
         private static Instruction s_liftedToNullSByte, s_liftedToNullInt16, s_liftedToNullChar, s_liftedToNullInt32, s_liftedToNullInt64, s_liftedToNullByte, s_liftedToNullUInt16, s_liftedToNullUInt32, s_liftedToNullUInt64, s_liftedToNullSingle, s_liftedToNullDouble;
 
-        public override int ConsumedStack { get { return 2; } }
-        public override int ProducedStack { get { return 1; } }
-        public override string InstructionName
-        {
-            get { return "GreaterThanOrEqual"; }
-        }
+        public override int ConsumedStack => 2;
+        public override int ProducedStack => 1;
+        public override string InstructionName => "GreaterThanOrEqual";
+        
         private GreaterThanOrEqualInstruction(object nullValue)
         {
             _nullValue = nullValue;
@@ -359,15 +348,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((SByte)left) >= (SByte)right);
+                    frame.Push(((sbyte)left) >= (sbyte)right);
                 }
                 return +1;
             }
@@ -382,15 +371,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Int16)left) >= (Int16)right);
+                    frame.Push(((short)left) >= (short)right);
                 }
                 return +1;
             }
@@ -405,15 +394,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Char)left) >= (Char)right);
+                    frame.Push(((char)left) >= (char)right);
                 }
                 return +1;
             }
@@ -428,15 +417,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Int32)left) >= (Int32)right);
+                    frame.Push(((int)left) >= (int)right);
                 }
                 return +1;
             }
@@ -451,15 +440,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Int64)left) >= (Int64)right);
+                    frame.Push(((long)left) >= (long)right);
                 }
                 return +1;
             }
@@ -474,15 +463,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Byte)left) >= (Byte)right);
+                    frame.Push(((byte)left) >= (byte)right);
                 }
                 return +1;
             }
@@ -497,15 +486,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((UInt16)left) >= (UInt16)right);
+                    frame.Push(((ushort)left) >= (ushort)right);
                 }
                 return +1;
             }
@@ -520,15 +509,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((UInt32)left) >= (UInt32)right);
+                    frame.Push(((uint)left) >= (uint)right);
                 }
                 return +1;
             }
@@ -543,15 +532,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((UInt64)left) >= (UInt64)right);
+                    frame.Push(((ulong)left) >= (ulong)right);
                 }
                 return +1;
             }
@@ -566,15 +555,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Single)left) >= (Single)right);
+                    frame.Push(((float)left) >= (float)right);
                 }
                 return +1;
             }
@@ -589,15 +578,15 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                var right = frame.Pop();
-                var left = frame.Pop();
+                object right = frame.Pop();
+                object left = frame.Pop();
                 if (left == null || right == null)
                 {
                     frame.Push(_nullValue);
                 }
                 else
                 {
-                    frame.Push(((Double)left) >= (Double)right);
+                    frame.Push(((double)left) >= (double)right);
                 }
                 return +1;
             }
@@ -608,7 +597,7 @@ namespace System.Linq.Expressions.Interpreter
             Debug.Assert(!type.GetTypeInfo().IsEnum);
             if (liftedToNull)
             {
-                switch (System.Dynamic.Utils.TypeExtensions.GetTypeCode(TypeUtils.GetNonNullableType(type)))
+                switch (TypeUtils.GetNonNullableType(type).GetTypeCode())
                 {
                     case TypeCode.SByte: return s_liftedToNullSByte ?? (s_liftedToNullSByte = new GreaterThanOrEqualSByte(null));
                     case TypeCode.Byte: return s_liftedToNullByte ?? (s_liftedToNullByte = new GreaterThanOrEqualByte(null));
@@ -628,7 +617,7 @@ namespace System.Linq.Expressions.Interpreter
             }
             else
             {
-                switch (System.Dynamic.Utils.TypeExtensions.GetTypeCode(TypeUtils.GetNonNullableType(type)))
+                switch (TypeUtils.GetNonNullableType(type).GetTypeCode())
                 {
                     case TypeCode.SByte: return s_SByte ?? (s_SByte = new GreaterThanOrEqualSByte(ScriptingRuntimeHelpers.False));
                     case TypeCode.Byte: return s_byte ?? (s_byte = new GreaterThanOrEqualByte(ScriptingRuntimeHelpers.False));
@@ -648,9 +637,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        public override string ToString()
-        {
-            return "GreaterThanOrEqual()";
-        }
+        public override string ToString() => "GreaterThanOrEqual()";
     }
 }

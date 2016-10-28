@@ -14,6 +14,8 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     public class HttpClientHandler_SslProtocols_Test
     {
         [Fact]
@@ -191,7 +193,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ActiveIssue(8538, PlatformID.Windows)]
         [Fact]
         public async Task GetAsync_DisallowTls10_AllowTls11_AllowTls12()
         {

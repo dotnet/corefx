@@ -17,12 +17,12 @@ namespace System.Net.NetworkInformation.Tests
     {
         private const int IcmpHeaderLengthInBytes = 8;
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/561
+        [Theory]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(50)]
         [InlineData(1000)]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public static async Task PacketSizeIsRespected(int payloadSize)
         {
             IPAddress localAddress = await TestSettings.GetLocalIPAddress();

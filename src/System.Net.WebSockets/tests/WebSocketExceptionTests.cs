@@ -3,12 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
-
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Net.WebSockets.Tests
 {
-    public sealed class WebSocketExceptionTests
+    public sealed partial class WebSocketExceptionTests
     {
         public static object[][] ErrorData = {
             new object[] { WebSocketError.Success },
@@ -30,6 +30,7 @@ namespace System.Net.WebSockets.Tests
 
         public static object[][] UnrelatedErrorData =
             ErrorData.SelectMany(wse => NativeErrorData.Select(ne => new object[] { wse[0], ne[0], ne[2] })).ToArray();
+
 
         [Theory, MemberData(nameof(ErrorData))]
         public void ConstructorTests_WebSocketError_Success(WebSocketError error)

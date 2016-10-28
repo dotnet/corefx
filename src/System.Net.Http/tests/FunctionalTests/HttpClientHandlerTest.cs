@@ -21,6 +21,8 @@ using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
     public class HttpClientHandlerTest
@@ -494,7 +496,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ActiveIssue(8945, PlatformID.Windows)]
         [Theory]
         [InlineData(3, 2)]
         [InlineData(3, 3)]
@@ -583,7 +584,7 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         [InlineData("#origFragment", "", "#origFragment", false)]
         [InlineData("#origFragment", "", "#origFragment", true)]
         [InlineData("", "#redirFragment", "#redirFragment", false)]
@@ -980,6 +981,53 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(200)]
+        [InlineData(500)]
+        [InlineData(600)]
+        [InlineData(900)]
+        [InlineData(999)]
+        public async Task GetAsync_ExpectedStatusCode(int statusCode)
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 {statusCode}\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+                    using (HttpResponseMessage response = await getResponse)
+                    {
+                        Assert.Equal(statusCode, (int)response.StatusCode);
+                    }
+                }
+            });
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(99)]
+        [InlineData(1000)]
+        public async Task GetAsync_StatusCodeOutOfRange_ExpectedException(int statusCode)
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (var client = new HttpClient())
+                {
+                    Task<HttpResponseMessage> getResponse = client.GetAsync(url);
+                    await LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 {statusCode}\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+
+                    await Assert.ThrowsAsync<HttpRequestException>(() => getResponse);
+                }
+            });
+        }
+
         #region Post Methods Tests
 
         [OuterLoop] // TODO: Issue #11345
@@ -1347,7 +1395,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Assert.False(contentDisposed, "Expected request content to not be disposed while request data still being sent");
                         }
-                        else // [ActiveIssue(9006, PlatformID.AnyUnix)]
+                        else // [ActiveIssue(9006, TestPlatforms.AnyUnix)]
                         {
                             await post;
                             Assert.True(contentDisposed, "Current implementation will dispose of the request content once response headers arrive");
@@ -1423,7 +1471,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [PlatformSpecific(PlatformID.Windows)] // CopyToAsync(Stream, TransportContext) isn't used on unix
+        [PlatformSpecific(TestPlatforms.Windows)] // CopyToAsync(Stream, TransportContext) isn't used on unix
         [Fact]
         public async Task PostAsync_Post_ChannelBindingHasExpectedValue()
         {
@@ -1548,7 +1596,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && method == "TRACE")
                     {
-                        // [ActiveIssue(9023, PlatformID.Windows)]
+                        // [ActiveIssue(9023, TestPlatforms.Windows)]
                         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
                     }
                     else
@@ -1592,7 +1640,7 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(Http2Servers))]
-        [ActiveIssue(10958, PlatformID.Windows)]
+        [ActiveIssue(10958, TestPlatforms.Windows)]
         public async Task SendAsync_RequestVersion20_ResponseVersion20IfHttp2Supported(Uri server)
         {
             // We don't currently have a good way to test whether HTTP/2 is supported without

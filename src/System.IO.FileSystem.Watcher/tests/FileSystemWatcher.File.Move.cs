@@ -9,47 +9,47 @@ namespace System.IO.Tests
     public class File_Move_Tests : FileSystemWatcherTest
     {
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Windows_File_Move_To_Same_Directory()
         {
             FileMove_SameDirectory(WatcherChangeTypes.Renamed);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Unix_File_Move_To_Same_Directory()
         {
             FileMove_SameDirectory(WatcherChangeTypes.Created | WatcherChangeTypes.Deleted);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Fact]
         public void File_Move_From_Watched_To_Unwatched()
         {
             FileMove_FromWatchedToUnwatched(WatcherChangeTypes.Deleted);
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Windows_File_Move_To_Different_Watched_Directory()
         {
             FileMove_DifferentWatchedDirectory(WatcherChangeTypes.Changed);
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX)]
         public void OSX_File_Move_To_Different_Watched_Directory()
         {
             FileMove_DifferentWatchedDirectory(WatcherChangeTypes.Changed);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
-        [PlatformSpecific(PlatformID.Linux)]
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)]
         public void Linux_File_Move_To_Different_Watched_Directory()
         {
             FileMove_DifferentWatchedDirectory(0);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Fact]
         public void File_Move_From_Unwatched_To_Watched()
         {
             FileMove_FromUnwatchedToWatched(WatcherChangeTypes.Created);
@@ -58,30 +58,30 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Windows_File_Move_In_Nested_Directory(bool includeSubdirectories)
         {
             FileMove_NestedDirectory(includeSubdirectories ? WatcherChangeTypes.Renamed : 0, includeSubdirectories);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
+        [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Unix_File_Move_In_Nested_Directory(bool includeSubdirectories)
         {
             FileMove_NestedDirectory(includeSubdirectories ? WatcherChangeTypes.Created | WatcherChangeTypes.Deleted : 0, includeSubdirectories);
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void Windows_File_Move_With_Set_NotifyFilter()
         {
             FileMove_WithNotifyFilter(WatcherChangeTypes.Renamed);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/216
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Unix_File_Move_With_Set_NotifyFilter()
         {
             FileMove_WithNotifyFilter(WatcherChangeTypes.Deleted);
