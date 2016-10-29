@@ -20,6 +20,10 @@ namespace System.Net.Tests
             yield return new object[] { "&#xE000;&#xe000;", "\uE000\uE000" };
             yield return new object[] { "&#97;&#98;&#99;", "abc" };
 
+            // Html5 Entities
+            yield return new object[] { "&trade;", "\x2122" };
+            yield return new object[] { "&acE;", "\x223e\x0333" };
+
             // Surrogate pairs
             yield return new object[] { "&#65536;", "\uD800\uDC00" };
             yield return new object[] { "a&#65536;b", "a\uD800\uDC00b" };
