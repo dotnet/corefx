@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace System.Dynamic.Utils
 {
-    internal static class ExpressionUtils
+    internal static partial class ExpressionUtils
     {
         public static ReadOnlyCollection<T> ReturnReadOnly<T>(ref IReadOnlyList<T> collection)
         {
@@ -65,26 +65,6 @@ namespace System.Dynamic.Utils
 
             // and return what is not guaranteed to be a readonly collection
             return (ReadOnlyCollection<Expression>)collection;
-        }
-
-        /// <summary>
-        /// See overload with <see cref="IArgumentProvider"/> for more information. 
-        /// </summary>
-        public static ReadOnlyCollection<ParameterExpression> ReturnReadOnly(IParameterProvider provider, ref object collection)
-        {
-            ParameterExpression tObj = collection as ParameterExpression;
-            if (tObj != null)
-            {
-                // otherwise make sure only one readonly collection ever gets exposed
-                Interlocked.CompareExchange(
-                    ref collection,
-                    new ReadOnlyCollection<ParameterExpression>(new ListParameterProvider(provider, tObj)),
-                    tObj
-                );
-            }
-
-            // and return what is not guaranteed to be a readonly collection
-            return (ReadOnlyCollection<ParameterExpression>)collection;
         }
 
         /// <summary>

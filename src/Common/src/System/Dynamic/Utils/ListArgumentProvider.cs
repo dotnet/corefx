@@ -129,7 +129,7 @@ namespace System.Dynamic.Utils
     /// optimization.  See IArgumentProvider for more general information on the Expression
     /// tree optimizations being used here.
     /// </summary>
-    internal class ListArgumentProvider : ListProvider<Expression>
+    internal sealed class ListArgumentProvider : ListProvider<Expression>
     {
         private readonly IArgumentProvider _provider;
         private readonly Expression _arg0;
@@ -143,24 +143,5 @@ namespace System.Dynamic.Utils
         protected override Expression First => _arg0;
         protected override int ElementCount => _provider.ArgumentCount;
         protected override Expression GetElement(int index) => _provider.GetArgument(index);
-    }
-
-    /// <summary>
-    /// See <see cref="ListArgumentProvider"/> for design considerations. 
-    /// </summary>
-    internal class ListParameterProvider : ListProvider<ParameterExpression>
-    {
-        private readonly IParameterProvider _provider;
-        private readonly ParameterExpression _arg0;
-
-        internal ListParameterProvider(IParameterProvider provider, ParameterExpression arg0)
-        {
-            _provider = provider;
-            _arg0 = arg0;
-        }
-
-        protected override ParameterExpression First => _arg0;
-        protected override int ElementCount => _provider.ParameterCount;
-        protected override ParameterExpression GetElement(int index) => _provider.GetParameter(index);
     }
 }
