@@ -41,6 +41,11 @@ namespace System.Linq.Expressions.Compiler
             private int _expressionsCount;
 
             /// <summary>
+            /// The index of the last expression that requires a SpillStack action.
+            /// </summary>
+            private int _lastSpillIndex;
+
+            /// <summary>
             /// The comma of expressions that will evaluate the parent expression
             /// using temporary variables introduced by stack spilling. This field
             /// is populated in <see cref="EnsureDone"/> which gets called upon
@@ -120,6 +125,11 @@ namespace System.Linq.Expressions.Compiler
                 _action |= exp.Action;
                 _stack = Stack.NonEmpty;
 
+                if (exp.Action == RewriteAction.SpillStack)
+                {
+                    _lastSpillIndex = _expressionsCount;
+                }
+
                 // Track items in case we need to copy or spill stack.
                 _expressions[_expressionsCount++] = exp.Node;
             }
@@ -185,7 +195,7 @@ namespace System.Linq.Expressions.Compiler
                     if (_action == RewriteAction.SpillStack)
                     {
                         Expression[] clone = _expressions;
-                        int count = clone.Length;
+                        int count = _lastSpillIndex + 1;
                         List<Expression> comma = new List<Expression>(count + 1);
                         for (int i = 0; i < count; i++)
                         {
