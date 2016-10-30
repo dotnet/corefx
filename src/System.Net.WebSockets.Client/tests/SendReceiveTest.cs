@@ -85,44 +85,55 @@ namespace System.Net.WebSockets.Client.Tests
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
             {
-                var tasks = new Task[2];
+                var cts = new CancellationTokenSource(TimeOutMilliseconds);
 
-                // Need large buffer, or Send completes too quickly and no exception is thrown.
-                var sendBuffer = new byte[128 * 1024];
-                var segment = new ArraySegment<byte>(sendBuffer);
+                Task[] tasks = new Task[10];
 
-                for (int i = 0; i < tasks.Length; i++)
+                try
                 {
-                    tasks[i] = cws.SendAsync(
-                        segment,
-                        WebSocketMessageType.Text,
-                        true,
-                        CancellationToken.None);
+                    for (int i = 0; i < tasks.Length; i++)
+                    {
+                        tasks[i] = cws.SendAsync(
+                            WebSocketData.GetBufferFromText("hello"),
+                            WebSocketMessageType.Text,
+                            true,
+                            cts.Token);
+                    }
+
+                    Task.WaitAll(tasks);
+
+                    Assert.Equal(WebSocketState.Open, cws.State);
                 }
-
-                await Assert.ThrowsAsync<InvalidOperationException>(() => Task.WhenAll(tasks));
-                Assert.Equal(WebSocketState.Aborted, cws.State);
-
-                Assert.All(tasks, task =>
+                catch (AggregateException ag)
                 {
-                    Assert.Equal(TaskStatus.Faulted, task.Status);
-                    InvalidOperationException e = Assert.IsType<InvalidOperationException>(task.Exception.InnerException);
-                    Assert.Equal(
-                    ResourceHelper.GetExceptionMessage(
-                            "net_Websockets_AlreadyOneOutstandingOperation",
-                            "SendAsync"),
-                        e.Message);
-                });
+                    foreach (var ex in ag.InnerExceptions)
+                    {
+                        if (ex is InvalidOperationException)
+                        {
+                            Assert.Equal(
+                                ResourceHelper.GetExceptionMessage(
+                                    "net_Websockets_AlreadyOneOutstandingOperation",
+                                    "SendAsync"),
+                                ex.Message);
 
-                WebSocketException ex = await Assert.ThrowsAsync<WebSocketException>(() =>
-                    cws.SendAsync(
-                        WebSocketData.GetBufferFromText("small"),
-                        WebSocketMessageType.Text,
-                        true,
-                        CancellationToken.None));
-                Assert.Equal(
-                    ResourceHelper.GetExceptionMessage("net_WebSockets_InvalidState", "Aborted", "Open, CloseReceived"),
-                    ex.Message);
+                            Assert.Equal(WebSocketState.Aborted, cws.State);
+                        }
+                        else if (ex is WebSocketException)
+                        {
+                            // Multiple cases.
+                            Assert.Equal(WebSocketState.Aborted, cws.State);
+
+                            WebSocketError errCode = (ex as WebSocketException).WebSocketErrorCode;
+                            Assert.True(
+                                (errCode == WebSocketError.InvalidState) || (errCode == WebSocketError.Success),
+                                "WebSocketErrorCode");
+                        }
+                        else
+                        {
+                            Assert.IsAssignableFrom<OperationCanceledException>(ex);
+                        }
+                    }
+                }
             }
         }
 
