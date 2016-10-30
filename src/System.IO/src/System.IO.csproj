@@ -10,7 +10,6 @@
     <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
     <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.7;uap10.1</PackageTargetFramework>
     <DefineConstants Condition="'$(TargetGroup)'==''">$(DefineConstants);netstandard17</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp1.1'">$(DefineConstants);netcoreapp11</DefineConstants>
     <NoWarn Condition="'$(TargetGroup)' != 'net462' and '$(TargetGroup)' != 'net463'">CS0436</NoWarn>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->

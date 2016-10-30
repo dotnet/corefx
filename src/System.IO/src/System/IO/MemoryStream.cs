@@ -474,7 +474,6 @@ namespace System.IO
             return _buffer[_position++];
         }
 
-#if netcoreapp11
         public override void CopyTo(Stream destination, int bufferSize)
         {
             // Since we did not originally override this method, validate the arguments
@@ -504,7 +503,6 @@ namespace System.IO
                 destination.Write(_buffer, originalPosition, remaining);
             }
         }
-#endif
 
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
