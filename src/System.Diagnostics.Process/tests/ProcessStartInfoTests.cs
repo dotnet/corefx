@@ -519,7 +519,8 @@ namespace System.Diagnostics.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Assert.True(environmentVariables.ContainsKey("NeWkEy"));
-                Assert.Equal("NewValue", environmentVariables["NeWkEy"]);
+                Assert.Equal("NewValue", environmentVariables["NeWKeY"]);
+                Assert.Throws<ArgumentException>(() => environmentVariables.Add("newkey", "newvalue100"));
             }
 
             Assert.False(environmentVariables.ContainsKey("NewKey99"));
