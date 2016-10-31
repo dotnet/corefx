@@ -306,6 +306,18 @@ namespace System.Transactions
             _cloneId = 1;
         }
 
+        // This serializtion constructor needs to be removed when we implement distributed transaction capabilities
+        // Issue 13137
+        protected Transaction(SerializationInfo serializationInfo, StreamingContext context)
+        {
+            if (serializationInfo == null)
+            {
+                throw new ArgumentNullException(nameof(serializationInfo));
+            }
+
+            throw DistributedTransaction.NotSupported();
+        }
+
         #region System.Object Overrides
 
         // Don't use the identifier for the hash code.

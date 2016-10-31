@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// System.Runtime.Serialization needs to be removed when we implement distributed transaction capabilities
+using System.Runtime.Serialization;
+
 namespace System.Transactions
 {
     [Serializable]
@@ -12,5 +15,12 @@ namespace System.Transactions
         public SubordinateTransaction(IsolationLevel isoLevel, ISimpleTransactionSuperior superior) : base(isoLevel, superior)
         {
         }
+
+        // This serializtion constructor needs to be removed when we implement distributed transaction capabilities
+        // Issue 13137
+        SubordinateTransaction(SerializationInfo serializationInfo, StreamingContext context) : base(serializationInfo, context)
+        {
+        }
+
     }
 }
