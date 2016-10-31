@@ -12,9 +12,7 @@ namespace System.Net.WebSockets.Client.Tests
 {
     public class CancelTest : ClientWebSocketTestBase
     {
-        public CancelTest(ITestOutputHelper output) : base(output)
-        {
-        }
+        public CancelTest(ITestOutputHelper output) : base(output) { }
 
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
@@ -102,6 +100,7 @@ namespace System.Net.WebSockets.Client.Tests
         {
             await TestCancellation(async (cws) =>
             {
+
                 var cts = new CancellationTokenSource(5);
                 var ctsDefault = new CancellationTokenSource(TimeOutMilliseconds);
 
