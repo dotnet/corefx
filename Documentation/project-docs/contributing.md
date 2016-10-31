@@ -15,7 +15,7 @@ We intend to bring dotnet/corefx into full conformance with the style guidelines
 API Changes
 -----------
 
-Do not submit such PRs until the APIs have been approved via the [API Review Process](api-review-process.md).
+* **DO NOT** submit such PRs until the APIs have been approved via the [API Review Process](api-review-process.md).
 
 Pull Requests
 -------------
