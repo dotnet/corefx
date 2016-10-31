@@ -635,10 +635,13 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData("Format_String_TestData_O")]
+        [MemberData(nameof(Format_String_TestData_O))]
         public static void ParseExact_String_String_FormatProvider_DateTimeStyles_O(DateTime dt, string expected)
         {
-            DateTime result = DateTime.ParseExact(dt.ToString("o"), "o", null, DateTimeStyles.None);
+            string actual = dt.ToString("o");
+            Assert.Equal(expected, actual);
+
+            DateTime result = DateTime.ParseExact(actual, "o", null, DateTimeStyles.None);
             Assert.Equal(expected, result.ToString("o"));
         }
 
@@ -650,10 +653,13 @@ namespace System.Tests
         }
 
         [Theory] 
-        [MemberData("Format_String_TestData_R")]
+        [MemberData(nameof(Format_String_TestData_R))]
         public static void ParseExact_String_String_FormatProvider_DateTimeStyles_R(DateTime dt, string expected)
         {
-            DateTime result = DateTime.ParseExact(dt.ToString("r"), "r", null, DateTimeStyles.None);
+            string actual = dt.ToString("r");
+            Assert.Equal(expected, actual);
+
+            DateTime result = DateTime.ParseExact(actual, "r", null, DateTimeStyles.None);
             Assert.Equal(expected, result.ToString("r"));
         }
 

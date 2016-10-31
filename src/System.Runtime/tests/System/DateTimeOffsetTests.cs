@@ -860,10 +860,13 @@ namespace System.Tests
             Assert.Equal(expectedString, result.ToString("g"));
         }
 
-        [Theory, MemberData("Format_String_TestData_O")]
+        [Theory, MemberData(nameof(Format_String_TestData_O))]
         public static void ParseExact_String_String_FormatProvider_DateTimeStyles_O(DateTimeOffset dt, string expected)
         {
-            DateTimeOffset result = DateTimeOffset.ParseExact(dt.ToString("o"), "o", null, DateTimeStyles.None);
+            string actual = dt.ToString("o");
+            Assert.Equal(expected, actual);
+
+            DateTimeOffset result = DateTimeOffset.ParseExact(actual, "o", null, DateTimeStyles.None);
             Assert.Equal(expected, result.ToString("o"));
         }
 
@@ -875,10 +878,13 @@ namespace System.Tests
             yield return new object[] { new DateTimeOffset(1906, 8, 15, 7, 24, 5, 300, new TimeSpan(7, 30, 0)), "1906-08-15T07:24:05.3000000+07:30" };
         }
 
-        [Theory, MemberData("Format_String_TestData_R")]
+        [Theory, MemberData(nameof(Format_String_TestData_R))]
         public static void ParseExact_String_String_FormatProvider_DateTimeStyles_R(DateTimeOffset dt, string expected)
         {
-            DateTimeOffset result = DateTimeOffset.ParseExact(dt.ToString("r"), "r", null, DateTimeStyles.None);
+            string actual = dt.ToString("r");
+            Assert.Equal(expected, actual);
+
+            DateTimeOffset result = DateTimeOffset.ParseExact(actual, "r", null, DateTimeStyles.None);
             Assert.Equal(expected, result.ToString("r"));
         }
 
