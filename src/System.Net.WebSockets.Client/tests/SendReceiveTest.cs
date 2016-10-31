@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -11,9 +14,7 @@ namespace System.Net.WebSockets.Client.Tests
 {
     public class SendReceiveTest : ClientWebSocketTestBase
     {
-        public SendReceiveTest(ITestOutputHelper output) : base(output)
-        {
-        }
+        public SendReceiveTest(ITestOutputHelper output) : base(output) { }
 
         [OuterLoop] // TODO: Issue #11345
         [ActiveIssue(10702)]
@@ -143,34 +144,59 @@ namespace System.Net.WebSockets.Client.Tests
         {
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
             {
-                var tasks = new Task[2];
+                var cts = new CancellationTokenSource(TimeOutMilliseconds);
+
+                Task[] tasks = new Task[2];
+
+                await cws.SendAsync(
+                    WebSocketData.GetBufferFromText(".delay5sec"),
+                    WebSocketMessageType.Text,
+                    true,
+                    cts.Token);
 
                 var recvBuffer = new byte[100];
                 var recvSegment = new ArraySegment<byte>(recvBuffer);
 
-                for (int i = 0; i < tasks.Length; i++)
+                try
                 {
-                    tasks[i] = cws.ReceiveAsync(recvSegment, CancellationToken.None);
+                    for (int i = 0; i < tasks.Length; i++)
+                    {
+                        tasks[i] = cws.ReceiveAsync(recvSegment, cts.Token);
+                    }
+
+                    Task.WaitAll(tasks);
+                    Assert.Equal(WebSocketState.Open, cws.State);
                 }
-
-                await Assert.ThrowsAsync<InvalidOperationException>(() => Task.WhenAll(tasks));
-                Assert.Equal(WebSocketState.Aborted, cws.State);
-                Assert.All(tasks, task =>
+                catch (AggregateException ag)
                 {
-                    Assert.Equal(TaskStatus.Faulted, task.Status);
-                    InvalidOperationException e = Assert.IsType<InvalidOperationException>(task.Exception.InnerException);
-                    Assert.Equal(
-                    ResourceHelper.GetExceptionMessage(
-                            "net_Websockets_AlreadyOneOutstandingOperation",
-                            "ReceiveAsync"),
-                        e.Message);
-                });
+                    foreach (var ex in ag.InnerExceptions)
+                    {
+                        if (ex is InvalidOperationException)
+                        {
+                            Assert.Equal(
+                                ResourceHelper.GetExceptionMessage(
+                                    "net_Websockets_AlreadyOneOutstandingOperation",
+                                    "ReceiveAsync"),
+                                ex.Message);
 
-                WebSocketException ex = await Assert.ThrowsAsync<WebSocketException>(() =>
-                    cws.ReceiveAsync(recvSegment, CancellationToken.None));
-                Assert.Equal(
-                    ResourceHelper.GetExceptionMessage("net_WebSockets_InvalidState", "Aborted", "Open, CloseSent"),
-                    ex.Message);
+                            Assert.Equal(WebSocketState.Aborted, cws.State);
+                        }
+                        else if (ex is WebSocketException)
+                        {
+                            // Multiple cases.
+                            Assert.Equal(WebSocketState.Aborted, cws.State);
+
+                            WebSocketError errCode = (ex as WebSocketException).WebSocketErrorCode;
+                            Assert.True(
+                                (errCode == WebSocketError.InvalidState) || (errCode == WebSocketError.Success),
+                                "WebSocketErrorCode");
+                        }
+                        else
+                        {
+                            Assert.True(false, "Unexpected exception: " + ex.Message);
+                        }
+                    }
+                }
             }
         }
 
