@@ -31,7 +31,6 @@ namespace System.Diagnostics
         private Encoding _standardErrorEncoding;
         private bool _errorDialog;
         private IntPtr _errorDialogParentHandle;
-        private SecureString _password;
         private string _verb;
         private ProcessWindowStyle _windowStyle;
 
@@ -225,12 +224,6 @@ namespace System.Diagnostics
         {
             get { return _errorDialogParentHandle; }
             set { _errorDialogParentHandle = value; }
-        }
-
-        public SecureString Password 
-        {
-            get { return _password; } 
-            set { _password = value; }
         }
 
         [DefaultValueAttribute("")]

@@ -161,7 +161,6 @@ namespace System.Diagnostics
         public string WorkingDirectory { get { throw null; } set { } }
         public bool ErrorDialog { get { throw null; } set { } }
         public System.IntPtr ErrorDialogParentHandle { get { throw null; } set { } }
-        public System.Security.SecureString Password { get { throw null; } set { } }
         [System.ComponentModel.DefaultValueAttribute(null)]
         public string Verb { get { throw null; } set { } }
         public string[] Verbs { get { throw null; } }
