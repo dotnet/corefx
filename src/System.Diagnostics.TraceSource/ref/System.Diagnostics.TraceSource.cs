@@ -75,7 +75,7 @@ namespace System.Diagnostics
         protected virtual void OnSwitchSettingChanged() { }
         protected virtual void OnValueChanged() { }
         public System.Collections.Specialized.StringDictionary Attributes { get { throw null; } }
-        virtual protected internal string[] GetSupportedAttributes() { throw null; }
+        protected internal virtual string[] GetSupportedAttributes() { throw null; }
     }
     public sealed partial class Trace
     {

@@ -35,8 +35,7 @@ namespace System.Diagnostics
         private ProcessWindowStyle _windowStyle;
 
         private bool _createNoWindow = false;
-        internal Dictionary<string, string> _environment;
-        private StringDictionary _environmentVariables;
+        internal Dictionary<string, string> _environmentVariables;
 
         /// <devdoc>
         ///     Default constructor.  At least the <see cref='System.Diagnostics.ProcessStartInfo.FileName'/>
@@ -89,47 +88,18 @@ namespace System.Diagnostics
             set { _createNoWindow = value; }
         }
 
-        public StringDictionary EnvironmentVariables 
-        {
-            get 
-            {
-                                
-                if (_environmentVariables == null)
-                {
-#if PLATFORM_UNIX
-                    _environmentVariables = new StringDictionaryWithComparer(StringComparer.Ordinal);
-#else
-                    _environmentVariables = new StringDictionaryWithComparer(StringComparer.OrdinalIgnoreCase);
-#endif // PLATFORM_UNIX
-
-                    IEnumerator<KeyValuePair<string,string>> e = Environment.GetEnumerator();
-                    try
-                    {
-                        while (e.MoveNext())
-                        {
-                            _environmentVariables.Add((string)e.Current.Key, (string)e.Current.Value);
-                        }
-                    }
-                    finally
-                    {
-                        (e as IDisposable)?.Dispose();
-                    }
-                
-                }
-                return _environmentVariables;
-            }
-        }
+        public StringDictionary EnvironmentVariables => new StringDictionaryWithComparer(Environment);
 
         public IDictionary<string, string> Environment
         {
             get
             {
-                if (_environment == null)
+                if (_environmentVariables == null)
                 {
                     IDictionary envVars = System.Environment.GetEnvironmentVariables();
 
 #pragma warning disable 0429 // CaseSensitiveEnvironmentVaribles is constant but varies depending on if we build for Unix or Windows
-                    _environment = new Dictionary<string, string>(
+                    _environmentVariables = new Dictionary<string, string>(
                         envVars.Count,
                         CaseSensitiveEnvironmentVariables ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
 #pragma warning restore 0429
@@ -141,7 +111,7 @@ namespace System.Diagnostics
                         while (e.MoveNext())
                         {
                             DictionaryEntry entry = e.Entry;
-                            _environment.Add((string)entry.Key, (string)entry.Value);
+                            _environmentVariables.Add((string)entry.Key, (string)entry.Value);
                         }
                     }
                     finally
@@ -149,7 +119,7 @@ namespace System.Diagnostics
                         (e as IDisposable)?.Dispose();
                     }
                 }
-                return _environment;
+                return _environmentVariables;
             }
         }
 
@@ -240,41 +210,6 @@ namespace System.Diagnostics
             }
         }
 
-        public string[] Verbs {
-            [ResourceExposure(ResourceScope.None)]
-            [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
-            get 
-            {
-                ArrayList verbs = new ArrayList();
-                RegistryKey key = null;
-                string extension = Path.GetExtension(FileName);
-                try {
-                    if (extension != null && extension.Length > 0) {
-                        key = Registry.ClassesRoot.OpenSubKey(extension);
-                        if (key != null) {
-                            string value = (string)key.GetValue(String.Empty);
-                            key.Dispose();
-                            key = Registry.ClassesRoot.OpenSubKey(value + "\\shell");
-                            if (key != null) {
-                                string[] names = key.GetSubKeyNames();
-                                for (int i = 0; i < names.Length; i++)
-                                    if (string.Compare(names[i], "new", StringComparison.OrdinalIgnoreCase) != 0)
-                                        verbs.Add(names[i]);
-                                key.Dispose();
-                                key = null;
-                            }
-                        }
-                    }
-                }
-                finally {
-                    if (key != null) key.Dispose();
-                }
-                string[] temp = new string[verbs.Count];
-                verbs.CopyTo(temp, 0);
-                return temp;
-            }
-        }
-
         [DefaultValueAttribute(System.Diagnostics.ProcessWindowStyle.Normal)]
         public ProcessWindowStyle WindowStyle
         {
@@ -284,8 +219,10 @@ namespace System.Diagnostics
             }
             set 
             {
-                if (!Enum.IsDefined(typeof(ProcessWindowStyle), value)) 
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(ProcessWindowStyle));
+                if (!Enum.IsDefined(typeof(ProcessWindowStyle), value))
+                {
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(ProcessWindowStyle));
+                } 
                     
                 _windowStyle = value;
             }

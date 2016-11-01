@@ -3,6 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Security;
+using System.Collections.Generic;
+using Microsoft.Win32;
+using System.IO;
 
 namespace System.Diagnostics
 {
@@ -37,6 +40,47 @@ namespace System.Diagnostics
         {
             get { return _loadUserProfile; }
             set { _loadUserProfile = value; }
+        }
+
+        public string[] Verbs 
+        {
+            get 
+            {
+                List<string> verbs = new List<string>();
+                RegistryKey key = null;
+                string extension = Path.GetExtension(FileName);
+                try 
+                {
+                    if (!string.IsNullOrEmpty(extension)) 
+                    {
+                        key = Registry.ClassesRoot.OpenSubKey(extension);
+                        if (key != null) 
+                        {
+                            string value = (string)key.GetValue(string.Empty);
+                            key.Dispose();
+                            key = Registry.ClassesRoot.OpenSubKey(value + "\\shell");
+                            if (key != null) 
+                            {
+                                string[] names = key.GetSubKeyNames();
+                                foreach(string name in names)
+                                {
+                                    if (!string.Equals(name, "new", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        verbs.Add(name);
+                                    }
+                                }
+                                key.Dispose();
+                                key = null;
+                            }
+                        }
+                    }
+                }
+                finally 
+                {
+                    if (key != null) key.Dispose();
+                }
+                return verbs.ToArray();
+            }
         }
 
         // CoreCLR can't correctly support UseShellExecute=true for the following reasons

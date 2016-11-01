@@ -171,9 +171,7 @@ namespace System.Diagnostics
             }
         }
 
-        virtual protected internal string[] GetSupportedAttributes() {
-            return null;
-        }
+        protected internal virtual string[] GetSupportedAttributes() => null;
 
         protected string Value
         {
