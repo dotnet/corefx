@@ -3,26 +3,44 @@
     {
       "enabled": true,
       "continueOnError": false,
-      "alwaysRun": false,
-      "displayName": "Run clean.cmd",
+      "alwaysRun": true,
+      "displayName": "Delete 'corefx'",
       "timeoutInMinutes": 0,
       "task": {
-        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "*",
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "clean.cmd",
-        "arguments": "-all",
+        "scriptType": "inlineScript",
+        "scriptName": "",
+        "arguments": "-path $(build.SourcesDirectory)\\corefx",
+        "inlineScript": "param($path)\n\nif (Test-Path $path){\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n\nif (Test-Path $path){\n    # this will print out an error each time a file can't be deleted.\n    .\\diag_tools\\handle.exe -accepteula $path\n }",
         "workingFolder": "",
-        "failOnStandardError": "false"
+        "failOnStandardError": "true"
       }
     },
     {
       "enabled": false,
       "continueOnError": false,
+      "alwaysRun": true,
+      "displayName": "Delete files from $(build.SourcesDirectory)",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "b7e8b412-0437-4065-9371-edc5881de25b",
+        "versionSpec": "*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "SourceFolder": "$(build.SourcesDirectory)",
+        "Contents": "corefx"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Check out the specified commit",
+      "displayName": "git clone",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -30,9 +48,64 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "git",
-        "arguments": "checkout $(CommitToCheckout)",
+        "filename": "$(Git)",
+        "arguments": "clone $(VsoCorefxGitUrl) corefx",
         "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "git checkout",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(Git)",
+        "arguments": "checkout $(SourceVersion)",
+        "workingFolder": "corefx",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Setup environment",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "bfc8bf76-e7ac-4a8c-9a55-a944a9f632fd",
+        "versionSpec": "*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(VS140COMNTOOLS)\\\\VsDevCmd.bat",
+        "arguments": "",
+        "modifyEnvironment": "true",
+        "workingFolder": "corefx",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": false,
+      "alwaysRun": false,
+      "displayName": "Run $(Build.SourcesDirectory)\\corefx\\clean.cmd",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(Build.SourcesDirectory)\\corefx\\clean.cmd",
+        "arguments": "-all",
+        "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
     },
@@ -48,9 +121,9 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "sync.cmd",
+        "filename": "$(Build.SourcesDirectory)\\corefx\\sync.cmd",
         "arguments": "-ab -AzureAccount=$(CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(Label) -- /p:\"DownloadDirectory=$(PackagesTransferDirectory)\" /p:\"SkipCleanPackages=true\" /p:\"PackagesDrops=$(PackagesTransferDirectory)\\$(ConfigurationGroup)\"",
-        "workingFolder": "",
+        "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
     },
@@ -66,9 +139,9 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "sync.cmd",
+        "filename": "$(Build.SourcesDirectory)\\corefx\\sync.cmd",
         "arguments": "-t -AzureAccount=$(CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(Label) -- /p:\"DownloadDirectory=$(PackagesTransferDirectory)\" /p:\"SkipCleanPackages=true\" /p:\"PackagesDrops=$(PackagesTransferDirectory)\\$(ConfigurationGroup)\"",
-        "workingFolder": "",
+        "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
     },
@@ -84,9 +157,9 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "build-managed.cmd",
+        "filename": "$(Build.SourcesDirectory)\\corefx\\build-managed.cmd",
         "arguments": "-GenerateVersion -OfficialBuildId=$(OfficialBuildId)",
-        "workingFolder": "",
+        "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
     },
@@ -102,10 +175,10 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "build-tests.cmd",
-        "arguments": "-BuildTestsAgainstPackages -$(ConfigurationGroup) -SkipTests -target-os=$(TargetOS) -OuterLoop  -- /p:\"PackagesDrops=$(PackagesTransferDirectory)\\$(ConfigurationGroup)\" /p:\"ArchiveTests=true\" /p:\"Performance=$(Performance)\" /p:\"FuncTestsDisabled=$(FuncTestsDisabled)\" /p:\"TestNugetRuntimeId=$(TestNugetRuntimeId)\" /p:XunitTraitOptions=\\\"-notrait category=requireselevation\\\"",
+        "filename": "$(build.SourcesDirectory)/corefx/build-tests.cmd",
+        "arguments": "-BuildTestsAgainstPackages -$(ConfigurationGroup) -SkipTests -target-os=$(TargetOS) -OuterLoop  -- /p:\"PackagesDrops=$(PackagesTransferDirectory)\\$(ConfigurationGroup)\" /p:\"ArchiveTests=true\" /p:\"Performance=$(Performance)\" /p:\"FuncTestsDisabled=$(FuncTestsDisabled)\" /p:\"TestNugetRuntimeId=$(TestNugetRuntimeId)\" /p:XunitTraitOptions=\\\"-notrait category=requireselevation\\\" /flp:v=detailed",
         "modifyEnvironment": "false",
-        "workingFolder": "",
+        "workingFolder": "$(build.SourcesDirectory)/corefx",
         "failOnStandardError": "false"
       }
     },
@@ -121,9 +194,9 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "Tools/msbuild.cmd",
+        "filename": "msbuild",
         "arguments": "src\\post.builds /t:CompressPackagesDir /p:\"EnableCloudTest=true\"",
-        "workingFolder": "",
+        "workingFolder": "$(build.SourcesDirectory)/corefx",
         "failOnStandardError": "false"
       }
     },
@@ -139,9 +212,9 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "Tools/msbuild.cmd",
-        "arguments": "src\\post.builds /t:CloudBuild /p:\"BuildTestsAgainstPackages=true\" /p:\"ConfigurationGroup=$(ConfigurationGroup)\" /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ArchiveTests=true\" /p:\"EnableCloudTest=true\" /p:\"BuildMoniker=$(OfficialBuildId)\" /p:\"TargetQueue=$(TargetQueue)\" /p:\"TestProduct=CoreFx\" /p:\"Branch=$(HelixBranch)\" /p:\"CloudDropAccountName=$(OutputCloudDropAccountName)\" /p:\"CloudResultsAccountName=$(OutputCloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(OutputCloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(OutputCloudResultsAccessToken)\" /p:\"BuildCompleteConnection=$(BuildCompleteConnection)\" /p:\"BuildIsOfficialConnection=$(BuildOfficialConnection)\" /p:\"Outerloop=true\" /p:\"TestNugetRuntimeId=$(TestNugetRuntimeId)\" /p:\"FilterToOSGroup=$(FilterToOsGroup)\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=$(TargetOS)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"Creator=$(Creator)\" /p:\"CloudTestContainerSuffix=$(TestContainerSuffix)-2\" /p:\"OverwriteOnUpload=true\" /p:\"TargetsWindows=$(TargetsWindows)\" /flp:\"LogFile=pushtohelix-diag.log;Verbosity=diagnostic\"",
-        "workingFolder": "",
+        "filename": "$(Build.SourcesDirectory)\\corefx\\tools\\msbuild.cmd",
+        "arguments": "src\\post.builds /t:CloudBuild /p:\"BuildTestsAgainstPackages=true\" /p:\"ConfigurationGroup=$(ConfigurationGroup)\" /p:\"OfficialBuildId=$(OfficialBuildId)\" /p:\"ArchiveTests=true\" /p:\"EnableCloudTest=true\" /p:\"BuildMoniker=$(OfficialBuildId)\" /p:\"TargetQueue=$(TargetQueue)\" /p:\"TestProduct=corefx\" /p:\"Branch=$(HelixBranch)\" /p:\"CloudDropAccountName=$(OutputCloudDropAccountName)\" /p:\"CloudResultsAccountName=$(OutputCloudResultsAccountName)\" /p:\"CloudDropAccessToken=$(OutputCloudDropAccessToken)\" /p:\"CloudResultsAccessToken=$(OutputCloudResultsAccessToken)\" /p:\"BuildCompleteConnection=$(BuildCompleteConnection)\" /p:\"BuildIsOfficialConnection=$(BuildOfficialConnection)\" /p:\"Outerloop=true\" /p:\"TestNugetRuntimeId=$(TestNugetRuntimeId)\" /p:\"FilterToOSGroup=$(FilterToOsGroup)\" /p:\"TimeoutInSeconds=1200\" /p:\"TargetOS=$(TargetOS)\" /p:\"HelixApiAccessKey=$(HelixApiAccessKey)\" /p:\"Creator=$(Creator)\" /p:\"CloudTestContainerSuffix=$(TestContainerSuffix)-2\" /p:\"OverwriteOnUpload=true\" /p:\"TargetsWindows=$(TargetsWindows)\" /flp:\"LogFile=pushtohelix-diag.log;Verbosity=diagnostic\" /p:HelixApiEndpoint=$(HelixApiEndpoint)",
+        "workingFolder": "$(build.SourcesDirectory)/corefx",
         "failOnStandardError": "false"
       }
     },
@@ -149,7 +222,7 @@
       "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
-      "displayName": "Run publish-packages.cmd",
+      "displayName": "Run $(build.SourcesDirectory)/corefx/publish-packages.cmd",
       "timeoutInMinutes": 0,
       "task": {
         "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
@@ -157,9 +230,27 @@
         "definitionType": "task"
       },
       "inputs": {
-        "filename": "publish-packages.cmd",
-        "arguments": "-AzureAccount=$(CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(Label)-$(TestContainerSuffix)-test -- /p:OverwriteOnPublish=true /p:PublishPattern=$(Build.SourcesDirectory)\\bin\\tests\\*\\archive\\**\\*.zip",
-        "workingFolder": "",
+        "filename": "$(build.SourcesDirectory)/corefx/publish-packages.cmd",
+        "arguments": "-AzureAccount=$(CloudDropAccountName) -AzureToken=$(CloudDropAccessToken) -Container=$(Label)-$(TestContainerSuffix)-test -- /p:OverwriteOnPublish=true /p:PublishPattern=$(Build.SourcesDirectory)\\corefx\\bin\\tests\\*\\archive\\**\\*.zip",
+        "workingFolder": "$(build.SourcesDirectory)/corefx",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Final clean to remove lingering processes",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "$(Build.SourcesDirectory)\\corefx\\clean.cmd",
+        "arguments": "",
+        "workingFolder": "corefx",
         "failOnStandardError": "false"
       }
     },
@@ -176,7 +267,7 @@
       },
       "inputs": {
         "CopyRoot": "",
-        "Contents": "*.log",
+        "Contents": "*.log\ncorefx\\*.log\ncorefx\\src\\*.log",
         "ArtifactName": "Detailed build logs",
         "ArtifactType": "Container",
         "TargetPath": "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
@@ -234,7 +325,7 @@
       "isSecret": true
     },
     "PackagesTransferDirectory": {
-      "value": "$(Build.SourcesDirectory)\\Packages\\AzureTransfer"
+      "value": "$(Build.SourcesDirectory)\\corefx\\Packages\\AzureTransfer"
     },
     "Release": {
       "value": "rc3",
@@ -266,19 +357,9 @@
       "value": null,
       "isSecret": true
     },
-    "BuildCompleteConnection": {
-      "value": "Endpoint=sb://dotnethelix.servicebus.windows.net/;SharedAccessKeyName=helixcontroller;SharedAccessKey=IlxIZCWfaCyLLWzU93PBJBh03LlC+Orfj4F2J9vMYWE="
-    },
-    "BuildOfficialConnection": {
-      "value": "Endpoint=sb://clrstats.servicebus.windows.net/;SharedAccessKeyName=Send;SharedAccessKey=p21OxPYc8N4iV1HD6bFasz/YvodQvjgw6yogVRq45V4="
-    },
     "HelixApiAccessKey": {
       "value": null,
       "isSecret": true
-    },
-    "CommitToCheckout": {
-      "value": "HEAD",
-      "allowOverride": true
     },
     "TargetOS": {
       "value": "Windows_NT",
@@ -297,8 +378,8 @@
       "allowOverride": true
     },
     "TargetsWindows": {
-      "value": "true",
-      "allowOverride": true
+      "value": null,
+      "isSecret": true
     },
     "Creator": {
       "value": "corbvt"
@@ -311,6 +392,41 @@
     },
     "HelixBranch": {
       "value": "master"
+    },
+    "HelixApiEndpoint": {
+      "value": "https://helix.dot.net/api/2016-06-28/jobs"
+    },
+    "VsoAccountName": {
+      "value": "dn-bot"
+    },
+    "VsoPassword": {
+      "value": null,
+      "isSecret": true
+    },
+    "VsoRepositoryName": {
+      "value": "DotNet-CoreFX-Trusted",
+      "allowOverride": true
+    },
+    "VsoCorefxGitUrl": {
+      "value": "https://$(VsoAccountName):$(VsoPassword)@devdiv.visualstudio.com/DevDiv/_git/$(VsoRepositoryName)/"
+    },
+    "SourceVersion": {
+      "value": "master",
+      "allowOverride": true
+    },
+    "BuildMoniker": {
+      "value": "$(OfficialBuildId)",
+      "allowOverride": true
+    },
+    "FilterToOSGroup": {
+      "value": "Windows_NT",
+      "allowOverride": true
+    },
+    "ContainerName": {
+      "value": ""
+    },
+    "Git": {
+      "value": "$(ProgramFiles)\\Git\\cmd\\git.exe"
     }
   },
   "retentionRules": [
@@ -334,34 +450,20 @@
   "repository": {
     "properties": {
       "labelSources": "0",
-      "reportBuildStatus": "true"
+      "reportBuildStatus": "true",
+      "fetchDepth": "0",
+      "gitLfsSupport": "false"
     },
-    "id": "58fa2458-e392-4373-ba2b-dd3ef0c2d7ce",
+    "id": "0a2b2664-c1be-429c-9b40-8a24dee27a4a",
     "type": "TfsGit",
-    "name": "DotNet-CoreFX-Trusted",
-    "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-CoreFX-Trusted",
+    "name": "DotNet-BuildPipeline",
+    "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-BuildPipeline",
     "defaultBranch": "refs/heads/master",
     "clean": "false",
     "checkoutSubmodules": false
   },
-  "quality": "draft",
+  "quality": "definition",
   "defaultBranch": "refs/heads/master",
-  "draftOf": {
-    "uri": "vstfs:///Build/Definition/1064",
-    "type": "build",
-    "revision": 339,
-    "id": 1064,
-    "name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
-    "url": "https://devdiv.visualstudio.com/DefaultCollection/0bdbc590-a062-4c3f-b0f6-9383f67865ee/_apis/build/Definitions/1064",
-    "project": {
-      "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
-      "name": "DevDiv",
-      "description": "Visual Studio and DevDiv team project for git source code repositories.  Work items will be added for Adams, Dev14 work items are tracked in vstfdevdiv.  ",
-      "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/projects/0bdbc590-a062-4c3f-b0f6-9383f67865ee",
-      "state": "wellFormed",
-      "revision": 418097399
-    }
-  },
   "queue": {
     "pool": {
       "id": 39,
@@ -372,7 +474,7 @@
   },
   "path": "\\",
   "type": "build",
-  "id": 3434,
+  "id": 1064,
   "name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
   "project": {
     "id": "0bdbc590-a062-4c3f-b0f6-9383f67865ee",
