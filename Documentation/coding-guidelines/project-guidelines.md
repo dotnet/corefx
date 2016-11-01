@@ -21,6 +21,7 @@ Below is a list of all the various options we pivot the project builds on.
 - **Platform Runtimes:** NetFx (aka CLR/Desktop), CoreCLR, CoreRT (aka NetNative/AOT/MRT)
 - **Target Frameworks:** NetFx (aka Desktop), netstandard (aka dotnet/Portable), NETCoreApp (aka .NET Core), UAP (aka UWP/Store/netcore50)
 - **Version:** Potentially multiple versions at the same time.
+- **TestTFM:** net46, netcoreapp1.1, netcore50. This is the TFM that will be used to run the tests in. (Used in test projects only)
 
 ##Full Repo build pass
 **Build Parameters:** *Flavor, Architecture*<BR/>
@@ -46,12 +47,12 @@ For each unique configuration needed for a given library project a configuration
 
 ####*Examples*
 Project configurations for a pure IL library project which targets the defaults.
-```
+```xml
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
 ```
 Project configurations with a unique implementation for each OS
-```
+```xml
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU'" />
@@ -62,7 +63,7 @@ Project configurations with a unique implementation for each OS
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
 ```
 Project configurations that are unique for a few different target frameworks and runtimes
-```
+```xml
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap101aot_Debug|AnyCPU'" />
@@ -77,7 +78,7 @@ To drive the Project build pass we have a `.builds` project file that will multi
 ####*Examples*
 
 Project configurations for pure IL library project
-```
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
@@ -88,7 +89,7 @@ Project configurations for pure IL library project
 </Project>
 ```
 Project configurations with a unique implementation for each OS
-```
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
@@ -115,7 +116,7 @@ Project configurations with a unique implementation for each OS
 
 ```
 Project configurations that are unique for a few different target frameworks and runtimes
-```
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
@@ -133,6 +134,27 @@ Project configurations that are unique for a few different target frameworks and
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 </Project>
 ```
+
+###Tests project .builds files
+
+The tests .builds files are very similar to the regular ones, except that they usually tend to pass in one extra property as metadata: `TestTFMs`. The pourpuse for this extra metadata property, is to show which TFMs are supported by the test projects build configuration. When doing a full build, a TestTFM will be specified (if not specified netcoreapp1.1 will be used as default), and the build will look into all of these test .builds files to try and find which configurations support testing in that TestTFM, and then start running the tests for those configurations.
+
+####*Example*
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <ItemGroup>
+    <Project Include="System.Linq.Expressions.Tests.csproj" />
+    <Project Include="System.Linq.Expressions.Tests.csproj">
+      <OSGroup>Windows_NT</OSGroup>
+      <TestTFMs>net463</TestTFMs>
+    </Project>
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
+</Project>
+```
+In the example above, the first configuration does not pass in `TestTFMs`, which means that this configuration is supported only by [the default TestTFM](https://github.com/dotnet/corefx/blob/master/dir.props#L495)
 
 ##Facades
 Facade are unique in that they don't have any code and instead are generated by finding a contract reference assembly with the matching identity and generating type forwards for all the types to where they live in the implementation assemblies (aka facade seeds). There are also partial facades which contain some type forwards as well as some code definitions. All the various build configurations should be contained in the one csproj file per library.
