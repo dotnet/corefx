@@ -74,6 +74,10 @@ namespace System.Dynamic
     {
         System.Dynamic.DynamicMetaObject GetMetaObject(System.Linq.Expressions.Expression parameter);
     }
+    public partial interface IInvokeOnGetBinder
+    {
+        bool InvokeOnGet { get; }
+    }
     public abstract partial class BindingRestrictions
     {
         internal BindingRestrictions() { }
@@ -1162,5 +1166,16 @@ namespace System.Runtime.CompilerServices
         internal CallSite() { }
         public System.Runtime.CompilerServices.CallSiteBinder Binder { get { throw null; } }
         public static System.Runtime.CompilerServices.CallSite Create(System.Type delegateType, System.Runtime.CompilerServices.CallSiteBinder binder) { throw null; }
+    }
+    public static partial class CallSiteHelpers
+    {
+        public static bool IsInternalFrame(System.Reflection.MethodBase mb) { throw null; }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(10636))]
+    public sealed partial class DynamicAttribute : System.Attribute
+    {
+        public DynamicAttribute() { }
+        public DynamicAttribute(bool[] transformFlags) { }
+        public System.Collections.Generic.IList<bool> TransformFlags { get { throw null; } }
     }
 }

@@ -8,6 +8,8 @@
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.CompilerServices.CallSiteBinder))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.CompilerServices.CallSite))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.CompilerServices.CallSite<>))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.CompilerServices.CallSiteHelpers))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.CompilerServices.DynamicAttribute))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Linq.Expressions.DynamicExpression))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Linq.Expressions.DynamicExpressionVisitor))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Dynamic.DynamicMetaObject))]
@@ -29,25 +31,5 @@
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Dynamic.IDynamicMetaObjectProvider))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Dynamic.DynamicObject))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Dynamic.ExpandoObject))]
-
-namespace System.Dynamic
-{
-    public partial interface IInvokeOnGetBinder
-    {
-        bool InvokeOnGet { get; }
-    }
-}
-namespace System.Runtime.CompilerServices
-{
-    public static partial class CallSiteHelpers
-    {
-        public static bool IsInternalFrame(System.Reflection.MethodBase mb) { throw null; }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(10636))]
-    public sealed partial class DynamicAttribute : System.Attribute
-    {
-        public DynamicAttribute() { }
-        public DynamicAttribute(bool[] transformFlags) { }
-        public System.Collections.Generic.IList<bool> TransformFlags { get { throw null; } }
-    }
-}
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Dynamic.IInvokeOnGetBinder))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.CompilerServices.ConditionalWeakTable<,>))]

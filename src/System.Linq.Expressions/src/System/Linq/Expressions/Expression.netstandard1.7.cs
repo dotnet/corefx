@@ -8,6 +8,7 @@ using System.Dynamic.Utils;
 using System.Linq.Expressions.Compiler;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using DelegateHelpers = System.Linq.Expressions.Compiler.DelegateHelpers;
 
 namespace System.Linq.Expressions
 {
@@ -35,11 +36,11 @@ namespace System.Linq.Expressions
         /// </remarks>
         public static DynamicExpression Dynamic(CallSiteBinder binder, Type returnType, IEnumerable<Expression> arguments)
         {
-            ContractUtils.RequiresNotNull(arguments, "arguments");
-            ContractUtils.RequiresNotNull(returnType, "returnType");
+            ContractUtils.RequiresNotNull(arguments, nameof(arguments));
+            ContractUtils.RequiresNotNull(returnType, nameof(returnType));
 
             var args = arguments.ToReadOnly();
-            ContractUtils.RequiresNotEmpty(args, "args");
+            ContractUtils.RequiresNotEmpty(args, nameof(args));
             return MakeDynamic(binder, returnType, args);
         }
 
@@ -61,14 +62,14 @@ namespace System.Linq.Expressions
         /// </remarks>
         public static DynamicExpression Dynamic(CallSiteBinder binder, Type returnType, Expression arg0)
         {
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             ValidateDynamicArgument(arg0, nameof(arg0));
 
-            System.Linq.Expressions.Compiler.DelegateHelpers.TypeInfo info = System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+            DelegateHelpers.TypeInfo info = DelegateHelpers.GetNextTypeInfo(
                 returnType,
-                System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                DelegateHelpers.GetNextTypeInfo(
                     arg0.Type,
-                    System.Linq.Expressions.Compiler.DelegateHelpers.NextTypeInfo(typeof(CallSite))
+                    DelegateHelpers.NextTypeInfo(typeof(CallSite))
                 )
             );
 
@@ -100,17 +101,17 @@ namespace System.Linq.Expressions
         /// </remarks>
         public static DynamicExpression Dynamic(CallSiteBinder binder, Type returnType, Expression arg0, Expression arg1)
         {
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             ValidateDynamicArgument(arg0, nameof(arg0));
             ValidateDynamicArgument(arg1, nameof(arg1));
 
-            System.Linq.Expressions.Compiler.DelegateHelpers.TypeInfo info = System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+            DelegateHelpers.TypeInfo info = DelegateHelpers.GetNextTypeInfo(
                 returnType,
-                System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                DelegateHelpers.GetNextTypeInfo(
                     arg1.Type,
-                    System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                    DelegateHelpers.GetNextTypeInfo(
                         arg0.Type,
-                        System.Linq.Expressions.Compiler.DelegateHelpers.NextTypeInfo(typeof(CallSite))
+                        DelegateHelpers.NextTypeInfo(typeof(CallSite))
                     )
                 )
             );
@@ -144,20 +145,20 @@ namespace System.Linq.Expressions
         /// </remarks>
         public static DynamicExpression Dynamic(CallSiteBinder binder, Type returnType, Expression arg0, Expression arg1, Expression arg2)
         {
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             ValidateDynamicArgument(arg0, nameof(arg0));
             ValidateDynamicArgument(arg1, nameof(arg1));
             ValidateDynamicArgument(arg2, nameof(arg2));
 
-            System.Linq.Expressions.Compiler.DelegateHelpers.TypeInfo info = System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+            DelegateHelpers.TypeInfo info = DelegateHelpers.GetNextTypeInfo(
                 returnType,
-                System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                DelegateHelpers.GetNextTypeInfo(
                     arg2.Type,
-                    System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                    DelegateHelpers.GetNextTypeInfo(
                         arg1.Type,
-                        System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                        DelegateHelpers.GetNextTypeInfo(
                             arg0.Type,
-                            System.Linq.Expressions.Compiler.DelegateHelpers.NextTypeInfo(typeof(CallSite))
+                            DelegateHelpers.NextTypeInfo(typeof(CallSite))
                         )
                     )
                 )
@@ -193,23 +194,23 @@ namespace System.Linq.Expressions
         /// </remarks>
         public static DynamicExpression Dynamic(CallSiteBinder binder, Type returnType, Expression arg0, Expression arg1, Expression arg2, Expression arg3)
         {
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             ValidateDynamicArgument(arg0, nameof(arg0));
             ValidateDynamicArgument(arg1, nameof(arg1));
             ValidateDynamicArgument(arg2, nameof(arg2));
             ValidateDynamicArgument(arg3, nameof(arg3));
 
-            System.Linq.Expressions.Compiler.DelegateHelpers.TypeInfo info = System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+            DelegateHelpers.TypeInfo info = DelegateHelpers.GetNextTypeInfo(
                 returnType,
-                System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                DelegateHelpers.GetNextTypeInfo(
                     arg3.Type,
-                    System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                    DelegateHelpers.GetNextTypeInfo(
                         arg2.Type,
-                        System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                        DelegateHelpers.GetNextTypeInfo(
                             arg1.Type,
-                            System.Linq.Expressions.Compiler.DelegateHelpers.GetNextTypeInfo(
+                            DelegateHelpers.GetNextTypeInfo(
                                 arg0.Type,
-                                System.Linq.Expressions.Compiler.DelegateHelpers.NextTypeInfo(typeof(CallSite))
+                                DelegateHelpers.NextTypeInfo(typeof(CallSite))
                             )
                         )
                     )
@@ -248,7 +249,7 @@ namespace System.Linq.Expressions
 
         private static DynamicExpression MakeDynamic(CallSiteBinder binder, Type returnType, ReadOnlyCollection<Expression> args)
         {
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
 
             for (int i = 0; i < args.Count; i++)
             {
@@ -257,7 +258,7 @@ namespace System.Linq.Expressions
                 ValidateDynamicArgument(arg, nameof(arg));
             }
 
-            Type delegateType = System.Linq.Expressions.Compiler.DelegateHelpers.MakeCallSiteDelegate(args, returnType);
+            Type delegateType = DelegateHelpers.MakeCallSiteDelegate(args, returnType);
 
             // Since we made a delegate with argument types that exactly match,
             // we can skip delegate and argument validation
@@ -287,8 +288,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static DynamicExpression MakeDynamic(Type delegateType, CallSiteBinder binder, IEnumerable<Expression> arguments)
         {
-            ContractUtils.RequiresNotNull(delegateType, "delegateType");
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw Error.TypeMustBeDerivedFromSystemDelegate();
 
             var method = GetValidMethodForDynamic(delegateType);
@@ -314,8 +315,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static DynamicExpression MakeDynamic(Type delegateType, CallSiteBinder binder, Expression arg0)
         {
-            ContractUtils.RequiresNotNull(delegateType, "delegateType");
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw Error.TypeMustBeDerivedFromSystemDelegate();
 
             var method = GetValidMethodForDynamic(delegateType);
@@ -344,8 +345,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static DynamicExpression MakeDynamic(Type delegateType, CallSiteBinder binder, Expression arg0, Expression arg1)
         {
-            ContractUtils.RequiresNotNull(delegateType, "delegateType");
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw Error.TypeMustBeDerivedFromSystemDelegate();
 
             var method = GetValidMethodForDynamic(delegateType);
@@ -377,8 +378,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static DynamicExpression MakeDynamic(Type delegateType, CallSiteBinder binder, Expression arg0, Expression arg1, Expression arg2)
         {
-            ContractUtils.RequiresNotNull(delegateType, "delegateType");
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw Error.TypeMustBeDerivedFromSystemDelegate();
 
             var method = GetValidMethodForDynamic(delegateType);
@@ -413,8 +414,8 @@ namespace System.Linq.Expressions
         /// </returns>
         public static DynamicExpression MakeDynamic(Type delegateType, CallSiteBinder binder, Expression arg0, Expression arg1, Expression arg2, Expression arg3)
         {
-            ContractUtils.RequiresNotNull(delegateType, "delegateType");
-            ContractUtils.RequiresNotNull(binder, "binder");
+            ContractUtils.RequiresNotNull(delegateType, nameof(delegateType));
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw Error.TypeMustBeDerivedFromSystemDelegate();
 
             var method = GetValidMethodForDynamic(delegateType);
