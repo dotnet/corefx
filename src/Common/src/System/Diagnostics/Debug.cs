@@ -2,7 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#define DEBUG // Do not remove this, it is needed to retain calls to these conditional methods in release builds
+// Do not remove this, it is needed to retain calls to these conditional methods in release builds
+#define DEBUG
 
 namespace System.Diagnostics
 {
@@ -11,6 +12,40 @@ namespace System.Diagnostics
     /// </summary>
     static partial class Debug
     {
+        public static bool AutoFlush { get { return true; } set { } }
+        public static int IndentLevel { get; set; }
+        public static int IndentSize { get; set; } = 4;
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Close() { }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Flush() { }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Indent()
+        {
+            IndentLevel++;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Unindent()
+        {
+            IndentLevel--;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Print(string message)
+        {
+            Write(message);
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void Print(string format, params object[] args)
+        {
+            Write(string.Format(format, args));
+        }
+
         private static readonly object s_ForLock = new Object();
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -61,11 +96,17 @@ namespace System.Diagnostics
 
         private static string FormatAssert(string stackTrace, string message, string detailMessage)
         {
-            return SR.DebugAssertBanner + Environment.NewLine
-                   + SR.DebugAssertShortMessage + Environment.NewLine
-                   + message + Environment.NewLine
-                   + SR.DebugAssertLongMessage + Environment.NewLine
-                   + detailMessage + Environment.NewLine
+            var newLine = Environment.NewLine;
+            var indentLevel = IndentLevel;
+            if (indentLevel != 0)
+            {
+                newLine += new string(' ', IndentSize * indentLevel);
+            }
+            return SR.DebugAssertBanner + newLine
+                   + SR.DebugAssertShortMessage + newLine
+                   + message + newLine
+                   + SR.DebugAssertLongMessage + newLine
+                   + detailMessage + newLine
                    + stackTrace;
         }
 
@@ -84,19 +125,31 @@ namespace System.Diagnostics
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Write(string message)
         {
-            s_logger.WriteCore(message ?? string.Empty);
+            if (message == null)
+            {
+                return;
+            }
+            if (NeedIndent)
+            {
+                WriteIndent();
+            }
+            WriteCore(message);
+            if (message.EndsWith(Environment.NewLine))
+            {
+                NeedIndent = true;
+            }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void WriteLine(object value)
         {
-            WriteLine((value == null) ? string.Empty : value.ToString());
+            WriteLine(value?.ToString() ?? string.Empty);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void WriteLine(object value, string category)
         {
-            WriteLine((value == null) ? string.Empty : value.ToString(), category);
+            WriteLine(value?.ToString() ?? string.Empty, category);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -114,14 +167,14 @@ namespace System.Diagnostics
             }
             else
             {
-                WriteLine(category + ":" + ((message == null) ? string.Empty : message));
+                WriteLine(category + ":" + (message ?? string.Empty));
             }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Write(object value)
         {
-            Write((value == null) ? string.Empty : value.ToString());
+            Write(value?.ToString() ?? string.Empty);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -133,14 +186,14 @@ namespace System.Diagnostics
             }
             else
             {
-                Write(category + ":" + ((message == null) ? string.Empty : message));
+                Write(category + ":" + (message ?? string.Empty));
             }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Write(object value, string category)
         {
-            Write((value == null) ? string.Empty : value.ToString(), category);
+            Write(value?.ToString() ?? string.Empty, category);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -213,6 +266,38 @@ namespace System.Diagnostics
             {
                 WriteLine(value, category);
             }
+        }
+
+        private static bool NeedIndent { get; set; }
+
+        private static void WriteIndent()
+        {
+            NeedIndent = false;
+            int indentLevel = IndentLevel;
+            int indentSize = IndentSize;
+            for (int i = 0; i < indentLevel; i++)
+            {
+                switch (indentSize)
+                {
+                    case 2:
+                        WriteCore("  ");
+                        break;
+                    case 4:
+                        WriteCore("    ");
+                        break;
+                    default:
+                        for (int j = 0; j < indentSize; j++)
+                        {
+                            WriteCore(" ");
+                        }
+                        break;
+                }
+            }
+        }
+
+        private static void WriteCore(string message)
+        {
+            s_logger.WriteCore(message);
         }
 
         internal interface IDebugLogger
