@@ -55,11 +55,7 @@ namespace System.Xml.Serialization
             _context = context;
             Schemas.SetCache(Context.Cache, Context.ShareTypes);
 
-            SchemaImporterExtensionsSection section = PrivilegedConfigurationManager.GetSection(ConfigurationStrings.SchemaImporterExtensionsSectionPath) as SchemaImporterExtensionsSection;
-            if (section != null)
-                _extensions = section.SchemaImporterExtensionsInternal;
-            else
-                _extensions = new SchemaImporterExtensionCollection();
+            _extensions = new SchemaImporterExtensionCollection();
         }
 
         internal ImportContext Context

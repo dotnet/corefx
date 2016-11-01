@@ -29,7 +29,6 @@
     </Compile>
     <Compile Include="Misc\HResults.cs" />
     <Compile Include="Misc\InvariantComparer.cs" />
-    <Compile Include="Misc\PrivilegedConfigurationManager.cs" />
     <Compile Include="System\Xml\AsyncHelper.cs" />
     <Compile Include="System\Xml\Base64Decoder.cs" />
     <Compile Include="System\Xml\Base64Encoder.cs" />
@@ -481,11 +480,7 @@
     <Compile Include="System\Xml\Serialization\TypeExtensions.cs" />
     <Compile Include="System\Xml\Serialization\Advanced\SchemaImporterExtension.cs" />
     <Compile Include="System\Xml\Serialization\PrimitiveXmlSerializers.cs" />
-    <Compile Include="System\Xml\Serialization\Configuration\ConfigurationStrings.cs" />
     <Compile Include="System\Xml\Serialization\Configuration\DateTimeSerializationSection.cs" />
-    <Compile Include="System\Xml\Serialization\Configuration\SchemaImporterExtensionElement.cs" />
-    <Compile Include="System\Xml\Serialization\Configuration\SchemaImporterExtensionsSection.cs" />
-    <Compile Include="System\Xml\Serialization\Configuration\XmlSerializerSection.cs" />
     <Compile Include="System\Xml\Resolvers\XmlSystemPathResolver.cs" />
     <Compile Include="System\Xml\Extensions\ExtensionMethods.cs" />
     <Compile Include="System\Xml\Serialization\Globals.cs" />

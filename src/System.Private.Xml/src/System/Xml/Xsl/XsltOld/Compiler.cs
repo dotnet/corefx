@@ -180,7 +180,6 @@ namespace System.Xml.Xsl.XsltOld
         {
             Debug.Assert(input != null);
             Debug.Assert(xmlResolver != null);
-            //            Debug.Assert(evidence    != null); -- default evidence is null now
             Debug.Assert(_input == null && _atoms == null);
             _xmlResolver = xmlResolver;
 
