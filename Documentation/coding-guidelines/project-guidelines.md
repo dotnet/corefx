@@ -137,7 +137,21 @@ Project configurations that are unique for a few different target frameworks and
 
 ###Tests project .builds files
 
-The tests .builds files are very similar to the regular ones, except that they usually tend to pass in one extra property as metadata: `TestTFMs`. The pourpuse for this extra metadata property, is to show which TFMs are supported by the test projects build configuration. When doing a full build, a TestTFM will be specified (if not specified netcoreapp1.1 will be used as default), and the build will look into all of these test .builds files to try and find which configurations support testing in that TestTFM, and then start running the tests for those configurations.
+The tests .builds files are very similar to the regular ones, except that they usually tend to pass in one extra property as metadata: `TestTFMs`. The purpose for this extra metadata property, is to show which TFMs are supported by the test projects build configuration. When doing a full build, a TestTFM will be specified (if not specified netcoreapp1.1 will be used as default), and the build will look into all of these test .builds files to try and find which configurations support testing in that TestTFM, and then start running the tests for those configurations.
+
+####How to know which TestTFMs does a project support
+`TargetGroup` and `TestTFM` are closely  tied together, given that `TargetGroup` selects the TFM (the surface area) that the test assembly will use, and the `TestTFM` is where tests will actually run on. Here is a small cheat sheet of which `TestTFMs` you should add to the builds file given a `TargetGroup`:
+
+TargetGroup | TestTFMs Supported
+----------- | ------------------
+netstandard1.1 | netcoreapp1.0;net45
+netstandard1.2 | netcoreapp1.0;net451
+netstandard1.3 | netcoreapp1.0;net46
+netstandard1.4 | netcoreapp1.0;netcore50;net46
+netcoreapp1.0 | netcoreapp1.0
+netstandard1.6 | netcoreapp1.0;net462;netcore50
+netcoreapp1.1 | netcoreapp1.1
+netstandard1.7 | netcoreapp1.1;uap10.1;net463
 
 ####*Example*
 ```xml
