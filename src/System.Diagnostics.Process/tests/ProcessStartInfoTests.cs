@@ -610,7 +610,6 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Fact]
         public void TestEnvironmentVariablesPropertyUnix(){
-            Console.WriteLine("Runing Unix EnvironmentVariables");
             ProcessStartInfo psi = new ProcessStartInfo();
 
             // Creating a detached ProcessStartInfo will pre-populate the environment
@@ -631,7 +630,7 @@ namespace System.Diagnostics.Tests
 
             //Exception not thrown with invalid key
             Assert.Throws<ArgumentException>(() => { environmentVariables.Add("NewKey2", "NewValue2"); });
-            Assert.Throws<ArgumentException>(() => { environmentVariables.Remove("newkey2"); });
+            Assert.False(environmentVariables.ContainsKey("NewKey"));
 
             environmentVariables.Add("newkey2", "newvalue2");
             Assert.True(environmentVariables.ContainsKey("newkey2"));
@@ -644,6 +643,8 @@ namespace System.Diagnostics.Tests
 
             environmentVariables.Add("NewKey", "newvalue");
             environmentVariables.Add("newkey2", "NewValue2");
+            Assert.False(environmentVariables.ContainsKey("newkey"));
+            Assert.False(environmentVariables.ContainsValue("NewValue"));
 
             string result = null;
             int index = 0;
