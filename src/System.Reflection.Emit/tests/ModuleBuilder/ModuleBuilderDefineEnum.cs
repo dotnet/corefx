@@ -14,7 +14,8 @@ namespace System.Reflection.Emit.Tests
 
         public static IEnumerable<object[]> DefineEnum_TestData()
         {
-            foreach (string name in new string[] { "TestEnum", "testenum", "enum", "\uD800\uDC00", "a\0b\0c" })
+            // [ActiveIssue("https://github.com/dotnet/coreclr/issues/7669")]
+            foreach (string name in new string[] { "TestEnum", "testenum", "enum", "\uD800\uDC00" /*, "a\0b\0c" */})
             {
                 foreach (object[] attributesData in VisibilityAttributes(true))
                 {
