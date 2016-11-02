@@ -67,7 +67,7 @@ namespace System.Diagnostics
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Print(string format, params object[] args)
         {
-            Write(string.Format(format, args));
+            Write(string.Format(null, format, args));
         }
 
         private static readonly object s_ForLock = new Object();
