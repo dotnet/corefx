@@ -120,12 +120,7 @@ namespace System.Diagnostics
 
         private static string FormatAssert(string stackTrace, string message, string detailMessage)
         {
-            var newLine = Environment.NewLine;
-            var indentLevel = IndentLevel;
-            if (indentLevel != 0)
-            {
-                newLine += new string(' ', IndentSize * indentLevel);
-            }
+            var newLine = GetIndentString() + Environment.NewLine;
             return SR.DebugAssertBanner + newLine
                    + SR.DebugAssertShortMessage + newLine
                    + message + newLine
@@ -151,29 +146,31 @@ namespace System.Diagnostics
         {
             if (message == null)
             {
+                WriteCore(string.Empty);
                 return;
             }
-            if (NeedIndent)
+            if (s_needIndent)
             {
-                WriteIndent();
+                message = GetIndentString() + message;
+                s_needIndent = false;
             }
             WriteCore(message);
             if (message.EndsWith(Environment.NewLine))
             {
-                NeedIndent = true;
+                s_needIndent = true;
             }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void WriteLine(object value)
         {
-            WriteLine(value?.ToString() ?? string.Empty);
+            WriteLine(value?.ToString());
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void WriteLine(object value, string category)
         {
-            WriteLine(value?.ToString() ?? string.Empty, category);
+            WriteLine(value?.ToString(), category);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -198,7 +195,7 @@ namespace System.Diagnostics
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Write(object value)
         {
-            Write(value?.ToString() ?? string.Empty);
+            Write(value?.ToString());
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -217,7 +214,7 @@ namespace System.Diagnostics
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Write(object value, string category)
         {
-            Write(value?.ToString() ?? string.Empty, category);
+            Write(value?.ToString(), category);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -292,31 +289,18 @@ namespace System.Diagnostics
             }
         }
 
-        private static bool NeedIndent { get; set; }
+        private static bool s_needIndent;
 
-        private static void WriteIndent()
+        private static string s_indentString;
+
+        private static string GetIndentString()
         {
-            NeedIndent = false;
-            int indentLevel = IndentLevel;
-            int indentSize = IndentSize;
-            for (int i = 0; i < indentLevel; i++)
+            int indentCount = IndentSize * IndentLevel;
+            if (s_indentString?.Length == indentCount)
             {
-                switch (indentSize)
-                {
-                    case 2:
-                        WriteCore("  ");
-                        break;
-                    case 4:
-                        WriteCore("    ");
-                        break;
-                    default:
-                        for (int j = 0; j < indentSize; j++)
-                        {
-                            WriteCore(" ");
-                        }
-                        break;
-                }
+                return s_indentString;
             }
+            return s_indentString = new string(' ', indentCount);
         }
 
         private static void WriteCore(string message)
