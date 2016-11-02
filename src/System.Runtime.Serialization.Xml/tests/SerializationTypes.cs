@@ -3976,3 +3976,11 @@ public class TypeWithSerializableAttributeAndNonSerializedField
         _member3 = value;
     }
 }
+
+[Serializable]
+public class TypeWithOptionalField
+{
+    public int Member1;
+    [OptionalField]
+    public int Member2;
+}

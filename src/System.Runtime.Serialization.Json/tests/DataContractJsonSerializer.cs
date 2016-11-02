@@ -2311,6 +2311,25 @@ public static partial class DataContractJsonSerializerTests
         Assert.Null(actual.Member4);
     }
 
+    [Fact]
+    public static void DCJS_TypeWithOptionalField()
+    {
+        var value = new TypeWithOptionalField();
+        value.Member1 = 11;
+        value.Member2 = 22;
+
+        var actual = SerializeAndDeserialize(value, "{\"Member1\":11,\"Member2\":22}");
+        Assert.NotNull(actual);
+        Assert.Equal(value.Member1, actual.Member1);
+        Assert.Equal(value.Member2, actual.Member2);
+
+        int member1Value = 11;
+        string payloadMissingOptionalField = $"{{\"Member1\":{11}}}";
+        var deserialized = DeserializeString<TypeWithOptionalField>(payloadMissingOptionalField);
+        Assert.Equal(member1Value, deserialized.Member1);
+        Assert.Equal(0, deserialized.Member2);
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractJsonSerializer dcjs;
@@ -2340,6 +2359,28 @@ public static partial class DataContractJsonSerializerTests
 
             ms.Position = 0;
             T deserialized = (T)dcjs.ReadObject(ms);
+
+            return deserialized;
+        }
+    }
+
+    private static T DeserializeString<T>(string stringToDeserialize, bool shouldReportDeserializationExceptions = true, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null)
+    {
+        DataContractJsonSerializer dcs;
+        if (serializerFactory != null)
+        {
+            dcs = serializerFactory();
+        }
+        else
+        {
+            dcs = (settings != null) ? new DataContractJsonSerializer(typeof(T), settings) : new DataContractJsonSerializer(typeof(T));
+        }
+
+        byte[] bytesToDeserialize = Encoding.UTF8.GetBytes(stringToDeserialize);
+        using (MemoryStream ms = new MemoryStream(bytesToDeserialize))
+        {
+            ms.Position = 0;
+            T deserialized = (T)dcs.ReadObject(ms);
 
             return deserialized;
         }
