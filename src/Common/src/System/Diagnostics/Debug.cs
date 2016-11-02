@@ -188,7 +188,7 @@ namespace System.Diagnostics
             }
             else
             {
-                WriteLine(category + ":" + (message ?? string.Empty));
+                WriteLine(category + ":" + message);
             }
         }
 
@@ -207,7 +207,7 @@ namespace System.Diagnostics
             }
             else
             {
-                Write(category + ":" + (message ?? string.Empty));
+                Write(category + ":" + message);
             }
         }
 
