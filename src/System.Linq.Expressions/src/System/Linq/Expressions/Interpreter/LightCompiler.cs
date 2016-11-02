@@ -203,7 +203,7 @@ namespace System.Linq.Expressions.Interpreter
     {
     }
 
-    internal class DebugInfo
+    internal sealed class DebugInfo
     {
         public int StartLine, EndLine;
         public int Index;
@@ -339,7 +339,6 @@ namespace System.Linq.Expressions.Interpreter
             DebugInfo[] debugInfos = _debugInfos.ToArray();
             return new Interpreter(lambdaName, _locals, GetBranchMapping(), _instructions.ToArray(), debugInfos);
         }
-
 
         private void CompileConstantExpression(Expression expr)
         {
@@ -723,7 +722,7 @@ namespace System.Linq.Expressions.Interpreter
 
         private void CompileVariableAssignment(BinaryExpression node, bool asVoid)
         {
-            this.Compile(node.Right);
+            Compile(node.Right);
 
             var target = (ParameterExpression)node.Left;
             CompileSetVariable(target, asVoid);
@@ -827,12 +826,12 @@ namespace System.Linq.Expressions.Interpreter
                             if (node.NodeType == ExpressionType.Equal)
                             {
                                 // right null, left not, false
-                                _instructions.EmitLoad(ScriptingRuntimeHelpers.False, typeof(bool));
+                                _instructions.EmitLoad(ScriptingRuntimeHelpers.Boolean_False, typeof(bool));
                             }
                             else
                             {
                                 // right null, left not, true
-                                _instructions.EmitLoad(ScriptingRuntimeHelpers.True, typeof(bool));
+                                _instructions.EmitLoad(ScriptingRuntimeHelpers.Boolean_True, typeof(bool));
                             }
                             _instructions.EmitBranch(end, hasResult: false, hasValue: true);
 
@@ -877,7 +876,7 @@ namespace System.Linq.Expressions.Interpreter
                                     {
                                         goto default;
                                     }
-                                    _instructions.EmitLoad(ScriptingRuntimeHelpers.False, typeof(object));
+                                    _instructions.EmitLoad(ScriptingRuntimeHelpers.Boolean_False, typeof(object));
                                     break;
                                 default:
                                     _instructions.EmitLoad(null, typeof(object));
@@ -1354,7 +1353,7 @@ namespace System.Linq.Expressions.Interpreter
                 _instructions.EmitBranchTrue(returnFalse);
             }
 
-            // compute right                
+            // compute right
             _instructions.MarkLabel(computeRight);
             LocalDefinition rightTemp = _locals.DefineLocal(Expression.Parameter(node.Right.Type), _instructions.Count);
             Compile(node.Right);
@@ -1382,13 +1381,13 @@ namespace System.Linq.Expressions.Interpreter
             _instructions.EmitBranchTrue(returnNull);
 
             // return true
-            _instructions.EmitLoad(andAlso ? ScriptingRuntimeHelpers.True : ScriptingRuntimeHelpers.False, typeof(object));
+            _instructions.EmitLoad(andAlso ? ScriptingRuntimeHelpers.Boolean_True : ScriptingRuntimeHelpers.Boolean_False, typeof(object));
             _instructions.EmitStoreLocal(result.Index);
             _instructions.EmitBranch(returnValue);
 
             // return false
             _instructions.MarkLabel(returnFalse);
-            _instructions.EmitLoad(andAlso ? ScriptingRuntimeHelpers.False : ScriptingRuntimeHelpers.True, typeof(object));
+            _instructions.EmitLoad(andAlso ? ScriptingRuntimeHelpers.Boolean_False : ScriptingRuntimeHelpers.Boolean_True, typeof(object));
             _instructions.EmitStoreLocal(result.Index);
             _instructions.EmitBranch(returnValue);
 
@@ -1459,8 +1458,6 @@ namespace System.Linq.Expressions.Interpreter
             }
         }
 
-        #region Loops
-
         private void CompileLoopExpression(Expression expr)
         {
             var node = (LoopExpression)expr;
@@ -1481,8 +1478,6 @@ namespace System.Linq.Expressions.Interpreter
 
             PopLabelBlock(LabelScopeKind.Statement);
         }
-
-        #endregion
 
         private void CompileSwitchExpression(Expression expr)
         {
@@ -1510,14 +1505,14 @@ namespace System.Linq.Expressions.Interpreter
                     return;
                 }
 
-                TypeCode switchType = System.Dynamic.Utils.TypeExtensions.GetTypeCode(node.SwitchValue.Type);
+                TypeCode switchType = node.SwitchValue.Type.GetTypeCode();
 
                 if (node.Comparison == null)
                 {
                     switch (switchType)
                     {
                         case TypeCode.Int32:
-                            CompileIntSwitchExpression<System.Int32>(node);
+                            CompileIntSwitchExpression<int>(node);
                             return;
 
                         // the following cases are uncommon,
@@ -1534,7 +1529,7 @@ namespace System.Linq.Expressions.Interpreter
                         case TypeCode.UInt32:
                         case TypeCode.UInt64:
                         case TypeCode.Int64:
-                            CompileIntSwitchExpression<System.Object>(node);
+                            CompileIntSwitchExpression<object>(node);
                             return;
                     }
                 }
@@ -1772,7 +1767,7 @@ namespace System.Linq.Expressions.Interpreter
             return result;
         }
 
-        internal LabelInfo DefineLabel(LabelTarget node)
+        private LabelInfo DefineLabel(LabelTarget node)
         {
             if (node == null)
             {
@@ -1889,7 +1884,6 @@ namespace System.Linq.Expressions.Interpreter
             }
             return newLabelMapping;
         }
-
 
         private void CheckRethrow()
         {
@@ -2185,8 +2179,8 @@ namespace System.Linq.Expressions.Interpreter
 
         private ByRefUpdater CompileArrayIndexAddress(Expression array, Expression index, int argumentIndex)
         {
-            LocalDefinition left = _locals.DefineLocal(Expression.Parameter(array.Type, "array"), _instructions.Count);
-            LocalDefinition right = _locals.DefineLocal(Expression.Parameter(index.Type, "index"), _instructions.Count);
+            LocalDefinition left = _locals.DefineLocal(Expression.Parameter(array.Type, nameof(array)), _instructions.Count);
+            LocalDefinition right = _locals.DefineLocal(Expression.Parameter(index.Type, nameof(index)), _instructions.Count);
             Compile(array);
             _instructions.EmitStoreLocal(left.Index);
             Compile(index);
@@ -2227,11 +2221,8 @@ namespace System.Linq.Expressions.Interpreter
         }
 
         /// <summary>
-        /// Emits the address of the specified node.  
+        /// Emits the address of the specified node.
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
         private ByRefUpdater CompileAddress(Expression node, int index)
         {
             if (index != -1 || ShouldWritebackNode(node))
@@ -2549,7 +2540,6 @@ namespace System.Linq.Expressions.Interpreter
             _instructions.EmitNewRuntimeVariables(node.Variables.Count);
         }
 
-
         private void CompileLambdaExpression(Expression expr)
         {
             var node = (LambdaExpression)expr;
@@ -2754,7 +2744,7 @@ namespace System.Linq.Expressions.Interpreter
             _instructions.Emit(new QuoteInstruction(unary.Operand, mapping.Count > 0 ? mapping : null));
         }
 
-        private class QuoteVisitor : ExpressionVisitor
+        private sealed class QuoteVisitor : ExpressionVisitor
         {
             private readonly Dictionary<ParameterExpression, int> _definedParameters = new Dictionary<ParameterExpression, int>();
             public readonly HashSet<ParameterExpression> _hoistedParameters = new HashSet<ParameterExpression>();
@@ -3097,7 +3087,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    internal class ParameterByRefUpdater : ByRefUpdater
+    internal sealed class ParameterByRefUpdater : ByRefUpdater
     {
         private readonly LocalVariable _parameter;
 
@@ -3126,7 +3116,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    internal class ArrayByRefUpdater : ByRefUpdater
+    internal sealed class ArrayByRefUpdater : ByRefUpdater
     {
         private readonly LocalDefinition _array, _index;
 
@@ -3150,7 +3140,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    internal class FieldByRefUpdater : ByRefUpdater
+    internal sealed class FieldByRefUpdater : ByRefUpdater
     {
         private readonly LocalDefinition? _object;
         private readonly FieldInfo _field;
@@ -3177,7 +3167,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    internal class PropertyByRefUpdater : ByRefUpdater
+    internal sealed class PropertyByRefUpdater : ByRefUpdater
     {
         private readonly LocalDefinition? _object;
         private readonly PropertyInfo _property;
@@ -3213,7 +3203,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    internal class IndexMethodByRefUpdater : ByRefUpdater
+    internal sealed class IndexMethodByRefUpdater : ByRefUpdater
     {
         private readonly MethodInfo _indexer;
         private readonly LocalDefinition? _obj;
