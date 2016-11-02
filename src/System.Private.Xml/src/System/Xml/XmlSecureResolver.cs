@@ -6,7 +6,6 @@ namespace System.Xml
 {
     using System.Net;
     using System.Security;
-    using System.Security.Policy;
     using System.Runtime.Versioning;
 
     public partial class XmlSecureResolver : XmlResolver
@@ -48,29 +47,5 @@ namespace System.Xml
             return new Evidence();
         }
 #endif
-
-        [Serializable]
-        private class UncDirectory
-        {
-            private string _uncDir;
-
-            public UncDirectory(string uncDirectory)
-            {
-                _uncDir = uncDirectory;
-            }
-
-            private SecurityElement ToXml()
-            {
-                SecurityElement root = new SecurityElement("System.Xml.XmlSecureResolver");
-                root.AddAttribute("version", "1");
-                root.AddChild(new SecurityElement("UncDirectory", _uncDir));
-                return root;
-            }
-
-            public override string ToString()
-            {
-                return ToXml().ToString();
-            }
-        }
     }
 }

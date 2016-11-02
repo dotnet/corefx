@@ -400,7 +400,6 @@
     <Compile Include="System\Xml\Schema\Inference\Infer.cs" />
     <Compile Include="System\Xml\Schema\Inference\XmlSchemaInferenceException.cs" />
     <Compile Include="System\Xml\Serialization\AppSettings.cs" />
-    <Compile Include="System\Xml\Serialization\CodeExporter.cs" />
     <Compile Include="System\Xml\Serialization\CodeGenerationoptions.cs" />
     <Compile Include="System\Xml\Serialization\CodeGenerator.cs" />
     <Compile Include="System\Xml\Serialization\CodeIdentifier.cs" />
@@ -421,14 +420,11 @@
     <Compile Include="System\Xml\Serialization\SoapAttributeAttribute.cs" />
     <Compile Include="System\Xml\Serialization\SoapAttributeOverrides.cs" />
     <Compile Include="System\Xml\Serialization\SoapAttributes.cs" />
-    <Compile Include="System\Xml\Serialization\SoapCodeExporter.cs" />
     <Compile Include="System\Xml\Serialization\SoapElementAttribute.cs" />
     <Compile Include="System\Xml\Serialization\SoapEnumAttribute.cs" />
     <Compile Include="System\Xml\Serialization\SoapIgnoreAttribute.cs" />
     <Compile Include="System\Xml\Serialization\SoapIncludeAttribute.cs" />
     <Compile Include="System\Xml\Serialization\SoapReflectionImporter.cs" />
-    <Compile Include="System\Xml\Serialization\SoapSchemaExporter.cs" />
-    <Compile Include="System\Xml\Serialization\SoapSchemaImporter.cs" />
     <Compile Include="System\Xml\Serialization\SoapSchemamember.cs" />
     <Compile Include="System\Xml\Serialization\SoapTypeAttribute.cs" />
     <Compile Include="System\Xml\Serialization\SourceInfo.cs" />
@@ -443,7 +439,6 @@
     <Compile Include="System\Xml\Serialization\XmlAttributeOverrides.cs" />
     <Compile Include="System\Xml\Serialization\XmlAttributes.cs" />
     <Compile Include="System\Xml\Serialization\XmlChoiceIdentifierAttribute.cs" />
-    <Compile Include="System\Xml\Serialization\XmlCodeExporter.cs" />
     <Compile Include="System\Xml\Serialization\XmlCountingReader.cs" />
     <Compile Include="System\Xml\Serialization\Xmlcustomformatter.cs" />
     <Compile Include="System\Xml\Serialization\XmlElementAttribute.cs" />
@@ -478,7 +473,6 @@
     <Compile Include="System\Xml\Serialization\XmlTypeMapping.cs" />
     <Compile Include="System\Xml\Serialization\_Events.cs" />
     <Compile Include="System\Xml\Serialization\TypeExtensions.cs" />
-    <Compile Include="System\Xml\Serialization\Advanced\SchemaImporterExtension.cs" />
     <Compile Include="System\Xml\Serialization\PrimitiveXmlSerializers.cs" />
     <Compile Include="System\Xml\Serialization\Configuration\DateTimeSerializationSection.cs" />
     <Compile Include="System\Xml\Resolvers\XmlSystemPathResolver.cs" />
@@ -725,6 +719,11 @@
     <Compile Include="System\Xml\Xsl\Xslt\XslVisitor.cs" />
     <Compile Include="$(CommonPath)\System\LocalAppContext.cs" />
     <Compile Include="System\Xml\Core\LocalAppContextSwitches.cs" />
+    <Compile Include="System\CodeDom\CodeDomProvider.cs" />
+    <Compile Include="System\CodeDom\CodeGenerator.cs" />
+    <Compile Include="System\CodeDom\CompilerError.cs" />
+    <Compile Include="System\CodeDom\CompilerResults.cs" />
+    <Compile Include="System\CodeDom\TempFileCollection.cs" />
     <Compile Include="Misc\ThisAssembly.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)'=='true'">
