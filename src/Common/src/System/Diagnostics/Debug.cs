@@ -12,8 +12,11 @@ namespace System.Diagnostics
     /// </summary>
     static partial class Debug
     {
+        private static object s_lock = new object();
+
         public static bool AutoFlush { get { return true; } set { } }
 
+        [ThreadStatic]
         private static int s_indentLevel;
         public static int IndentLevel
         {
@@ -144,20 +147,23 @@ namespace System.Diagnostics
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Write(string message)
         {
-            if (message == null)
+            lock (s_lock)
             {
-                WriteCore(string.Empty);
-                return;
-            }
-            if (s_needIndent)
-            {
-                message = GetIndentString() + message;
-                s_needIndent = false;
-            }
-            WriteCore(message);
-            if (message.EndsWith(Environment.NewLine))
-            {
-                s_needIndent = true;
+                if (message == null)
+                {
+                    WriteCore(string.Empty);
+                    return;
+                }
+                if (s_needIndent)
+                {
+                    message = GetIndentString() + message;
+                    s_needIndent = false;
+                }
+                WriteCore(message);
+                if (message.EndsWith(Environment.NewLine))
+                {
+                    s_needIndent = true;
+                }
             }
         }
 
