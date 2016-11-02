@@ -1148,6 +1148,12 @@ namespace System.Runtime.Serialization
                         FieldInfo field = member as FieldInfo;
 
                         bool canSerializeMember;
+
+                        // Previously System.SerializableAttribute was not available in NetCore, so we had
+                        // a list of known [Serializable] types for type in the framework. Although now SerializableAttribute
+                        // is available in NetCore, some framework types still do not have [Serializable] 
+                        // yet, e.g. ReadOnlyDictionary<TKey, TValue>. So, we still need to maintain the known serializable
+                        // type list.
                         if (IsKnownSerializableType(type))
                         {
                             canSerializeMember = CanSerializeMember(field);
