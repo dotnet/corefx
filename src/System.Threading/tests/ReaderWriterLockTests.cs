@@ -12,7 +12,7 @@ namespace System.Threading.Tests
         private const int UnexpectedTimeoutMilliseconds = ThreadTestHelpers.UnexpectedTimeoutMilliseconds;
 
         private const int TimeoutExceptionHResult = unchecked((int)0x800705B4); // ERROR_TIMEOUT
-        private const int NotOwnerExceptionHResult = unchecked((int)0x80070120); // ERROR_NOT_OWNER
+        private const int NotOwnerExceptionHResult = 0x120; // this is not an HResult, see ReaderWriterLock.GetNotOwnerException
         private const int InvalidLockCookieExceptionHResult = unchecked((int)0x80070057); // E_INVALIDARG
 
         [Fact]
@@ -364,12 +364,12 @@ namespace System.Threading.Tests
             trwl.DowngradeFromWriterLock(tlc);
             trwl.ReleaseReaderLock();
 
-            // Can take a recursive write lock in multiple ways
+            // Can acquire and release a recursive write lock in multiple ways
             trwl.AcquireWriterLock();
             trwl.AcquireWriterLock();
             trwl.ReleaseWriterLock();
             trwl.AcquireReaderLock();
-            trwl.ReleaseWriterLock();
+            trwl.ReleaseReaderLock();
             trwl.UpgradeToWriterLock();
             trwl.ReleaseWriterLock();
             trwl.ReleaseWriterLock();
@@ -773,6 +773,7 @@ namespace System.Threading.Tests
             public void Dispose()
             {
                 GC.SuppressFinalize(this);
+                Assert.Equal(0, ThreadReaderLevel);
                 Assert.False(RemoveFromThreadReaderLevels());
                 Assert.Equal(InvalidThreadID, _writerThreadID);
                 Assert.Equal(0, _writerLevel);
@@ -983,8 +984,21 @@ namespace System.Threading.Tests
                 {
                     if (ex == null)
                     {
-                        Assert.NotEqual(0, ThreadReaderLevel);
-                        --ThreadReaderLevel;
+                        if (_writerThreadID == Environment.CurrentManagedThreadId)
+                        {
+                            // Write lock is already held, release a write lock instead
+                            Assert.NotEqual(0, _writerLevel);
+                            --_writerLevel;
+                            if (_writerLevel == 0)
+                            {
+                                _writerThreadID = InvalidThreadID;
+                            }
+                        }
+                        else
+                        {
+                            Assert.NotEqual(0, ThreadReaderLevel);
+                            --ThreadReaderLevel;
+                        }
                     }
 
                     if (_pendingStateChanges == 0)

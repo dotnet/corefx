@@ -4,6 +4,10 @@
 
 namespace System.Threading
 {
+    /// <summary>
+    /// Stores the lock state of a <see cref="ReaderWriterLock"/> before its lock state is changed, such that the lock state may
+    /// later be restored.
+    /// </summary>
     public struct LockCookie
     {
         internal LockCookieFlags _flags;
