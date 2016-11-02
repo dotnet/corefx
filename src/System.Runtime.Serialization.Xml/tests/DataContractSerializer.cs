@@ -2748,6 +2748,26 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.StringValue, actual.StringValue);
     }
 
+    [Fact]
+    public static void DCS_TypeWithNonSerializedField()
+    {
+        var value = new TypeWithSerializableAttributeAndNonSerializedField();
+        value.Member1 = 11;
+        value.Member2 = "22";
+        value.SetMember3(33);
+        value.Member4 = "44";
+
+        var actual = SerializeAndDeserialize(
+            value, 
+            "<TypeWithSerializableAttributeAndNonSerializedField xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><Member1>11</Member1><_member2>22</_member2><_member3>33</_member3></TypeWithSerializableAttributeAndNonSerializedField>",
+            skipStringCompare: false);
+        Assert.NotNull(actual);
+        Assert.Equal(value.Member1, actual.Member1);
+        Assert.Equal(value.Member2, actual.Member2);
+        Assert.Equal(value.Member3, actual.Member3);
+        Assert.Null(actual.Member4);
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractSerializer dcs;

@@ -1145,12 +1145,19 @@ namespace System.Runtime.Serialization
                     }
                     else
                     {
-                        // [Serializible] and [NonSerialized] are deprecated on FxCore
-                        // Try to mimic the behavior by allowing certain known types to go through
-                        // POD types are fine also
-
                         FieldInfo field = member as FieldInfo;
-                        if (CanSerializeMember(field))
+
+                        bool canSerializeMember;
+                        if (IsKnownSerializableType(type))
+                        {
+                            canSerializeMember = CanSerializeMember(field);
+                        }
+                        else
+                        {
+                            canSerializeMember = field != null && !field.IsNotSerialized;
+                        }
+
+                        if (canSerializeMember)
                         {
                             DataMember memberContract = new DataMember(member);
 

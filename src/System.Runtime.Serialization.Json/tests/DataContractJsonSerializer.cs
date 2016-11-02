@@ -2294,6 +2294,23 @@ public static partial class DataContractJsonSerializerTests
         }
     }
 
+    [Fact]
+    public static void DCJS_TypeWithNonSerializedField()
+    {
+        var value = new TypeWithSerializableAttributeAndNonSerializedField();
+        value.Member1 = 11;
+        value.Member2 = "22";
+        value.SetMember3(33);
+        value.Member4 = "44";
+
+        var actual = SerializeAndDeserialize(value, "{\"Member1\":11,\"_member2\":\"22\",\"_member3\":33}");
+        Assert.NotNull(actual);
+        Assert.Equal(value.Member1, actual.Member1);
+        Assert.Equal(value.Member2, actual.Member2);
+        Assert.Equal(value.Member3, actual.Member3);
+        Assert.Null(actual.Member4);
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractJsonSerializer dcjs;
