@@ -50,23 +50,15 @@ namespace System.Collections.Generic.Tests
         [MemberData(nameof(EnumerableData))]
         public void AddRange(IEnumerable<T> seed)
         {
-            var builder1 = new LargeArrayBuilder<T>(initialize: true);
-            var builder2 = new LargeArrayBuilder<T>(initialize: true);
+            var builder = new LargeArrayBuilder<T>(initialize: true);
 
             // Call AddRange multiple times and verify contents w/ each iteration.
             for (int i = 1; i <= 10; i++)
             {
-                builder1.AddRange(seed);
-
-                // LargeArrayBuilder.AddRange features an overload that accepts an IEnumerator.
-                using (IEnumerator<T> enumerator = seed.GetEnumerator())
-                {
-                    builder2.AddRange(enumerator);
-                }
+                builder.AddRange(seed);
 
                 IEnumerable<T> expected = Enumerable.Repeat(seed, i).SelectMany(s => s);
-                Assert.Equal(expected, builder1.ToArray());
-                Assert.Equal(expected, builder2.ToArray());
+                Assert.Equal(expected, builder.ToArray());
             }
         }
 

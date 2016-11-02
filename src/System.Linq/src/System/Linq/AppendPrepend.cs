@@ -293,6 +293,11 @@ namespace System.Linq
 
             public IEnumerator<TSource> GetEnumerator()
             {
+                return ToArray().AsEnumerable().GetEnumerator();
+            }
+
+            public TSource[] ToArray()
+            {
                 TSource[] array = new TSource[Count];
                 int index = Count;
                 for (SingleLinkedNode<TSource> node = this; node != null; node = node.Linked)
@@ -302,7 +307,7 @@ namespace System.Linq
                 }
 
                 Debug.Assert(index == 0);
-                return ((IEnumerable<TSource>)array).GetEnumerator();
+                return array;
             }
         }
 
@@ -388,7 +393,10 @@ namespace System.Linq
 
                 if (_appended != null)
                 {
-                    builder.AddRange(_appended.GetEnumerator());
+                    foreach (TSource item in _appended.ToArray())
+                    {
+                        builder.Add(item);
+                    }
                 }
 
                 return builder.ToArray();

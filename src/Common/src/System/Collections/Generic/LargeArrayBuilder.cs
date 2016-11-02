@@ -69,39 +69,30 @@ namespace System.Collections.Generic
 
             using (IEnumerator<T> enumerator = items.GetEnumerator())
             {
-                AddRange(enumerator);
-            }
-        }
+                T[] destination = _current;
+                int index = _index;
 
-        /// <summary>
-        /// Adds a range of items to this builder.
-        /// </summary>
-        /// <param name="enumerator">The enumerator to add.</param>
-        public void AddRange(IEnumerator<T> enumerator)
-        {
-            T[] destination = _current;
-            int index = _index;
+                // Continuously read in items from the enumerator, updating _count
+                // and _index when we run out of space.
 
-            // Continuously read in items from the enumerator, updating _count
-            // and _index when we run out of space.
-
-            while (enumerator.MoveNext())
-            {
-                if (index == destination.Length)
+                while (enumerator.MoveNext())
                 {
-                    // No more space in this buffer. Resize.
-                    _count += index - _index;
-                    _index = index;
-                    destination = AllocateBuffer();
-                    index = _index; // May have been reset to 0
+                    if (index == destination.Length)
+                    {
+                        // No more space in this buffer. Resize.
+                        _count += index - _index;
+                        _index = index;
+                        destination = AllocateBuffer();
+                        index = _index; // May have been reset to 0
+                    }
+
+                    destination[index++] = enumerator.Current;
                 }
 
-                destination[index++] = enumerator.Current;
+                // Final update to _count and _index.
+                _count += index - _index;
+                _index = index;
             }
-
-            // Final update to _count and _index.
-            _count += index - _index;
-            _index = index;
         }
 
         /// <summary>
