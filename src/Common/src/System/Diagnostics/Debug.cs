@@ -13,8 +13,32 @@ namespace System.Diagnostics
     static partial class Debug
     {
         public static bool AutoFlush { get { return true; } set { } }
-        public static int IndentLevel { get; set; }
-        public static int IndentSize { get; set; } = 4;
+
+        private static int s_indentLevel;
+        public static int IndentLevel
+        {
+            get
+            {
+                return s_indentLevel;
+            }
+            set
+            {
+                s_indentLevel = value < 0 ? 0 : value;
+            }
+        }
+
+        private static int s_indentSize = 4;
+        public static int IndentSize
+        {
+            get
+            {
+                return s_indentSize;
+            }
+            set
+            {
+                s_indentSize = value < 0 ? 0 : value;
+            }
+        }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Close() { }
