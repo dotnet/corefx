@@ -453,18 +453,18 @@ namespace System.Threading.Tests
                 tlc = trwl.UpgradeToWriterLock();
                 trwl.AcquireWriterLock();
                 trwl.DowngradeFromWriterLock(tlc);
-                Assert.False(trwl.IsReaderLockHeld);
-                Assert.False(trwl.IsWriterLockHeld);
+                trwl.VerifyIsReaderLockHeld(false);
+                trwl.VerifyIsWriterLockHeld(false);
 
                 // Lock cookie obtained when write locks are held
                 trwl.AcquireWriterLock();
                 tlc = trwl.UpgradeToWriterLock();
                 trwl.AcquireWriterLock();
                 trwl.DowngradeFromWriterLock(tlc);
-                Assert.False(trwl.IsReaderLockHeld);
-                Assert.True(trwl.IsWriterLockHeld);
+                trwl.VerifyIsReaderLockHeld(false);
+                trwl.VerifyIsWriterLockHeld(true);
                 trwl.ReleaseWriterLock();
-                Assert.False(trwl.IsWriterLockHeld);
+                trwl.VerifyIsWriterLockHeld(false);
             }
 
             // Cannot downgrade to a recursive write lock level greater than or equal to the current
@@ -476,8 +476,8 @@ namespace System.Threading.Tests
             trwl.ReleaseWriterLock();
             trwl.DowngradeFromWriterLock(tlc, InvalidLockCookieExceptionHResult);
             trwl.ReleaseWriterLock();
-            Assert.False(trwl.IsReaderLockHeld);
-            Assert.False(trwl.IsWriterLockHeld);
+            trwl.VerifyIsReaderLockHeld(false);
+            trwl.VerifyIsWriterLockHeld(false);
 
             trwl.Dispose();
         }
@@ -610,8 +610,8 @@ namespace System.Threading.Tests
                     waitingUpgraderReady.Set();
                     continueWaitingUpgrader.CheckedWait();
                     trwl.ReleaseWriterLock();
-                    Assert.False(trwl.IsReaderLockHeld);
-                    Assert.False(trwl.IsWriterLockHeld);
+                    trwl.VerifyIsReaderLockHeld(false);
+                    trwl.VerifyIsWriterLockHeld(false);
                 });
             waitingUpgrader.IsBackground = true;
             waitingUpgrader.Start();
@@ -834,38 +834,49 @@ namespace System.Threading.Tests
                 }
             }
 
-            public bool IsReaderLockHeld
+            public void VerifyIsReaderLockHeld(bool expectedToBeHeld)
             {
-                get
+                lock (_rwl)
                 {
-                    bool rwlIsReaderLockHeld;
-                    lock (_rwl)
+                    if (_pendingStateChanges != 0)
                     {
-                        Assert.Equal(0, _pendingStateChanges);
-                        rwlIsReaderLockHeld = _rwl.IsReaderLockHeld;
+                        return;
                     }
 
-                    bool isReaderLockHeld = ThreadReaderLevel != 0;
-                    Assert.Equal(isReaderLockHeld, rwlIsReaderLockHeld);
-                    return isReaderLockHeld;
+                    if (expectedToBeHeld)
+                    {
+                        Assert.NotEqual(0, ThreadReaderLevel);
+                        Assert.True(_rwl.IsReaderLockHeld);
+                    }
+                    else
+                    {
+                        Assert.Equal(0, ThreadReaderLevel);
+                        Assert.False(_rwl.IsReaderLockHeld);
+                    }
                 }
             }
 
-            public bool IsWriterLockHeld
+            public void VerifyIsWriterLockHeld(bool expectedToBeHeld)
             {
-                get
+                lock (_rwl)
                 {
-                    bool isWriteLockHeld, rwlIsWriteLockHeld;
-                    lock (_rwl)
+                    if (_pendingStateChanges != 0)
                     {
-                        Assert.Equal(0, _pendingStateChanges);
-                        isWriteLockHeld = _writerThreadID == Environment.CurrentManagedThreadId;
-                        Assert.True(!isWriteLockHeld || _writerLevel != 0);
-                        rwlIsWriteLockHeld = _rwl.IsWriterLockHeld;
+                        return;
                     }
 
-                    Assert.Equal(isWriteLockHeld, rwlIsWriteLockHeld);
-                    return isWriteLockHeld;
+                    if (expectedToBeHeld)
+                    {
+                        Assert.Equal(Environment.CurrentManagedThreadId, _writerThreadID);
+                        Assert.NotEqual(0, _writerLevel);
+                        Assert.True(_rwl.IsWriterLockHeld);
+                    }
+                    else
+                    {
+                        Assert.NotEqual(Environment.CurrentManagedThreadId, _writerThreadID);
+                        Assert.Equal(0, _writerLevel);
+                        Assert.False(_rwl.IsWriterLockHeld);
+                    }
                 }
             }
 

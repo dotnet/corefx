@@ -30,9 +30,15 @@ namespace System.Threading
         private static readonly int DefaultSpinCount = Environment.ProcessorCount != 1 ? 500 : 0;
 
         /// <summary>
-        /// This is not an HResult, <see cref="GetNotOwnerException"/>
+        /// This is not an HResult, see <see cref="GetNotOwnerException"/>
         /// </summary>
         private const int IncorrectButCompatibleNotOwnerExceptionHResult = 0x120;
+
+        /// <summary>
+        /// The original code used STATUS_NO_MEMORY instead of E_OUTOFMEMORY, keeping that for compatibility. See
+        /// <see cref="GetOutOfMemoryException(Exception)"/>.
+        /// </summary>
+        private const int CompatibleOutOfMemoryExceptionHResult = unchecked((int)0xC0000017); // STATUS_NO_MEMORY
 
         private static long s_mostRecentLockID;
 
@@ -492,7 +498,7 @@ namespace System.Threading
                         {
                             writerEvent = GetOrCreateWriterEvent();
                         }
-                        catch (SystemException)
+                        catch (ReaderWriterLockApplicationException) // out of memory
                         {
                             Helpers.Sleep(100);
                             currentState = _state;
@@ -508,7 +514,7 @@ namespace System.Threading
                         {
                             readerEvent = GetOrCreateReaderEvent();
                         }
-                        catch (OutOfMemoryException)
+                        catch (ReaderWriterLockApplicationException) // out of memory
                         {
                             Helpers.Sleep(100);
                             currentState = _state;
@@ -594,7 +600,7 @@ namespace System.Threading
                     {
                         readerEvent = GetOrCreateReaderEvent();
                     }
-                    catch (OutOfMemoryException)
+                    catch (ReaderWriterLockApplicationException) // out of memory
                     {
                         Helpers.Sleep(100);
                         currentState = _state;
@@ -610,7 +616,7 @@ namespace System.Threading
                     {
                         writerEvent = GetOrCreateWriterEvent();
                     }
-                    catch (SystemException)
+                    catch (ReaderWriterLockApplicationException) // out of memory
                     {
                         Helpers.Sleep(100);
                         currentState = _state;
@@ -759,12 +765,6 @@ namespace System.Threading
             // Check if the thread was a reader
             if ((flags & LockCookieFlags.OwnedReader) != 0)
             {
-                // REVIEW: Original code:
-                //   Debug.Assert(_writerLevel == 1);
-                // I believe this assert is incorrect. Multiple recursive write locks could have been taken before downgrading,
-                // and the code below the assert release all write locks as expected.
-                //
-                // Several of the new tests fail with the original assertion. Fixed the assert under this assumption.
                 Debug.Assert(_writerLevel > 0);
 
                 ThreadLocalLockEntry threadLocalLockEntry = ThreadLocalLockEntry.GetOrCreateCurrent(_lockID);
@@ -785,7 +785,7 @@ namespace System.Threading
                         {
                             readerEvent = GetOrCreateReaderEvent();
                         }
-                        catch (OutOfMemoryException)
+                        catch (ReaderWriterLockApplicationException) // out of memory
                         {
                             Helpers.Sleep(100);
                             currentState = _state;
@@ -1004,7 +1004,6 @@ namespace System.Threading
             return true;
         }
 
-        /// <exception cref="OutOfMemoryException">Failed to allocate the event object</exception>
         private ManualResetEventSlim GetOrCreateReaderEvent()
         {
             ManualResetEventSlim currentEvent = _readerEvent;
@@ -1013,7 +1012,15 @@ namespace System.Threading
                 return currentEvent;
             }
 
-            currentEvent = new ManualResetEventSlim(false, 0);
+            try
+            {
+                currentEvent = new ManualResetEventSlim(false, 0);
+            }
+            catch (OutOfMemoryException ex)
+            {
+                throw GetOutOfMemoryException(ex);
+            }
+
             ManualResetEventSlim previousEvent = Interlocked.CompareExchange(ref _readerEvent, currentEvent, null);
             if (previousEvent == null)
             {
@@ -1024,8 +1031,6 @@ namespace System.Threading
             return previousEvent;
         }
 
-        /// <exception cref="OutOfMemoryException">Failed to allocate the event object</exception>
-        /// <exception cref="SystemException">Failed to create the system event due to some system error</exception>
         private AutoResetEvent GetOrCreateWriterEvent()
         {
             AutoResetEvent currentEvent = _writerEvent;
@@ -1034,7 +1039,15 @@ namespace System.Threading
                 return currentEvent;
             }
 
-            currentEvent = new AutoResetEvent(false);
+            try
+            {
+                currentEvent = new AutoResetEvent(false);
+            }
+            catch (SystemException ex)
+            {
+                throw GetOutOfMemoryException(ex);
+            }
+
             AutoResetEvent previousEvent = Interlocked.CompareExchange(ref _writerEvent, currentEvent, null);
             if (previousEvent == null)
             {
@@ -1081,20 +1094,21 @@ namespace System.Threading
 
         /// <summary>
         /// The original code used to throw <see cref="ApplicationException"/> for almost all exception cases, even for
-        /// out-of-memory scenarios. <see cref="Exception.HResult"/> property was set to a specific value to indicate the actual
-        /// error that occurred, and this was not documented.
-        /// 
-        /// In this C# rewrite, out-of-memory and low-resource cases throw <see cref="OutOfMemoryException"/> or whatever the
-        /// original type of exception was (for example, <see cref="IO.IOException"/> may be thrown if the system is unable to
-        /// create an <see cref="AutoResetEvent"/>). For all other exceptions, a
-        /// <see cref="ReaderWriterLockApplicationException"/> is thrown with the same <see cref="Exception.HResult"/> as
-        /// before.
+        /// out-of-memory scenarios (see <see cref="GetOutOfMemoryException(Exception)"/>). The <see cref="Exception.HResult"/>
+        /// property was set to a specific value to indicate the actual error that occurred, and this was not documented. For
+        /// compatibility, a <see cref="ReaderWriterLockApplicationException"/> is thrown with the same
+        /// <see cref="Exception.HResult"/> as before.
         /// </summary>
         [Serializable]
         private sealed class ReaderWriterLockApplicationException : ApplicationException
         {
             public ReaderWriterLockApplicationException(int errorHResult, string message)
-                : base(SR.Format(message, SR.Format(SR.ExceptionFromHResult, errorHResult)))
+                : this(errorHResult, message, null)
+            {
+            }
+
+            public ReaderWriterLockApplicationException(int errorHResult, string message, Exception innerException)
+                : base(SR.Format(message, SR.Format(SR.ExceptionFromHResult, errorHResult)), innerException)
             {
                 HResult = errorHResult;
             }
@@ -1126,6 +1140,21 @@ namespace System.Threading
         private static ApplicationException GetInvalidLockCookieException()
         {
             return new ReaderWriterLockApplicationException(HResults.E_INVALIDARG, SR.ReaderWriterLock_InvalidLockCookie);
+        }
+
+        /// <summary>
+        /// The original code used an ApplicationException for almost all error conditions, including out-of-memory. The HResult
+        /// used (STATUS_NO_MEMORY) is also not the typical one used for out-of-memory (E_OUTOFMEMORY). Preserving these
+        /// behaviors for compatibility. Callers that intend to handle out-of-memory would still need to catch
+        /// <see cref="OutOfMemoryException"/> for the trivial cases where we can't even allocate an exception object.
+        /// </summary>
+        private static ApplicationException GetOutOfMemoryException(Exception innerException)
+        {
+            return
+                new ReaderWriterLockApplicationException(
+                    CompatibleOutOfMemoryExceptionHResult,
+                    SR.ReaderWriterLock_OutOfMemory,
+                    innerException);
         }
 
         // This would normally be a [Flags] enum, but due to the limited types on which methods of Interlocked operate, and to
