@@ -32,6 +32,15 @@
           }
         },
         {
+          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Parameters": {
+            "DockerTag": "fedora24_prereqs_v4"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Fedora 24"
+          }
+        },        
+        {
           "Name": "DotNet-CoreFx-Trusted-Linux-Native",
           "Parameters": {
             "DockerTag": "opensuse132_prereqs_v4"
@@ -97,6 +106,15 @@
             "Type": "build/product/"
           }
         },
+        {
+          "Name": "CoreFx-Linux-Product-Native-Trusted",
+          "Parameters": {
+            "DockerTag": "alpine_prereqs"
+          },
+          "ReportingParameters": {
+            "OperatingSystem": "Alpine 3.4.3"
+          }
+        },        
         {
           "Name": "DotNet-CoreFx-Trusted-Mac-Native",
           "ReportingParameters": {
