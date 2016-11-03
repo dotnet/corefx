@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security;
-using System.Collections.Generic;
 using Microsoft.Win32;
+using System.Collections.Generic;
 using System.IO;
+using System.Security;
 
 namespace System.Diagnostics
 {
@@ -46,40 +46,36 @@ namespace System.Diagnostics
         {
             get 
             {
-                List<string> verbs = new List<string>();
-                RegistryKey key = null;
                 string extension = Path.GetExtension(FileName);
-                try 
+                if (string.IsNullOrEmpty(extension))
+                    return Array.Empty<string>();
+
+                using (RegistryKey key = Registry.ClassesRoot.OpenSubKey(extension))
                 {
-                    if (!string.IsNullOrEmpty(extension)) 
+                    if (key == null)
+                        return Array.Empty<string>();
+
+                    string value = key.GetValue(string.Empty) as string;
+                    if (string.IsNullOrEmpty(value))
+                        return Array.Empty<string>();
+
+                    using (RegistryKey subKey = Registry.ClassesRoot.OpenSubKey(value + "\\shell"))
                     {
-                        key = Registry.ClassesRoot.OpenSubKey(extension);
-                        if (key != null) 
+                        if (subKey == null)
+                            return Array.Empty<string>();
+
+                        string[] names = subKey.GetSubKeyNames();
+                        List<string> verbs = new List<string>();
+                        foreach (string name in names)
                         {
-                            string value = (string)key.GetValue(string.Empty);
-                            key.Dispose();
-                            key = Registry.ClassesRoot.OpenSubKey(value + "\\shell");
-                            if (key != null) 
+                            if (!string.Equals(name, "new", StringComparison.OrdinalIgnoreCase))
                             {
-                                string[] names = key.GetSubKeyNames();
-                                foreach(string name in names)
-                                {
-                                    if (!string.Equals(name, "new", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        verbs.Add(name);
-                                    }
-                                }
-                                key.Dispose();
-                                key = null;
+                                verbs.Add(name);
                             }
                         }
+                        return verbs.ToArray();
                     }
                 }
-                finally 
-                {
-                    if (key != null) key.Dispose();
-                }
-                return verbs.ToArray();
             }
         }
 

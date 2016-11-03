@@ -12,13 +12,13 @@ namespace System.Collections.Specialized
     // is private and we don't want to make that field protected.
 
     [Serializable]
-    internal sealed class StringDictionaryWithComparer : StringDictionary
+    internal sealed class StringDictionaryWrapper : StringDictionary
     {
         private readonly Dictionary<string, string> _contents;
 
-        public StringDictionaryWithComparer(IDictionary<string, string> contents)
+        public StringDictionaryWrapper(Dictionary<string, string> contents)
         {
-            _contents = (Dictionary<string,string>)contents;
+            _contents = contents;
         }
 
         public override string this[string key]

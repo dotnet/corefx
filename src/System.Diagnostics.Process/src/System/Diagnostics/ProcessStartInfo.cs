@@ -5,12 +5,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Security;
-using System.Text;
 using System.ComponentModel;
-using System.Runtime.Versioning;
-using System.IO;
-using Microsoft.Win32;
+using System.Text;
 
 namespace System.Diagnostics
 {
@@ -88,7 +84,7 @@ namespace System.Diagnostics
             set { _createNoWindow = value; }
         }
 
-        public StringDictionary EnvironmentVariables => new StringDictionaryWithComparer(Environment);
+        public StringDictionary EnvironmentVariables => new StringDictionaryWrapper(Environment as Dictionary<string,string>);
 
         public IDictionary<string, string> Environment
         {
@@ -199,15 +195,8 @@ namespace System.Diagnostics
         [DefaultValueAttribute("")]
         public string Verb 
         {
-            get 
-            {
-                if (_verb == null) return string.Empty;
-                return _verb;
-            }
-            set 
-            {
-                _verb = value;
-            }
+            get { return _verb ?? string.Empty; }
+            set { _verb = value; }
         }
 
         [DefaultValueAttribute(System.Diagnostics.ProcessWindowStyle.Normal)]
