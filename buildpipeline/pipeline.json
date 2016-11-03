@@ -217,14 +217,16 @@
       },
       "ReportingParameters": {
         "Type": "test/functional/cli",
-        "TargetQueue": {}
+        "TargetQueue": {},
+        "TargetTestCategory": {}        
       },
       "Definitions": [
         {
           "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10"
+            "TestContainerSuffix": "windows10",
+            "TargetTestCategory": "Core Tests"
           },
           "ReportingParameters": {
             "TargetQueue": null,
@@ -247,6 +249,7 @@
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10ilc",
+            "TargetTestCategory": "UWP ILC",            
             "FilterToTestTFM": "netcore50",
             "TestNugetRuntimeId": "win10-x64-aot",
             "UseDotNetNativeToolchain": "true",
@@ -262,6 +265,7 @@
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10uwp",
+            "TargetTestCategory": "UWP",            
             "FilterToTestTFM": "netcore50",
             "TestNugetRuntimeId": "win10-x64",
             "EnableCloudTest": "true"
@@ -276,6 +280,7 @@
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10desktop",
+            "TargetTestCategory": "Full Framework",
             "FilterToTestTFM": "net46",
             "TestNugetRuntimeId": "win10-x64",
             "EnableCloudTest": "true"
@@ -497,12 +502,18 @@
         "TargetsWindows": "true",
         "TestNugetRuntimeId": "win7-x64"
       },
+      "ReportingParameters": {
+        "Type": "test/functional/cli",
+        "TargetQueue": {},
+        "TargetTestCategory": {}
+      },      
       "Definitions": [
         {
           "Name": "DotNet-CoreFx-Trusted-Windows-Build-Test",
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
-            "TestContainerSuffix": "windows10"
+            "TestContainerSuffix": "windows10",
+            "TargetTestCategory": "Core Tests"
           },
           "ReportingParameters": {
             "TargetQueue": null,
@@ -525,6 +536,7 @@
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10ilc",
+            "TargetTestCategory": "UWP ILC",            
             "FilterToTestTFM": "netcore50",
             "TestNugetRuntimeId": "win10-x64-aot",
             "UseDotNetNativeToolchain": "true",
@@ -540,6 +552,7 @@
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10uwp",
+            "TargetTestCategory": "UWP",            
             "FilterToTestTFM": "netcore50",
             "TestNugetRuntimeId": "win10-x64",
             "EnableCloudTest": "true"
@@ -554,6 +567,7 @@
           "Parameters": {
             "TargetQueue": "Windows.10.Amd64",
             "TestContainerSuffix": "windows10desktop",
+            "TargetTestCategory": "Full Framework",            
             "FilterToTestTFM": "net46",
             "TestNugetRuntimeId": "win10-x64",
             "EnableCloudTest": "true"
