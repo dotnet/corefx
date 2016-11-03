@@ -3984,3 +3984,16 @@ public class TypeWithOptionalField
     [OptionalField]
     public int Member2;
 }
+
+[Serializable]
+public enum SerializableEnumWithNonSerializedValue
+{
+    One = 1,
+    [NonSerialized]
+    Two = 2,
+}
+
+public class TypeWithSerializableEnum
+{
+    public SerializableEnumWithNonSerializedValue EnumField;
+}

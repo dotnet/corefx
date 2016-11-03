@@ -262,7 +262,7 @@ namespace System.Runtime.Serialization
                     }
                     else
                     {
-                        //if (!field.IsNotSerialized)
+                        if (!field.IsNotSerialized)
                         {
                             DataMember memberContract = new DataMember(field);
                             memberContract.Name = field.Name;

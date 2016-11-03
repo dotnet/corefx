@@ -2787,6 +2787,20 @@ public static partial class DataContractSerializerTests
         Assert.Equal(0, deserialized.Member2);
     }
 
+    [Fact]
+    public static void DCS_SerializableEnumWithNonSerializedValue()
+    {
+        var value1 = new TypeWithSerializableEnum();
+        value1.EnumField = SerializableEnumWithNonSerializedValue.One;
+        var actual1 = SerializeAndDeserialize(value1, "<TypeWithSerializableEnum xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><EnumField>One</EnumField></TypeWithSerializableEnum>");
+        Assert.NotNull(actual1);
+        Assert.Equal(value1.EnumField, actual1.EnumField);
+
+        var value2 = new TypeWithSerializableEnum();
+        value2.EnumField = SerializableEnumWithNonSerializedValue.Two;
+        Assert.Throws<SerializationException>(() => SerializeAndDeserialize(value2, ""));
+    }
+
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractSerializer dcs;
