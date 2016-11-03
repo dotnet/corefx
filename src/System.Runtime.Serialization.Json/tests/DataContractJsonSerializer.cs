@@ -2324,7 +2324,7 @@ public static partial class DataContractJsonSerializerTests
         Assert.Equal(value.Member2, actual.Member2);
 
         int member1Value = 11;
-        string payloadMissingOptionalField = $"{{\"Member1\":{11}}}";
+        string payloadMissingOptionalField = $"{{\"Member1\":{member1Value}}}";
         var deserialized = DeserializeString<TypeWithOptionalField>(payloadMissingOptionalField);
         Assert.Equal(member1Value, deserialized.Member1);
         Assert.Equal(0, deserialized.Member2);
