@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// System.Runtime.Serialization needs to be removed when we implement distributed transaction capabilities
+using System.Runtime.Serialization;
 using System.Transactions.Diagnostics;
 
 namespace System.Transactions
@@ -29,6 +31,12 @@ namespace System.Transactions
                     _internalTransaction.State.CreateAbortingClone(_internalTransaction);
                 }
             }
+        }
+
+        // This serializtion constructor needs to be removed when we implement distributed transaction capabilities
+        // Issue 13137
+        DependentTransaction(SerializationInfo serializationInfo, StreamingContext context) : base(serializationInfo, context)
+        {
         }
 
         public void Complete()

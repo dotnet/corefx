@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// System.Runtime.Serialization needs to be removed when we implement distributed transaction capabilities
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Transactions.Diagnostics;
 
@@ -41,6 +43,12 @@ namespace System.Transactions
             {
                 TransactionCreatedTraceRecord.Trace(SR.TraceSourceLtm, TransactionTraceId);
             }
+        }
+
+        // This serializtion constructor needs to be removed when we implement distributed transaction capabilities
+        // Issue 13137
+        CommittableTransaction(SerializationInfo serializationInfo, StreamingContext context) : base(serializationInfo, context)
+        {
         }
 
         public IAsyncResult BeginCommit(AsyncCallback asyncCallback, object asyncState)
