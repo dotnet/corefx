@@ -12,7 +12,7 @@ namespace System.Diagnostics
     /// </summary>
     static partial class Debug
     {
-        private static object s_lock = new object();
+        private static readonly object s_lock = new object();
 
         public static bool AutoFlush { get { return true; } set { } }
 
