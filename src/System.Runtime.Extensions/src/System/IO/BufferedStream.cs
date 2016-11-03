@@ -334,7 +334,7 @@ namespace System.IO
                     // User streams may have opted to throw from Flush if CanWrite is false (although the abstract Stream does not do so).
                     // However, if we do not forward the Flush to the underlying stream, we may have problems when chaining several streams.
                     // Let us make a best effort attempt:
-                    if (_stream.CanRead)
+                    if (_stream.CanWrite)
                         await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
 
                     Debug.Assert(_writePos == 0 && _readPos == 0 && _readLen == 0);
