@@ -9,7 +9,6 @@ namespace System.Reflection.Tests
 {
     public class GetTypeTests
     {
-
         [Fact]
         public void GetType_EmptyString()
         {

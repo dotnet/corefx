@@ -11,14 +11,13 @@ using System.Reflection.Tests;
 using System.Runtime.CompilerServices;
 using Xunit;
 
-[assembly: 
+[assembly:
 Attr(77, name = "AttrSimple"),
 Int32Attr(77, name = "Int32AttrSimple"),
 Int64Attr(77, name = "Int64AttrSimple"),
 StringAttr("hello", name = "StringAttrSimple"),
 EnumAttr(PublicEnum.Case1, name = "EnumAttrSimple"),
 TypeAttr(typeof(object), name = "TypeAttrSimple")]
-
 [assembly: CompilationRelaxations(8)]
 [assembly: Debuggable((DebuggableAttribute.DebuggingModes)263)]
 [assembly: CLSCompliant(false)]

@@ -16,13 +16,13 @@ namespace System.Reflection.Tests
 
         private static IEnumerable<ProcessorArchitecture> ValidProcessorArchitectureValues()
         {
-        	return (ProcessorArchitecture[])Enum.GetValues(typeof(ProcessorArchitecture));
+            return (ProcessorArchitecture[])Enum.GetValues(typeof(ProcessorArchitecture));
         }
 
         public static IEnumerable<object[]> ProcessorArchitectures_TestData()
         {
-         	return ValidProcessorArchitectureValues().Select(arch => new object[] { arch });
-     	}
+            return ValidProcessorArchitectureValues().Select(arch => new object[] { arch });
+        }
 
         public static IEnumerable<object[]> Names_TestData()
         {
@@ -187,7 +187,7 @@ namespace System.Reflection.Tests
         public void FullName(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-            
+
             string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null";
             Assert.StartsWith(expectedName, assemblyName.FullName);
             if (assemblyName.FullName.Length > expectedName.Length)
@@ -229,7 +229,7 @@ namespace System.Reflection.Tests
             assemblyName.SetPublicKeyToken(publicKeyToken);
             Assert.Equal(publicKeyToken, assemblyName.GetPublicKeyToken());
         }
-        
+
         [Fact]
         public void GetPublicKeyToken_CurrentlyExecutingAssembly()
         {

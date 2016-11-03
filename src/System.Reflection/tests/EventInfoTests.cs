@@ -83,7 +83,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(typeof(void), removeMethod.ReturnParameter.ParameterType);
             }
         }
-        
+
         [Theory]
         [MemberData(nameof(Events_TestData))]
         public void GetRaiseMethod(Type type, string name)
@@ -165,7 +165,7 @@ namespace System.Reflection.Tests
             Assert.Equal(expected, eventInfo1.Equals(eventInfo2));
             Assert.Equal(expected, eventInfo1.GetHashCode().Equals(eventInfo2.GetHashCode()));
         }
-        
+
         [Theory]
         [MemberData(nameof(Events_TestData))]
         public void EventHandlerType(Type type, string name)

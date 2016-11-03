@@ -22,7 +22,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(ConstructorInfo.ConstructorName, constructorInfo.Name);
             }
         }
-        
+
         public static IEnumerable<object[]> Equals_TestData()
         {
             ConstructorInfo[] methodSampleConstructors1 = GetConstructors(typeof(ClassWith3Constructors));
@@ -83,7 +83,7 @@ namespace System.Reflection.Tests
             // Try to invoke Array ctors with different lengths
             foreach (int length in arraylength)
             {
-                // Create big Array with  elements 
+                // Create big Array with  elements
                 object[] arr = (object[])constructors[0].Invoke(new object[] { length });
                 Assert.Equal(arr.Length, length);
             }
@@ -97,7 +97,7 @@ namespace System.Reflection.Tests
             // Try to invoke Array ctors with different lengths
             foreach (int length in arraylength)
             {
-                // Create big Array with  elements 
+                // Create big Array with  elements
                 Assert.Throws<OverflowException>(() => (object[])constructors[0].Invoke(new object[] { length }));
             }
         }
