@@ -332,7 +332,7 @@
           "Name": "DotNet-Trusted-Tests-Publish",
           "Parameters": {
             "TestContainerSuffix": "windows10",
-            "TestTFM": "netcoreapp1.0"
+            "TestTFM": "netcoreapp1.1"
           },
           "ReportingParameters": {
             "Type": "build/publish/"
