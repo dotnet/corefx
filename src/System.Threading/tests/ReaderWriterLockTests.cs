@@ -16,7 +16,8 @@ namespace System.Threading.Tests
         private const int InvalidLockCookieExceptionHResult = unchecked((int)0x80070057); // E_INVALIDARG
 
         [Fact]
-        public static void InvalidTimeoutTest()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // desktop framework treats the timeout as an unsigned value
+        public static void InvalidTimeoutTest_ChangedInDotNetCore()
         {
             var rwl = new ReaderWriterLock();
             Assert.Throws<ArgumentOutOfRangeException>(() => rwl.AcquireReaderLock(-2));
@@ -753,7 +754,7 @@ namespace System.Threading.Tests
             private readonly ReaderWriterLock _rwl;
             private int _writerThreadID = InvalidThreadID;
             private int _writerLevel;
-            private int _writerSeqNum;
+            private int _writerSeqNum = 1;
 
             // When there are pending changes, the state of the ReaderWriterLock may be manipulated in parallel
             // nondeterministically, so only verify the state once all pending state changes have been made and are reflected by

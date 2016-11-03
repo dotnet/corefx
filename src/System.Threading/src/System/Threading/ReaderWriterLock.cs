@@ -41,7 +41,7 @@ namespace System.Threading
         private long _lockID;
         private volatile int _state;
         private int _writerID = InvalidThreadID;
-        private int _writerSeqNum;
+        private int _writerSeqNum = 1;
         private ushort _writerLevel;
 
         public ReaderWriterLock()
