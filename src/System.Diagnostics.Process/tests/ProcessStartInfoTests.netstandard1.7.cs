@@ -11,7 +11,6 @@ namespace System.Diagnostics.Tests
 {
     public partial class ProcessStartInfoTests
     {
-        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         public void TestEnvironmentVariables_Environment_DataRoundTrips()
         {
