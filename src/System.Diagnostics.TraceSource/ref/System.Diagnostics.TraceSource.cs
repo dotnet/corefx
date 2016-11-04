@@ -53,6 +53,7 @@ namespace System.Diagnostics
         Information = 15,
         Off = 0,
         Verbose = 31,
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
         ActivityTracing = 0xFF00,
         Warning = 7,
     }
