@@ -219,7 +219,4 @@
   <data name="ReaderWriterLock_RestoreLockWithOwnedLocks" xml:space="preserve">
     <value>ReaderWriterLock.RestoreLock was called without releasing all locks acquired since the call to ReleaseLock.</value>
   </data>
-  <data name="ReaderWriterLock_OutOfMemory" xml:space="preserve">
-    <value>Failed to perform the requested operation due to insufficient memory or system resources. {0}</value>
-  </data>
 </root>

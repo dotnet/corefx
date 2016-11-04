@@ -34,12 +34,6 @@ namespace System.Threading
         /// </summary>
         private const int IncorrectButCompatibleNotOwnerExceptionHResult = 0x120;
 
-        /// <summary>
-        /// The original code used STATUS_NO_MEMORY instead of E_OUTOFMEMORY, keeping that for compatibility. See
-        /// <see cref="GetOutOfMemoryException(Exception)"/>.
-        /// </summary>
-        private const int CompatibleOutOfMemoryExceptionHResult = unchecked((int)0xC0000017); // STATUS_NO_MEMORY
-
         private static long s_mostRecentLockID;
 
         private ManualResetEventSlim _readerEvent;
@@ -498,7 +492,7 @@ namespace System.Threading
                         {
                             writerEvent = GetOrCreateWriterEvent();
                         }
-                        catch (ReaderWriterLockApplicationException) // out of memory
+                        catch (SystemException)
                         {
                             Helpers.Sleep(100);
                             currentState = _state;
@@ -514,7 +508,7 @@ namespace System.Threading
                         {
                             readerEvent = GetOrCreateReaderEvent();
                         }
-                        catch (ReaderWriterLockApplicationException) // out of memory
+                        catch (OutOfMemoryException)
                         {
                             Helpers.Sleep(100);
                             currentState = _state;
@@ -600,7 +594,7 @@ namespace System.Threading
                     {
                         readerEvent = GetOrCreateReaderEvent();
                     }
-                    catch (ReaderWriterLockApplicationException) // out of memory
+                    catch (OutOfMemoryException)
                     {
                         Helpers.Sleep(100);
                         currentState = _state;
@@ -616,7 +610,7 @@ namespace System.Threading
                     {
                         writerEvent = GetOrCreateWriterEvent();
                     }
-                    catch (ReaderWriterLockApplicationException) // out of memory
+                    catch (SystemException)
                     {
                         Helpers.Sleep(100);
                         currentState = _state;
@@ -752,7 +746,6 @@ namespace System.Threading
             ushort requestedWriterLevel = lockCookie._writerLevel;
             if ((flags & LockCookieFlags.Invalid) != 0 ||
                 lockCookie._threadID != threadID ||
-                // REVIEW: Addition to original code, see large REVIEW comment below
                 (
                     // Cannot downgrade to a writer level that is greater than or equal to the current
                     (flags & (LockCookieFlags.OwnedWriter | LockCookieFlags.OwnedNone)) != 0 &&
@@ -785,7 +778,7 @@ namespace System.Threading
                         {
                             readerEvent = GetOrCreateReaderEvent();
                         }
-                        catch (ReaderWriterLockApplicationException) // out of memory
+                        catch (OutOfMemoryException)
                         {
                             Helpers.Sleep(100);
                             currentState = _state;
@@ -813,14 +806,13 @@ namespace System.Threading
             }
             else if ((flags & (LockCookieFlags.OwnedWriter | LockCookieFlags.OwnedNone)) != 0)
             {
-                // REVIEW: Original code:
+                // Original code:
                 //     ReleaseWriterLock();
                 //     Debug.Assert((flags & LockCookieFlags.OwnedWriter) != 0 || _writerID != threadID);
                 //
-                // I believe the assertion is correct, but the code is not, since the lock cookie is ignored on this path.
-                // UpgradeToWriterLock allows upgrading from an unlocked state or when the write lock is already held, where it
-                // just calls AcquireWriteLock. To compensate, I believe DowngradeFromWriterLock intends to just behave as
-                // ReleaseWriterLock.
+                // Previously, the lock cookie was ignored on this path. UpgradeToWriterLock allows upgrading from an unlocked
+                // state or when the write lock is already held, where it just calls AcquireWriteLock. To compensate, I
+                // DowngradeFromWriterLock intends to just behave as ReleaseWriterLock.
                 //
                 // However, the lock cookie could be several operations old. Consider:
                 //   lockCookie = UpgradeToWriterLock()
@@ -838,9 +830,6 @@ namespace System.Threading
                 //   lockCookie = UpgradeToWriterLock()
                 //   AcquireWriterLock()
                 //   DowngradeFromWriterLock(ref lockCookie) // does not restore recursion level of write lock!
-                // I assume this quirk is unintended as well.
-                //
-                // Fixed the code under the assumptions above, and retained the original assert.
                 Debug.Assert(_writerLevel > 0);
                 Debug.Assert(_writerLevel > requestedWriterLevel);
                 if (requestedWriterLevel > 0)
@@ -1004,6 +993,7 @@ namespace System.Threading
             return true;
         }
 
+        /// <exception cref="OutOfMemoryException">Failed to allocate the event object</exception>
         private ManualResetEventSlim GetOrCreateReaderEvent()
         {
             ManualResetEventSlim currentEvent = _readerEvent;
@@ -1012,15 +1002,7 @@ namespace System.Threading
                 return currentEvent;
             }
 
-            try
-            {
-                currentEvent = new ManualResetEventSlim(false, 0);
-            }
-            catch (OutOfMemoryException ex)
-            {
-                throw GetOutOfMemoryException(ex);
-            }
-
+            currentEvent = new ManualResetEventSlim(false, 0);
             ManualResetEventSlim previousEvent = Interlocked.CompareExchange(ref _readerEvent, currentEvent, null);
             if (previousEvent == null)
             {
@@ -1031,6 +1013,8 @@ namespace System.Threading
             return previousEvent;
         }
 
+        /// <exception cref="OutOfMemoryException">Failed to allocate the event object</exception>
+        /// <exception cref="SystemException">Failed to create the system event due to some system error</exception>
         private AutoResetEvent GetOrCreateWriterEvent()
         {
             AutoResetEvent currentEvent = _writerEvent;
@@ -1039,15 +1023,7 @@ namespace System.Threading
                 return currentEvent;
             }
 
-            try
-            {
-                currentEvent = new AutoResetEvent(false);
-            }
-            catch (SystemException ex)
-            {
-                throw GetOutOfMemoryException(ex);
-            }
-
+            currentEvent = new AutoResetEvent(false);
             AutoResetEvent previousEvent = Interlocked.CompareExchange(ref _writerEvent, currentEvent, null);
             if (previousEvent == null)
             {
@@ -1094,21 +1070,20 @@ namespace System.Threading
 
         /// <summary>
         /// The original code used to throw <see cref="ApplicationException"/> for almost all exception cases, even for
-        /// out-of-memory scenarios (see <see cref="GetOutOfMemoryException(Exception)"/>). The <see cref="Exception.HResult"/>
-        /// property was set to a specific value to indicate the actual error that occurred, and this was not documented. For
-        /// compatibility, a <see cref="ReaderWriterLockApplicationException"/> is thrown with the same
-        /// <see cref="Exception.HResult"/> as before.
+        /// out-of-memory scenarios. <see cref="Exception.HResult"/> property was set to a specific value to indicate the actual
+        /// error that occurred, and this was not documented.
+        /// 
+        /// In this C# rewrite, out-of-memory and low-resource cases throw <see cref="OutOfMemoryException"/> or whatever the
+        /// original type of exception was (for example, <see cref="IO.IOException"/> may be thrown if the system is unable to
+        /// create an <see cref="AutoResetEvent"/>). For all other exceptions, a
+        /// <see cref="ReaderWriterLockApplicationException"/> is thrown with the same <see cref="Exception.HResult"/> as
+        /// before.
         /// </summary>
         [Serializable]
         private sealed class ReaderWriterLockApplicationException : ApplicationException
         {
             public ReaderWriterLockApplicationException(int errorHResult, string message)
-                : this(errorHResult, message, null)
-            {
-            }
-
-            public ReaderWriterLockApplicationException(int errorHResult, string message, Exception innerException)
-                : base(SR.Format(message, SR.Format(SR.ExceptionFromHResult, errorHResult)), innerException)
+                : base(SR.Format(message, SR.Format(SR.ExceptionFromHResult, errorHResult)))
             {
                 HResult = errorHResult;
             }
@@ -1142,21 +1117,6 @@ namespace System.Threading
             return new ReaderWriterLockApplicationException(HResults.E_INVALIDARG, SR.ReaderWriterLock_InvalidLockCookie);
         }
 
-        /// <summary>
-        /// The original code used an ApplicationException for almost all error conditions, including out-of-memory. The HResult
-        /// used (STATUS_NO_MEMORY) is also not the typical one used for out-of-memory (E_OUTOFMEMORY). Preserving these
-        /// behaviors for compatibility. Callers that intend to handle out-of-memory would still need to catch
-        /// <see cref="OutOfMemoryException"/> for the trivial cases where we can't even allocate an exception object.
-        /// </summary>
-        private static ApplicationException GetOutOfMemoryException(Exception innerException)
-        {
-            return
-                new ReaderWriterLockApplicationException(
-                    CompatibleOutOfMemoryExceptionHResult,
-                    SR.ReaderWriterLock_OutOfMemory,
-                    innerException);
-        }
-
         // This would normally be a [Flags] enum, but due to the limited types on which methods of Interlocked operate, and to
         // avoid the required explicit casts between the enum and its underlying type, the values below are typed directly as
         // the underlying type.
@@ -1186,14 +1146,14 @@ namespace System.Threading
             public const int CachingEvents = ReaderSignaled | WriterSignaled;
         }
 
-        // REVIEW: The original code maintained lists of thread-local lock entries on the CLR's thread objects, and manually
-        // released lock entries, which involved walking through all threads. While this is possible with ThreadLocal<T>, I
-        // preferred to use a similar design to that from ReaderWriterLockSlim, and allow reusing empty entries without removing
-        // entries, since it is unlikely that the list length for any thread would get unreasonably long. I have preserved the
-        // logic from the original code to move recently used entries to the front of the list in the GetOrCreate path.
         /// <summary>
         /// Stores thread-local lock info and manages the association of this info with each <see cref="ReaderWriterLock"/>
         /// owned by a thread.
+        /// 
+        /// The original code maintained lists of thread-local lock entries on the CLR's thread objects, and manually released
+        /// lock entries, which involved walking through all threads. While this is possible with ThreadLocal<T>, this
+        /// implementation prefers to use a similar design to that from ReaderWriterLockSlim, and allow reusing free entries
+        /// without removing entries, since it is unlikely that the list length for any thread would get unreasonably long.
         /// </summary>
         private sealed class ThreadLocalLockEntry
         {
