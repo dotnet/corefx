@@ -8,20 +8,13 @@ namespace System.ComponentModel
 
     public class DoWorkEventArgs : CancelEventArgs
     {
-        private readonly object _argument;
-        private object _result;
-
         public DoWorkEventArgs(object argument)
         {
-            _argument = argument;
+            Argument = argument;
         }
 
-        public object Argument => _argument;
+        public object Argument { get; }
 
-        public object Result
-        {
-            get { return _result; }
-            set { _result = value; }
-        }
+        public object Result { get; set; }
     }
 }
