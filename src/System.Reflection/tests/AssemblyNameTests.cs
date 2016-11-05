@@ -189,11 +189,7 @@ namespace System.Reflection.Tests
             AssemblyName assemblyName = new AssemblyName(name);
 
             string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null";
-            Assert.StartsWith(expectedName, assemblyName.FullName);
-            if (assemblyName.FullName.Length > expectedName.Length)
-            {
-                Assert.Equal(extended, assemblyName.FullName);
-            }
+            Assert.True(assemblyName.FullName == expectedName || assemblyName.FullName == extended);
         }
 
         [Fact]
@@ -272,11 +268,7 @@ namespace System.Reflection.Tests
 
             string expected = "MyAssemblyName, Version=" + versionString;
             string extended = expected + ", Culture=neutral, PublicKeyToken=null";
-            Assert.StartsWith(expected, assemblyName.FullName);
-            if (assemblyName.FullName.Length > expected.Length)
-            {
-                Assert.Equal(extended, assemblyName.FullName);
-            }
+            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended);
         }
 
         [Fact]

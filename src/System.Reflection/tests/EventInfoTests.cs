@@ -34,16 +34,8 @@ namespace System.Reflection.Tests
         public void GetAddMethod(Type type, string name, bool isVisible)
         {
             EventInfo eventInfo = GetEventInfo(type, name);
-            if (isVisible)
-            {
-                Assert.NotNull(eventInfo.GetAddMethod());
-                Assert.NotNull(eventInfo.GetAddMethod(false));
-            }
-            else
-            {
-                Assert.Null(eventInfo.GetAddMethod());
-                Assert.Null(eventInfo.GetAddMethod(false));
-            }
+            Assert.Equal(isVisible, eventInfo.GetAddMethod() != null);
+            Assert.Equal(isVisible, eventInfo.GetAddMethod(false) != null);
             Assert.NotNull(eventInfo.GetAddMethod(true));
 
             MethodInfo addMethod = eventInfo.AddMethod;
@@ -62,16 +54,8 @@ namespace System.Reflection.Tests
         public void GetRemoveMethod(Type type, string name, bool isVisible)
         {
             EventInfo eventInfo = GetEventInfo(type, name);
-            if (isVisible)
-            {
-                Assert.NotNull(eventInfo.GetRemoveMethod());
-                Assert.NotNull(eventInfo.GetRemoveMethod(false));
-            }
-            else
-            {
-                Assert.Null(eventInfo.GetRemoveMethod());
-                Assert.Null(eventInfo.GetRemoveMethod(false));
-            }
+            Assert.Equal(isVisible, eventInfo.GetRemoveMethod() != null);
+            Assert.Equal(isVisible, eventInfo.GetRemoveMethod(false) != null);
             Assert.NotNull(eventInfo.GetRemoveMethod(true));
 
             MethodInfo removeMethod = eventInfo.RemoveMethod;

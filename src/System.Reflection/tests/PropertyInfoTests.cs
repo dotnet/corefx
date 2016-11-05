@@ -40,22 +40,8 @@ namespace System.Reflection.Tests
         public void GetMethod_SetMethod(Type type, string name, bool hasGetter, bool hasSetter)
         {
             PropertyInfo propertyInfo = GetProperty(type, name);
-            if (hasGetter)
-            {
-                Assert.NotNull(propertyInfo.GetMethod);
-            }
-            else
-            {
-                Assert.Null(propertyInfo.GetMethod);
-            }
-            if (hasSetter)
-            {
-                Assert.NotNull(propertyInfo.SetMethod);
-            }
-            else
-            {
-                Assert.Null(propertyInfo.SetMethod);
-            }
+            Assert.Equal(hasGetter, propertyInfo.GetMethod != null);
+            Assert.Equal(hasSetter, propertyInfo.SetMethod != null);
         }
 
         public static IEnumerable<object[]> GetValue_TestData()

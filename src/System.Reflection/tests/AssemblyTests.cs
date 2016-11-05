@@ -66,14 +66,8 @@ namespace System.Reflection.Tests
         public void DefinedTypes(Type type, bool expected)
         {
             IEnumerable<Type> customAttrs = Helpers.ExecutingAssembly.DefinedTypes.Select(typeInfo => typeInfo.AsType());
-            if (expected)
-            {
-                Assert.Contains(type, customAttrs);
-            }
-            else
-            {
-                Assert.DoesNotContain(type, customAttrs);
-            }
+
+            Assert.Equal(expected, customAttrs.Contains(type));
         }
 
         [Theory]
@@ -84,16 +78,8 @@ namespace System.Reflection.Tests
             string[] resources = Helpers.ExecutingAssembly.GetManifestResourceNames();
             Stream resourceStream = Helpers.ExecutingAssembly.GetManifestResourceStream(resource);
 
-            if (exists)
-            {
-                Assert.Contains(resource, resources);
-                Assert.NotNull(resourceStream);
-            }
-            else
-            {
-                Assert.DoesNotContain(resource, resources);
-                Assert.Null(resourceStream);
-            }
+            Assert.Equal(exists, resources.Contains(resource));
+            Assert.Equal(exists, resourceStream != null);
         }
 
         [Fact]
